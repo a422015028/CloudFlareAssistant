@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:background="#F5F5F5"
+     android:padding="16dp">
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:background="#FFFFFF"
+         android:elevation="3dp"
+         android:padding="16dp"
+         android:layout_marginHorizontal="8dp"
+         android:orientation="vertical"
+         android:clipChildren="false"
+         android:clipToPadding="false"
+         android:layout_marginTop="8dp">
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#666"
+             android:text="Worker 名称" />
+
+        <EditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:background="@android:drawable/edit_text"
+             android:hint="请输入 Worker 名称"
+             android:padding="8dp"
+             android:layout_marginTop="4dp"
+             android:id="@+id/workerNameEdit" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#666"
+             android:layout_marginTop="12dp"
+             android:text="Worker 脚本文件" />
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:orientation="horizontal"
+             android:layout_marginTop="4dp">
+
+            <EditText
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:background="@android:drawable/edit_text"
+                 android:hint="脚本路径"
+                 android:clickable="false"
+                 android:padding="8dp"
+                 android:layout_weight="1"
+                 android:focusable="false"
+                 android:id="@+id/filePathEdit" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:layout_marginStart="8dp"
+                 android:id="@+id/selectFileBtn"
+                 android:text="选择" />
+
+        </LinearLayout>
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#666"
+             android:layout_marginTop="12dp"
+             android:text="选择账号" />
+
+        <Spinner
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:layout_marginTop="4dp"
+             android:id="@+id/accountSpinner">
+
+        </Spinner>
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:orientation="horizontal"
+             android:layout_marginTop="12dp">
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:layout_weight="1"
+                 android:id="@+id/manageAccountsBtn"
+                 android:text="管理账号" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:layout_marginStart="8dp"
+                 android:layout_weight="1"
+                 android:id="@+id/clearHistoryBtn"
+                 android:text="清除记录" />
+
+        </LinearLayout>
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:backgroundTint="#3F51B5"
+             android:textColor="#FFFFFF"
+             android:layout_marginTop="16dp"
+             android:id="@+id/bindRouteBtn"
+             android:text="绑定路由" />
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:backgroundTint="#FF9800"
+             android:textColor="#FFFFFF"
+             android:layout_marginTop="12dp"
+             android:id="@+id/manageDnsBtn"
+             android:text="管理DNS记录" />
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:backgroundTint="#4CAF50"
+             android:textColor="#FFFFFF"
+             android:layout_marginTop="12dp"
+             android:id="@+id/uploadBtn"
+             android:text="上传Worker脚本" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:scrollbars="vertical"
+             android:background="#EEEEEE"
+             android:minHeight="120dp"
+             android:padding="12dp"
+             android:textSize="13sp"
+             android:textColor="#333"
+             android:layout_marginTop="16dp"
+             android:id="@+id/responseText"
+             android:text="响应结果将显示在这里" />
+
+    </LinearLayout>
+
+</ScrollView>

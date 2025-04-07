@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:background="#F5F5F5"
+     android:padding="16dp">
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:background="#FFFFFF"
+         android:elevation="2dp"
+         android:padding="16dp"
+         android:layout_margin="8dp"
+         android:orientation="vertical"
+         android:clipChildren="false"
+         android:clipToPadding="false">
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#666"
+             android:text="账号名称" />
+
+        <EditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:background="@android:drawable/edit_text"
+             android:hint="例如：主账号 / 备用账号"
+             android:padding="8dp"
+             android:layout_marginTop="4dp"
+             android:inputType="text"
+             android:id="@+id/nameEdit" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#666"
+             android:layout_marginTop="12dp"
+             android:text="Account ID" />
+
+        <EditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:background="@android:drawable/edit_text"
+             android:hint="请输入 Account ID"
+             android:padding="8dp"
+             android:layout_marginTop="4dp"
+             android:inputType="text"
+             android:id="@+id/accountIdEdit" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#666"
+             android:layout_marginTop="12dp"
+             android:text="API Token" />
+
+        <EditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:background="@android:drawable/edit_text"
+             android:hint="请输入 API Token"
+             android:padding="8dp"
+             android:layout_marginTop="4dp"
+             android:inputType="text"
+             android:id="@+id/tokenEdit" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#666"
+             android:layout_marginTop="12dp"
+             android:text="Zone ID" />
+
+        <EditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:background="@android:drawable/edit_text"
+             android:hint="请输入 Zone ID"
+             android:padding="8dp"
+             android:layout_marginTop="4dp"
+             android:inputType="text"
+             android:id="@+id/zoneIdEdit" />
+
+    </LinearLayout>
+
+</ScrollView>

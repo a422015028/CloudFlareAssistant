@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:background="#F5F5F5"
+     android:padding="16dp"
+     android:orientation="vertical">
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="8dp"
+         android:textSize="18sp"
+         android:textColor="#333"
+         android:text="Cloudflare 账号列表"
+         android:textStyle="bold" />
+
+    <LinearLayout
+         android:layout_height="0dp"
+         android:layout_width="match_parent"
+         android:background="#FFFFFF"
+         android:elevation="2dp"
+         android:padding="8dp"
+         android:orientation="vertical"
+         android:clipChildren="false"
+         android:clipToPadding="false"
+         android:layout_weight="1">
+
+        <ListView
+             android:layout_height="match_parent"
+             android:layout_width="match_parent"
+             android:divider="@android:color/darker_gray"
+             android:id="@+id/accountListView"
+             android:dividerHeight="1dp">
+
+        </ListView>
+
+    </LinearLayout>
+
+    <Button
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:backgroundTint="#2196F3"
+         android:textColor="#FFFFFF"
+         android:layout_marginTop="16dp"
+         android:id="@+id/addAccountBtn"
+         android:text="添加账号" />
+
+</LinearLayout>
