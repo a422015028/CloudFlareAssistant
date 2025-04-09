@@ -31,8 +31,8 @@
 
 ## TODO（计划中功能）
 
-- DNS 全类型支持（TXT、MX、SRV、CAA 等）[已支持]
--WebDAV备份账号 [已支持]
+- DNS 全类型支持（TXT、MX、SRV、CAA 等）√
+- WebDAV备份账号 √
 - Worker KV 存储管理
 - 定时触发器（Cron Triggers）配置
 - Workers 脚本在线编辑器
