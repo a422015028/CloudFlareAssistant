@@ -1,0 +1,49 @@
+<resources>
+    <string name="app_name">CloudFlare助手</string>
+    <string-array name="dns_types">
+        <item>A</item>
+        <item>AAAA</item>
+        <item>CNAME</item>
+        <item>TXT</item>
+        <item>MX</item>
+        <item>NS</item>
+        <item>SRV</item>
+        <item>LOC</item>
+        <item>SPF</item>
+        <item>CERT</item>
+        <item>DNSKEY</item>
+        <item>DS</item>
+        <item>NAPTR</item>
+        <item>SMIMEA</item>
+        <item>SSHFP</item>
+        <item>SVCB</item>
+        <item>TLSA</item>
+        <item>URI</item>
+        <item>PTR</item>
+        <item>HTTPS</item>
+    </string-array>
+
+    <!-- 默认TTL都改成1 -->
+    <string-array name="default_ttl">
+        <item>1</item> <!-- A -->
+        <item>1</item> <!-- AAAA -->
+        <item>1</item> <!-- CNAME -->
+        <item>1</item> <!-- TXT -->
+        <item>1</item> <!-- MX -->
+        <item>1</item> <!-- NS -->
+        <item>1</item> <!-- SRV -->
+        <item>1</item> <!-- LOC -->
+        <item>1</item> <!-- SPF -->
+        <item>1</item> <!-- CERT -->
+        <item>1</item> <!-- DNSKEY -->
+        <item>1</item> <!-- DS -->
+        <item>1</item> <!-- NAPTR -->
+        <item>1</item> <!-- SMIMEA -->
+        <item>1</item> <!-- SSHFP -->
+        <item>1</item> <!-- SVCB -->
+        <item>1</item> <!-- TLSA -->
+        <item>1</item> <!-- URI -->
+        <item>1</item> <!-- PTR -->
+        <item>1</item> <!-- HTTPS -->
+    </string-array>
+</resources>

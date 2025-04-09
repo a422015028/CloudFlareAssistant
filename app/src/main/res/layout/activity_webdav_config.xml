@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:background="#F5F5F5"
+     android:padding="16dp"
+     android:orientation="vertical">
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:layout_marginBottom="16dp"
+         android:gravity="center"
+         android:textSize="18sp"
+         android:textColor="#333"
+         android:text="WebDAV 配置" />
+
+    <EditText
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:hint="WebDAV URL"
+         android:inputType="textUri"
+         android:id="@+id/urlEditText" />
+
+    <EditText
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:hint="用户名"
+         android:id="@+id/usernameEditText" />
+
+    <EditText
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:hint="密码"
+         android:inputType="text"
+         android:id="@+id/passwordEditText" />
+
+    <Button
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:backgroundTint="#3F51B5"
+         android:textColor="#FFFFFF"
+         android:id="@+id/saveButton"
+         android:text="保存配置" />
+
+</LinearLayout>

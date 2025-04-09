@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest 
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- 查看网络连接 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- 查看WLAN连接 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- 拥有完全的网络访问权限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 读取您共享存储空间中的内容 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- 修改或删除您共享存储空间中的内容 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 所有文件访问权限 -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <application 
+        android:allowBackup="true" 
+        android:icon="@drawable/ic_launcher" 
+        android:roundIcon="@drawable/ic_launcher" 
+        android:label="@string/app_name" 
+        android:supportsRtl="true" 
+        android:theme="@style/AppTheme">
+        
+        <activity 
+            android:name="MainActivity" 
+            android:exported="true">
+            <intent-filter>
+                <action 
+                    android:name="android.intent.action.MAIN" />
+                <category 
+                    android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity 
+            android:name=".RouteBindActivity"
+            android:exported="true"/>
+        
+        <activity 
+            android:name=".AccountManagerActivity" 
+            android:exported="true" />
+        
+        <!-- 如果有其他界面，可以在这里添加 -->
+        <activity 
+            android:name=".DnsManagerActivity" 
+            android:exported="true"/>
+            
+            <!-- 可选的其他配置 -->
+        <activity 
+        android:name=".BackupActivity"
+        android:exported="true"/>
+        
+        <activity
+        android:name=".WebDavConfigActivity" >
+        android:exported="true"/>
+                
+        </activity>
+        
+    </application>
+</manifest>

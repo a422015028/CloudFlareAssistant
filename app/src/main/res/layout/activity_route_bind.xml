@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:background="#F9F9F9"
+     android:padding="16dp">
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:background="@android:color/white"
+         android:elevation="4dp"
+         android:padding="16dp"
+         android:layout_marginHorizontal="8dp"
+         android:orientation="vertical"
+         android:clipChildren="false"
+         android:clipToPadding="false"
+         android:layout_marginTop="8dp">
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="16sp"
+             android:textColor="#333"
+             android:id="@+id/accountText"
+             android:text="当前账号："
+             android:textStyle="bold" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#666"
+             android:layout_marginTop="16dp"
+             android:id="@+id/workerNameText"
+             android:text="选择 Worker 名称" />
+
+        <Spinner
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:background="@android:drawable/btn_dropdown"
+             android:layout_marginTop="8dp"
+             android:id="@+id/workerSpinner">
+
+        </Spinner>
+
+        <EditText
+             android:layout_height="150dp"
+             android:layout_width="match_parent"
+             android:scrollbars="vertical"
+             android:gravity="top"
+             android:background="@android:drawable/edit_text"
+             android:hint="每行一个路由（如 abcd.1234.xyz/*）"
+             android:padding="8dp"
+             android:layout_marginTop="16dp"
+             android:inputType="textMultiLine"
+             android:id="@+id/routesEdit" />
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:backgroundTint="#3F51B5"
+             android:textColor="#FFF"
+             android:layout_marginTop="16dp"
+             android:id="@+id/bindBtn"
+             android:text="绑定路由" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:scrollbars="vertical"
+             android:background="#EFEFEF"
+             android:minHeight="120dp"
+             android:padding="10dp"
+             android:textSize="13sp"
+             android:textColor="#444"
+             android:layout_marginTop="16dp"
+             android:id="@+id/resultText"
+             android:text="响应结果将显示在这里" />
+
+    </LinearLayout>
+
+</ScrollView>

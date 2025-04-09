@@ -1,0 +1,35 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/UpWorker/app/src/main/java/com/muort/upworker/DnsManagerActivity.kt",
+      "selection": {
+        "end": {
+          "column": 1,
+          "index": 7833,
+          "line": 203
+        },
+        "start": {
+          "column": 1,
+          "index": 7833,
+          "line": 203
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/UpWorker/app/src/main/AndroidManifest.xml",
+      "selection": {
+        "end": {
+          "column": 81,
+          "index": 811,
+          "line": 16
+        },
+        "start": {
+          "column": 81,
+          "index": 811,
+          "line": 16
+        }
+      }
+    }
+  ],
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/UpWorker/app/src/main/java/com/muort/upworker/DnsManagerActivity.kt"
+}

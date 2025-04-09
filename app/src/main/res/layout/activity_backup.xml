@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:background="#F5F5F5"
+     android:padding="16dp"
+     android:orientation="vertical">
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="20dp"
+         android:gravity="center"
+         android:textSize="16sp"
+         android:textColor="#333"
+         android:id="@+id/statusText"
+         android:text="请备份或恢复账号" />
+
+    <Button
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:backgroundTint="#4CAF50"
+         android:textColor="#FFFFFF"
+         android:id="@+id/importBtn"
+         android:text="恢复账号" />
+
+    <Button
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:backgroundTint="#3F51B5"
+         android:textColor="#FFFFFF"
+         android:id="@+id/exportBtn"
+         android:text="备份账号" />
+
+    <Button
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:backgroundTint="#FF9800"
+         android:textColor="#FFFFFF"
+         android:id="@+id/webDavConfigBtn"
+         android:text="WebDAV配置" />
+
+</LinearLayout>
