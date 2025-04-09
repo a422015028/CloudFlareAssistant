@@ -2,6 +2,7 @@ package com.muort.upworker
 
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.muort.upworker.databinding.ActivityRouteBindBinding
@@ -10,13 +11,15 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
-import android.widget.ArrayAdapter
 
 class RouteBindActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRouteBindBinding
     private val client = OkHttpClient()
     private var currentAccount: Account? = null
+    private val routeList = mutableListOf<Route>()
+
+    data class Route(val id: String, val pattern: String, val script: String)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +28,6 @@ class RouteBindActivity : AppCompatActivity() {
 
         binding.resultText.movementMethod = ScrollingMovementMethod.getInstance()
 
-        // 从 Intent 获取账号数据
         val name = intent.getStringExtra("account_name")
         val accountId = intent.getStringExtra("account_id")
         val token = intent.getStringExtra("token")
@@ -39,59 +41,122 @@ class RouteBindActivity : AppCompatActivity() {
 
         currentAccount = Account(name = name, accountId = accountId, token = token, zoneId = zoneId)
         binding.accountText.text = "当前账号: ${currentAccount!!.name}"
-        currentAccount?.let { loadWorkerList(it) }
+
+        currentAccount?.let {
+            loadWorkerList(it)
+            loadCurrentRoutes(it)
+        }
+
         binding.bindBtn.setOnClickListener { bindRoutes() }
+
+        binding.deleteBtn.setOnClickListener {
+            val routeId = binding.routeIdEdit.text.toString().trim()
+            if (routeId.isNotEmpty()) deleteRoute(routeId)
+        }
+
+        binding.updateBtn.setOnClickListener {
+            val routeId = binding.routeIdEdit.text.toString().trim()
+            val pattern = binding.patternEdit.text.toString().trim()
+            val script = binding.workerSpinner.selectedItem?.toString()?.trim() ?: ""
+            if (routeId.isNotEmpty() && pattern.isNotEmpty() && script.isNotEmpty()) {
+                updateRoute(routeId, pattern, script)
+            }
+        }
+
+        binding.selectRouteBtn.setOnClickListener {
+            if (routeList.isEmpty()) {
+                showToast("暂无绑定项")
+                return@setOnClickListener
+            }
+
+            val routeNames = routeList.map { "路径: ${it.pattern}\n脚本: ${it.script}" }.toTypedArray()
+
+            android.app.AlertDialog.Builder(this)
+                .setTitle("选择一个绑定项")
+                .setItems(routeNames) { _, index ->
+                    val route = routeList[index]
+                    binding.routeIdEdit.setText(route.id)
+                    binding.patternEdit.setText(route.pattern)
+                    val pos = (0 until binding.workerSpinner.count).firstOrNull {
+                        binding.workerSpinner.getItemAtPosition(it).toString() == route.script
+                    } ?: -1
+                    if (pos >= 0) binding.workerSpinner.setSelection(pos)
+                }
+                .show()
+        }
     }
 
-
     private fun loadWorkerList(account: Account) {
-    val url = "https://api.cloudflare.com/client/v4/accounts/${account.accountId}/workers/scripts"
-    val request = Request.Builder()
-        .url(url)
-        .get()
-        .addHeader("Authorization", "Bearer ${account.token}")
-        .build()
+        val url = "https://api.cloudflare.com/client/v4/accounts/${account.accountId}/workers/scripts"
+        val request = Request.Builder().url(url).get().addHeader("Authorization", "Bearer ${account.token}").build()
 
-    client.newCall(request).enqueue(object : Callback {
-        override fun onFailure(call: Call, e: IOException) {
-            runOnUiThread {
-                showToast("获取 Worker 列表失败：${e.message}")
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { showToast("获取 Worker 列表失败：${e.message}") }
             }
-        }
 
-        override fun onResponse(call: Call, response: Response) {
-            val json = response.body?.string() ?: return
-            val names = mutableListOf<String>()
-            try {
-                val root = JSONObject(json)
-                val result = root.getJSONArray("result")
-                for (i in 0 until result.length()) {
-                    val item = result.getJSONObject(i)
-                    names.add(item.getString("id"))
+            override fun onResponse(call: Call, response: Response) {
+                val json = response.body?.string() ?: return
+                val names = mutableListOf<String>()
+                try {
+                    val root = JSONObject(json)
+                    val result = root.getJSONArray("result")
+                    for (i in 0 until result.length()) {
+                        names.add(result.getJSONObject(i).getString("id"))
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread { showToast("解析 Worker 列表失败") }
+                    return
                 }
-            } catch (e: Exception) {
                 runOnUiThread {
-                    showToast("解析 Worker 列表失败")
+                    val adapter = ArrayAdapter(this@RouteBindActivity, android.R.layout.simple_spinner_item, names)
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    binding.workerSpinner.adapter = adapter
                 }
-                return
+            }
+        })
+    }
+
+    private fun loadCurrentRoutes(account: Account) {
+        val url = "https://api.cloudflare.com/client/v4/zones/${account.zoneId}/workers/routes"
+        val request = Request.Builder().url(url).get().addHeader("Authorization", "Bearer ${account.token}").build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { appendResult("获取绑定列表失败：${e.message}") }
             }
 
-            runOnUiThread {
-                val adapter = ArrayAdapter(this@RouteBindActivity, android.R.layout.simple_spinner_item, names)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                binding.workerSpinner.adapter = adapter
+            override fun onResponse(call: Call, response: Response) {
+                val res = response.body?.string() ?: return
+                runOnUiThread {
+                    try {
+                        val root = JSONObject(res)
+                        val result = root.getJSONArray("result")
+                        for (i in 0 until result.length()) {
+                            val obj = result.getJSONObject(i)
+                            val id = obj.getString("id")
+                            val pattern = obj.getString("pattern")
+                            val script = obj.optString("script", "未绑定")
+                            val route = Route(id, pattern, script)
+                            routeList.add(route)
+                            appendResult("ID: $id\n路径: $pattern\n绑定脚本: $script\n")
+                        }
+                    } catch (e: Exception) {
+                        appendResult("解析失败：${e.message}")
+                    }
+                }
             }
-        }
-    })
-}
+        })
+    }
+
     private fun bindRoutes() {
         val account = currentAccount ?: return
-        val zoneId = account.zoneId
+        val zoneId = account.zoneId ?: return
         val token = account.token
         val script = binding.workerSpinner.selectedItem?.toString()?.trim() ?: ""
         val patterns = binding.routesEdit.text.toString().split("\n").map { it.trim() }.filter { it.isNotEmpty() }
 
-        if (script.isEmpty() || zoneId.isNullOrEmpty() || token.isEmpty() || patterns.isEmpty()) {
+        if (script.isEmpty() || patterns.isEmpty()) {
             showToast("请填写 Worker 名称 和 路由列表")
             return
         }
@@ -105,20 +170,13 @@ class RouteBindActivity : AppCompatActivity() {
                 put("pattern", pattern)
                 put("script", script)
             }
-
             val body = json.toString().toRequestBody("application/json".toMediaType())
-            val request = Request.Builder()
-                .url(url)
-                .post(body)
-                .addHeader("Authorization", "Bearer $token")
-                .addHeader("Content-Type", "application/json")
-                .build()
+            val request = Request.Builder().url(url).post(body).addHeader("Authorization", "Bearer $token")
+                .addHeader("Content-Type", "application/json").build()
 
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    runOnUiThread {
-                        appendResult("失败：$pattern\n错误：${e.message}\n")
-                    }
+                    runOnUiThread { appendResult("失败：$pattern\n错误：${e.message}\n") }
                 }
 
                 override fun onResponse(call: Call, response: Response) {
@@ -135,6 +193,58 @@ class RouteBindActivity : AppCompatActivity() {
         }
 
         binding.bindBtn.isEnabled = true
+    }
+
+    private fun deleteRoute(routeId: String) {
+        val account = currentAccount ?: return
+        val url = "https://api.cloudflare.com/client/v4/zones/${account.zoneId}/workers/routes/$routeId"
+        val request = Request.Builder().url(url).delete().addHeader("Authorization", "Bearer ${account.token}").build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { appendResult("删除失败：${e.message}") }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val res = response.body?.string()
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        appendResult("删除成功：$routeId")
+                    } else {
+                        appendResult("删除失败：$routeId\n返回：$res")
+                    }
+                }
+            }
+        })
+    }
+
+    private fun updateRoute(routeId: String, pattern: String, script: String) {
+        val account = currentAccount ?: return
+        val url = "https://api.cloudflare.com/client/v4/zones/${account.zoneId}/workers/routes/$routeId"
+        val json = JSONObject().apply {
+            put("pattern", pattern)
+            put("script", script)
+        }
+        val body = json.toString().toRequestBody("application/json".toMediaType())
+        val request = Request.Builder().url(url).put(body).addHeader("Authorization", "Bearer ${account.token}")
+            .addHeader("Content-Type", "application/json").build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { appendResult("更新失败：${e.message}") }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val res = response.body?.string()
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        appendResult("更新成功：$routeId")
+                    } else {
+                        appendResult("更新失败：$routeId\n返回：$res")
+                    }
+                }
+            }
+        })
     }
 
     private fun appendResult(msg: String) {

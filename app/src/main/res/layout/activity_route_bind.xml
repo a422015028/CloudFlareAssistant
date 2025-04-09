@@ -10,75 +10,154 @@
          android:layout_height="wrap_content"
          android:layout_width="match_parent"
          android:layout_marginBottom="16dp"
-         android:background="@android:color/white"
-         android:elevation="4dp"
-         android:padding="16dp"
          android:layout_marginHorizontal="8dp"
          android:orientation="vertical"
          android:clipChildren="false"
          android:clipToPadding="false"
          android:layout_marginTop="8dp">
 
-        <TextView
+        <LinearLayout
              android:layout_height="wrap_content"
              android:layout_width="match_parent"
-             android:textSize="16sp"
-             android:textColor="#333"
-             android:id="@+id/accountText"
-             android:text="当前账号："
-             android:textStyle="bold" />
+             android:background="@android:color/white"
+             android:elevation="4dp"
+             android:padding="16dp"
+             android:orientation="vertical">
 
-        <TextView
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:textSize="16sp"
+                 android:textColor="#333"
+                 android:id="@+id/accountText"
+                 android:text="当前账号："
+                 android:textStyle="bold" />
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:textSize="14sp"
+                 android:textColor="#666"
+                 android:layout_marginTop="16dp"
+                 android:id="@+id/workerNameText"
+                 android:text="选择 Worker 名称" />
+
+            <Spinner
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:background="@android:drawable/btn_dropdown"
+                 android:layout_marginTop="8dp"
+                 android:id="@+id/workerSpinner">
+
+            </Spinner>
+
+            <EditText
+                 android:layout_height="150dp"
+                 android:layout_width="match_parent"
+                 android:scrollbars="vertical"
+                 android:gravity="top"
+                 android:background="@android:drawable/edit_text"
+                 android:hint="每行一个路由（如 abcd.1234.xyz/*）"
+                 android:padding="8dp"
+                 android:layout_marginTop="16dp"
+                 android:inputType="textMultiLine"
+                 android:id="@+id/routesEdit" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:backgroundTint="#3F51B5"
+                 android:textColor="#FFF"
+                 android:layout_marginTop="16dp"
+                 android:id="@+id/bindBtn"
+                 android:text="绑定路由" />
+
+        </LinearLayout>
+
+        <LinearLayout
              android:layout_height="wrap_content"
              android:layout_width="match_parent"
-             android:textSize="14sp"
-             android:textColor="#666"
+             android:background="@android:color/white"
+             android:elevation="4dp"
+             android:padding="16dp"
+             android:orientation="vertical"
              android:layout_marginTop="16dp"
-             android:id="@+id/workerNameText"
-             android:text="选择 Worker 名称" />
+             android:id="@+id/boundRoutesLayout">
 
-        <Spinner
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:id="@+id/selectRouteBtn"
+                 android:text="选择绑定项" />
+
+            <EditText
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:background="@android:drawable/edit_text"
+                 android:hint="路由 ID（用于更新或删除）"
+                 android:padding="8dp"
+                 android:layout_marginTop="16dp"
+                 android:id="@+id/routeIdEdit" />
+
+            <EditText
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:background="@android:drawable/edit_text"
+                 android:hint="新路由 Pattern（用于更新）"
+                 android:padding="8dp"
+                 android:layout_marginTop="8dp"
+                 android:id="@+id/patternEdit" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:backgroundTint="#FFA000"
+                 android:textColor="#FFF"
+                 android:layout_marginTop="16dp"
+                 android:id="@+id/updateBtn"
+                 android:text="更新路由" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:backgroundTint="#D32F2F"
+                 android:textColor="#FFF"
+                 android:layout_marginTop="8dp"
+                 android:id="@+id/deleteBtn"
+                 android:text="删除路由" />
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:textSize="15sp"
+                 android:textColor="#333"
+                 android:text="已绑定路由："
+                 android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
              android:layout_height="wrap_content"
              android:layout_width="match_parent"
-             android:background="@android:drawable/btn_dropdown"
-             android:layout_marginTop="8dp"
-             android:id="@+id/workerSpinner">
+             android:background="@android:color/white"
+             android:elevation="4dp"
+             android:padding="16dp"
+             android:orientation="vertical"
+             android:layout_marginTop="16dp">
 
-        </Spinner>
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:scrollbars="vertical"
+                 android:background="#EFEFEF"
+                 android:minHeight="120dp"
+                 android:padding="10dp"
+                 android:textSize="13sp"
+                 android:textColor="#444"
+                 android:id="@+id/resultText"
+                 android:text="响应结果将显示在这里" />
 
-        <EditText
-             android:layout_height="150dp"
-             android:layout_width="match_parent"
-             android:scrollbars="vertical"
-             android:gravity="top"
-             android:background="@android:drawable/edit_text"
-             android:hint="每行一个路由（如 abcd.1234.xyz/*）"
-             android:padding="8dp"
-             android:layout_marginTop="16dp"
-             android:inputType="textMultiLine"
-             android:id="@+id/routesEdit" />
-
-        <Button
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:backgroundTint="#3F51B5"
-             android:textColor="#FFF"
-             android:layout_marginTop="16dp"
-             android:id="@+id/bindBtn"
-             android:text="绑定路由" />
-
-        <TextView
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:scrollbars="vertical"
-             android:background="#EFEFEF"
-             android:minHeight="120dp"
-             android:padding="10dp"
-             android:textSize="13sp"
-             android:textColor="#444"
-             android:layout_marginTop="16dp"
-             android:id="@+id/resultText"
-             android:text="响应结果将显示在这里" />
+        </LinearLayout>
 
     </LinearLayout>
 
