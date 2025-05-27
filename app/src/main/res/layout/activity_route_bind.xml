@@ -51,6 +51,13 @@
 
             </Spinner>
 
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:layout_marginTop="12dp"
+                 android:id="@+id/manageScriptsBtn"
+                 android:text="管理脚本" />
+
             <EditText
                  android:layout_height="150dp"
                  android:layout_width="match_parent"

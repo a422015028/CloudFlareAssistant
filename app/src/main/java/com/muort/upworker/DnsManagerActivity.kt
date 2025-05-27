@@ -107,101 +107,107 @@ class DnsManagerActivity : AppCompatActivity() {
                     dnsRecords.clear()
                     dnsRecords.addAll(resultList)
                     adapter.clear()
-                    adapter.addAll(dnsRecords.map {"${it.type} ${it.name} -> ${it.content} (TTL=${it.ttl}) [${if (it.proxied) "代理" else "直连"}]"})
+                    adapter.addAll(dnsRecords.map {
+                        "${it.type} ${it.name} -> ${it.content} (TTL=${it.ttl}) [${if (it.proxied) "代理" else "直连"}]"
+                    })
                 }
             }
         })
     }
 
     private fun showDnsDialog(record: DnsRecord?) {
-    val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_dns_input, null)
-    val typeSpinner = dialogView.findViewById<Spinner>(R.id.typeSpinner)
-    val nameEdit = dialogView.findViewById<EditText>(R.id.nameEdit)
-    val contentEdit = dialogView.findViewById<EditText>(R.id.contentEdit)
-    val ttlEdit = dialogView.findViewById<EditText>(R.id.ttlEdit)
-    val proxiedCheckBox = dialogView.findViewById<CheckBox>(R.id.proxiedCheckBox)
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_dns_input, null)
+        val typeSpinner = dialogView.findViewById<Spinner>(R.id.typeSpinner)
+        val nameEdit = dialogView.findViewById<EditText>(R.id.nameEdit)
+        val contentEdit = dialogView.findViewById<EditText>(R.id.contentEdit)
+        val ttlEdit = dialogView.findViewById<EditText>(R.id.ttlEdit)
+        val proxiedCheckBox = dialogView.findViewById<CheckBox>(R.id.proxiedCheckBox)
 
-    // 填充 Spinner
-    val typesAdapter = ArrayAdapter.createFromResource(
-        this,
-        R.array.dns_types,
-        android.R.layout.simple_spinner_item
-    )
-    typesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-    typeSpinner.adapter = typesAdapter
+        val typesAdapter = ArrayAdapter.createFromResource(
+            this,
+            R.array.dns_types,
+            android.R.layout.simple_spinner_item
+        )
+        typesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        typeSpinner.adapter = typesAdapter
 
-    // 设置默认 TTL 为 1
-    ttlEdit.setText("1")
+        ttlEdit.setText("1")
 
-    // 如果是编辑已有记录，填充数据
-    record?.let {
-        val typePosition = typesAdapter.getPosition(it.type)
-        typeSpinner.setSelection(typePosition)
-        nameEdit.setText(it.name)
-        contentEdit.setText(it.content)
-        ttlEdit.setText(it.ttl.toString())
-        proxiedCheckBox.isChecked = it.proxied // 这里填充从 API 获取的 proxied 状态
-    }
+        var isFirstLoad = true
 
-    // 设置 Spinner 的选择监听
-    typeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(parentView: AdapterView<*>, view: View?, position: Int, id: Long) {
-            val selectedType = parentView.getItemAtPosition(position) as String
+        typeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parentView: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedType = parentView.getItemAtPosition(position) as String
 
-            // 设置默认 TTL
-            ttlEdit.setText("1")
-
-            when (selectedType) {
-                "MX", "TXT" -> {
-                    proxiedCheckBox.isEnabled = false
-                    proxiedCheckBox.isChecked = false
-                    contentEdit.setText("")
-                    contentEdit.hint = if (selectedType == "MX") {
-                        "请输入邮件服务器地址（如 mail.example.com）"
-                    } else {
-                        "请输入文本内容（如 SPF 或验证信息）"
+                // 设置 hint 不覆盖内容
+                if (!isFirstLoad && contentEdit.text.isEmpty()) {
+                    when (selectedType) {
+                        "MX", "TXT" -> contentEdit.setText("")
+                        else -> contentEdit.setText("2.2.2.2")
                     }
                 }
-                else -> {
-                    proxiedCheckBox.isEnabled = true
-                    contentEdit.setText("2.2.2.2")
-                    contentEdit.hint = when (selectedType) {
-                        "A" -> "请输入 IPv4 地址（如 2.2.2.2）"
-                        "AAAA" -> "请输入 IPv6 地址（如 2001:db8::1）"
-                        "CNAME" -> "请输入目标域名（如 example.com）"
-                        else -> "请输入记录内容"
+
+                when (selectedType) {
+                    "MX", "TXT" -> {
+                        proxiedCheckBox.isEnabled = false
+                        proxiedCheckBox.isChecked = false
+                        contentEdit.hint = if (selectedType == "MX") {
+                            "请输入邮件服务器地址（如 mail.example.com）"
+                        } else {
+                            "请输入文本内容（如 SPF 或验证信息）"
+                        }
+                    }
+                    else -> {
+                        proxiedCheckBox.isEnabled = true
+                        contentEdit.hint = when (selectedType) {
+                            "A" -> "请输入 IPv4 地址（如 2.2.2.2）"
+                            "AAAA" -> "请输入 IPv6 地址（如 2001:db8::1）"
+                            "CNAME" -> "请输入目标域名（如 example.com）"
+                            else -> "请输入记录内容"
+                        }
                     }
                 }
+
+                isFirstLoad = false
             }
+
+            override fun onNothingSelected(parentView: AdapterView<*>) {}
         }
 
-        override fun onNothingSelected(parentView: AdapterView<*>) {}
+        record?.let {
+            nameEdit.setText(it.name)
+            contentEdit.setText(it.content)
+            ttlEdit.setText(it.ttl.toString())
+            proxiedCheckBox.isChecked = it.proxied
+
+            val typePosition = typesAdapter.getPosition(it.type)
+            typeSpinner.setSelection(typePosition)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(if (record == null) "添加记录" else "编辑记录")
+            .setView(dialogView)
+            .setPositiveButton("保存") { _, _ ->
+                val type = typeSpinner.selectedItem.toString()
+                val name = nameEdit.text.toString().trim()
+                val content = contentEdit.text.toString().trim()
+                val ttl = ttlEdit.text.toString().toIntOrNull() ?: 1
+                val proxied = proxiedCheckBox.isChecked
+
+                if (type.isEmpty() || name.isEmpty() || content.isEmpty()) {
+                    toast("请填写所有字段")
+                    return@setPositiveButton
+                }
+
+                if (record == null) {
+                    addDnsRecord(type, name, content, ttl, proxied)
+                } else {
+                    updateDnsRecord(record.copy(type = type, name = name, content = content, ttl = ttl, proxied = proxied))
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
-
-    AlertDialog.Builder(this)
-        .setTitle(if (record == null) "添加记录" else "编辑记录")
-        .setView(dialogView)
-        .setPositiveButton("保存") { _, _ ->
-            val type = typeSpinner.selectedItem.toString()
-            val name = nameEdit.text.toString().trim()
-            val content = contentEdit.text.toString().trim()
-            val ttl = ttlEdit.text.toString().toIntOrNull() ?: 1
-            val proxied = proxiedCheckBox.isChecked
-
-            if (type.isEmpty() || name.isEmpty() || content.isEmpty()) {
-                toast("请填写所有字段")
-                return@setPositiveButton
-            }
-
-            if (record == null) {
-                addDnsRecord(type, name, content, ttl, proxied)
-            } else {
-                updateDnsRecord(record.copy(type = type, name = name, content = content, ttl = ttl, proxied = proxied))
-            }
-        }
-        .setNegativeButton("取消", null)
-        .show()
-}
 
     private fun addDnsRecord(type: String, name: String, content: String, ttl: Int, proxied: Boolean) {
         val account = currentAccount ?: return

@@ -18,6 +18,7 @@ class RouteBindActivity : AppCompatActivity() {
     private val client = OkHttpClient()
     private var currentAccount: Account? = null
     private val routeList = mutableListOf<Route>()
+    private val workerList = mutableListOf<String>()  // 保存脚本列表
 
     data class Route(val id: String, val pattern: String, val script: String)
 
@@ -84,6 +85,15 @@ class RouteBindActivity : AppCompatActivity() {
                 }
                 .show()
         }
+
+        // 新增管理脚本按钮点击事件
+        binding.manageScriptsBtn.setOnClickListener {
+            if (workerList.isEmpty()) {
+                showToast("没有可管理的脚本")
+                return@setOnClickListener
+            }
+            showManageScriptsDialog()
+        }
     }
 
     private fun loadWorkerList(account: Account) {
@@ -109,6 +119,8 @@ class RouteBindActivity : AppCompatActivity() {
                     return
                 }
                 runOnUiThread {
+                    workerList.clear()
+                    workerList.addAll(names)
                     val adapter = ArrayAdapter(this@RouteBindActivity, android.R.layout.simple_spinner_item, names)
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     binding.workerSpinner.adapter = adapter
@@ -116,6 +128,77 @@ class RouteBindActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun showManageScriptsDialog() {
+        val selectedItems = BooleanArray(workerList.size)
+        android.app.AlertDialog.Builder(this)
+            .setTitle("选择要删除的脚本")
+            .setMultiChoiceItems(workerList.toTypedArray(), selectedItems) { _, which, isChecked ->
+                selectedItems[which] = isChecked
+            }
+            .setPositiveButton("删除") { _, _ ->
+                val toDelete = workerList.filterIndexed { index, _ -> selectedItems[index] }
+                if (toDelete.isEmpty()) {
+                    showToast("未选择任何脚本")
+                    return@setPositiveButton
+                }
+                deleteScripts(toDelete)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun deleteScripts(scripts: List<String>) {
+        val account = currentAccount ?: return
+        val token = account.token
+        if (token.isEmpty()) return
+
+        binding.resultText.append("开始删除脚本...\n")
+
+        var successCount = 0
+        var failCount = 0
+
+        scripts.forEach { scriptName ->
+            val url = "https://api.cloudflare.com/client/v4/accounts/${account.accountId}/workers/scripts/$scriptName"
+            val request = Request.Builder().url(url).delete().addHeader("Authorization", "Bearer $token").build()
+
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    runOnUiThread {
+                        binding.resultText.append("删除失败：$scriptName，错误：${e.message}\n")
+                        failCount++
+                        checkDeleteComplete(successCount, failCount, scripts.size)
+                    }
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    runOnUiThread {
+                        if (response.isSuccessful) {
+                            binding.resultText.append("删除成功：$scriptName\n")
+                            successCount++
+                        } else {
+                            val res = response.body?.string()
+                            binding.resultText.append("删除失败：$scriptName\n返回：$res\n")
+                            failCount++
+                        }
+                        checkDeleteComplete(successCount, failCount, scripts.size)
+                    }
+                }
+            })
+        }
+    }
+
+    // 删除完成后刷新列表
+    private fun checkDeleteComplete(successCount: Int, failCount: Int, total: Int) {
+        if (successCount + failCount >= total) {
+            runOnUiThread {
+                showToast("脚本删除完成（成功：$successCount，失败：$failCount）")
+                currentAccount?.let { loadWorkerList(it) }
+            }
+        }
+    }
+
+    // ... 以下保持你原有代码不变 ...
 
     private fun loadCurrentRoutes(account: Account) {
         val url = "https://api.cloudflare.com/client/v4/zones/${account.zoneId}/workers/routes"
@@ -132,6 +215,7 @@ class RouteBindActivity : AppCompatActivity() {
                     try {
                         val root = JSONObject(res)
                         val result = root.getJSONArray("result")
+                        routeList.clear()
                         for (i in 0 until result.length()) {
                             val obj = result.getJSONObject(i)
                             val id = obj.getString("id")
