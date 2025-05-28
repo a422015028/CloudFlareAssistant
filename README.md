@@ -33,10 +33,8 @@
 
 - DNS 全类型支持（TXT、MX、SRV、CAA 等）√
 - WebDAV备份账号 √
-- Worker KV 存储管理
-- 定时触发器（Cron Triggers）配置
+- Worker KV 存储管理 √
 - Workers 脚本在线编辑器
-- 国际化支持（中英文切换）
 
 ## License
 

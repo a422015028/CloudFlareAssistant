@@ -129,6 +129,15 @@
         <Button
              android:layout_height="wrap_content"
              android:layout_width="match_parent"
+             android:backgroundTint="#009688"
+             android:textColor="#FFFFFF"
+             android:layout_marginTop="12dp"
+             android:id="@+id/manageKvBtn"
+             android:text="管理KV" />
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
              android:backgroundTint="#4CAF50"
              android:textColor="#FFFFFF"
              android:layout_marginTop="12dp"

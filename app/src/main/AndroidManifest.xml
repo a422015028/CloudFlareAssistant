@@ -46,6 +46,10 @@
         <activity 
             android:name=".DnsManagerActivity" 
             android:exported="true"/>
+        
+        <activity 
+            android:name=".KvManagerActivity"
+            android:exported="true"/>
             
             <!-- 可选的其他配置 -->
         <activity 

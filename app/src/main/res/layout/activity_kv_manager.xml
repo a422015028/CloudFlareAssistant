@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:background="#F5F5F5"
+     android:padding="16dp">
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:background="#FFFFFF"
+         android:elevation="3dp"
+         android:padding="16dp"
+         android:layout_marginHorizontal="8dp"
+         android:orientation="vertical"
+         android:clipChildren="false"
+         android:clipToPadding="false"
+         android:layout_marginTop="8dp">
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="18sp"
+             android:textColor="#333"
+             android:text="KV命名空间管理" />
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:orientation="horizontal"
+             android:layout_marginTop="4dp">
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:backgroundTint="#607D8B"
+                 android:textColor="#FFFFFF"
+                 android:layout_weight="1"
+                 android:id="@+id/selectNamespaceBtn"
+                 android:text="选择名称" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:backgroundTint="#009688"
+                 android:textColor="#FFFFFF"
+                 android:layout_marginStart="8dp"
+                 android:layout_weight="1"
+                 android:id="@+id/refreshNamespaceBtn"
+                 android:text="刷新" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:backgroundTint="#FFC107"
+                 android:textColor="#FFFFFF"
+                 android:layout_marginStart="8dp"
+                 android:layout_weight="1"
+                 android:id="@+id/createNamespaceBtn"
+                 android:text="新建" />
+
+        </LinearLayout>
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:background="#E0F2F1"
+             android:padding="4dp"
+             android:textSize="16sp"
+             android:textColor="#009688"
+             android:layout_marginTop="8dp"
+             android:id="@+id/namespaceText"
+             android:text="未选择名称" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#666"
+             android:layout_marginTop="12dp"
+             android:text="Key" />
+
+        <EditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:background="@android:drawable/edit_text"
+             android:hint="请输入 Key"
+             android:padding="8dp"
+             android:layout_marginTop="4dp"
+             android:id="@+id/keyEdit" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#666"
+             android:layout_marginTop="12dp"
+             android:text="Value" />
+
+        <EditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:background="@android:drawable/edit_text"
+             android:hint="请输入 Value"
+             android:padding="8dp"
+             android:layout_marginTop="4dp"
+             android:id="@+id/valueEdit" />
+
+        <GridLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:rowOrderPreserved="false"
+             android:orientation="horizontal"
+             android:useDefaultMargins="true"
+             android:alignmentMode="alignMargins"
+             android:layout_marginTop="12dp"
+             android:columnCount="3"
+             android:rowCount="2">
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:backgroundTint="#2196F3"
+                 android:textColor="#FFFFFF"
+                 android:layout_columnWeight="1"
+                 android:id="@+id/readBtn"
+                 android:text="读取" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:backgroundTint="#4CAF50"
+                 android:textColor="#FFFFFF"
+                 android:layout_columnWeight="1"
+                 android:id="@+id/writeBtn"
+                 android:text="写入" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:backgroundTint="#F44336"
+                 android:textColor="#FFFFFF"
+                 android:layout_columnWeight="1"
+                 android:id="@+id/deleteBtn"
+                 android:text="删除" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:backgroundTint="#FF9800"
+                 android:textColor="#FFFFFF"
+                 android:layout_columnWeight="1"
+                 android:id="@+id/listBtn"
+                 android:text="列出所有键值" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:backgroundTint="#9C27B0"
+                 android:textColor="#FFFFFF"
+                 android:layout_columnWeight="1"
+                 android:id="@+id/deleteNamespaceBtn"
+                 android:text="删除当前名称" />
+
+            <Button
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:backgroundTint="#607D8B"
+                 android:textColor="#FFFFFF"
+                 android:layout_columnWeight="1"
+                 android:id="@+id/copyResultBtn"
+                 android:text="复制响应结果" />
+
+        </GridLayout>
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="13sp"
+             android:textColor="#333"
+             android:text="响应结果将显示在这里：" />
+             
+        <EditText
+             android:id="@+id/resultText"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:background="@android:drawable/edit_text"
+             android:hint="响应结果将显示在这里"
+             android:padding="8dp"
+             android:layout_marginTop="12dp"
+             android:textSize="13sp"
+             android:textColor="#333"
+             android:inputType="textMultiLine"
+             android:scrollbars="vertical"
+             android:overScrollMode="always"
+             android:text="" />
+
+    </LinearLayout>
+
+</ScrollView>

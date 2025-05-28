@@ -130,6 +130,21 @@ class MainActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
+        // 新增按钮 - 启动 KV 管理页面
+        binding.manageKvBtn.setOnClickListener {
+            val account = currentAccount
+            if (account == null) {
+                showToast("请先选择账号")
+                return@setOnClickListener
+            }
+
+            val intent = Intent(this, KvManagerActivity::class.java).apply {
+                putExtra("account_name", account.name)
+                putExtra("account_id", account.accountId)
+                putExtra("token", account.token)
+            }
+            startActivity(intent)
+        }
     }
 
     override fun onResume() {
