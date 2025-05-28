@@ -17,6 +17,12 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import android.text.Editable
+import android.widget.EditText
+
+fun EditText.setTextSafe(text: String) {
+    this.text = Editable.Factory.getInstance().newEditable(text)
+}
 
 class MainActivity : AppCompatActivity() {
 
@@ -211,7 +217,8 @@ class MainActivity : AppCompatActivity() {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
-                    binding.responseText.text = "上传失败: ${e.message}"
+                   // binding.responseText.text = "上传失败: ${e.message}"
+                    binding.responseText.setTextSafe("上传失败: ${e.message}")
                     showToast("上传失败")
                     binding.uploadBtn.isEnabled = true
                 }
@@ -220,7 +227,8 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(call: Call, response: Response) {
                 val body = response.body?.string()
                 runOnUiThread {
-                    binding.responseText.text = "上传成功，状态码: ${response.code}\n返回: $body"
+                  //  binding.responseText.text = "上传成功，状态码: ${response.code}\n返回: $body"
+                    binding.responseText.setTextSafe("上传成功，状态码: ${response.code}\n返回: $body")
                     showToast("上传成功")
                     binding.uploadBtn.isEnabled = true
                 }

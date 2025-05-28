@@ -11,6 +11,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
+import android.text.Editable
+import android.widget.EditText
 
 class RouteBindActivity : AppCompatActivity() {
 
@@ -246,7 +248,8 @@ class RouteBindActivity : AppCompatActivity() {
         }
 
         binding.bindBtn.isEnabled = false
-        binding.resultText.text = "正在绑定...\n"
+       // binding.resultText.text = "正在绑定...\n"
+        binding.resultText.setTextSafe("正在绑定...\n")
 
         patterns.forEach { pattern ->
             val url = "https://api.cloudflare.com/client/v4/zones/$zoneId/workers/routes"

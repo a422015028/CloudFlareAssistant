@@ -144,18 +144,20 @@
              android:id="@+id/uploadBtn"
              android:text="上传Worker脚本" />
 
-        <TextView
-             android:layout_height="wrap_content"
+           <EditText
+             android:id="@+id/responseText"
              android:layout_width="match_parent"
-             android:scrollbars="vertical"
-             android:background="#EEEEEE"
-             android:minHeight="120dp"
-             android:padding="12dp"
+             android:layout_height="wrap_content"
+             android:background="@android:drawable/edit_text"
+             android:hint="响应结果将显示在这里"
+             android:padding="8dp"
+             android:layout_marginTop="12dp"
              android:textSize="13sp"
              android:textColor="#333"
-             android:layout_marginTop="16dp"
-             android:id="@+id/responseText"
-             android:text="响应结果将显示在这里" />
+             android:inputType="textMultiLine"
+             android:scrollbars="vertical"
+             android:overScrollMode="always"
+             android:text="" />
 
     </LinearLayout>
 

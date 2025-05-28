@@ -152,17 +152,20 @@
              android:orientation="vertical"
              android:layout_marginTop="16dp">
 
-            <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="match_parent"
-                 android:scrollbars="vertical"
-                 android:background="#EFEFEF"
-                 android:minHeight="120dp"
-                 android:padding="10dp"
-                 android:textSize="13sp"
-                 android:textColor="#444"
-                 android:id="@+id/resultText"
-                 android:text="响应结果将显示在这里" />
+        <EditText
+             android:id="@+id/resultText"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:background="@android:drawable/edit_text"
+             android:hint="响应结果将显示在这里"
+             android:padding="8dp"
+             android:layout_marginTop="12dp"
+             android:textSize="13sp"
+             android:textColor="#333"
+             android:inputType="textMultiLine"
+             android:scrollbars="vertical"
+             android:overScrollMode="always"
+             android:text="" />
 
         </LinearLayout>
 
