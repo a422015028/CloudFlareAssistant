@@ -102,20 +102,25 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, AccountManagerActivity::class.java))
         }
 
-        // 清除历史记录
-        binding.clearHistoryBtn.setOnClickListener {
-            prefs.edit()
-                .remove("last_worker_name")
-                .remove("last_file_path")
-                .remove("last_selected_account")
-                .apply()
+        // 清除历史记录和缓存  
+binding.clearHistoryBtn.setOnClickListener {  
+    // 清除 SharedPreferences 中保存的历史记录  
+    prefs.edit()  
+        .remove("last_worker_name")  
+        .remove("last_file_path")  
+        .remove("last_selected_account")  
+        .apply()  
 
-            binding.workerNameEdit.setText("")
-            binding.filePathEdit.setText("")
-            binding.accountSpinner.setSelection(0)
+    // 清除 UI 输入框内容  
+    binding.workerNameEdit.setText("")  
+    binding.filePathEdit.setText("")  
+    binding.accountSpinner.setSelection(0)  
 
-            showToast("历史已清除")
-        }
+    // 清除缓存目录  
+    clearCache()
+
+    showToast("历史记录和缓存已清除")  
+}       
 
         setupAccountSpinner()
         setupBindRouteButton()
@@ -153,11 +158,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     override fun onResume() {
         super.onResume()
         setupAccountSpinner()
     }
-
+// 清除缓存方法  
+private fun clearCache() {
+    try {
+        // 获取缓存目录路径
+        val cacheDir = cacheDir
+        // 遍历缓存目录中的所有文件并删除
+        cacheDir.listFiles()?.forEach { file ->
+            if (file.isDirectory) {
+                file.deleteRecursively()  // 删除目录及其内容
+            } else {
+                file.delete()  // 删除文件
+            }
+        }
+    } catch (e: Exception) {
+        Log.e("MainActivity", "清除缓存失败", e)
+    }
+}
     private fun setupBindRouteButton() {
         binding.bindRouteBtn.setOnClickListener {
             val account = currentAccount

@@ -15,6 +15,7 @@ import java.io.IOException
 import okhttp3.MediaType.Companion.toMediaType
 import org.json.JSONObject
 import org.json.JSONArray
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class KvManagerActivity : AppCompatActivity() {
 
@@ -125,7 +126,7 @@ class KvManagerActivity : AppCompatActivity() {
                 }
                 val url = "https://api.cloudflare.com/client/v4/accounts/${account.accountId}/storage/kv/namespaces"
                 val json = """{"title":"$nsName"}"""
-                val body = RequestBody.create("application/json; charset=utf-8".toMediaType(), json)
+                val body = json.toRequestBody("application/json; charset=utf-8".toMediaType())
                 val request = Request.Builder()
                     .url(url)
                     .post(body)
@@ -191,7 +192,7 @@ class KvManagerActivity : AppCompatActivity() {
                         val url = "https://api.cloudflare.com/client/v4/accounts/${account.accountId}/storage/kv/namespaces/${ns.id}/values/$k"
                         val request = Request.Builder()
                             .url(url)
-                            .put(RequestBody.create(null, "")) // value为空字符串
+                            .put("".toRequestBody(null)) // value为空字符串
                             .addHeader("Authorization", "Bearer ${account.token}")
                             .build()
                         try {
@@ -226,7 +227,7 @@ class KvManagerActivity : AppCompatActivity() {
         val url = "https://api.cloudflare.com/client/v4/accounts/${account.accountId}/storage/kv/namespaces/${ns.id}/values/$key"
         val request = Request.Builder()
             .url(url)
-            .put(RequestBody.create(null, value))
+            .put(value.toRequestBody(null))
             .addHeader("Authorization", "Bearer ${account.token}")
             .build()
         client.newCall(request).enqueue(object : Callback {
