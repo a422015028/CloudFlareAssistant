@@ -115,7 +115,7 @@
              android:textColor="#FFFFFF"
              android:layout_marginTop="16dp"
              android:id="@+id/bindRouteBtn"
-             android:text="绑定路由" />
+             android:text="管理域和路由" />
 
         <Button
              android:layout_height="wrap_content"

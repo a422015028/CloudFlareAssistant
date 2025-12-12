@@ -2,8 +2,10 @@ package com.muort.upworker
 
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.muort.upworker.databinding.ActivityRouteBindBinding
 import okhttp3.*
@@ -11,16 +13,19 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
-import android.text.Editable
-import android.widget.EditText
 
 class RouteBindActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRouteBindBinding
     private val client = OkHttpClient()
     private var currentAccount: Account? = null
+
     private val routeList = mutableListOf<Route>()
     private val workerList = mutableListOf<String>()  // 保存脚本列表
+
+    // ===== 自定义域 =====
+    data class WorkerDomain(val id: String, val hostname: String, val service: String, val zoneId: String?)
+    private val domainList = mutableListOf<WorkerDomain>()
 
     data class Route(val id: String, val pattern: String, val script: String)
 
@@ -50,6 +55,26 @@ class RouteBindActivity : AppCompatActivity() {
             loadCurrentRoutes(it)
         }
 
+        // ========= 模式切换（你需要在 XML 里加 bindModeGroup/routeLayout/domainLayout 等控件） =========
+        binding.bindModeGroup.setOnCheckedChangeListener { _, checkedId ->
+            if (checkedId == binding.routeModeBtn.id) {
+                binding.routeLayout.visibility = View.VISIBLE
+                binding.domainLayout.visibility = View.GONE
+            } else {
+                binding.routeLayout.visibility = View.GONE
+                binding.domainLayout.visibility = View.VISIBLE
+                loadDomainsForSelectedWorker()
+            }
+        }
+
+        // Worker 切换时，如果当前在“自定义域”模式，刷新自定义域列表
+        binding.workerSpinner.onItemSelectedListener = SimpleItemSelectedListener {
+            if (binding.domainLayout.visibility == View.VISIBLE) {
+                loadDomainsForSelectedWorker()
+            }
+        }
+
+        // ========= 原有路由逻辑 =========
         binding.bindBtn.setOnClickListener { bindRoutes() }
 
         binding.deleteBtn.setOnClickListener {
@@ -73,8 +98,7 @@ class RouteBindActivity : AppCompatActivity() {
             }
 
             val routeNames = routeList.map { "路径: ${it.pattern}\n脚本: ${it.script}" }.toTypedArray()
-
-            android.app.AlertDialog.Builder(this)
+            AlertDialog.Builder(this)
                 .setTitle("选择一个绑定项")
                 .setItems(routeNames) { _, index ->
                     val route = routeList[index]
@@ -88,7 +112,6 @@ class RouteBindActivity : AppCompatActivity() {
                 .show()
         }
 
-        // 新增管理脚本按钮点击事件
         binding.manageScriptsBtn.setOnClickListener {
             if (workerList.isEmpty()) {
                 showToast("没有可管理的脚本")
@@ -96,11 +119,36 @@ class RouteBindActivity : AppCompatActivity() {
             }
             showManageScriptsDialog()
         }
+
+        // ========= 自定义域：列表 Adapter =========
+        binding.domainListView.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            mutableListOf<String>() // 先占位，真正数据在 refreshDomainListUI()
+        )
+
+        // 自定义域：绑定按钮
+        binding.addDomainBtn.setOnClickListener { attachCustomDomain() }
+
+        // 自定义域：点击删除（带确认）
+        binding.domainListView.setOnItemClickListener { _, _, position, _ ->
+            val d = domainList.getOrNull(position) ?: return@setOnItemClickListener
+            AlertDialog.Builder(this)
+                .setTitle("删除自定义域")
+                .setMessage("确定删除：${d.hostname} ？")
+                .setPositiveButton("删除") { _, _ -> deleteCustomDomain(d) }
+                .setNegativeButton("取消", null)
+                .show()
+        }
     }
 
+    // ------------------ Worker 列表（原逻辑不动） ------------------
     private fun loadWorkerList(account: Account) {
         val url = "https://api.cloudflare.com/client/v4/accounts/${account.accountId}/workers/scripts"
-        val request = Request.Builder().url(url).get().addHeader("Authorization", "Bearer ${account.token}").build()
+        val request = Request.Builder()
+            .url(url).get()
+            .addHeader("Authorization", "Bearer ${account.token}")
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -116,14 +164,19 @@ class RouteBindActivity : AppCompatActivity() {
                     for (i in 0 until result.length()) {
                         names.add(result.getJSONObject(i).getString("id"))
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     runOnUiThread { showToast("解析 Worker 列表失败") }
                     return
                 }
+
                 runOnUiThread {
                     workerList.clear()
                     workerList.addAll(names)
-                    val adapter = ArrayAdapter(this@RouteBindActivity, android.R.layout.simple_spinner_item, names)
+                    val adapter = ArrayAdapter(
+                        this@RouteBindActivity,
+                        android.R.layout.simple_spinner_item,
+                        names
+                    )
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     binding.workerSpinner.adapter = adapter
                 }
@@ -131,9 +184,162 @@ class RouteBindActivity : AppCompatActivity() {
         })
     }
 
+    // ------------------ 自定义域：加载当前 Worker 的域名列表 ------------------
+    private fun loadDomainsForSelectedWorker() {
+        val acc = currentAccount ?: return
+        val worker = binding.workerSpinner.selectedItem?.toString()?.trim().orEmpty()
+        if (worker.isEmpty()) return
+
+        val url = "https://api.cloudflare.com/client/v4/accounts/${acc.accountId}/workers/domains"
+        val req = Request.Builder()
+            .url(url).get()
+            .addHeader("Authorization", "Bearer ${acc.token}")
+            .build()
+
+        client.newCall(req).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { appendResult("获取自定义域失败：${e.message}") }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val res = response.body?.string().orEmpty()
+                if (!response.isSuccessful) {
+                    runOnUiThread { appendResult("获取自定义域失败：$res") }
+                    return
+                }
+
+                val list = mutableListOf<WorkerDomain>()
+                try {
+                    val root = JSONObject(res)
+                    val arr = root.getJSONArray("result")
+                    for (i in 0 until arr.length()) {
+                        val o = arr.getJSONObject(i)
+                        val service = o.optString("service", "")
+                        if (service != worker) continue
+                        list.add(
+                            WorkerDomain(
+                                id = o.getString("id"),
+                                hostname = o.getString("hostname"),
+                                service = service,
+                                zoneId = o.optString("zone_id", null)
+                            )
+                        )
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread { appendResult("解析自定义域失败：${e.message}") }
+                    return
+                }
+
+                runOnUiThread {
+                    domainList.clear()
+                    domainList.addAll(list)
+                    refreshDomainListUI()
+                }
+            }
+        })
+    }
+
+    private fun refreshDomainListUI() {
+        val display = domainList.map { it.hostname }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, display)
+        binding.domainListView.adapter = adapter
+        adapter.notifyDataSetChanged()
+    }
+
+    // ------------------ 自定义域：绑定（Attach To Domain） ------------------
+    private fun attachCustomDomain() {
+        val acc = currentAccount ?: return
+        val worker = binding.workerSpinner.selectedItem?.toString()?.trim().orEmpty()
+        val host = binding.domainEdit.text.toString().trim()
+
+        if (worker.isEmpty()) {
+            showToast("请先选择 Worker")
+            return
+        }
+        if (host.isEmpty()) {
+            showToast("请输入域名")
+            return
+        }
+        if (acc.zoneId.isNullOrEmpty()) {
+            showToast("缺少 Zone ID，无法绑定自定义域")
+            return
+        }
+
+        val url = "https://api.cloudflare.com/client/v4/accounts/${acc.accountId}/workers/domains"
+        val json = JSONObject().apply {
+            put("hostname", host)
+            put("service", worker)
+            put("zone_id", acc.zoneId)
+        }
+        val body = json.toString().toRequestBody("application/json".toMediaType())
+
+        // 官方是 PUT attach 1
+        val req = Request.Builder()
+            .url(url)
+            .put(body)
+            .addHeader("Authorization", "Bearer ${acc.token}")
+            .addHeader("Content-Type", "application/json")
+            .build()
+
+        binding.addDomainBtn.isEnabled = false
+        client.newCall(req).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    binding.addDomainBtn.isEnabled = true
+                    appendResult("绑定自定义域失败：${e.message}")
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val res = response.body?.string().orEmpty()
+                runOnUiThread {
+                    binding.addDomainBtn.isEnabled = true
+                    if (response.isSuccessful) {
+                        appendResult("自定义域绑定成功：$host")
+                        binding.domainEdit.setText("")
+                        loadDomainsForSelectedWorker()
+                    } else {
+                        appendResult("自定义域绑定失败：$res")
+                    }
+                }
+            }
+        })
+    }
+
+    // ------------------ 自定义域：删除（Detach From Domain） ------------------
+    private fun deleteCustomDomain(d: WorkerDomain) {
+        val acc = currentAccount ?: return
+
+        val url = "https://api.cloudflare.com/client/v4/accounts/${acc.accountId}/workers/domains/${d.id}"
+        val req = Request.Builder()
+            .url(url)
+            .delete()
+            .addHeader("Authorization", "Bearer ${acc.token}")
+            .build()
+
+        client.newCall(req).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { appendResult("删除自定义域失败：${e.message}") }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val res = response.body?.string().orEmpty()
+                runOnUiThread {
+                    if (response.isSuccessful) {
+                        appendResult("删除自定义域成功：${d.hostname}")
+                        loadDomainsForSelectedWorker()
+                    } else {
+                        appendResult("删除自定义域失败：$res")
+                    }
+                }
+            }
+        })
+    }
+
+    // ------------------ 原有脚本管理（不动） ------------------
     private fun showManageScriptsDialog() {
         val selectedItems = BooleanArray(workerList.size)
-        android.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle("选择要删除的脚本")
             .setMultiChoiceItems(workerList.toTypedArray(), selectedItems) { _, which, isChecked ->
                 selectedItems[which] = isChecked
@@ -162,7 +368,11 @@ class RouteBindActivity : AppCompatActivity() {
 
         scripts.forEach { scriptName ->
             val url = "https://api.cloudflare.com/client/v4/accounts/${account.accountId}/workers/scripts/$scriptName"
-            val request = Request.Builder().url(url).delete().addHeader("Authorization", "Bearer $token").build()
+            val request = Request.Builder()
+                .url(url)
+                .delete()
+                .addHeader("Authorization", "Bearer $token")
+                .build()
 
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
@@ -190,7 +400,6 @@ class RouteBindActivity : AppCompatActivity() {
         }
     }
 
-    // 删除完成后刷新列表
     private fun checkDeleteComplete(successCount: Int, failCount: Int, total: Int) {
         if (successCount + failCount >= total) {
             runOnUiThread {
@@ -200,11 +409,13 @@ class RouteBindActivity : AppCompatActivity() {
         }
     }
 
-    // ... 以下保持你原有代码不变 ...
-
+    // ------------------ 你原有路由代码（保持不变） ------------------
     private fun loadCurrentRoutes(account: Account) {
         val url = "https://api.cloudflare.com/client/v4/zones/${account.zoneId}/workers/routes"
-        val request = Request.Builder().url(url).get().addHeader("Authorization", "Bearer ${account.token}").build()
+        val request = Request.Builder()
+            .url(url).get()
+            .addHeader("Authorization", "Bearer ${account.token}")
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -240,7 +451,8 @@ class RouteBindActivity : AppCompatActivity() {
         val zoneId = account.zoneId ?: return
         val token = account.token
         val script = binding.workerSpinner.selectedItem?.toString()?.trim() ?: ""
-        val patterns = binding.routesEdit.text.toString().split("\n").map { it.trim() }.filter { it.isNotEmpty() }
+        val patterns = binding.routesEdit.text.toString()
+            .split("\n").map { it.trim() }.filter { it.isNotEmpty() }
 
         if (script.isEmpty() || patterns.isEmpty()) {
             showToast("请填写 Worker 名称 和 路由列表")
@@ -248,7 +460,6 @@ class RouteBindActivity : AppCompatActivity() {
         }
 
         binding.bindBtn.isEnabled = false
-       // binding.resultText.text = "正在绑定...\n"
         binding.resultText.setTextSafe("正在绑定...\n")
 
         patterns.forEach { pattern ->
@@ -258,8 +469,12 @@ class RouteBindActivity : AppCompatActivity() {
                 put("script", script)
             }
             val body = json.toString().toRequestBody("application/json".toMediaType())
-            val request = Request.Builder().url(url).post(body).addHeader("Authorization", "Bearer $token")
-                .addHeader("Content-Type", "application/json").build()
+            val request = Request.Builder()
+                .url(url)
+                .post(body)
+                .addHeader("Authorization", "Bearer $token")
+                .addHeader("Content-Type", "application/json")
+                .build()
 
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
@@ -285,7 +500,11 @@ class RouteBindActivity : AppCompatActivity() {
     private fun deleteRoute(routeId: String) {
         val account = currentAccount ?: return
         val url = "https://api.cloudflare.com/client/v4/zones/${account.zoneId}/workers/routes/$routeId"
-        val request = Request.Builder().url(url).delete().addHeader("Authorization", "Bearer ${account.token}").build()
+        val request = Request.Builder()
+            .url(url)
+            .delete()
+            .addHeader("Authorization", "Bearer ${account.token}")
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -313,8 +532,12 @@ class RouteBindActivity : AppCompatActivity() {
             put("script", script)
         }
         val body = json.toString().toRequestBody("application/json".toMediaType())
-        val request = Request.Builder().url(url).put(body).addHeader("Authorization", "Bearer ${account.token}")
-            .addHeader("Content-Type", "application/json").build()
+        val request = Request.Builder()
+            .url(url)
+            .put(body)
+            .addHeader("Authorization", "Bearer ${account.token}")
+            .addHeader("Content-Type", "application/json")
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -341,4 +564,20 @@ class RouteBindActivity : AppCompatActivity() {
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
+}
+
+/**
+ * 极简 Spinner 选择监听，避免写一堆空实现
+ */
+private class SimpleItemSelectedListener(
+    val onSelected: () -> Unit
+) : android.widget.AdapterView.OnItemSelectedListener {
+    override fun onItemSelected(
+        parent: android.widget.AdapterView<*>?,
+        view: android.view.View?,
+        position: Int,
+        id: Long
+    ) = onSelected()
+
+    override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
 }

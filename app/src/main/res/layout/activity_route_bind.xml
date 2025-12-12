@@ -58,88 +58,166 @@
                  android:id="@+id/manageScriptsBtn"
                  android:text="管理脚本" />
 
-            <EditText
-                 android:layout_height="150dp"
-                 android:layout_width="match_parent"
-                 android:scrollbars="vertical"
-                 android:gravity="top"
-                 android:background="@android:drawable/edit_text"
-                 android:hint="每行一个路由（如 abcd.1234.xyz/*）"
-                 android:padding="8dp"
-                 android:layout_marginTop="16dp"
-                 android:inputType="textMultiLine"
-                 android:id="@+id/routesEdit" />
-
-            <Button
+            <RadioGroup
                  android:layout_height="wrap_content"
                  android:layout_width="match_parent"
-                 android:backgroundTint="#3F51B5"
-                 android:textColor="#FFF"
+                 android:orientation="horizontal"
                  android:layout_marginTop="16dp"
-                 android:id="@+id/bindBtn"
-                 android:text="绑定路由" />
+                 android:id="@+id/bindModeGroup">
+
+                <RadioButton
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:checked="true"
+                     android:id="@+id/routeModeBtn"
+                     android:text="路由绑定" />
+
+                <RadioButton
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:layout_marginStart="16dp"
+                     android:id="@+id/domainModeBtn"
+                     android:text="自定义域" />
+
+            </RadioGroup>
 
         </LinearLayout>
 
         <LinearLayout
              android:layout_height="wrap_content"
              android:layout_width="match_parent"
+             android:orientation="vertical"
+             android:id="@+id/routeLayout">
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:background="@android:color/white"
+                 android:elevation="4dp"
+                 android:padding="16dp"
+                 android:orientation="vertical"
+                 android:layout_marginTop="16dp">
+
+                <EditText
+                     android:layout_height="150dp"
+                     android:layout_width="match_parent"
+                     android:background="@android:drawable/edit_text"
+                     android:gravity="top"
+                     android:hint="每行一个路由（如 abcd.1234.xyz/*）"
+                     android:padding="8dp"
+                     android:inputType="textMultiLine"
+                     android:id="@+id/routesEdit" />
+
+                <Button
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:backgroundTint="#3F51B5"
+                     android:textColor="#FFF"
+                     android:layout_marginTop="16dp"
+                     android:id="@+id/bindBtn"
+                     android:text="绑定路由" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:background="@android:color/white"
+                 android:elevation="4dp"
+                 android:padding="16dp"
+                 android:orientation="vertical"
+                 android:layout_marginTop="16dp"
+                 android:id="@+id/boundRoutesLayout">
+
+                <Button
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:id="@+id/selectRouteBtn"
+                     android:text="选择绑定项" />
+
+                <EditText
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:background="@android:drawable/edit_text"
+                     android:hint="路由 ID（用于更新或删除）"
+                     android:padding="8dp"
+                     android:layout_marginTop="16dp"
+                     android:id="@+id/routeIdEdit" />
+
+                <EditText
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:background="@android:drawable/edit_text"
+                     android:hint="新路由 Pattern（用于更新）"
+                     android:padding="8dp"
+                     android:layout_marginTop="8dp"
+                     android:id="@+id/patternEdit" />
+
+                <Button
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:backgroundTint="#FFA000"
+                     android:textColor="#FFF"
+                     android:layout_marginTop="16dp"
+                     android:id="@+id/updateBtn"
+                     android:text="更新路由" />
+
+                <Button
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:backgroundTint="#D32F2F"
+                     android:textColor="#FFF"
+                     android:layout_marginTop="8dp"
+                     android:id="@+id/deleteBtn"
+                     android:text="删除路由" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:textSize="15sp"
+                     android:textColor="#333"
+                     android:layout_marginTop="12dp"
+                     android:text="已绑定路由："
+                     android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:visibility="gone"
              android:background="@android:color/white"
              android:elevation="4dp"
              android:padding="16dp"
              android:orientation="vertical"
              android:layout_marginTop="16dp"
-             android:id="@+id/boundRoutesLayout">
-
-            <Button
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:id="@+id/selectRouteBtn"
-                 android:text="选择绑定项" />
+             android:id="@+id/domainLayout">
 
             <EditText
                  android:layout_height="wrap_content"
                  android:layout_width="match_parent"
-                 android:background="@android:drawable/edit_text"
-                 android:hint="路由 ID（用于更新或删除）"
-                 android:padding="8dp"
-                 android:layout_marginTop="16dp"
-                 android:id="@+id/routeIdEdit" />
-
-            <EditText
-                 android:layout_height="wrap_content"
-                 android:layout_width="match_parent"
-                 android:background="@android:drawable/edit_text"
-                 android:hint="新路由 Pattern（用于更新）"
-                 android:padding="8dp"
-                 android:layout_marginTop="8dp"
-                 android:id="@+id/patternEdit" />
+                 android:hint="例如 worker.example.com"
+                 android:inputType="textUri"
+                 android:id="@+id/domainEdit" />
 
             <Button
                  android:layout_height="wrap_content"
                  android:layout_width="match_parent"
-                 android:backgroundTint="#FFA000"
+                 android:backgroundTint="#3F51B5"
                  android:textColor="#FFF"
-                 android:layout_marginTop="16dp"
-                 android:id="@+id/updateBtn"
-                 android:text="更新路由" />
+                 android:layout_marginTop="12dp"
+                 android:id="@+id/addDomainBtn"
+                 android:text="绑定自定义域" />
 
-            <Button
-                 android:layout_height="wrap_content"
+            <ListView
+                 android:layout_height="200dp"
                  android:layout_width="match_parent"
-                 android:backgroundTint="#D32F2F"
-                 android:textColor="#FFF"
-                 android:layout_marginTop="8dp"
-                 android:id="@+id/deleteBtn"
-                 android:text="删除路由" />
+                 android:layout_marginTop="12dp"
+                 android:id="@+id/domainListView">
 
-            <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="match_parent"
-                 android:textSize="15sp"
-                 android:textColor="#333"
-                 android:text="已绑定路由："
-                 android:textStyle="bold" />
+            </ListView>
 
         </LinearLayout>
 
@@ -152,20 +230,17 @@
              android:orientation="vertical"
              android:layout_marginTop="16dp">
 
-        <EditText
-             android:id="@+id/resultText"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:background="@android:drawable/edit_text"
-             android:hint="响应结果将显示在这里"
-             android:padding="8dp"
-             android:layout_marginTop="12dp"
-             android:textSize="13sp"
-             android:textColor="#333"
-             android:inputType="textMultiLine"
-             android:scrollbars="vertical"
-             android:overScrollMode="always"
-             android:text="" />
+            <EditText
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:scrollbars="vertical"
+                 android:background="@android:drawable/edit_text"
+                 android:hint="响应结果将显示在这里"
+                 android:padding="8dp"
+                 android:textSize="13sp"
+                 android:textColor="#333"
+                 android:inputType="textMultiLine"
+                 android:id="@+id/resultText" />
 
         </LinearLayout>
 
