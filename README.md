@@ -27,13 +27,15 @@
 
 ## 预览截图
 
-![1000059721](https://raw.githubusercontent.com/a422015028/wow/main/png/1000059721.png)
+![1000059721](https://raw.githubusercontent.com/a422015028/wow/main/1000094156.jpg)
 
 ## TODO（计划中功能）
 
 - DNS 全类型支持（TXT、MX、SRV、CAA 等）√
 - WebDAV备份账号 √
 - Worker KV 存储管理 √
+- 管理Pages √
+- 管理R2存储 √
 - Workers 脚本在线编辑器
 
 ## License

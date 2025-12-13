@@ -76,10 +76,10 @@ class AccountManagerActivity : AppCompatActivity() {
                 val name = nameEdit.text.toString().trim()
                 val id = accountIdEdit.text.toString().trim()
                 val token = tokenEdit.text.toString().trim()
-                val zoneId = zoneIdEdit.text.toString().trim()
+                val zoneId = zoneIdEdit.text.toString().trim().ifEmpty { null }
 
-                if (name.isEmpty() || id.isEmpty() || token.isEmpty() || zoneId.isEmpty()) {
-                    Toast.makeText(this, "请完整填写所有字段", Toast.LENGTH_SHORT).show()
+                if (name.isEmpty() || id.isEmpty() || token.isEmpty()) {
+                    Toast.makeText(this, "请填写账号名称、Account ID 和 API Token", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 

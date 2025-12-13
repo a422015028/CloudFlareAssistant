@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cloudflare Pages 项目管理"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/selectedProjectText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="未选择项目"
+        android:textSize="14sp"
+        android:textColor="#666"
+        android:layout_marginBottom="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <EditText
+            android:id="@+id/projectNameEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="项目名称" />
+
+        <Button
+            android:id="@+id/createBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="创建项目" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/refreshBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="刷新列表" />
+
+    <ListView
+        android:id="@+id/projectsList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="自定义域名管理 (选择项目后操作)"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <EditText
+            android:id="@+id/domainEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="域名 (如 example.com)" />
+
+        <Button
+            android:id="@+id/addDomainBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="添加域名" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <EditText
+            android:id="@+id/deleteDomainEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="要删除的域名" />
+
+        <Button
+            android:id="@+id/deleteDomainBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="删除域名" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/listDomainsBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="查看域名列表"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="部署项目 (选择项目后输入分支)"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/branchEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="分支名称 (默认 main)" />
+
+        <Button
+            android:id="@+id/deployBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="部署" />
+
+    </LinearLayout>
+
+</LinearLayout>

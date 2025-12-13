@@ -138,6 +138,24 @@
         <Button
              android:layout_height="wrap_content"
              android:layout_width="match_parent"
+             android:backgroundTint="#9C27B0"
+             android:textColor="#FFFFFF"
+             android:layout_marginTop="12dp"
+             android:id="@+id/managePagesBtn"
+             android:text="管理Pages" />
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:backgroundTint="#607D8B"
+             android:textColor="#FFFFFF"
+             android:layout_marginTop="12dp"
+             android:id="@+id/manageR2Btn"
+             android:text="管理R2存储" />
+
+        <Button
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
              android:backgroundTint="#4CAF50"
              android:textColor="#FFFFFF"
              android:layout_marginTop="12dp"

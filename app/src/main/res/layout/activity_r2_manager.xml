@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cloudflare R2 存储管理"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/selectedBucketText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="未选择桶"
+        android:textSize="14sp"
+        android:textColor="#666"
+        android:layout_marginBottom="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <EditText
+            android:id="@+id/bucketNameEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="桶名称" />
+
+        <Button
+            android:id="@+id/createBucketBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="创建桶" />
+
+        <Button
+            android:id="@+id/deleteBucketBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="删除桶" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/refreshBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="刷新桶列表"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="桶列表 (点击选择)"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp" />
+
+    <ListView
+        android:id="@+id/bucketsList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/listObjectsBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="列出对象"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/objectNameEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="对象名称 (支持路径如: folder/file.txt)"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <Button
+            android:id="@+id/uploadBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="上传对象" />
+
+        <Button
+            android:id="@+id/downloadBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="下载对象" />
+
+        <Button
+            android:id="@+id/deleteObjectBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="删除对象" />
+
+    </LinearLayout>
+
+</LinearLayout>

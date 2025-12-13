@@ -221,7 +221,7 @@ class RouteBindActivity : AppCompatActivity() {
                                 id = o.getString("id"),
                                 hostname = o.getString("hostname"),
                                 service = service,
-                                zoneId = o.optString("zone_id", null)
+                                zoneId = if (o.has("zone_id")) o.getString("zone_id") else null
                             )
                         )
                     }

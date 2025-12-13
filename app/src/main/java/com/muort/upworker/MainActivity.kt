@@ -156,6 +156,36 @@ binding.clearHistoryBtn.setOnClickListener {
             }
             startActivity(intent)
         }
+        // 新增按钮 - 启动 Pages 管理页面
+        binding.managePagesBtn.setOnClickListener {
+            val account = currentAccount
+            if (account == null) {
+                showToast("请先选择账号")
+                return@setOnClickListener
+            }
+
+            val intent = Intent(this, PagesManagerActivity::class.java).apply {
+                putExtra("account_name", account.name)
+                putExtra("account_id", account.accountId)
+                putExtra("token", account.token)
+            }
+            startActivity(intent)
+        }
+        // 新增按钮 - 启动 R2 管理页面
+        binding.manageR2Btn.setOnClickListener {
+            val account = currentAccount
+            if (account == null) {
+                showToast("请先选择账号")
+                return@setOnClickListener
+            }
+
+            val intent = Intent(this, R2ManagerActivity::class.java).apply {
+                putExtra("account_name", account.name)
+                putExtra("account_id", account.accountId)
+                putExtra("token", account.token)
+            }
+            startActivity(intent)
+        }
     }
 
 
