@@ -20,8 +20,8 @@ android {
         applicationId = "com.muort.upworker"
         minSdk = 25
         targetSdk = 34
-        versionCode = 2025121250
-        versionName = "5.0"
+        versionCode = 2025121451
+        versionName = "5.1"
         
         vectorDrawables { 
             useSupportLibrary = true
@@ -30,6 +30,15 @@ android {
         // Room schema export
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
+        }
+    }
+    
+    signingConfigs {
+        create("release") {
+            storeFile = file("E:\\AI\\MT.jks")
+            storePassword = "861390202"
+            keyAlias = "MT"
+            keyPassword = "861390202"
         }
     }
     
@@ -48,6 +57,7 @@ android {
     
     buildTypes {
         getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(
