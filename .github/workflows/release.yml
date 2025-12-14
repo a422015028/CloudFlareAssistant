@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      version_tag:
+        description: '版本标签 (例如: v5.2)'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -49,9 +54,16 @@ jobs:
         VERSION_CODE=$(grep "versionCode" app/build.gradle.kts | awk -F'=' '{print $2}' | tr -d ' ')
         echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
         echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+        # 获取 tag（push tag 或手动输入）
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          echo "tag_name=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
+        else
+          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
     
     - name: Rename APK
       run: |
+        tag_name: ${{ steps.version.outputs.tag_name }}
         mv app/build/outputs/apk/release/app-release.apk \
            app/build/outputs/apk/release/CloudFlareAssistant-v${{ steps.version.version_name }}.apk
     
