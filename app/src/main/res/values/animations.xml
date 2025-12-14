@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 加载动画 -->
+    <style name="LoadingAnimation">
+        <item name="android:indeterminateDrawable">@android:drawable/progress_indeterminate_horizontal</item>
+    </style>
+    
+    <!-- 卡片淡入动画 -->
+    <style name="CardFadeInAnimation">
+        <item name="android:animateLayoutChanges">true</item>
+    </style>
+</resources>

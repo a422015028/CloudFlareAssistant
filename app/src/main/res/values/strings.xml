@@ -1,0 +1,102 @@
+<resources>
+    <string name="app_name">CloudFlare助手</string>
+    
+    <!-- 通用字符串 -->
+    <string name="loading">加载中…</string>
+    <string name="empty_list">暂无数据</string>
+    <string name="error_network">网络错误，请检查连接</string>
+    <string name="success">操作成功</string>
+    <string name="failed">操作失败</string>
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
+    <string name="delete">删除</string>
+    <string name="edit">编辑</string>
+    <string name="save">保存</string>
+    <string name="add">添加</string>
+    
+    <!-- 账户相关 -->
+    <string name="account_empty">暂无账户\n点击 + 添加</string>
+    <string name="account_add">添加账户</string>
+    <string name="account_edit">编辑账户</string>
+    <string name="account_delete_confirm">确定要删除此账户吗？</string>
+    <string name="account_set_default">设为默认</string>
+    
+    <!-- Worker 相关 -->
+    <string name="worker_upload">上传 Worker</string>
+    <string name="worker_select_file">选择文件</string>
+    <string name="worker_uploading">上传中…</string>
+    <string name="worker_upload_success">上传成功</string>
+    <string name="worker_upload_failed">上传失败</string>
+    
+    <!-- DNS 相关 -->
+    <string name="dns_record">DNS 记录</string>
+    <string name="dns_add_record">添加记录</string>
+    <string name="dns_edit_record">编辑记录</string>
+    <string name="dns_delete_confirm">确定要删除此 DNS 记录吗？</string>
+    
+    <!-- KV 相关 -->
+    <string name="kv_namespace">命名空间</string>
+    <string name="kv_create_namespace">创建命名空间</string>
+    <string name="kv_delete_namespace_confirm">确定要删除此命名空间吗？</string>
+    <string name="kv_key_value">键值对</string>
+    <string name="kv_add_key">添加键值对</string>
+    <string name="kv_edit_key">编辑键值对</string>
+    <string name="kv_delete_key_confirm">确定要删除此键值对吗？</string>
+    
+    <!-- Pages 相关 -->
+    <string name="pages_project">Pages 项目</string>
+    <string name="pages_create_project">创建项目</string>
+    <string name="pages_delete_project_confirm">确定要删除此项目吗？</string>
+    
+    <!-- R2 相关 -->
+    <string name="r2_bucket">存储桶</string>
+    <string name="r2_create_bucket">创建存储桶</string>
+    <string name="r2_delete_bucket_confirm">确定要删除此存储桶吗？</string>
+    
+    <string-array name="dns_types">
+        <item>A</item>
+        <item>AAAA</item>
+        <item>CNAME</item>
+        <item>TXT</item>
+        <item>MX</item>
+        <item>NS</item>
+        <item>SRV</item>
+        <item>LOC</item>
+        <item>SPF</item>
+        <item>CERT</item>
+        <item>DNSKEY</item>
+        <item>DS</item>
+        <item>NAPTR</item>
+        <item>SMIMEA</item>
+        <item>SSHFP</item>
+        <item>SVCB</item>
+        <item>TLSA</item>
+        <item>URI</item>
+        <item>PTR</item>
+        <item>HTTPS</item>
+    </string-array>
+
+    <!-- 默认TTL都改成1 -->
+    <string-array name="default_ttl">
+        <item>1</item> <!-- A -->
+        <item>1</item> <!-- AAAA -->
+        <item>1</item> <!-- CNAME -->
+        <item>1</item> <!-- TXT -->
+        <item>1</item> <!-- MX -->
+        <item>1</item> <!-- NS -->
+        <item>1</item> <!-- SRV -->
+        <item>1</item> <!-- LOC -->
+        <item>1</item> <!-- SPF -->
+        <item>1</item> <!-- CERT -->
+        <item>1</item> <!-- DNSKEY -->
+        <item>1</item> <!-- DS -->
+        <item>1</item> <!-- NAPTR -->
+        <item>1</item> <!-- SMIMEA -->
+        <item>1</item> <!-- SSHFP -->
+        <item>1</item> <!-- SVCB -->
+        <item>1</item> <!-- TLSA -->
+        <item>1</item> <!-- URI -->
+        <item>1</item> <!-- PTR -->
+        <item>1</item> <!-- HTTPS -->
+    </string-array>
+</resources>

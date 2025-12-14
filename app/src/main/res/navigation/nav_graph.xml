@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.muort.upworker.feature.home.HomeFragment"
+        android:label="CloudFlare 助手"
+        tools:layout="@layout/fragment_home">
+        
+        <action
+            android:id="@+id/action_home_to_accounts"
+            app:destination="@id/accountListFragment" />
+        
+        <action
+            android:id="@+id/action_home_to_worker"
+            app:destination="@id/workerFragment" />
+        
+        <action
+            android:id="@+id/action_home_to_dns"
+            app:destination="@id/dnsFragment" />
+        
+        <action
+            android:id="@+id/action_home_to_route"
+            app:destination="@id/routeFragment" />
+        
+        <action
+            android:id="@+id/action_home_to_kv"
+            app:destination="@id/kvFragment" />
+        
+        <action
+            android:id="@+id/action_home_to_pages"
+            app:destination="@id/pagesFragment" />
+        
+        <action
+            android:id="@+id/action_home_to_r2"
+            app:destination="@id/r2Fragment" />
+        
+        <action
+            android:id="@+id/action_home_to_backup"
+            app:destination="@id/backupFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/accountListFragment"
+        android:name="com.muort.upworker.feature.account.AccountListFragment"
+        android:label="账号管理"
+        tools:layout="@layout/fragment_account_list">
+        
+        <action
+            android:id="@+id/action_accounts_to_add"
+            app:destination="@id/accountEditFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/accountEditFragment"
+        android:name="com.muort.upworker.feature.account.AccountEditFragment"
+        android:label="编辑账号"
+        tools:layout="@layout/fragment_account_edit">
+        
+        <argument
+            android:name="accountId"
+            android:defaultValue="-1L"
+            app:argType="long" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/workerFragment"
+        android:name="com.muort.upworker.feature.worker.WorkerFragment"
+        android:label="Workers 管理"
+        tools:layout="@layout/fragment_worker" />
+
+    <fragment
+        android:id="@+id/dnsFragment"
+        android:name="com.muort.upworker.feature.dns.DnsFragment"
+        android:label="DNS 管理"
+        tools:layout="@layout/fragment_dns" />
+
+    <fragment
+        android:id="@+id/routeFragment"
+        android:name="com.muort.upworker.feature.route.RouteFragment"
+        android:label="路由绑定"
+        tools:layout="@layout/fragment_route" />
+
+    <fragment
+        android:id="@+id/kvFragment"
+        android:name="com.muort.upworker.feature.kv.KvFragment"
+        android:label="KV 存储"
+        tools:layout="@layout/fragment_kv" />
+
+    <fragment
+        android:id="@+id/pagesFragment"
+        android:name="com.muort.upworker.feature.pages.PagesFragment"
+        android:label="Pages 项目"
+        tools:layout="@layout/fragment_pages" />
+
+    <fragment
+        android:id="@+id/r2Fragment"
+        android:name="com.muort.upworker.feature.r2.R2Fragment"
+        android:label="R2 存储"
+        tools:layout="@layout/fragment_r2" />
+
+    <fragment
+        android:id="@+id/backupFragment"
+        android:name="com.muort.upworker.feature.backup.BackupFragment"
+        android:label="备份恢复"
+        tools:layout="@layout/fragment_backup" />
+
+</navigation>

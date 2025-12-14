@@ -1,0 +1,236 @@
+package com.muort.upworker.feature.r2
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.muort.upworker.core.model.Account
+import com.muort.upworker.core.model.R2Bucket
+import com.muort.upworker.core.model.R2CustomDomain
+import com.muort.upworker.core.model.R2Object
+import com.muort.upworker.core.model.Resource
+import java.io.File
+import com.muort.upworker.core.repository.R2Repository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import timber.log.Timber
+import javax.inject.Inject
+
+@HiltViewModel
+class R2ViewModel @Inject constructor(
+    private val r2Repository: R2Repository
+) : ViewModel() {
+    
+    private val _buckets = MutableStateFlow<List<R2Bucket>>(emptyList())
+    val buckets: StateFlow<List<R2Bucket>> = _buckets.asStateFlow()
+    
+    private val _selectedBucket = MutableStateFlow<R2Bucket?>(null)
+    val selectedBucket: StateFlow<R2Bucket?> = _selectedBucket.asStateFlow()
+    
+    private val _objects = MutableStateFlow<List<R2Object>>(emptyList())
+    val objects: StateFlow<List<R2Object>> = _objects.asStateFlow()
+    
+    private val _customDomains = MutableStateFlow<List<R2CustomDomain>>(emptyList())
+    val customDomains: StateFlow<List<R2CustomDomain>> = _customDomains.asStateFlow()
+    
+    private val _loadingState = MutableStateFlow(false)
+    val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
+    
+    private val _message = MutableSharedFlow<String>()
+    val message: SharedFlow<String> = _message.asSharedFlow()
+    
+    fun loadBuckets(account: Account) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = r2Repository.listBuckets(account)) {
+                is Resource.Success -> {
+                    _buckets.value = result.data
+                    Timber.d("Loaded ${result.data.size} buckets")
+                }
+                is Resource.Error -> {
+                    _message.emit("Failed to load buckets: ${result.message}")
+                    Timber.e("Failed to load buckets: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    fun createBucket(account: Account, name: String, location: String? = null) {
+        if (name.isBlank()) {
+            viewModelScope.launch {
+                _message.emit("Please enter bucket name")
+            }
+            return
+        }
+        
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = r2Repository.createBucket(account, name, location)) {
+                is Resource.Success -> {
+                    _message.emit("Bucket created successfully")
+                    loadBuckets(account)
+                }
+                is Resource.Error -> {
+                    _message.emit("Failed to create bucket: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    fun deleteBucket(account: Account, bucketName: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = r2Repository.deleteBucket(account, bucketName)) {
+                is Resource.Success -> {
+                    _message.emit("Bucket deleted successfully")
+                    if (_selectedBucket.value?.name == bucketName) {
+                        _selectedBucket.value = null
+                        _objects.value = emptyList()
+                    }
+                    loadBuckets(account)
+                }
+                is Resource.Error -> {
+                    _message.emit("Failed to delete bucket: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    fun selectBucket(bucket: R2Bucket) {
+        _selectedBucket.value = bucket
+    }
+    
+    fun clearObjects() {
+        _objects.value = emptyList()
+    }
+    
+    fun loadObjects(account: Account, bucketName: String, prefix: String? = null) {
+        viewModelScope.launch {
+            // Clear previous objects immediately
+            _objects.value = emptyList()
+            _loadingState.value = true
+            
+            when (val result = r2Repository.listObjects(account, bucketName, prefix)) {
+                is Resource.Success -> {
+                    _objects.value = result.data.objects ?: emptyList()
+                    Timber.d("Loaded ${result.data.objects?.size ?: 0} objects")
+                }
+                is Resource.Error -> {
+                    _message.emit("Failed to load objects: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    fun uploadObject(account: Account, bucketName: String, objectKey: String, file: File) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = r2Repository.uploadObject(account, bucketName, objectKey, file)) {
+                is Resource.Success -> {
+                    _message.emit("Object uploaded successfully")
+                    loadObjects(account, bucketName)
+                }
+                is Resource.Error -> {
+                    _message.emit("Failed to upload object: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    fun downloadObject(account: Account, bucketName: String, objectKey: String, onResult: (ByteArray?) -> Unit) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = r2Repository.downloadObject(account, bucketName, objectKey)) {
+                is Resource.Success -> {
+                    onResult(result.data)
+                }
+                is Resource.Error -> {
+                    _message.emit("Failed to download object: ${result.message}")
+                    onResult(null)
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    fun deleteObject(account: Account, bucketName: String, objectKey: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = r2Repository.deleteObject(account, bucketName, objectKey)) {
+                is Resource.Success -> {
+                    _message.emit("Object deleted successfully")
+                    loadObjects(account, bucketName)
+                }
+                is Resource.Error -> {
+                    _message.emit("Failed to delete object: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    // ==================== Custom Domains ====================
+    
+    fun loadCustomDomains(account: Account, bucketName: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = r2Repository.listCustomDomains(account, bucketName)) {
+                is Resource.Success -> {
+                    _customDomains.value = result.data
+                    Timber.d("Loaded ${result.data.size} custom domains")
+                }
+                is Resource.Error -> {
+                    _message.emit("Failed to load custom domains: ${result.message}")
+                    Timber.e("Failed to load custom domains: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    fun deleteCustomDomain(account: Account, bucketName: String, domain: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = r2Repository.deleteCustomDomain(account, bucketName, domain)) {
+                is Resource.Success -> {
+                    _message.emit("Custom domain deleted successfully")
+                    loadCustomDomains(account, bucketName)
+                }
+                is Resource.Error -> {
+                    _message.emit("Failed to delete custom domain: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+}
