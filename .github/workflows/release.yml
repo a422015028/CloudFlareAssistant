@@ -63,19 +63,19 @@ jobs:
     
     - name: Rename APK
       run: |
-        tag_name: ${{ steps.version.outputs.tag_name }}
         mv app/build/outputs/apk/release/app-release.apk \
-           app/build/outputs/apk/release/CloudFlareAssistant-v${{ steps.version.version_name }}.apk
+           app/build/outputs/apk/release/CloudFlareAssistant-v${{ steps.version.outputs.version_name }}.apk
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: app/build/outputs/apk/release/CloudFlareAssistant-v${{ steps.version.version_name }}.apk
+        tag_name: ${{ steps.version.outputs.tag_name }}
+        files: app/build/outputs/apk/release/CloudFlareAssistant-v${{ steps.version.outputs.version_name }}.apk
         body: |
           ## 🎉 新版本发布
           
-          **版本号**: ${{ steps.version.version_name }}
-          **Build**: ${{ steps.version.version_code }}
+          **版本号**: ${{ steps.version.outputs.version_name }}
+          **Build**: ${{ steps.version.outputs.version_code }}
           
           ### 📥 下载
           点击下方的 APK 文件即可下载安装（已签名）
