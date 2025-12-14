@@ -132,6 +132,14 @@ class R2Fragment : Fragment() {
                         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                     }
                 }
+                
+                launch {
+                    accountViewModel.defaultAccount.collect { account ->
+                        if (account != null) {
+                            r2ViewModel.loadBuckets(account)
+                        }
+                    }
+                }
             }
         }
     }
