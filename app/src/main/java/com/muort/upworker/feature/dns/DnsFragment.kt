@@ -102,6 +102,14 @@ class DnsFragment : Fragment() {
                         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                     }
                 }
+                
+                launch {
+                    accountViewModel.defaultAccount.collect { account ->
+                        if (account != null) {
+                            dnsViewModel.loadDnsRecords(account)
+                        }
+                    }
+                }
             }
         }
     }
