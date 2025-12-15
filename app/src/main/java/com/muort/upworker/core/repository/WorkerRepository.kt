@@ -1,11 +1,13 @@
 package com.muort.upworker.core.repository
 
+import com.google.gson.Gson
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
@@ -15,14 +17,132 @@ import javax.inject.Singleton
 
 @Singleton
 class WorkerRepository @Inject constructor(
-    private val api: CloudFlareApi
+    private val api: CloudFlareApi,
+    private val gson: Gson
 ) {
     
+    /**
+     * Upload Worker Script using multipart/form-data (Recommended method)
+     * Supports full metadata configuration including bindings, compatibility settings, etc.
+     */
+    suspend fun uploadWorkerScriptMultipart(
+        account: Account,
+        scriptName: String,
+        scriptFile: File,
+        metadata: WorkerMetadata? = null
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            // Create metadata or use default
+            val finalMetadata = metadata ?: WorkerMetadata(
+                mainModule = scriptFile.name,
+                compatibilityDate = "2024-12-01" // Use recent stable date
+            )
+            
+            // Convert metadata to JSON RequestBody
+            val metadataJson = gson.toJson(finalMetadata)
+            val metadataBody = metadataJson.toRequestBody("application/json".toMediaType())
+            
+            // Determine content type based on file extension
+            val contentType = when (scriptFile.extension.lowercase()) {
+                "js" -> "application/javascript+module"
+                "mjs" -> "application/javascript+module"
+                "py" -> "text/x-python"
+                "wasm" -> "application/wasm"
+                else -> "application/javascript"
+            }.toMediaType()
+            
+            // Create multipart body for script
+            val scriptPart = MultipartBody.Part.createFormData(
+                name = finalMetadata.mainModule ?: scriptFile.name,
+                filename = scriptFile.name,
+                body = scriptFile.asRequestBody(contentType)
+            )
+            
+            val response = api.uploadWorkerScriptMultipart(
+                token = "Bearer ${account.token}",
+                accountId = account.accountId,
+                scriptName = scriptName,
+                metadata = metadataBody,
+                script = scriptPart
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("Upload successful but no result returned")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message() 
+                    ?: "Unknown error"
+                Resource.Error("Upload failed: $errorMsg")
+            }
+        }
+    }
+    
+    /**
+     * Upload Worker Script content only (without metadata)
+     * Faster method when you only need to update the script code
+     */
+    suspend fun uploadWorkerScriptContent(
+        account: Account,
+        scriptName: String,
+        scriptFile: File
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val contentType = when (scriptFile.extension.lowercase()) {
+                "js", "mjs" -> "application/javascript"
+                "py" -> "text/x-python"
+                else -> "application/javascript"
+            }.toMediaType()
+            
+            val requestBody = scriptFile.asRequestBody(contentType)
+            val response = api.uploadWorkerScriptContent(
+                token = "Bearer ${account.token}",
+                accountId = account.accountId,
+                scriptName = scriptName,
+                script = requestBody
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("Upload successful but no result returned")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message() 
+                    ?: "Unknown error"
+                Resource.Error("Upload failed: $errorMsg")
+            }
+        }
+    }
+    
+    /**
+     * Upload Worker Script (Legacy/Simple method)
+     * Kept for backward compatibility - tries multiple upload methods
+     */
     suspend fun uploadWorkerScript(
         account: Account,
         scriptName: String,
         scriptFile: File
     ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        // Try multipart upload first (recommended)
+        Timber.d("Attempting multipart upload for $scriptName")
+        val multipartResult = uploadWorkerScriptMultipart(account, scriptName, scriptFile)
+        
+        if (multipartResult is Resource.Success) {
+            return@withContext multipartResult
+        }
+        
+        // Fallback to content-only upload
+        Timber.d("Multipart upload failed, trying content-only upload")
+        val contentResult = uploadWorkerScriptContent(account, scriptName, scriptFile)
+        
+        if (contentResult is Resource.Success) {
+            return@withContext contentResult
+        }
+        
+        // Final fallback to simple upload
+        Timber.d("Content upload failed, trying simple upload")
         safeApiCall {
             val requestBody = scriptFile.asRequestBody("application/javascript".toMediaType())
             val response = api.uploadWorkerScript(
@@ -40,7 +160,7 @@ class WorkerRepository @Inject constructor(
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message() 
                     ?: "Unknown error"
-                Resource.Error("Upload failed: $errorMsg")
+                Resource.Error("All upload methods failed. Last error: $errorMsg")
             }
         }
     }

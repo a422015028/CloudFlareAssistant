@@ -15,6 +15,38 @@ interface CloudFlareApi {
     
     // ==================== Workers ====================
     
+    /**
+     * Upload Worker Script using multipart/form-data (Recommended)
+     * Supports metadata and module files
+     * https://developers.cloudflare.com/api/operations/worker-script-upload-worker-module
+     */
+    @Multipart
+    @PUT("accounts/{account_id}/workers/scripts/{script_name}")
+    suspend fun uploadWorkerScriptMultipart(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Part("metadata") metadata: RequestBody,
+        @Part script: MultipartBody.Part
+    ): Response<CloudFlareResponse<WorkerScript>>
+    
+    /**
+     * Upload Worker Script content only (without touching config/metadata)
+     * https://developers.cloudflare.com/api/operations/worker-script-put-content
+     */
+    @PUT("accounts/{account_id}/workers/scripts/{script_name}/content")
+    @Headers("Content-Type: application/javascript")
+    suspend fun uploadWorkerScriptContent(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Body script: RequestBody
+    ): Response<CloudFlareResponse<WorkerScript>>
+    
+    /**
+     * Upload Worker Script (Legacy/Simple method)
+     * Kept for backward compatibility
+     */
     @PUT("accounts/{account_id}/workers/scripts/{script_name}")
     suspend fun uploadWorkerScript(
         @Header("Authorization") token: String,

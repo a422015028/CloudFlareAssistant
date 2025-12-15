@@ -46,6 +46,40 @@ data class WorkerScript(
     @SerializedName("size") val size: Long? = null
 )
 
+/**
+ * Metadata for Worker Script multipart upload
+ * https://developers.cloudflare.com/workers/configuration/multipart-upload-metadata/
+ */
+data class WorkerMetadata(
+    @SerializedName("main_module") val mainModule: String? = null,
+    @SerializedName("body_part") val bodyPart: String? = null,
+    @SerializedName("compatibility_date") val compatibilityDate: String? = null,
+    @SerializedName("compatibility_flags") val compatibilityFlags: List<String>? = null,
+    @SerializedName("usage_model") val usageModel: String? = null,
+    @SerializedName("bindings") val bindings: List<WorkerBinding>? = null,
+    @SerializedName("vars") val vars: Map<String, String>? = null,
+    @SerializedName("logpush") val logpush: Boolean? = null,
+    @SerializedName("tail_consumers") val tailConsumers: List<TailConsumer>? = null
+)
+
+/**
+ * Worker bindings for KV, R2, D1, etc.
+ */
+data class WorkerBinding(
+    @SerializedName("type") val type: String, // "kv_namespace", "r2_bucket", "d1", etc.
+    @SerializedName("name") val name: String, // Variable name in worker
+    @SerializedName("namespace_id") val namespaceId: String? = null, // For KV
+    @SerializedName("bucket_name") val bucketName: String? = null, // For R2
+    @SerializedName("database_id") val databaseId: String? = null, // For D1
+    @SerializedName("service") val service: String? = null, // For service bindings
+    @SerializedName("environment") val environment: String? = null
+)
+
+data class TailConsumer(
+    @SerializedName("service") val service: String,
+    @SerializedName("environment") val environment: String? = "production"
+)
+
 data class Route(
     @SerializedName("id") val id: String,
     @SerializedName("pattern") val pattern: String,
