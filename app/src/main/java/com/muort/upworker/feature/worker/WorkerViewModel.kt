@@ -63,6 +63,79 @@ class WorkerViewModel @Inject constructor(
         }
     }
     
+    /**
+     * Upload Worker Script with KV Namespace bindings
+     * @param kvBindings List of pairs containing (binding_name, namespace_id)
+     */
+    fun uploadWorkerScriptWithKvBindings(
+        account: Account,
+        scriptName: String,
+        scriptFile: File,
+        kvBindings: List<Pair<String, String>>
+    ) {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Uploading
+            
+            when (val result = workerRepository.uploadWorkerScriptWithKvBindings(
+                account, scriptName, scriptFile, kvBindings
+            )) {
+                is Resource.Success -> {
+                    _uploadState.value = UploadState.Success
+                    _message.emit("Worker script with KV bindings uploaded successfully")
+                    Timber.d("Script with KV bindings uploaded: $scriptName")
+                    
+                    // Reload scripts list
+                    loadWorkerScripts(account)
+                }
+                is Resource.Error -> {
+                    _uploadState.value = UploadState.Error(result.message)
+                    _message.emit("Upload failed: ${result.message}")
+                    Timber.e("Failed to upload script with KV bindings: ${result.message}")
+                }
+                is Resource.Loading -> {
+                    _uploadState.value = UploadState.Uploading
+                }
+            }
+        }
+    }
+    
+    /**
+     * Update KV bindings for an existing Worker Script
+     * Only updates the bindings configuration, does NOT re-upload script code
+     * @param scriptName Name of the existing script
+     * @param kvBindings List of pairs containing (binding_name, namespace_id)
+     */
+    fun updateWorkerKvBindings(
+        account: Account,
+        scriptName: String,
+        kvBindings: List<Pair<String, String>>
+    ) {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Uploading
+            
+            when (val result = workerRepository.updateWorkerKvBindings(
+                account, scriptName, kvBindings
+            )) {
+                is Resource.Success -> {
+                    _uploadState.value = UploadState.Success
+                    _message.emit("KV bindings updated successfully for '$scriptName'")
+                    Timber.d("KV bindings updated for script: $scriptName")
+                    
+                    // Reload scripts list
+                    loadWorkerScripts(account)
+                }
+                is Resource.Error -> {
+                    _uploadState.value = UploadState.Error(result.message)
+                    _message.emit("Failed to update bindings: ${result.message}")
+                    Timber.e("Failed to update KV bindings: ${result.message}")
+                }
+                is Resource.Loading -> {
+                    _uploadState.value = UploadState.Uploading
+                }
+            }
+        }
+    }
+    
     fun loadWorkerScripts(account: Account) {
         viewModelScope.launch {
             when (val result = workerRepository.listWorkerScripts(account)) {
@@ -94,6 +167,32 @@ class WorkerViewModel @Inject constructor(
             }
             
             _loadingState.value = false
+        }
+    }
+    
+    /**
+     * Get Worker Script settings (includes bindings)
+     */
+    fun getWorkerSettings(
+        account: Account,
+        scriptName: String,
+        onResult: (Resource<WorkerScript>) -> Unit
+    ) {
+        viewModelScope.launch {
+            when (val result = workerRepository.getWorkerSettings(account, scriptName)) {
+                is Resource.Success -> {
+                    Timber.d("Fetched settings for '$scriptName' with ${result.data.bindings?.size ?: 0} bindings")
+                    onResult(result)
+                }
+                is Resource.Error -> {
+                    Timber.e("Failed to fetch settings: ${result.message}")
+                    _message.emit("Failed to load settings: ${result.message}")
+                    onResult(result)
+                }
+                is Resource.Loading -> {
+                    onResult(result)
+                }
+            }
         }
     }
     

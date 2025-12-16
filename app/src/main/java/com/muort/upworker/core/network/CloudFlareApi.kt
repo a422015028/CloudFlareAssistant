@@ -68,12 +68,36 @@ interface CloudFlareApi {
         @Path("script_name") scriptName: String
     ): Response<ResponseBody>
     
+    /**
+     * Get Worker Script settings (includes bindings and other configuration)
+     * https://developers.cloudflare.com/api/operations/worker-script-get-settings
+     */
+    @GET("accounts/{account_id}/workers/scripts/{script_name}/settings")
+    suspend fun getWorkerSettings(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String
+    ): Response<CloudFlareResponse<WorkerScript>>
+    
     @DELETE("accounts/{account_id}/workers/scripts/{script_name}")
     suspend fun deleteWorkerScript(
         @Header("Authorization") token: String,
         @Path("account_id") accountId: String,
         @Path("script_name") scriptName: String
     ): Response<CloudFlareResponse<Unit>>
+    
+    /**
+     * Update Worker Script settings (bindings, etc.) without uploading script content
+     * https://developers.cloudflare.com/api/operations/worker-script-update-settings
+     */
+    @Multipart
+    @PATCH("accounts/{account_id}/workers/scripts/{script_name}/settings")
+    suspend fun updateWorkerSettings(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Part("settings") settings: RequestBody
+    ): Response<CloudFlareResponse<WorkerScript>>
     
     // ==================== Routes ====================
     

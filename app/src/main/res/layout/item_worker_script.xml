@@ -47,6 +47,17 @@
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/configKvBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="KV"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TextButton"
+                app:iconGravity="textStart"
+                app:icon="@android:drawable/ic_menu_add" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/viewBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

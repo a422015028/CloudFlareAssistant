@@ -40,6 +40,7 @@ class WorkerRepository @Inject constructor(
             
             // Convert metadata to JSON RequestBody
             val metadataJson = gson.toJson(finalMetadata)
+            Timber.d("Upload metadata JSON: $metadataJson")
             val metadataBody = metadataJson.toRequestBody("application/json".toMediaType())
             
             // Determine content type based on file extension
@@ -68,15 +69,54 @@ class WorkerRepository @Inject constructor(
             
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
+                    Timber.d("Upload successful: ${it.id}")
                     Resource.Success(it)
                 } ?: Resource.Error("Upload successful but no result returned")
             } else {
+                val errorBody = response.errorBody()?.string()
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message() 
                     ?: "Unknown error"
+                Timber.e("Upload failed: $errorMsg, Response code: ${response.code()}, Error body: $errorBody")
                 Resource.Error("Upload failed: $errorMsg")
             }
         }
+    }
+    
+    /**
+     * Upload Worker Script with KV Namespace bindings
+     * Convenience method that creates metadata with KV bindings
+     */
+    suspend fun uploadWorkerScriptWithKvBindings(
+        account: Account,
+        scriptName: String,
+        scriptFile: File,
+        kvBindings: List<Pair<String, String>> // List of (binding_name, namespace_id) pairs
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        Timber.d("Uploading worker with ${kvBindings.size} KV bindings")
+        
+        // Convert KV bindings to WorkerBinding objects
+        val bindings = kvBindings.map { (name, namespaceId) ->
+            Timber.d("Adding KV binding: $name -> $namespaceId")
+            WorkerBinding(
+                type = "kv_namespace",
+                name = name,
+                namespaceId = namespaceId
+            )
+        }
+        
+        // Create metadata with KV bindings
+        val metadata = WorkerMetadata(
+            mainModule = scriptFile.name,
+            compatibilityDate = "2024-12-01",
+            bindings = bindings
+        )
+        
+        // Log metadata for debugging
+        Timber.d("Metadata: ${gson.toJson(metadata)}")
+        
+        // Use the multipart upload method with metadata
+        uploadWorkerScriptMultipart(account, scriptName, scriptFile, metadata)
     }
     
     /**
@@ -199,6 +239,99 @@ class WorkerRepository @Inject constructor(
                 Resource.Success(scriptContent)
             } else {
                 Resource.Error("Failed to get script: ${response.message()}")
+            }
+        }
+    }
+    
+    /**
+     * Update only the KV bindings for an existing Worker Script
+     * Does NOT re-upload the script code, only updates the configuration
+     * 
+     * @param account The Cloudflare account
+     * @param scriptName Name of the existing script
+     * @param kvBindings List of (variable name, namespace ID) pairs
+     * @return Resource indicating success or error
+     */
+    suspend fun updateWorkerKvBindings(
+        account: Account,
+        scriptName: String,
+        kvBindings: List<Pair<String, String>>
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            Timber.d("Updating KV bindings for script '$scriptName' with ${kvBindings.size} bindings")
+            
+            // Convert pairs to WorkerBinding objects
+            val bindings = kvBindings.map { (name, namespaceId) ->
+                Timber.d("Adding KV binding: $name -> $namespaceId")
+                WorkerBinding(
+                    type = "kv_namespace",
+                    name = name,
+                    namespaceId = namespaceId
+                )
+            }
+            
+            // Create settings request
+            val settingsRequest = WorkerSettingsRequest(
+                bindings = bindings,
+                compatibilityDate = "2024-12-01"
+            )
+            
+            val settingsJson = gson.toJson(settingsRequest)
+            Timber.d("Settings request: $settingsJson")
+            
+            // Convert to RequestBody with multipart content type
+            val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
+            
+            // Call API to update settings
+            val response = api.updateWorkerSettings(
+                token = "Bearer ${account.token}",
+                accountId = account.accountId,
+                scriptName = scriptName,
+                settings = settingsBody
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                Timber.d("Successfully updated KV bindings for '$scriptName'")
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("Update successful but no result returned")
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Timber.e("Failed to update bindings: Response code: ${response.code()}, Error body: $errorBody")
+                Resource.Error("Failed to update bindings: $errorMsg")
+            }
+        }
+    }
+    
+    /**
+     * Get Worker Script settings (includes bindings)
+     * @param account The Cloudflare account
+     * @param scriptName Name of the script
+     * @return Resource with WorkerScript including bindings
+     */
+    suspend fun getWorkerSettings(
+        account: Account,
+        scriptName: String
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val response = api.getWorkerSettings(
+                token = "Bearer ${account.token}",
+                accountId = account.accountId,
+                scriptName = scriptName
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                Timber.d("Successfully fetched settings for '$scriptName'")
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("No settings returned")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Timber.e("Failed to fetch settings: $errorMsg")
+                Resource.Error("Failed to fetch settings: $errorMsg")
             }
         }
     }

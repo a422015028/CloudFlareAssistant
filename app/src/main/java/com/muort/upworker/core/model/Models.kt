@@ -43,7 +43,8 @@ data class WorkerScript(
     @SerializedName("created_on") val createdOn: String?,
     @SerializedName("modified_on") val modifiedOn: String?,
     @SerializedName("etag") val etag: String?,
-    @SerializedName("size") val size: Long? = null
+    @SerializedName("size") val size: Long? = null,
+    @SerializedName("bindings") val bindings: List<WorkerBinding>? = null
 )
 
 /**
@@ -97,6 +98,18 @@ data class CustomDomain(
 data class RouteRequest(
     @SerializedName("pattern") val pattern: String,
     @SerializedName("script") val script: String?
+)
+
+/**
+ * Request to update Worker Script settings (bindings, etc.)
+ * Used for updating configuration without re-uploading script code
+ */
+data class WorkerSettingsRequest(
+    @SerializedName("bindings") val bindings: List<WorkerBinding>? = null,
+    @SerializedName("compatibility_date") val compatibilityDate: String? = null,
+    @SerializedName("compatibility_flags") val compatibilityFlags: List<String>? = null,
+    @SerializedName("usage_model") val usageModel: String? = null,
+    @SerializedName("logpush") val logpush: Boolean? = null
 )
 
 data class CustomDomainRequest(
