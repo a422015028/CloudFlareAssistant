@@ -35,6 +35,46 @@ Write-Host "密钥库 Base64 已复制到剪贴板，可直接粘贴到 GitHub S
 - **Name**: `KEY_PASSWORD`
 - **Value**: `861390202`
 
+### 3. Telegram 发布配置（可选）
+
+要启用 Telegram 自动推送功能（APK文件+发布说明），需要添加以下 Secrets：
+
+#### TELEGRAM_BOT_TOKEN
+- **Name**: `TELEGRAM_BOT_TOKEN`
+- **Value**: 你的 Telegram Bot Token
+
+**获取方法**：
+1. 在 Telegram 中找到 @BotFather
+2. 发送 `/newbot` 创建新机器人
+3. 按提示设置机器人名称
+4. 复制获得的 Token
+
+#### TELEGRAM_CHAT_ID
+- **Name**: `TELEGRAM_CHAT_ID`
+- **Value**: 你的 Telegram 群组 ID
+
+**获取方法**：
+1. 将机器人添加到目标群组
+2. 在群组中发送任意消息
+3. 访问：`https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
+4. 查找 `"chat":{"id":-1001234567890}` 中的 ID（包括负号）
+
+#### TELEGRAM_TOPIC_ID（可选）
+- **Name**: `TELEGRAM_TOPIC_ID`
+- **Value**: 群组话题 ID（如果使用话题功能）
+
+**获取方法**：
+1. 在群组中开启话题功能
+2. 创建"版本发布"话题
+3. 在该话题中发送消息
+4. 访问：`https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
+5. 查找 `"message_thread_id": 123` 中的 ID
+
+**注意**：
+- 如果不使用话题功能，可以不配置 `TELEGRAM_TOPIC_ID`，APK 会发送到群组主聊天
+- Bot 需要有群组的文件发送权限
+- APK 文件会作为文档发送，并附带完整的版本说明
+
 ## 🚀 使用方法
 
 ### 方法 1：通过 Git Tag 自动触发
@@ -57,6 +97,7 @@ git push origin v5.2
 - ✅ 自动创建 GitHub Release
 - ✅ 自动上传签名后的 APK
 - ✅ 自动生成版本说明
+- ✅ 自动发送 APK 到 Telegram（可选）
 
 ## 🔄 工作流程
 
@@ -67,7 +108,8 @@ git push origin v5.2
    - 解码密钥库
    - 编译并签名 APK
    - 创建 Release
-   - 上传 APK
+   - 上传 APK 到 GitHub
+   - 发送 APK 到 Telegram（如已配置）
 
 ## ⚠️ 注意事项
 
