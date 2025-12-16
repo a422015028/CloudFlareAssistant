@@ -1,5 +1,7 @@
 package com.muort.upworker.feature.home
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,12 +12,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.muort.upworker.R
 import com.muort.upworker.core.util.AnimationHelper
+import com.muort.upworker.core.util.showToast
+import com.muort.upworker.databinding.DialogAboutBinding
 import com.muort.upworker.databinding.FragmentHomeBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -96,6 +102,11 @@ class HomeFragment : Fragment() {
                 findNavController().navigate(R.id.action_home_to_backup)
             }, 150)
         }
+        
+        binding.aboutCard.setOnClickListener {
+            AnimationHelper.scaleDown(it)
+            showAboutDialog()
+        }
     }
     
     private fun animateFeatureCards() {
@@ -118,6 +129,44 @@ class HomeFragment : Fragment() {
                     .setDuration(300)
                     .start()
             }, (index * 50).toLong())
+        }
+    }
+    
+    private fun showAboutDialog() {
+        val dialogBinding = DialogAboutBinding.inflate(LayoutInflater.from(requireContext()))
+        
+        // 自动读取版本号
+        try {
+            val versionName = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).versionName
+            dialogBinding.tvVersion.text = "版本 $versionName"
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get version name")
+        }
+        
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .create()
+        
+        // Telegram 链接点击
+        dialogBinding.layoutTelegram.setOnClickListener {
+            openUrl("https://t.me/CFmuort")
+        }
+        
+        // GitHub 链接点击
+        dialogBinding.layoutGithub.setOnClickListener {
+            openUrl("https://github.com/a422015028/CloudFlareAssistant")
+        }
+        
+        dialog.show()
+    }
+    
+    private fun openUrl(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (e: Exception) {
+            requireContext().showToast("无法打开链接")
+            Timber.e(e, "Failed to open URL: $url")
         }
     }
     
