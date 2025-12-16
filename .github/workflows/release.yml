@@ -69,26 +69,62 @@ jobs:
         mv app/build/outputs/apk/release/app-release.apk \
            app/build/outputs/apk/release/CloudFlareAssistant-v${{ steps.version.outputs.version_name }}.apk
     
+    - name: Prepare Release Notes
+      id: release_notes
+      run: |
+        TAG_NAME="${{ steps.version.outputs.tag_name }}"
+        # 检查是否存在对应的 release notes 文件
+        RELEASE_NOTES_FILE="RELEASE_NOTES_${TAG_NAME}.md"
+        
+        if [ -f "$RELEASE_NOTES_FILE" ]; then
+          echo "使用 $RELEASE_NOTES_FILE 作为发布说明"
+          # 读取文件内容，添加版本信息头部
+          {
+            echo "## 🎉 CloudFlare Assistant ${TAG_NAME} 发布"
+            echo ""
+            echo "**版本号**: ${{ steps.version.outputs.version_name }}"
+            echo "**Build**: ${{ steps.version.outputs.version_code }}"
+            echo ""
+            cat "$RELEASE_NOTES_FILE"
+            echo ""
+            echo "---"
+            echo ""
+            echo "### 📥 下载"
+            echo "点击下方的 APK 文件即可下载安装（已签名）"
+            echo ""
+            echo "### 📦 安装要求"
+            echo "- 最低 Android 版本: 7.0 (API 25)"
+            echo "- 目标 Android 版本: 14 (API 34)"
+            echo ""
+            echo "### 🔐 签名信息"
+            echo "此版本已使用开发者证书签名，可以直接安装使用。"
+          } > release_notes.md
+        else
+          echo "未找到 $RELEASE_NOTES_FILE，使用默认模板"
+          {
+            echo "## 🎉 新版本发布"
+            echo ""
+            echo "**版本号**: ${{ steps.version.outputs.version_name }}"
+            echo "**Build**: ${{ steps.version.outputs.version_code }}"
+            echo ""
+            echo "### 📥 下载"
+            echo "点击下方的 APK 文件即可下载安装（已签名）"
+            echo ""
+            echo "### 📦 安装要求"
+            echo "- 最低 Android 版本: 7.0 (API 25)"
+            echo "- 目标 Android 版本: 14 (API 34)"
+            echo ""
+            echo "### 🔐 签名信息"
+            echo "此版本已使用开发者证书签名，可以直接安装使用。"
+          } > release_notes.md
+        fi
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.version.outputs.tag_name }}
         files: app/build/outputs/apk/release/CloudFlareAssistant-v${{ steps.version.outputs.version_name }}.apk
-        body: |
-          ## 🎉 新版本发布
-          
-          **版本号**: ${{ steps.version.outputs.version_name }}
-          **Build**: ${{ steps.version.outputs.version_code }}
-          
-          ### 📥 下载
-          点击下方的 APK 文件即可下载安装（已签名）
-          
-          ### 📦 安装要求
-          - 最低 Android 版本: 7.0 (API 25)
-          - 目标 Android 版本: 14 (API 34)
-          
-          ### 🔐 签名信息
-          此版本已使用开发者证书签名，可以直接安装使用。
+        body_path: release_notes.md
         draft: false
         prerelease: false
       env:
