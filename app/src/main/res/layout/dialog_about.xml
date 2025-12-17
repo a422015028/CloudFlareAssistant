@@ -12,7 +12,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/app_name"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@drawable/ic_launcher" />
 
     <!-- App Name -->
     <TextView
