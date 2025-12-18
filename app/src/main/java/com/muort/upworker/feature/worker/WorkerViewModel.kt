@@ -136,6 +136,113 @@ class WorkerViewModel @Inject constructor(
         }
     }
     
+    /**
+     * Update R2 bindings for an existing Worker Script
+     * Only updates the bindings configuration, does NOT re-upload script code
+     * @param scriptName Name of the existing script
+     * @param r2Bindings List of pairs containing (binding_name, bucket_name)
+     */
+    fun updateWorkerR2Bindings(
+        account: Account,
+        scriptName: String,
+        r2Bindings: List<Pair<String, String>>
+    ) {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Uploading
+            
+            when (val result = workerRepository.updateWorkerR2Bindings(
+                account, scriptName, r2Bindings
+            )) {
+                is Resource.Success -> {
+                    _uploadState.value = UploadState.Success
+                    _message.emit("R2 bindings updated successfully for '$scriptName'")
+                    Timber.d("R2 bindings updated for script: $scriptName")
+                    
+                    // Reload scripts list
+                    loadWorkerScripts(account)
+                }
+                is Resource.Error -> {
+                    _uploadState.value = UploadState.Error(result.message)
+                    _message.emit("Failed to update bindings: ${result.message}")
+                    Timber.e("Failed to update R2 bindings: ${result.message}")
+                }
+                is Resource.Loading -> {
+                    _uploadState.value = UploadState.Uploading
+                }
+            }
+        }
+    }
+    
+    /**
+     * Update environment variables for an existing Worker Script
+     * @param scriptName Name of the existing script
+     * @param variables List of triples containing (variable_name, variable_value, variable_type)
+     */
+    fun updateWorkerVariables(
+        account: Account,
+        scriptName: String,
+        variables: List<Triple<String, String, String>>
+    ) {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Uploading
+            
+            when (val result = workerRepository.updateWorkerVariables(
+                account, scriptName, variables
+            )) {
+                is Resource.Success -> {
+                    _uploadState.value = UploadState.Success
+                    _message.emit("Environment variables updated successfully for '$scriptName'")
+                    Timber.d("Variables updated for script: $scriptName")
+                    
+                    loadWorkerScripts(account)
+                }
+                is Resource.Error -> {
+                    _uploadState.value = UploadState.Error(result.message)
+                    _message.emit("Failed to update variables: ${result.message}")
+                    Timber.e("Failed to update variables: ${result.message}")
+                }
+                is Resource.Loading -> {
+                    _uploadState.value = UploadState.Uploading
+                }
+            }
+        }
+    }
+    
+    /**
+     * Update secrets for an existing Worker Script
+     * @param scriptName Name of the existing script
+     * @param secrets List of pairs containing (secret_name, secret_value)
+     */
+    fun updateWorkerSecrets(
+        account: Account,
+        scriptName: String,
+        secrets: List<Pair<String, String>>
+    ) {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Uploading
+            
+            when (val result = workerRepository.updateWorkerSecrets(
+                account, scriptName, secrets
+            )) {
+                is Resource.Success -> {
+                    _uploadState.value = UploadState.Success
+                    _message.emit("Secrets updated successfully for '$scriptName'")
+                    Timber.d("Secrets updated for script: $scriptName")
+                    
+                    loadWorkerScripts(account)
+                }
+                is Resource.Error -> {
+                    _uploadState.value = UploadState.Error(result.message)
+                    _message.emit("Failed to update secrets: ${result.message}")
+                    Timber.e("Failed to update secrets: ${result.message}")
+                }
+                is Resource.Loading -> {
+                    _uploadState.value = UploadState.Uploading
+                }
+            }
+        }
+    }
+    
     fun loadWorkerScripts(account: Account) {
         viewModelScope.launch {
             when (val result = workerRepository.listWorkerScripts(account)) {

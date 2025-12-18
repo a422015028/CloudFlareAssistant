@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/scriptNameTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="配置 Worker 的 R2 绑定"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/scriptNameText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="脚本名称: my-worker"
+        android:textSize="14sp"
+        android:textColor="?attr/colorPrimary"
+        android:layout_marginBottom="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="R2 绑定列表"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/addBindingBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+ 添加绑定"
+            android:textSize="12sp"
+            style="@style/Widget.Material3.Button.TextButton" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/bindingsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="300dp"
+        android:nestedScrollingEnabled="true"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+    <TextView
+        android:id="@+id/noBindingsText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="暂无 R2 绑定"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:padding="16dp"
+        android:gravity="center"
+        android:visibility="visible" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="⚠️ 注意：更新绑定配置不会重新上传 Worker 脚本"
+        android:textSize="12sp"
+        android:textColor="?attr/colorError"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:background="?attr/colorErrorContainer" />
+
+</LinearLayout>

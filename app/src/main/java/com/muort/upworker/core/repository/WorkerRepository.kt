@@ -260,8 +260,20 @@ class WorkerRepository @Inject constructor(
         safeApiCall {
             Timber.d("Updating KV bindings for script '$scriptName' with ${kvBindings.size} bindings")
             
+            // First, get existing settings to preserve other bindings
+            val existingBindings = mutableListOf<WorkerBinding>()
+            val settingsResult = getWorkerSettings(account, scriptName)
+            if (settingsResult is Resource.Success) {
+                settingsResult.data.bindings?.forEach { binding ->
+                    // Keep all non-KV bindings
+                    if (binding.type != "kv_namespace") {
+                        existingBindings.add(binding)
+                    }
+                }
+            }
+            
             // Convert pairs to WorkerBinding objects
-            val bindings = kvBindings.map { (name, namespaceId) ->
+            val kvBindingsList = kvBindings.map { (name, namespaceId) ->
                 Timber.d("Adding KV binding: $name -> $namespaceId")
                 WorkerBinding(
                     type = "kv_namespace",
@@ -270,9 +282,13 @@ class WorkerRepository @Inject constructor(
                 )
             }
             
+            // Combine existing bindings with new KV bindings
+            val allBindings = existingBindings + kvBindingsList
+            Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${kvBindingsList.size} KV)")
+            
             // Create settings request
             val settingsRequest = WorkerSettingsRequest(
-                bindings = bindings,
+                bindings = allBindings,
                 compatibilityDate = "2024-12-01"
             )
             
@@ -301,6 +317,254 @@ class WorkerRepository @Inject constructor(
                     ?: response.message()
                 Timber.e("Failed to update bindings: Response code: ${response.code()}, Error body: $errorBody")
                 Resource.Error("Failed to update bindings: $errorMsg")
+            }
+        }
+    }
+    
+    /**
+     * Update R2 bindings for an existing Worker Script (without re-uploading script code)
+     * @param account The Cloudflare account
+     * @param scriptName Name of the existing script
+     * @param r2Bindings List of (variable name, bucket name) pairs
+     * @return Resource indicating success or error
+     */
+    suspend fun updateWorkerR2Bindings(
+        account: Account,
+        scriptName: String,
+        r2Bindings: List<Pair<String, String>>
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            Timber.d("Updating R2 bindings for script '$scriptName' with ${r2Bindings.size} bindings")
+            
+            // First, get existing settings to preserve other bindings
+            val existingBindings = mutableListOf<WorkerBinding>()
+            val settingsResult = getWorkerSettings(account, scriptName)
+            if (settingsResult is Resource.Success) {
+                settingsResult.data.bindings?.forEach { binding ->
+                    // Keep all non-R2 bindings
+                    if (binding.type != "r2_bucket") {
+                        existingBindings.add(binding)
+                    }
+                }
+            }
+            
+            // Convert pairs to WorkerBinding objects
+            val r2BindingsList = r2Bindings.map { (name, bucketName) ->
+                Timber.d("Adding R2 binding: $name -> $bucketName")
+                WorkerBinding(
+                    type = "r2_bucket",
+                    name = name,
+                    bucketName = bucketName
+                )
+            }
+            
+            // Combine existing bindings with new R2 bindings
+            val allBindings = existingBindings + r2BindingsList
+            Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${r2BindingsList.size} R2)")
+            
+            // Create settings request
+            val settingsRequest = WorkerSettingsRequest(
+                bindings = allBindings,
+                compatibilityDate = "2024-12-01"
+            )
+            
+            val settingsJson = gson.toJson(settingsRequest)
+            Timber.d("Settings request: $settingsJson")
+            
+            // Convert to RequestBody with multipart content type
+            val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
+            
+            // Call API to update settings
+            val response = api.updateWorkerSettings(
+                token = "Bearer ${account.token}",
+                accountId = account.accountId,
+                scriptName = scriptName,
+                settings = settingsBody
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                Timber.d("Successfully updated R2 bindings for '$scriptName'")
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("Update successful but no result returned")
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Timber.e("Failed to update bindings: Response code: ${response.code()}, Error body: $errorBody")
+                Resource.Error("Failed to update bindings: $errorMsg")
+            }
+        }
+    }
+    
+    /**
+     * Update environment variables for an existing Worker Script
+     * @param account The Cloudflare account
+     * @param scriptName Name of the existing script
+     * @param variables List of (variable name, variable value, variable type) triples
+     * @return Resource indicating success or error
+     */
+    suspend fun updateWorkerVariables(
+        account: Account,
+        scriptName: String,
+        variables: List<Triple<String, String, String>>
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            Timber.d("Updating variables for script '$scriptName' with ${variables.size} variables")
+            
+            // First, get existing settings to preserve other bindings
+            val existingBindings = mutableListOf<WorkerBinding>()
+            val settingsResult = getWorkerSettings(account, scriptName)
+            if (settingsResult is Resource.Success) {
+                settingsResult.data.bindings?.forEach { binding ->
+                    // Keep all non-variable bindings (KV, R2, Secrets, etc.)
+                    if (binding.type != "plain_text" && binding.type != "json") {
+                        existingBindings.add(binding)
+                    }
+                }
+            }
+            
+            // Convert triples to WorkerBinding objects
+            val variableBindings = variables.map { (name, value, type) ->
+                Timber.d("Adding variable: name='$name', type='$type', value='$value'")
+                if (type == "json") {
+                    // For JSON type, parse the value and put it in json field
+                    val jsonObject = try {
+                        com.google.gson.JsonParser.parseString(value)
+                    } catch (e: Exception) {
+                        Timber.e(e, "Failed to parse JSON value for variable $name")
+                        null
+                    }
+                    WorkerBinding(
+                        type = type,
+                        name = name,
+                        json = jsonObject
+                    ).also {
+                        Timber.d("Created WorkerBinding: type=${it.type}, name=${it.name}, json=${it.json}")
+                    }
+                } else {
+                    // For plain_text type, use text field
+                    WorkerBinding(
+                        type = type,
+                        name = name,
+                        text = value
+                    ).also {
+                        Timber.d("Created WorkerBinding: type=${it.type}, name=${it.name}, text=${it.text}")
+                    }
+                }
+            }
+            
+            // Combine existing bindings with new variables
+            val allBindings = existingBindings + variableBindings
+            Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${variableBindings.size} variables)")
+            
+            // Create settings request
+            val settingsRequest = WorkerSettingsRequest(
+                bindings = allBindings,
+                compatibilityDate = "2024-12-01"
+            )
+            
+            val settingsJson = gson.toJson(settingsRequest)
+            Timber.d("Settings request: $settingsJson")
+            
+            // Convert to RequestBody
+            val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
+            
+            // Call API to update settings
+            val response = api.updateWorkerSettings(
+                token = "Bearer ${account.token}",
+                accountId = account.accountId,
+                scriptName = scriptName,
+                settings = settingsBody
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                Timber.d("Successfully updated variables for '$scriptName'")
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("Update successful but no result returned")
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Timber.e("Failed to update variables: Response code: ${response.code()}, Error body: $errorBody")
+                Resource.Error("Failed to update variables: $errorMsg")
+            }
+        }
+    }
+    
+    /**
+     * Update secrets for an existing Worker Script
+     * @param account The Cloudflare account
+     * @param scriptName Name of the existing script
+     * @param secrets List of (secret name, secret value) pairs
+     * @return Resource indicating success or error
+     */
+    suspend fun updateWorkerSecrets(
+        account: Account,
+        scriptName: String,
+        secrets: List<Pair<String, String>>
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            Timber.d("Updating secrets for script '$scriptName' with ${secrets.size} secrets")
+            
+            // First, get existing settings to preserve other bindings
+            val existingBindings = mutableListOf<WorkerBinding>()
+            val settingsResult = getWorkerSettings(account, scriptName)
+            if (settingsResult is Resource.Success) {
+                settingsResult.data.bindings?.forEach { binding ->
+                    // Keep all non-secret bindings
+                    if (binding.type != "secret_text") {
+                        existingBindings.add(binding)
+                    }
+                }
+            }
+            
+            // Convert pairs to WorkerBinding objects
+            val secretBindings = secrets.map { (name, value) ->
+                Timber.d("Adding secret: $name")
+                WorkerBinding(
+                    type = "secret_text",
+                    name = name,
+                    text = value
+                )
+            }
+            
+            // Combine existing bindings with new secrets
+            val allBindings = existingBindings + secretBindings
+            Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${secretBindings.size} secrets)")
+            
+            // Create settings request
+            val settingsRequest = WorkerSettingsRequest(
+                bindings = allBindings,
+                compatibilityDate = "2024-12-01"
+            )
+            
+            val settingsJson = gson.toJson(settingsRequest)
+            Timber.d("Settings request (secrets hidden): bindings count = ${allBindings.size}")
+            
+            // Convert to RequestBody
+            val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
+            
+            // Call API to update settings
+            val response = api.updateWorkerSettings(
+                token = "Bearer ${account.token}",
+                accountId = account.accountId,
+                scriptName = scriptName,
+                settings = settingsBody
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                Timber.d("Successfully updated secrets for '$scriptName'")
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("Update successful but no result returned")
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Timber.e("Failed to update secrets: Response code: ${response.code()}, Error body: $errorBody")
+                Resource.Error("Failed to update secrets: $errorMsg")
             }
         }
     }

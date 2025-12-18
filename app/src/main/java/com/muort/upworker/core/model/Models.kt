@@ -67,14 +67,28 @@ data class WorkerMetadata(
  * Worker bindings for KV, R2, D1, etc.
  */
 data class WorkerBinding(
-    @SerializedName("type") val type: String, // "kv_namespace", "r2_bucket", "d1", etc.
+    @SerializedName("type") val type: String, // "kv_namespace", "r2_bucket", "d1", "plain_text", "secret_text", etc.
     @SerializedName("name") val name: String, // Variable name in worker
     @SerializedName("namespace_id") val namespaceId: String? = null, // For KV
     @SerializedName("bucket_name") val bucketName: String? = null, // For R2
     @SerializedName("database_id") val databaseId: String? = null, // For D1
     @SerializedName("service") val service: String? = null, // For service bindings
-    @SerializedName("environment") val environment: String? = null
-)
+    @SerializedName("environment") val environment: String? = null,
+    @SerializedName("text") val text: String? = null, // For plain_text and secret_text bindings
+    @SerializedName("json") val json: Any? = null // For json type bindings
+) {
+    // Helper to get the value regardless of whether it's in text or json field
+    fun getValue(): String? {
+        return when {
+            text != null -> text
+            json != null -> {
+                // If json is a string, return it directly; otherwise convert to JSON string
+                if (json is String) json else com.google.gson.Gson().toJson(json)
+            }
+            else -> null
+        }
+    }
+}
 
 data class TailConsumer(
     @SerializedName("service") val service: String,

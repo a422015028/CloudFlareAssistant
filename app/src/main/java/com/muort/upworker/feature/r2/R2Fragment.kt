@@ -14,11 +14,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import android.widget.Toast
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContracts
 import com.muort.upworker.R
+import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.R2CustomDomain
 import com.muort.upworker.core.model.R2Object
@@ -90,6 +92,7 @@ class R2Fragment : Fragment() {
                 r2ViewModel.selectBucket(bucket)
                 accountViewModel.defaultAccount.value?.let { account ->
                     r2ViewModel.loadObjects(account, bucket.name)
+                    r2ViewModel.loadCustomDomains(account, bucket.name)
                 }
                 showObjectsDialog(bucket)
             },
@@ -190,14 +193,23 @@ class R2Fragment : Fragment() {
             
             loadingDialog.dismiss()
             
-            // Now show the actual objects dialog
+            // Get account ID for URL generation
+            val account = accountViewModel.defaultAccount.value
+            if (account == null) {
+                showToast("账号信息不可用")
+                return@launch
+            }
+            
+            // Now show the actual objects dialog with URL display
             val objects = r2ViewModel.objects.value
+            val customDomains = r2ViewModel.customDomains.value
             
             val items = if (objects.isEmpty()) {
                 arrayOf("暂无对象", "上传文件")
             } else {
                 objects.map { obj ->
-                    "${obj.key} (${formatFileSize(obj.size ?: 0)})"
+                    val size = formatFileSize(obj.size ?: 0)
+                    "${obj.key} ($size)"
                 }.toTypedArray() + "上传文件"
             }
             
@@ -210,7 +222,7 @@ class R2Fragment : Fragment() {
                         }
                     } else {
                         if (which < objects.size) {
-                            showObjectOptionsDialog(bucket, objects[which])
+                            showObjectDetailsDialog(account, bucket, objects[which], customDomains)
                         } else {
                             selectFileToUpload(bucket)
                         }
@@ -221,19 +233,100 @@ class R2Fragment : Fragment() {
         }
     }
     
-    private fun showObjectOptionsDialog(bucket: R2Bucket, obj: R2Object) {
-        val options = arrayOf("下载", "删除")
+    private fun showObjectDetailsDialog(account: Account, bucket: R2Bucket, obj: R2Object, customDomains: List<R2CustomDomain>) {
+        // R2 public URL format: https://pub-<hash>.r2.dev/<object-key>
+        // Note: The actual URL format depends on whether public access is enabled for the bucket
+        // For now we show the standard format, but it requires the bucket to have public access configured
+        val accountHash = account.accountId.take(16) // Use first 16 chars of account ID as approximation
+        val defaultUrl = "https://pub-${accountHash}.r2.dev/${bucket.name}/${obj.key}"
+        
+        val customUrl = customDomains.firstOrNull()?.let { domain ->
+            "https://${domain.domain}/${obj.key}"
+        }
+        
+        timber.log.Timber.d("Showing object details: customDomains size=${customDomains.size}, customUrl=$customUrl")
+        
+        val options = mutableListOf<String>()
+        if (customUrl != null) {
+            options.add("复制自定义域 URL")
+            options.add("复制默认 URL")
+        } else {
+            options.add("复制 URL")
+        }
+        options.add("下载")
+        options.add("删除")
+        
+        timber.log.Timber.d("Dialog options: ${options.joinToString()}")
+        
+        val title = buildString {
+            append(obj.key)
+            append("\n")
+            append("大小: ${formatFileSize(obj.size ?: 0)}")
+        }
+        
+        val message = buildString {
+            if (customUrl != null) {
+                append("自定义域 URL:\n$customUrl")
+                append("\n\n默认 URL:\n$defaultUrl")
+            } else {
+                append("URL:\n$defaultUrl")
+                append("\n\n注意: 需要为存储桶配置公开访问才能使用此 URL")
+            }
+        }
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("对象操作")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> downloadObject(bucket, obj)
-                    1 -> showDeleteObjectDialog(bucket, obj)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("关闭", null)
+            .setNeutralButton(if (customUrl != null) "复制自定义域 URL" else "复制 URL") { _, _ ->
+                copyToClipboard(customUrl ?: defaultUrl, if (customUrl != null) "自定义域 URL 已复制" else "URL 已复制")
+            }
+            .setNegativeButton("更多") { _, _ ->
+                // Show more options
+                showObjectActionsDialog(account, bucket, obj, customUrl, defaultUrl)
+            }
+            .show()
+    }
+    
+    private fun showObjectActionsDialog(account: Account, bucket: R2Bucket, obj: R2Object, customUrl: String?, defaultUrl: String) {
+        val options = mutableListOf<String>()
+        if (customUrl != null) {
+            options.add("复制自定义域 URL")
+            options.add("复制默认 URL")
+        } else {
+            options.add("复制 URL")
+        }
+        options.add("下载")
+        options.add("删除")
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("操作")
+            .setItems(options.toTypedArray()) { _, which ->
+                var index = 0
+                when {
+                    customUrl != null && which == index++ -> {
+                        copyToClipboard(customUrl, "自定义域 URL 已复制")
+                    }
+                    which == index++ -> {
+                        copyToClipboard(if (customUrl != null) defaultUrl else defaultUrl, if (customUrl != null) "默认 URL 已复制" else "URL 已复制")
+                    }
+                    which == index++ -> {
+                        downloadObject(bucket, obj)
+                    }
+                    which == index -> {
+                        showDeleteObjectDialog(bucket, obj)
+                    }
                 }
             }
             .setNegativeButton("取消", null)
             .show()
+    }
+    
+    private fun copyToClipboard(text: String, message: String) {
+        val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+        val clip = android.content.ClipData.newPlainText("R2 URL", text)
+        clipboard.setPrimaryClip(clip)
+        showToast(message)
     }
     
     private fun showDeleteObjectDialog(bucket: R2Bucket, obj: R2Object) {
@@ -283,6 +376,9 @@ class R2Fragment : Fragment() {
         }
     }
     
+    private fun showToast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
 
     
     private fun uploadFile(uri: Uri) {

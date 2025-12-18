@@ -26,13 +26,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.muort.upworker.core.model.KvNamespace
+import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.WorkerScript
 import com.muort.upworker.core.repository.KvRepository
+import com.muort.upworker.core.repository.R2Repository
 import timber.log.Timber
 import com.muort.upworker.core.util.showToast
+import com.muort.upworker.databinding.DialogAddSecretBinding
+import com.muort.upworker.databinding.DialogAddVariableBinding
 import com.muort.upworker.databinding.DialogKvBindingBinding
+import com.muort.upworker.databinding.DialogR2BindingBinding
 import com.muort.upworker.databinding.FragmentWorkerBinding
 import com.muort.upworker.databinding.ItemKvBindingBinding
+import com.muort.upworker.databinding.ItemR2BindingBinding
+import com.muort.upworker.databinding.ItemSecretBinding
+import com.muort.upworker.databinding.ItemVariableBinding
 import com.muort.upworker.databinding.ItemWorkerScriptBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -55,13 +63,12 @@ class WorkerFragment : Fragment() {
     @Inject
     lateinit var kvRepository: KvRepository
     
+    @Inject
+    lateinit var r2Repository: R2Repository
+    
     private var selectedFile: File? = null
     private lateinit var scriptsAdapter: WorkerScriptsAdapter
-    private lateinit var kvBindingsAdapter: KvBindingsAdapter
     private var scriptViewDialog: AlertDialog? = null
-    
-    // Store KV bindings as (binding_name, namespace_id) pairs
-    private val kvBindings = mutableListOf<Pair<String, String>>()
     
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -114,22 +121,20 @@ class WorkerFragment : Fragment() {
             },
             onConfigKvClick = { script ->
                 showConfigKvBindingsDialog(script)
+            },
+            onConfigR2Click = { script ->
+                showConfigR2BindingsDialog(script)
+            },
+            onConfigVariablesClick = { script ->
+                showConfigVariablesDialog(script)
+            },
+            onConfigSecretsClick = { script ->
+                showConfigSecretsDialog(script)
             }
         )
         binding.scriptsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = scriptsAdapter
-        }
-        
-        kvBindingsAdapter = KvBindingsAdapter(
-            onDeleteClick = { position ->
-                kvBindings.removeAt(position)
-                updateKvBindingsUI()
-            }
-        )
-        binding.kvBindingsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = kvBindingsAdapter
         }
         
         binding.selectFileBtn.setOnClickListener {
@@ -149,10 +154,6 @@ class WorkerFragment : Fragment() {
             binding.selectFileBtn.performClick()
         }
         
-        binding.addKvBindingBtn.setOnClickListener {
-            showAddKvBindingDialog()
-        }
-        
         binding.uploadBtn.setOnClickListener {
             uploadWorker()
         }
@@ -160,8 +161,6 @@ class WorkerFragment : Fragment() {
         binding.refreshBtn.setOnClickListener {
             loadScripts()
         }
-        
-        updateKvBindingsUI()
     }
     
     private fun uploadWorker() {
@@ -184,81 +183,7 @@ class WorkerFragment : Fragment() {
             return
         }
         
-        // Upload with or without KV bindings
-        if (kvBindings.isEmpty()) {
-            timber.log.Timber.d("Uploading worker without KV bindings")
-            viewModel.uploadWorkerScript(account, workerName, file)
-        } else {
-            timber.log.Timber.d("Uploading worker with ${kvBindings.size} KV bindings: $kvBindings")
-            viewModel.uploadWorkerScriptWithKvBindings(account, workerName, file, kvBindings)
-        }
-    }
-    
-    private fun showAddKvBindingDialog() {
-        val account = accountViewModel.defaultAccount.value
-        if (account == null) {
-            showToast("请先选择账号")
-            return
-        }
-        
-        // Load KV namespaces
-        viewLifecycleOwner.lifecycleScope.launch {
-            val result = kvRepository.listNamespaces(account)
-            
-            if (result is com.muort.upworker.core.model.Resource.Success) {
-                val namespaces = result.data
-                
-                if (namespaces.isEmpty()) {
-                    showToast("暂无 KV 命名空间，请先创建")
-                    return@launch
-                }
-                
-                // Show dialog
-                val dialogBinding = DialogKvBindingBinding.inflate(layoutInflater)
-                
-                // Setup spinner
-                val namespaceNames = namespaces.map { "${it.title} (${it.id})" }
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, namespaceNames)
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                dialogBinding.namespaceSpinner.adapter = adapter
-                
-                MaterialAlertDialogBuilder(requireContext())
-                    .setView(dialogBinding.root)
-                    .setPositiveButton("添加") { _, _ ->
-                        val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
-                        val selectedIndex = dialogBinding.namespaceSpinner.selectedItemPosition
-                        
-                        if (bindingName.isEmpty()) {
-                            showToast("请输入绑定名称")
-                            return@setPositiveButton
-                        }
-                        
-                        if (selectedIndex >= 0 && selectedIndex < namespaces.size) {
-                            val namespace = namespaces[selectedIndex]
-                            val binding = Pair(bindingName, namespace.id)
-                            kvBindings.add(binding)
-                            timber.log.Timber.d("Added KV binding: $bindingName -> ${namespace.id}, Total bindings: ${kvBindings.size}")
-                            updateKvBindingsUI()
-                            showToast("KV 绑定已添加: $bindingName")
-                        }
-                    }
-                    .setNegativeButton("取消", null)
-                    .show()
-            } else if (result is com.muort.upworker.core.model.Resource.Error) {
-                showToast("加载 KV 命名空间失败: ${result.message}")
-            }
-        }
-    }
-    
-    private fun updateKvBindingsUI() {
-        if (kvBindings.isEmpty()) {
-            binding.noBindingsText.visibility = View.VISIBLE
-            binding.kvBindingsRecyclerView.visibility = View.GONE
-        } else {
-            binding.noBindingsText.visibility = View.GONE
-            binding.kvBindingsRecyclerView.visibility = View.VISIBLE
-            kvBindingsAdapter.submitList(kvBindings)
-        }
+        viewModel.uploadWorkerScript(account, workerName, file)
     }
     
     private fun showConfigKvBindingsDialog(script: WorkerScript) {
@@ -325,10 +250,7 @@ class WorkerFragment : Fragment() {
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
                     .setPositiveButton("应用配置") { _, _ ->
-                        if (tempKvBindings.isEmpty()) {
-                            showToast("请至少添加一个 KV 绑定")
-                            return@setPositiveButton
-                        }
+                        // Allow empty bindings (remove all bindings)
                         applyKvBindingsToScript(script, tempKvBindings)
                     }
                     .setNegativeButton("取消", null)
@@ -432,6 +354,585 @@ class WorkerFragment : Fragment() {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
             showToast("KV 绑定配置已更新")
+        }
+    }
+    
+    // ==================== R2 Bindings Configuration ====================
+    
+    private fun showConfigR2BindingsDialog(script: WorkerScript) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在加载...")
+            .setMessage("正在获取当前 R2 绑定配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        // First, fetch current settings to get existing bindings
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.getWorkerSettings(account, script.id) { settingsResult ->
+                loadingDialog.dismiss()
+                
+                val dialogBinding = com.muort.upworker.databinding.DialogScriptR2BindingsBinding.inflate(layoutInflater)
+                
+                // Setup title
+                dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+                
+                // Temporary list for this dialog - initialize with existing bindings
+                val tempR2Bindings = mutableListOf<Pair<String, String>>()
+                
+                // Load existing R2 bindings from settings
+                if (settingsResult is com.muort.upworker.core.model.Resource.Success) {
+                    settingsResult.data.bindings?.forEach { binding ->
+                        if (binding.type == "r2_bucket" && binding.bucketName != null) {
+                            tempR2Bindings.add(Pair(binding.name, binding.bucketName))
+                            Timber.d("Loaded existing R2 binding: ${binding.name} -> ${binding.bucketName}")
+                        }
+                    }
+                }
+                
+                // Setup adapter with lateinit reference
+                lateinit var tempAdapter: R2BindingsAdapter
+                tempAdapter = R2BindingsAdapter(
+                    onDeleteClick = { position ->
+                        tempR2Bindings.removeAt(position)
+                        updateDialogR2BindingsUI(dialogBinding, tempAdapter, tempR2Bindings)
+                    }
+                )
+                dialogBinding.bindingsRecyclerView.apply {
+                    layoutManager = LinearLayoutManager(requireContext())
+                    adapter = tempAdapter
+                }
+                
+                // Add binding button
+                dialogBinding.addBindingBtn.setOnClickListener {
+                    showAddR2BindingDialogForScript(tempR2Bindings) {
+                        updateDialogR2BindingsUI(dialogBinding, tempAdapter, tempR2Bindings)
+                    }
+                }
+                
+                updateDialogR2BindingsUI(dialogBinding, tempAdapter, tempR2Bindings)
+                
+                // Show dialog
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("应用配置") { _, _ ->
+                        // Allow empty bindings (remove all bindings)
+                        applyR2BindingsToScript(script, tempR2Bindings)
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            }
+        }
+    }
+    
+    private fun updateDialogR2BindingsUI(
+        dialogBinding: com.muort.upworker.databinding.DialogScriptR2BindingsBinding,
+        adapter: R2BindingsAdapter,
+        bindings: List<Pair<String, String>>
+    ) {
+        if (bindings.isEmpty()) {
+            dialogBinding.noBindingsText.visibility = View.VISIBLE
+            dialogBinding.bindingsRecyclerView.visibility = View.GONE
+        } else {
+            dialogBinding.noBindingsText.visibility = View.GONE
+            dialogBinding.bindingsRecyclerView.visibility = View.VISIBLE
+            adapter.submitList(bindings)
+        }
+    }
+    
+    private fun showAddR2BindingDialogForScript(
+        tempBindings: MutableList<Pair<String, String>>,
+        onAdded: () -> Unit
+    ) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = r2Repository.listBuckets(account)
+            
+            if (result is com.muort.upworker.core.model.Resource.Success) {
+                val buckets = result.data
+                
+                if (buckets.isEmpty()) {
+                    showToast("暂无 R2 存储桶，请先创建")
+                    return@launch
+                }
+                
+                val dialogBinding = DialogR2BindingBinding.inflate(layoutInflater)
+                
+                // Setup spinner
+                val bucketNames = buckets.map { 
+                    val location = it.location?.uppercase() ?: "自动选择"
+                    "${it.name} ($location)"
+                }
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, bucketNames)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                dialogBinding.bucketSpinner.adapter = adapter
+                
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("添加") { _, _ ->
+                        val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
+                        val selectedIndex = dialogBinding.bucketSpinner.selectedItemPosition
+                        
+                        if (bindingName.isEmpty()) {
+                            showToast("请输入绑定名称")
+                            return@setPositiveButton
+                        }
+                        
+                        if (selectedIndex >= 0 && selectedIndex < buckets.size) {
+                            val bucket = buckets[selectedIndex]
+                            tempBindings.add(Pair(bindingName, bucket.name))
+                            onAdded()
+                            showToast("R2 绑定已添加")
+                        }
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            } else if (result is com.muort.upworker.core.model.Resource.Error) {
+                showToast("加载 R2 存储桶失败: ${result.message}")
+            }
+        }
+    }
+    
+    private fun applyR2BindingsToScript(script: WorkerScript, bindings: List<Pair<String, String>>) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        Timber.d("Applying ${bindings.size} R2 bindings to script '${script.id}'")
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在更新...")
+            .setMessage("正在更新 R2 绑定配置（不重新上传脚本代码）")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        // Use the new method that only updates bindings without re-uploading script
+        viewModel.updateWorkerR2Bindings(account, script.id, bindings)
+        
+        // Dismiss loading dialog after a short delay to show the message
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(500)
+            loadingDialog.dismiss()
+            showToast("R2 绑定配置已更新")
+        }
+    }
+    
+    // ==================== Variables Configuration ====================
+    
+    private fun showConfigVariablesDialog(script: WorkerScript) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在加载...")
+            .setMessage("正在获取当前环境变量配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        // Fetch current settings to get existing variables
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.getWorkerSettings(account, script.id) { settingsResult ->
+                loadingDialog.dismiss()
+                
+                val dialogBinding = com.muort.upworker.databinding.DialogScriptVariablesBinding.inflate(layoutInflater)
+                
+                // Setup title
+                dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+                
+                // Temporary list for variables (name, value, type)
+                val tempVariables = mutableListOf<Triple<String, String, String>>()
+                
+                // Load existing variables from settings
+                if (settingsResult is com.muort.upworker.core.model.Resource.Success) {
+                    settingsResult.data.bindings?.forEach { binding ->
+                        if (binding.type == "plain_text" || binding.type == "json") {
+                            // Plain text and JSON bindings are environment variables
+                            val value = binding.getValue() ?: ""
+                            Timber.d("Loaded existing variable: ${binding.name} (${binding.type}), text field: '${binding.text}', json field: '${binding.json}', value: '$value'")
+                            tempVariables.add(Triple(binding.name, value, binding.type))
+                        }
+                    }
+                }
+                
+                // Setup adapter
+                lateinit var tempAdapter: VariablesAdapter
+                tempAdapter = VariablesAdapter(
+                    onEditClick = { position ->
+                        showEditVariableDialog(tempVariables, position) {
+                            updateDialogVariablesUI(dialogBinding, tempAdapter, tempVariables)
+                        }
+                    },
+                    onDeleteClick = { position ->
+                        tempVariables.removeAt(position)
+                        updateDialogVariablesUI(dialogBinding, tempAdapter, tempVariables)
+                    }
+                )
+                dialogBinding.variablesRecyclerView.apply {
+                    layoutManager = LinearLayoutManager(requireContext())
+                    adapter = tempAdapter
+                }
+                
+                // Add variable button
+                dialogBinding.addVariableBtn.setOnClickListener {
+                    showAddVariableDialog(tempVariables) {
+                        updateDialogVariablesUI(dialogBinding, tempAdapter, tempVariables)
+                    }
+                }
+                
+                updateDialogVariablesUI(dialogBinding, tempAdapter, tempVariables)
+                
+                // Show dialog
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("应用配置") { _, _ ->
+                        applyVariablesToScript(script, tempVariables)
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            }
+        }
+    }
+    
+    private fun updateDialogVariablesUI(
+        dialogBinding: com.muort.upworker.databinding.DialogScriptVariablesBinding,
+        adapter: VariablesAdapter,
+        variables: List<Triple<String, String, String>>
+    ) {
+        if (variables.isEmpty()) {
+            dialogBinding.noVariablesText.visibility = View.VISIBLE
+            dialogBinding.variablesRecyclerView.visibility = View.GONE
+        } else {
+            dialogBinding.noVariablesText.visibility = View.GONE
+            dialogBinding.variablesRecyclerView.visibility = View.VISIBLE
+            adapter.submitList(variables)
+        }
+    }
+    
+    private fun showAddVariableDialog(
+        tempVariables: MutableList<Triple<String, String, String>>,
+        onAdded: () -> Unit
+    ) {
+        val dialogBinding = DialogAddVariableBinding.inflate(layoutInflater)
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .setPositiveButton("添加") { _, _ ->
+                val name = dialogBinding.variableNameEdit.text.toString().trim()
+                val value = dialogBinding.variableValueEdit.text.toString().trim()
+                val type = if (dialogBinding.typeJsonRadio.isChecked) "json" else "plain_text"
+                
+                if (name.isEmpty()) {
+                    showToast("请输入变量名称")
+                    return@setPositiveButton
+                }
+                
+                if (value.isEmpty()) {
+                    showToast("请输入变量值")
+                    return@setPositiveButton
+                }
+                
+                // Validate JSON format if JSON type is selected
+                if (type == "json") {
+                    try {
+                        com.google.gson.JsonParser.parseString(value)
+                    } catch (e: Exception) {
+                        showToast("JSON 格式无效: ${e.message}")
+                        return@setPositiveButton
+                    }
+                }
+                
+                tempVariables.add(Triple(name, value, type))
+                onAdded()
+                showToast("环境变量已添加")
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun showEditVariableDialog(
+        tempVariables: MutableList<Triple<String, String, String>>,
+        position: Int,
+        onEdited: () -> Unit
+    ) {
+        val variable = tempVariables[position]
+        val dialogBinding = DialogAddVariableBinding.inflate(layoutInflater)
+        
+        // Pre-fill existing values
+        dialogBinding.variableNameEdit.setText(variable.first)
+        dialogBinding.variableValueEdit.setText(variable.second)
+        if (variable.third == "json") {
+            dialogBinding.typeJsonRadio.isChecked = true
+        } else {
+            dialogBinding.typeTextRadio.isChecked = true
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("编辑环境变量")
+            .setView(dialogBinding.root)
+            .setPositiveButton("保存") { _, _ ->
+                val name = dialogBinding.variableNameEdit.text.toString().trim()
+                val value = dialogBinding.variableValueEdit.text.toString().trim()
+                val type = if (dialogBinding.typeJsonRadio.isChecked) "json" else "plain_text"
+                
+                if (name.isEmpty()) {
+                    showToast("请输入变量名称")
+                    return@setPositiveButton
+                }
+                
+                if (value.isEmpty()) {
+                    showToast("请输入变量值")
+                    return@setPositiveButton
+                }
+                
+                // Validate JSON format if JSON type is selected
+                if (type == "json") {
+                    try {
+                        com.google.gson.JsonParser.parseString(value)
+                    } catch (e: Exception) {
+                        showToast("JSON 格式无效: ${e.message}")
+                        return@setPositiveButton
+                    }
+                }
+                
+                tempVariables[position] = Triple(name, value, type)
+                onEdited()
+                showToast("环境变量已更新")
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun applyVariablesToScript(script: WorkerScript, variables: List<Triple<String, String, String>>) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        Timber.d("Applying ${variables.size} variables to script '${script.id}'")
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在更新...")
+            .setMessage("正在更新环境变量配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        viewModel.updateWorkerVariables(account, script.id, variables)
+        
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(500)
+            loadingDialog.dismiss()
+            showToast("环境变量配置已更新")
+        }
+    }
+    
+    // ==================== Secrets Configuration ====================
+    
+    private fun showConfigSecretsDialog(script: WorkerScript) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在加载...")
+            .setMessage("正在获取当前机密变量配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        // Fetch current settings to get existing secrets
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.getWorkerSettings(account, script.id) { settingsResult ->
+                loadingDialog.dismiss()
+                
+                val dialogBinding = com.muort.upworker.databinding.DialogScriptSecretsBinding.inflate(layoutInflater)
+                
+                // Setup title
+                dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+                
+                // Temporary list for secrets (name only, values are not readable)
+                val tempSecrets = mutableListOf<Pair<String, String>>()
+                
+                // Load existing secrets from settings
+                if (settingsResult is com.muort.upworker.core.model.Resource.Success) {
+                    settingsResult.data.bindings?.forEach { binding ->
+                        if (binding.type == "secret_text") {
+                            // Secret bindings - values are not returned by API
+                            tempSecrets.add(Pair(binding.name, ""))
+                            Timber.d("Loaded existing secret: ${binding.name}")
+                        }
+                    }
+                }
+                
+                // Setup adapter
+                lateinit var tempAdapter: SecretsAdapter
+                tempAdapter = SecretsAdapter(
+                    onEditClick = { position ->
+                        showEditSecretDialog(tempSecrets, position) {
+                            updateDialogSecretsUI(dialogBinding, tempAdapter, tempSecrets)
+                        }
+                    },
+                    onDeleteClick = { position ->
+                        tempSecrets.removeAt(position)
+                        updateDialogSecretsUI(dialogBinding, tempAdapter, tempSecrets)
+                    }
+                )
+                dialogBinding.secretsRecyclerView.apply {
+                    layoutManager = LinearLayoutManager(requireContext())
+                    adapter = tempAdapter
+                }
+                
+                // Add secret button
+                dialogBinding.addSecretBtn.setOnClickListener {
+                    showAddSecretDialog(tempSecrets) {
+                        updateDialogSecretsUI(dialogBinding, tempAdapter, tempSecrets)
+                    }
+                }
+                
+                updateDialogSecretsUI(dialogBinding, tempAdapter, tempSecrets)
+                
+                // Show dialog
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("应用配置") { _, _ ->
+                        applySecretsToScript(script, tempSecrets)
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            }
+        }
+    }
+    
+    private fun updateDialogSecretsUI(
+        dialogBinding: com.muort.upworker.databinding.DialogScriptSecretsBinding,
+        adapter: SecretsAdapter,
+        secrets: List<Pair<String, String>>
+    ) {
+        if (secrets.isEmpty()) {
+            dialogBinding.noSecretsText.visibility = View.VISIBLE
+            dialogBinding.secretsRecyclerView.visibility = View.GONE
+        } else {
+            dialogBinding.noSecretsText.visibility = View.GONE
+            dialogBinding.secretsRecyclerView.visibility = View.VISIBLE
+            adapter.submitList(secrets)
+        }
+    }
+    
+    private fun showAddSecretDialog(
+        tempSecrets: MutableList<Pair<String, String>>,
+        onAdded: () -> Unit
+    ) {
+        val dialogBinding = DialogAddSecretBinding.inflate(layoutInflater)
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .setPositiveButton("添加") { _, _ ->
+                val name = dialogBinding.secretNameEdit.text.toString().trim()
+                val value = dialogBinding.secretValueEdit.text.toString().trim()
+                
+                if (name.isEmpty()) {
+                    showToast("请输入机密名称")
+                    return@setPositiveButton
+                }
+                
+                if (value.isEmpty()) {
+                    showToast("请输入机密值")
+                    return@setPositiveButton
+                }
+                
+                tempSecrets.add(Pair(name, value))
+                onAdded()
+                showToast("机密变量已添加")
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun showEditSecretDialog(
+        tempSecrets: MutableList<Pair<String, String>>,
+        position: Int,
+        onEdited: () -> Unit
+    ) {
+        val secret = tempSecrets[position]
+        val dialogBinding = DialogAddSecretBinding.inflate(layoutInflater)
+        
+        // Pre-fill existing name (value cannot be retrieved)
+        dialogBinding.secretNameEdit.setText(secret.first)
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("编辑机密变量")
+            .setView(dialogBinding.root)
+            .setPositiveButton("保存") { _, _ ->
+                val name = dialogBinding.secretNameEdit.text.toString().trim()
+                val value = dialogBinding.secretValueEdit.text.toString().trim()
+                
+                if (name.isEmpty()) {
+                    showToast("请输入机密名称")
+                    return@setPositiveButton
+                }
+                
+                if (value.isEmpty()) {
+                    showToast("请输入机密值")
+                    return@setPositiveButton
+                }
+                
+                tempSecrets[position] = Pair(name, value)
+                onEdited()
+                showToast("机密变量已更新")
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun applySecretsToScript(script: WorkerScript, secrets: List<Pair<String, String>>) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        Timber.d("Applying ${secrets.size} secrets to script '${script.id}'")
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在更新...")
+            .setMessage("正在更新机密变量配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        viewModel.updateWorkerSecrets(account, script.id, secrets)
+        
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(500)
+            loadingDialog.dismiss()
+            showToast("机密变量配置已更新")
         }
     }
     
@@ -606,7 +1107,10 @@ class WorkerFragment : Fragment() {
 class WorkerScriptsAdapter(
     private val onViewClick: (WorkerScript) -> Unit,
     private val onDeleteClick: (WorkerScript) -> Unit,
-    private val onConfigKvClick: (WorkerScript) -> Unit
+    private val onConfigKvClick: (WorkerScript) -> Unit,
+    private val onConfigR2Click: (WorkerScript) -> Unit,
+    private val onConfigVariablesClick: (WorkerScript) -> Unit,
+    private val onConfigSecretsClick: (WorkerScript) -> Unit
 ) : RecyclerView.Adapter<WorkerScriptsAdapter.ScriptViewHolder>() {
     
     private var scripts = listOf<WorkerScript>()
@@ -643,6 +1147,18 @@ class WorkerScriptsAdapter(
             
             binding.configKvBtn.setOnClickListener {
                 onConfigKvClick(script)
+            }
+            
+            binding.configR2Btn.setOnClickListener {
+                onConfigR2Click(script)
+            }
+            
+            binding.configVariablesBtn.setOnClickListener {
+                onConfigVariablesClick(script)
+            }
+            
+            binding.configSecretsBtn.setOnClickListener {
+                onConfigSecretsClick(script)
             }
             
             binding.viewBtn.setOnClickListener {
@@ -704,6 +1220,139 @@ class KvBindingsAdapter(
             binding.namespaceIdText.text = "Namespace ID: ${kvBinding.second}"
             
             binding.deleteBindingBtn.setOnClickListener {
+                onDeleteClick(position)
+            }
+        }
+    }
+}
+
+class R2BindingsAdapter(
+    private val onDeleteClick: (Int) -> Unit
+) : RecyclerView.Adapter<R2BindingsAdapter.BindingViewHolder>() {
+    
+    private var bindings = listOf<Pair<String, String>>()
+    
+    fun submitList(newBindings: List<Pair<String, String>>) {
+        bindings = newBindings
+        notifyDataSetChanged()
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
+        val binding = ItemR2BindingBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return BindingViewHolder(binding)
+    }
+    
+    override fun onBindViewHolder(holder: BindingViewHolder, position: Int) {
+        holder.bind(bindings[position], position)
+    }
+    
+    override fun getItemCount() = bindings.size
+    
+    inner class BindingViewHolder(
+        private val binding: ItemR2BindingBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+        
+        fun bind(r2Binding: Pair<String, String>, position: Int) {
+            binding.bindingNameText.text = r2Binding.first
+            binding.bucketNameText.text = "Bucket: ${r2Binding.second}"
+            
+            binding.deleteBindingBtn.setOnClickListener {
+                onDeleteClick(position)
+            }
+        }
+    }
+}
+
+class VariablesAdapter(
+    private val onEditClick: (Int) -> Unit,
+    private val onDeleteClick: (Int) -> Unit
+) : RecyclerView.Adapter<VariablesAdapter.VariableViewHolder>() {
+    
+    private var variables = listOf<Triple<String, String, String>>()
+    
+    fun submitList(newVariables: List<Triple<String, String, String>>) {
+        variables = newVariables
+        notifyDataSetChanged()
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VariableViewHolder {
+        val binding = ItemVariableBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return VariableViewHolder(binding)
+    }
+    
+    override fun onBindViewHolder(holder: VariableViewHolder, position: Int) {
+        holder.bind(variables[position], position)
+    }
+    
+    override fun getItemCount() = variables.size
+    
+    inner class VariableViewHolder(
+        private val binding: ItemVariableBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+        
+        fun bind(variable: Triple<String, String, String>, position: Int) {
+            binding.variableNameText.text = variable.first
+            binding.variableValueText.text = variable.second
+            binding.variableTypeText.text = if (variable.third == "json") "[JSON]" else "[文本]"
+            
+            binding.editVariableBtn.setOnClickListener {
+                onEditClick(position)
+            }
+            
+            binding.deleteVariableBtn.setOnClickListener {
+                onDeleteClick(position)
+            }
+        }
+    }
+}
+
+class SecretsAdapter(
+    private val onEditClick: (Int) -> Unit,
+    private val onDeleteClick: (Int) -> Unit
+) : RecyclerView.Adapter<SecretsAdapter.SecretViewHolder>() {
+    
+    private var secrets = listOf<Pair<String, String>>()
+    
+    fun submitList(newSecrets: List<Pair<String, String>>) {
+        secrets = newSecrets
+        notifyDataSetChanged()
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SecretViewHolder {
+        val binding = ItemSecretBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return SecretViewHolder(binding)
+    }
+    
+    override fun onBindViewHolder(holder: SecretViewHolder, position: Int) {
+        holder.bind(secrets[position], position)
+    }
+    
+    override fun getItemCount() = secrets.size
+    
+    inner class SecretViewHolder(
+        private val binding: ItemSecretBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+        
+        fun bind(secret: Pair<String, String>, position: Int) {
+            binding.secretNameText.text = secret.first
+            
+            binding.editSecretBtn.setOnClickListener {
+                onEditClick(position)
+            }
+            
+            binding.deleteSecretBtn.setOnClickListener {
                 onDeleteClick(position)
             }
         }

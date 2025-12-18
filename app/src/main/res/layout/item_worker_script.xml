@@ -14,69 +14,137 @@
         android:orientation="vertical"
         android:padding="12dp">
 
+        <!-- Script Info -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/scriptNameText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
+                tools:text="my-worker" />
+
+            <TextView
+                android:id="@+id/scriptSizeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="4dp"
+                tools:text="12.5 KB • 2025-12-13" />
+
+        </LinearLayout>
+
+        <!-- Buttons Row 1 - Bindings -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/scriptNameText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorOnSurface"
-                    tools:text="my-worker" />
-
-                <TextView
-                    android:id="@+id/scriptSizeText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:layout_marginTop="4dp"
-                    tools:text="12.5 KB • 2025-12-13" />
-
-            </LinearLayout>
+            android:gravity="end"
+            android:layout_marginTop="8dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/configKvBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="KV"
-                android:textSize="12sp"
+                android:textSize="11sp"
+                android:minWidth="48dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton"
-                app:iconGravity="textStart"
-                app:icon="@android:drawable/ic_menu_add" />
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                app:icon="@android:drawable/ic_menu_add"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/configR2Btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="R2"
+                android:textSize="11sp"
+                android:minWidth="48dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                app:icon="@android:drawable/ic_menu_add"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/configVariablesBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="变量"
+                android:textSize="11sp"
+                android:minWidth="48dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                app:icon="@android:drawable/ic_menu_edit"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/configSecretsBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="机密"
+                android:textSize="11sp"
+                android:minWidth="48dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                app:icon="@android:drawable/ic_lock_lock"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
+
+        </LinearLayout>
+
+        <!-- Buttons Row 2 - Actions -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="4dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/viewBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="查看"
-                android:textSize="12sp"
+                android:textSize="11sp"
+                android:minWidth="48dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton"
-                app:iconGravity="textStart"
-                app:icon="@android:drawable/ic_menu_view" />
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                app:icon="@android:drawable/ic_menu_view"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/deleteBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="删除"
-                android:textSize="12sp"
-                style="@style/Widget.Material3.Button.TextButton"
-                app:iconGravity="textStart"
-                app:icon="@android:drawable/ic_menu_delete" />
+                android:textSize="11sp"
+                android:minWidth="48dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                app:icon="@android:drawable/ic_menu_delete"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
 
         </LinearLayout>
 
