@@ -74,6 +74,14 @@ class MainActivity : AppCompatActivity() {
                     accountViewModel.setDefaultAccount(account.id)
                     dialog.dismiss()
                     showToast("已切换到账号: ${account.name}")
+                    
+                    // Load zones and show zone selection dialog
+                    accountViewModel.loadZonesForAccount(account.id)
+                    lifecycleScope.launch {
+                        // Wait a bit for zones to load
+                        kotlinx.coroutines.delay(300)
+                        showZoneSelectionDialog(account)
+                    }
                 }
             )
             
@@ -131,6 +139,48 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+    
+    private fun showZoneSelectionDialog(account: Account) {
+        val zones = accountViewModel.zones.value
+        val selectedZone = accountViewModel.selectedZone.value
+        
+        if (zones.isEmpty()) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("选择域名")
+                .setMessage("该账号暂无域名。\n\n您可以在账号管理页面通过API获取域名列表。")
+                .setPositiveButton("确定", null)
+                .show()
+            return
+        }
+        
+        val items = zones.map { zone ->
+            val status = if (zone.status == "active") "✓" else "○"
+            val selected = if (zone.id == selectedZone?.id) " [当前]" else ""
+            "$status ${zone.name}$selected"
+        }.toTypedArray()
+        
+        val selectedIndex = zones.indexOfFirst { it.id == selectedZone?.id }
+        
+        MaterialAlertDialogBuilder(this)
+            .setTitle("选择域名 - ${account.name}")
+            .setSingleChoiceItems(items, selectedIndex) { dialog, which ->
+                val zone = zones[which]
+                accountViewModel.selectZone(account.id, zone.id)
+                dialog.dismiss()
+                showToast("已选择域名: ${zone.name}")
+            }
+            .setNeutralButton("从API刷新") { dialog, _ ->
+                dialog.dismiss()
+                accountViewModel.fetchZonesFromApi(account)
+                lifecycleScope.launch {
+                    // Wait for API call to complete
+                    kotlinx.coroutines.delay(1500)
+                    showZoneSelectionDialog(account)
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
     
     private fun performMigrationIfNeeded() {

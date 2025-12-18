@@ -51,4 +51,7 @@ interface AccountDao {
     
     @Query("SELECT COUNT(*) FROM accounts")
     suspend fun getAccountCount(): Int
+    
+    @Query("UPDATE accounts SET zoneId = :zoneId, updatedAt = :updatedAt WHERE id = :accountId")
+    suspend fun updateAccountZoneId(accountId: Long, zoneId: String, updatedAt: Long = System.currentTimeMillis())
 }

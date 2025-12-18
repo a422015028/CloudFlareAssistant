@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.repository.AccountRepository
+import com.muort.upworker.core.repository.ZoneRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -13,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AccountViewModel @Inject constructor(
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val zoneRepository: ZoneRepository
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<AccountUiState>(AccountUiState.Loading)
@@ -27,6 +30,16 @@ class AccountViewModel @Inject constructor(
     
     private val _message = MutableSharedFlow<String>()
     val message: SharedFlow<String> = _message.asSharedFlow()
+    
+    // Zone management
+    private val _zones = MutableStateFlow<List<Zone>>(emptyList())
+    val zones: StateFlow<List<Zone>> = _zones.asStateFlow()
+    
+    private val _selectedZone = MutableStateFlow<Zone?>(null)
+    val selectedZone: StateFlow<Zone?> = _selectedZone.asStateFlow()
+    
+    private val _loadingZones = MutableStateFlow(false)
+    val loadingZones: StateFlow<Boolean> = _loadingZones.asStateFlow()
     
     init {
         loadAccounts()
@@ -191,6 +204,48 @@ class AccountViewModel @Inject constructor(
                 is Resource.Loading -> {}
             }
         }
+    }
+    
+    // Zone management functions
+    
+    fun loadZonesForAccount(accountId: Long) {
+        viewModelScope.launch {
+            zoneRepository.getZonesByAccount(accountId).collect { zones ->
+                _zones.value = zones
+                // Load selected zone
+                val selected = zoneRepository.getSelectedZone(accountId)
+                _selectedZone.value = selected
+            }
+        }
+    }
+    
+    fun fetchZonesFromApi(account: Account) {
+        viewModelScope.launch {
+            _loadingZones.value = true
+            when (val result = zoneRepository.fetchAndSaveZones(account.id, account.token)) {
+                is Resource.Success -> {
+                    _message.emit("成功获取 ${result.data.size} 个域名")
+                    loadZonesForAccount(account.id)
+                }
+                is Resource.Error -> {
+                    _message.emit("获取域名失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingZones.value = false
+        }
+    }
+    
+    fun selectZone(accountId: Long, zoneId: String) {
+        viewModelScope.launch {
+            zoneRepository.setSelectedZone(accountId, zoneId)
+            _message.emit("已选择域名")
+            loadZonesForAccount(accountId)
+        }
+    }
+    
+    fun getSelectedZoneId(@Suppress("UNUSED_PARAMETER") accountId: Long): String? {
+        return _selectedZone.value?.id
     }
 }
 

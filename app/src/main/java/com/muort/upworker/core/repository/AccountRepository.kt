@@ -153,4 +153,13 @@ class AccountRepository @Inject constructor(
             0
         }
     }
+    
+    suspend fun updateAccountZoneId(accountId: Long, zoneId: String) {
+        try {
+            accountDao.updateAccountZoneId(accountId, zoneId)
+            Timber.d("Updated account $accountId zoneId to $zoneId")
+        } catch (e: Exception) {
+            Timber.e(e, "Error updating account zoneId")
+        }
+    }
 }

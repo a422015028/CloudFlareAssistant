@@ -36,6 +36,50 @@ data class Account(
     val r2SecretAccessKey: String? = null
 )
 
+// ==================== Zones ====================
+
+@Entity(
+    tableName = "zones",
+    foreignKeys = [
+        androidx.room.ForeignKey(
+            entity = Account::class,
+            parentColumns = ["id"],
+            childColumns = ["accountId"],
+            onDelete = androidx.room.ForeignKey.CASCADE
+        )
+    ],
+    indices = [androidx.room.Index(value = ["accountId"])]
+)
+data class Zone(
+    @PrimaryKey
+    val id: String, // Zone ID from Cloudflare
+    val accountId: Long, // Foreign key to Account
+    val name: String, // Zone name (domain)
+    val status: String, // active, pending, etc.
+    val type: String? = null, // full, partial
+    val paused: Boolean = false,
+    val isSelected: Boolean = false, // Whether this zone is currently selected for the account
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
+)
+
+// API response model for zones
+data class ZoneInfo(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("status") val status: String,
+    @SerializedName("paused") val paused: Boolean = false,
+    @SerializedName("type") val type: String? = null,
+    @SerializedName("development_mode") val developmentMode: Int? = null,
+    @SerializedName("name_servers") val nameServers: List<String>? = null,
+    @SerializedName("original_name_servers") val originalNameServers: List<String>? = null,
+    @SerializedName("original_registrar") val originalRegistrar: String? = null,
+    @SerializedName("original_dnshost") val originalDnshost: String? = null,
+    @SerializedName("created_on") val createdOn: String? = null,
+    @SerializedName("modified_on") val modifiedOn: String? = null,
+    @SerializedName("activated_on") val activatedOn: String? = null
+)
+
 // ==================== Workers ====================
 
 data class WorkerScript(

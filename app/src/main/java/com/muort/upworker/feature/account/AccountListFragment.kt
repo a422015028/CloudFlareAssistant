@@ -113,6 +113,13 @@ class AccountListFragment : Fragment() {
             when (item.itemId) {
                 R.id.action_set_default -> {
                     viewModel.setDefaultAccount(account.id)
+                    // Load zones and show zone selection dialog
+                    viewModel.loadZonesForAccount(account.id)
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        // Wait a bit for zones to load
+                        kotlinx.coroutines.delay(300)
+                        showZoneSelectionDialog(account)
+                    }
                     true
                 }
                 R.id.action_edit -> {
@@ -138,6 +145,53 @@ class AccountListFragment : Fragment() {
             .setMessage("确定要删除账号 ${account.name} 吗？")
             .setPositiveButton("删除") { _, _ ->
                 viewModel.deleteAccount(account)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun showZoneSelectionDialog(account: Account) {
+        val zones = viewModel.zones.value
+        val selectedZone = viewModel.selectedZone.value
+        
+        if (zones.isEmpty()) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("选择域名")
+                .setMessage("该账号暂无域名。\n\n您可以在账号编辑页面通过API获取域名列表。")
+                .setPositiveButton("前往编辑") { _, _ ->
+                    val action = AccountListFragmentDirections
+                        .actionAccountsToAdd(account.id)
+                    findNavController().navigate(action)
+                }
+                .setNegativeButton("跳过", null)
+                .show()
+            return
+        }
+        
+        val items = zones.map { zone ->
+            val status = if (zone.status == "active") "✓" else "○"
+            val selected = if (zone.id == selectedZone?.id) " [当前]" else ""
+            "$status ${zone.name}$selected"
+        }.toTypedArray()
+        
+        val selectedIndex = zones.indexOfFirst { it.id == selectedZone?.id }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("选择域名 - ${account.name}")
+            .setSingleChoiceItems(items, selectedIndex) { dialog, which ->
+                val zone = zones[which]
+                viewModel.selectZone(account.id, zone.id)
+                dialog.dismiss()
+                showToast("已选择域名: ${zone.name}")
+            }
+            .setNeutralButton("从API刷新") { dialog, _ ->
+                dialog.dismiss()
+                viewModel.fetchZonesFromApi(account)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    // Wait for API call to complete
+                    kotlinx.coroutines.delay(1500)
+                    showZoneSelectionDialog(account)
+                }
             }
             .setNegativeButton("取消", null)
             .show()

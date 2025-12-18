@@ -13,6 +13,19 @@ import retrofit2.http.*
  */
 interface CloudFlareApi {
     
+    // ==================== Zones ====================
+    
+    /**
+     * List all zones for the account
+     * https://developers.cloudflare.com/api/operations/zones-get
+     */
+    @GET("zones")
+    suspend fun listZones(
+        @Header("Authorization") token: String,
+        @Query("per_page") perPage: Int = 50,
+        @Query("page") page: Int = 1
+    ): Response<CloudFlareResponse<List<ZoneInfo>>>
+    
     // ==================== Workers ====================
     
     /**

@@ -39,6 +39,7 @@ class AccountEditFragment : Fragment() {
         
         loadAccountIfEditing()
         setupSaveButton()
+        setupZoneButtons()
         observeViewModel()
     }
     
@@ -52,13 +53,47 @@ class AccountEditFragment : Fragment() {
                         binding.nameEditText.setText(it.name)
                         binding.accountIdEditText.setText(it.accountId)
                         binding.tokenEditText.setText(it.token)
-                        binding.zoneIdEditText.setText(it.zoneId ?: "")
                         binding.r2AccessKeyIdEditText.setText(it.r2AccessKeyId ?: "")
                         binding.r2SecretAccessKeyEditText.setText(it.r2SecretAccessKey ?: "")
                         binding.defaultSwitch.isChecked = it.isDefault
+                        
+                        // Load zones for this account
+                        viewModel.loadZonesForAccount(it.id)
                     }
                 }
             }
+        }
+    }
+    
+    private fun setupZoneButtons() {
+        binding.fetchZonesBtn.setOnClickListener {
+            val name = binding.nameEditText.text.toString().trim()
+            val accountId = binding.accountIdEditText.text.toString().trim()
+            val token = binding.tokenEditText.text.toString().trim()
+            
+            if (accountId.isEmpty() || token.isEmpty()) {
+                showToast("请先填写 Account ID 和 API Token")
+                return@setOnClickListener
+            }
+            
+            // Create temporary account for API call
+            val tempAccount = com.muort.upworker.core.model.Account(
+                id = if (args.accountId == -1L) 0 else args.accountId,
+                name = name.ifEmpty { "临时" },
+                accountId = accountId,
+                token = token
+            )
+            
+            viewModel.fetchZonesFromApi(tempAccount)
+        }
+        
+        binding.manageZonesBtn.setOnClickListener {
+            if (args.accountId == -1L) {
+                showToast("请先保存账号")
+                return@setOnClickListener
+            }
+            
+            showZoneManagementDialog()
         }
     }
     
@@ -67,10 +102,14 @@ class AccountEditFragment : Fragment() {
             val name = binding.nameEditText.text.toString().trim()
             val accountId = binding.accountIdEditText.text.toString().trim()
             val token = binding.tokenEditText.text.toString().trim()
-            val zoneId = binding.zoneIdEditText.text.toString().trim()
             val r2AccessKeyId = binding.r2AccessKeyIdEditText.text.toString().trim()
             val r2SecretAccessKey = binding.r2SecretAccessKeyEditText.text.toString().trim()
             val isDefault = binding.defaultSwitch.isChecked
+            
+            // Get selected zone ID from ViewModel (backward compatibility with old zoneId field)
+            val selectedZoneId = if (args.accountId != -1L) {
+                viewModel.getSelectedZoneId(args.accountId)
+            } else null
             
             if (name.isEmpty()) {
                 showToast("请输入账号名称")
@@ -93,7 +132,7 @@ class AccountEditFragment : Fragment() {
                     name, 
                     accountId, 
                     token, 
-                    zoneId.ifEmpty { null }, 
+                    selectedZoneId,
                     isDefault,
                     r2AccessKeyId.ifEmpty { null },
                     r2SecretAccessKey.ifEmpty { null }
@@ -109,7 +148,7 @@ class AccountEditFragment : Fragment() {
                                 name = name,
                                 accountId = accountId,
                                 token = token,
-                                zoneId = zoneId.ifEmpty { null },
+                                zoneId = selectedZoneId,
                                 isDefault = isDefault,
                                 r2AccessKeyId = r2AccessKeyId.ifEmpty { null },
                                 r2SecretAccessKey = r2SecretAccessKey.ifEmpty { null }
@@ -131,6 +170,32 @@ class AccountEditFragment : Fragment() {
                 }
             }
         }
+    }
+    
+    private fun showZoneManagementDialog() {
+        val zones = viewModel.zones.value
+        val selectedZone = viewModel.selectedZone.value
+        
+        if (zones.isEmpty()) {
+            showToast("暂无域名，请先从API获取")
+            return
+        }
+        
+        val items = zones.map { zone ->
+            val status = if (zone.status == "active") "✓" else "○"
+            val selected = if (zone.id == selectedZone?.id) " [已选择]" else ""
+            "$status ${zone.name}$selected"
+        }.toTypedArray()
+        
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle("选择域名")
+            .setSingleChoiceItems(items, zones.indexOfFirst { it.id == selectedZone?.id }) { dialog, which ->
+                val zone = zones[which]
+                viewModel.selectZone(args.accountId, zone.id)
+                dialog.dismiss()
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
     
     override fun onDestroyView() {
