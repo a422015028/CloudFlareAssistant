@@ -320,6 +320,14 @@ interface CloudFlareApi {
         @Path("bucket_name") bucketName: String
     ): Response<CloudFlareResponse<R2CustomDomainsResponse>>
     
+    @POST("accounts/{account_id}/r2/buckets/{bucket_name}/domains/custom")
+    suspend fun createR2CustomDomain(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("bucket_name") bucketName: String,
+        @Body request: R2CustomDomainRequest
+    ): Response<CloudFlareResponse<R2CustomDomain>>
+    
     @DELETE("accounts/{account_id}/r2/buckets/{bucket_name}/custom_domains/{domain}")
     suspend fun deleteR2CustomDomain(
         @Header("Authorization") token: String,

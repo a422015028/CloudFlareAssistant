@@ -337,6 +337,12 @@ data class R2CustomDomainDeleteResponse(
     @SerializedName("domain") val domain: String
 )
 
+data class R2CustomDomainRequest(
+    @SerializedName("domain") val domain: String,
+    @SerializedName("zoneId") val zoneId: String,
+    @SerializedName("enabled") val enabled: Boolean = true
+)
+
 // ==================== UI State ====================
 
 sealed class UiState<out T> {

@@ -215,6 +215,25 @@ class R2ViewModel @Inject constructor(
         }
     }
     
+    fun createCustomDomain(account: Account, bucketName: String, domain: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = r2Repository.createCustomDomain(account, bucketName, domain)) {
+                is Resource.Success -> {
+                    _message.emit("自定义域添加成功")
+                    loadCustomDomains(account, bucketName)
+                }
+                is Resource.Error -> {
+                    _message.emit("添加自定义域失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
     fun deleteCustomDomain(account: Account, bucketName: String, domain: String) {
         viewModelScope.launch {
             _loadingState.value = true

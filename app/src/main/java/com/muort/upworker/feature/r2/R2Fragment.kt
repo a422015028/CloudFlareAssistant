@@ -178,59 +178,65 @@ class R2Fragment : Fragment() {
     }
     
     private fun showObjectsDialog(bucket: R2Bucket) {
-        // Show loading dialog first
-        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("${bucket.name}")
-            .setMessage("加载中...")
-            .setCancelable(true)
-            .create()
-        loadingDialog.show()
+        accountViewModel.defaultAccount.value?.let { account ->
+            // Show loading dialog first
+            val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+                .setTitle("${bucket.name}")
+                .setMessage("加载中...")
+                .setCancelable(true)
+                .create()
+            loadingDialog.show()
+            
+            // Load and wait for completion
+            viewLifecycleOwner.lifecycleScope.launch {
+                // Start loading objects and custom domains
+                r2ViewModel.loadObjects(account, bucket.name)
+                r2ViewModel.loadCustomDomains(account, bucket.name)
+                
+                // Wait for loading to start
+                r2ViewModel.loadingState.first { it }
+                // Wait for loading to complete
+                r2ViewModel.loadingState.first { !it }
+                
+                loadingDialog.dismiss()
+                
+                // Show the objects list dialog
+                showObjectsListDialog(account, bucket)
+            }
+        } ?: showToast("账号信息不可用")
+    }
+    
+    private fun showObjectsListDialog(account: Account, bucket: R2Bucket) {
+            
+        val objects = r2ViewModel.objects.value
+        val customDomains = r2ViewModel.customDomains.value
         
-        // Load and wait for completion
-        viewLifecycleOwner.lifecycleScope.launch {
-            // Wait for loading to complete without timeout
-            r2ViewModel.loadingState.first { !it }
-            
-            loadingDialog.dismiss()
-            
-            // Get account ID for URL generation
-            val account = accountViewModel.defaultAccount.value
-            if (account == null) {
-                showToast("账号信息不可用")
-                return@launch
-            }
-            
-            // Now show the actual objects dialog with URL display
-            val objects = r2ViewModel.objects.value
-            val customDomains = r2ViewModel.customDomains.value
-            
-            val items = if (objects.isEmpty()) {
-                arrayOf("暂无对象", "上传文件")
-            } else {
-                objects.map { obj ->
-                    val size = formatFileSize(obj.size ?: 0)
-                    "${obj.key} ($size)"
-                }.toTypedArray() + "上传文件"
-            }
-            
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("${bucket.name} - 对象列表")
-                .setItems(items) { _, which ->
-                    if (objects.isEmpty()) {
-                        if (which == 1) {
-                            selectFileToUpload(bucket)
-                        }
+        val items = if (objects.isEmpty()) {
+            arrayOf("暂无对象", "上传文件")
+        } else {
+            objects.map { obj ->
+                val size = formatFileSize(obj.size ?: 0)
+                "${obj.key} ($size)"
+            }.toTypedArray() + "上传文件"
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("${bucket.name} - 对象列表")
+            .setItems(items) { _, which ->
+                if (objects.isEmpty()) {
+                    if (which == 1) {
+                        selectFileToUpload(bucket)
+                    }
+                } else {
+                    if (which < objects.size) {
+                        showObjectDetailsDialog(account, bucket, objects[which], customDomains)
                     } else {
-                        if (which < objects.size) {
-                            showObjectDetailsDialog(account, bucket, objects[which], customDomains)
-                        } else {
-                            selectFileToUpload(bucket)
-                        }
+                        selectFileToUpload(bucket)
                     }
                 }
-                .setNegativeButton("关闭", null)
-                .show()
-        }
+            }
+            .setNegativeButton("关闭", null)
+            .show()
     }
     
     private fun showObjectDetailsDialog(account: Account, bucket: R2Bucket, obj: R2Object, customDomains: List<R2CustomDomain>) {
@@ -277,9 +283,14 @@ class R2Fragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("关闭", null)
+            .setPositiveButton("返回") { _, _ ->
+                // Return to objects list
+                showObjectsListDialog(account, bucket)
+            }
             .setNeutralButton(if (customUrl != null) "复制自定义域 URL" else "复制 URL") { _, _ ->
                 copyToClipboard(customUrl ?: defaultUrl, if (customUrl != null) "自定义域 URL 已复制" else "URL 已复制")
+                // Return to objects list after copying
+                showObjectsListDialog(account, bucket)
             }
             .setNegativeButton("更多") { _, _ ->
                 // Show more options
@@ -306,19 +317,24 @@ class R2Fragment : Fragment() {
                 when {
                     customUrl != null && which == index++ -> {
                         copyToClipboard(customUrl, "自定义域 URL 已复制")
+                        showObjectsListDialog(account, bucket)
                     }
                     which == index++ -> {
                         copyToClipboard(if (customUrl != null) defaultUrl else defaultUrl, if (customUrl != null) "默认 URL 已复制" else "URL 已复制")
+                        showObjectsListDialog(account, bucket)
                     }
                     which == index++ -> {
                         downloadObject(bucket, obj)
+                        showObjectsListDialog(account, bucket)
                     }
                     which == index -> {
                         showDeleteObjectDialog(bucket, obj)
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton("返回") { _, _ ->
+                showObjectsListDialog(account, bucket)
+            }
             .show()
     }
     
@@ -330,16 +346,20 @@ class R2Fragment : Fragment() {
     }
     
     private fun showDeleteObjectDialog(bucket: R2Bucket, obj: R2Object) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除对象")
-            .setMessage("确定要删除对象 ${obj.key} 吗？")
-            .setPositiveButton("删除") { _, _ ->
-                accountViewModel.defaultAccount.value?.let { account ->
+        accountViewModel.defaultAccount.value?.let { account ->
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("删除对象")
+                .setMessage("确定要删除对象 ${obj.key} 吗？")
+                .setPositiveButton("删除") { _, _ ->
                     r2ViewModel.deleteObject(account, bucket.name, obj.key)
+                    // Note: After deletion, the list will be refreshed automatically
+                    // and the dialog will be dismissed
                 }
-            }
-            .setNegativeButton("取消", null)
-            .show()
+                .setNegativeButton("取消") { _, _ ->
+                    showObjectsListDialog(account, bucket)
+                }
+                .show()
+        }
     }
     
     private fun selectFileToUpload(bucket: R2Bucket) {
@@ -477,25 +497,71 @@ class R2Fragment : Fragment() {
                     .setTitle("自定义域 - $bucketName")
                     .setItems(items) { _, which ->
                         if (!domains.isEmpty() && which < domains.size) {
-                            showDeleteCustomDomainDialog(bucket, domains[which])
+                            showDeleteCustomDomainDialog(account, bucket, domains[which])
                         }
                     }
-                    .setNegativeButton("关闭", null)
+                    .setPositiveButton("添加域名") { _, _ ->
+                        showAddCustomDomainDialog(account, bucket)
+                    }
+                    .setNegativeButton("返回", null)
                     .show()
             }
         }
     }
     
-    private fun showDeleteCustomDomainDialog(bucket: R2Bucket, domain: R2CustomDomain) {
+    private fun showAddCustomDomainDialog(account: Account, bucket: R2Bucket) {
+        if (account.zoneId.isNullOrEmpty()) {
+            showToast("该账号未配置 Zone ID，无法添加自定义域")
+            showCustomDomainsDialog(bucket)
+            return
+        }
+        
+        val input = android.widget.EditText(requireContext()).apply {
+            hint = "example.com"
+            inputType = android.text.InputType.TYPE_TEXT_VARIATION_URI
+        }
+        
+        val container = android.widget.FrameLayout(requireContext()).apply {
+            val params = android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+            )
+            params.leftMargin = resources.getDimensionPixelSize(com.google.android.material.R.dimen.design_bottom_sheet_peek_height_min) / 2
+            params.rightMargin = params.leftMargin
+            addView(input, params)
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("添加自定义域")
+            .setMessage("输入要绑定的域名：")
+            .setView(container)
+            .setPositiveButton("添加") { _, _ ->
+                val domain = input.text.toString().trim()
+                if (domain.isNotEmpty()) {
+                    r2ViewModel.createCustomDomain(account, bucket.name, domain)
+                    showCustomDomainsDialog(bucket)
+                } else {
+                    showToast("请输入域名")
+                    showCustomDomainsDialog(bucket)
+                }
+            }
+            .setNegativeButton("返回") { _, _ ->
+                showCustomDomainsDialog(bucket)
+            }
+            .show()
+    }
+    
+    private fun showDeleteCustomDomainDialog(account: Account, bucket: R2Bucket, domain: R2CustomDomain) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("删除自定义域")
             .setMessage("确定要删除域名 \"${domain.domain}\" 吗？")
             .setPositiveButton("删除") { _, _ ->
-                accountViewModel.defaultAccount.value?.let { account ->
-                    r2ViewModel.deleteCustomDomain(account, bucket.name, domain.domain)
-                }
+                r2ViewModel.deleteCustomDomain(account, bucket.name, domain.domain)
+                showCustomDomainsDialog(bucket)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton("返回") { _, _ ->
+                showCustomDomainsDialog(bucket)
+            }
             .show()
     }
     

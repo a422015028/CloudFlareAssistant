@@ -205,6 +205,43 @@ class R2Repository @Inject constructor(
         }
     }
     
+    suspend fun createCustomDomain(
+        account: Account,
+        bucketName: String,
+        domain: String
+    ): Resource<R2CustomDomain> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val zoneId = account.zoneId 
+                ?: return@safeApiCall Resource.Error("账号未配置 Zone ID")
+            
+            val request = R2CustomDomainRequest(
+                domain = domain,
+                zoneId = zoneId,
+                enabled = true
+            )
+            
+            val response = api.createR2CustomDomain(
+                token = "Bearer ${account.token}",
+                accountId = account.accountId,
+                bucketName = bucketName,
+                request = request
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                val customDomain = response.body()?.result
+                if (customDomain != null) {
+                    Resource.Success(customDomain)
+                } else {
+                    Resource.Error("创建成功但无返回数据")
+                }
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Resource.Error("Failed to create custom domain: $errorMsg")
+            }
+        }
+    }
+    
     suspend fun deleteCustomDomain(
         account: Account,
         bucketName: String,
