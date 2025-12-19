@@ -234,6 +234,11 @@ class DnsFragment : Fragment() {
                 binding.dnsTtlText.text = "TTL: ${record.ttl}"
                 binding.dnsProxiedText.text = if (record.proxied) "🟠 已代理" else "⚪ 仅 DNS"
                 
+                // 点击列表项直接显示编辑窗口
+                binding.root.setOnClickListener {
+                    onEditClick(record)
+                }
+                
                 binding.dnsMenuButton.setOnClickListener { view ->
                     PopupMenu(view.context, view).apply {
                         inflate(R.menu.menu_account)

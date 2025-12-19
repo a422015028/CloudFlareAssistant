@@ -3,6 +3,7 @@ package com.muort.upworker.feature.pages
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.muort.upworker.core.model.Account
+import com.muort.upworker.core.model.PagesDomain
 import com.muort.upworker.core.model.PagesDeployment
 import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.PagesProjectDetail
@@ -179,6 +180,231 @@ class PagesViewModel @Inject constructor(
                     _message.emit("Failed to delete deployment: ${result.message}")
                 }
                 is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    fun createDeployment(
+        account: Account,
+        projectName: String,
+        branch: String,
+        file: java.io.File
+    ) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = pagesRepository.createDeployment(account, projectName, branch, file)) {
+                is Resource.Success -> {
+                    _message.emit("部署创建成功")
+                    loadProjects(account)
+                }
+                is Resource.Error -> {
+                    _message.emit("部署失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    // ==================== Configuration Management ====================
+    
+    /**
+     * Update environment variables for a Pages project
+     * @param environment "production" or "preview"
+     * @param variables Map of variable name to (type, value) pairs
+     */
+    fun updateEnvironmentVariables(
+        account: Account,
+        projectName: String,
+        environment: String,
+        variables: Map<String, Pair<String, String>?>
+    ) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = pagesRepository.updateEnvironmentVariables(
+                account, projectName, environment, variables
+            )) {
+                is Resource.Success -> {
+                    _message.emit("环境变量更新成功")
+                    _projectDetail.value = result.data
+                    Timber.d("Environment variables updated for $projectName")
+                }
+                is Resource.Error -> {
+                    _message.emit(result.message)
+                    Timber.e("Failed to update environment variables: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
+    /**
+     * Update KV namespace bindings for a Pages project
+     * @param environment "production" or "preview"
+     * @param bindings Map of binding name to namespace ID
+     */
+    fun updateKvBindings(
+        account: Account,
+        projectName: String,
+        environment: String,
+        bindings: Map<String, String?>
+    ) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = pagesRepository.updateKvBindings(
+                account, projectName, environment, bindings
+            )) {
+                is Resource.Success -> {
+                    _message.emit("KV 绑定更新成功")
+                    _projectDetail.value = result.data
+                    Timber.d("KV bindings updated for $projectName")
+                }
+                is Resource.Error -> {
+                    _message.emit(result.message)
+                    Timber.e("Failed to update KV bindings: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
+    /**
+     * Update R2 bucket bindings for a Pages project
+     * @param environment "production" or "preview"
+     * @param bindings Map of binding name to bucket name
+     */
+    fun updateR2Bindings(
+        account: Account,
+        projectName: String,
+        environment: String,
+        bindings: Map<String, String?>
+    ) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = pagesRepository.updateR2Bindings(
+                account, projectName, environment, bindings
+            )) {
+                is Resource.Success -> {
+                    _message.emit("R2 绑定更新成功")
+                    _projectDetail.value = result.data
+                    Timber.d("R2 bindings updated for $projectName")
+                }
+                is Resource.Error -> {
+                    _message.emit(result.message)
+                    Timber.e("Failed to update R2 bindings: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
+    /**
+     * Update D1 database bindings for a Pages project
+     * @param environment "production" or "preview"
+     * @param bindings Map of binding name to database ID
+     */
+    fun updateD1Bindings(
+        account: Account,
+        projectName: String,
+        environment: String,
+        bindings: Map<String, String?>
+    ) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = pagesRepository.updateD1Bindings(
+                account, projectName, environment, bindings
+            )) {
+                is Resource.Success -> {
+                    _message.emit("D1 绑定更新成功")
+                    _projectDetail.value = result.data
+                    Timber.d("D1 bindings updated for $projectName")
+                }
+                is Resource.Error -> {
+                    _message.emit(result.message)
+                    Timber.e("Failed to update D1 bindings: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
+    /**
+     * Get current project detail with callback for synchronous access
+     */
+    fun getProjectDetail(
+        account: Account,
+        projectName: String,
+        callback: (Resource<PagesProjectDetail>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = pagesRepository.getProject(account, projectName)
+            callback(result)
+        }
+    }
+    
+    // ==================== Pages Domains ====================
+    
+    /**
+     * Add custom domain to Pages project
+     * @param callback Callback with domain result for showing DNS configuration
+     */
+    fun addCustomDomain(
+        account: Account,
+        projectName: String,
+        domainName: String,
+        callback: (Resource<PagesDomain>) -> Unit
+    ) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = pagesRepository.addDomain(
+                account, projectName, domainName
+            )) {
+                is Resource.Success -> {
+                    _message.emit("自定义域添加成功")
+                    Timber.d("Domain $domainName added to $projectName")
+                    callback(result)
+                }
+                is Resource.Error -> {
+                    _message.emit(result.message)
+                    Timber.e("Failed to add domain: ${result.message}")
+                    callback(result)
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
+    /**
+     * Load all custom domains from all Pages projects
+     */
+    fun loadAllCustomDomains(account: Account) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            // 获取所有项目的自定义域
+            val allDomains = mutableListOf<Pair<String, PagesDomain>>() // Pair<ProjectName, Domain>
+            
+            projects.value.forEach { project ->
+                when (val result = pagesRepository.listDomains(account, project.name)) {
+                    is Resource.Success -> {
+                        result.data.forEach { domain ->
+                            allDomains.add(project.name to domain)
+                        }
+                    }
+                    is Resource.Error -> {
+                        Timber.e("Failed to load domains for ${project.name}: ${result.message}")
+                    }
+                    is Resource.Loading -> {}
+                }
             }
             
             _loadingState.value = false

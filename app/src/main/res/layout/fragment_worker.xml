@@ -32,7 +32,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="上传 Worker 脚本"
+                        android:text="部署 Worker 脚本"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
@@ -42,9 +42,10 @@
                         android:layout_height="wrap_content"
                         android:hint="Worker 名称"
                         app:boxBackgroundMode="outline"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_marginBottom="12dp">
 
-                        <com.google.android.material.textfield.TextInputEditText
+                        <AutoCompleteTextView
                             android:id="@+id/workerNameEdit"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -83,7 +84,7 @@
                         android:id="@+id/uploadBtn"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
-                        android:text="上传脚本"
+                        android:text="部署脚本"
                         android:textSize="16sp"
                         style="@style/Widget.Material3.Button" />
 
@@ -123,7 +124,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="已上传的脚本"
+                            android:text="已部署的脚本"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 

@@ -302,12 +302,125 @@ data class DeploymentConfigs(
 )
 
 data class EnvironmentConfig(
-    @SerializedName("env_vars") val envVars: Map<String, EnvVar>?
+    @SerializedName("env_vars") val envVars: Map<String, EnvVar>?,
+    @SerializedName("kv_namespaces") val kvNamespaces: Map<String, KvBinding>? = null,
+    @SerializedName("r2_buckets") val r2Buckets: Map<String, R2Binding>? = null,
+    @SerializedName("d1_databases") val d1Databases: Map<String, D1Binding>? = null,
+    @SerializedName("durable_objects") val durableObjects: Map<String, DurableObjectBinding>? = null,
+    @SerializedName("services") val services: Map<String, ServiceBinding>? = null
 )
 
 data class EnvVar(
     @SerializedName("type") val type: String?,
     @SerializedName("value") val value: String?
+)
+
+/**
+ * Request model for updating Pages project configuration
+ * Used with PATCH /accounts/{account_id}/pages/projects/{project_name}
+ */
+data class PagesProjectUpdateRequest(
+    @SerializedName("deployment_configs") val deploymentConfigs: DeploymentConfigsUpdate? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("production_branch") val productionBranch: String? = null
+)
+
+data class DeploymentConfigsUpdate(
+    @SerializedName("preview") val preview: EnvironmentConfigUpdate? = null,
+    @SerializedName("production") val production: EnvironmentConfigUpdate? = null
+)
+
+/**
+ * Environment configuration update model for Pages
+ * To delete an environment variable, set its value to null
+ */
+data class EnvironmentConfigUpdate(
+    @SerializedName("env_vars") val envVars: Map<String, EnvVarUpdate?>? = null,
+    @SerializedName("kv_namespaces") val kvNamespaces: Map<String, KvBindingUpdate?>? = null,
+    @SerializedName("r2_buckets") val r2Buckets: Map<String, R2BindingUpdate?>? = null,
+    @SerializedName("d1_databases") val d1Databases: Map<String, D1BindingUpdate?>? = null,
+    @SerializedName("durable_objects") val durableObjects: Map<String, DurableObjectBindingUpdate?>? = null,
+    @SerializedName("services") val services: Map<String, ServiceBindingUpdate?>? = null
+)
+
+data class EnvVarUpdate(
+    @SerializedName("type") val type: String = "plain_text",  // "plain_text" or "secret_text"
+    @SerializedName("value") val value: String
+)
+
+// ==================== Pages Domains ====================
+
+data class PagesDomain(
+    @SerializedName("id") val id: String?,
+    @SerializedName("name") val name: String,
+    @SerializedName("status") val status: String?,
+    @SerializedName("validation_data") val validationData: DomainValidationData?,
+    @SerializedName("verification_data") val verificationData: DomainVerificationData?,
+    @SerializedName("zone_tag") val zoneTag: String?,
+    @SerializedName("created_on") val createdOn: String?
+)
+
+data class DomainValidationData(
+    @SerializedName("status") val status: String?,
+    @SerializedName("method") val method: String?
+)
+
+data class DomainVerificationData(
+    @SerializedName("type") val type: String?,
+    @SerializedName("name") val name: String?,
+    @SerializedName("value") val value: String?
+)
+
+data class PagesDomainRequest(
+    @SerializedName("name") val name: String
+)
+
+// ==================== Bindings ====================
+
+data class KvBinding(
+    @SerializedName("namespace_id") val namespaceId: String
+)
+
+data class KvBindingUpdate(
+    @SerializedName("namespace_id") val namespaceId: String
+)
+
+data class R2Binding(
+    @SerializedName("name") val name: String
+)
+
+data class R2BindingUpdate(
+    @SerializedName("name") val name: String
+)
+
+data class D1Binding(
+    @SerializedName("id") val id: String
+)
+
+data class D1BindingUpdate(
+    @SerializedName("id") val id: String
+)
+
+data class DurableObjectBinding(
+    @SerializedName("namespace_id") val namespaceId: String,
+    @SerializedName("class_name") val className: String,
+    @SerializedName("script_name") val scriptName: String? = null
+)
+
+data class DurableObjectBindingUpdate(
+    @SerializedName("namespace_id") val namespaceId: String,
+    @SerializedName("class_name") val className: String,
+    @SerializedName("script_name") val scriptName: String? = null
+)
+
+data class ServiceBinding(
+    @SerializedName("service") val service: String,
+    @SerializedName("environment") val environment: String? = null
+)
+
+data class ServiceBindingUpdate(
+    @SerializedName("service") val service: String,
+    @SerializedName("environment") val environment: String? = null
 )
 
 // ==================== R2 ====================

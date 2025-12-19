@@ -6,82 +6,88 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="添加变量/机密"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="域名">
+        android:hint="变量名称 (如: API_URL)"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_marginBottom="12dp">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/domainHostname"
+            android:id="@+id/variableNameEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textUri" />
+            android:inputType="text"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="服务类型"
+        android:text="变量类型"
         android:textSize="14sp"
         android:textStyle="bold"
-        android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp" />
 
     <RadioGroup
-        android:id="@+id/serviceTypeGroup"
+        android:id="@+id/variableTypeGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
 
         <RadioButton
-            android:id="@+id/typeWorkerRadio"
+            android:id="@+id/typePlainTextRadio"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Worker 脚本"
+            android:text="环境变量"
             android:checked="true" />
 
         <RadioButton
-            android:id="@+id/typePagesRadio"
+            android:id="@+id/typeSecretRadio"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Pages 项目" />
+            android:text="机密" />
 
     </RadioGroup>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/workerScriptLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="Worker 脚本"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        android:hint="变量值"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_marginBottom="12dp">
 
-        <AutoCompleteTextView
-            android:id="@+id/domainScript"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/variableValueEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="none" />
+            android:inputType="text"
+            android:gravity="top|start"
+            android:minLines="3"
+            android:maxLines="5" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/pagesProjectLayout"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="💡 环境变量：明文存储的配置信息\n🔒 机密：加密存储的敏感信息（如 API 密钥），设置后无法查看"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary"
         android:layout_marginTop="8dp"
-        android:hint="Pages 项目"
-        android:visibility="gone"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-
-        <AutoCompleteTextView
-            android:id="@+id/domainProject"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none" />
-
-    </com.google.android.material.textfield.TextInputLayout>
+        android:padding="8dp"
+        android:background="?attr/colorSurfaceVariant" />
 
 </LinearLayout>

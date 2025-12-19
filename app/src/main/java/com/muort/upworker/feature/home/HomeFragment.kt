@@ -112,10 +112,10 @@ class HomeFragment : Fragment() {
     private fun animateFeatureCards() {
         val cards = listOf(
             binding.workerCard,
+            binding.pagesCard,
             binding.dnsCard,
             binding.routeCard,
             binding.kvCard,
-            binding.pagesCard,
             binding.r2Card,
             binding.backupCard
         )

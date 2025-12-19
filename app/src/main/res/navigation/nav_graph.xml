@@ -82,7 +82,7 @@
     <fragment
         android:id="@+id/routeFragment"
         android:name="com.muort.upworker.feature.route.RouteFragment"
-        android:label="路由绑定"
+        android:label="域和路由管理"
         tools:layout="@layout/fragment_route" />
 
     <fragment

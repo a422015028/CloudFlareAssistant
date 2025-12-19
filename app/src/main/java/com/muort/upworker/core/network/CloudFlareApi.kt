@@ -302,6 +302,70 @@ interface CloudFlareApi {
         @Path("deployment_id") deploymentId: String
     ): Response<CloudFlareResponse<Unit>>
     
+    /**
+     * Update Pages project configuration (environment variables, bindings, etc.)
+     * https://developers.cloudflare.com/api/operations/pages-project-update-project
+     */
+    @PATCH("accounts/{account_id}/pages/projects/{project_name}")
+    suspend fun updatePagesProject(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Body updateRequest: PagesProjectUpdateRequest
+    ): Response<CloudFlareResponse<PagesProjectDetail>>
+    
+    /**
+     * Create a Pages deployment via Direct Upload
+     * https://developers.cloudflare.com/api/operations/pages-deployment-create-deployment
+     * Direct Upload 需要 manifest 字段描述文件结构
+     */
+    @Multipart
+    @POST("accounts/{account_id}/pages/projects/{project_name}/deployments")
+    suspend fun createPagesDeployment(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Part("manifest") manifest: RequestBody,
+        @Part file: MultipartBody.Part
+    ): Response<CloudFlareResponse<PagesDeployment>>
+    
+    // ==================== Pages Domains ====================
+    
+    /**
+     * Get custom domains for Pages project
+     * https://developers.cloudflare.com/api/operations/pages-domains-get-domains
+     */
+    @GET("accounts/{account_id}/pages/projects/{project_name}/domains")
+    suspend fun listPagesDomains(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String
+    ): Response<CloudFlareResponse<List<PagesDomain>>>
+    
+    /**
+     * Add a custom domain to Pages project
+     * https://developers.cloudflare.com/api/operations/pages-domains-add-domain
+     */
+    @POST("accounts/{account_id}/pages/projects/{project_name}/domains")
+    suspend fun addPagesDomain(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Body request: PagesDomainRequest
+    ): Response<CloudFlareResponse<PagesDomain>>
+    
+    /**
+     * Delete a custom domain from Pages project
+     * https://developers.cloudflare.com/api/operations/pages-domains-delete-domain
+     */
+    @DELETE("accounts/{account_id}/pages/projects/{project_name}/domains/{domain_name}")
+    suspend fun deletePagesDomain(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Path("domain_name") domainName: String
+    ): Response<CloudFlareResponse<Unit>>
+    
     // ==================== R2 ====================
     
     @GET("accounts/{account_id}/r2/buckets")

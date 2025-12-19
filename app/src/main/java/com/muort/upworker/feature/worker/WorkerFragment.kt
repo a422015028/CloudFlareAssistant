@@ -1076,6 +1076,8 @@ class WorkerFragment : Fragment() {
                             binding.scriptsRecyclerView.visibility = View.VISIBLE
                             scriptsAdapter.submitList(scripts)
                         }
+                        // 更新 Worker 名称下拉框
+                        updateWorkerNameAutoComplete(scripts)
                     }
                 }
                 
@@ -1093,6 +1095,21 @@ class WorkerFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
+    
+    private fun updateWorkerNameAutoComplete(scripts: List<WorkerScript>) {
+        val scriptNames = scripts.map { it.id }
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            scriptNames
+        )
+        binding.workerNameEdit.setAdapter(adapter)
+        
+        // 设置点击下拉图标时显示所有选项
+        binding.workerNameEdit.setOnClickListener {
+            binding.workerNameEdit.showDropDown()
         }
     }
     
