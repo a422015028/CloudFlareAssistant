@@ -39,6 +39,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -859,7 +864,10 @@ class PagesFragment : Fragment() {
         
         Timber.d("Deploying project: $projectName, branch: $branch, file: ${file?.name}")
         
-        pagesViewModel.createDeployment(account, projectName, branch, file!!)
+        // 处理 ZIP 文件：如果是纯 Worker ZIP，自动添加 public/.keep
+        val processedFile = processZipFile(file!!)
+        
+        pagesViewModel.createDeployment(account, projectName, branch, processedFile)
         
         // Hide progress after a delay (will be handled by loading state)
         viewLifecycleOwner.lifecycleScope.launch {
@@ -1089,6 +1097,146 @@ class PagesFragment : Fragment() {
         } catch (e: Exception) {
             dateString.substringBefore('T').replace('-', '/')
         }
+    }
+    
+    // ==================== ZIP 处理工具函数 ====================
+    
+    /**
+     * 检测 ZIP 是否包含目录结构
+     */
+    private fun zipHasDirectory(zipBytes: ByteArray): Boolean {
+        ByteArrayInputStream(zipBytes).use { bis ->
+            ZipInputStream(bis).use { zis ->
+                var entry = zis.nextEntry
+                while (entry != null) {
+                    // 明确的目录条目
+                    if (entry.isDirectory) return true
+                    // 存在子路径（例如 dist/app.js）
+                    if (entry.name.contains("/")) return true
+                    entry = zis.nextEntry
+                }
+            }
+        }
+        return false
+    }
+    
+    /**
+     * 检测 ZIP 是否包含 _worker.js
+     */
+    private fun containsWorkerJs(zipBytes: ByteArray): Boolean {
+        ByteArrayInputStream(zipBytes).use { bis ->
+            ZipInputStream(bis).use { zis ->
+                var entry = zis.nextEntry
+                while (entry != null) {
+                    if (entry.name == "_worker.js") return true
+                    entry = zis.nextEntry
+                }
+            }
+        }
+        return false
+    }
+    
+    /**
+     * 判断是否需要修补 ZIP（添加 public/.keep）
+     * 只在包含 _worker.js 且没有目录结构时才修补
+     */
+    private fun shouldPatchZip(zipBytes: ByteArray): Boolean {
+        return containsWorkerJs(zipBytes) && !zipHasDirectory(zipBytes)
+    }
+    
+    /**
+     * 自动添加 public/.keep 到 ZIP
+     * 确保 Cloudflare Pages 识别为 Hybrid Worker 部署而不是 Uploaded Assets
+     */
+    private fun ensurePagesStatic(zipBytes: ByteArray): ByteArray {
+        // 如果已经有目录结构，不需要处理
+        if (!shouldPatchZip(zipBytes)) return zipBytes
+        
+        Timber.d("检测到纯 Worker ZIP，自动添加 public/.keep")
+        
+        val baos = ByteArrayOutputStream()
+        ZipOutputStream(baos).use { zos ->
+            // 拷贝原 ZIP 中的所有文件
+            ByteArrayInputStream(zipBytes).use { bis ->
+                ZipInputStream(bis).use { zis ->
+                    var entry = zis.nextEntry
+                    val buffer = ByteArray(8192)
+                    
+                    while (entry != null) {
+                        zos.putNextEntry(ZipEntry(entry.name))
+                        var len = zis.read(buffer)
+                        while (len > 0) {
+                            zos.write(buffer, 0, len)
+                            len = zis.read(buffer)
+                        }
+                        zos.closeEntry()
+                        entry = zis.nextEntry
+                    }
+                }
+            }
+            
+            // 添加 public/.keep 文件
+            zos.putNextEntry(ZipEntry("public/.keep"))
+            zos.write(ByteArray(0)) // 空文件
+            zos.closeEntry()
+        }
+        
+        return baos.toByteArray()
+    }
+    
+    /**
+     * 处理并返回修复后的文件
+     * 如果需要修补，会创建临时文件
+     */
+    private fun processZipFile(originalFile: File): File {
+        val zipBytes = originalFile.readBytes()
+        
+        // 打印 ZIP 内容用于调试
+        Timber.d("=== ZIP 文件分析 ===")
+        Timber.d("文件名: ${originalFile.name}, 大小: ${originalFile.length()} bytes")
+        ByteArrayInputStream(zipBytes).use { bis ->
+            ZipInputStream(bis).use { zis ->
+                var entry = zis.nextEntry
+                var hasDirectory = false
+                var hasWorkerJs = false
+                Timber.d("ZIP 内容列表:")
+                while (entry != null) {
+                    Timber.d("  - ${entry.name} (目录: ${entry.isDirectory}, 大小: ${entry.size})")
+                    if (entry.isDirectory || entry.name.contains("/")) hasDirectory = true
+                    if (entry.name == "_worker.js") hasWorkerJs = true
+                    entry = zis.nextEntry
+                }
+                Timber.d("包含目录: $hasDirectory, 包含 _worker.js: $hasWorkerJs")
+            }
+        }
+        
+        if (!shouldPatchZip(zipBytes)) {
+            Timber.d("ZIP 文件已包含目录结构，无需修补")
+            return originalFile
+        }
+        
+        // 需要修补
+        Timber.d("检测到纯 Worker ZIP，开始修补...")
+        val patchedBytes = ensurePagesStatic(zipBytes)
+        val patchedFile = File(requireContext().cacheDir, "patched_${originalFile.name}")
+        patchedFile.writeBytes(patchedBytes)
+        
+        // 打印修补后的内容
+        Timber.d("=== 修补后 ZIP 内容 ===")
+        ByteArrayInputStream(patchedBytes).use { bis ->
+            ZipInputStream(bis).use { zis ->
+                var entry = zis.nextEntry
+                while (entry != null) {
+                    Timber.d("  - ${entry.name} (目录: ${entry.isDirectory}, 大小: ${entry.size})")
+                    entry = zis.nextEntry
+                }
+            }
+        }
+        
+        Timber.d("已自动注入 public/.keep，修补后文件: ${patchedFile.absolutePath}")
+        showToast("检测到纯 Worker ZIP，已自动添加静态目录支持")
+        
+        return patchedFile
     }
     
     override fun onDestroyView() {
