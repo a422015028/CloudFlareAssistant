@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: '版本标签 (例如: v5.2)'
+        description: '版本标签 (例如: v5.9)'
         required: true
         type: string
 

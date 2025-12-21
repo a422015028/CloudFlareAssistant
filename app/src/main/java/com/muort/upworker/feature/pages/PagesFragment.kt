@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -1351,9 +1352,9 @@ class PagesVariablesAndSecretsAdapter(
             } else {
                 binding.variableValueText.text = value
                 binding.variableValueText.setTypeface(null, Typeface.NORMAL)
-                binding.variableValueText.setTextColor(
-                    binding.root.context.getColor(android.R.color.black)
-                )
+                val typedValue = TypedValue()
+                binding.root.context.theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true)
+                binding.variableValueText.setTextColor(typedValue.data)
             }
             
             // Show type label

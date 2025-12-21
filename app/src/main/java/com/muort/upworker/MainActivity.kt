@@ -1,9 +1,18 @@
 package com.muort.upworker
 
+import android.content.res.Configuration
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -13,6 +22,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.muort.upworker.core.model.Account
+import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.util.DataMigrationHelper
 import com.muort.upworker.core.util.MigrationResult
 import com.muort.upworker.core.util.showToast
@@ -20,6 +30,7 @@ import com.muort.upworker.databinding.ActivityMainBinding
 import com.muort.upworker.databinding.DialogAccountSelectionBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -39,11 +50,92 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         
         setupNavigation()
+        configureSystemBars()
         setupAccountSelector()
         observeViewModel()
         performMigrationIfNeeded()
     }
     
+    private fun configureSystemBars() {
+        // 1. 获取 MD3 颜色定义
+        val typedValueContainer = TypedValue()
+        // Surface Container (用于 Toolbar 背景)
+        val hasContainer = theme.resolveAttribute(com.google.android.material.R.attr.colorSurfaceContainer, typedValueContainer, true)
+        val colorSurfaceContainer = if (hasContainer) typedValueContainer.data else {
+            val typedValueSurface = TypedValue()
+            theme.resolveAttribute(com.google.android.material.R.attr.colorSurface, typedValueSurface, true)
+            typedValueSurface.data
+        }
+        
+        // Secondary Container (用于账号选择器背景 - 胶囊样式)
+        val typedValueSecContainer = TypedValue()
+        theme.resolveAttribute(com.google.android.material.R.attr.colorSecondaryContainer, typedValueSecContainer, true)
+        val colorSecondaryContainer = typedValueSecContainer.data
+        
+        // On Secondary Container (用于账号选择器前景)
+        val typedValueOnSecContainer = TypedValue()
+        theme.resolveAttribute(com.google.android.material.R.attr.colorOnSecondaryContainer, typedValueOnSecContainer, true)
+        val colorOnSecondaryContainer = typedValueOnSecContainer.data
+
+        // On Surface (用于 Toolbar 上的通用图标)
+        val typedValueOnSurface = TypedValue()
+        theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValueOnSurface, true)
+        val colorOnSurface = typedValueOnSurface.data
+
+        // 2. 设置状态栏和 Toolbar 背景
+        window.statusBarColor = colorSurfaceContainer
+        binding.toolbar.setBackgroundColor(colorSurfaceContainer)
+        binding.toolbar.setTitleTextColor(colorOnSurface)
+        
+        // 3. Toolbar 样式调整：去阴影、居中
+        (binding.toolbar as? com.google.android.material.appbar.MaterialToolbar)?.isTitleCentered = true
+        binding.toolbar.elevation = 0f
+        
+        // 4. 打造 "胶囊" (Chip) 样式的账号选择器
+        // 创建圆角背景
+        val chipBackground = android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+            setColor(colorSecondaryContainer)
+            cornerRadius = 100f // 大圆角
+        }
+        binding.selectAccountButton.background = chipBackground
+        
+        // 增加内边距 (8dp vertical, 16dp horizontal)
+        val density = resources.displayMetrics.density
+        val paddingH = (16 * density).toInt()
+        val paddingV = (6 * density).toInt()
+        binding.selectAccountButton.setPadding(paddingH, paddingV, paddingH, paddingV)
+        
+        // 5. 设置选择器内容颜色 (OnSecondaryContainer)
+        val contentColorFilter = PorterDuffColorFilter(colorOnSecondaryContainer, PorterDuff.Mode.SRC_IN)
+        
+        binding.currentAccountText.typeface = android.graphics.Typeface.DEFAULT_BOLD
+        binding.currentAccountText.setTextColor(colorOnSecondaryContainer)
+        binding.currentAccountText.isSingleLine = false
+        binding.currentAccountText.maxLines = 2
+        binding.currentAccountText.ellipsize = android.text.TextUtils.TruncateAt.END
+        binding.currentAccountText.compoundDrawables.forEach { it?.mutate()?.colorFilter = contentColorFilter }
+        binding.currentAccountText.compoundDrawablesRelative.forEach { it?.mutate()?.colorFilter = contentColorFilter }
+        
+        (binding.selectAccountButton as? android.widget.TextView)?.let { textView ->
+            textView.text = ""
+            val icon = getDrawable(android.R.drawable.ic_menu_more)
+            textView.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, icon, null)
+            textView.setTextColor(colorOnSecondaryContainer)
+            textView.compoundDrawables.forEach { it?.mutate()?.colorFilter = contentColorFilter }
+            textView.compoundDrawablesRelative.forEach { it?.mutate()?.colorFilter = contentColorFilter }
+        }
+        
+        // 6. 设置 Toolbar 导航图标颜色 (OnSurface)
+        val navColorFilter = PorterDuffColorFilter(colorOnSurface, PorterDuff.Mode.SRC_IN)
+        binding.toolbar.navigationIcon?.mutate()?.colorFilter = navColorFilter
+        binding.toolbar.overflowIcon?.mutate()?.colorFilter = navColorFilter
+
+        val isNightMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == 
+                Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !isNightMode
+    }
+
     private fun setupAccountSelector() {
         binding.selectAccountButton.setOnClickListener {
             showAccountSelectionDialog()
@@ -110,6 +202,14 @@ class MainActivity : AppCompatActivity() {
         )
         
         setupActionBarWithNavController(navController, appBarConfiguration)
+        
+        // 监听导航变化，确保返回按钮/菜单图标颜色在页面切换后依然正确
+        navController.addOnDestinationChangedListener { _, _, _ ->
+            val typedValue = TypedValue()
+            theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true)
+            val colorOnSurface = typedValue.data
+            binding.toolbar.navigationIcon?.mutate()?.colorFilter = PorterDuffColorFilter(colorOnSurface, PorterDuff.Mode.SRC_IN)
+        }
     }
     
     override fun onSupportNavigateUp(): Boolean {
@@ -123,11 +223,20 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
+                    combine(
+                        accountViewModel.defaultAccount,
+                        accountViewModel.selectedZone
+                    ) { account, zone ->
+                        Pair(account, zone)
+                    }.collect { (account, zone) ->
+                        updateTitleBar(account, zone)
+                    }
+                }                
+
+                launch {
                     accountViewModel.defaultAccount.collect { account ->
                         account?.let {
-                            binding.currentAccountText.text = it.name
-                        } ?: run {
-                            binding.currentAccountText.text = "未选择账号"
+                            accountViewModel.loadZonesForAccount(it.id)
                         }
                     }
                 }
@@ -138,6 +247,32 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+    
+    private fun updateTitleBar(account: Account?, zone: Zone?) {
+        if (account == null) {
+            binding.currentAccountText.text = "未选择账号"
+            return
+        }
+
+        val accountName = account.name
+        val zoneName = zone?.name
+
+        if (zoneName.isNullOrEmpty()) {
+            binding.currentAccountText.text = accountName
+        } else {
+            val text = "$accountName\n$zoneName"
+            val spannable = SpannableString(text)
+            
+            // 设置域名部分为正常字体（非粗体）和小字号 (75%)
+            val start = accountName.length + 1
+            val end = text.length
+            
+            spannable.setSpan(StyleSpan(android.graphics.Typeface.NORMAL), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            spannable.setSpan(RelativeSizeSpan(0.75f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            
+            binding.currentAccountText.text = spannable
         }
     }
     
