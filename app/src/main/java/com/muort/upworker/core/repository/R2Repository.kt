@@ -1,6 +1,5 @@
 package com.muort.upworker.core.repository
 
-import com.amazonaws.services.s3.AmazonS3Client
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.network.R2S3Client
@@ -14,14 +13,17 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
+
 @Singleton
 class R2Repository @Inject constructor(
     private val api: CloudFlareApi,
     private val r2S3Client: R2S3Client
 ) {
     
-    // Cache S3 clients to avoid recreating them
-    private val s3ClientCache = mutableMapOf<String, AmazonS3Client>()
+
+    // 缓存 S3Config，避免重复创建
+    private val s3ConfigCache = mutableMapOf<String, R2S3Client.S3Config>()
     
     suspend fun listBuckets(account: Account): Resource<List<R2Bucket>> = 
         withContext(Dispatchers.IO) {
@@ -91,16 +93,16 @@ class R2Repository @Inject constructor(
     }
     
     /**
-     * Get or create S3 client for account
-     * Requires R2 access key ID and secret access key to be set in account
+     * 获取或创建 S3Config
+     * 需要 R2 access key id 和 secret access key
      */
-    private fun getS3Client(account: Account): AmazonS3Client {
+    private fun getS3Config(account: Account): R2S3Client.S3Config {
         val cacheKey = "${account.accountId}:${account.r2AccessKeyId}"
-        return s3ClientCache.getOrPut(cacheKey) {
+        return s3ConfigCache.getOrPut(cacheKey) {
             if (account.r2AccessKeyId.isNullOrEmpty() || account.r2SecretAccessKey.isNullOrEmpty()) {
                 throw IllegalArgumentException("R2 access credentials not configured")
             }
-            r2S3Client.createS3Client(
+            R2S3Client.S3Config(
                 accountId = account.accountId,
                 accessKeyId = account.r2AccessKeyId,
                 secretAccessKey = account.r2SecretAccessKey
@@ -115,8 +117,8 @@ class R2Repository @Inject constructor(
     ): Resource<R2ObjectList> = withContext(Dispatchers.IO) {
         safeApiCall {
             try {
-                val s3Client = getS3Client(account)
-                val result = r2S3Client.listObjects(s3Client, bucketName, prefix)
+                val s3Config = getS3Config(account)
+                val result = r2S3Client.listObjects(s3Config, bucketName, prefix)
                 Resource.Success(result)
             } catch (e: IllegalArgumentException) {
                 Resource.Error("请先配置R2访问凭证（Access Key ID和Secret Access Key）")
@@ -134,8 +136,8 @@ class R2Repository @Inject constructor(
     ): Resource<R2ObjectUpload> = withContext(Dispatchers.IO) {
         safeApiCall {
             try {
-                val s3Client = getS3Client(account)
-                r2S3Client.uploadObject(s3Client, bucketName, objectKey, file)
+                val s3Config = getS3Config(account)
+                r2S3Client.uploadObject(s3Config, bucketName, objectKey, file)
                 Resource.Success(R2ObjectUpload(objectKey, file.length(), null))
             } catch (e: IllegalArgumentException) {
                 Resource.Error("请先配置R2访问凭证（Access Key ID和Secret Access Key）")
@@ -152,8 +154,8 @@ class R2Repository @Inject constructor(
     ): Resource<ByteArray> = withContext(Dispatchers.IO) {
         safeApiCall {
             try {
-                val s3Client = getS3Client(account)
-                val data = r2S3Client.downloadObject(s3Client, bucketName, objectKey)
+                val s3Config = getS3Config(account)
+                val data = r2S3Client.downloadObject(s3Config, bucketName, objectKey)
                 Resource.Success(data)
             } catch (e: IllegalArgumentException) {
                 Resource.Error("请先配置R2访问凭证（Access Key ID和Secret Access Key）")
@@ -170,8 +172,8 @@ class R2Repository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             try {
-                val s3Client = getS3Client(account)
-                r2S3Client.deleteObject(s3Client, bucketName, objectKey)
+                val s3Config = getS3Config(account)
+                r2S3Client.deleteObject(s3Config, bucketName, objectKey)
                 Resource.Success(Unit)
             } catch (e: IllegalArgumentException) {
                 Resource.Error("请先配置R2访问凭证（Access Key ID和Secret Access Key）")

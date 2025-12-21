@@ -1,232 +1,287 @@
+
+
 package com.muort.upworker.core.network
 
-import com.amazonaws.auth.AWSCredentials
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.ClientConfiguration
-import com.amazonaws.regions.Region
-import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.*
 import com.muort.upworker.core.model.R2Object
 import com.muort.upworker.core.model.R2ObjectList
-import java.io.File
-import java.io.InputStream
-import javax.inject.Inject
-import javax.inject.Singleton
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
-import java.security.MessageDigest
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
+import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.collections.LinkedHashMap
 
 /**
- * R2 S3 API Client
- * Handles R2 object operations through S3-compatible API
+ * R2 S3 API Client (OkHttp + AWS v4 签名实现)
+ * 兼容 Cloudflare R2，支持列举、上传、下载、删除对象
  */
+
 @Singleton
 class R2S3Client @Inject constructor() {
-    
-    /**
-     * Create S3 client for R2
-     * Requires R2 access key ID and secret access key (not the API token)
-     * Users need to create R2 API tokens from Cloudflare dashboard
-     */
-    fun createS3Client(accountId: String, accessKeyId: String, secretAccessKey: String): AmazonS3Client {
-        val credentials: AWSCredentials = BasicAWSCredentials(accessKeyId, secretAccessKey)
-        val endpoint = "https://$accountId.r2.cloudflarestorage.com"
-        
-        // Critical: Disable chunked encoding globally to avoid STREAMING-AWS4-HMAC-SHA256-PAYLOAD
-        System.setProperty("com.amazonaws.services.s3.disableChunkedEncoding", "true")
-        
-        val clientConfiguration = ClientConfiguration().apply {
-            // Disable chunked encoding to avoid STREAMING-AWS4-HMAC-SHA256-PAYLOAD error
-            // R2 doesn't support streaming signature, use standard AWS4-HMAC-SHA256 instead
-            signerOverride = "AWSS3V4SignerType"
-            maxConnections = 50
-            connectionTimeout = 50000
-            socketTimeout = 50000
-        }
-        val client = AmazonS3Client(credentials, Region.getRegion("us-east-1"), clientConfiguration)
-        client.setEndpoint(endpoint)
-        
-        return client
+
+    data class S3Config(
+        val accountId: String,
+        val accessKeyId: String,
+        val secretAccessKey: String
+    ) {
+        val endpoint: String get() = "https://$accountId.r2.cloudflarestorage.com"
     }
-    
-    /**
-     * List objects in a bucket
-     */
+
+    private val httpClient = OkHttpClient()
+
+    // ================== S3 API ==================
+
     fun listObjects(
-        s3Client: AmazonS3Client,
+        config: S3Config,
         bucketName: String,
         prefix: String? = null,
         maxKeys: Int = 1000
     ): R2ObjectList {
-        try {
-            val request = ListObjectsV2Request()
-                .withBucketName(bucketName)
-                .withMaxKeys(maxKeys)
-            
-            if (!prefix.isNullOrEmpty()) {
-                request.withPrefix(prefix)
+        val query = LinkedHashMap<String, String>()
+        query["list-type"] = "2"
+        query["max-keys"] = maxKeys.toString()
+        if (!prefix.isNullOrEmpty()) query["prefix"] = prefix
+        val url = buildUrl(config.endpoint, bucketName, query)
+        val now = Date()
+        val request = Request.Builder()
+            .url(url)
+            .get()
+            .applyAwsV4Signature(config, "GET", "/$bucketName", query, null, now)
+            .build()
+        httpClient.newCall(request).execute().use { resp ->
+            val bodyStr = resp.body?.string() ?: ""
+            if (!resp.isSuccessful) {
+                throw RuntimeException("List failed: ${resp.code} ${resp.message} $bodyStr")
             }
-            
-            val result = s3Client.listObjectsV2(request)
-            
-            val objects = result.objectSummaries.map { summary ->
-                R2Object(
-                    key = summary.key,
-                    size = summary.size,
-                    etag = summary.eTag,
-                    uploaded = summary.lastModified?.toString(),
-                    httpMetadata = null
-                )
-            }
-            
-            return R2ObjectList(
-                objects = objects,
-                truncated = result.isTruncated,
-                cursor = result.nextContinuationToken,
-                delimitedPrefixes = result.commonPrefixes
-            )
-        } catch (e: Exception) {
-            throw e
+            return parseListObjectsXml(bodyStr)
         }
     }
-    
-    /**
-     * Upload object to bucket using presigned URL
-     * This bypasses AWS SDK's chunked encoding which R2 doesn't support
-     */
+
     fun uploadObject(
-        s3Client: AmazonS3Client,
+        config: S3Config,
         bucketName: String,
         objectKey: String,
         file: File,
         contentType: String = "application/octet-stream"
     ) {
-        try {
-            // Generate presigned URL for PUT operation (valid for 1 hour)
-            val expiration = Date(System.currentTimeMillis() + 3600 * 1000)
-            val generatePresignedUrlRequest = GeneratePresignedUrlRequest(bucketName, objectKey)
-                .withMethod(com.amazonaws.HttpMethod.PUT)
-                .withExpiration(expiration)
-                .withContentType(contentType)
-            
-            val presignedUrl = s3Client.generatePresignedUrl(generatePresignedUrlRequest)
-            
-            // Use OkHttp to upload directly via HTTP PUT (no chunked encoding)
-            val client = OkHttpClient()
-            val mediaType = contentType.toMediaType()
-            val requestBody = file.asRequestBody(mediaType)
-            
-            val request = Request.Builder()
-                .url(presignedUrl)
-                .put(requestBody)
-                .addHeader("Content-Type", contentType)
-                .build()
-            
-            val response = client.newCall(request).execute()
-            if (!response.isSuccessful) {
-                val errorBody = response.body?.string() ?: ""
-                throw RuntimeException("Upload failed: ${response.code} ${response.message} - $errorBody")
-            }
-        } catch (e: Exception) {
-            throw e
+        FileInputStream(file).use { inputStream ->
+            uploadObject(config, bucketName, objectKey, inputStream, file.length(), contentType)
         }
     }
-    
-    /**
-     * Upload object from input stream
-     */
+
     fun uploadObject(
-        s3Client: AmazonS3Client,
+        config: S3Config,
         bucketName: String,
         objectKey: String,
         inputStream: InputStream,
         contentLength: Long,
         contentType: String = "application/octet-stream"
     ) {
-        try {
-            val metadata = ObjectMetadata().apply {
-                this.contentType = contentType
-                this.contentLength = contentLength
+        val url = buildUrl(config.endpoint, bucketName, null, objectKey)
+        val now = Date()
+        val body = object : RequestBody() {
+            override fun contentType() = contentType.toMediaType()
+            override fun contentLength() = contentLength
+            override fun writeTo(sink: okio.BufferedSink) {
+                inputStream.use { it.copyTo(sink.outputStream()) }
             }
-            
-            val request = PutObjectRequest(bucketName, objectKey, inputStream, metadata)
-            s3Client.putObject(request)
-        } catch (e: Exception) {
-            throw e
+        }
+        val request = Request.Builder()
+            .url(url)
+            .put(body)
+            .addHeader("Content-Type", contentType)
+            .applyAwsV4Signature(config, "PUT", "/$bucketName/$objectKey", null, null, now)
+            .build()
+        httpClient.newCall(request).execute().use { resp ->
+            val bodyStr = resp.body?.string() ?: ""
+            if (!resp.isSuccessful) {
+                throw RuntimeException("Upload failed: ${resp.code} ${resp.message} $bodyStr")
+            }
         }
     }
-    
-    /**
-     * Download object from bucket
-     */
+
     fun downloadObject(
-        s3Client: AmazonS3Client,
+        config: S3Config,
         bucketName: String,
         objectKey: String
     ): ByteArray {
-        try {
-            val s3Object = s3Client.getObject(bucketName, objectKey)
-            return s3Object.objectContent.use { it.readBytes() }
-        } catch (e: Exception) {
-            throw e
+        val url = buildUrl(config.endpoint, bucketName, null, objectKey)
+        val now = Date()
+        val request = Request.Builder()
+            .url(url)
+            .get()
+            .applyAwsV4Signature(config, "GET", "/$bucketName/$objectKey", null, null, now)
+            .build()
+        httpClient.newCall(request).execute().use { resp ->
+            val bodyBytes = resp.body?.bytes() ?: ByteArray(0)
+            if (!resp.isSuccessful) {
+                val bodyStr = String(bodyBytes)
+                throw RuntimeException("Download failed: ${resp.code} ${resp.message} $bodyStr")
+            }
+            return bodyBytes
         }
     }
-    
-    /**
-     * Download object to file
-     */
+
     fun downloadObjectToFile(
-        s3Client: AmazonS3Client,
+        config: S3Config,
         bucketName: String,
         objectKey: String,
         destinationFile: File
     ) {
-        try {
-            val s3Object = s3Client.getObject(bucketName, objectKey)
-            s3Object.objectContent.use { input ->
-                destinationFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-        } catch (e: Exception) {
-            throw e
-        }
+        val data = downloadObject(config, bucketName, objectKey)
+        destinationFile.outputStream().use { it.write(data) }
     }
-    
-    /**
-     * Delete object from bucket
-     */
+
     fun deleteObject(
-        s3Client: AmazonS3Client,
+        config: S3Config,
         bucketName: String,
         objectKey: String
     ) {
-        try {
-            s3Client.deleteObject(bucketName, objectKey)
-        } catch (e: Exception) {
-            throw e
+        val url = buildUrl(config.endpoint, bucketName, null, objectKey)
+        val now = Date()
+        val request = Request.Builder()
+            .url(url)
+            .delete()
+            .applyAwsV4Signature(config, "DELETE", "/$bucketName/$objectKey", null, null, now)
+            .build()
+        httpClient.newCall(request).execute().use { resp ->
+            val bodyStr = resp.body?.string() ?: ""
+            if (!resp.isSuccessful) {
+                throw RuntimeException("Delete failed: ${resp.code} ${resp.message} $bodyStr")
+            }
         }
     }
-    
-    /**
-     * Get object metadata
-     */
-    fun getObjectMetadata(
-        s3Client: AmazonS3Client,
-        bucketName: String,
-        objectKey: String
-    ): ObjectMetadata {
-        try {
-            return s3Client.getObjectMetadata(bucketName, objectKey)
-        } catch (e: Exception) {
-            throw e
+
+    // ================== 工具方法 ==================
+
+    private fun buildUrl(endpoint: String, bucket: String, query: Map<String, String>? = null, objectKey: String? = null): String {
+        val sb = StringBuilder()
+        sb.append(endpoint)
+        sb.append("/")
+        sb.append(bucket)
+        if (!objectKey.isNullOrEmpty()) {
+            sb.append("/")
+            sb.append(URLEncoder.encode(objectKey, "UTF-8").replace("+", "%20"))
         }
+        if (!query.isNullOrEmpty()) {
+            sb.append("?")
+            sb.append(query.entries.joinToString("&") { "${it.key}=${URLEncoder.encode(it.value, "UTF-8")}" })
+        }
+        return sb.toString()
+    }
+
+    // AWS v4 签名实现（简化版，支持 R2 S3 基本操作）
+    private fun Request.Builder.applyAwsV4Signature(
+        config: S3Config,
+        method: String,
+        canonicalUri: String,
+        query: Map<String, String>?,
+        body: ByteArray?,
+        now: Date
+    ): Request.Builder {
+        val region = "auto" // R2 只支持 auto
+        val service = "s3"
+        val dateFormat = SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") }
+        val dateStampFormat = SimpleDateFormat("yyyyMMdd", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") }
+        val amzDate = dateFormat.format(now)
+        val dateStamp = dateStampFormat.format(now)
+        val host = config.endpoint.toHttpUrl().host
+        val payloadHash = body?.let { sha256Hex(it) } ?: if (method == "GET" || method == "DELETE") "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" else "UNSIGNED-PAYLOAD"
+        val canonicalQuery = query?.entries
+            ?.sortedBy { it.key }
+            ?.joinToString("&") { "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}" }
+            ?: ""
+        val canonicalHeaders = "host:$host\nx-amz-content-sha256:$payloadHash\nx-amz-date:$amzDate\n"
+        val signedHeaders = "host;x-amz-content-sha256;x-amz-date"
+        val canonicalRequest = listOf(
+            method,
+            canonicalUri,
+            canonicalQuery,
+            canonicalHeaders,
+            signedHeaders,
+            payloadHash
+        ).joinToString("\n")
+        val credentialScope = "$dateStamp/$region/$service/aws4_request"
+        val stringToSign = listOf(
+            "AWS4-HMAC-SHA256",
+            amzDate,
+            credentialScope,
+            sha256Hex(canonicalRequest.toByteArray())
+        ).joinToString("\n")
+        val signingKey = getSignatureKey(config.secretAccessKey, dateStamp, region, service)
+        val signature = hmacSha256Hex(signingKey, stringToSign)
+        val authorization = "AWS4-HMAC-SHA256 Credential=${config.accessKeyId}/$credentialScope, SignedHeaders=$signedHeaders, Signature=$signature"
+        return this
+            .addHeader("x-amz-date", amzDate)
+            .addHeader("x-amz-content-sha256", payloadHash)
+            .addHeader("Authorization", authorization)
+            .addHeader("host", host)
+    }
+
+    private fun sha256Hex(data: ByteArray): String {
+        val md = java.security.MessageDigest.getInstance("SHA-256")
+        val hash = md.digest(data)
+        return hash.joinToString("") { "%02x".format(it) }
+    }
+
+    private fun hmacSha256Hex(key: ByteArray, data: String): String {
+        val mac = Mac.getInstance("HmacSHA256")
+        mac.init(SecretKeySpec(key, "HmacSHA256"))
+        val hash = mac.doFinal(data.toByteArray())
+        return hash.joinToString("") { "%02x".format(it) }
+    }
+
+    private fun getSignatureKey(key: String, dateStamp: String, regionName: String, serviceName: String): ByteArray {
+        var kSecret = ("AWS4" + key).toByteArray()
+        var kDate = hmacSha256(kSecret, dateStamp)
+        var kRegion = hmacSha256(kDate, regionName)
+        var kService = hmacSha256(kRegion, serviceName)
+        return hmacSha256(kService, "aws4_request")
+    }
+
+    private fun hmacSha256(key: ByteArray, data: String): ByteArray {
+        val mac = Mac.getInstance("HmacSHA256")
+        mac.init(SecretKeySpec(key, "HmacSHA256"))
+        return mac.doFinal(data.toByteArray())
+    }
+
+    // 解析 S3 ListObjectsV2 XML 响应（只提取常用字段）
+    private fun parseListObjectsXml(xml: String): R2ObjectList {
+        val objects = mutableListOf<R2Object>()
+        val regex = Regex("<Contents>(.*?)</Contents>", RegexOption.DOT_MATCHES_ALL)
+        val keyRegex = Regex("<Key>(.*?)</Key>")
+        val sizeRegex = Regex("<Size>(\\d+)</Size>")
+        val etagRegex = Regex("<ETag>\\\"(.*?)\\\"</ETag>")
+        val lastModRegex = Regex("<LastModified>(.*?)</LastModified>")
+        for (match in regex.findAll(xml)) {
+            val content = match.groupValues[1]
+            val key = keyRegex.find(content)?.groupValues?.get(1) ?: continue
+            val size = sizeRegex.find(content)?.groupValues?.get(1)?.toLongOrNull()
+            val etag = etagRegex.find(content)?.groupValues?.get(1)
+            val lastMod = lastModRegex.find(content)?.groupValues?.get(1)
+            objects.add(
+                R2Object(
+                    key = key,
+                    size = size,
+                    etag = etag,
+                    uploaded = lastMod,
+                    httpMetadata = null
+                )
+            )
+        }
+        return R2ObjectList(
+            objects = objects,
+            truncated = false,
+            cursor = null,
+            delimitedPrefixes = emptyList()
+        )
     }
 }

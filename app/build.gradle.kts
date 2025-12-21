@@ -18,10 +18,10 @@ android {
     
     defaultConfig {
         applicationId = "com.muort.upworker"
-        minSdk = 25
+        minSdk = 26
         targetSdk = 34
-        versionCode = 2025122001
-        versionName = "5.7"
+        versionCode = 2025122101
+        versionName = "5.8"
         
         vectorDrawables { 
             useSupportLibrary = true
@@ -158,9 +158,6 @@ dependencies {
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     
-    // AWS S3 SDK for R2
-    implementation("com.amazonaws:aws-android-sdk-s3:2.76.0")
-    implementation("com.amazonaws:aws-android-sdk-core:2.76.0")
     
     // Testing
     testImplementation("junit:junit:4.13.2")
