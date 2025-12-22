@@ -12,6 +12,17 @@ import retrofit2.http.*
  * API Documentation: https://developers.cloudflare.com/api/
  */
 interface CloudFlareApi {
+        /**
+         * 更新自定义域名
+         * PATCH /accounts/{account_id}/workers/domains/{domain_id}
+         */
+        @PATCH("accounts/{account_id}/workers/domains/{domain_id}")
+        suspend fun updateCustomDomain(
+            @Header("Authorization") token: String,
+            @Path("account_id") accountId: String,
+            @Path("domain_id") domainId: String,
+            @Body request: CustomDomainRequest
+        ): Response<CloudFlareResponse<CustomDomain>>
     
     // ==================== Zones ====================
     
@@ -162,7 +173,7 @@ interface CloudFlareApi {
         @Header("Authorization") token: String,
         @Path("account_id") accountId: String,
         @Path("domain_id") domainId: String
-    ): Response<CloudFlareResponse<Unit>>
+    ): Response<Unit>
     
     // ==================== DNS ====================
     

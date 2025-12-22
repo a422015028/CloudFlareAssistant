@@ -214,7 +214,8 @@ data class KvNamespaceRequest(
 data class KvKey(
     @SerializedName("name") val name: String,
     @SerializedName("expiration") val expiration: Long? = null,
-    @SerializedName("metadata") val metadata: Map<String, Any>? = null
+    @SerializedName("metadata") val metadata: Map<String, Any>? = null,
+    var value: String? = null // 添加value字段用于显示
 )
 
 // ==================== Pages ====================

@@ -111,6 +111,18 @@ class RouteFragment : Fragment() {
         binding.routeRecyclerView.adapter = routeAdapter
         
         domainAdapter = CustomDomainAdapter(
+            onEditClick = { domain ->
+                when (domain.type) {
+                    DomainType.WORKER -> {
+                        if (domain.originalWorkerDomain != null) {
+                            showEditCustomDomainDialog(domain)
+                        }
+                    }
+                    DomainType.PAGES -> {
+                        Snackbar.make(binding.root, "Pages 项目的自定义域官方不支持修改。", Snackbar.LENGTH_LONG).show()
+                    }
+                }
+            },
             onDeleteClick = { domain ->
                 showDeleteDomainDialog(domain)
             }
@@ -119,42 +131,52 @@ class RouteFragment : Fragment() {
     }
     
     private fun setupTabs() {
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                currentTab = tab?.position ?: 0
-                updateTabContent()
+        // 已移除TabLayout，左右分栏独立显示，无需Tab切换
+        // 保留方法以兼容旧代码调用但不做任何事
+    }
+    
+    private fun showEditCustomDomainDialog(domain: UnifiedDomain) {
+        val dialogBinding = DialogDomainInputBinding.inflate(layoutInflater)
+        // 填充现有数据
+        dialogBinding.domainHostname.setText(domain.hostname)
+        dialogBinding.typeWorkerRadio.isChecked = true
+        dialogBinding.workerScriptLayout.visibility = View.VISIBLE
+        dialogBinding.pagesProjectLayout.visibility = View.GONE
+        dialogBinding.domainScript.setText(domain.target, false)
+        // 设置 Worker 脚本下拉列表
+        val scriptNames = workerViewModel.scripts.value.map { it.id }
+        val scriptAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, scriptNames)
+        dialogBinding.domainScript.setAdapter(scriptAdapter)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("编辑自定义域")
+            .setView(dialogBinding.root)
+            .setPositiveButton("保存") { _, _ ->
+                val hostname = dialogBinding.domainHostname.text.toString()
+                val script = dialogBinding.domainScript.text.toString()
+                accountViewModel.defaultAccount.value?.let { account ->
+                    if (hostname.isNotEmpty() && script.isNotEmpty()) {
+                        workerViewModel.updateCustomDomain(account, domain.id, hostname, script)
+                    } else {
+                        Snackbar.make(binding.root, "域名和脚本不能为空", Snackbar.LENGTH_SHORT).show()
+                    }
+                }
             }
-            
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
+            .setNegativeButton("取消", null)
+            .show()
     }
     
     private fun updateTabContent() {
-        when (currentTab) {
-            0 -> {
-                binding.routeRecyclerView.visibility = View.VISIBLE
-                binding.domainRecyclerView.visibility = View.GONE
-                binding.emptyText.text = "暂无路由\n点击 + 添加"
-                binding.emptyText.visibility = 
-                    if (routeAdapter.itemCount == 0) View.VISIBLE else View.GONE
-            }
-            1 -> {
-                binding.routeRecyclerView.visibility = View.GONE
-                binding.domainRecyclerView.visibility = View.VISIBLE
-                binding.emptyText.text = "暂无自定义域\n点击 + 添加"
-                binding.emptyText.visibility = 
-                    if (domainAdapter.itemCount == 0) View.VISIBLE else View.GONE
-            }
-        }
+        // 新布局下不再切换Tab，直接根据各自Adapter数量控制左右两侧emptyText显示
+        binding.routeEmptyText.visibility = if (routeAdapter.itemCount == 0) View.VISIBLE else View.GONE
+        binding.domainEmptyText.visibility = if (domainAdapter.itemCount == 0) View.VISIBLE else View.GONE
     }
     
     private fun setupClickListeners() {
         binding.fabAddRoute.setOnClickListener {
-            when (currentTab) {
-                0 -> showAddRouteDialog()
-                1 -> showAddDomainDialog()
-            }
+            showAddRouteDialog()
+        }
+        binding.fabAddDomain.setOnClickListener {
+            showAddDomainDialog()
         }
     }
     
@@ -164,13 +186,9 @@ class RouteFragment : Fragment() {
                 launch {
                     workerViewModel.routes.collect { routes ->
                         routeAdapter.submitList(routes)
-                        if (currentTab == 0) {
-                            binding.emptyText.visibility = 
-                                if (routes.isEmpty()) View.VISIBLE else View.GONE
-                        }
+                        binding.routeEmptyText.visibility = if (routes.isEmpty()) View.VISIBLE else View.GONE
                     }
                 }
-                
                 launch {
                     // 合并 Worker 和 Pages 的自定义域
                     combine(
@@ -178,7 +196,6 @@ class RouteFragment : Fragment() {
                         pagesViewModel.projects
                     ) { workerDomains, projects ->
                         val unified = mutableListOf<UnifiedDomain>()
-                        
                         // 添加 Worker 域名
                         workerDomains.forEach { domain ->
                             unified.add(UnifiedDomain(
@@ -189,11 +206,9 @@ class RouteFragment : Fragment() {
                                 originalWorkerDomain = domain
                             ))
                         }
-                        
                         // 添加 Pages 域名（从项目的 domains 字段）
                         projects.forEach { project ->
                             project.domains?.forEach { domainName ->
-                                // 过滤掉默认的 .pages.dev 域名
                                 if (!domainName.endsWith(".pages.dev")) {
                                     unified.add(UnifiedDomain(
                                         id = "${project.id}_$domainName",
@@ -205,36 +220,28 @@ class RouteFragment : Fragment() {
                                 }
                             }
                         }
-                        
                         unified
                     }.collect { domains ->
                         domainAdapter.submitList(domains)
-                        if (currentTab == 1) {
-                            binding.emptyText.visibility = 
-                                if (domains.isEmpty()) View.VISIBLE else View.GONE
-                        }
+                        binding.domainEmptyText.visibility = if (domains.isEmpty()) View.VISIBLE else View.GONE
                     }
                 }
-                
                 launch {
                     workerViewModel.loadingState.collect { isLoading ->
-                        binding.progressBar.visibility = 
-                            if (isLoading) View.VISIBLE else View.GONE
+                        binding.routeProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+                        binding.domainProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
                     }
                 }
-                
                 launch {
                     workerViewModel.message.collect { message ->
                         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                     }
                 }
-                
                 launch {
                     pagesViewModel.message.collect { message ->
                         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                     }
                 }
-                
                 launch {
                     accountViewModel.defaultAccount.collect { account ->
                         if (account != null) {
@@ -444,6 +451,9 @@ class RouteFragment : Fragment() {
         
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.bind(routes[position])
+            holder.itemView.setOnClickListener {
+                onEditClick(routes[position])
+            }
         }
         
         override fun getItemCount() = routes.size
@@ -481,6 +491,7 @@ class RouteFragment : Fragment() {
     }
     
     private class CustomDomainAdapter(
+        private val onEditClick: (UnifiedDomain) -> Unit,
         private val onDeleteClick: (UnifiedDomain) -> Unit
     ) : RecyclerView.Adapter<CustomDomainAdapter.ViewHolder>() {
         
@@ -500,6 +511,9 @@ class RouteFragment : Fragment() {
         
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.bind(domains[position])
+            holder.itemView.setOnClickListener {
+                onEditClick(domains[position])
+            }
         }
         
         override fun getItemCount() = domains.size

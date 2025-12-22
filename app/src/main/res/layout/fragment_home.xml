@@ -18,38 +18,55 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             app:cardElevation="4dp"
-            app:cardCornerRadius="12dp">
+            app:cardCornerRadius="12dp"
+            android:clickable="true"
+            android:focusable="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="当前账号"
-                    android:textSize="14sp"
-                    android:textColor="?android:textColorSecondary" />
-
-                <TextView
-                    android:id="@+id/accountNameText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="未选择账号"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="4dp" />
-
-                <Button
-                    android:id="@+id/manageAccountsBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="管理账号"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.Material3.Button.TextButton" />
-
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:clickable="false"
+                    android:focusable="false">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="当前账号"
+                        android:textSize="14sp"
+                        android:textColor="?android:textColorSecondary" />
+                    <TextView
+                        android:id="@+id/accountNameText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="未选择账号"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+                    <Button
+                        android:id="@+id/manageAccountsBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="管理账号"
+                        android:layout_marginTop="8dp"
+                        style="@style/Widget.Material3.Button.TextButton" />
+                </LinearLayout>
+                <ImageButton
+                    android:id="@+id/aboutBtn"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_info_details"
+                    android:tint="?attr/colorPrimary"
+                    android:contentDescription="关于应用信息和联系方式"
+                    android:focusable="true"
+                    android:clickable="true" />
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
@@ -470,6 +487,7 @@
             android:layout_marginBottom="12dp"
             android:clickable="true"
             android:focusable="true"
+            android:visibility="gone"
             app:cardElevation="2dp"
             app:cardCornerRadius="8dp">
 
@@ -518,6 +536,7 @@
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
 
     </LinearLayout>
 

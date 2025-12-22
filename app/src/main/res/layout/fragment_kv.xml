@@ -17,13 +17,24 @@
             android:orientation="vertical"
             android:background="?attr/colorSurface">
 
-            <com.google.android.material.appbar.MaterialToolbar
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/colorPrimary"
-                app:title="命名空间"
-                app:titleTextColor="?attr/colorOnPrimary"
-                android:elevation="4dp" />
+                android:layout_margin="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@android:color/transparent"
+                app:cardBackgroundColor="?attr/colorSurface">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/kv_namespace"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:gravity="center_vertical|start"
+                    android:padding="16dp" />
+            </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/namespaceRecyclerView"
@@ -60,22 +71,39 @@
 
         </LinearLayout>
 
+        <!-- 中间分割线 -->
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="?attr/colorOutlineVariant" />
+
         <!-- 右侧：键值对列表 -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:background="?attr/colorSurfaceVariant">
+            android:background="?attr/colorSurface">
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/kvToolbar"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/colorPrimary"
-                app:title="键值对"
-                app:titleTextColor="?attr/colorOnPrimary"
-                android:elevation="4dp" />
+                android:layout_margin="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@android:color/transparent"
+                app:cardBackgroundColor="?attr/colorSurface">
+                <TextView
+                    android:id="@+id/keyTitleText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/kv_key_value"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:gravity="center_vertical|start"
+                    android:padding="16dp" />
+            </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/keyRecyclerView"

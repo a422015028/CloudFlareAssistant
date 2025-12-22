@@ -121,8 +121,15 @@ class KvViewModel @Inject constructor(
             
             when (val result = kvRepository.listKeys(account, namespaceId)) {
                 is Resource.Success -> {
-                    _keys.value = result.data
-                    Timber.d("Loaded ${result.data.size} keys")
+                    val keysWithValues = result.data.map { key ->
+                        // 为每个键异步获取值
+                        val valueResult = kvRepository.getValue(account, namespaceId, key.name)
+                        key.apply {
+                            value = if (valueResult is Resource.Success) valueResult.data else null
+                        }
+                    }
+                    _keys.value = keysWithValues
+                    Timber.d("Loaded ${keysWithValues.size} keys with values")
                 }
                 is Resource.Error -> {
                     _message.emit("Failed to load keys: ${result.message}")

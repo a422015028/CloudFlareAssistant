@@ -48,11 +48,32 @@ class HomeFragment : Fragment() {
     }
     
     private fun setupUI() {
+                binding.aboutBtn.setOnClickListener {
+                    showAboutDialog()
+                }
         animateFeatureCards()
         
         binding.manageAccountsBtn.setOnClickListener {
             findNavController().navigate(R.id.action_home_to_accounts)
         }
+
+                // 点击整个账号卡片也可进入账号管理/编辑
+                binding.accountCard.setOnClickListener {
+                    AnimationHelper.scaleDown(it)
+                    it.postDelayed({
+                        val accountId = accountViewModel.defaultAccount.value?.id ?: -1L
+                        if (accountId != -1L) {
+                            // 跳转到 AccountEditFragment 并传递 accountId
+                            findNavController().navigate(
+                                R.id.accountEditFragment,
+                                android.os.Bundle().apply { putLong("accountId", accountId) }
+                            )
+                        } else {
+                            // 没有账号时跳转到账号管理
+                            findNavController().navigate(R.id.action_home_to_accounts)
+                        }
+                    }, 150)
+                }
         
         binding.workerCard.setOnClickListener {
             AnimationHelper.scaleDown(it)

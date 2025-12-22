@@ -82,8 +82,9 @@ class MainActivity : AppCompatActivity() {
         theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValueOnSurface, true)
         val colorOnSurface = typedValueOnSurface.data
 
-        // 2. 设置状态栏和 Toolbar 背景
-        window.statusBarColor = colorSurfaceContainer
+        // 2. 设置状态栏为透明，并让内容延伸到状态栏下方
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         binding.toolbar.setBackgroundColor(colorSurfaceContainer)
         binding.toolbar.setTitleTextColor(colorOnSurface)
         

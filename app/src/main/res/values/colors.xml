@@ -1,2 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+	<!-- Material3 PrimaryContainer 示例色，可根据主题调整 -->
+	<color name="md_theme_light_primaryContainer">#F3EBF8</color>
+</resources>

@@ -25,17 +25,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
-                android:textSize="16sp"
-                android:text="命名空间" />
+                android:textSize="15sp"
+                android:textColor="?attr/colorOnSurface"
+                android:text="@string/kv_namespace"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.01"
+                android:lineHeight="20sp" />
 
             <TextView
                 android:id="@+id/namespaceIdText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:textColor="?android:textColorSecondary"
-                android:layout_marginTop="4dp"
-                android:text="ID" />
+                android:textSize="11sp"
+                android:textColor="?attr/colorOutline"
+                android:layout_marginTop="2dp"
+                android:text="ID"
+                android:fontFamily="sans-serif"
+                android:letterSpacing="0.01"
+                android:lineHeight="15sp" />
 
         </LinearLayout>
 

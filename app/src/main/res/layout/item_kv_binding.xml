@@ -26,18 +26,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="MY_KV"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 android:textStyle="bold"
-                android:textColor="?attr/colorPrimary" />
+                android:textColor="?attr/colorOnSurface"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.01"
+                android:lineHeight="20sp"
+                android:background="@drawable/bg_title_rounded" />
 
             <TextView
                 android:id="@+id/namespaceIdText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Namespace ID: abc123"
-                android:textSize="12sp"
-                android:textColor="?android:attr/textColorSecondary"
-                android:layout_marginTop="4dp" />
+                android:textSize="11sp"
+                android:textColor="?attr/colorOutline"
+                android:layout_marginTop="2dp"
+                android:fontFamily="sans-serif"
+                android:letterSpacing="0.01"
+                android:lineHeight="15sp" />
 
         </LinearLayout>
 

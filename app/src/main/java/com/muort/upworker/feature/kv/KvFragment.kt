@@ -106,18 +106,13 @@ class KvFragment : Fragment() {
                             if (namespaces.isEmpty()) View.VISIBLE else View.GONE
                     }
                 }
-                
+
                 launch {
                     kvViewModel.selectedNamespace.collect { namespace ->
-                        if (namespace != null) {
-                            binding.kvToolbar.title = namespace.title
-                            binding.fabAddKey.visibility = View.VISIBLE
-                            binding.keyEmptyText.text = "暂无键值对\n点击 + 添加"
-                        } else {
-                            binding.kvToolbar.title = "键值对"
-                            binding.fabAddKey.visibility = View.GONE
-                            binding.keyEmptyText.text = "请先选择命名空间"
-                        }
+                        binding.fabAddKey.visibility = if (namespace != null) View.VISIBLE else View.GONE
+                        binding.keyEmptyText.text = if (namespace != null) "暂无键值对\n点击 + 添加" else "请先选择命名空间"
+                        // 动态更新右侧标题栏
+                        binding.keyTitleText.text = namespace?.title ?: getString(R.string.kv_key_value)
                     }
                 }
                 
@@ -209,47 +204,21 @@ class KvFragment : Fragment() {
         val dialogBinding = DialogKvInputBinding.inflate(layoutInflater)
         dialogBinding.keyName.setText(key.name)
         dialogBinding.keyName.isEnabled = false
+        dialogBinding.keyValue.setText(key.value ?: "")
         
-        // 显示加载对话框
-        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取键值")
-            .setCancelable(true)
-            .create()
-        loadingDialog.show()
-        
-        // 使用回调方式获取值
-        accountViewModel.defaultAccount.value?.let { account ->
-            kvViewModel.selectedNamespace.value?.let { namespace ->
-                kvViewModel.getValue(account, namespace.id, key.name) { value ->
-                    loadingDialog.dismiss()
-                    
-                    if (value != null) {
-                        // 设置获取到的值
-                        dialogBinding.keyValue.setText(value)
-                        
-                        // 显示编辑对话框
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("编辑键值对")
-                            .setView(dialogBinding.root)
-                            .setPositiveButton("保存") { _, _ ->
-                                val keyValue = dialogBinding.keyValue.text.toString()
-                                accountViewModel.defaultAccount.value?.let { acc ->
-                                    kvViewModel.selectedNamespace.value?.let { ns ->
-                                        kvViewModel.putValue(acc, ns.id, key.name, keyValue)
-                                    }
-                                }
-                            }
-                            .setNegativeButton("取消", null)
-                            .setOnDismissListener {
-                                // 清空 keyValue 以便下次使用
-                                kvViewModel.clearKeyValue()
-                            }
-                            .show()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("编辑键值对")
+            .setView(dialogBinding.root)
+            .setPositiveButton("保存") { _, _ ->
+                val keyValue = dialogBinding.keyValue.text.toString()
+                accountViewModel.defaultAccount.value?.let { account ->
+                    kvViewModel.selectedNamespace.value?.let { namespace ->
+                        kvViewModel.putValue(account, namespace.id, key.name, keyValue)
                     }
                 }
             }
-        } ?: loadingDialog.dismiss()
+            .setNegativeButton("取消", null)
+            .show()
     }
     
     private fun showDeleteKeyDialog(key: KvKey) {
@@ -362,7 +331,7 @@ class KvFragment : Fragment() {
             
             fun bind(key: KvKey) {
                 binding.keyNameText.text = key.name
-                binding.keyMetadataText.text = key.metadata?.let { "元数据: $it" } ?: "无元数据"
+                binding.keyMetadataText.text = key.value?.let { "值: $it" } ?: "加载中..."
                 
                 binding.root.setOnClickListener {
                     onKeyClick(key)

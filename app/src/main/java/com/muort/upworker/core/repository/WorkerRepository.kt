@@ -20,6 +20,29 @@ class WorkerRepository @Inject constructor(
     private val api: CloudFlareApi,
     private val gson: Gson
 ) {
+    suspend fun updateCustomDomain(
+        account: Account,
+        domainId: String,
+        request: CustomDomainRequest
+    ): Resource<CustomDomain> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val response = api.updateCustomDomain(
+                token = "Bearer ${account.token}",
+                accountId = account.accountId,
+                domainId = domainId,
+                request = request
+            )
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("域名更新成功但无返回结果")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.message()
+                Resource.Error("更新自定义域名失败: $errorMsg")
+            }
+        }
+    }
     
     /**
      * Upload Worker Script using multipart/form-data (Recommended method)
@@ -751,20 +774,26 @@ class WorkerRepository @Inject constructor(
         account: Account,
         domainId: String
     ): Resource<Unit> = withContext(Dispatchers.IO) {
-        safeApiCall {
+        try {
             val response = api.deleteCustomDomain(
                 token = "Bearer ${account.token}",
                 accountId = account.accountId,
                 domainId = domainId
             )
             
-            if (response.isSuccessful && response.body()?.success == true) {
+            Timber.d("Delete custom domain response: code=${response.code()}, isSuccessful=${response.isSuccessful}")
+            
+            if (response.isSuccessful) {
+                Timber.d("Delete custom domain successful")
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
+                val errorMsg = response.message() ?: "HTTP ${response.code()}"
+                Timber.e("Delete custom domain failed: $errorMsg")
                 Resource.Error("Failed to delete custom domain: $errorMsg")
             }
+        } catch (e: Exception) {
+            Timber.e(e, "Exception in deleteCustomDomain")
+            Resource.Error("Failed to delete custom domain: ${e.message}")
         }
     }
     

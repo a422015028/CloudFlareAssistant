@@ -462,6 +462,29 @@ class WorkerViewModel @Inject constructor(
     fun resetUploadState() {
         _uploadState.value = UploadState.Idle
     }
+
+    fun updateCustomDomain(account: Account, domainId: String, hostname: String, scriptName: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            val request = com.muort.upworker.core.model.CustomDomainRequest(
+                hostname = hostname,
+                service = scriptName,
+                environment = "production"
+            )
+            val result = workerRepository.updateCustomDomain(account, domainId, request)
+            when (result) {
+                is Resource.Success -> {
+                    _message.emit("自定义域名已更新")
+                    loadCustomDomains(account)
+                }
+                is Resource.Error -> {
+                    _message.emit("更新自定义域名失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
 }
 
 sealed class UploadState {
