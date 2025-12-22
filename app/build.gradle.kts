@@ -12,6 +12,16 @@ kotlin {
     jvmToolchain(17)
 }
 
+kapt {
+    arguments {
+        arg("dagger.fastInit", "enabled")
+        arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
+        arg("dagger.hilt.android.internal.projectType", "app")
+        arg("dagger.hilt.internal.useAggregatingRootProcessor", "enabled")
+        arg("kapt.kotlin.generated", layout.buildDirectory.dir("generated/source/kaptKotlin").get().asFile.path)
+    }
+}
+
 android {
     namespace = "com.muort.upworker"
     compileSdk = 34
@@ -20,8 +30,8 @@ android {
         applicationId = "com.muort.upworker"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2025122201
-        versionName = "5.9"
+        versionCode = 2025122202
+        versionName = "6.0"
         
         vectorDrawables { 
             useSupportLibrary = true

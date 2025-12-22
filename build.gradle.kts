@@ -9,11 +9,7 @@ plugins {
 }
 
 // Configure Java toolchain for all projects
-allprojects {
-    tasks.withType<JavaCompile>().configureEach {
-        options.release.set(17)
-    }
-}
+// Removed options.release.set(17) to avoid --release warning, using sourceCompatibility/targetCompatibility instead
 
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)

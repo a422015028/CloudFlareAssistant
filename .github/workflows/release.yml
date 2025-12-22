@@ -87,17 +87,6 @@ jobs:
             echo ""
             cat "$RELEASE_NOTES_FILE"
             echo ""
-            echo "---"
-            echo ""
-            echo "### 📥 下载"
-            echo "点击下方的 APK 文件即可下载安装（已签名）"
-            echo ""
-            echo "### 📦 安装要求"
-            echo "- 最低 Android 版本: 7.0 (API 25)"
-            echo "- 目标 Android 版本: 14 (API 34)"
-            echo ""
-            echo "### 🔐 签名信息"
-            echo "此版本已使用开发者证书签名，可以直接安装使用。"
           } > release_notes.md
         else
           echo "未找到 $RELEASE_NOTES_FILE，使用默认模板"
