@@ -295,7 +295,7 @@ cd CloudFlareAssistant
 
 ## 📸 预览截图
 
-![应用截图](https://raw.githubusercontent.com/a422015028/wow/main/1000094309.jpg)
+![应用截图](https://raw.githubusercontent.com/a422015028/wow/main/1000094593.jpg)
 
 ---
 
