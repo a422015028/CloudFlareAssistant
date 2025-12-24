@@ -35,6 +35,20 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class R2Fragment : Fragment() {
     
+    /**
+     * 文件名缩短显示，保留后缀，超长用 ... 省略
+     */
+    private fun shortenFileName(name: String, maxLen: Int = 24): String {
+        if (name.length <= maxLen) return name
+        val dotIdx = name.lastIndexOf('.')
+        return if (dotIdx > 0 && dotIdx < name.length - 1) {
+            val ext = name.substring(dotIdx)
+            val prefix = name.substring(0, maxLen - ext.length - 3)
+            "$prefix...$ext"
+        } else {
+            name.substring(0, maxLen - 3) + "..."
+        }
+    }
     private var _binding: FragmentR2Binding? = null
     private val binding get() = _binding!!
     
@@ -307,10 +321,12 @@ class R2Fragment : Fragment() {
         timber.log.Timber.d("Dialog options: ${options.joinToString()}")
         
         val title = buildString {
-            append(obj.key)
+            append(shortenFileName(obj.key))
             append("\n")
             append("大小: ${formatFileSize(obj.size ?: 0)}")
         }
+
+        // ...existing code...
         
         val message = buildString {
             if (customUrl != null) {

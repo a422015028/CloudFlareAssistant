@@ -36,9 +36,19 @@ class ObjectAdapter : RecyclerView.Adapter<ObjectAdapter.ViewHolder>() {
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(obj: R2Object) {
             binding.objectKeyText.text = obj.key
-            binding.objectSizeText.text = obj.size?.let { "${it} B" } ?: "-"
+            binding.objectSizeText.text = obj.size?.let { formatFileSizeCompat(it) } ?: "-"
             binding.root.setOnClickListener {
                 onObjectClick?.invoke(obj)
+            }
+        }
+
+        // 兼容调用Fragment的formatFileSize
+        private fun formatFileSizeCompat(size: Long): String {
+            return when {
+                size < 1024 -> "$size B"
+                size < 1024 * 1024 -> String.format("%.1f KB", size / 1024.0)
+                size < 1024 * 1024 * 1024 -> String.format("%.2f MB", size / 1024.0 / 1024.0)
+                else -> String.format("%.2f GB", size / 1024.0 / 1024.0 / 1024.0)
             }
         }
     }
