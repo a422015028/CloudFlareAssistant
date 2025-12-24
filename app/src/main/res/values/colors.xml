@@ -2,4 +2,6 @@
 <resources>
 	<!-- Material3 PrimaryContainer 示例色，可根据主题调整 -->
 	<color name="md_theme_light_primaryContainer">#F3EBF8</color>
+	<!-- 兼容旧代码所需紫色 -->
+	<color name="purple_700">#3700B3</color>
 </resources>

@@ -45,25 +45,25 @@ android {
     signingConfigs {
         create("release") {
             // 优先使用命令行参数（CI/CD），其次使用本地配置
-            storeFile = if (project.hasProperty("android.injected.signing.store.file")) {
-                file(project.property("android.injected.signing.store.file").toString())
+            if (project.hasProperty("android.injected.signing.store.file")) {
+                storeFile = file(project.property("android.injected.signing.store.file").toString())
             } else {
-                file("E:\\AI\\MT.jks")
+                storeFile = file("E:\\AI\\MT.jks")
             }
-            storePassword = if (project.hasProperty("android.injected.signing.store.password")) {
-                project.property("android.injected.signing.store.password").toString()
+            if (project.hasProperty("android.injected.signing.store.password")) {
+                storePassword = project.property("android.injected.signing.store.password").toString()
             } else {
-                "861390202"
+                storePassword = "861390202"
             }
-            keyAlias = if (project.hasProperty("android.injected.signing.key.alias")) {
-                project.property("android.injected.signing.key.alias").toString()
+            if (project.hasProperty("android.injected.signing.key.alias")) {
+                keyAlias = project.property("android.injected.signing.key.alias").toString()
             } else {
-                "MT"
+                keyAlias = "MT"
             }
-            keyPassword = if (project.hasProperty("android.injected.signing.key.password")) {
-                project.property("android.injected.signing.key.password").toString()
+            if (project.hasProperty("android.injected.signing.key.password")) {
+                keyPassword = project.property("android.injected.signing.key.password").toString()
             } else {
-                "861390202"
+                keyPassword = "861390202"
             }
         }
     }

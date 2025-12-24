@@ -107,8 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="测试连接"
-                android:layout_marginEnd="8dp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                android:layout_marginEnd="8dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveConfigButton"
@@ -151,8 +150,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="刷新列表"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                android:text="刷新列表" />
         </LinearLayout>
 
         <TextView

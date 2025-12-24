@@ -25,7 +25,9 @@ import kotlin.collections.LinkedHashMap
  */
 
 @Singleton
-class R2S3Client @Inject constructor() {
+class R2S3Client @Inject constructor(
+    private val logInterceptor: LogOkHttpInterceptor
+) {
 
     data class S3Config(
         val accountId: String,
@@ -35,7 +37,9 @@ class R2S3Client @Inject constructor() {
         val endpoint: String get() = "https://$accountId.r2.cloudflarestorage.com"
     }
 
-    private val httpClient = OkHttpClient()
+    private val httpClient = OkHttpClient.Builder()
+        .addInterceptor(logInterceptor)
+        .build()
 
     // ================== S3 API ==================
 
@@ -98,7 +102,7 @@ class R2S3Client @Inject constructor() {
             .url(url)
             .put(body)
             .addHeader("Content-Type", contentType)
-            .applyAwsV4Signature(config, "PUT", "/$bucketName/$objectKey", null, null, now)
+            .applyAwsV4Signature(config, "PUT", "/$bucketName/$objectKey", null, null, now, contentLength)
             .build()
         httpClient.newCall(request).execute().use { resp ->
             val bodyStr = resp.body?.string() ?: ""
@@ -185,7 +189,8 @@ class R2S3Client @Inject constructor() {
         canonicalUri: String,
         query: Map<String, String>?,
         body: ByteArray?,
-        now: Date
+        now: Date,
+        contentLength: Long = -1
     ): Request.Builder {
         val region = "auto" // R2 只支持 auto
         val service = "s3"
@@ -194,7 +199,11 @@ class R2S3Client @Inject constructor() {
         val amzDate = dateFormat.format(now)
         val dateStamp = dateStampFormat.format(now)
         val host = config.endpoint.toHttpUrl().host
-        val payloadHash = body?.let { sha256Hex(it) } ?: if (method == "GET" || method == "DELETE") "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" else "UNSIGNED-PAYLOAD"
+        val payloadHash = body?.let { sha256Hex(it) } ?: when {
+            method == "GET" || method == "DELETE" -> "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            method == "PUT" && contentLength == 0L -> "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            else -> "UNSIGNED-PAYLOAD"
+        }
         val canonicalQuery = query?.entries
             ?.sortedBy { it.key }
             ?.joinToString("&") { "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}" }

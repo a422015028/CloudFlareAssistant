@@ -30,6 +30,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- 注册日志页面 -->
+        <activity android:name="com.muort.upworker.feature.log.LogActivity" android:exported="false" />
         
     </application>
 </manifest>

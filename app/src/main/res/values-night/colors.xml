@@ -1,2 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+	<!-- 兼容旧代码所需紫色（夜间模式可自定义） -->
+	<color name="purple_700">#BB86FC</color>
+</resources>

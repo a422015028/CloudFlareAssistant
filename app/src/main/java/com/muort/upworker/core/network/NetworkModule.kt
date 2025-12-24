@@ -1,4 +1,6 @@
+
 package com.muort.upworker.core.network
+import com.muort.upworker.core.network.LogOkHttpInterceptor
 
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -32,6 +34,7 @@ object NetworkModule {
         loggingInterceptor: HttpLoggingInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
+            .addInterceptor(LogOkHttpInterceptor())
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)

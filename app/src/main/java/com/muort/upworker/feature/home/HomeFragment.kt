@@ -1,5 +1,8 @@
 package com.muort.upworker.feature.home
 
+import com.muort.upworker.core.log.LogRepository
+import kotlinx.coroutines.flow.collectLatest
+
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -25,6 +28,10 @@ import timber.log.Timber
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
+        override fun onAttach(context: android.content.Context) {
+            super.onAttach(context)
+            LogRepository.init(context.applicationContext)
+        }
     
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -45,8 +52,14 @@ class HomeFragment : Fragment() {
         
         setupUI()
         observeViewModel()
+
+        // 日志卡片点击跳转新页面
+        binding.logCard.setOnClickListener {
+            startActivity(android.content.Intent(requireContext(), com.muort.upworker.feature.log.LogActivity::class.java))
+        }
+        // 日志开关已移至日志页面
     }
-    
+
     private fun setupUI() {
                 binding.aboutBtn.setOnClickListener {
                     showAboutDialog()
