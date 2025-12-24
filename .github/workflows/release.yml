@@ -100,8 +100,8 @@ jobs:
             echo "点击下方的 APK 文件即可下载安装（已签名）"
             echo ""
             echo "### 📦 安装要求"
-            echo "- 最低 Android 版本: 7.0 (API 25)"
-            echo "- 目标 Android 版本: 14 (API 34)"
+            echo "- 最低 Android 版本: 8.0 (API 26)"
+            echo "- 目标 Android 版本: 16 (API 36)"
             echo ""
             echo "### 🔐 签名信息"
             echo "此版本已使用开发者证书签名，可以直接安装使用。"
@@ -156,8 +156,8 @@ jobs:
         <a href=\"${RELEASE_URL}\">📄 查看完整发布说明</a>
         
         📦 <b>安装要求</b>
-        • 最低版本: Android 7.0 (API 25)
-        • 目标版本: Android 14 (API 34)"
+        • 最低版本: Android 8.0 (API 26)
+        • 目标版本: Android 16 (API 36)"
         
         # 发送 APK 文件到 Telegram（支持话题）
         echo "📤 正在发送 APK 文件到 Telegram..."

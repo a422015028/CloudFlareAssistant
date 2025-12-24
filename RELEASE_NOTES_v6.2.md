@@ -1,5 +1,3 @@
-# CloudFlare Assistant v6.2
-
 ## 主要更新内容
 
 ### 新增网络日志功能
