@@ -82,17 +82,23 @@ class MainActivity : AppCompatActivity() {
         theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValueOnSurface, true)
         val colorOnSurface = typedValueOnSurface.data
 
-        // 2. 设置状态栏为透明，并让内容延伸到状态栏下方
+        // 2. 设置状态栏为透明，但不让内容延伸到状态栏下方
         window.statusBarColor = android.graphics.Color.TRANSPARENT
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        
+        // 3. 处理系统栏 insets，为内容添加 padding
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+        // 4. Toolbar 样式调整：设置背景色、去阴影、居中
         binding.toolbar.setBackgroundColor(colorSurfaceContainer)
         binding.toolbar.setTitleTextColor(colorOnSurface)
-        
-        // 3. Toolbar 样式调整：去阴影、居中
         (binding.toolbar as? com.google.android.material.appbar.MaterialToolbar)?.isTitleCentered = true
         binding.toolbar.elevation = 0f
         
-        // 4. 打造 "胶囊" (Chip) 样式的账号选择器
+        // 5. 打造 "胶囊" (Chip) 样式的账号选择器
         // 创建圆角背景
         val chipBackground = android.graphics.drawable.GradientDrawable().apply {
             shape = android.graphics.drawable.GradientDrawable.RECTANGLE
@@ -107,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         val paddingV = (6 * density).toInt()
         binding.selectAccountButton.setPadding(paddingH, paddingV, paddingH, paddingV)
         
-        // 5. 设置选择器内容颜色 (OnSecondaryContainer)
+        // 6. 设置选择器内容颜色 (OnSecondaryContainer)
         val contentColorFilter = PorterDuffColorFilter(colorOnSecondaryContainer, PorterDuff.Mode.SRC_IN)
         
         binding.currentAccountText.typeface = android.graphics.Typeface.DEFAULT_BOLD
@@ -127,7 +133,7 @@ class MainActivity : AppCompatActivity() {
             textView.compoundDrawablesRelative.forEach { it?.mutate()?.colorFilter = contentColorFilter }
         }
         
-        // 6. 设置 Toolbar 导航图标颜色 (OnSurface)
+        // 7. 设置 Toolbar 导航图标颜色 (OnSurface)
         val navColorFilter = PorterDuffColorFilter(colorOnSurface, PorterDuff.Mode.SRC_IN)
         binding.toolbar.navigationIcon?.mutate()?.colorFilter = navColorFilter
         binding.toolbar.overflowIcon?.mutate()?.colorFilter = navColorFilter
