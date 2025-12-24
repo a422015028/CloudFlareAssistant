@@ -14,11 +14,10 @@ kotlin {
 
 kapt {
     arguments {
-        arg("dagger.fastInit", "enabled")
         arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
         arg("dagger.hilt.android.internal.projectType", "app")
         arg("dagger.hilt.internal.useAggregatingRootProcessor", "enabled")
-        arg("kapt.kotlin.generated", layout.buildDirectory.dir("generated/source/kaptKotlin").get().asFile.path)
+        // 移除了未被识别的 kapt 参数 dagger.fastInit 和 kapt.kotlin.generated
     }
 }
 
