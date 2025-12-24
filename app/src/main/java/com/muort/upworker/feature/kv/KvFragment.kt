@@ -111,8 +111,8 @@ class KvFragment : Fragment() {
                     kvViewModel.selectedNamespace.collect { namespace ->
                         binding.fabAddKey.visibility = if (namespace != null) View.VISIBLE else View.GONE
                         binding.keyEmptyText.text = if (namespace != null) "暂无键值对\n点击 + 添加" else "请先选择命名空间"
-                        // 动态更新右侧标题栏
-                        binding.keyTitleText.text = namespace?.title ?: getString(R.string.kv_key_value)
+                        // 动态更新右侧标题栏，格式：键值对（namespaceName）
+                        binding.keyTitleText.text = namespace?.let { "键值对（${it.title}）" } ?: getString(R.string.kv_key_value)
                     }
                 }
                 

@@ -42,6 +42,7 @@ class R2Fragment : Fragment() {
     private val r2ViewModel: R2ViewModel by viewModels()
     
     private lateinit var bucketAdapter: BucketAdapter
+    private lateinit var objectAdapter: ObjectAdapter
     private var currentBucket: R2Bucket? = null
     private var downloadData: ByteArray? = null
     
@@ -78,9 +79,11 @@ class R2Fragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         setupAdapter()
+        setupObjectAdapter()
         setupClickListeners()
         observeViewModel()
-        
+        // 初始对象标题
+        binding.objectTitleText.text = "对象"
         accountViewModel.defaultAccount.value?.let { account ->
             r2ViewModel.loadBuckets(account)
         }
@@ -94,7 +97,10 @@ class R2Fragment : Fragment() {
                     r2ViewModel.loadObjects(account, bucket.name)
                     r2ViewModel.loadCustomDomains(account, bucket.name)
                 }
-                showObjectsDialog(bucket)
+                // 设置右侧对象标题为当前存储桶名
+                binding.objectTitleText.text = "对象（${bucket.name}）"
+                // 清空对象列表等待新数据
+                objectAdapter.submitList(emptyList())
             },
             onDeleteClick = { bucket ->
                 showDeleteBucketDialog(bucket)
@@ -105,10 +111,31 @@ class R2Fragment : Fragment() {
         )
         binding.bucketRecyclerView.adapter = bucketAdapter
     }
+
+    private fun setupObjectAdapter() {
+        objectAdapter = ObjectAdapter()
+        objectAdapter.setOnObjectClickListener { obj ->
+            val bucket = r2ViewModel.selectedBucket.value
+            val account = accountViewModel.defaultAccount.value
+            if (bucket != null && account != null) {
+                showObjectDetailsDialog(account, bucket, obj, r2ViewModel.customDomains.value)
+            }
+        }
+        binding.objectRecyclerView.adapter = objectAdapter
+    }
     
     private fun setupClickListeners() {
         binding.fabAddBucket.setOnClickListener {
             showAddBucketDialog()
+        }
+        binding.fabAddObject.setOnClickListener {
+            // 仅允许在选中存储桶时上传
+            val bucket = r2ViewModel.selectedBucket.value
+            if (bucket != null) {
+                selectFileToUpload(bucket)
+            } else {
+                Snackbar.make(binding.root, "请先选择存储桶", Snackbar.LENGTH_SHORT).show()
+            }
         }
     }
     
@@ -120,6 +147,21 @@ class R2Fragment : Fragment() {
                         bucketAdapter.submitList(buckets)
                         binding.emptyText.visibility = 
                             if (buckets.isEmpty()) View.VISIBLE else View.GONE
+                    }
+                }
+
+                launch {
+                    r2ViewModel.objects.collect { objects ->
+                        objectAdapter.submitList(objects)
+                        binding.objectEmptyText.visibility =
+                            if (objects.isEmpty()) View.VISIBLE else View.GONE
+                    }
+                }
+
+                launch {
+                    r2ViewModel.selectedBucket.collect { bucket ->
+                        // 选中存储桶时显示fabAddObject，否则隐藏
+                        binding.fabAddObject.visibility = if (bucket != null) View.VISIBLE else View.GONE
                     }
                 }
                 
@@ -283,14 +325,9 @@ class R2Fragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("返回") { _, _ ->
-                // Return to objects list
-                showObjectsListDialog(account, bucket)
-            }
+            .setPositiveButton("返回", null)
             .setNeutralButton(if (customUrl != null) "复制自定义域 URL" else "复制 URL") { _, _ ->
                 copyToClipboard(customUrl ?: defaultUrl, if (customUrl != null) "自定义域 URL 已复制" else "URL 已复制")
-                // Return to objects list after copying
-                showObjectsListDialog(account, bucket)
             }
             .setNegativeButton("更多") { _, _ ->
                 // Show more options
@@ -307,9 +344,8 @@ class R2Fragment : Fragment() {
         } else {
             options.add("复制 URL")
         }
-        options.add("下载")
         options.add("删除")
-        
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("操作")
             .setItems(options.toTypedArray()) { _, which ->
@@ -317,15 +353,9 @@ class R2Fragment : Fragment() {
                 when {
                     customUrl != null && which == index++ -> {
                         copyToClipboard(customUrl, "自定义域 URL 已复制")
-                        showObjectsListDialog(account, bucket)
                     }
                     which == index++ -> {
                         copyToClipboard(if (customUrl != null) defaultUrl else defaultUrl, if (customUrl != null) "默认 URL 已复制" else "URL 已复制")
-                        showObjectsListDialog(account, bucket)
-                    }
-                    which == index++ -> {
-                        downloadObject(bucket, obj)
-                        showObjectsListDialog(account, bucket)
                     }
                     which == index -> {
                         showDeleteObjectDialog(bucket, obj)
@@ -333,7 +363,8 @@ class R2Fragment : Fragment() {
                 }
             }
             .setNegativeButton("返回") { _, _ ->
-                showObjectsListDialog(account, bucket)
+                // 返回对象详情弹窗
+                showObjectDetailsDialog(account, bucket, obj, r2ViewModel.customDomains.value)
             }
             .show()
     }
