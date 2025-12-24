@@ -177,6 +177,23 @@ class HomeFragment : Fragment() {
         dialogBinding.layoutGithub.setOnClickListener {
             openUrl("https://github.com/a422015028/CloudFlareAssistant")
         }
+
+        // Cloudflare API 文档链接点击
+        dialogBinding.layoutCloudflareApi.setOnClickListener {
+            openUrl("https://developers.cloudflare.com/api/")
+        }
+
+        // API 令牌获取说明展开/收起
+        dialogBinding.tvApiTokenGuideTitle.setOnClickListener {
+            val content = dialogBinding.tvApiTokenGuideContent
+            if (content.visibility == View.GONE) {
+                content.visibility = View.VISIBLE
+                dialogBinding.tvApiTokenGuideTitle.text = "🔑 如何获取 Cloudflare API 令牌（点击收起）"
+            } else {
+                content.visibility = View.GONE
+                dialogBinding.tvApiTokenGuideTitle.text = "🔑 如何获取 Cloudflare API 令牌（点击展开）"
+            }
+        }
         
         dialog.show()
     }

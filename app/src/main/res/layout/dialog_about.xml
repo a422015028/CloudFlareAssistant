@@ -104,6 +104,69 @@
             android:textSize="14sp" />
     </LinearLayout>
 
+
+    <!-- Cloudflare API 文档 -->
+    <LinearLayout
+        android:id="@+id/layoutCloudflareApi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🌐 Cloudflare API 文档"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvCloudflareApiLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="访问 →"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- 获取API令牌说明（可展开） -->
+    <LinearLayout
+        android:id="@+id/layoutApiTokenGuide"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+        <TextView
+            android:id="@+id/tvApiTokenGuideTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔑 如何获取 Cloudflare API 令牌（点击展开）"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true" />
+        <TextView
+            android:id="@+id/tvApiTokenGuideContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. 登录 Cloudflare 仪表板\n2. 进入 我的个人资料 → API 令牌\n3. 点击 创建代币\n4. 选择模板或自定义权限：\n   - Workers 脚本：编辑\n   - Workers 路径：编辑\n   - DNS：编辑\n   - 账户设置：读取\n   - Workers KV 存储：编辑\n   - Pages：编辑\n   - R2：编辑\n5. 复制生成的 Token 并妥善保存"
+            android:textColor="?android:textColorSecondary"
+            android:textSize="14sp"
+            android:visibility="gone"
+            android:padding="8dp" />
+    </LinearLayout>
+
     <!-- Divider -->
     <View
         android:layout_width="match_parent"
