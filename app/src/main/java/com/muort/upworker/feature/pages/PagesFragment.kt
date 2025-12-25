@@ -431,7 +431,11 @@ class PagesFragment : Fragment() {
         loadingDialog.show()
         
         // Fetch current project detail to get existing bindings
-        viewLifecycleOwner.lifecycleScope.launch {
+        // Fetch all namespaces first
+        lifecycleScope.launch {
+            val namespacesResult = kvRepository.listNamespaces(account)
+            val namespaces = if (namespacesResult is Resource.Success) namespacesResult.data else emptyList()
+            // Fetch current project detail to get existing bindings
             pagesViewModel.getProjectDetail(account, project.name) { projectResult ->
                 loadingDialog.dismiss()
                 
@@ -452,10 +456,12 @@ class PagesFragment : Fragment() {
                         projectResult.data.deploymentConfigs?.preview
                     }
                     envConfig?.kvNamespaces?.forEach { (bindingName, kvBinding) ->
-                        val binding = Pair(bindingName, kvBinding.namespaceId)
+                        val ns = namespaces.find { it.id == kvBinding.namespaceId }
+                        val nsTitle = ns?.title ?: kvBinding.namespaceId
+                        val binding = Pair(bindingName, nsTitle)
                         tempKvBindings.add(binding)
                         originalKvBindings.add(binding)
-                        Timber.d("Loaded existing KV binding: $bindingName -> ${kvBinding.namespaceId}")
+                        Timber.d("Loaded existing KV binding: $bindingName -> $nsTitle")
                     }
                 }
                 
@@ -528,7 +534,7 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogKvBindingBinding.inflate(layoutInflater)
                 
                 // Setup spinner
-                val namespaceNames = namespaces.map { "${it.title} (${it.id})" }
+                val namespaceNames = namespaces.map { it.title }
                 val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, namespaceNames)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 dialogBinding.namespaceSpinner.adapter = adapter
@@ -1207,7 +1213,7 @@ class PagesKvBindingsAdapter(
         
         fun bind(kvBinding: Pair<String, String>) {
             binding.bindingNameText.text = kvBinding.first
-            binding.namespaceIdText.text = "Namespace ID: ${kvBinding.second}"
+            binding.namespaceIdText.text = kvBinding.second
             
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(kvBinding)

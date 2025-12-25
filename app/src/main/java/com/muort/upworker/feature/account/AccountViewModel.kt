@@ -105,7 +105,7 @@ class AccountViewModel @Inject constructor(
     ) {
         if (name.isBlank() || accountId.isBlank() || token.isBlank()) {
             viewModelScope.launch {
-                _message.emit("Please fill in all required fields")
+                _message.emit("请填写所有必填项")
             }
             return
         }
@@ -123,13 +123,13 @@ class AccountViewModel @Inject constructor(
             
             when (val result = accountRepository.insertAccount(account)) {
                 is Resource.Success -> {
-                    _message.emit("Account added successfully")
+                    _message.emit("账号添加成功")
                     if (isDefault) {
                         accountRepository.setDefaultAccount(result.data)
                     }
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to add account: ${result.message}")
+                    _message.emit("添加账号失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -140,13 +140,13 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.updateAccount(account)) {
                 is Resource.Success -> {
-                    _message.emit("Account updated successfully")
+                    _message.emit("账号更新成功")
                     if (account.isDefault) {
                         accountRepository.setDefaultAccount(account.id)
                     }
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to update account: ${result.message}")
+                    _message.emit("更新账号失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -157,10 +157,10 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.deleteAccount(account)) {
                 is Resource.Success -> {
-                    _message.emit("Account deleted successfully")
+                    _message.emit("账号删除成功")
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to delete account: ${result.message}")
+                    _message.emit("删除账号失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -171,10 +171,10 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.setDefaultAccount(accountId)) {
                 is Resource.Success -> {
-                    _message.emit("Default account updated")
+                    _message.emit("默认账号已更新")
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to set default account: ${result.message}")
+                    _message.emit("设置默认账号失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -185,7 +185,7 @@ class AccountViewModel @Inject constructor(
         return when (val result = accountRepository.exportAccounts()) {
             is Resource.Success -> result.data
             is Resource.Error -> {
-                _message.emit("Failed to export accounts: ${result.message}")
+                _message.emit("导出账号失败: ${result.message}")
                 null
             }
             is Resource.Loading -> null
@@ -196,10 +196,10 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.importAccounts(accounts)) {
                 is Resource.Success -> {
-                    _message.emit("Accounts imported successfully")
+                    _message.emit("账号导入成功")
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to import accounts: ${result.message}")
+                    _message.emit("导入账号失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }

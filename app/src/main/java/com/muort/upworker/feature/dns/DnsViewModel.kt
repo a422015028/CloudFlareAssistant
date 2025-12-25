@@ -37,7 +37,7 @@ class DnsViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} DNS records")
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to load DNS records: ${result.message}")
+                    _message.emit("加载 DNS 记录失败: ${result.message}")
                     Timber.e("Failed to load DNS records: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -71,11 +71,11 @@ class DnsViewModel @Inject constructor(
             
             when (val result = dnsRepository.createDnsRecord(account, record)) {
                 is Resource.Success -> {
-                    _message.emit("DNS record created successfully")
+                    _message.emit("DNS 记录创建成功")
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to create DNS record: ${result.message}")
+                    _message.emit("创建 DNS 记录失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -109,11 +109,11 @@ class DnsViewModel @Inject constructor(
             
             when (val result = dnsRepository.updateDnsRecord(account, recordId, record)) {
                 is Resource.Success -> {
-                    _message.emit("DNS record updated successfully")
+                    _message.emit("DNS 记录更新成功")
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to update DNS record: ${result.message}")
+                    _message.emit("更新 DNS 记录失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -128,11 +128,11 @@ class DnsViewModel @Inject constructor(
             
             when (val result = dnsRepository.deleteDnsRecord(account, recordId)) {
                 is Resource.Success -> {
-                    _message.emit("DNS record deleted successfully")
+                    _message.emit("DNS 记录删除成功")
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to delete DNS record: ${result.message}")
+                    _message.emit("删除 DNS 记录失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }

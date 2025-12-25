@@ -209,27 +209,33 @@ class WorkerFragment : Fragment() {
         
         // First, fetch current settings to get existing bindings
         viewLifecycleOwner.lifecycleScope.launch {
+            // 先查出所有命名空间
+            val namespaces = run {
+                val result = kvRepository.listNamespaces(account)
+                if (result is com.muort.upworker.core.model.Resource.Success) result.data else emptyList()
+            }
             viewModel.getWorkerSettings(account, script.id) { settingsResult ->
                 loadingDialog.dismiss()
-                
+
                 val dialogBinding = com.muort.upworker.databinding.DialogScriptKvBindingsBinding.inflate(layoutInflater)
-                
+
                 // Setup title
                 dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
-                
+
                 // Temporary list for this dialog - initialize with existing bindings
                 val tempKvBindings = mutableListOf<Pair<String, String>>()
-                
                 // Load existing KV bindings from settings
                 if (settingsResult is com.muort.upworker.core.model.Resource.Success) {
                     settingsResult.data.bindings?.forEach { binding ->
                         if (binding.type == "kv_namespace" && binding.namespaceId != null) {
-                            tempKvBindings.add(Pair(binding.name, binding.namespaceId))
-                            Timber.d("Loaded existing KV binding: ${binding.name} -> ${binding.namespaceId}")
+                            val ns = namespaces.find { it.id == binding.namespaceId }
+                            val nsTitle = ns?.title ?: binding.namespaceId
+                            tempKvBindings.add(Pair(binding.name, nsTitle))
+                            Timber.d("Loaded existing KV binding: ${binding.name} -> $nsTitle")
                         }
                     }
                 }
-                
+
                 // Setup adapter with lateinit reference
                 lateinit var tempAdapter: KvBindingsAdapter
             tempAdapter = KvBindingsAdapter(
@@ -304,7 +310,7 @@ class WorkerFragment : Fragment() {
                 val dialogBinding = DialogKvBindingBinding.inflate(layoutInflater)
                 
                 // Setup spinner
-                val namespaceNames = namespaces.map { "${it.title} (${it.id})" }
+                val namespaceNames = namespaces.map { it.title }
                 val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, namespaceNames)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 dialogBinding.namespaceSpinner.adapter = adapter
@@ -322,7 +328,7 @@ class WorkerFragment : Fragment() {
                         
                         if (selectedIndex >= 0 && selectedIndex < namespaces.size) {
                             val namespace = namespaces[selectedIndex]
-                            tempBindings.add(Pair(bindingName, namespace.id))
+                            tempBindings.add(Pair(bindingName, namespace.title))
                             onAdded()
                             showToast("KV 绑定已添加")
                         }
@@ -1240,7 +1246,7 @@ class KvBindingsAdapter(
         
         fun bind(kvBinding: Pair<String, String>, position: Int) {
             binding.bindingNameText.text = kvBinding.first
-            binding.namespaceIdText.text = "Namespace ID: ${kvBinding.second}"
+            binding.namespaceIdText.text = kvBinding.second
             
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(position)

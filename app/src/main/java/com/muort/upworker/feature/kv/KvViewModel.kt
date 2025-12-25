@@ -49,7 +49,7 @@ class KvViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} namespaces")
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to load namespaces: ${result.message}")
+                    _message.emit("加载命名空间失败: ${result.message}")
                     Timber.e("Failed to load namespaces: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -62,7 +62,7 @@ class KvViewModel @Inject constructor(
     fun createNamespace(account: Account, title: String) {
         if (title.isBlank()) {
             viewModelScope.launch {
-                _message.emit("Please enter namespace title")
+                _message.emit("请输入命名空间名称")
             }
             return
         }
@@ -72,11 +72,11 @@ class KvViewModel @Inject constructor(
             
             when (val result = kvRepository.createNamespace(account, title)) {
                 is Resource.Success -> {
-                    _message.emit("Namespace created successfully")
+                    _message.emit("命名空间创建成功")
                     loadNamespaces(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to create namespace: ${result.message}")
+                    _message.emit("创建命名空间失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -91,7 +91,7 @@ class KvViewModel @Inject constructor(
             
             when (val result = kvRepository.deleteNamespace(account, namespaceId)) {
                 is Resource.Success -> {
-                    _message.emit("Namespace deleted successfully")
+                    _message.emit("命名空间删除成功")
                     if (_selectedNamespace.value?.id == namespaceId) {
                         _selectedNamespace.value = null
                         _keys.value = emptyList()
@@ -99,7 +99,7 @@ class KvViewModel @Inject constructor(
                     loadNamespaces(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to delete namespace: ${result.message}")
+                    _message.emit("删除命名空间失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -132,7 +132,7 @@ class KvViewModel @Inject constructor(
                     Timber.d("Loaded ${keysWithValues.size} keys with values")
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to load keys: ${result.message}")
+                    _message.emit("加载 Key 列表失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -152,7 +152,7 @@ class KvViewModel @Inject constructor(
                     onResult(result.data)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to get value: ${result.message}")
+                    _message.emit("获取 Value 失败: ${result.message}")
                     onResult(null)
                 }
                 is Resource.Loading -> {}
@@ -165,7 +165,7 @@ class KvViewModel @Inject constructor(
     fun putValue(account: Account, namespaceId: String, keyName: String, value: String) {
         if (keyName.isBlank()) {
             viewModelScope.launch {
-                _message.emit("Please enter key name")
+                _message.emit("请输入 Key 名称")
             }
             return
         }
@@ -175,11 +175,11 @@ class KvViewModel @Inject constructor(
             
             when (val result = kvRepository.putValue(account, namespaceId, keyName, value)) {
                 is Resource.Success -> {
-                    _message.emit("Value saved successfully")
+                    _message.emit("Value 保存成功")
                     loadKeys(account, namespaceId)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to save value: ${result.message}")
+                    _message.emit("保存 Value 失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -194,7 +194,7 @@ class KvViewModel @Inject constructor(
             
             when (val result = kvRepository.deleteValue(account, namespaceId, keyName)) {
                 is Resource.Success -> {
-                    _message.emit("Value deleted successfully")
+                    _message.emit("Value 删除成功")
                     if (_selectedKey.value?.name == keyName) {
                         _selectedKey.value = null
                         _keyValue.value = ""
@@ -202,7 +202,7 @@ class KvViewModel @Inject constructor(
                     loadKeys(account, namespaceId)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to delete value: ${result.message}")
+                    _message.emit("删除 Value 失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }

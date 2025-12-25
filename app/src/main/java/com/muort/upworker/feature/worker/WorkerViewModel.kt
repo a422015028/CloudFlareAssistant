@@ -38,13 +38,13 @@ class WorkerViewModel @Inject constructor(
                     when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, scriptFile, metadata)) {
                         is Resource.Success -> {
                             _uploadState.value = UploadState.Success
-                            _message.emit("Worker script uploaded successfully (bindings preserved)")
+                            _message.emit("Worker 脚本上传成功（保留原有绑定）")
                             Timber.d("Script uploaded with bindings: $scriptName")
                             loadWorkerScripts(account)
                         }
                         is Resource.Error -> {
                             _uploadState.value = UploadState.Error(result.message)
-                            _message.emit("Upload failed: ${result.message}")
+                            _message.emit("上传失败: ${result.message}")
                             Timber.e("Failed to upload script: ${result.message}")
                         }
                         is Resource.Loading -> {
@@ -88,15 +88,14 @@ class WorkerViewModel @Inject constructor(
             when (val result = workerRepository.uploadWorkerScript(account, scriptName, scriptFile)) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("Worker script uploaded successfully")
+                    _message.emit("Worker 脚本上传成功")
                     Timber.d("Script uploaded: $scriptName")
-                    
-                    // Reload scripts list
+                    // 重新加载脚本列表
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("Upload failed: ${result.message}")
+                    _message.emit("上传失败: ${result.message}")
                     Timber.e("Failed to upload script: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -124,15 +123,14 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("Worker script with KV bindings uploaded successfully")
+                    _message.emit("Worker 脚本上传成功（保留原有绑定）")
                     Timber.d("Script with KV bindings uploaded: $scriptName")
-                    
-                    // Reload scripts list
+                    // 重新加载脚本列表
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("Upload failed: ${result.message}")
+                    _message.emit("上传失败: ${result.message}")
                     Timber.e("Failed to upload script with KV bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -161,15 +159,14 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("KV bindings updated successfully for '$scriptName'")
+                    _message.emit("KV 绑定已成功更新（'$scriptName'）")
                     Timber.d("KV bindings updated for script: $scriptName")
-                    
-                    // Reload scripts list
+                    // 重新加载脚本列表
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("Failed to update bindings: ${result.message}")
+                    _message.emit("更新绑定失败: ${result.message}")
                     Timber.e("Failed to update KV bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -198,15 +195,14 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("R2 bindings updated successfully for '$scriptName'")
+                    _message.emit("R2 绑定已成功更新（'$scriptName'）")
                     Timber.d("R2 bindings updated for script: $scriptName")
-                    
-                    // Reload scripts list
+                    // 重新加载脚本列表
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("Failed to update bindings: ${result.message}")
+                    _message.emit("更新绑定失败: ${result.message}")
                     Timber.e("Failed to update R2 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -234,14 +230,13 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("Environment variables updated successfully for '$scriptName'")
+                    _message.emit("环境变量已成功更新（'$scriptName'）")
                     Timber.d("Variables updated for script: $scriptName")
-                    
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("Failed to update variables: ${result.message}")
+                    _message.emit("更新环境变量失败: ${result.message}")
                     Timber.e("Failed to update variables: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -269,14 +264,13 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("Secrets updated successfully for '$scriptName'")
+                    _message.emit("密钥已成功更新（'$scriptName'）")
                     Timber.d("Secrets updated for script: $scriptName")
-                    
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("Failed to update secrets: ${result.message}")
+                    _message.emit("更新密钥失败: ${result.message}")
                     Timber.e("Failed to update secrets: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -294,7 +288,7 @@ class WorkerViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} worker scripts")
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to load scripts: ${result.message}")
+                    _message.emit("加载 Worker 脚本列表失败: ${result.message}")
                     Timber.e("Failed to load scripts: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -311,7 +305,7 @@ class WorkerViewModel @Inject constructor(
                     onSuccess(result.data)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to load script: ${result.message}")
+                    _message.emit("加载脚本失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -336,7 +330,7 @@ class WorkerViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     Timber.e("Failed to fetch settings: ${result.message}")
-                    _message.emit("Failed to load settings: ${result.message}")
+                    _message.emit("加载脚本设置失败: ${result.message}")
                     onResult(result)
                 }
                 is Resource.Loading -> {
@@ -350,11 +344,11 @@ class WorkerViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = workerRepository.deleteWorkerScript(account, scriptName)) {
                 is Resource.Success -> {
-                    _message.emit("Script deleted successfully")
+                    _message.emit("脚本删除成功")
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to delete script: ${result.message}")
+                    _message.emit("删除脚本失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -372,7 +366,7 @@ class WorkerViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} routes")
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to load routes: ${result.message}")
+                    _message.emit("加载路由列表失败: ${result.message}")
                     Timber.e("Failed to load routes: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -385,7 +379,7 @@ class WorkerViewModel @Inject constructor(
     fun createRoute(account: Account, pattern: String, scriptName: String) {
         if (pattern.isBlank() || scriptName.isBlank()) {
             viewModelScope.launch {
-                _message.emit("Pattern and script name are required")
+                _message.emit("请填写路由规则和脚本名称")
             }
             return
         }
@@ -395,11 +389,11 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.createRoute(account, pattern, scriptName)) {
                 is Resource.Success -> {
-                    _message.emit("Route created successfully")
+                    _message.emit("路由创建成功")
                     loadRoutes(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to create route: ${result.message}")
+                    _message.emit("创建路由失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -414,11 +408,11 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.updateRoute(account, routeId, pattern, scriptName)) {
                 is Resource.Success -> {
-                    _message.emit("Route updated successfully")
+                    _message.emit("路由更新成功")
                     loadRoutes(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to update route: ${result.message}")
+                    _message.emit("更新路由失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -433,11 +427,11 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.deleteRoute(account, routeId)) {
                 is Resource.Success -> {
-                    _message.emit("Route deleted successfully")
+                    _message.emit("路由删除成功")
                     loadRoutes(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to delete route: ${result.message}")
+                    _message.emit("删除路由失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -455,7 +449,7 @@ class WorkerViewModel @Inject constructor(
                     _customDomains.value = result.data
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to load custom domains: ${result.message}")
+                    _message.emit("加载自定义域名失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -470,11 +464,11 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.addCustomDomain(account, hostname, scriptName)) {
                 is Resource.Success -> {
-                    _message.emit("Custom domain added successfully")
+                    _message.emit("自定义域名添加成功")
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to add custom domain: ${result.message}")
+                    _message.emit("添加自定义域名失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -489,11 +483,11 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.deleteCustomDomain(account, domainId)) {
                 is Resource.Success -> {
-                    _message.emit("Custom domain deleted successfully")
+                    _message.emit("自定义域名删除成功")
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to delete custom domain: ${result.message}")
+                    _message.emit("删除自定义域名失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }

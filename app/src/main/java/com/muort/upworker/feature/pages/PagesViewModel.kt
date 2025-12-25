@@ -48,7 +48,7 @@ class PagesViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} projects")
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to load projects: ${result.message}")
+                    _message.emit("加载项目失败: ${result.message}")
                     Timber.e("Failed to load projects: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -61,7 +61,7 @@ class PagesViewModel @Inject constructor(
     fun createProject(account: Account, name: String, productionBranch: String = "main") {
         if (name.isBlank()) {
             viewModelScope.launch {
-                _message.emit("Please enter project name")
+                _message.emit("请输入项目名称")
             }
             return
         }
@@ -71,11 +71,11 @@ class PagesViewModel @Inject constructor(
             
             when (val result = pagesRepository.createProject(account, name, productionBranch)) {
                 is Resource.Success -> {
-                    _message.emit("Project created successfully")
+                    _message.emit("项目创建成功")
                     loadProjects(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to create project: ${result.message}")
+                    _message.emit("创建项目失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -90,7 +90,7 @@ class PagesViewModel @Inject constructor(
             
             when (val result = pagesRepository.deleteProject(account, projectName)) {
                 is Resource.Success -> {
-                    _message.emit("Project deleted successfully")
+                    _message.emit("项目删除成功")
                     if (_selectedProject.value?.name == projectName) {
                         _selectedProject.value = null
                         _deployments.value = emptyList()
@@ -98,7 +98,7 @@ class PagesViewModel @Inject constructor(
                     loadProjects(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to delete project: ${result.message}")
+                    _message.emit("删除项目失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -120,7 +120,7 @@ class PagesViewModel @Inject constructor(
                     _projectDetail.value = result.data
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to load project detail: ${result.message}")
+                    _message.emit("加载项目详情失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -139,7 +139,7 @@ class PagesViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} deployments")
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to load deployments: ${result.message}")
+                    _message.emit("加载部署列表失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -154,11 +154,11 @@ class PagesViewModel @Inject constructor(
             
             when (val result = pagesRepository.retryDeployment(account, projectName, deploymentId)) {
                 is Resource.Success -> {
-                    _message.emit("Deployment retry started")
+                    _message.emit("已重新发起部署")
                     loadDeployments(account, projectName)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to retry deployment: ${result.message}")
+                    _message.emit("重新部署失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -173,11 +173,11 @@ class PagesViewModel @Inject constructor(
             
             when (val result = pagesRepository.deleteDeployment(account, projectName, deploymentId)) {
                 is Resource.Success -> {
-                    _message.emit("Deployment deleted successfully")
+                    _message.emit("部署删除成功")
                     loadDeployments(account, projectName)
                 }
                 is Resource.Error -> {
-                    _message.emit("Failed to delete deployment: ${result.message}")
+                    _message.emit("删除部署失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -234,7 +234,7 @@ class PagesViewModel @Inject constructor(
                     Timber.d("Environment variables updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit(result.message)
+                    _message.emit("环境变量更新失败: ${result.message}")
                     Timber.e("Failed to update environment variables: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -265,7 +265,7 @@ class PagesViewModel @Inject constructor(
                     Timber.d("KV bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit(result.message)
+                    _message.emit("KV 绑定更新失败: ${result.message}")
                     Timber.e("Failed to update KV bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -296,7 +296,7 @@ class PagesViewModel @Inject constructor(
                     Timber.d("R2 bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit(result.message)
+                    _message.emit("R2 绑定更新失败: ${result.message}")
                     Timber.e("Failed to update R2 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -327,7 +327,7 @@ class PagesViewModel @Inject constructor(
                     Timber.d("D1 bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit(result.message)
+                    _message.emit("D1 绑定更新失败: ${result.message}")
                     Timber.e("Failed to update D1 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -373,7 +373,7 @@ class PagesViewModel @Inject constructor(
                     callback(result)
                 }
                 is Resource.Error -> {
-                    _message.emit(result.message)
+                    _message.emit("自定义域添加失败: ${result.message}")
                     Timber.e("Failed to add domain: ${result.message}")
                     callback(result)
                 }

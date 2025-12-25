@@ -165,7 +165,7 @@ app/
 ### 环境要求
 - **Android Studio**: Hedgehog | 2023.1.1 或更高版本
 - **JDK**: 17
-- **Android SDK**: API 25+ (Android 7.0+)
+- **Android SDK**: API 26+ (Android 8.0+)
 - **Gradle**: 8.0+
 
 ### 编译步骤
