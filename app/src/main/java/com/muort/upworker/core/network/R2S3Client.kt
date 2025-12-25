@@ -28,6 +28,16 @@ import kotlin.collections.LinkedHashMap
 class R2S3Client @Inject constructor(
     private val logInterceptor: LogOkHttpInterceptor
 ) {
+    // S3标准编码，不保留 /，所有非字母数字和 -_.~ 都百分号编码
+    private fun s3Encode(key: String): String {
+        val sb = StringBuilder()
+        key.toByteArray(Charsets.UTF_8).forEach { b ->
+            val c = b.toInt().toChar()
+            if (c.isLetterOrDigit() || c in "-_.~") sb.append(c)
+            else sb.append("%%%02X".format(b))
+        }
+        return sb.toString()
+    }
 
     data class S3Config(
         val accountId: String,
@@ -77,7 +87,7 @@ class R2S3Client @Inject constructor(
         contentType: String = "application/octet-stream"
     ) {
         FileInputStream(file).use { inputStream ->
-            uploadObject(config, bucketName, objectKey, inputStream, file.length(), contentType)
+            uploadObject(config, bucketName, objectKey, inputStream, contentType)
         }
     }
 
@@ -86,23 +96,23 @@ class R2S3Client @Inject constructor(
         bucketName: String,
         objectKey: String,
         inputStream: InputStream,
-        contentLength: Long,
         contentType: String = "application/octet-stream"
     ) {
+        val data = inputStream.readBytes()
         val url = buildUrl(config.endpoint, bucketName, null, objectKey)
         val now = Date()
         val body = object : RequestBody() {
             override fun contentType() = contentType.toMediaType()
-            override fun contentLength() = contentLength
+            override fun contentLength() = data.size.toLong()
             override fun writeTo(sink: okio.BufferedSink) {
-                inputStream.use { it.copyTo(sink.outputStream()) }
+                sink.write(data)
             }
         }
         val request = Request.Builder()
             .url(url)
             .put(body)
             .addHeader("Content-Type", contentType)
-            .applyAwsV4Signature(config, "PUT", "/$bucketName/$objectKey", null, null, now, contentLength)
+            .applyAwsV4Signature(config, "PUT", "/$bucketName/${s3Encode(objectKey)}", null, data, now, data.size.toLong())
             .build()
         httpClient.newCall(request).execute().use { resp ->
             val bodyStr = resp.body?.string() ?: ""
@@ -122,7 +132,7 @@ class R2S3Client @Inject constructor(
         val request = Request.Builder()
             .url(url)
             .get()
-            .applyAwsV4Signature(config, "GET", "/$bucketName/$objectKey", null, null, now)
+            .applyAwsV4Signature(config, "GET", "/$bucketName/${s3Encode(objectKey)}", null, null, now)
             .build()
         httpClient.newCall(request).execute().use { resp ->
             val bodyBytes = resp.body?.bytes() ?: ByteArray(0)
@@ -154,7 +164,7 @@ class R2S3Client @Inject constructor(
         val request = Request.Builder()
             .url(url)
             .delete()
-            .applyAwsV4Signature(config, "DELETE", "/$bucketName/$objectKey", null, null, now)
+            .applyAwsV4Signature(config, "DELETE", "/$bucketName/${s3Encode(objectKey)}", null, null, now)
             .build()
         httpClient.newCall(request).execute().use { resp ->
             val bodyStr = resp.body?.string() ?: ""
@@ -173,7 +183,7 @@ class R2S3Client @Inject constructor(
         sb.append(bucket)
         if (!objectKey.isNullOrEmpty()) {
             sb.append("/")
-            sb.append(URLEncoder.encode(objectKey, "UTF-8").replace("+", "%20"))
+            sb.append(s3Encode(objectKey))
         }
         if (!query.isNullOrEmpty()) {
             sb.append("?")
@@ -210,9 +220,14 @@ class R2S3Client @Inject constructor(
             ?: ""
         val canonicalHeaders = "host:$host\nx-amz-content-sha256:$payloadHash\nx-amz-date:$amzDate\n"
         val signedHeaders = "host;x-amz-content-sha256;x-amz-date"
+        val fixedCanonicalUri = if (canonicalUri.startsWith("/")) {
+            val parts = canonicalUri.split("/", limit = 3)
+            if (parts.size == 3) "/" + parts[1] + "/" + s3Encode(parts[2])
+            else canonicalUri
+        } else canonicalUri
         val canonicalRequest = listOf(
             method,
-            canonicalUri,
+            fixedCanonicalUri,
             canonicalQuery,
             canonicalHeaders,
             signedHeaders,

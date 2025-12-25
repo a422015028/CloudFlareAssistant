@@ -39,14 +39,43 @@ class R2Fragment : Fragment() {
      * 文件名缩短显示，保留后缀，超长用 ... 省略
      */
     private fun shortenFileName(name: String, maxLen: Int = 24): String {
+        // 边界处理
+        if (maxLen <= 3) return ".".repeat(maxLen)
         if (name.length <= maxLen) return name
+        val ellipsis = "..."
+        // 分离文件名和扩展名
         val dotIdx = name.lastIndexOf('.')
-        return if (dotIdx > 0 && dotIdx < name.length - 1) {
-            val ext = name.substring(dotIdx)
-            val prefix = name.substring(0, maxLen - ext.length - 3)
-            "$prefix...$ext"
+        val (fileNamePart, extension) = if (dotIdx > 0 && dotIdx < name.length - 1) {
+            name.substring(0, dotIdx) to name.substring(dotIdx)
         } else {
-            name.substring(0, maxLen - 3) + "..."
+            name to ""
+        }
+        return if (extension.isEmpty()) {
+            // 没有扩展名
+            val nameChars = maxOf(1, maxLen - ellipsis.length)
+            "${fileNamePart.take(nameChars)}$ellipsis"
+        } else {
+            // 有扩展名
+            // 尝试最优方案：显示尽可能多的文件名 + 完整扩展名
+            val availableForName = maxLen - extension.length - ellipsis.length
+            when {
+                availableForName >= 1 ->
+                    "${fileNamePart.take(availableForName)}$ellipsis$extension"
+                availableForName == 0 ->
+                    "$ellipsis$extension"
+                else -> {
+                    // 计算还能显示多少扩展名
+                    val availableForExt = maxLen - ellipsis.length
+                    when {
+                        availableForExt >= extension.length ->
+                            "$ellipsis$extension"  // 意外情况
+                        availableForExt > 0 ->
+                            "$ellipsis${extension.take(availableForExt)}"
+                        else ->
+                            ellipsis.take(maxLen)  // 保护
+                    }
+                }
+            }
         }
     }
     private var _binding: FragmentR2Binding? = null
@@ -133,6 +162,18 @@ class R2Fragment : Fragment() {
             val account = accountViewModel.defaultAccount.value
             if (bucket != null && account != null) {
                 showObjectDetailsDialog(account, bucket, obj, r2ViewModel.customDomains.value)
+            }
+        }
+        objectAdapter.setOnDownloadClickListener { obj ->
+            val bucket = r2ViewModel.selectedBucket.value
+            if (bucket != null) {
+                downloadObject(bucket, obj)
+            }
+        }
+        objectAdapter.setOnDeleteClickListener { obj ->
+            val bucket = r2ViewModel.selectedBucket.value
+            if (bucket != null) {
+                showDeleteObjectDialog(bucket, obj)
             }
         }
         binding.objectRecyclerView.adapter = objectAdapter
@@ -402,9 +443,7 @@ class R2Fragment : Fragment() {
                     // Note: After deletion, the list will be refreshed automatically
                     // and the dialog will be dismissed
                 }
-                .setNegativeButton("取消") { _, _ ->
-                    showObjectsListDialog(account, bucket)
-                }
+                .setNegativeButton("取消", null)
                 .show()
         }
     }
@@ -451,7 +490,14 @@ class R2Fragment : Fragment() {
     private fun uploadFile(uri: Uri) {
         val bucket = currentBucket ?: return
         val account = accountViewModel.defaultAccount.value ?: return
-        
+
+        // 上传前提示（用 Toast，显示更久）
+        Toast.makeText(
+            requireContext(),
+            "Cloudflare R2 API 暂不支持带中文或特殊字符文件名上传，建议仅用英文、数字、-_.~，否则可能 500 错误。",
+            Toast.LENGTH_LONG
+        ).show()
+
         try {
             val inputStream = requireContext().contentResolver.openInputStream(uri)
             if (inputStream == null) {

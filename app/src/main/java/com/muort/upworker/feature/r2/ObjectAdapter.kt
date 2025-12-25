@@ -9,6 +9,8 @@ import com.muort.upworker.databinding.ItemR2ObjectBinding
 class ObjectAdapter : RecyclerView.Adapter<ObjectAdapter.ViewHolder>() {
     private var objects = listOf<R2Object>()
     private var onObjectClick: ((R2Object) -> Unit)? = null
+    private var onDownloadClick: ((R2Object) -> Unit)? = null
+    private var onDeleteClick: ((R2Object) -> Unit)? = null
 
     fun submitList(newList: List<R2Object>) {
         objects = newList
@@ -19,9 +21,17 @@ class ObjectAdapter : RecyclerView.Adapter<ObjectAdapter.ViewHolder>() {
         onObjectClick = listener
     }
 
+    fun setOnDownloadClickListener(listener: (R2Object) -> Unit) {
+        onDownloadClick = listener
+    }
+
+    fun setOnDeleteClickListener(listener: (R2Object) -> Unit) {
+        onDeleteClick = listener
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemR2ObjectBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding, onObjectClick)
+        return ViewHolder(binding, onObjectClick, onDownloadClick, onDeleteClick)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -32,13 +42,21 @@ class ObjectAdapter : RecyclerView.Adapter<ObjectAdapter.ViewHolder>() {
 
     class ViewHolder(
         private val binding: ItemR2ObjectBinding,
-        private val onObjectClick: ((R2Object) -> Unit)?
+        private val onObjectClick: ((R2Object) -> Unit)?,
+        private val onDownloadClick: ((R2Object) -> Unit)?,
+        private val onDeleteClick: ((R2Object) -> Unit)?
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind(obj: R2Object) {
             binding.objectKeyText.text = obj.key
             binding.objectSizeText.text = obj.size?.let { formatFileSizeCompat(it) } ?: "-"
             binding.root.setOnClickListener {
                 onObjectClick?.invoke(obj)
+            }
+            binding.btnDownload.setOnClickListener {
+                onDownloadClick?.invoke(obj)
+            }
+            binding.btnDelete.setOnClickListener {
+                onDeleteClick?.invoke(obj)
             }
         }
 
