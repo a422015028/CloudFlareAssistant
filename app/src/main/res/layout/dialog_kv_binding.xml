@@ -6,19 +6,21 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="配置 KV 命名空间绑定"
-        android:textSize="16sp"
+        android:text="添加 KV 绑定"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
+
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="绑定名称 (在代码中使用)"
-        app:boxBackgroundMode="outline"
+        android:hint="绑定名称 (如: MY_KV)"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_marginBottom="12dp">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -26,9 +28,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:text="MY_KV" />
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
 
     <TextView
         android:layout_width="match_parent"
@@ -41,18 +44,16 @@
         android:id="@+id/namespaceSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:background="@android:drawable/btn_dropdown"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:layout_marginBottom="16dp" />
+        android:minHeight="48dp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="提示：在 Worker 代码中可以通过 env.MY_KV 访问此 KV 命名空间。代码中必须使用绑定名称（如上所填），而非命名空间 ID。否则上传和绑定会失败！！"
+        android:text="💡 提示：绑定名称将作为环境变量在 Worker 脚本中使用"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:background="?attr/colorSurfaceVariant" />
 
 </LinearLayout>

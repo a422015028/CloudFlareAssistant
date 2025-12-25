@@ -258,8 +258,19 @@ class WorkerRepository @Inject constructor(
             )
             
             if (response.isSuccessful) {
-                val scriptContent = response.body()?.string() ?: ""
-                Resource.Success(scriptContent)
+                val body = response.body()?.string() ?: ""
+                // 检查是否为 multipart 格式
+                val boundaryRegex = Regex("--([a-zA-Z0-9]+)")
+                val boundaryMatch = boundaryRegex.find(body)
+                if (boundaryMatch != null) {
+                    val boundary = boundaryMatch.value
+                    // 提取 name="xxx.js" 部分
+                    val partRegex = Regex("""Content-Disposition: form-data; name=".*?\.js"\r?\n\r?\n([\s\S]*?)\r?\n$boundary""", RegexOption.MULTILINE)
+                    val extracted = partRegex.find(body)?.groups?.get(1)?.value ?: body
+                    Resource.Success(extracted.trim())
+                } else {
+                    Resource.Success(body.trim())
+                }
             } else {
                 Resource.Error("Failed to get script: ${response.message()}")
             }

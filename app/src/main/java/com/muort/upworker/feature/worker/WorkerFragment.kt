@@ -166,24 +166,30 @@ class WorkerFragment : Fragment() {
     private fun uploadWorker() {
         val workerName = binding.workerNameEdit.text.toString().trim()
         val file = selectedFile
-        
+
         if (workerName.isEmpty()) {
             showToast("请输入 Worker 名称")
             return
         }
-        
+
         if (file == null || !file.exists()) {
             showToast("请选择脚本文件")
             return
         }
-        
+
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
             showToast("请先选择账号")
             return
         }
-        
-        viewModel.uploadWorkerScript(account, workerName, file)
+
+        // 判断是否为已存在脚本，存在则保留绑定
+        val exists = viewModel.scripts.value.any { it.id == workerName }
+        if (exists) {
+            viewModel.uploadWorkerScriptWithBindings(account, workerName, file)
+        } else {
+            viewModel.uploadWorkerScript(account, workerName, file)
+        }
     }
     
     private fun showConfigKvBindingsDialog(script: WorkerScript) {
@@ -1009,11 +1015,11 @@ class WorkerFragment : Fragment() {
             showToast("请先选择账号")
             return
         }
-        
         val tempFile = File(requireContext().cacheDir, "${script.id}-edited.js")
         try {
             tempFile.writeText(newContent)
-            viewModel.uploadWorkerScript(account, script.id, tempFile)
+            // 使用自动保留绑定的上传方法
+            viewModel.uploadWorkerScriptWithBindings(account, script.id, tempFile)
             showToast("正在保存...")
             tempFile.deleteOnExit()
         } catch (e: Exception) {

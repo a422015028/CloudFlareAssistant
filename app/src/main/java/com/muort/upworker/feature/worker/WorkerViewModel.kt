@@ -19,6 +19,49 @@ import javax.inject.Inject
 class WorkerViewModel @Inject constructor(
     private val workerRepository: WorkerRepository
 ) : ViewModel() {
+
+    /**
+     * 上传脚本内容并自动保留原有 bindings（KV/R2/变量等）
+     */
+    fun uploadWorkerScriptWithBindings(account: Account, scriptName: String, scriptFile: File) {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Uploading
+            // 先获取原有 bindings
+            when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
+                is Resource.Success -> {
+                    val bindings = settings.data.bindings
+                    val metadata = com.muort.upworker.core.model.WorkerMetadata(
+                        mainModule = scriptFile.name,
+                        compatibilityDate = "2024-12-01",
+                        bindings = bindings
+                    )
+                    when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, scriptFile, metadata)) {
+                        is Resource.Success -> {
+                            _uploadState.value = UploadState.Success
+                            _message.emit("Worker script uploaded successfully (bindings preserved)")
+                            Timber.d("Script uploaded with bindings: $scriptName")
+                            loadWorkerScripts(account)
+                        }
+                        is Resource.Error -> {
+                            _uploadState.value = UploadState.Error(result.message)
+                            _message.emit("Upload failed: ${result.message}")
+                            Timber.e("Failed to upload script: ${result.message}")
+                        }
+                        is Resource.Loading -> {
+                            _uploadState.value = UploadState.Uploading
+                        }
+                    }
+                }
+                is Resource.Error -> {
+                    _uploadState.value = UploadState.Error(settings.message)
+                    _message.emit("获取原有绑定失败: ${settings.message}")
+                }
+                is Resource.Loading -> {
+                    _uploadState.value = UploadState.Uploading
+                }
+            }
+        }
+    }
     
     private val _uploadState = MutableStateFlow<UploadState>(UploadState.Idle)
     val uploadState: StateFlow<UploadState> = _uploadState.asStateFlow()
