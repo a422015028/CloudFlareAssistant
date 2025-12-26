@@ -23,7 +23,8 @@ kapt {
 
 android {
     namespace = "com.muort.upworker"
-    compileSdk = 34
+    compileSdk = 36
+    buildToolsVersion = "36.1.0"
     
     defaultConfig {
         applicationId = "com.muort.upworker"

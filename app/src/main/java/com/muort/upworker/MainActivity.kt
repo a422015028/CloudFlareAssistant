@@ -83,8 +83,14 @@ class MainActivity : AppCompatActivity() {
         val colorOnSurface = typedValueOnSurface.data
 
         // 2. 设置状态栏为透明，但不让内容延伸到状态栏下方
-        window.statusBarColor = android.graphics.Color.TRANSPARENT
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        // 使用 WindowInsetsControllerCompat 设置状态栏颜色和模式
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) != android.content.res.Configuration.UI_MODE_NIGHT_YES
+        }
+        // 状态栏颜色设置依然保留，兼容旧设备
+        @Suppress("DEPRECATION")
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
         
         // 3. 处理系统栏 insets，为内容添加 padding
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->

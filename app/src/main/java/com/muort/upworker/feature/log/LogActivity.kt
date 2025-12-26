@@ -26,8 +26,14 @@ class LogActivity : AppCompatActivity() {
         setContentView(R.layout.activity_log)
         
         // Configure system bars like main activity
-        window.statusBarColor = android.graphics.Color.TRANSPARENT
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        // 使用 WindowInsetsControllerCompat 设置状态栏颜色和模式
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) != android.content.res.Configuration.UI_MODE_NIGHT_YES
+        }
+        // 状态栏颜色设置依然保留，兼容旧设备
+        @Suppress("DEPRECATION")
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
         
         // Handle system bar insets
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
