@@ -213,6 +213,41 @@ class WorkerViewModel @Inject constructor(
     }
     
     /**
+     * Update D1 database bindings for an existing Worker Script
+     * Only updates the bindings configuration, does NOT re-upload script code
+     * @param scriptName Name of the existing script
+     * @param d1Bindings List of pairs containing (binding_name, database_id)
+     */
+    fun updateWorkerD1Bindings(
+        account: Account,
+        scriptName: String,
+        d1Bindings: List<Pair<String, String>>
+    ) {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Uploading
+            
+            when (val result = workerRepository.updateWorkerD1Bindings(
+                account, scriptName, d1Bindings
+            )) {
+                is Resource.Success -> {
+                    _uploadState.value = UploadState.Success
+                    _message.emit("D1 绑定已成功更新（'$scriptName'）")
+                    Timber.d("D1 bindings updated for script: $scriptName")
+                    loadWorkerScripts(account)
+                }
+                is Resource.Error -> {
+                    _uploadState.value = UploadState.Error(result.message)
+                    _message.emit("更新 D1 绑定失败: ${result.message}")
+                    Timber.e("Failed to update D1 bindings: ${result.message}")
+                }
+                is Resource.Loading -> {
+                    _uploadState.value = UploadState.Uploading
+                }
+            }
+        }
+    }
+    
+    /**
      * Update environment variables for an existing Worker Script
      * @param scriptName Name of the existing script
      * @param variables List of triples containing (variable_name, variable_value, variable_type)

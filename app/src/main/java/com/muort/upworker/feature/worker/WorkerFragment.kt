@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.InputType
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +31,7 @@ import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.WorkerScript
 import com.muort.upworker.core.repository.KvRepository
 import com.muort.upworker.core.repository.R2Repository
+import com.muort.upworker.core.repository.D1Repository
 import timber.log.Timber
 import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.DialogAddSecretBinding
@@ -51,6 +53,13 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 
+// Data class for D1 binding display
+data class D1BindingItem(
+    val bindingName: String,
+    val databaseId: String,
+    val databaseName: String
+)
+
 @AndroidEntryPoint
 class WorkerFragment : Fragment() {
     
@@ -66,6 +75,9 @@ class WorkerFragment : Fragment() {
     @Inject
     lateinit var r2Repository: R2Repository
     
+    @Inject
+    lateinit var d1Repository: D1Repository
+    
     private var selectedFile: File? = null
     private lateinit var scriptsAdapter: WorkerScriptsAdapter
     private var scriptViewDialog: AlertDialog? = null
@@ -75,7 +87,19 @@ class WorkerFragment : Fragment() {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-                val fileName = uri.lastPathSegment?.substringAfterLast("/") ?: "script.js"
+                var fileName = uri.lastPathSegment?.substringAfterLast("/") ?: "script.js"
+                // 尝试从 ContentResolver 获取真实文件名，以兼容更多文件管理器
+                try {
+                    requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        if (cursor.moveToFirst() && nameIndex >= 0) {
+                            cursor.getString(nameIndex)?.let { fileName = it }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to resolve file name")
+                }
+
                 val tempFile = File(requireContext().cacheDir, fileName)
                 
                 requireContext().contentResolver.openInputStream(uri)?.use { input ->
@@ -124,6 +148,9 @@ class WorkerFragment : Fragment() {
             },
             onConfigR2Click = { script ->
                 showConfigR2BindingsDialog(script)
+            },
+            onConfigD1Click = { script ->
+                showConfigD1BindingsDialog(script)
             },
             onConfigVariablesClick = { script ->
                 showConfigVariablesDialog(script)
@@ -183,12 +210,23 @@ class WorkerFragment : Fragment() {
             return
         }
 
-        // 判断是否为已存在脚本，存在则保留绑定
-        val exists = viewModel.scripts.value.any { it.id == workerName }
-        if (exists) {
-            viewModel.uploadWorkerScriptWithBindings(account, workerName, file)
-        } else {
-            viewModel.uploadWorkerScript(account, workerName, file)
+        // 显示检查状态的 Loading
+        val checkingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在准备...")
+            .setMessage("正在检查 Worker 状态")
+            .setCancelable(false)
+            .create()
+        checkingDialog.show()
+
+        // 直接从云端检查 Worker 是否存在，而不是依赖本地缓存列表
+        // 这样即使本地列表为空（如刚打开 App），也能正确识别已存在的 Worker 并保留绑定
+        viewModel.getWorkerSettings(account, workerName) { result ->
+            checkingDialog.dismiss()
+            if (result is com.muort.upworker.core.model.Resource.Success) {
+                viewModel.uploadWorkerScriptWithBindings(account, workerName, file)
+            } else {
+                viewModel.uploadWorkerScript(account, workerName, file)
+            }
         }
     }
     
@@ -239,6 +277,7 @@ class WorkerFragment : Fragment() {
                 // Setup adapter with lateinit reference
                 lateinit var tempAdapter: KvBindingsAdapter
             tempAdapter = KvBindingsAdapter(
+                namespaces = namespaces,
                 onDeleteClick = { position ->
                     tempKvBindings.removeAt(position)
                     updateDialogBindingsUI(dialogBinding, tempAdapter, tempKvBindings)
@@ -328,7 +367,7 @@ class WorkerFragment : Fragment() {
                         
                         if (selectedIndex >= 0 && selectedIndex < namespaces.size) {
                             val namespace = namespaces[selectedIndex]
-                            tempBindings.add(Pair(bindingName, namespace.title))
+                            tempBindings.add(Pair(bindingName, namespace.id))
                             onAdded()
                             showToast("KV 绑定已添加")
                         }
@@ -542,6 +581,192 @@ class WorkerFragment : Fragment() {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
             showToast("R2 绑定配置已更新")
+        }
+    }
+    
+    // ==================== D1 Bindings Configuration ====================
+    
+    private fun showConfigD1BindingsDialog(script: WorkerScript) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在加载...")
+            .setMessage("正在获取当前 D1 绑定配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        // First, fetch current settings to get existing bindings
+        viewLifecycleOwner.lifecycleScope.launch {
+            // First get D1 databases for name resolution
+            val databasesResult = d1Repository.listDatabases(account)
+            val databaseIdToName = if (databasesResult is com.muort.upworker.core.model.Resource.Success) {
+                databasesResult.data.associate { it.uuid to it.name }
+            } else {
+                emptyMap()
+            }
+            
+            viewModel.getWorkerSettings(account, script.id) { settingsResult ->
+                loadingDialog.dismiss()
+                
+                val dialogBinding = com.muort.upworker.databinding.DialogScriptD1BindingsBinding.inflate(layoutInflater)
+                
+                // Setup title
+                dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+                
+                // Temporary list for this dialog - initialize with existing bindings
+                val tempD1Bindings = mutableListOf<D1BindingItem>()
+                
+                // Load existing D1 bindings from settings
+                if (settingsResult is com.muort.upworker.core.model.Resource.Success) {
+                    settingsResult.data.bindings?.forEach { binding ->
+                        if (binding.type == "d1" && binding.databaseId != null) {
+                            val databaseName = databaseIdToName[binding.databaseId] ?: binding.databaseId
+                            tempD1Bindings.add(D1BindingItem(binding.name, binding.databaseId, databaseName))
+                            Timber.d("Loaded existing D1 binding: ${binding.name} -> ${databaseName} (${binding.databaseId})")
+                        }
+                    }
+                }
+                
+                // Setup adapter with lateinit reference
+                lateinit var tempAdapter: D1BindingsAdapter
+                tempAdapter = D1BindingsAdapter(
+                    onDeleteClick = { position ->
+                        tempD1Bindings.removeAt(position)
+                        updateDialogD1BindingsUI(dialogBinding, tempAdapter, tempD1Bindings)
+                    }
+                )
+                dialogBinding.bindingsRecyclerView.apply {
+                    layoutManager = LinearLayoutManager(requireContext())
+                    adapter = tempAdapter
+                }
+                
+                // Add binding button
+                dialogBinding.addBindingBtn.setOnClickListener {
+                    showAddD1BindingDialogForScript(tempD1Bindings) {
+                        updateDialogD1BindingsUI(dialogBinding, tempAdapter, tempD1Bindings)
+                    }
+                }
+                
+                updateDialogD1BindingsUI(dialogBinding, tempAdapter, tempD1Bindings)
+                
+                // Show dialog
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("应用配置") { _, _ ->
+                        // Allow empty bindings (remove all bindings)
+                        applyD1BindingsToScript(script, tempD1Bindings)
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            }
+        }
+    }
+    
+    private fun updateDialogD1BindingsUI(
+        dialogBinding: com.muort.upworker.databinding.DialogScriptD1BindingsBinding,
+        adapter: D1BindingsAdapter,
+        bindings: List<D1BindingItem>
+    ) {
+        if (bindings.isEmpty()) {
+            dialogBinding.noBindingsText.visibility = View.VISIBLE
+            dialogBinding.bindingsRecyclerView.visibility = View.GONE
+        } else {
+            dialogBinding.noBindingsText.visibility = View.GONE
+            dialogBinding.bindingsRecyclerView.visibility = View.VISIBLE
+            adapter.submitList(bindings)
+        }
+    }
+    
+    private fun showAddD1BindingDialogForScript(
+        tempBindings: MutableList<D1BindingItem>,
+        onAdded: () -> Unit
+    ) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = d1Repository.listDatabases(account)
+            
+            if (result is com.muort.upworker.core.model.Resource.Success<List<com.muort.upworker.core.model.D1Database>>) {
+                val databases = result.data
+                
+                if (databases.isEmpty()) {
+                    showToast("暂无 D1 数据库，请先创建")
+                    return@launch
+                }
+                
+                val dialogBinding = com.muort.upworker.databinding.DialogD1BindingBinding.inflate(layoutInflater)
+                
+                // Setup spinner
+                val databaseNames = mutableListOf<String>()
+                databases.forEach { database: com.muort.upworker.core.model.D1Database ->
+                    databaseNames.add("${database.name} (${database.uuid})")
+                }
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, databaseNames)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                dialogBinding.databaseSpinner.adapter = adapter
+                
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("添加") { _, _ ->
+                        val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
+                        val selectedIndex = dialogBinding.databaseSpinner.selectedItemPosition
+                        
+                        if (bindingName.isEmpty()) {
+                            showToast("请输入绑定名称")
+                            return@setPositiveButton
+                        }
+                        
+                        if (selectedIndex >= 0 && selectedIndex < databases.size) {
+                            val database = databases[selectedIndex]
+                            tempBindings.add(D1BindingItem(bindingName, database.uuid, database.name))
+                            onAdded()
+                            showToast("D1 绑定已添加")
+                        }
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            } else if (result is com.muort.upworker.core.model.Resource.Error) {
+                showToast("加载 D1 数据库失败: ${result.message}")
+            }
+        }
+    }
+    
+    private fun applyD1BindingsToScript(script: WorkerScript, bindings: List<D1BindingItem>) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        Timber.d("Applying ${bindings.size} D1 bindings to script '${script.id}'")
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在更新...")
+            .setMessage("正在更新 D1 绑定配置（不重新上传脚本代码）")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        // Use the new method that only updates bindings without re-uploading script
+        val bindingPairs = bindings.map { Pair(it.bindingName, it.databaseId) }
+        viewModel.updateWorkerD1Bindings(account, script.id, bindingPairs)
+        
+        // Dismiss loading dialog after a short delay to show the message
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(500)
+            loadingDialog.dismiss()
+            showToast("D1 绑定配置已更新")
         }
     }
     
@@ -1138,6 +1363,7 @@ class WorkerScriptsAdapter(
     private val onDeleteClick: (WorkerScript) -> Unit,
     private val onConfigKvClick: (WorkerScript) -> Unit,
     private val onConfigR2Click: (WorkerScript) -> Unit,
+    private val onConfigD1Click: (WorkerScript) -> Unit,
     private val onConfigVariablesClick: (WorkerScript) -> Unit,
     private val onConfigSecretsClick: (WorkerScript) -> Unit
 ) : RecyclerView.Adapter<WorkerScriptsAdapter.ScriptViewHolder>() {
@@ -1182,6 +1408,10 @@ class WorkerScriptsAdapter(
                 onConfigR2Click(script)
             }
             
+            binding.configD1Btn.setOnClickListener {
+                onConfigD1Click(script)
+            }
+            
             binding.configVariablesBtn.setOnClickListener {
                 onConfigVariablesClick(script)
             }
@@ -1215,6 +1445,7 @@ class WorkerScriptsAdapter(
 }
 
 class KvBindingsAdapter(
+    private val namespaces: List<KvNamespace>,
     private val onDeleteClick: (Int) -> Unit
 ) : RecyclerView.Adapter<KvBindingsAdapter.BindingViewHolder>() {
     
@@ -1246,7 +1477,11 @@ class KvBindingsAdapter(
         
         fun bind(kvBinding: Pair<String, String>, position: Int) {
             binding.bindingNameText.text = kvBinding.first
-            binding.namespaceIdText.text = kvBinding.second
+            // Convert namespace ID to title for display
+            val namespaceId = kvBinding.second
+            val namespace = namespaces.find { it.id == namespaceId }
+            val displayText = namespace?.title ?: namespaceId
+            binding.namespaceIdText.text = displayText
             
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(position)
@@ -1382,6 +1617,47 @@ class SecretsAdapter(
             }
             
             binding.deleteSecretBtn.setOnClickListener {
+                onDeleteClick(position)
+            }
+        }
+    }
+}
+
+class D1BindingsAdapter(
+    private val onDeleteClick: (Int) -> Unit
+) : RecyclerView.Adapter<D1BindingsAdapter.BindingViewHolder>() {
+    
+    private var bindings = listOf<D1BindingItem>()
+    
+    fun submitList(newBindings: List<D1BindingItem>) {
+        bindings = newBindings
+        notifyDataSetChanged()
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
+        val binding = com.muort.upworker.databinding.ItemD1BindingBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return BindingViewHolder(binding)
+    }
+    
+    override fun onBindViewHolder(holder: BindingViewHolder, position: Int) {
+        holder.bind(bindings[position], position)
+    }
+    
+    override fun getItemCount() = bindings.size
+    
+    inner class BindingViewHolder(
+        private val binding: com.muort.upworker.databinding.ItemD1BindingBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+        
+        fun bind(d1Binding: D1BindingItem, position: Int) {
+            binding.bindingNameText.text = d1Binding.bindingName
+            binding.databaseNameText.text = d1Binding.databaseName
+            
+            binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(position)
             }
         }

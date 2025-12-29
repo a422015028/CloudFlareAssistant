@@ -31,6 +31,7 @@ import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.repository.KvRepository
 import com.muort.upworker.core.repository.R2Repository
+import com.muort.upworker.core.repository.D1Repository
 import com.muort.upworker.databinding.DialogPagesInputBinding
 import com.muort.upworker.databinding.FragmentPagesBinding
 import com.muort.upworker.databinding.ItemPagesProjectBinding
@@ -56,6 +57,9 @@ class PagesFragment : Fragment() {
     
     @Inject
     lateinit var r2Repository: R2Repository
+    
+    @Inject
+    lateinit var d1Repository: D1Repository
     
     private lateinit var projectAdapter: ProjectAdapter
     
@@ -155,6 +159,11 @@ class PagesFragment : Fragment() {
                     showConfigDialog(account, project, "production", "kv")
                 }
             },
+            onConfigD1Click = { project ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showConfigDialog(account, project, "production", "d1")
+                }
+            },
             onConfigR2Click = { project ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     showConfigDialog(account, project, "production", "r2")
@@ -176,6 +185,7 @@ class PagesFragment : Fragment() {
             "环境变量 (预览)",
             "KV 绑定",
             "R2 绑定",
+            "D1 绑定",
             "机密 (Secrets)"
         )
         
@@ -188,7 +198,8 @@ class PagesFragment : Fragment() {
                     2 -> showConfigDialog(account, project, "preview", "env")
                     3 -> showConfigDialog(account, project, "production", "kv")
                     4 -> showConfigDialog(account, project, "production", "r2")
-                    5 -> showConfigDialog(account, project, "production", "secret")
+                    5 -> showConfigDialog(account, project, "production", "d1")
+                    6 -> showConfigDialog(account, project, "production", "secret")
                 }
             }
             .setNegativeButton("关闭", null)
@@ -200,6 +211,7 @@ class PagesFragment : Fragment() {
             "env" -> showVariablesDialog(account, project, environment)
             "kv" -> showKvBindingsDialog(account, project, environment)
             "r2" -> showR2BindingsDialog(account, project, environment)
+            "d1" -> showD1BindingsDialog(account, project, environment)
         }
     }
     
@@ -784,6 +796,185 @@ class PagesFragment : Fragment() {
     }
     
 
+    private fun showD1BindingsDialog(account: Account, project: PagesProject, environment: String) {
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("加载中...")
+            .setMessage("正在获取当前 D1 绑定配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        // Fetch current project detail to get existing bindings
+        viewLifecycleOwner.lifecycleScope.launch {
+            pagesViewModel.getProjectDetail(account, project.name) { projectResult ->
+                loadingDialog.dismiss()
+                
+                val dialogBinding = com.muort.upworker.databinding.DialogPagesD1BindingsBinding.inflate(layoutInflater)
+                
+                // Setup title
+                dialogBinding.projectNameText.text = "项目名称: ${project.name} (${if (environment == "production") "生产" else "预览"}环境)"
+                
+                // Temporary list for this dialog - initialize with existing bindings
+                val tempD1Bindings = mutableListOf<Pair<String, String>>()
+                val originalD1Bindings = mutableListOf<Pair<String, String>>()
+                
+                // Load existing D1 bindings from project settings
+                if (projectResult is Resource.Success) {
+                    val envConfig = if (environment == "production") {
+                        projectResult.data.deploymentConfigs?.production
+                    } else {
+                        projectResult.data.deploymentConfigs?.preview
+                    }
+                    envConfig?.d1Databases?.forEach { (bindingName, d1Binding) ->
+                        val binding = Pair(bindingName, d1Binding.id)
+                        tempD1Bindings.add(binding)
+                        originalD1Bindings.add(binding)
+                        Timber.d("Loaded existing D1 binding: $bindingName -> ${d1Binding.id}")
+                    }
+                }
+                
+                // Setup adapter
+                lateinit var tempAdapter: PagesD1BindingsAdapter
+                tempAdapter = PagesD1BindingsAdapter(
+                    onDeleteClick = { binding ->
+                        tempD1Bindings.remove(binding)
+                        tempAdapter.submitList(tempD1Bindings.toList())
+                        updateD1DialogBindingsUI(dialogBinding, tempAdapter, tempD1Bindings)
+                    }
+                )
+                dialogBinding.bindingsRecyclerView.apply {
+                    layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+                    adapter = tempAdapter
+                }
+                
+                // Add binding button
+                dialogBinding.addBindingBtn.setOnClickListener {
+                    showAddD1BindingDialogForPages(account, tempD1Bindings) {
+                        updateD1DialogBindingsUI(dialogBinding, tempAdapter, tempD1Bindings)
+                    }
+                }
+                
+                updateD1DialogBindingsUI(dialogBinding, tempAdapter, tempD1Bindings)
+                
+                // Show dialog
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("应用配置") { _, _ ->
+                        applyD1BindingsToPages(account, project, environment, originalD1Bindings, tempD1Bindings)
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            }
+        }
+    }
+    
+    private fun updateD1DialogBindingsUI(
+        dialogBinding: com.muort.upworker.databinding.DialogPagesD1BindingsBinding,
+        adapter: PagesD1BindingsAdapter,
+        bindings: List<Pair<String, String>>
+    ) {
+        if (bindings.isEmpty()) {
+            dialogBinding.noBindingsText.visibility = View.VISIBLE
+            dialogBinding.bindingsRecyclerView.visibility = View.GONE
+        } else {
+            dialogBinding.noBindingsText.visibility = View.GONE
+            dialogBinding.bindingsRecyclerView.visibility = View.VISIBLE
+            adapter.submitList(bindings)
+        }
+    }
+    
+    private fun showAddD1BindingDialogForPages(
+        account: Account,
+        tempBindings: MutableList<Pair<String, String>>,
+        onAdded: () -> Unit
+    ) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = d1Repository.listDatabases(account)
+            
+            if (result is Resource.Success) {
+                val databases = result.data
+                
+                if (databases.isEmpty()) {
+                    showToast("暂无 D1 数据库，请先创建")
+                    return@launch
+                }
+                
+                val dialogBinding = com.muort.upworker.databinding.DialogPagesD1BindingBinding.inflate(layoutInflater)
+                
+                // Setup spinner
+                val databaseNames = databases.map { "${it.name}" }
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, databaseNames)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                dialogBinding.databaseSpinner.adapter = adapter
+                
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("添加") { _, _ ->
+                        val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
+                        val selectedIndex = dialogBinding.databaseSpinner.selectedItemPosition
+                        
+                        if (bindingName.isEmpty()) {
+                            showToast("请输入绑定名称")
+                            return@setPositiveButton
+                        }
+                        
+                        if (selectedIndex >= 0 && selectedIndex < databases.size) {
+                            val database = databases[selectedIndex]
+                            tempBindings.add(Pair(bindingName, database.uuid))
+                            onAdded()
+                            showToast("D1 绑定已添加")
+                        }
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            } else if (result is Resource.Error) {
+                showToast("加载 D1 数据库失败: ${result.message}")
+            }
+        }
+    }
+    
+    private fun applyD1BindingsToPages(
+        account: Account,
+        project: PagesProject,
+        environment: String,
+        originalBindings: List<Pair<String, String>>,
+        newBindings: List<Pair<String, String>>
+    ) {
+        Timber.d("Applying ${newBindings.size} D1 bindings to Pages project '${project.name}' ($environment)")
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在更新...")
+            .setMessage("正在更新 D1 绑定配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        // Convert to Map format for API
+        // Include all new bindings with their values
+        val bindingsMap = newBindings.associate { it.first to it.second as String? }.toMutableMap()
+        
+        // Add deleted bindings with null values
+        val newBindingNames = newBindings.map { it.first }.toSet()
+        originalBindings.forEach { (name, _) ->
+            if (name !in newBindingNames) {
+                bindingsMap[name] = null
+                Timber.d("Marking D1 binding for deletion: $name")
+            }
+        }
+        
+        pagesViewModel.updateD1Bindings(account, project.name, environment, bindingsMap)
+        
+        // Dismiss loading dialog after a short delay
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(500)
+            loadingDialog.dismiss()
+            showToast("D1 绑定配置已更新")
+        }
+    }
+    
+
     private fun setupClickListeners() {
         // File selection
         binding.selectFileBtn.setOnClickListener {
@@ -1108,6 +1299,7 @@ class PagesFragment : Fragment() {
         private val onDeleteClick: (PagesProject) -> Unit,
         private val onConfigEnvClick: (PagesProject) -> Unit,
         private val onConfigKvClick: (PagesProject) -> Unit,
+        private val onConfigD1Click: (PagesProject) -> Unit,
         private val onConfigR2Click: (PagesProject) -> Unit,
         private val onViewDeploymentsClick: (PagesProject) -> Unit
     ) : RecyclerView.Adapter<ProjectAdapter.ViewHolder>() {
@@ -1148,6 +1340,10 @@ class PagesFragment : Fragment() {
                 
                 binding.configKvBtn.setOnClickListener {
                     onConfigKvClick(project)
+                }
+                
+                binding.configD1Btn.setOnClickListener {
+                    onConfigD1Click(project)
                 }
                 
                 binding.configR2Btn.setOnClickListener {
@@ -1258,6 +1454,47 @@ class PagesR2BindingsAdapter(
             
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(r2Binding)
+            }
+        }
+    }
+}
+
+class PagesD1BindingsAdapter(
+    private val onDeleteClick: (Pair<String, String>) -> Unit
+) : RecyclerView.Adapter<PagesD1BindingsAdapter.BindingViewHolder>() {
+    
+    private var bindings = listOf<Pair<String, String>>()
+    
+    fun submitList(newBindings: List<Pair<String, String>>) {
+        bindings = newBindings
+        notifyDataSetChanged()
+    }
+    
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
+        val binding = com.muort.upworker.databinding.ItemPagesD1BindingBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return BindingViewHolder(binding)
+    }
+    
+    override fun onBindViewHolder(holder: BindingViewHolder, position: Int) {
+        holder.bind(bindings[position])
+    }
+    
+    override fun getItemCount() = bindings.size
+    
+    inner class BindingViewHolder(
+        private val binding: com.muort.upworker.databinding.ItemPagesD1BindingBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+        
+        fun bind(d1Binding: Pair<String, String>) {
+            binding.bindingNameText.text = d1Binding.first
+            binding.databaseNameText.text = "Database: ${d1Binding.second}"
+            
+            binding.deleteBindingBtn.setOnClickListener {
+                onDeleteClick(d1Binding)
             }
         }
     }

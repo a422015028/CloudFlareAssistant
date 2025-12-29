@@ -58,7 +58,7 @@ class WorkerRepository @Inject constructor(
             // Create metadata or use default
             val finalMetadata = metadata ?: WorkerMetadata(
                 mainModule = scriptFile.name,
-                compatibilityDate = "2024-12-01" // Use recent stable date
+                compatibilityDate = "2022-01-01" // Use stable compatibility date
             )
             
             // Convert metadata to JSON RequestBody
@@ -131,7 +131,7 @@ class WorkerRepository @Inject constructor(
         // Create metadata with KV bindings
         val metadata = WorkerMetadata(
             mainModule = scriptFile.name,
-            compatibilityDate = "2024-12-01",
+            compatibilityDate = "2022-01-01",
             bindings = bindings
         )
         
@@ -323,13 +323,13 @@ class WorkerRepository @Inject constructor(
             // Create settings request
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = "2024-12-01"
+                compatibilityDate = "2022-01-01"
             )
             
             val settingsJson = gson.toJson(settingsRequest)
-            Timber.d("Settings request: $settingsJson")
+            Timber.d("KV Settings request: $settingsRequest")
             
-            // Convert to RequestBody with multipart content type
+            // Convert to RequestBody for multipart
             val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
             
             // Call API to update settings
@@ -399,13 +399,13 @@ class WorkerRepository @Inject constructor(
             // Create settings request
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = "2024-12-01"
+                compatibilityDate = "2022-01-01"
             )
             
             val settingsJson = gson.toJson(settingsRequest)
-            Timber.d("Settings request: $settingsJson")
+            Timber.d("R2 Settings request: $settingsRequest")
             
-            // Convert to RequestBody with multipart content type
+            // Convert to RequestBody for multipart
             val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
             
             // Call API to update settings
@@ -427,6 +427,84 @@ class WorkerRepository @Inject constructor(
                     ?: response.message()
                 Timber.e("Failed to update bindings: Response code: ${response.code()}, Error body: $errorBody")
                 Resource.Error("Failed to update bindings: $errorMsg")
+            }
+        }
+    }
+    
+    /**
+     * Update D1 database bindings for an existing Worker Script
+     * Only updates the bindings configuration, does NOT re-upload script code
+     * @param account The Cloudflare account
+     * @param scriptName Name of the existing script
+     * @param d1Bindings List of (variable name, database id) pairs
+     * @return Resource indicating success or error
+     */
+    suspend fun updateWorkerD1Bindings(
+        account: Account,
+        scriptName: String,
+        d1Bindings: List<Pair<String, String>>
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            Timber.d("Updating D1 bindings for script '$scriptName' with ${d1Bindings.size} bindings")
+            
+            // First, get existing settings to preserve other bindings
+            val existingBindings = mutableListOf<WorkerBinding>()
+            val settingsResult = getWorkerSettings(account, scriptName)
+            if (settingsResult is Resource.Success) {
+                settingsResult.data.bindings?.forEach { binding ->
+                    // Keep all non-D1 bindings
+                    if (binding.type != "d1") {
+                        existingBindings.add(binding)
+                    }
+                }
+            }
+            
+            // Convert pairs to WorkerBinding objects
+            val d1BindingsList = d1Bindings.map { (name, databaseId) ->
+                Timber.d("Adding D1 binding: $name -> $databaseId")
+                WorkerBinding(
+                    type = "d1",
+                    name = name,
+                    databaseId = databaseId
+                )
+            }
+            
+            // Combine existing bindings with new D1 bindings
+            val allBindings = existingBindings + d1BindingsList
+            Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${d1BindingsList.size} D1)")
+            
+            // Create settings request
+            val settingsRequest = WorkerSettingsRequest(
+                bindings = allBindings,
+                compatibilityDate = "2022-01-01"
+            )
+            
+            Timber.d("D1 Settings request: $settingsRequest")
+            
+            val settingsJson = gson.toJson(settingsRequest)
+            
+            // Convert to RequestBody for multipart
+            val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
+            
+            // Call API to update settings
+            val response = api.updateWorkerSettings(
+                token = "Bearer ${account.token}",
+                accountId = account.accountId,
+                scriptName = scriptName,
+                settings = settingsBody
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                Timber.d("Successfully updated D1 bindings for '$scriptName'")
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("Update successful but no result returned")
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Timber.e("Failed to update D1 bindings: Response code: ${response.code()}, Error body: $errorBody")
+                Resource.Error("Failed to update D1 bindings: $errorMsg")
             }
         }
     }
@@ -495,13 +573,13 @@ class WorkerRepository @Inject constructor(
             // Create settings request
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = "2024-12-01"
+                compatibilityDate = "2022-01-01"
             )
             
             val settingsJson = gson.toJson(settingsRequest)
             Timber.d("Settings request: $settingsJson")
             
-            // Convert to RequestBody
+            // Convert to RequestBody for multipart
             val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
             
             // Call API to update settings
@@ -571,13 +649,13 @@ class WorkerRepository @Inject constructor(
             // Create settings request
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = "2024-12-01"
+                compatibilityDate = "2022-01-01"
             )
             
             val settingsJson = gson.toJson(settingsRequest)
             Timber.d("Settings request (secrets hidden): bindings count = ${allBindings.size}")
             
-            // Convert to RequestBody
+            // Convert to RequestBody for multipart
             val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
             
             // Call API to update settings

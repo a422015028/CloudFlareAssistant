@@ -399,6 +399,28 @@ interface CloudFlareApi {
         @Path("bucket_name") bucketName: String
     ): Response<CloudFlareResponse<Unit>>
     
+    // ==================== D1 ====================
+    
+    @GET("accounts/{account_id}/d1/database")
+    suspend fun listD1Databases(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<D1Database>>>
+    
+    @POST("accounts/{account_id}/d1/database")
+    suspend fun createD1Database(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body database: D1DatabaseRequest
+    ): Response<CloudFlareResponse<D1Database>>
+    
+    @DELETE("accounts/{account_id}/d1/database/{database_id}")
+    suspend fun deleteD1Database(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("database_id") databaseId: String
+    ): Response<CloudFlareResponse<Unit>>
+    
     // ==================== R2 Custom Domains ====================
     
     @GET("accounts/{account_id}/r2/buckets/{bucket_name}/custom_domains")

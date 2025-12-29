@@ -115,7 +115,7 @@ data class WorkerBinding(
     @SerializedName("name") val name: String, // Variable name in worker
     @SerializedName("namespace_id") val namespaceId: String? = null, // For KV
     @SerializedName("bucket_name") val bucketName: String? = null, // For R2
-    @SerializedName("database_id") val databaseId: String? = null, // For D1
+    @SerializedName("id") val databaseId: String? = null, // For D1 - Cloudflare expects "id" not "database_id"
     @SerializedName("service") val service: String? = null, // For service bindings
     @SerializedName("environment") val environment: String? = null,
     @SerializedName("text") val text: String? = null, // For plain_text and secret_text bindings
@@ -297,6 +297,50 @@ data class BuildConfig(
     @SerializedName("web_analytics_token") val webAnalyticsToken: String?
 )
 
+// ==================== Pages Bindings ====================
+
+data class KvBinding(
+    @SerializedName("namespace_id") val namespaceId: String
+)
+
+data class R2Binding(
+    @SerializedName("name") val name: String
+)
+
+data class D1Binding(
+    @SerializedName("id") val id: String
+)
+
+data class DurableObjectBinding(
+    @SerializedName("class_name") val className: String
+)
+
+data class ServiceBinding(
+    @SerializedName("service") val service: String,
+    @SerializedName("environment") val environment: String = "production"
+)
+
+data class KvBindingUpdate(
+    @SerializedName("namespace_id") val namespaceId: String
+)
+
+data class R2BindingUpdate(
+    @SerializedName("name") val name: String
+)
+
+data class D1BindingUpdate(
+    @SerializedName("id") val id: String
+)
+
+data class DurableObjectBindingUpdate(
+    @SerializedName("class_name") val className: String
+)
+
+data class ServiceBindingUpdate(
+    @SerializedName("service") val service: String,
+    @SerializedName("environment") val environment: String = "production"
+)
+
 data class DeploymentConfigs(
     @SerializedName("preview") val preview: EnvironmentConfig?,
     @SerializedName("production") val production: EnvironmentConfig?
@@ -376,54 +420,6 @@ data class PagesDomainRequest(
     @SerializedName("name") val name: String
 )
 
-// ==================== Bindings ====================
-
-data class KvBinding(
-    @SerializedName("namespace_id") val namespaceId: String
-)
-
-data class KvBindingUpdate(
-    @SerializedName("namespace_id") val namespaceId: String
-)
-
-data class R2Binding(
-    @SerializedName("name") val name: String
-)
-
-data class R2BindingUpdate(
-    @SerializedName("name") val name: String
-)
-
-data class D1Binding(
-    @SerializedName("id") val id: String
-)
-
-data class D1BindingUpdate(
-    @SerializedName("id") val id: String
-)
-
-data class DurableObjectBinding(
-    @SerializedName("namespace_id") val namespaceId: String,
-    @SerializedName("class_name") val className: String,
-    @SerializedName("script_name") val scriptName: String? = null
-)
-
-data class DurableObjectBindingUpdate(
-    @SerializedName("namespace_id") val namespaceId: String,
-    @SerializedName("class_name") val className: String,
-    @SerializedName("script_name") val scriptName: String? = null
-)
-
-data class ServiceBinding(
-    @SerializedName("service") val service: String,
-    @SerializedName("environment") val environment: String? = null
-)
-
-data class ServiceBindingUpdate(
-    @SerializedName("service") val service: String,
-    @SerializedName("environment") val environment: String? = null
-)
-
 // ==================== R2 ====================
 
 data class R2Bucket(
@@ -499,6 +495,19 @@ data class R2CustomDomainRequest(
     @SerializedName("domain") val domain: String,
     @SerializedName("zoneId") val zoneId: String,
     @SerializedName("enabled") val enabled: Boolean = true
+)
+
+// ==================== D1 ====================
+
+data class D1Database(
+    @SerializedName("uuid") val uuid: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("created_at") val createdAt: String?,
+    @SerializedName("version") val version: String?
+)
+
+data class D1DatabaseRequest(
+    @SerializedName("name") val name: String
 )
 
 // ==================== UI State ====================
