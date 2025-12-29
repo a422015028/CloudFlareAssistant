@@ -130,6 +130,14 @@ class HomeFragment : Fragment() {
             }, 150)
         }
         
+        binding.d1Card.setOnClickListener {
+            AnimationHelper.scaleDown(it)
+            it.postDelayed({
+                // TODO: Navigate to D1 fragment when implemented
+                showToast("D1数据库功能开发中...")
+            }, 150)
+        }
+        
         binding.backupCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
@@ -151,7 +159,9 @@ class HomeFragment : Fragment() {
             binding.routeCard,
             binding.kvCard,
             binding.r2Card,
-            binding.backupCard
+            binding.d1Card,
+            binding.backupCard,
+            binding.logCard
         )
         
         cards.forEachIndexed { index, card ->
