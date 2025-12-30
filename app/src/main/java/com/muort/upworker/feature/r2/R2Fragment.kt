@@ -228,6 +228,13 @@ class R2Fragment : Fragment() {
                 }
                 
                 launch {
+                    r2ViewModel.objectsLoadingState.collect { isLoading ->
+                        binding.objectProgressBar.visibility = 
+                            if (isLoading) View.VISIBLE else View.GONE
+                    }
+                }
+                
+                launch {
                     r2ViewModel.message.collect { message ->
                         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                     }

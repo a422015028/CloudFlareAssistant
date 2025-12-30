@@ -77,7 +77,7 @@
 ```
 核心框架：
 ├── Kotlin 1.9.20              # 主开发语言
-├── Android SDK 25-34          # 支持 Android 7.0+
+├── Android SDK 26-36          # 支持 Android 8.0+
 └── Gradle 8.2.0               # 构建系统
 
 Jetpack 组件：

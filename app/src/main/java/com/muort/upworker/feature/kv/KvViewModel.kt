@@ -36,6 +36,9 @@ class KvViewModel @Inject constructor(
     private val _loadingState = MutableStateFlow(false)
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
     
+    private val _keysLoadingState = MutableStateFlow(false)
+    val keysLoadingState: StateFlow<Boolean> = _keysLoadingState.asStateFlow()
+    
     private val _message = MutableSharedFlow<String>()
     val message: SharedFlow<String> = _message.asSharedFlow()
     
@@ -117,7 +120,7 @@ class KvViewModel @Inject constructor(
     
     fun loadKeys(account: Account, namespaceId: String) {
         viewModelScope.launch {
-            _loadingState.value = true
+            _keysLoadingState.value = true
             
             when (val result = kvRepository.listKeys(account, namespaceId)) {
                 is Resource.Success -> {
@@ -137,7 +140,7 @@ class KvViewModel @Inject constructor(
                 is Resource.Loading -> {}
             }
             
-            _loadingState.value = false
+            _keysLoadingState.value = false
         }
     }
     

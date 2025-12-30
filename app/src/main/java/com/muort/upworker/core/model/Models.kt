@@ -506,8 +506,34 @@ data class D1Database(
     @SerializedName("version") val version: String?
 )
 
+
 data class D1DatabaseRequest(
     @SerializedName("name") val name: String
+)
+
+// D1 表结构
+data class D1Table(
+    @SerializedName("name") val name: String,
+    @SerializedName("columns") val columns: List<D1Column>?
+)
+
+data class D1Column(
+    @SerializedName("name") val name: String,
+    @SerializedName("type") val type: String?
+)
+
+// D1 SQL 查询请求
+data class D1QueryRequest(
+    @SerializedName("sql") val sql: String,
+    @SerializedName("params") val params: List<Any>? = null
+)
+
+// D1 SQL 查询结果
+data class D1QueryResult(
+    @SerializedName("results") val results: List<Map<String, Any?>>? = null,
+    @SerializedName("success") val success: Boolean = true,
+    @SerializedName("error") val error: String? = null,
+    @SerializedName("meta") val meta: Any? = null
 )
 
 // ==================== UI State ====================

@@ -1,81 +1,119 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Clean Project",
-            "type": "shell",
-            "command": "./gradlew",
-            "args": ["clean"],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Build Debug APK",
-            "type": "shell",
-            "command": "./gradlew",
-            "args": ["assembleDebug"],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": ["$gradle"]
-        },
-        {
-            "label": "Build Release APK",
-            "type": "shell",
-            "command": "./gradlew",
-            "args": ["assembleRelease"],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": ["$gradle"]
-        },
-        {
-            "label": "Install Debug APK",
-            "type": "shell",
-            "command": "./gradlew",
-            "args": ["installDebug"],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": ["$gradle"],
-            "dependsOn": ["Build Debug APK"]
-        },
-        {
-            "label": "Run Unit Tests",
-            "type": "shell",
-            "command": "./gradlew",
-            "args": ["test"],
-            "group": "test",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": ["$gradle"]
-        },
-        {
-            "label": "Gradle Sync",
-            "type": "shell",
-            "command": "./gradlew",
-            "args": ["--refresh-dependencies"],
-            "group": "build",
-            "presentation": {
-                "reveal": "always",
-                "panel": "new"
-            },
-            "problemMatcher": []
-        }
-    ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Clean Project",
+			"type": "shell",
+			"command": "./gradlew",
+			"args": [
+				"clean"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Build Debug APK",
+			"type": "shell",
+			"command": "./gradlew",
+			"args": [
+				"assembleDebug"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+			"problemMatcher": [
+				"$gradle"
+			]
+		},
+		{
+			"label": "Build Release APK",
+			"type": "shell",
+			"command": "./gradlew",
+			"args": [
+				"assembleRelease"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+			"problemMatcher": [
+				"$gradle"
+			]
+		},
+		{
+			"label": "Install Debug APK",
+			"type": "shell",
+			"command": "./gradlew",
+			"args": [
+				"installDebug"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+			"problemMatcher": [
+				"$gradle"
+			],
+			"dependsOn": [
+				"Build Debug APK"
+			]
+		},
+		{
+			"label": "Run Unit Tests",
+			"type": "shell",
+			"command": "./gradlew",
+			"args": [
+				"test"
+			],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+			"problemMatcher": [
+				"$gradle"
+			]
+		},
+		{
+			"label": "Gradle Sync",
+			"type": "shell",
+			"command": "./gradlew",
+			"args": [
+				"--refresh-dependencies"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Clean Project",
+			"type": "shell",
+			"command": "./gradlew",
+			"args": [
+				"clean"
+			]
+		},
+		{
+			"label": "Assemble Debug APK",
+			"type": "shell",
+			"command": "./gradlew",
+			"args": [
+				"assembleDebug"
+			]
+		}
+	]
 }

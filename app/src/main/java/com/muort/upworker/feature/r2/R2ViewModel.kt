@@ -35,6 +35,9 @@ class R2ViewModel @Inject constructor(
     private val _loadingState = MutableStateFlow(false)
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
     
+    private val _objectsLoadingState = MutableStateFlow(false)
+    val objectsLoadingState: StateFlow<Boolean> = _objectsLoadingState.asStateFlow()
+    
     private val _message = MutableSharedFlow<String>()
     val message: SharedFlow<String> = _message.asSharedFlow()
     
@@ -119,7 +122,7 @@ class R2ViewModel @Inject constructor(
         viewModelScope.launch {
             // Clear previous objects immediately
             _objects.value = emptyList()
-            _loadingState.value = true
+            _objectsLoadingState.value = true
             
             when (val result = r2Repository.listObjects(account, bucketName, prefix)) {
                 is Resource.Success -> {
@@ -132,7 +135,7 @@ class R2ViewModel @Inject constructor(
                 is Resource.Loading -> {}
             }
             
-            _loadingState.value = false
+            _objectsLoadingState.value = false
         }
     }
     
@@ -197,8 +200,6 @@ class R2ViewModel @Inject constructor(
     
     fun loadCustomDomains(account: Account, bucketName: String) {
         viewModelScope.launch {
-            _loadingState.value = true
-            
             when (val result = r2Repository.listCustomDomains(account, bucketName)) {
                 is Resource.Success -> {
                     _customDomains.value = result.data
@@ -210,8 +211,6 @@ class R2ViewModel @Inject constructor(
                 }
                 is Resource.Loading -> {}
             }
-            
-            _loadingState.value = false
         }
     }
     

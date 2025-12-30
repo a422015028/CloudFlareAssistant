@@ -133,8 +133,7 @@ class HomeFragment : Fragment() {
         binding.d1Card.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                // TODO: Navigate to D1 fragment when implemented
-                showToast("D1数据库功能开发中...")
+                findNavController().navigate(R.id.action_home_to_d1)
             }, 150)
         }
         

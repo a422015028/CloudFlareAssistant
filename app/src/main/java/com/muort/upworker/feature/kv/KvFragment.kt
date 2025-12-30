@@ -131,6 +131,11 @@ class KvFragment : Fragment() {
                     kvViewModel.loadingState.collect { isLoading ->
                         binding.namespaceProgressBar.visibility = 
                             if (isLoading) View.VISIBLE else View.GONE
+                    }
+                }
+                
+                launch {
+                    kvViewModel.keysLoadingState.collect { isLoading ->
                         binding.keyProgressBar.visibility = 
                             if (isLoading) View.VISIBLE else View.GONE
                     }

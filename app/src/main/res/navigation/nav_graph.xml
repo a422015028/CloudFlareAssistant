@@ -42,6 +42,9 @@
         <action
             android:id="@+id/action_home_to_backup"
             app:destination="@id/backupFragment" />
+        <action
+            android:id="@+id/action_home_to_d1"
+            app:destination="@id/d1ManagerFragment" />
     </fragment>
 
     <fragment
@@ -97,11 +100,31 @@
         android:label="Pages 项目"
         tools:layout="@layout/fragment_pages" />
 
+
     <fragment
         android:id="@+id/r2Fragment"
         android:name="com.muort.upworker.feature.r2.R2Fragment"
         android:label="R2 存储"
         tools:layout="@layout/fragment_r2" />
+
+
+    <fragment
+        android:id="@+id/d1ManagerFragment"
+        android:name="com.muort.upworker.feature.d1.D1ManagerFragment"
+        android:label="D1 数据库"
+        tools:layout="@layout/fragment_d1_manager">
+
+        <action
+            android:id="@+id/action_d1_to_data_viewer"
+            app:destination="@id/d1DataViewerFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/d1DataViewerFragment"
+        android:name="com.muort.upworker.feature.d1.D1DataViewerFragment"
+        android:label="数据查看器"
+        tools:layout="@layout/fragment_d1_data_viewer" />
 
     <fragment
         android:id="@+id/backupFragment"

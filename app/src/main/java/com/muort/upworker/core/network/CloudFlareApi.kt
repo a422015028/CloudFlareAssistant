@@ -420,7 +420,58 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String,
         @Path("database_id") databaseId: String
     ): Response<CloudFlareResponse<Unit>>
-    
+
+    // ==================== D1 Table & SQL ====================
+
+    /**
+     * 列出数据库下所有表
+     * GET /accounts/{account_id}/d1/database/{database_id}/tables
+     */
+    @GET("accounts/{account_id}/d1/database/{database_id}/tables")
+    suspend fun listD1Tables(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("database_id") databaseId: String
+    ): Response<CloudFlareResponse<List<D1Table>>>
+
+    /**
+     * 执行 SQL 语句（支持查询/增删改/DDL）
+     * POST /accounts/{account_id}/d1/database/{database_id}/query
+     * body: { "sql": "...", "params": [...] }
+     */
+    @POST("accounts/{account_id}/d1/database/{database_id}/query")
+    suspend fun executeD1Query(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("database_id") databaseId: String,
+        @Body query: D1QueryRequest
+    ): Response<Map<String, @JvmSuppressWildcards Any>>
+
+    /**
+     * 导出数据库
+     * GET /accounts/{account_id}/d1/database/{database_id}/backup
+     */
+    @GET("accounts/{account_id}/d1/database/{database_id}/backup")
+    suspend fun exportD1Database(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("database_id") databaseId: String
+    ): Response<ResponseBody>
+
+    /**
+     * 导入数据库
+     * POST /accounts/{account_id}/d1/database/{database_id}/restore
+     * body: Multipart sqlite file
+     */
+    @Multipart
+    @POST("accounts/{account_id}/d1/database/{database_id}/restore")
+    suspend fun importD1Database(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("database_id") databaseId: String,
+        @Part file: MultipartBody.Part
+    ): Response<CloudFlareResponse<Unit>>
+
     // ==================== R2 Custom Domains ====================
     
     @GET("accounts/{account_id}/r2/buckets/{bucket_name}/custom_domains")
