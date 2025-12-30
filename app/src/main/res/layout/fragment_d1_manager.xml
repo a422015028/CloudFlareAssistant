@@ -159,27 +159,6 @@
                 android:src="@android:drawable/ic_media_play"
                 android:contentDescription="执行 SQL" />
 
-            <!-- 导入导出按钮 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="end"
-                android:layout_marginTop="8dp">
-
-                <Button
-                    android:id="@+id/btnImport"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="导入" />
-                <Button
-                    android:id="@+id/btnExport"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="导出"
-                    android:layout_marginStart="8dp" />
-            </LinearLayout>
-
         </LinearLayout>
 
     </LinearLayout>

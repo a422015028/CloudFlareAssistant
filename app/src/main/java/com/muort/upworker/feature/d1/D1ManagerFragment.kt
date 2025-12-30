@@ -159,12 +159,6 @@ class D1ManagerFragment : Fragment() {
         binding.fabExecuteSql.setOnClickListener {
             showGlobalExecuteSqlDialog()
         }
-        binding.btnImport.setOnClickListener {
-            Snackbar.make(binding.root, "暂未实现导入功能", Snackbar.LENGTH_SHORT).show()
-        }
-        binding.btnExport.setOnClickListener {
-            Snackbar.make(binding.root, "暂未实现导出功能", Snackbar.LENGTH_SHORT).show()
-        }
     }
 
     private fun observeViewModel() {

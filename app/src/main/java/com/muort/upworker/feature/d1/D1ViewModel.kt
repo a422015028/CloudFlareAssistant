@@ -17,18 +17,12 @@ class D1ViewModel @Inject constructor(
 ) : ViewModel() {
 
     suspend fun deleteDatabase(account: Account, databaseId: String): Boolean {
-        return when (val result = d1Repository.deleteDatabase(account, databaseId)) {
-            is Resource.Success -> true
-            else -> false
-        }
+        return d1Repository.deleteDatabase(account, databaseId) is Resource.Success
     }
 
 
     suspend fun createDatabase(account: Account, name: String): Boolean {
-        return when (val result = d1Repository.createDatabase(account, name)) {
-            is Resource.Success -> true
-            else -> false
-        }
+        return d1Repository.createDatabase(account, name) is Resource.Success
     }
     private val _databases = MutableStateFlow<UiState<List<D1Database>>>(UiState.Idle)
     val databases: StateFlow<UiState<List<D1Database>>> = _databases
