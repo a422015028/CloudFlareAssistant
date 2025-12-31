@@ -159,11 +159,16 @@ class D1Repository @Inject constructor(
                 val success = body["success"] as? Boolean ?: false
                 if (success) {
                     val resultArray = body["result"] as? List<*> ?: emptyList<Any>()
+                    @Suppress("UNCHECKED_CAST")
                     val firstResult = resultArray.firstOrNull() as? Map<String, Any?>
+                    @Suppress("UNCHECKED_CAST")
                     val results = firstResult?.get("results") as? List<*> ?: emptyList<Any>()
                     val meta = firstResult?.get("meta")
                     val d1Result = com.muort.upworker.core.model.D1QueryResult(
-                        results = results.mapNotNull { it as? Map<String, Any?> },
+                        results = results.mapNotNull {
+                            @Suppress("UNCHECKED_CAST")
+                            it as? Map<String, Any?>
+                        },
                         success = true,
                         error = null,
                         meta = meta

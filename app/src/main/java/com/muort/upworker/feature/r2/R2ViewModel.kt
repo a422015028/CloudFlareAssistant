@@ -200,6 +200,7 @@ class R2ViewModel @Inject constructor(
     
     fun loadCustomDomains(account: Account, bucketName: String) {
         viewModelScope.launch {
+            _loadingState.value = true
             when (val result = r2Repository.listCustomDomains(account, bucketName)) {
                 is Resource.Success -> {
                     _customDomains.value = result.data
@@ -211,6 +212,7 @@ class R2ViewModel @Inject constructor(
                 }
                 is Resource.Loading -> {}
             }
+            _loadingState.value = false
         }
     }
     

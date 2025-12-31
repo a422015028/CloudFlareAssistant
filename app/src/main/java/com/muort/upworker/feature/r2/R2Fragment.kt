@@ -34,6 +34,9 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class R2Fragment : Fragment() {
+
+        private lateinit var bucketAdapter: BucketAdapter
+        private lateinit var objectAdapter: ObjectAdapter
     
     /**
      * 文件名缩短显示，保留后缀，超长用 ... 省略
@@ -84,10 +87,9 @@ class R2Fragment : Fragment() {
     private val accountViewModel: AccountViewModel by activityViewModels()
     private val r2ViewModel: R2ViewModel by viewModels()
     
-    private lateinit var bucketAdapter: BucketAdapter
-    private lateinit var objectAdapter: ObjectAdapter
     private var currentBucket: R2Bucket? = null
     private var downloadData: ByteArray? = null
+    private var isLoadingCustomDomains = false
     
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
