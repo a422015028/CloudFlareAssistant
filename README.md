@@ -9,8 +9,6 @@
 
 **CloudFlare Assistant** 是一款功能全面的 Cloudflare 服务管理 Android 应用，采用现代化架构和 Material Design 3 设计语言，提供完整的 Cloudflare 生态系统管理能力。
 
-**当前版本**: v6.6 | **最后更新**: 2024年12月31日
-
 </div>
 
 ---
