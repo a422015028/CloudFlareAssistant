@@ -90,27 +90,31 @@
 ```
 核心框架：
 ├── Kotlin 1.9.20              # 主开发语言
-├── Android SDK 26-36          # 支持 Android 8.0+
-└── Gradle 8.2.0               # 构建系统
+├── Android SDK 26-36          # 支持 Android 8.0+ (minSdk=26, targetSdk=36)
+└── Gradle 8.13                # 构建系统
 
 Jetpack 组件：
 ├── Room 2.6.1                 # 数据持久化
 ├── Navigation 2.7.6           # 导航管理
-├── ViewModel & LiveData       # 架构组件
-├── DataStore                  # 偏好设置
-└── WorkManager                # 后台任务
+├── ViewModel & LiveData 2.7.0 # 架构组件
+├── DataStore 1.0.0            # 偏好设置
+└── WorkManager 2.9.0          # 后台任务
 
 网络层：
 ├── Retrofit 2.9.0             # HTTP 客户端
-├── OkHttp 4.12.0              # 网络层 + 自签名 S3 API (R2)
-└── Gson 2.10.1                # JSON 解析
+├── OkHttp 4.12.0             # 网络层 + 自签名 S3 API (R2)
+└── Gson 2.10.1               # JSON 解析
 
 依赖注入：
-└── Hilt 2.48                  # 依赖注入框架
+└── Hilt 2.48                 # 依赖注入框架
 
 UI 设计：
-├── Material Design 3          # 设计语言
-└── RecyclerView               # 列表展示
+├── Material Design 1.11.0     # 设计语言
+└── RecyclerView              # 列表展示 (通过其他依赖)
+
+其他工具：
+├── Coroutines 1.7.3          # 协程支持
+└── Timber 5.0.1              # 日志框架
 ```
 
 ### 项目结构
@@ -119,64 +123,78 @@ UI 设计：
 app/
 ├── src/main/
 │   ├── java/com/muort/upworker/
-│   │   ├── core/                    # 核心层
-│   │   │   ├── database/            # Room 数据库
-│   │   │   │   ├── AppDatabase.kt   # 数据库实例
-│   │   │   │   ├── AccountDao.kt    # 账号 DAO
-│   │   │   │   └── Migration.kt     # 数据库迁移
-│   │   │   ├── network/             # 网络层
-│   │   │   │   ├── CloudFlareApi.kt # API 接口
-│   │   │   │   ├── R2S3Client.kt    # R2 客户端
-│   │   │   │   └── WebDavClient.kt  # WebDAV 客户端
-│   │   │   ├── model/               # 数据模型
-│   │   │   │   └── Models.kt        # 实体类
-│   │   │   ├── repository/          # 数据仓库
-│   │   │   │   ├── AccountRepository.kt
-│   │   │   │   ├── WorkerRepository.kt
-│   │   │   │   ├── DnsRepository.kt
-│   │   │   │   ├── KvRepository.kt
-│   │   │   │   ├── PagesRepository.kt
-│   │   │   │   ├── R2Repository.kt
-│   │   │   │   ├── D1Repository.kt   # D1 数据库仓库
-│   │   │   │   └── LogRepository.kt  # 日志仓库
-│   │   │   └── util/                # 工具类
-│   │   │       └── Extensions.kt
-│   │   ├── feature/                 # 功能模块
-│   │   │   ├── account/             # 账号管理
-│   │   │   │   ├── AccountViewModel.kt
-│   │   │   │   └── AccountListFragment.kt
-│   │   │   ├── d1/                  # D1 数据库
-│   │   │   │   └── D1ManagerFragment.kt
-│   │   │   ├── worker/              # Workers
-│   │   │   │   └── WorkerFragment.kt
-│   │   │   ├── route/               # 路由
-│   │   │   │   └── RouteFragment.kt
-│   │   │   ├── dns/                 # DNS
-│   │   │   │   └── DnsFragment.kt
-│   │   │   ├── kv/                  # KV 存储
-│   │   │   │   └── KvFragment.kt
-│   │   │   ├── pages/               # Pages
-│   │   │   │   └── PagesFragment.kt
-│   │   │   ├── r2/                  # R2 存储
-│   │   │   │   └── R2Fragment.kt
-│   │   │   ├── log/                 # 日志系统
-│   │   │   │   └── LogActivity.kt
-│   │   │   ├── home/                # 主界面
-│   │   │   │   └── HomeFragment.kt
-│   │   │   └── backup/              # 备份
-│   │   │       └── BackupFragment.kt
-│   │   ├── adapter/                 # 适配器
-│   │   │   └── AccountSelectionAdapter.kt
-│   │   ├── util/                    # 工具类
-│   │   │   └── DialogUtils.kt       # 对话框工具
-│   │   ├── MainActivity.kt          # 主界面
-│   │   └── CloudFlareApp.kt         # Application
-│   ├── res/                         # 资源文件
-│   │   ├── layout/                  # 布局文件
-│   │   ├── values/                  # 配置文件
-│   │   └── drawable/                # 图片资源
-│   └── AndroidManifest.xml          # 清单文件
-└── build.gradle.kts                 # 构建配置
+│   │   ├── AccountSelectionAdapter.kt    # 账号选择适配器
+│   │   ├── CloudFlareApp.kt              # Application 类
+│   │   ├── MainActivity.kt               # 主 Activity
+│   │   ├── core/                         # 核心层
+│   │   │   ├── database/                 # 数据库层
+│   │   │   │   ├── AccountDao.kt         # 账号数据访问对象
+│   │   │   │   ├── AppDatabase.kt        # 数据库实例
+│   │   │   │   ├── DatabaseModule.kt     # 数据库依赖注入模块
+│   │   │   │   ├── WebDavConfigDao.kt    # WebDAV 配置 DAO
+│   │   │   │   └── ZoneDao.kt            # Zone 数据访问对象
+│   │   │   ├── log/                      # 日志相关
+│   │   │   ├── model/                    # 数据模型
+│   │   │   ├── network/                  # 网络层
+│   │   │   │   ├── AppModule.kt          # 应用依赖注入模块
+│   │   │   │   ├── CloudFlareApi.kt      # Cloudflare API 接口
+│   │   │   │   ├── LogOkHttpInterceptor.kt # 日志拦截器
+│   │   │   │   ├── NetworkModule.kt      # 网络依赖注入模块
+│   │   │   │   └── R2S3Client.kt         # R2 S3 客户端
+│   │   │   ├── repository/               # 数据仓库层
+│   │   │   │   ├── AccountRepository.kt  # 账号仓库
+│   │   │   │   ├── BackupRepository.kt   # 备份仓库
+│   │   │   │   ├── D1Repository.kt       # D1 数据库仓库
+│   │   │   │   ├── DnsRepository.kt      # DNS 仓库
+│   │   │   │   ├── KvRepository.kt       # KV 仓库
+│   │   │   │   ├── PagesRepository.kt    # Pages 仓库
+│   │   │   │   ├── R2Repository.kt       # R2 仓库
+│   │   │   │   ├── WorkerRepository.kt   # Worker 仓库
+│   │   │   │   └── ZoneRepository.kt     # Zone 仓库
+│   │   │   ├── util/                     # 工具类
+│   │   │   └── webdav/                   # WebDAV 相关
+│   │   └── feature/                      # 功能模块层
+│   │       ├── account/                  # 账号管理模块
+│   │       │   ├── AccountEditFragment.kt    # 账号编辑界面
+│   │       │   ├── AccountListFragment.kt    # 账号列表界面
+│   │       │   └── AccountViewModel.kt       # 账号 ViewModel
+│   │       ├── backup/                   # 备份模块
+│   │       │   ├── BackupFilesAdapter.kt     # 备份文件适配器
+│   │       │   ├── BackupFragment.kt         # 备份界面
+│   │       │   └── BackupViewModel.kt        # 备份 ViewModel
+│   │       ├── d1/                       # D1 数据库模块
+│   │       │   ├── D1DataAdapter.kt          # D1 数据适配器
+│   │       │   ├── D1DataViewerFragment.kt   # D1 数据查看界面
+│   │       │   ├── D1ManagerFragment.kt      # D1 管理界面
+│   │       │   └── D1ViewModel.kt            # D1 ViewModel
+│   │       ├── dns/                      # DNS 模块
+│   │       │   ├── DnsFragment.kt            # DNS 界面
+│   │       │   └── DnsViewModel.kt           # DNS ViewModel
+│   │       ├── home/                     # 主界面模块
+│   │       │   └── HomeFragment.kt           # 主界面
+│   │       ├── kv/                       # KV 存储模块
+│   │       │   ├── KvFragment.kt             # KV 界面
+│   │       │   └── KvViewModel.kt            # KV ViewModel
+│   │       ├── log/                      # 日志模块
+│   │       │   └── LogActivity.kt            # 日志 Activity
+│   │       ├── pages/                    # Pages 模块
+│   │       │   ├── PagesFragment.kt          # Pages 界面
+│   │       │   └── PagesViewModel.kt         # Pages ViewModel
+│   │       ├── r2/                       # R2 存储模块
+│   │       │   ├── ObjectAdapter.kt          # 对象适配器
+│   │       │   ├── R2Fragment.kt             # R2 界面
+│   │       │   └── R2ViewModel.kt            # R2 ViewModel
+│   │       ├── route/                    # 路由模块
+│   │       │   └── RouteFragment.kt          # 路由界面
+│   │       └── worker/                   # Worker 模块
+│   │           ├── WorkerFragment.kt         # Worker 界面
+│   │           └── WorkerViewModel.kt        # Worker ViewModel
+│   ├── res/                              # 资源文件
+│   │   ├── layout/                       # 布局文件
+│   │   ├── values/                       # 值文件
+│   │   └── drawable/                     # 图片资源
+│   └── AndroidManifest.xml               # 应用清单
+└── build.gradle.kts                      # 应用构建配置
 ```
 
 ---
@@ -187,7 +205,7 @@ app/
 - **Android Studio**: Hedgehog | 2023.1.1 或更高版本
 - **JDK**: 17
 - **Android SDK**: API 26+ (Android 8.0+)
-- **Gradle**: 8.0+
+- **Gradle**: 8.13
 
 ### 编译步骤
 
@@ -216,14 +234,17 @@ cd CloudFlareAssistant
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. 进入 **My Profile** → **API Tokens**
 3. 点击 **Create Token**
-4. 选择模板或自定义权限：
-   - **Workers Scripts**: Edit
-   - **Workers Routes**: Edit
-   - **DNS**: Edit
-   - **Account Settings**: Read
-   - **Workers KV Storage**: Edit
-   - **Pages**: Edit
-   - **R2**: Edit
+4. 选择模板或自定义权限（根据应用功能需要以下权限）：
+   - **Workers Scripts**: Edit（上传、删除、获取Worker脚本）
+   - **Workers Routes**: Edit（创建、更新、删除路由规则）
+   - **Workers Custom Domains**: Edit（管理Worker自定义域名）
+   - **DNS**: Edit（DNS记录的增删改查）
+   - **Workers KV Storage**: Edit（KV命名空间和键值对管理）
+   - **Pages**: Edit（Pages项目、部署和域名管理）
+   - **R2**: Edit（R2存储桶和自定义域名管理）
+   - **D1**: Edit（D1数据库创建、删除和SQL执行）
+   - **Account Settings**: Read（获取账号基本信息）
+   - **Zone Settings**: Read（获取Zone列表和配置）
 5. 复制生成的 Token 并妥善保存
 
 ---
@@ -309,12 +330,6 @@ cd CloudFlareAssistant
 
 5. **构建 UI**  
    创建 Fragment 和对应的 XML 布局
-
-### 现有功能扩展
-
-- **D1 数据库**：在 `feature/d1/` 目录下实现数据库管理界面
-- **日志系统**：在 `feature/log/` 目录下实现日志查看和过滤功能
-- **备份恢复**：在 `feature/backup/` 目录下实现 WebDAV 和本地备份功能
 
 ### 代码规范
 - 遵循 Kotlin 官方编码规范
