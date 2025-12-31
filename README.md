@@ -7,7 +7,9 @@
 ![Material Design](https://img.shields.io/badge/Material%20Design-3-purple.svg)
 ![License](https://img.shields.io/badge/License-MIT-orange.svg)
 
-**CloudFlare Assistant** 是一款专业的 Cloudflare 多账号管理 Android 应用，采用现代化架构和 Material Design 3 设计语言。
+**CloudFlare Assistant** 是一款功能全面的 Cloudflare 服务管理 Android 应用，采用现代化架构和 Material Design 3 设计语言，提供完整的 Cloudflare 生态系统管理能力。
+
+**当前版本**: v6.6 | **最后更新**: 2024年12月31日
 
 </div>
 
@@ -21,11 +23,18 @@
 - **导入导出**：支持 WebDAV 自动备份，保障数据安全
 - **加密存储**：API Token 安全存储，防止泄露
 
+### �️ D1 数据库管理
+- **数据库操作**：创建、删除 D1 数据库实例
+- **SQL 执行**：支持直接执行 SQL 查询语句
+- **数据浏览**：查看数据库表结构和数据内容
+- **查询历史**：保存和重用常用查询
+
 ### 🚀 Workers 管理
 - **脚本上传**：图形化界面选择并上传 JavaScript 脚本
 - **智能命名**：自动识别文件名，支持自定义脚本名称
 - **脚本列表**：查看所有已上传的 Worker 脚本
 - **快速删除**：一键清理不需要的脚本
+- **绑定配置**：支持 KV、D1、R2 等资源绑定
 
 ### 📄 Pages 管理
 - **项目管理**：查看、创建、删除 Pages 项目
@@ -55,6 +64,12 @@
 - **对象操作**：上传、下载、删除对象
 - **自定义域名**：为 Bucket 配置自定义域名（支持验证）
 - **存储统计**：查看存储使用情况和对象数量
+
+### 📋 日志系统
+- **实时日志**：实时显示应用运行日志
+- **语法高亮**：支持日志内容语法高亮显示
+- **日志过滤**：按级别过滤日志内容
+- **日志导出**：支持导出日志到文件
 
 ### 💼 备份与恢复
 - **WebDAV 支持**：自动备份账号数据到 WebDAV 服务器
@@ -123,13 +138,17 @@ app/
 │   │   │   │   ├── DnsRepository.kt
 │   │   │   │   ├── KvRepository.kt
 │   │   │   │   ├── PagesRepository.kt
-│   │   │   │   └── R2Repository.kt
+│   │   │   │   ├── R2Repository.kt
+│   │   │   │   ├── D1Repository.kt   # D1 数据库仓库
+│   │   │   │   └── LogRepository.kt  # 日志仓库
 │   │   │   └── util/                # 工具类
 │   │   │       └── Extensions.kt
 │   │   ├── feature/                 # 功能模块
 │   │   │   ├── account/             # 账号管理
 │   │   │   │   ├── AccountViewModel.kt
 │   │   │   │   └── AccountListFragment.kt
+│   │   │   ├── d1/                  # D1 数据库
+│   │   │   │   └── D1ManagerFragment.kt
 │   │   │   ├── worker/              # Workers
 │   │   │   │   └── WorkerFragment.kt
 │   │   │   ├── route/               # 路由
@@ -142,6 +161,10 @@ app/
 │   │   │   │   └── PagesFragment.kt
 │   │   │   ├── r2/                  # R2 存储
 │   │   │   │   └── R2Fragment.kt
+│   │   │   ├── log/                 # 日志系统
+│   │   │   │   └── LogActivity.kt
+│   │   │   ├── home/                # 主界面
+│   │   │   │   └── HomeFragment.kt
 │   │   │   └── backup/              # 备份
 │   │   │       └── BackupFragment.kt
 │   │   ├── adapter/                 # 适配器
@@ -220,23 +243,35 @@ cd CloudFlareAssistant
 - 选择要切换的账号
 - 应用会自动加载该账号的数据
 
-### 3. 上传 Worker 脚本
+### 3. 管理 D1 数据库
+- 切换到 **D1** 标签
+- 创建新的数据库实例
+- 执行 SQL 查询查看和修改数据
+- 浏览数据库表结构和内容
+
+### 4. 上传 Worker 脚本
 - 切换到 **Workers** 标签
 - 点击 **上传脚本** 按钮
 - 选择 JavaScript 文件
 - 确认脚本名称并提交
 
-### 4. 管理 DNS 记录
+### 5. 管理 DNS 记录
 - 切换到 **DNS** 标签
 - 点击 **+** 添加新记录
 - 选择记录类型并填写详细信息
 - 保存后记录会立即生效
 
-### 5. 配置 R2 存储
+### 6. 配置 R2 存储
 - 切换到 **R2** 标签
 - 创建 Bucket 或选择现有 Bucket
 - 上传文件或配置自定义域名
 - 管理对象和查看存储统计
+
+### 7. 查看日志
+- 切换到 **日志** 标签
+- 实时查看应用运行日志
+- 使用语法高亮和过滤功能
+- 导出日志文件进行分析
 
 ---
 
@@ -245,12 +280,14 @@ cd CloudFlareAssistant
 | 功能模块 | 状态 | 说明 |
 |---------|------|------|
 | 多账号管理 | ✅ 已完成 | 支持添加、编辑、删除、切换账号 |
-| Workers 管理 | ✅ 已完成 | 上传、列表、删除脚本 |
+| D1 数据库管理 | ✅ 已完成 | 数据库创建、SQL 执行、数据浏览 |
+| Workers 管理 | ✅ 已完成 | 上传、列表、删除脚本，支持绑定配置 |
 | 路由管理 | ✅ 已完成 | 创建、更新、删除路由 |
 | DNS 管理 | ✅ 已完成 | 支持 20+ 种记录类型 |
 | KV 存储 | ✅ 已完成 | 命名空间和键值对管理 |
 | Pages 管理 | ✅ 已完成 | 项目和域名管理 |
 | R2 对象存储 | ✅ 已完成 | Bucket 和对象管理 |
+| 日志系统 | ✅ 已完成 | 实时日志显示和语法高亮 |
 | WebDAV 备份 | ✅ 已完成 | 自动备份和恢复 |
 | Material Design 3 | ✅ 已完成 | 统一的界面风格 |
 
@@ -274,6 +311,12 @@ cd CloudFlareAssistant
 
 5. **构建 UI**  
    创建 Fragment 和对应的 XML 布局
+
+### 现有功能扩展
+
+- **D1 数据库**：在 `feature/d1/` 目录下实现数据库管理界面
+- **日志系统**：在 `feature/log/` 目录下实现日志查看和过滤功能
+- **备份恢复**：在 `feature/backup/` 目录下实现 WebDAV 和本地备份功能
 
 ### 代码规范
 - 遵循 Kotlin 官方编码规范
