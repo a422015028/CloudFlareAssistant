@@ -205,6 +205,11 @@ class HomeFragment : Fragment() {
             openUrl("https://developers.cloudflare.com/api/")
         }
 
+        // Cloudflare 官网链接点击
+        dialogBinding.layoutCloudflareWebsite.setOnClickListener {
+            openUrl("https://www.cloudflare.com/")
+        }
+
         // API 令牌获取说明展开/收起
         dialogBinding.tvApiTokenGuideTitle.setOnClickListener {
             val content = dialogBinding.tvApiTokenGuideContent

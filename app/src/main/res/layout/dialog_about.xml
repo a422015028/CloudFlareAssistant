@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:scrollbars="vertical">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -136,6 +141,37 @@
             android:textSize="14sp" />
     </LinearLayout>
 
+    <!-- Cloudflare 官网 -->
+    <LinearLayout
+        android:id="@+id/layoutCloudflareWebsite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🏠 Cloudflare 官网"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvCloudflareWebsiteLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="访问 →"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="14sp" />
+    </LinearLayout>
+
     <!-- 获取API令牌说明（可展开） -->
     <LinearLayout
         android:id="@+id/layoutApiTokenGuide"
@@ -160,9 +196,10 @@
             android:id="@+id/tvApiTokenGuideContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1. 登录 Cloudflare 仪表板\n2. 进入 我的个人资料 → API 令牌\n3. 点击 创建代币\n4. 选择模板或自定义权限：\n   - Workers 脚本：编辑\n   - Workers 路径：编辑\n   - DNS：编辑\n   - 账户设置：读取\n   - Workers KV 存储：编辑\n   - Pages：编辑\n   - R2：编辑\n5. 复制生成的 Token 并妥善保存"
+            android:text="所需API权限: \n\n1. 登录 Cloudflare 仪表板\n2. 进入 我的个人资料 → API 令牌\n3. 点击 创建代币\n4. 选择以下权限：\n   • 账户设置：读取\n   • Workers 脚本：编辑\n   • Workers 路由：编辑\n   • Workers R2 存储：编辑\n   • Workers KV 存储：编辑\n   • DNS: 编辑\n   • Cloudflare Pages: 编辑\n   • D1: 编辑\n5. 复制生成的 Token"
             android:textColor="?android:textColorSecondary"
-            android:textSize="14sp"
+            android:textSize="12sp"
+            android:lineSpacingExtra="1dp"
             android:visibility="gone"
             android:padding="8dp" />
     </LinearLayout>
@@ -185,3 +222,5 @@
         android:textSize="12sp" />
 
 </LinearLayout>
+
+</ScrollView>
