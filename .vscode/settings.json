@@ -17,5 +17,6 @@
     "files.associations": {
         "*.gradle.kts": "gradle",
         "*.gradle": "gradle"
-    }
+    },
+    "java.jdt.ls.java.home": ""
 }

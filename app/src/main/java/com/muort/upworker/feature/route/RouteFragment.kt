@@ -35,8 +35,9 @@ import com.muort.upworker.feature.account.AccountViewModel
 import com.muort.upworker.feature.pages.PagesViewModel
 import com.muort.upworker.feature.worker.WorkerViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 // 统一的域名显示数据类
@@ -47,11 +48,13 @@ data class UnifiedDomain(
     val type: DomainType,
     val originalWorkerDomain: CustomDomain? = null,
     val originalPagesDomain: PagesDomain? = null,
+    val originalR2Domain: com.muort.upworker.core.model.R2CustomDomain? = null,
+    val r2BucketName: String? = null,
     val projectName: String? = null
 )
 
 enum class DomainType {
-    WORKER, PAGES
+    WORKER, PAGES, R2
 }
 
 @AndroidEntryPoint
@@ -63,6 +66,10 @@ class RouteFragment : Fragment() {
     private val accountViewModel: AccountViewModel by activityViewModels()
     private val workerViewModel: WorkerViewModel by viewModels()
     private val pagesViewModel: PagesViewModel by viewModels()
+    private val r2ViewModel: com.muort.upworker.feature.r2.R2ViewModel by viewModels()
+
+        // R2自定义域ViewModel，需你实现
+        // private val r2ViewModel: R2ViewModel by viewModels()
     
     @Inject
     lateinit var dnsRepository: DnsRepository
@@ -85,17 +92,30 @@ class RouteFragment : Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         setupAdapter()
         setupTabs()
         setupClickListeners()
         observeViewModel()
-        
+
         accountViewModel.defaultAccount.value?.let { account ->
             workerViewModel.loadWorkerScripts(account)
             workerViewModel.loadRoutes(account)
             workerViewModel.loadCustomDomains(account)
             pagesViewModel.loadProjects(account)
+            // 加载R2存储桶列表
+            r2ViewModel.loadBuckets(account)
+        }
+
+        // 监听R2存储桶变化，自动加载所有自定义域
+        lifecycleScope.launch {
+            r2ViewModel.buckets.collect { buckets ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    buckets.forEach { bucket ->
+                        r2ViewModel.loadCustomDomains(account, bucket.name)
+                    }
+                }
+            }
         }
     }
     
@@ -119,7 +139,10 @@ class RouteFragment : Fragment() {
                         }
                     }
                     DomainType.PAGES -> {
-                        Snackbar.make(binding.root, "Pages 项目的自定义域官方不支持修改。", Snackbar.LENGTH_LONG).show()
+                        Snackbar.make(binding.root, "Pages自定义域官方不支持编辑。", Snackbar.LENGTH_LONG).show()
+                    }
+                    DomainType.R2 -> {
+                        Snackbar.make(binding.root, "R2自定义域官方不支持编辑。", Snackbar.LENGTH_LONG).show()
                     }
                 }
             },
@@ -154,10 +177,20 @@ class RouteFragment : Fragment() {
                 val hostname = dialogBinding.domainHostname.text.toString()
                 val script = dialogBinding.domainScript.text.toString()
                 accountViewModel.defaultAccount.value?.let { account ->
-                    if (hostname.isNotEmpty() && script.isNotEmpty()) {
-                        workerViewModel.updateCustomDomain(account, domain.id, hostname, script)
-                    } else {
-                        Snackbar.make(binding.root, "域名和脚本不能为空", Snackbar.LENGTH_SHORT).show()
+                    when (domain.type) {
+                        DomainType.WORKER -> {
+                            if (hostname.isNotEmpty() && script.isNotEmpty()) {
+                                workerViewModel.updateCustomDomain(account, domain.id, hostname, script)
+                            } else {
+                                Snackbar.make(binding.root, "域名和脚本不能为空", Snackbar.LENGTH_SHORT).show()
+                            }
+                        }
+                        DomainType.PAGES -> {
+                            Snackbar.make(binding.root, "Pages 项目的自定义域官方不支持修改。", Snackbar.LENGTH_LONG).show()
+                        }
+                        DomainType.R2 -> {
+                            Snackbar.make(binding.root, "R2自定义域暂不支持编辑。", Snackbar.LENGTH_LONG).show()
+                        }
                     }
                 }
             }
@@ -190,13 +223,14 @@ class RouteFragment : Fragment() {
                     }
                 }
                 launch {
-                    // 合并 Worker 和 Pages 的自定义域
+                    // 合并 Worker、Pages、R2 的自定义域
                     combine(
                         workerViewModel.customDomains,
-                        pagesViewModel.projects
-                    ) { workerDomains, projects ->
+                        pagesViewModel.projects,
+                        r2ViewModel.allCustomDomains
+                    ) { workerDomains, projects, allR2Domains ->
                         val unified = mutableListOf<UnifiedDomain>()
-                        // 添加 Worker 域名
+                        // Worker 域名
                         workerDomains.forEach { domain ->
                             unified.add(UnifiedDomain(
                                 id = domain.id,
@@ -206,18 +240,31 @@ class RouteFragment : Fragment() {
                                 originalWorkerDomain = domain
                             ))
                         }
-                        // 添加 Pages 域名（从项目的 domains 字段）
+                        // Pages 域名
                         projects.forEach { project ->
                             project.domains?.forEach { domainName ->
                                 if (!domainName.endsWith(".pages.dev")) {
                                     unified.add(UnifiedDomain(
                                         id = "${project.id}_$domainName",
-                                        hostname = domainName,
+                                        hostname = project.name, // 显示项目名称
                                         target = project.subdomain ?: "${project.name}.pages.dev",
                                         type = DomainType.PAGES,
                                         projectName = project.name
                                     ))
                                 }
+                            }
+                        }
+                        // R2 域名
+                        allR2Domains.forEach { (bucketName, r2Domains) ->
+                            r2Domains.forEach { r2Domain ->
+                                unified.add(UnifiedDomain(
+                                    id = "${bucketName}_${r2Domain.domain}",
+                                    hostname = r2Domain.domain,
+                                    target = bucketName,
+                                    type = DomainType.R2,
+                                    originalR2Domain = r2Domain,
+                                    r2BucketName = bucketName
+                                ))
                             }
                         }
                         unified
@@ -321,62 +368,87 @@ class RouteFragment : Fragment() {
     
     private fun showAddDomainDialog() {
         val dialogBinding = DialogDomainInputBinding.inflate(layoutInflater)
-        
+
         // 设置 Worker 脚本下拉列表
         val scriptNames = workerViewModel.scripts.value.map { it.id }
         val scriptAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, scriptNames)
         dialogBinding.domainScript.setAdapter(scriptAdapter)
-        
+
         // 设置 Pages 项目下拉列表
         val projectNames = pagesViewModel.projects.value.map { it.name }
         val projectAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, projectNames)
         dialogBinding.domainProject.setAdapter(projectAdapter)
-        
+
+        // 设置 R2 存储桶下拉列表（假设你已在布局中添加 domainR2Bucket AutoCompleteTextView 和 typeR2Radio RadioButton）
+        val r2BucketNames = r2ViewModel.buckets.value.map { it.name }
+        val r2BucketAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, r2BucketNames)
+        dialogBinding.domainR2Bucket.setAdapter(r2BucketAdapter)
+
         // 类型切换监听
         dialogBinding.serviceTypeGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 dialogBinding.typeWorkerRadio.id -> {
                     dialogBinding.workerScriptLayout.visibility = View.VISIBLE
                     dialogBinding.pagesProjectLayout.visibility = View.GONE
+                    dialogBinding.r2BucketLayout.visibility = View.GONE
                 }
                 dialogBinding.typePagesRadio.id -> {
                     dialogBinding.workerScriptLayout.visibility = View.GONE
                     dialogBinding.pagesProjectLayout.visibility = View.VISIBLE
+                    dialogBinding.r2BucketLayout.visibility = View.GONE
+                }
+                dialogBinding.typeR2Radio.id -> {
+                    dialogBinding.workerScriptLayout.visibility = View.GONE
+                    dialogBinding.pagesProjectLayout.visibility = View.GONE
+                    dialogBinding.r2BucketLayout.visibility = View.VISIBLE
                 }
             }
         }
-        
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("添加自定义域")
             .setView(dialogBinding.root)
             .setPositiveButton("保存") { _, _ ->
                 val hostname = dialogBinding.domainHostname.text.toString()
-                
+
                 accountViewModel.defaultAccount.value?.let { account ->
-                    if (dialogBinding.typeWorkerRadio.isChecked) {
-                        // Worker 脚本
-                        val script = dialogBinding.domainScript.text.toString()
-                        if (script.isNotEmpty()) {
-                            workerViewModel.addCustomDomain(account, hostname, script)
-                        } else {
-                            Snackbar.make(binding.root, "请选择 Worker 脚本", Snackbar.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        // Pages 项目
-                        val project = dialogBinding.domainProject.text.toString()
-                        if (project.isNotEmpty()) {
-                            // 从项目列表中查找项目的subdomain
-                            val pagesProject = pagesViewModel.projects.value.find { it.name == project }
-                            val subdomain = pagesProject?.subdomain ?: "$project.pages.dev"
-                            
-                            pagesViewModel.addCustomDomain(account, project, hostname) { result: Resource<PagesDomain> ->
-                                if (result is Resource.Success) {
-                                    // 显示 DNS 配置说明，传递正确的subdomain
-                                    showDnsConfigDialog(result.data, subdomain)
-                                }
+                    when {
+                        dialogBinding.typeWorkerRadio.isChecked -> {
+                            // Worker 脚本
+                            val script = dialogBinding.domainScript.text.toString()
+                            if (script.isNotEmpty()) {
+                                workerViewModel.addCustomDomain(account, hostname, script)
+                            } else {
+                                Snackbar.make(binding.root, "请选择 Worker 脚本", Snackbar.LENGTH_SHORT).show()
                             }
-                        } else {
-                            Snackbar.make(binding.root, "请选择 Pages 项目", Snackbar.LENGTH_SHORT).show()
+                        }
+                        dialogBinding.typePagesRadio.isChecked -> {
+                            // Pages 项目
+                            val project = dialogBinding.domainProject.text.toString()
+                            if (project.isNotEmpty()) {
+                                // 从项目列表中查找项目的subdomain
+                                val pagesProject = pagesViewModel.projects.value.find { it.name == project }
+                                val subdomain = pagesProject?.subdomain ?: "$project.pages.dev"
+
+                                pagesViewModel.addCustomDomain(account, project, hostname) { result: Resource<PagesDomain> ->
+                                    if (result is Resource.Success) {
+                                        // 显示 DNS 配置说明，传递正确的subdomain
+                                        showDnsConfigDialog(result.data, subdomain)
+                                    }
+                                }
+                            } else {
+                                Snackbar.make(binding.root, "请选择 Pages 项目", Snackbar.LENGTH_SHORT).show()
+                            }
+                        }
+                        dialogBinding.typeR2Radio.isChecked == true -> {
+                            // R2 存储桶
+                            val bucket = dialogBinding.domainR2Bucket.text.toString()
+                            if (bucket.isNotEmpty()) {
+                                r2ViewModel.createCustomDomain(account, bucket, hostname)
+                                Snackbar.make(binding.root, "R2自定义域添加请求已发出", Snackbar.LENGTH_SHORT).show()
+                            } else {
+                                Snackbar.make(binding.root, "请选择 R2 存储桶", Snackbar.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 }
@@ -400,6 +472,11 @@ class RouteFragment : Fragment() {
                         DomainType.PAGES -> {
                             domain.projectName?.let { projectName ->
                                 deletePagesDomain(account, projectName, domain.hostname)
+                            }
+                        }
+                        DomainType.R2 -> {
+                            if (domain.r2BucketName != null) {
+                                r2ViewModel.deleteCustomDomain(account, domain.r2BucketName, domain.hostname)
                             }
                         }
                     }
@@ -523,13 +600,22 @@ class RouteFragment : Fragment() {
         ) : RecyclerView.ViewHolder(binding.root) {
             
             fun bind(domain: UnifiedDomain) {
-                binding.domainHostnameText.text = domain.hostname
+                // Pages类型显示项目名称，其它类型显示域名
+                binding.domainHostnameText.text = when (domain.type) {
+                    DomainType.PAGES -> domain.projectName ?: domain.hostname
+                    else -> domain.hostname
+                }
                 val targetPrefix = when (domain.type) {
                     DomainType.WORKER -> "→ Worker: "
                     DomainType.PAGES -> "→ Pages: "
+                    DomainType.R2 -> "→ R2: "
                 }
-                binding.domainScriptText.text = "$targetPrefix${domain.target}"
-                
+                // Pages类型target显示域名，其它类型显示原target
+                val targetText = when (domain.type) {
+                    DomainType.PAGES -> domain.hostname
+                    else -> domain.target
+                }
+                binding.domainScriptText.text = "$targetPrefix$targetText"
                 binding.domainMenuButton.setOnClickListener { view ->
                     PopupMenu(view.context, view).apply {
                         inflate(R.menu.menu_account)

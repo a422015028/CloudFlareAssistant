@@ -49,6 +49,13 @@
             android:layout_weight="1"
             android:text="Pages 项目" />
 
+        <RadioButton
+            android:id="@+id/typeR2Radio"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="R2 存储桶" />
+
     </RadioGroup>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -78,6 +85,24 @@
 
         <AutoCompleteTextView
             android:id="@+id/domainProject"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- R2 存储桶选择布局 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/r2BucketLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="R2 存储桶"
+        android:visibility="gone"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+        <AutoCompleteTextView
+            android:id="@+id/domainR2Bucket"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none" />

@@ -32,6 +32,10 @@ class R2ViewModel @Inject constructor(
     private val _customDomains = MutableStateFlow<List<R2CustomDomain>>(emptyList())
     val customDomains: StateFlow<List<R2CustomDomain>> = _customDomains.asStateFlow()
     
+    // 存储所有 bucket 的自定义域映射：bucketName -> List<R2CustomDomain>
+    private val _allCustomDomains = MutableStateFlow<Map<String, List<R2CustomDomain>>>(emptyMap())
+    val allCustomDomains: StateFlow<Map<String, List<R2CustomDomain>>> = _allCustomDomains.asStateFlow()
+    
     private val _loadingState = MutableStateFlow(false)
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
     
@@ -204,7 +208,11 @@ class R2ViewModel @Inject constructor(
             when (val result = r2Repository.listCustomDomains(account, bucketName)) {
                 is Resource.Success -> {
                     _customDomains.value = result.data
-                    Timber.d("Loaded ${result.data.size} custom domains")
+                    // 更新所有自定义域映射
+                    val currentMap = _allCustomDomains.value.toMutableMap()
+                    currentMap[bucketName] = result.data
+                    _allCustomDomains.value = currentMap
+                    Timber.d("Loaded ${result.data.size} custom domains for bucket $bucketName")
                 }
                 is Resource.Error -> {
                     _message.emit("加载自定义域失败: ${result.message}")
