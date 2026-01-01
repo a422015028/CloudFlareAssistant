@@ -22,7 +22,7 @@ data class WebDavConfig(
 // ==================== Backup Data ====================
 
 data class AccountBackup(
-    @SerializedName("version") val version: String = "1.0",
+    @SerializedName("version") val version: String = "1.1",
     @SerializedName("backupDate") val backupDate: Long = System.currentTimeMillis(),
     @SerializedName("accounts") val accounts: List<AccountData>
 )
@@ -36,7 +36,8 @@ data class AccountData(
     @SerializedName("r2AccessKeyId") val r2AccessKeyId: String? = null,
     @SerializedName("r2SecretAccessKey") val r2SecretAccessKey: String? = null,
     @SerializedName("createdAt") val createdAt: Long,
-    @SerializedName("updatedAt") val updatedAt: Long
+    @SerializedName("updatedAt") val updatedAt: Long,
+    @SerializedName("zones") val zones: List<Zone>? = null
 )
 
 // Convert between Account and AccountData

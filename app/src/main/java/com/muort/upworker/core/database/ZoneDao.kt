@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ZoneDao {
+        @Query("DELETE FROM zones")
+        suspend fun deleteAllZones()
     
     @Query("SELECT * FROM zones WHERE accountId = :accountId ORDER BY name ASC")
     fun getZonesByAccount(accountId: Long): Flow<List<Zone>>
