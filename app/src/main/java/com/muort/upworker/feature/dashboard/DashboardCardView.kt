@@ -60,7 +60,7 @@ class DashboardCardView @JvmOverloads constructor(
     }
     
     private fun setupTimeRangeChips() {
-        binding.timeRangeChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
+        binding.timeRangeChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
             if (checkedIds.isEmpty()) return@setOnCheckedStateChangeListener
             
             val timeRange = when (checkedIds[0]) {

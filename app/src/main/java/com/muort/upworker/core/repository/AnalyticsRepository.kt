@@ -33,15 +33,6 @@ class AnalyticsRepository @Inject constructor(
                 val startDateTime = timeRange.getStartDateTime()
                 val endDateTime = timeRange.getEndDateTime()
                 
-                // Zone 数据使用日期格式 (yyyy-MM-dd)
-                val dateOnlyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
-                    timeZone = TimeZone.getTimeZone("UTC")
-                }
-                
-                val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
-                    timeZone = TimeZone.getTimeZone("UTC")
-                }
-                
                 val startDate = startDateTime.substring(0, 10) // 提取日期部分
                 val endDate = endDateTime.substring(0, 10)
                 
