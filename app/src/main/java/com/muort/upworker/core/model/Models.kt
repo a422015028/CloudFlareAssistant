@@ -503,7 +503,8 @@ data class D1Database(
     @SerializedName("uuid") val uuid: String,
     @SerializedName("name") val name: String,
     @SerializedName("created_at") val createdAt: String?,
-    @SerializedName("version") val version: String?
+    @SerializedName("version") val version: String?,
+    @SerializedName("file_size") val fileSize: Long? = null // 数据库文件大小（字节）
 )
 
 
@@ -549,4 +550,272 @@ sealed class Resource<out T> {
     data class Success<T>(val data: T) : Resource<T>()
     data class Error(val message: String, val exception: Throwable? = null) : Resource<Nothing>()
     object Loading : Resource<Nothing>()
+}
+
+// ==================== Analytics ====================
+
+/**
+ * GraphQL Analytics 请求体
+ * 用于查询 Cloudflare Analytics 数据
+ */
+data class AnalyticsGraphQLRequest(
+    @SerializedName("query") val query: String,
+    @SerializedName("variables") val variables: Map<String, Any>? = null
+)
+
+/**
+ * GraphQL Analytics 响应
+ */
+data class AnalyticsGraphQLResponse(
+    @SerializedName("data") val data: AnalyticsData?,
+    @SerializedName("errors") val errors: List<GraphQLError>?
+)
+
+data class GraphQLError(
+    @SerializedName("message") val message: String,
+    @SerializedName("path") val path: List<String>? = null
+)
+
+/**
+ * Analytics 数据容器
+ */
+data class AnalyticsData(
+    @SerializedName("viewer") val viewer: AnalyticsViewer?
+)
+
+data class AnalyticsViewer(
+    @SerializedName("zones") val zones: List<ZoneAnalytics>?,
+    @SerializedName("accounts") val accounts: List<AccountAnalytics>?
+)
+
+/**
+ * Zone 级别的 Analytics
+ */
+data class ZoneAnalytics(
+    @SerializedName("httpRequests1dGroups") val httpRequests: List<HttpRequestsGroup>?,
+    @SerializedName("httpRequestsCacheGroups") val cacheGroups: List<CacheGroup>?
+)
+
+/**
+ * Account 级别的 Analytics (Workers)
+ */
+data class AccountAnalytics(
+    @SerializedName("workersInvocationsAdaptive") val workersInvocations: List<WorkersInvocationGroup>?,
+    @SerializedName("d1AnalyticsAdaptiveGroups") val d1Analytics: List<D1AnalyticsGroup>?,
+    @SerializedName("d1StorageAdaptiveGroups") val d1Storage: List<D1StorageGroup>?,
+    @SerializedName("r2OperationsAdaptiveGroups") val r2Operations: List<R2OperationsGroup>?,
+    @SerializedName("r2StorageAdaptiveGroups") val r2Storage: List<R2StorageGroup>?
+)
+
+/**
+ * HTTP 请求统计组
+ */
+data class HttpRequestsGroup(
+    @SerializedName("sum") val sum: RequestSum,
+    @SerializedName("uniq") val uniq: RequestUniq? = null,
+    @SerializedName("dimensions") val dimensions: RequestDimensions?
+)
+
+data class RequestSum(
+    @SerializedName("requests") val requests: Long,
+    @SerializedName("bytes") val bytes: Long,
+    @SerializedName("cachedRequests") val cachedRequests: Long? = null,
+    @SerializedName("cachedBytes") val cachedBytes: Long? = null,
+    @SerializedName("threats") val threats: Long? = null,
+    @SerializedName("pageViews") val pageViews: Long? = null,
+    @SerializedName("encryptedRequests") val encryptedRequests: Long? = null
+)
+
+data class RequestUniq(
+    @SerializedName("uniques") val uniques: Long? = null
+)
+
+data class RequestCount(
+    @SerializedName("uniques") val uniques: Long? = null
+)
+
+data class RequestDimensions(
+    @SerializedName("date") val date: String?,
+    @SerializedName("datetime") val datetime: String?
+)
+
+/**
+ * 缓存统计组
+ */
+data class CacheGroup(
+    @SerializedName("sum") val sum: CacheSum,
+    @SerializedName("dimensions") val dimensions: CacheDimensions?
+)
+
+data class CacheSum(
+    @SerializedName("requests") val requests: Long,
+    @SerializedName("cachedRequests") val cachedRequests: Long
+)
+
+data class CacheDimensions(
+    @SerializedName("cacheStatus") val cacheStatus: String?
+)
+
+/**
+ * Workers 调用统计组
+ */
+data class WorkersInvocationGroup(
+    @SerializedName("sum") val sum: WorkersSum,
+    @SerializedName("dimensions") val dimensions: WorkersDimensions?
+)
+
+data class WorkersSum(
+    @SerializedName("requests") val requests: Long,
+    @SerializedName("errors") val errors: Long,
+    @SerializedName("subrequests") val subrequests: Long? = null,
+    @SerializedName("cpuTime") val cpuTime: Long? = null, // 单位: 微秒
+    @SerializedName("duration") val duration: Long? = null, // 平均执行时间 (微秒)
+    @SerializedName("wallTime") val wallTime: Long? = null // 墙钟时间 (微秒)
+)
+
+data class WorkersDimensions(
+    @SerializedName("scriptName") val scriptName: String?,
+    @SerializedName("datetime") val datetime: String?
+)
+
+/**
+ * D1 数据库统计组
+ */
+data class D1AnalyticsGroup(
+    @SerializedName("sum") val sum: D1Sum,
+    @SerializedName("dimensions") val dimensions: D1Dimensions?
+)
+
+data class D1Sum(
+    @SerializedName("rowsRead") val rowsRead: Long? = null,
+    @SerializedName("rowsWritten") val rowsWritten: Long? = null
+)
+
+data class D1Dimensions(
+    @SerializedName("date") val date: String?,
+    @SerializedName("databaseId") val databaseId: String?
+)
+
+/**
+ * D1 存储统计组
+ */
+data class D1StorageGroup(
+    @SerializedName("max") val max: D1StorageMax
+)
+
+data class D1StorageMax(
+    @SerializedName("storageInBytes") val storageInBytes: Long? = null, // 总存储
+    @SerializedName("billedStorageInByteMonths") val billedStorageInByteMonths: Long? = null // 计量存储
+)
+
+/**
+ * R2 操作统计组 - A类/B类操作
+ */
+data class R2OperationsGroup(
+    @SerializedName("sum") val sum: R2OperationsSum,
+    @SerializedName("dimensions") val dimensions: R2OperationsDimensions? = null
+)
+
+data class R2OperationsSum(
+    @SerializedName("requests") val requests: Long? = null
+)
+
+data class R2OperationsDimensions(
+    @SerializedName("actionType") val actionType: String? = null // ListBuckets, GetObject, PutObject 等
+)
+
+/**
+ * R2 存储统计组 - 存储数据
+ */
+data class R2StorageGroup(
+    @SerializedName("max") val max: R2StorageMax? = null
+)
+
+data class R2StorageMax(
+    @SerializedName("payloadSize") val payloadSize: Long? = null // 存储字节数
+)
+
+/**
+ * 仪表盘数据汇总
+ * 用于 UI 展示
+ */
+data class DashboardMetrics(
+    val totalRequests: Long = 0,
+    val cacheHitRate: Double = 0.0, // 0-100 百分比
+    val bandwidthBytes: Long = 0,
+    val workersInvocations: Long = 0,
+    val workersSubrequests: Long = 0, // Workers 子请求数
+    val workersErrorRate: Double = 0.0, // 0-100 百分比
+    val threatsBlocked: Long = 0, // 威胁拦截数
+    val pageViews: Long = 0, // 页面浏览量
+    val uniqueVisitors: Long = 0, // 独立访客数
+    val dataSaved: Long = 0, // 已节省流量（缓存字节数）
+    val encryptedRequestRate: Double = 0.0, // HTTPS 加密请求占比 (0-100 百分比)
+    // === 以下为衡生指标（基于现有数据计算）===
+    val originBandwidth: Long = 0, // 源站承担流量 = bytes - cachedBytes
+    val pagesPerVisit: Double = 0.0, // 人均页面浏览量 = pageViews / uniques
+    val avgRequestSize: Double = 0.0, // 平均请求体积 (KB) = bytes / requests / 1024
+    val unencryptedRequests: Long = 0, // 未加密请求数 = requests - encryptedRequests
+    // === D1 数据库监控 ===
+    val d1ReadRows: Long = 0, // D1 已读取行数 (主要计费指标) - GraphQL
+    val d1WriteRows: Long = 0, // D1 已写入行数 (主要计费指标) - GraphQL
+    val d1StorageBytes: Long = 0, // D1 总存储（字节）- REST API
+    val d1DatabaseCount: Int = 0, // D1 数据库数量 - REST API
+    // === R2 存储监控 ===
+    val r2ClassAOperations: Long = 0, // R2 A类操作（写操作）- GraphQL
+    val r2ClassBOperations: Long = 0, // R2 B类操作（读操作）- GraphQL
+    val r2StorageBytes: Long = 0, // R2 总存储（字节）- GraphQL
+    val r2BucketCount: Int = 0, // R2 存储桶数量 - REST API
+    val requestsTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val bandwidthTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val threatsTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val cachedBytesTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val pageViewsTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val status: HealthStatus = HealthStatus.HEALTHY
+)
+
+/**
+ * 时间序列数据点
+ */
+data class TimeSeriesPoint(
+    val timestamp: Long, // Unix timestamp
+    val value: Double
+)
+
+/**
+ * 时间范围枚举
+ */
+enum class TimeRange(val days: Int, val displayName: String) {
+    ONE_DAY(1, "24小时"),
+    SEVEN_DAYS(7, "7天"),
+    THIRTY_DAYS(30, "30天");
+    
+    /**
+     * 获取GraphQL查询的开始时间
+     */
+    fun getStartDateTime(): String {
+        val calendar = java.util.Calendar.getInstance()
+        calendar.add(java.util.Calendar.DAY_OF_MONTH, -days)
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US)
+        dateFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+        return dateFormat.format(calendar.time)
+    }
+    
+    /**
+     * 获取GraphQL查询的结束时间
+     */
+    fun getEndDateTime(): String {
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US)
+        dateFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+        return dateFormat.format(java.util.Date())
+    }
+}
+
+/**
+ * 健康状态枚举
+ */
+enum class HealthStatus {
+    HEALTHY,      // 正常
+    WARNING,      // 警告 (错误率 5-10%)
+    CRITICAL      // 严重 (错误率 > 10% 或 D1 超限)
 }

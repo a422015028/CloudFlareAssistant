@@ -4,4 +4,9 @@
 	<color name="md_theme_light_primaryContainer">#F3EBF8</color>
 	<!-- 兼容旧代码所需紫色 -->
 	<color name="purple_700">#3700B3</color>
+	
+	<!-- Dashboard 健康状态颜色 -->
+	<color name="md_theme_error">#BA1A1A</color>
+	<color name="md_theme_tertiary">#F57C00</color>
+	<color name="md_theme_success">#2E7D32</color>
 </resources>

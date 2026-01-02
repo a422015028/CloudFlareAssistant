@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -22,6 +23,8 @@ import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.DialogAboutBinding
 import com.muort.upworker.databinding.FragmentHomeBinding
 import com.muort.upworker.feature.account.AccountViewModel
+import com.muort.upworker.feature.dashboard.DashboardState
+import com.muort.upworker.feature.dashboard.DashboardViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -37,6 +40,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     
     private val accountViewModel: AccountViewModel by activityViewModels()
+    private val dashboardViewModel: DashboardViewModel by viewModels()
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,12 +56,29 @@ class HomeFragment : Fragment() {
         
         setupUI()
         observeViewModel()
+        setupDashboard()
 
         // 日志卡片点击跳转新页面
         binding.logCard.setOnClickListener {
             startActivity(android.content.Intent(requireContext(), com.muort.upworker.feature.log.LogActivity::class.java))
         }
         // 日志开关已移至日志页面
+    }
+
+    private fun setupDashboard() {
+        // 设置刷新按钮点击监听
+        binding.dashboardCard.onRefreshClick = {
+            accountViewModel.defaultAccount.value?.let { account ->
+                dashboardViewModel.refresh(account)
+            }
+        }
+        
+        // 设置时间范围切换监听
+        binding.dashboardCard.onTimeRangeChanged = { timeRange ->
+            accountViewModel.defaultAccount.value?.let { account ->
+                dashboardViewModel.changeTimeRange(account, timeRange)
+            }
+        }
     }
 
     private fun setupUI() {
@@ -152,6 +173,7 @@ class HomeFragment : Fragment() {
     
     private fun animateFeatureCards() {
         val cards = listOf(
+            binding.dashboardCard,
             binding.workerCard,
             binding.pagesCard,
             binding.dnsCard,
@@ -160,7 +182,8 @@ class HomeFragment : Fragment() {
             binding.r2Card,
             binding.d1Card,
             binding.backupCard,
-            binding.logCard
+            binding.logCard,
+            binding.accountCard
         )
         
         cards.forEachIndexed { index, card ->
@@ -238,8 +261,35 @@ class HomeFragment : Fragment() {
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                accountViewModel.defaultAccount.collect { account ->
-                    binding.accountNameText.text = account?.name ?: "未选择账号"
+                launch {
+                    accountViewModel.defaultAccount.collect { account ->
+                        binding.accountNameText.text = account?.name ?: "未选择账号"
+                        
+                        // 加载仪表盘数据
+                        if (account != null) {
+                            dashboardViewModel.loadDashboard(account)
+                        }
+                    }
+                }
+                
+                launch {
+                    dashboardViewModel.dashboardState.collect { state ->
+                        when (state) {
+                            is DashboardState.Idle -> {
+                                // 初始状态，不显示任何内容
+                            }
+                            is DashboardState.Loading -> {
+                                binding.dashboardCard.showLoading()
+                            }
+                            is DashboardState.Success -> {
+                                binding.dashboardCard.showData(state.metrics)
+                            }
+                            is DashboardState.Error -> {
+                                binding.dashboardCard.showError(state.message)
+                                Timber.e("Dashboard error: ${state.message}")
+                            }
+                        }
+                    }
                 }
             }
         }

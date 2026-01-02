@@ -30,8 +30,8 @@ android {
         applicationId = "com.muort.upworker"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2026010101
-        versionName = "6.7"
+        versionCode = 2026010301
+        versionName = "6.8"
         
         vectorDrawables { 
             useSupportLibrary = true
@@ -168,6 +168,8 @@ dependencies {
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     
+    // MPAndroidChart - 数据可视化图表库
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     
     // Testing
     testImplementation("junit:junit:4.13.2")

@@ -504,4 +504,16 @@ interface CloudFlareApi {
     // Note: R2 object upload/download/delete must use S3 API
     // These operations require AWS S3 signature v4 authentication
     // Use S3 SDK or manual signature generation instead
+    
+    // ==================== Analytics ====================
+    
+    /**
+     * GraphQL Analytics API
+     * https://developers.cloudflare.com/analytics/graphql-api/
+     */
+    @POST("graphql")
+    suspend fun queryAnalytics(
+        @Header("Authorization") token: String,
+        @Body request: AnalyticsGraphQLRequest
+    ): Response<AnalyticsGraphQLResponse>
 }
