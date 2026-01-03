@@ -266,37 +266,60 @@ class ScriptEditorFragment : Fragment() {
     }
     
     private fun setEditorContent(content: String) {
+        Timber.d("setEditorContent: Setting ${content.length} chars")
+        Timber.d("First 100 chars: ${content.take(100)}")
+        
+        // 按正确顺序转义，确保可逆
         val escapedContent = content
-            .replace("\\", "\\\\")
-            .replace("'", "\\'")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
+            .replace("\\", "\\\\")     // 反斜杠必须最先处理
+            .replace("\r", "\\r")      // 回车
+            .replace("\n", "\\n")      // 换行
+            .replace("\t", "\\t")      // 制表符
+            .replace("'", "\\'")       // 单引号（用于 JavaScript 字符串）
+        
         executeJavaScript("setContent('$escapedContent')")
     }
     
     private fun getEditorContent(callback: (String) -> Unit) {
         binding.webView.evaluateJavascript("getContent()") { result ->
+            Timber.d("getEditorContent raw result: ${result?.take(100)}")
             // Remove quotes from JSON string
             val content = result?.trim('"')?.let { unescapeJavaScript(it) } ?: ""
+            Timber.d("getEditorContent after unescape: ${content.length} chars")
+            Timber.d("First 100 chars: ${content.take(100)}")
             callback(content)
         }
     }
     
     private fun unescapeJavaScript(text: String): String {
         var result = text
-            .replace("\\\\", "\\")
-            .replace("\\'", "'")
-            .replace("\\\"", "\"")
-            .replace("\\n", "\n")
-            .replace("\\r", "\r")
-            .replace("\\t", "\t")
         
-        // 处理 Unicode 转义序列 (如 \u003C)
+        // 1. 先处理 Unicode 转义序列 (如 \u003C -> <)
         val unicodePattern = Regex("""\\u([0-9a-fA-F]{4})""")
         result = unicodePattern.replace(result) { matchResult ->
             val hexCode = matchResult.groupValues[1]
             hexCode.toInt(16).toChar().toString()
         }
+        
+        // 2. 处理 \x 转义序列（如 \x3C）
+        val hexPattern = Regex("""\\x([0-9a-fA-F]{2})""")
+        result = hexPattern.replace(result) { matchResult ->
+            val hexCode = matchResult.groupValues[1]
+            hexCode.toInt(16).toChar().toString()
+        }
+        
+        // 3. 处理其他转义序列（但不处理反斜杠，避免破坏后续处理）
+        result = result
+            .replace("\\n", "\n")
+            .replace("\\r", "\r")
+            .replace("\\t", "\t")
+            .replace("\\b", "\b")
+            .replace("\\f", "\u000C")
+            .replace("\\'", "'")
+            .replace("\\\"", "\"")
+        
+        // 4. 最后处理双反斜杠
+        result = result.replace("\\\\", "\\")
         
         return result
     }

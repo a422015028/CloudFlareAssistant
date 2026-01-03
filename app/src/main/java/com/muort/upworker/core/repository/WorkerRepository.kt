@@ -71,48 +71,83 @@ class WorkerRepository @Inject constructor(
             val isESModule = scriptContent.contains("export default") || scriptContent.contains("export {")
             val isServiceWorker = !isESModule && scriptContent.contains("addEventListener")
             
-            // Determine content type based on script format and file extension
-            val contentType = when {
-                // ES Module 格式（优先检查）
-                isESModule -> "application/javascript+module"
-                // Service Worker 格式使用标准 JavaScript MIME type
-                isServiceWorker -> "application/javascript"
-                // 其他格式
-                scriptFile.extension.lowercase() == "py" -> "text/x-python"
-                scriptFile.extension.lowercase() == "wasm" -> "application/wasm"
-                else -> "application/javascript+module"  // 默认使用 ES Module
-            }.toMediaType()
+            // 定义可能的 content type 列表（按优先级排序）
+            val contentTypesToTry = mutableListOf<String>()
             
-            Timber.d("Uploading script: ${scriptFile.name}, isServiceWorker=$isServiceWorker, contentType=$contentType")
-            
-            // Create multipart body for script
-            val scriptPart = MultipartBody.Part.createFormData(
-                name = finalMetadata.mainModule ?: scriptFile.name,
-                filename = scriptFile.name,
-                body = scriptFile.asRequestBody(contentType)
-            )
-            
-            val response = api.uploadWorkerScriptMultipart(
-                token = "Bearer ${account.token}",
-                accountId = account.accountId,
-                scriptName = scriptName,
-                metadata = metadataBody,
-                script = scriptPart
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Timber.d("Upload successful: ${it.id}")
-                    Resource.Success(it)
-                } ?: Resource.Error("Upload successful but no result returned")
-            } else {
-                val errorBody = response.errorBody()?.string()
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message() 
-                    ?: "Unknown error"
-                Timber.e("Upload failed: $errorMsg, Response code: ${response.code()}, Error body: $errorBody")
-                Resource.Error("Upload failed: $errorMsg")
+            // 根据文件扩展名和内容确定优先尝试的类型
+            when {
+                scriptFile.extension.lowercase() == "py" -> {
+                    contentTypesToTry.add("text/x-python")
+                }
+                scriptFile.extension.lowercase() == "wasm" -> {
+                    contentTypesToTry.add("application/wasm")
+                }
+                isESModule -> {
+                    contentTypesToTry.add("application/javascript+module")
+                    contentTypesToTry.add("application/javascript")
+                    contentTypesToTry.add("text/javascript")
+                }
+                isServiceWorker -> {
+                    contentTypesToTry.add("application/javascript")
+                    contentTypesToTry.add("application/javascript+module")
+                    contentTypesToTry.add("text/javascript")
+                }
+                else -> {
+                    // 加密/混淆或未识别的脚本，尝试所有 JavaScript 类型
+                    contentTypesToTry.add("application/javascript+module")
+                    contentTypesToTry.add("application/javascript")
+                    contentTypesToTry.add("text/javascript")
+                }
             }
+            
+            Timber.d("Uploading script: ${scriptFile.name}, will try content types: $contentTypesToTry")
+            
+            var lastError: String? = null
+            var lastErrorBody: String? = null
+            
+            // 尝试每种 content type
+            for ((index, contentTypeStr) in contentTypesToTry.withIndex()) {
+                val contentType = contentTypeStr.toMediaType()
+                Timber.d("Attempt ${index + 1}/${contentTypesToTry.size}: Using content type: $contentType")
+                
+                // Create multipart body for script
+                val scriptPart = MultipartBody.Part.createFormData(
+                    name = finalMetadata.mainModule ?: scriptFile.name,
+                    filename = scriptFile.name,
+                    body = scriptFile.asRequestBody(contentType)
+                )
+                
+                val response = api.uploadWorkerScriptMultipart(
+                    token = "Bearer ${account.token}",
+                    accountId = account.accountId,
+                    scriptName = scriptName,
+                    metadata = metadataBody,
+                    script = scriptPart
+                )
+                
+                if (response.isSuccessful && response.body()?.success == true) {
+                    response.body()?.result?.let {
+                        Timber.d("Upload successful with content type: $contentType")
+                        return@safeApiCall Resource.Success(it)
+                    } ?: return@safeApiCall Resource.Error("Upload successful but no result returned")
+                } else {
+                    lastErrorBody = response.errorBody()?.string()
+                    lastError = response.body()?.errors?.firstOrNull()?.message 
+                        ?: response.message() 
+                        ?: "Unknown error"
+                    Timber.w("Upload failed with $contentType: $lastError (code: ${response.code()})")
+                    
+                    // 如果不是最后一次尝试，继续下一个类型
+                    if (index < contentTypesToTry.size - 1) {
+                        Timber.d("Retrying with next content type...")
+                        continue
+                    }
+                }
+            }
+            
+            // 所有尝试都失败
+            Timber.e("All upload attempts failed. Last error: $lastError, Error body: $lastErrorBody")
+            Resource.Error("Upload failed (tried ${contentTypesToTry.size} content types): $lastError")
         }
     }
     
