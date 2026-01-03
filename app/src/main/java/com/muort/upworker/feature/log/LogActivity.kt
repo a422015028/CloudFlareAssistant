@@ -1,5 +1,6 @@
 package com.muort.upworker.feature.log
 
+import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
@@ -16,6 +17,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class LogActivity : AppCompatActivity() {
+    
+    companion object {
+        private const val TARGET_DENSITY = 3.5f
+        private const val TARGET_DENSITY_DPI = (160 * TARGET_DENSITY).toInt()
+    }
+    
     // 保证状态栏样式与主界面一致
     override fun getTheme(): android.content.res.Resources.Theme {
         val theme = super.getTheme()
@@ -23,35 +30,50 @@ class LogActivity : AppCompatActivity() {
         return theme
     }
     
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(createConfigurationContext(newBase))
+    }
+    
     /**
-     * 固定应用显示大小为默认值，不跟随系统显示大小设置变化
-     * 但保留系统字体大小设置
+     * 创建固定配置的Context
+     */
+    private fun createConfigurationContext(context: Context): Context {
+        val config = Configuration(context.resources.configuration)
+        config.fontScale = 1.0f
+        config.densityDpi = TARGET_DENSITY_DPI
+        return context.createConfigurationContext(config)
+    }
+    
+    override fun getResources(): Resources {
+        val res = super.getResources()
+        adaptDisplayDensity(res)
+        return res
+    }
+    
+    /**
+     * 固定应用显示大小和字体大小，不跟随系统设置变化
      */
     @Suppress("DEPRECATION")
-    private fun adaptDisplayDensity() {
-        val appDisplayMetrics = resources.displayMetrics
-        val targetDensity = 3.5f // 固定为默认密度
-        val targetDensityDpi = (160 * targetDensity).toInt()
+    private fun adaptDisplayDensity(res: Resources) {
+        val config = res.configuration
+        val dm = res.displayMetrics
         
-        // 获取系统的字体缩放比例
-        val systemFontScale = Resources.getSystem().configuration.fontScale
+        // 固定 fontScale 为 1.0
+        if (config.fontScale != 1.0f) {
+            config.fontScale = 1.0f
+        }
+        if (config.densityDpi != TARGET_DENSITY_DPI) {
+            config.densityDpi = TARGET_DENSITY_DPI
+        }
         
-        // 设置固定的显示密度
-        appDisplayMetrics.density = targetDensity
-        appDisplayMetrics.densityDpi = targetDensityDpi
-        // scaledDensity 需要根据字体缩放比例计算，这样字体会跟随系统设置
-        appDisplayMetrics.scaledDensity = targetDensity * systemFontScale
-        
-        // 同时更新 Configuration
-        val appConfig = resources.configuration
-        appConfig.densityDpi = targetDensityDpi
-        appConfig.fontScale = systemFontScale
+        // 设置固定的显示密度和字体密度
+        dm.density = TARGET_DENSITY
+        dm.densityDpi = TARGET_DENSITY_DPI
+        dm.scaledDensity = TARGET_DENSITY
     }
     
     private val scope = MainScope()
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 在 Activity 创建时也应用密度设置
-        adaptDisplayDensity()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log)
         
