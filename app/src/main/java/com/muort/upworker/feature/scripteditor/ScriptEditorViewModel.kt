@@ -167,7 +167,7 @@ class ScriptEditorViewModel @Inject constructor(
                 Timber.d("Original content length: ${content.length}, Fixed: ${fixedContent.length}")
                 
                 // Create temporary file
-                val tempDir = java.io.File(System.getProperty("java.io.tmpdir"))
+                val tempDir = java.io.File(System.getProperty("java.io.tmpdir") ?: System.getenv("TEMP") ?: "/tmp")
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
                 
                 try {

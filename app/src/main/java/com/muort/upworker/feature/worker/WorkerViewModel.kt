@@ -33,7 +33,7 @@ class WorkerViewModel @Inject constructor(
                 val content = scriptFile.readText(Charsets.UTF_8)
                 
                 // 创建临时文件
-                val tempDir = java.io.File(System.getProperty("java.io.tmpdir"))
+                val tempDir = java.io.File(System.getProperty("java.io.tmpdir") ?: System.getenv("TEMP") ?: "/tmp")
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
                 
                 try {
