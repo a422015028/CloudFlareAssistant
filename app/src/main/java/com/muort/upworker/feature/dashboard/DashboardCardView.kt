@@ -1,6 +1,7 @@
 package com.muort.upworker.feature.dashboard
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -43,9 +44,19 @@ class DashboardCardView @JvmOverloads constructor(
     
     var onRefreshClick: (() -> Unit)? = null
     var onTimeRangeChanged: ((TimeRange) -> Unit)? = null
+    var onDashboardEnabledChanged: ((Boolean) -> Unit)? = null
     
     // 当前选择的时间范围，用于格式化图表 X 轴
     private var currentTimeRange: TimeRange = TimeRange.ONE_DAY
+    
+    // SharedPreferences 用于保存开关状态
+    private val prefs: SharedPreferences by lazy {
+        context.getSharedPreferences("dashboard_prefs", Context.MODE_PRIVATE)
+    }
+    
+    companion object {
+        private const val KEY_DASHBOARD_ENABLED = "dashboard_enabled"
+    }
 
     init {
         binding = CardDashboardBinding.inflate(LayoutInflater.from(context), this, true)
@@ -54,12 +65,47 @@ class DashboardCardView @JvmOverloads constructor(
         setupPieChart()
         setupBarChart()
         setupTimeRangeChips()
+        setupDashboardSwitch()
     }
 
     private fun setupListeners() {
         binding.refreshButton.setOnClickListener {
             onRefreshClick?.invoke()
         }
+    }
+    
+    /**
+     * 设置仪表盘开关
+     */
+    private fun setupDashboardSwitch() {
+        // 恢复保存的状态
+        val isEnabled = prefs.getBoolean(KEY_DASHBOARD_ENABLED, true)
+        binding.dashboardSwitch.isChecked = isEnabled
+        updateDashboardVisibility(isEnabled)
+        
+        // 监听开关变化
+        binding.dashboardSwitch.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean(KEY_DASHBOARD_ENABLED, isChecked).apply()
+            updateDashboardVisibility(isChecked)
+            onDashboardEnabledChanged?.invoke(isChecked)
+        }
+    }
+    
+    /**
+     * 更新仪表盘内容可见性
+     */
+    private fun updateDashboardVisibility(isEnabled: Boolean) {
+        binding.dashboardMainContainer.visibility = if (isEnabled) View.VISIBLE else View.GONE
+        binding.statusIndicator.visibility = if (isEnabled) View.VISIBLE else View.GONE
+        binding.statusText.visibility = if (isEnabled) View.VISIBLE else View.GONE
+        binding.refreshButton.visibility = if (isEnabled) View.VISIBLE else View.GONE
+    }
+    
+    /**
+     * 获取仪表盘是否启用
+     */
+    fun isDashboardEnabled(): Boolean {
+        return binding.dashboardSwitch.isChecked
     }
     
     private fun setupTimeRangeChips() {

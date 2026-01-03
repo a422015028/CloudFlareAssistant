@@ -32,6 +32,16 @@
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurface" />
 
+            <!-- 仪表盘开关 -->
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/dashboardSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:checked="true"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
             <!-- 健康状态指示器 -->
             <View
                 android:id="@+id/statusIndicator"
@@ -98,6 +108,13 @@
                 style="@style/Widget.Material3.Chip.Filter" />
 
         </com.google.android.material.chip.ChipGroup>
+
+        <!-- 仪表盘主容器 - 可通过开关控制显示/隐藏 -->
+        <LinearLayout
+            android:id="@+id/dashboardMainContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
         <!-- 加载状态 -->
         <FrameLayout
@@ -891,6 +908,9 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        </LinearLayout>
+        <!-- 内容容器结束 -->
 
     </LinearLayout>
 

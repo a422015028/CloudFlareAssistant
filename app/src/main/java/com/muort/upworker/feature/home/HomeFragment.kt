@@ -79,6 +79,16 @@ class HomeFragment : Fragment() {
                 dashboardViewModel.changeTimeRange(account, timeRange)
             }
         }
+        
+        // 设置仪表盘开关监听
+        binding.dashboardCard.onDashboardEnabledChanged = { isEnabled ->
+            if (isEnabled) {
+                // 开启时自动刷新数据
+                accountViewModel.defaultAccount.value?.let { account ->
+                    dashboardViewModel.refresh(account)
+                }
+            }
+        }
     }
 
     private fun setupUI() {
@@ -265,8 +275,8 @@ class HomeFragment : Fragment() {
                     accountViewModel.defaultAccount.collect { account ->
                         binding.accountNameText.text = account?.name ?: "未选择账号"
                         
-                        // 加载仪表盘数据
-                        if (account != null) {
+                        // 仅在仪表盘开关开启时加载数据
+                        if (account != null && binding.dashboardCard.isDashboardEnabled()) {
                             dashboardViewModel.loadDashboard(account)
                         }
                     }
