@@ -41,22 +41,9 @@ class WorkerViewModel @Inject constructor(
                     when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
                         is Resource.Success -> {
                             val originalBindings = settings.data.bindings
-                            val hasBindings = !originalBindings.isNullOrEmpty()
                             
-                            // 检测脚本格式
-                            val isServiceWorker = content.contains("addEventListener")
-                            val isESModule = content.contains("export default")
-                            
-                            // 只有当是Service Worker格式且有bindings时才转换
-                            val finalContent = if (isServiceWorker && !isESModule && hasBindings) {
-                                Timber.d("Converting Service Worker to ES Module (has bindings)")
-                                convertServiceWorkerToESModule(content)
-                            } else {
-                                content
-                            }
-                            
-                            // 以 UTF-8 无 BOM 格式写入临时文件
-                            tempFile.writeText(finalContent, Charsets.UTF_8)
+                            // 直接使用原始内容，不做任何转换
+                            tempFile.writeText(content, Charsets.UTF_8)
                             
                             Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
                             
@@ -616,41 +603,6 @@ class WorkerViewModel @Inject constructor(
             }
             _loadingState.value = false
         }
-    }
-    
-    /**
-     * 将Service Worker格式转换为ES Module格式
-     * Service Worker格式不支持bindings，需要转换为ES Module
-     */
-    private fun convertServiceWorkerToESModule(serviceWorkerCode: String): String {
-        // 移除 addEventListener 部分，提取处理函数
-        var esModuleCode = serviceWorkerCode
-        
-        // 查找 addEventListener('fetch', ...) 模式
-        val addEventListenerPattern = Regex(
-            """addEventListener\s*\(\s*['"]fetch['"]\s*,\s*(?:event|e)\s*=>\s*\{[^}]*event\.respondWith\s*\(\s*(\w+)\s*\([^)]*\)\s*\)\s*\}\s*\)""",
-            RegexOption.DOT_MATCHES_ALL
-        )
-        
-        val match = addEventListenerPattern.find(esModuleCode)
-        val handlerFunctionName = match?.groupValues?.get(1) ?: "handleRequest"
-        
-        // 移除 addEventListener
-        esModuleCode = esModuleCode.replace(addEventListenerPattern, "")
-        
-        // 添加 ES Module export default
-        val exportDefault = """
-            export default {
-              async fetch(request, env, ctx) {
-                return $handlerFunctionName(request);
-              }
-            };
-        """.trimIndent()
-        
-        // 将 export default 添加到代码末尾
-        esModuleCode = esModuleCode.trim() + "\n\n" + exportDefault
-        
-        return esModuleCode
     }
 }
 

@@ -156,15 +156,7 @@ class ScriptEditorViewModel @Inject constructor(
                     return@launch
                 }
                 
-                // 清理内容：移除可能的多余转义
-                val cleanedContent = content
-                    .replace("\\\\", "\\")  // 双重转义变单次
-                    .replace("\\'", "'")     // 不必要的单引号转义
-                
-                // 修复字符串中的引号问题：将 \'xxx\' 替换为正确的引号
-                val fixedContent = fixQuotesInJavaScript(cleanedContent)
-                
-                Timber.d("Original content length: ${content.length}, Fixed: ${fixedContent.length}")
+                Timber.d("Uploading script content length: ${content.length}")
                 
                 // Create temporary file
                 val tempDir = java.io.File(System.getProperty("java.io.tmpdir") ?: System.getenv("TEMP") ?: "/tmp")
@@ -175,34 +167,13 @@ class ScriptEditorViewModel @Inject constructor(
                     when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
                         is Resource.Success -> {
                             val originalBindings = settings.data.bindings
-                            val hasBindings = !originalBindings.isNullOrEmpty()
                             
-                            // 检测脚本格式（使用修复后的内容）
-                            val isServiceWorker = fixedContent.contains("addEventListener")
-                            val isESModule = fixedContent.contains("export default")
-                            
-                            // 只有当是Service Worker格式且有bindings时才转换
-                            val finalContent = if (isServiceWorker && !isESModule && hasBindings) {
-                                Timber.d("Converting Service Worker to ES Module (has bindings)")
-                                convertServiceWorkerToESModule(fixedContent)
-                            } else {
-                                fixedContent
-                            }
-                            
-                            // 以 UTF-8 无 BOM 格式写入文件
-                            tempFile.writeText(finalContent, Charsets.UTF_8)
+                            // 直接使用原始内容，不做任何转换
+                            tempFile.writeText(content, Charsets.UTF_8)
                             
                             Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
                             
-                            // Debug: 输出第155-165行以检查问题
-                            val lines = finalContent.lines()
-                            if (lines.size >= 165) {
-                                Timber.d("Lines 155-165:")
-                                lines.subList(154, 165).forEachIndexed { index, line ->
-                                    Timber.d("  ${155 + index}: ${line.take(100)}")
-                                }
-                            }
-                            
+
                             // 过滤掉 secret_text bindings（无法获取值）
                             val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
                             
@@ -251,51 +222,6 @@ class ScriptEditorViewModel @Inject constructor(
                 _isLoading.value = false
             }
         }
-    }
-    
-    /**
-     * 修复 JavaScript 中的引号转义问题
-     * 将类似 onclick="foo(\'bar\')" 的转义引号修复为正确格式
-     */
-    private fun fixQuotesInJavaScript(code: String): String {
-        // 不做任何修改，直接返回原始内容
-        // 让 Cloudflare 自己处理，只要语法正确即可
-        return code
-    }
-    
-    /**
-     * 将Service Worker格式转换为ES Module格式
-     * Service Worker格式不支持bindings，需要转换为ES Module
-     */
-    private fun convertServiceWorkerToESModule(serviceWorkerCode: String): String {
-        // 移除 addEventListener 部分，提取处理函数
-        var esModuleCode = serviceWorkerCode
-        
-        // 查找 addEventListener('fetch', ...) 模式
-        val addEventListenerPattern = Regex(
-            """addEventListener\s*\(\s*['"]fetch['"]\s*,\s*(?:event|e)\s*=>\s*\{[^}]*event\.respondWith\s*\(\s*(\w+)\s*\([^)]*\)\s*\)\s*\}\s*\)""",
-            RegexOption.DOT_MATCHES_ALL
-        )
-        
-        val match = addEventListenerPattern.find(esModuleCode)
-        val handlerFunctionName = match?.groupValues?.get(1) ?: "handleRequest"
-        
-        // 移除 addEventListener
-        esModuleCode = esModuleCode.replace(addEventListenerPattern, "")
-        
-        // 添加 ES Module export default
-        val exportDefault = """
-            export default {
-              async fetch(request, env, ctx) {
-                return $handlerFunctionName(request);
-              }
-            };
-        """.trimIndent()
-        
-        // 在开头添加注释说明
-        val header = "// Automatically converted from Service Worker to ES Module format\n\n"
-        
-        return header + esModuleCode.trim() + "\n\n" + exportDefault
     }
     
     suspend fun getVersionHistory(accountEmail: String, scriptName: String): List<ScriptVersion> {

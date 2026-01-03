@@ -283,13 +283,22 @@ class ScriptEditorFragment : Fragment() {
     }
     
     private fun unescapeJavaScript(text: String): String {
-        return text
+        var result = text
             .replace("\\\\", "\\")
             .replace("\\'", "'")
             .replace("\\\"", "\"")
             .replace("\\n", "\n")
             .replace("\\r", "\r")
             .replace("\\t", "\t")
+        
+        // 处理 Unicode 转义序列 (如 \u003C)
+        val unicodePattern = Regex("""\\u([0-9a-fA-F]{4})""")
+        result = unicodePattern.replace(result) { matchResult ->
+            val hexCode = matchResult.groupValues[1]
+            hexCode.toInt(16).toChar().toString()
+        }
+        
+        return result
     }
     
     private fun executeJavaScript(script: String) {
