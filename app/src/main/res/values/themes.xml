@@ -6,4 +6,9 @@
   </style>
 
   <style name="AppTheme" parent="Base.AppTheme" />
+  
+  <!-- Toolbar标题文字样式 -->
+  <style name="ToolbarTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <item name="android:textSize">16sp</item>
+  </style>
 </resources>

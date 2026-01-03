@@ -26,9 +26,11 @@ object DatabaseModule {
             .addMigrations(
                 AppDatabase.MIGRATION_1_2, 
                 AppDatabase.MIGRATION_2_3,
-                AppDatabase.MIGRATION_3_4
+                AppDatabase.MIGRATION_3_4,
+                AppDatabase.MIGRATION_4_5
             )
-            .fallbackToDestructiveMigration()
+            // 移除fallbackToDestructiveMigration以保护用户数据
+            // 如果迁移失败会抛出异常而不是删除数据
             .build()
     }
     
@@ -48,5 +50,11 @@ object DatabaseModule {
     @Singleton
     fun provideZoneDao(database: AppDatabase): ZoneDao {
         return database.zoneDao()
+    }
+    
+    @Provides
+    @Singleton
+    fun provideScriptVersionDao(database: AppDatabase): ScriptVersionDao {
+        return database.scriptVersionDao()
     }
 }

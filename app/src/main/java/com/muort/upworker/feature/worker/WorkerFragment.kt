@@ -14,6 +14,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.TextView
+import android.webkit.WebView
+import android.webkit.WebSettings
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.NestedScrollView
@@ -23,9 +26,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.KvNamespace
 import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.WorkerScript
@@ -82,6 +87,9 @@ class WorkerFragment : Fragment() {
     private lateinit var scriptsAdapter: WorkerScriptsAdapter
     private var scriptViewDialog: AlertDialog? = null
     
+    // 缓存脚本大小
+    private val scriptSizeCache = mutableMapOf<String, Long>()
+    
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -137,6 +145,7 @@ class WorkerFragment : Fragment() {
     
     private fun setupUI() {
         scriptsAdapter = WorkerScriptsAdapter(
+            scriptSizeCache,
             onViewClick = { script ->
                 viewScriptContent(script)
             },
@@ -1177,6 +1186,38 @@ class WorkerFragment : Fragment() {
         val account = accountViewModel.defaultAccount.value
         if (account != null) {
             viewModel.loadWorkerScripts(account)
+            // 加载完成后自动获取所有脚本大小
+            loadScriptSizes(account)
+        }
+    }
+    
+    private fun loadScriptSizes(account: Account) {
+        lifecycleScope.launch {
+            // 等待脚本列表加载完成
+            viewModel.scripts.collect { scripts ->
+                if (scripts.isEmpty()) return@collect
+                
+                // 并发获取所有脚本的大小
+                scripts.forEach { script ->
+                    // 跳过已缓存的
+                    if (scriptSizeCache.containsKey(script.id)) return@forEach
+                    
+                    launch {
+                        try {
+                            viewModel.getWorkerScript(account, script.id, silent = true) { content ->
+                                scriptSizeCache[script.id] = content.length.toLong()
+                                // 更新UI
+                                scriptsAdapter.notifyDataSetChanged()
+                            }
+                        } catch (e: Exception) {
+                            Timber.e(e, "Failed to get script size for ${script.id}")
+                        }
+                    }
+                }
+                
+                // 只执行一次
+                return@collect
+            }
         }
     }
     
@@ -1187,56 +1228,313 @@ class WorkerFragment : Fragment() {
             return
         }
         
-        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取脚本内容")
-            .setCancelable(false)
-            .create()
-        loadingDialog.show()
+        // 导航到脚本编辑器
+        val action = WorkerFragmentDirections.actionWorkerToScriptEditor(
+            accountEmail = account.accountId,
+            scriptName = script.id
+        )
+        findNavController().navigate(action)
+    }
+    
+    private fun showScriptInEditText(script: WorkerScript, content: String) {
+        val scrollView = NestedScrollView(requireContext()).apply {
+            setPadding(48, 24, 48, 24)
+        }
         
-        viewModel.getWorkerScript(account, script.id) { content ->
-            loadingDialog.dismiss()
-            
-            val scrollView = NestedScrollView(requireContext()).apply {
-                setPadding(48, 24, 48, 24)
-            }
-            
-            val editText = EditText(requireContext()).apply {
+        val editText = EditText(requireContext()).apply {
+            post {
                 setText(content)
-                textSize = 12f
-                typeface = Typeface.MONOSPACE
-                inputType = InputType.TYPE_CLASS_TEXT or 
-                           InputType.TYPE_TEXT_FLAG_MULTI_LINE or
-                           InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-                isSingleLine = false
-                setHorizontallyScrolling(false)
-                minLines = 20
-                gravity = android.view.Gravity.TOP or android.view.Gravity.START
+            }
+            textSize = 12f
+            typeface = Typeface.MONOSPACE
+            inputType = InputType.TYPE_CLASS_TEXT or 
+                       InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+                       InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            isSingleLine = false
+            setHorizontallyScrolling(false)
+            minLines = 20
+            gravity = android.view.Gravity.TOP or android.view.Gravity.START
+            setTextIsSelectable(true)
+        }
+        
+        scrollView.addView(editText)
+        
+        scriptViewDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(script.id)
+            .setView(scrollView)
+            .setPositiveButton("保存") { _, _ ->
+                val newContent = editText.text.toString()
+                if (newContent != content) {
+                    saveScriptContent(script, newContent)
+                } else {
+                    showToast("内容未修改")
+                }
+                editText.setText("")
+            }
+            .setNegativeButton("关闭") { _, _ ->
+                editText.setText("")
+            }
+            .setNeutralButton("复制") { _, _ ->
+                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("Worker Script", editText.text.toString())
+                clipboard.setPrimaryClip(clip)
+                showToast("已复制到剪贴板")
+            }
+            .setOnDismissListener {
+                editText.setText("")
+                scriptViewDialog = null
+            }
+            .create()
+        
+        scriptViewDialog?.show()
+    }
+    
+    private fun showScriptInWebView(script: WorkerScript, content: String) {
+        // 获取当前主题的Dialog背景色
+        val typedValue = android.util.TypedValue()
+        val theme = requireContext().theme
+        
+        // 获取Dialog的实际背景色 - 使用android.R.attr.colorBackground更准确
+        theme.resolveAttribute(android.R.attr.colorBackground, typedValue, true)
+        val bgColor = typedValue.data
+        val backgroundColor = String.format("#%06X", 0xFFFFFF and bgColor)
+        
+        // 获取文字颜色
+        theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true)
+        val txtColor = typedValue.data
+        val textColor = String.format("#%06X", 0xFFFFFF and txtColor)
+        
+        val webView = WebView(requireContext()).apply {
+            // 设置透明背景，让HTML背景色生效
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+            
+            settings.apply {
+                javaScriptEnabled = false
+                defaultTextEncodingName = "utf-8"
+                textZoom = 85
+                // 禁用所有不必要的功能以提高性能
+                setSupportZoom(true)
+                builtInZoomControls = true
+                displayZoomControls = false
+                loadWithOverviewMode = false
+                useWideViewPort = false
+                cacheMode = WebSettings.LOAD_NO_CACHE
             }
             
-            scrollView.addView(editText)
+            // HTML转义处理，防止内容被解析
+            val escapedContent = content
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;")
             
-            scriptViewDialog = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(script.id)
-                .setView(scrollView)
-                .setPositiveButton("保存") { _, _ ->
-                    val newContent = editText.text.toString()
-                    if (newContent != content) {
-                        saveScriptContent(script, newContent)
-                    } else {
-                        showToast("内容未修改")
+            val html = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 12px;
+                            font-family: 'Courier New', monospace;
+                            font-size: 11px;
+                            line-height: 1.4;
+                            word-wrap: break-word;
+                            white-space: pre-wrap;
+                            background: $backgroundColor;
+                            color: $textColor;
+                        }
+                        * {
+                            -webkit-user-select: text;
+                            user-select: text;
+                        }
+                    </style>
+                </head>
+                <body>$escapedContent</body>
+                </html>
+            """.trimIndent()
+            
+            loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+        }
+        
+        // 格式化文件大小显示
+        val sizeText = formatScriptSize(content.length.toLong())
+        
+        scriptViewDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("${script.id} (只读 - $sizeText)")
+            .setView(webView)
+            .setNegativeButton("关闭", null)
+            .setNeutralButton("复制") { _, _ ->
+                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("Worker Script", content)
+                clipboard.setPrimaryClip(clip)
+                showToast("已复制到剪贴板")
+            }
+            .setPositiveButton("编辑") { _, _ ->
+                // 为大脚本提供导出和编辑选项
+                showEditOptionsDialog(script, content)
+            }
+            .setOnDismissListener {
+                webView.destroy()
+                scriptViewDialog = null
+            }
+            .create()
+        
+        scriptViewDialog?.show()
+    }
+    
+    private fun formatScriptSize(size: Long): String {
+        return when {
+            size < 1024 -> "${size}B"
+            size < 1024 * 1024 -> String.format("%.2f KB", size / 1024.0)
+            size < 1024 * 1024 * 1024 -> String.format("%.2f MB", size / (1024.0 * 1024))
+            else -> String.format("%.2f GB", size / (1024.0 * 1024 * 1024))
+        }
+    }
+    
+    private fun showEditOptionsDialog(script: WorkerScript, content: String) {
+        // 超过200KB的脚本强制使用导出功能，避免卡死
+        if (content.length > 200_000) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("脚本过大")
+                .setMessage("该脚本(${content.length}字符)过大，应用内编辑会导致卡顿。\n\n将自动导出到文件供外部编辑器使用。")
+                .setPositiveButton("导出") { _, _ ->
+                    exportScriptToFile(script, content)
+                }
+                .setNegativeButton("取消", null)
+                .show()
+            return
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("编辑脚本")
+            .setMessage("该脚本(${content.length}字符)，请选择编辑方式：")
+            .setPositiveButton("导出到文件") { _, _ ->
+                exportScriptToFile(script, content)
+            }
+            .setNeutralButton("应用内编辑") { _, _ ->
+                // 使用优化的方式编辑
+                showScriptInOptimizedEditText(script, content)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun exportScriptToFile(script: WorkerScript, content: String) {
+        try {
+            val fileName = "${script.id}.js"
+            val file = File(requireContext().getExternalFilesDir(null), fileName)
+            file.writeText(content)
+            
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("导出成功")
+                .setMessage("脚本已导出到：\n${file.absolutePath}\n\n你可以用任何文本编辑器打开编辑，编辑完成后重新上传。")
+                .setPositiveButton("确定", null)
+                .setNeutralButton("分享文件") { _, _ ->
+                    shareScriptFile(file)
+                }
+                .show()
+        } catch (e: Exception) {
+            Timber.e(e, "导出脚本失败")
+            showToast("导出失败: ${e.message}")
+        }
+    }
+    
+    private fun shareScriptFile(file: File) {
+        try {
+            val uri = androidx.core.content.FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.fileprovider",
+                file
+            )
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/javascript"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(intent, "分享脚本文件"))
+        } catch (e: Exception) {
+            Timber.e(e, "分享文件失败")
+            showToast("分享失败: ${e.message}")
+        }
+    }
+    
+    private fun showScriptInOptimizedEditText(script: WorkerScript, content: String) {
+        // 使用优化的EditText，减少内存占用
+        lifecycleScope.launch {
+            try {
+                val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("加载中...")
+                    .setMessage("正在准备编辑器")
+                    .setCancelable(false)
+                    .create()
+                loadingDialog.show()
+                
+                // 延迟加载，给UI线程时间响应
+                kotlinx.coroutines.delay(100)
+                
+                val scrollView = NestedScrollView(requireContext()).apply {
+                    setPadding(24, 12, 24, 12)
+                }
+                
+                val editText = EditText(requireContext()).apply {
+                    // 分批设置文本，减少卡顿
+                    hint = "加载中..."
+                    textSize = 10f  // 较小的字体减少渲染压力
+                    typeface = Typeface.MONOSPACE
+                    inputType = InputType.TYPE_CLASS_TEXT or 
+                               InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+                               InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                    isSingleLine = false
+                    setHorizontallyScrolling(false)  // 禁用水平滚动，启用自动换行
+                    minLines = 10
+                    maxLines = 30  // 限制最大行数
+                    gravity = android.view.Gravity.TOP or android.view.Gravity.START
+                    setTextIsSelectable(true)
+                    
+                    // 延迟设置内容
+                    postDelayed({
+                        setText(content)
+                        hint = ""
+                    }, 200)
+                }
+                
+                scrollView.addView(editText)
+                loadingDialog.dismiss()
+                
+                scriptViewDialog = MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("${script.id} (编辑)")
+                    .setView(scrollView)
+                    .setPositiveButton("保存") { _, _ ->
+                        val newContent = editText.text.toString()
+                        if (newContent != content && newContent.isNotEmpty()) {
+                            saveScriptContent(script, newContent)
+                        } else {
+                            showToast("内容未修改")
+                        }
+                        editText.setText("")
                     }
-                }
-                .setNegativeButton("关闭", null)
-                .setNeutralButton("复制") { _, _ ->
-                    val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Worker Script", editText.text.toString())
-                    clipboard.setPrimaryClip(clip)
-                    showToast("已复制到剪贴板")
-                }
-                .create()
-            
-            scriptViewDialog?.show()
+                    .setNegativeButton("取消") { _, _ ->
+                        editText.setText("")
+                    }
+                    .setOnDismissListener {
+                        editText.setText("")
+                        scriptViewDialog = null
+                    }
+                    .create()
+                
+                scriptViewDialog?.show()
+                
+            } catch (e: OutOfMemoryError) {
+                Timber.e(e, "内存不足")
+                showToast("内存不足，无法编辑。请使用导出功能。")
+            } catch (e: Exception) {
+                Timber.e(e, "编辑器加载失败")
+                showToast("加载失败: ${e.message}")
+            }
         }
     }
     
@@ -1359,6 +1657,7 @@ class WorkerFragment : Fragment() {
 }
 
 class WorkerScriptsAdapter(
+    private val scriptSizeCache: Map<String, Long>,
     private val onViewClick: (WorkerScript) -> Unit,
     private val onDeleteClick: (WorkerScript) -> Unit,
     private val onConfigKvClick: (WorkerScript) -> Unit,
@@ -1398,7 +1697,10 @@ class WorkerScriptsAdapter(
             binding.scriptNameText.text = script.id
             
             val dateText = formatDate(script.createdOn)
-            binding.scriptSizeText.text = "创建于 $dateText"
+            // 优先使用缓存的大小，其次是API返回的size
+            val size = scriptSizeCache[script.id] ?: script.size
+            val sizeText = formatSize(size)
+            binding.scriptSizeText.text = "$sizeText \u2022 $dateText"
             
             binding.configKvBtn.setOnClickListener {
                 onConfigKvClick(script)
@@ -1429,12 +1731,27 @@ class WorkerScriptsAdapter(
             }
         }
         
+        private fun formatSize(size: Long?): String {
+            if (size == null || size <= 0) return "未知大小"
+            
+            return when {
+                size < 1024 -> "${size}B"
+                size < 1024 * 1024 -> String.format("%.2f KB", size / 1024.0)
+                size < 1024 * 1024 * 1024 -> String.format("%.2f MB", size / (1024.0 * 1024))
+                else -> String.format("%.2f GB", size / (1024.0 * 1024 * 1024))
+            }
+        }
+        
         private fun formatDate(dateString: String?): String {
             if (dateString == null) return "未知日期"
             
             return try {
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                inputFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+                
+                val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA)
+                outputFormat.timeZone = java.util.TimeZone.getTimeZone("Asia/Shanghai")
+                
                 val date = inputFormat.parse(dateString)
                 date?.let { outputFormat.format(it) } ?: dateString
             } catch (e: Exception) {

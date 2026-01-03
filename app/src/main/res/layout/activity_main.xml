@@ -8,7 +8,8 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:elevation="0dp">
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -16,41 +17,50 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
             app:strokeColor="@android:color/transparent"
-            app:cardBackgroundColor="?attr/colorSurface">
+            app:cardBackgroundColor="?attr/colorSurface"
+            app:layout_scrollFlags="">
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@android:color/transparent"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:title="@string/app_name">
+                app:title="@string/app_name"
+                app:titleTextAppearance="@style/ToolbarTitleTextAppearance">
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
                     android:layout_marginEnd="4dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <TextView
-                        android:id="@+id/currentAccountText"
-                        android:layout_width="wrap_content"
+                    
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="未选择账号"
-                        android:textColor="@android:color/white"
-                        android:textSize="14sp"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:maxWidth="150dp" />
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+                        
+                        <TextView
+                            android:id="@+id/currentAccountText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="未选择账号"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textSize="14sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:gravity="center" />
+                    </LinearLayout>
+                    
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/selectAccountButton"
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="切换"
-                        android:textColor="@android:color/white"
-                        android:minWidth="60dp"
-                        android:layout_marginStart="8dp"
-                        app:iconTint="@android:color/white" />
+                        android:minWidth="48dp"
+                        app:icon="@android:drawable/ic_menu_sort_by_size"
+                        app:iconTint="?attr/colorOnSurface" />
                 </LinearLayout>
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.card.MaterialCardView>

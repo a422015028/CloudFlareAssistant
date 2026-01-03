@@ -66,14 +66,24 @@ class WorkerRepository @Inject constructor(
             Timber.d("Upload metadata JSON: $metadataJson")
             val metadataBody = metadataJson.toRequestBody("application/json".toMediaType())
             
-            // Determine content type based on file extension
-            val contentType = when (scriptFile.extension.lowercase()) {
-                "js" -> "application/javascript+module"
-                "mjs" -> "application/javascript+module"
-                "py" -> "text/x-python"
-                "wasm" -> "application/wasm"
-                else -> "application/javascript"
+            // 读取文件内容以检测脚本类型
+            val scriptContent = scriptFile.readText()
+            val isESModule = scriptContent.contains("export default") || scriptContent.contains("export {")
+            val isServiceWorker = !isESModule && scriptContent.contains("addEventListener")
+            
+            // Determine content type based on script format and file extension
+            val contentType = when {
+                // ES Module 格式（优先检查）
+                isESModule -> "application/javascript+module"
+                // Service Worker 格式使用标准 JavaScript MIME type
+                isServiceWorker -> "application/javascript"
+                // 其他格式
+                scriptFile.extension.lowercase() == "py" -> "text/x-python"
+                scriptFile.extension.lowercase() == "wasm" -> "application/wasm"
+                else -> "application/javascript+module"  // 默认使用 ES Module
             }.toMediaType()
+            
+            Timber.d("Uploading script: ${scriptFile.name}, isServiceWorker=$isServiceWorker, contentType=$contentType")
             
             // Create multipart body for script
             val scriptPart = MultipartBody.Part.createFormData(

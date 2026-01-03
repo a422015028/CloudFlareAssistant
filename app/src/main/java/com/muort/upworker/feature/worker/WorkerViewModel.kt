@@ -22,43 +22,89 @@ class WorkerViewModel @Inject constructor(
 
     /**
      * 上传脚本内容并自动保留原有 bindings（KV/R2/变量等）
+     * 使用与编辑器相同的上传逻辑
      */
     fun uploadWorkerScriptWithBindings(account: Account, scriptName: String, scriptFile: File) {
         viewModelScope.launch {
             _uploadState.value = UploadState.Uploading
-            // 先获取原有 bindings
-            when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
-                is Resource.Success -> {
-                    val bindings = settings.data.bindings
-                    val metadata = com.muort.upworker.core.model.WorkerMetadata(
-                        mainModule = scriptFile.name,
-                        compatibilityDate = "2024-12-01",
-                        bindings = bindings
-                    )
-                    when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, scriptFile, metadata)) {
+            
+            try {
+                // 读取文件内容
+                val content = scriptFile.readText(Charsets.UTF_8)
+                
+                // 创建临时文件
+                val tempDir = java.io.File(System.getProperty("java.io.tmpdir"))
+                val tempFile = java.io.File(tempDir, "$scriptName.js")
+                
+                try {
+                    // 获取原有配置以保留bindings
+                    when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
                         is Resource.Success -> {
-                            _uploadState.value = UploadState.Success
-                            _message.emit("Worker 脚本上传成功（保留原有绑定）")
-                            Timber.d("Script uploaded with bindings: $scriptName")
-                            loadWorkerScripts(account)
+                            val originalBindings = settings.data.bindings
+                            val hasBindings = !originalBindings.isNullOrEmpty()
+                            
+                            // 检测脚本格式
+                            val isServiceWorker = content.contains("addEventListener")
+                            val isESModule = content.contains("export default")
+                            
+                            // 只有当是Service Worker格式且有bindings时才转换
+                            val finalContent = if (isServiceWorker && !isESModule && hasBindings) {
+                                Timber.d("Converting Service Worker to ES Module (has bindings)")
+                                convertServiceWorkerToESModule(content)
+                            } else {
+                                content
+                            }
+                            
+                            // 以 UTF-8 无 BOM 格式写入临时文件
+                            tempFile.writeText(finalContent, Charsets.UTF_8)
+                            
+                            Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
+                            
+                            // 过滤掉 secret_text bindings（无法获取值）
+                            val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
+                            
+                            // 创建metadata并保留清理后的bindings
+                            val metadata = com.muort.upworker.core.model.WorkerMetadata(
+                                mainModule = tempFile.name,
+                                compatibilityDate = "2024-12-01",
+                                bindings = cleanedBindings
+                            )
+                            
+                            when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
+                                is Resource.Success -> {
+                                    _uploadState.value = UploadState.Success
+                                    _message.emit("Worker 脚本上传成功（保留原有绑定）")
+                                    Timber.d("Script uploaded with preserved bindings: $scriptName")
+                                    loadWorkerScripts(account)
+                                }
+                                is Resource.Error -> {
+                                    _uploadState.value = UploadState.Error(result.message)
+                                    _message.emit("上传失败: ${result.message}")
+                                    Timber.e("Failed to upload script: ${result.message}")
+                                }
+                                is Resource.Loading -> {
+                                    _uploadState.value = UploadState.Uploading
+                                }
+                            }
                         }
                         is Resource.Error -> {
-                            _uploadState.value = UploadState.Error(result.message)
-                            _message.emit("上传失败: ${result.message}")
-                            Timber.e("Failed to upload script: ${result.message}")
+                            _uploadState.value = UploadState.Error(settings.message)
+                            _message.emit("获取原有绑定失败: ${settings.message}")
                         }
                         is Resource.Loading -> {
                             _uploadState.value = UploadState.Uploading
                         }
                     }
+                } finally {
+                    // 清理临时文件
+                    if (tempFile.exists()) {
+                        tempFile.delete()
+                    }
                 }
-                is Resource.Error -> {
-                    _uploadState.value = UploadState.Error(settings.message)
-                    _message.emit("获取原有绑定失败: ${settings.message}")
-                }
-                is Resource.Loading -> {
-                    _uploadState.value = UploadState.Uploading
-                }
+            } catch (e: Exception) {
+                _uploadState.value = UploadState.Error(e.message ?: "Unknown error")
+                _message.emit("上传失败: ${e.message}")
+                Timber.e(e, "Failed to upload script")
             }
         }
     }
@@ -331,21 +377,35 @@ class WorkerViewModel @Inject constructor(
         }
     }
     
-    fun getWorkerScript(account: Account, scriptName: String, onSuccess: (String) -> Unit) {
+    fun getWorkerScript(account: Account, scriptName: String, silent: Boolean = false, onSuccess: (String) -> Unit) {
         viewModelScope.launch {
             _loadingState.value = true
             
-            when (val result = workerRepository.getWorkerScript(account, scriptName)) {
-                is Resource.Success -> {
-                    onSuccess(result.data)
+            try {
+                when (val result = workerRepository.getWorkerScript(account, scriptName)) {
+                    is Resource.Success -> {
+                        onSuccess(result.data)
+                    }
+                    is Resource.Error -> {
+                        if (!silent) {
+                            _message.emit("加载脚本失败: ${result.message}")
+                        }
+                    }
+                    is Resource.Loading -> {}
                 }
-                is Resource.Error -> {
-                    _message.emit("加载脚本失败: ${result.message}")
+            } catch (e: OutOfMemoryError) {
+                if (!silent) {
+                    _message.emit("内存不足，无法加载脚本")
                 }
-                is Resource.Loading -> {}
+                Timber.e(e, "内存不足")
+            } catch (e: Exception) {
+                if (!silent) {
+                    _message.emit("加载脚本时出错: ${e.message}")
+                }
+                Timber.e(e, "加载脚本异常")
+            } finally {
+                _loadingState.value = false
             }
-            
-            _loadingState.value = false
         }
     }
     
@@ -556,6 +616,41 @@ class WorkerViewModel @Inject constructor(
             }
             _loadingState.value = false
         }
+    }
+    
+    /**
+     * 将Service Worker格式转换为ES Module格式
+     * Service Worker格式不支持bindings，需要转换为ES Module
+     */
+    private fun convertServiceWorkerToESModule(serviceWorkerCode: String): String {
+        // 移除 addEventListener 部分，提取处理函数
+        var esModuleCode = serviceWorkerCode
+        
+        // 查找 addEventListener('fetch', ...) 模式
+        val addEventListenerPattern = Regex(
+            """addEventListener\s*\(\s*['"]fetch['"]\s*,\s*(?:event|e)\s*=>\s*\{[^}]*event\.respondWith\s*\(\s*(\w+)\s*\([^)]*\)\s*\)\s*\}\s*\)""",
+            RegexOption.DOT_MATCHES_ALL
+        )
+        
+        val match = addEventListenerPattern.find(esModuleCode)
+        val handlerFunctionName = match?.groupValues?.get(1) ?: "handleRequest"
+        
+        // 移除 addEventListener
+        esModuleCode = esModuleCode.replace(addEventListenerPattern, "")
+        
+        // 添加 ES Module export default
+        val exportDefault = """
+            export default {
+              async fetch(request, env, ctx) {
+                return $handlerFunctionName(request);
+              }
+            };
+        """.trimIndent()
+        
+        // 将 export default 添加到代码末尾
+        esModuleCode = esModuleCode.trim() + "\n\n" + exportDefault
+        
+        return esModuleCode
     }
 }
 

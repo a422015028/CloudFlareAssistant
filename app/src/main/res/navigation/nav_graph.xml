@@ -74,7 +74,27 @@
         android:id="@+id/workerFragment"
         android:name="com.muort.upworker.feature.worker.WorkerFragment"
         android:label="Workers 管理"
-        tools:layout="@layout/fragment_worker" />
+        tools:layout="@layout/fragment_worker">
+        
+        <action
+            android:id="@+id/action_worker_to_script_editor"
+            app:destination="@id/scriptEditorFragment" />
+    </fragment>
+    
+    <fragment
+        android:id="@+id/scriptEditorFragment"
+        android:name="com.muort.upworker.feature.scripteditor.ScriptEditorFragment"
+        android:label="脚本编辑器"
+        tools:layout="@layout/fragment_script_editor">
+        
+        <argument
+            android:name="accountEmail"
+            app:argType="string" />
+        
+        <argument
+            android:name="scriptName"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/dnsFragment"

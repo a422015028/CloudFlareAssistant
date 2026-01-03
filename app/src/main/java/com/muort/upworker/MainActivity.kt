@@ -1,8 +1,6 @@
 package com.muort.upworker
 
-import android.content.Context
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.text.SpannableString
@@ -40,58 +38,11 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     
-    companion object {
-        private const val TARGET_DENSITY = 3.5f
-        private const val TARGET_DENSITY_DPI = (160 * TARGET_DENSITY).toInt()
-    }
-    
     private lateinit var binding: ActivityMainBinding
     private val accountViewModel: AccountViewModel by viewModels()
     
     @Inject
     lateinit var migrationHelper: DataMigrationHelper
-    
-    override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(createConfigurationContext(newBase))
-    }
-    
-    /**
-     * 创建固定配置的Context
-     */
-    private fun createConfigurationContext(context: Context): Context {
-        val config = Configuration(context.resources.configuration)
-        config.fontScale = 1.0f
-        config.densityDpi = TARGET_DENSITY_DPI
-        return context.createConfigurationContext(config)
-    }
-    
-    override fun getResources(): Resources {
-        val res = super.getResources()
-        adaptDisplayDensity(res)
-        return res
-    }
-    
-    /**
-     * 固定应用显示大小和字体大小，不跟随系统设置变化
-     */
-    @Suppress("DEPRECATION")
-    private fun adaptDisplayDensity(res: Resources) {
-        val config = res.configuration
-        val dm = res.displayMetrics
-        
-        // 固定 fontScale 为 1.0
-        if (config.fontScale != 1.0f) {
-            config.fontScale = 1.0f
-        }
-        if (config.densityDpi != TARGET_DENSITY_DPI) {
-            config.densityDpi = TARGET_DENSITY_DPI
-        }
-        
-        // 设置固定的显示密度和字体密度
-        dm.density = TARGET_DENSITY
-        dm.densityDpi = TARGET_DENSITY_DPI
-        dm.scaledDensity = TARGET_DENSITY
-    }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -227,7 +178,6 @@ class MainActivity : AppCompatActivity() {
                 onAccountSelected = { account ->
                     accountViewModel.setDefaultAccount(account.id)
                     dialog.dismiss()
-                    showToast("已切换到账号: ${account.name}")
                     
                     // Load zones and show zone selection dialog
                     accountViewModel.loadZonesForAccount(account.id)
@@ -351,6 +301,14 @@ class MainActivity : AppCompatActivity() {
             return
         }
         
+        // 如果只有一个域名，直接选择它
+        if (zones.size == 1) {
+            val zone = zones[0]
+            accountViewModel.selectZone(account.id, zone.id)
+            // 单域名自动选择，不需要额外提示
+            return
+        }
+        
         val items = zones.map { zone ->
             val status = if (zone.status == "active") "✓" else "○"
             val selected = if (zone.id == selectedZone?.id) " [当前]" else ""
@@ -365,7 +323,6 @@ class MainActivity : AppCompatActivity() {
                 val zone = zones[which]
                 accountViewModel.selectZone(account.id, zone.id)
                 dialog.dismiss()
-                showToast("已选择域名: ${zone.name}")
             }
             .setNeutralButton("从API刷新") { dialog, _ ->
                 dialog.dismiss()

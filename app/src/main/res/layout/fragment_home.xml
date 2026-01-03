@@ -16,18 +16,9 @@
             android:id="@+id/dashboardCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="12dp" />
 
-        <!-- Feature Grid -->
-       <!-- 
-       <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="功能列表"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
-        -->
         <!-- Workers -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/workerCard"

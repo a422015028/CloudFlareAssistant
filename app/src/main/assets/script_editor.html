@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+    <title>Script Editor</title>
+    
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow: hidden;
+            background: var(--bg-color, #1e1e1e);
+            color: var(--text-color, #ffffff);
+        }
+        
+        #editor-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        .CodeMirror {
+            height: 100% !important;
+            font-size: 12px;
+            line-height: 1.5;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .CodeMirror-lint-tooltip {
+            z-index: 10000;
+            background-color: var(--tooltip-bg, #2d2d2d);
+            color: var(--text-color, #ffffff);
+            border: 1px solid var(--border-color, #555);
+            border-radius: 4px;
+            padding: 6px 8px;
+            max-width: 400px;
+        }
+        
+        .CodeMirror-lint-mark-error {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='3'%3E%3Cpath d='M0 3L3 0 6 3z' fill='%23f44336'/%3E%3C/svg%3E");
+        }
+        
+        .CodeMirror-lint-mark-warning {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='3'%3E%3Cpath d='M0 3L3 0 6 3z' fill='%23ff9800'/%3E%3C/svg%3E");
+        }
+        
+        /* Search highlight styles */
+        .search-highlight {
+            background-color: rgba(255, 235, 59, 0.3);
+            border-bottom: 2px solid #FFC107;
+        }
+        
+        .search-highlight-active {
+            background-color: rgba(255, 152, 0, 0.5);
+            border-bottom: 2px solid #FF9800;
+        }
+    </style>
+</head>
+<body>
+    <div id="editor-container"></div>
+    
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    
+    <!-- CodeMirror Addons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/brace-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/comment-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/search.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/javascript-lint.min.js"></script>
+    
+    <!-- JSHint for syntax checking -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js"></script>
+    
+    <script>
+        let editor;
+        let currentTheme = 'material-darker';
+        let autoSaveTimer;
+        let lastContent = '';
+        let searchCursor = null;
+        let currentSearchQuery = '';
+        let searchMatches = [];
+        let currentMatchIndex = -1;
+        
+        // Initialize CodeMirror
+        function initEditor() {
+            editor = CodeMirror(document.getElementById('editor-container'), {
+                mode: 'javascript',
+                theme: currentTheme,
+                lineNumbers: true,
+                lineWrapping: true,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                indentUnit: 2,
+                tabSize: 2,
+                indentWithTabs: false,
+                styleActiveLine: true,
+                foldGutter: true,
+                gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
+                lint: {
+                    options: {
+                        esversion: 11,  // Support modern JavaScript
+                        asi: true,      // Allow automatic semicolon insertion
+                        boss: true,     // Allow assignments in conditions
+                        sub: true,      // Allow subscript notation
+                        supernew: true, // Allow new function() { ... } syntax
+                        validthis: true // Allow 'this' in non-constructor functions
+                    }
+                },
+                extraKeys: {
+                    "Ctrl-F": "findPersistent",
+                    "Cmd-F": "findPersistent",
+                    "Ctrl-S": function() { notifyAndroidSave(); },
+                    "Cmd-S": function() { notifyAndroidSave(); }
+                }
+            });
+            
+            // Listen for content changes
+            editor.on('change', function() {
+                const currentContent = editor.getValue();
+                if (currentContent !== lastContent) {
+                    lastContent = currentContent;
+                    notifyAndroidContentChanged();
+                }
+            });
+            
+            // Notify Android that editor is ready
+            if (window.AndroidBridge) {
+                window.AndroidBridge.onEditorReady();
+            }
+        }
+        
+        // Set content from Android
+        function setContent(content) {
+            if (editor) {
+                lastContent = content;
+                editor.setValue(content);
+                editor.clearHistory();
+            }
+        }
+        
+        // Get current content
+        function getContent() {
+            return editor ? editor.getValue() : '';
+        }
+        
+        // Set theme
+        function setTheme(isDark) {
+            currentTheme = isDark ? 'material-darker' : 'eclipse';
+            if (editor) {
+                editor.setOption('theme', currentTheme);
+            }
+            
+            // Update CSS variables
+            if (isDark) {
+                document.documentElement.style.setProperty('--bg-color', '#1e1e1e');
+                document.documentElement.style.setProperty('--text-color', '#ffffff');
+                document.documentElement.style.setProperty('--tooltip-bg', '#2d2d2d');
+                document.documentElement.style.setProperty('--border-color', '#555');
+            } else {
+                document.documentElement.style.setProperty('--bg-color', '#ffffff');
+                document.documentElement.style.setProperty('--text-color', '#000000');
+                document.documentElement.style.setProperty('--tooltip-bg', '#f0f0f0');
+                document.documentElement.style.setProperty('--border-color', '#ccc');
+            }
+        }
+        
+
+        
+        // Notify Android of content changes
+        function notifyAndroidContentChanged() {
+            if (window.AndroidBridge) {
+                window.AndroidBridge.onContentChanged();
+            }
+        }
+        
+        // Notify Android to save
+        function notifyAndroidSave() {
+            if (window.AndroidBridge) {
+                window.AndroidBridge.onSaveRequested(getContent());
+            }
+            return false; // Prevent default
+        }
+        
+        // Copy content to clipboard
+        function copyToClipboard() {
+            const content = getContent();
+            if (window.AndroidBridge) {
+                window.AndroidBridge.onCopyRequested(content);
+            }
+        }
+        
+        // Get lint errors
+        function getLintErrors() {
+            if (!editor) return [];
+            
+            const errors = [];
+            const markers = editor.state.lint.marked;
+            if (markers) {
+                markers.forEach(function(mark) {
+                    const pos = mark.find();
+                    if (pos) {
+                        errors.push({
+                            line: pos.from.line + 1,
+                            column: pos.from.ch,
+                            message: mark.__annotation.message,
+                            severity: mark.__annotation.severity
+                        });
+                    }
+                });
+            }
+            return errors;
+        }
+        
+        // Focus editor
+        function focusEditor() {
+            if (editor) {
+                editor.focus();
+            }
+        }
+        
+        // Select all content
+        function selectAll() {
+            if (editor) {
+                editor.execCommand('selectAll');
+                editor.focus();
+            }
+        }
+        
+        // Search in editor
+        function search() {
+            if (editor) {
+                // Notify Android to show search bar
+                if (window.Android) {
+                    Android.onShowSearch();
+                }
+            }
+        }
+        
+        // Custom search function
+        function customSearch(query, caseSensitive) {
+            if (!editor || !query) {
+                clearSearchHighlights();
+                return 0;
+            }
+            
+            currentSearchQuery = query;
+            clearSearchHighlights();
+            searchMatches = [];
+            
+            const searchOptions = {
+                caseFold: !caseSensitive
+            };
+            
+            const cursor = editor.getSearchCursor(query, null, searchOptions);
+            let matchCount = 0;
+            
+            while (cursor.findNext()) {
+                const from = cursor.from();
+                const to = cursor.to();
+                searchMatches.push({ from: from, to: to });
+                
+                // Highlight match
+                editor.markText(from, to, {
+                    className: 'search-highlight',
+                    clearOnEnter: false
+                });
+                matchCount++;
+            }
+            
+            if (matchCount > 0) {
+                currentMatchIndex = 0;
+                jumpToMatch(0);
+            }
+            
+            return matchCount;
+        }
+        
+        // Jump to specific match
+        function jumpToMatch(index) {
+            if (searchMatches.length === 0 || index < 0 || index >= searchMatches.length) {
+                return;
+            }
+            
+            currentMatchIndex = index;
+            const match = searchMatches[index];
+            
+            // Clear previous active highlight
+            const marks = editor.getAllMarks();
+            marks.forEach(mark => {
+                if (mark.className === 'search-highlight-active') {
+                    mark.clear();
+                }
+            });
+            
+            // Highlight current match
+            editor.markText(match.from, match.to, {
+                className: 'search-highlight-active',
+                clearOnEnter: false
+            });
+            
+            // Scroll to match and center it
+            editor.scrollIntoView(match.from, 100);
+            editor.setCursor(match.from);
+            editor.focus();
+        }
+        
+        // Find next match
+        function findNext() {
+            if (searchMatches.length === 0) return;
+            currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
+            jumpToMatch(currentMatchIndex);
+        }
+        
+        // Find previous match
+        function findPrev() {
+            if (searchMatches.length === 0) return;
+            currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
+            jumpToMatch(currentMatchIndex);
+        }
+        
+        // Clear search highlights
+        function clearSearchHighlights() {
+            if (!editor) return;
+            
+            const marks = editor.getAllMarks();
+            marks.forEach(mark => {
+                if (mark.className === 'search-highlight' || mark.className === 'search-highlight-active') {
+                    mark.clear();
+                }
+            });
+            
+            searchMatches = [];
+            currentMatchIndex = -1;
+            currentSearchQuery = '';
+        }
+        
+        // Zoom functionality
+        let currentFontSize = 14;
+        const minFontSize = 10;
+        const maxFontSize = 30;
+        
+        function zoomIn() {
+            if (currentFontSize < maxFontSize) {
+                currentFontSize += 2;
+                updateFontSize();
+            }
+        }
+        
+        function zoomOut() {
+            if (currentFontSize > minFontSize) {
+                currentFontSize -= 2;
+                updateFontSize();
+            }
+        }
+        
+        function resetZoom() {
+            currentFontSize = 14;
+            updateFontSize();
+        }
+        
+        function updateFontSize() {
+            if (editor) {
+                const wrapper = editor.getWrapperElement();
+                wrapper.style.fontSize = currentFontSize + 'px';
+                editor.refresh();
+            }
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', initEditor);
+    </script>
+</body>
+</html>

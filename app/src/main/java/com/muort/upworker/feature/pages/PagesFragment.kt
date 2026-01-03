@@ -1278,7 +1278,9 @@ class PagesFragment : Fragment() {
         return try {
             val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US)
             inputFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
-            val outputFormat = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+            
+            val outputFormat = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.CHINA)
+            outputFormat.timeZone = java.util.TimeZone.getTimeZone("Asia/Shanghai")
             
             // 处理可能的毫秒部分
             val cleanDateString = dateString.substringBefore('Z').substringBefore('+')
@@ -1364,7 +1366,11 @@ class PagesFragment : Fragment() {
                 
                 return try {
                     val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US)
-                    val outputFormat = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
+                    inputFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+                    
+                    val outputFormat = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.CHINA)
+                    outputFormat.timeZone = java.util.TimeZone.getTimeZone("Asia/Shanghai")
+                    
                     val date = inputFormat.parse(dateString)
                     date?.let { outputFormat.format(it) } ?: dateString
                 } catch (e: Exception) {

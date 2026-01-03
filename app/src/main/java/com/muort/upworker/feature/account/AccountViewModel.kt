@@ -171,7 +171,7 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.setDefaultAccount(accountId)) {
                 is Resource.Success -> {
-                    _message.emit("默认账号已更新")
+                    // 账号切换成功，不显示提示
                 }
                 is Resource.Error -> {
                     _message.emit("设置默认账号失败: ${result.message}")
@@ -239,7 +239,7 @@ class AccountViewModel @Inject constructor(
     fun selectZone(accountId: Long, zoneId: String) {
         viewModelScope.launch {
             zoneRepository.setSelectedZone(accountId, zoneId)
-            _message.emit("已选择域名")
+            // 域名选择成功，不显示提示
             loadZonesForAccount(accountId)
         }
     }

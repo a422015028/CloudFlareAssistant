@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.github.mikephil.charting.charts.BarChart
+import com.google.android.material.color.MaterialColors
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -157,7 +158,7 @@ class DashboardCardView @JvmOverloads constructor(
                 position = XAxis.XAxisPosition.BOTTOM
                 setDrawGridLines(false)
                 granularity = 1f
-                textColor = context.getColor(android.R.color.darker_gray)
+                textColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.GRAY)
                 valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
                         // 根据时间范围选择不同的日期格式
@@ -173,8 +174,8 @@ class DashboardCardView @JvmOverloads constructor(
             // 左侧 Y 轴设置
             axisLeft.apply {
                 setDrawGridLines(true)
-                textColor = context.getColor(android.R.color.darker_gray)
-                gridColor = context.getColor(android.R.color.darker_gray)
+                textColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.GRAY)
+                gridColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurfaceVariant, Color.LTGRAY)
                 gridLineWidth = 0.5f
             }
             
@@ -184,7 +185,7 @@ class DashboardCardView @JvmOverloads constructor(
             // 图例设置
             legend.apply {
                 isEnabled = true
-                textColor = context.getColor(android.R.color.darker_gray)
+                textColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.GRAY)
             }
         }
     }
@@ -314,12 +315,13 @@ class DashboardCardView @JvmOverloads constructor(
             transparentCircleRadius = 61f
             setDrawCenterText(true)
             setCenterTextSize(12f)
+            setCenterTextColor(MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.BLACK))
             setDrawEntryLabels(true)
-            setEntryLabelColor(Color.BLACK)
+            setEntryLabelColor(MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.BLACK))
             setEntryLabelTextSize(10f)
             legend.isEnabled = true
             legend.textSize = 10f
-            legend.textColor = Color.BLACK
+            legend.textColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.BLACK)
             setTouchEnabled(true)
             animateY(1000)
         }
@@ -344,7 +346,7 @@ class DashboardCardView @JvmOverloads constructor(
                 granularity = 1f
                 labelCount = 5
                 textSize = 9f
-                textColor = Color.BLACK
+                textColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.BLACK)
                 valueFormatter = object : ValueFormatter() {
                     private val labels = listOf("请求", "带宽", "缓存", "威胁", "访客")
                     override fun getFormattedValue(value: Float): String {
@@ -355,9 +357,9 @@ class DashboardCardView @JvmOverloads constructor(
             
             axisLeft.apply {
                 setDrawGridLines(true)
-                gridColor = Color.LTGRAY
+                gridColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurfaceVariant, Color.LTGRAY)
                 textSize = 9f
-                textColor = Color.BLACK
+                textColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.BLACK)
                 axisMinimum = 0f
             }
             
@@ -456,7 +458,7 @@ class DashboardCardView @JvmOverloads constructor(
                 Color.parseColor("#FF9800")  // 橙色 - 访客
             )
             valueTextSize = 9f
-            valueTextColor = Color.BLACK
+            valueTextColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.BLACK)
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
                     // 显示对数值
