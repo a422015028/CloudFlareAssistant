@@ -43,6 +43,9 @@ class DashboardCardView @JvmOverloads constructor(
     
     var onRefreshClick: (() -> Unit)? = null
     var onTimeRangeChanged: ((TimeRange) -> Unit)? = null
+    
+    // 当前选择的时间范围，用于格式化图表 X 轴
+    private var currentTimeRange: TimeRange = TimeRange.ONE_DAY
 
     init {
         binding = CardDashboardBinding.inflate(LayoutInflater.from(context), this, true)
@@ -70,8 +73,24 @@ class DashboardCardView @JvmOverloads constructor(
                 else -> TimeRange.ONE_DAY
             }
             
+            // 更新当前时间范围
+            currentTimeRange = timeRange
+            
+            // 更新时间范围提示文本
+            updateTimeRangeHint(timeRange)
+            
             onTimeRangeChanged?.invoke(timeRange)
         }
+        
+        // 初始化显示文本（默认为1天）
+        updateTimeRangeHint(TimeRange.ONE_DAY)
+    }
+    
+    /**
+     * 更新时间范围提示文本
+     */
+    private fun updateTimeRangeHint(timeRange: TimeRange) {
+        binding.timeRangeHintText.text = "过去 ${timeRange.displayName} 数据"
     }
 
     /**
@@ -94,9 +113,13 @@ class DashboardCardView @JvmOverloads constructor(
                 granularity = 1f
                 textColor = context.getColor(android.R.color.darker_gray)
                 valueFormatter = object : ValueFormatter() {
-                    private val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
                     override fun getFormattedValue(value: Float): String {
-                        return dateFormat.format(Date(value.toLong()))
+                        // 根据时间范围选择不同的日期格式
+                        val format = when (currentTimeRange) {
+                            TimeRange.ONE_DAY -> SimpleDateFormat("HH:mm", Locale.getDefault())
+                            TimeRange.SEVEN_DAYS, TimeRange.THIRTY_DAYS -> SimpleDateFormat("MM-dd", Locale.getDefault())
+                        }
+                        return format.format(Date(value.toLong()))
                     }
                 }
             }
