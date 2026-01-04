@@ -136,15 +136,8 @@ jobs:
         # 读取发布说明（简化版本）
         RELEASE_NOTES_FILE="RELEASE_NOTES_${TAG_NAME}.md"
         if [ -f "$RELEASE_NOTES_FILE" ]; then
-          # 提取主要功能点（前20行），移除 Markdown 格式，转义 HTML 特殊字符
-          NOTES=$(head -n 20 "$RELEASE_NOTES_FILE" | \
-            sed 's/^#\+\s*//' | \
-            sed 's/\*\*//g' | \
-            sed 's/`//g' | \
-            sed 's/</\&lt;/g' | \
-            sed 's/>/\&gt;/g' | \
-            sed 's/&/\&amp;/g' | \
-            sed 's/"/\&quot;/g')
+          # 提取主要功能点（前20行），并转义 HTML 特殊字符
+          NOTES=$(head -n 20 "$RELEASE_NOTES_FILE" | sed 's/^#//' | sed 's/&/\&amp;/g' | sed 's/</\&lt;/g' | sed 's/>/\&gt;/g' | sed 's/"/\&quot;/g')
         else
           NOTES="新版本发布"
         fi
