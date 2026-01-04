@@ -246,8 +246,8 @@ class RouteFragment : Fragment() {
                                 if (!domainName.endsWith(".pages.dev")) {
                                     unified.add(UnifiedDomain(
                                         id = "${project.id}_$domainName",
-                                        hostname = project.name, // 显示项目名称
-                                        target = project.subdomain ?: "${project.name}.pages.dev",
+                                        hostname = domainName, // 显示域名
+                                        target = project.name, // 显示项目名称
                                         type = DomainType.PAGES,
                                         projectName = project.name
                                     ))
@@ -600,22 +600,15 @@ class RouteFragment : Fragment() {
         ) : RecyclerView.ViewHolder(binding.root) {
             
             fun bind(domain: UnifiedDomain) {
-                // Pages类型显示项目名称，其它类型显示域名
-                binding.domainHostnameText.text = when (domain.type) {
-                    DomainType.PAGES -> domain.projectName ?: domain.hostname
-                    else -> domain.hostname
-                }
+                // 所有类型都显示域名
+                binding.domainHostnameText.text = domain.hostname
                 val targetPrefix = when (domain.type) {
                     DomainType.WORKER -> "→ Worker: "
                     DomainType.PAGES -> "→ Pages: "
                     DomainType.R2 -> "→ R2: "
                 }
-                // Pages类型target显示域名，其它类型显示原target
-                val targetText = when (domain.type) {
-                    DomainType.PAGES -> domain.hostname
-                    else -> domain.target
-                }
-                binding.domainScriptText.text = "$targetPrefix$targetText"
+                // 显示目标（Worker脚本名/Pages项目名/R2桶名）
+                binding.domainScriptText.text = "$targetPrefix${domain.target}"
                 binding.domainMenuButton.setOnClickListener { view ->
                     PopupMenu(view.context, view).apply {
                         inflate(R.menu.menu_account)
