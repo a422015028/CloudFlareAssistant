@@ -136,8 +136,8 @@ jobs:
         # 读取发布说明（简化版本）
         RELEASE_NOTES_FILE="RELEASE_NOTES_${TAG_NAME}.md"
         if [ -f "$RELEASE_NOTES_FILE" ]; then
-          # 只提取标题行（以 # 或 - 开头），避免技术细节中的特殊字符
-          NOTES=$(grep -E '^(##|###|-\s+\*\*)' "$RELEASE_NOTES_FILE" | head -n 15 | sed 's/^##* //' | sed 's/\*\*//g' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+          # 提取主要功能点（前20行）
+          NOTES=$(head -n 20 "$RELEASE_NOTES_FILE" | sed 's/^#//' | sed 's/"/\\"/g')
         else
           NOTES="新版本发布"
         fi
