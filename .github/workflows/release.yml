@@ -78,12 +78,9 @@ jobs:
         
         if [ -f "$RELEASE_NOTES_FILE" ]; then
           echo "使用 $RELEASE_NOTES_FILE 作为发布说明"
-          # 读取文件内容，添加版本信息头部
           {
-            echo "## 🎉 CloudFlare Assistant ${TAG_NAME} 发布"
             echo ""
-            echo "**版本号**: ${{ steps.version.outputs.version_name }}"
-            echo "**Build**: ${{ steps.version.outputs.version_code }}"
+            echo "## 🎉 新版本发布"
             echo ""
             cat "$RELEASE_NOTES_FILE"
             echo ""
