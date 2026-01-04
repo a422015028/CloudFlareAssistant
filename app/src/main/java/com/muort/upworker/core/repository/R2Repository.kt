@@ -165,6 +165,28 @@ class R2Repository @Inject constructor(
         }
     }
     
+    /**
+     * 流式下载到文件（推荐用于大文件，避免 OOM）
+     */
+    suspend fun downloadObjectToFile(
+        account: Account,
+        bucketName: String,
+        objectKey: String,
+        destinationFile: File
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            try {
+                val s3Config = getS3Config(account)
+                r2S3Client.downloadObjectToFile(s3Config, bucketName, objectKey, destinationFile)
+                Resource.Success(Unit)
+            } catch (e: IllegalArgumentException) {
+                Resource.Error("请先配置R2访问凭证（Access Key ID和Secret Access Key）")
+            } catch (e: Exception) {
+                Resource.Error("下载失败: ${e.message}")
+            }
+        }
+    }
+    
     suspend fun deleteObject(
         account: Account,
         bucketName: String,

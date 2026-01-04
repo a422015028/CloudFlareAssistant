@@ -102,7 +102,8 @@ Jetpack 组件：
 
 网络层：
 ├── Retrofit 2.9.0             # HTTP 客户端
-├── OkHttp 4.12.0             # 网络层 + 自签名 S3 API (R2)
+├── OkHttp 4.12.0             # 网络层
+├── AWS SDK S3 2.81.1         # R2 对象存储 (S3 兼容)
 └── Gson 2.10.1               # JSON 解析
 
 依赖注入：

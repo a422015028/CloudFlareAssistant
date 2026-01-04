@@ -108,6 +108,8 @@ android {
             excludes += "/META-INF/DEPENDENCIES"
             excludes += "/META-INF/LICENSE.md"
             excludes += "/META-INF/NOTICE.md"
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/io.netty.versions.properties"
         }
     }
 }
@@ -170,6 +172,10 @@ dependencies {
     
     // MPAndroidChart - 数据可视化图表库
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    
+    // AWS SDK for S3 (for R2)
+    implementation("com.amazonaws:aws-android-sdk-s3:2.81.1")
+    implementation("com.amazonaws:aws-android-sdk-core:2.81.1")
     
     // Testing
     testImplementation("junit:junit:4.13.2")

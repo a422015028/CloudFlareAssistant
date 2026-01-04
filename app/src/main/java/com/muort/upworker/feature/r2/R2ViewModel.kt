@@ -143,7 +143,7 @@ class R2ViewModel @Inject constructor(
         }
     }
     
-    fun uploadObject(account: Account, bucketName: String, objectKey: String, file: File) {
+    fun uploadObject(account: Account, bucketName: String, objectKey: String, file: File, onComplete: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
             _loadingState.value = true
             
@@ -151,9 +151,11 @@ class R2ViewModel @Inject constructor(
                 is Resource.Success -> {
                     _message.emit("对象上传成功")
                     loadObjects(account, bucketName)
+                    onComplete(true)
                 }
                 is Resource.Error -> {
                     _message.emit("上传对象失败: ${result.message}")
+                    onComplete(false)
                 }
                 is Resource.Loading -> {}
             }
@@ -173,6 +175,29 @@ class R2ViewModel @Inject constructor(
                 is Resource.Error -> {
                     _message.emit("下载对象失败: ${result.message}")
                     onResult(null)
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    /**
+     * 流式下载到文件（推荐用于大文件）
+     */
+    fun downloadObjectToFile(account: Account, bucketName: String, objectKey: String, destinationFile: File, onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = r2Repository.downloadObjectToFile(account, bucketName, objectKey, destinationFile)) {
+                is Resource.Success -> {
+                    _message.emit("文件下载成功")
+                    onComplete(true)
+                }
+                is Resource.Error -> {
+                    _message.emit("下载对象失败: ${result.message}")
+                    onComplete(false)
                 }
                 is Resource.Loading -> {}
             }

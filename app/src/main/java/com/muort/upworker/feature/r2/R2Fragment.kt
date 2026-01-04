@@ -31,6 +31,7 @@ import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.File
 
 @AndroidEntryPoint
 class R2Fragment : Fragment() {
@@ -88,7 +89,7 @@ class R2Fragment : Fragment() {
     private val r2ViewModel: R2ViewModel by viewModels()
     
     private var currentBucket: R2Bucket? = null
-    private var downloadData: ByteArray? = null
+    private var currentDownloadObject: Pair<R2Bucket, R2Object>? = null  // 存储待下载的对象
     private var isLoadingCustomDomains = false
     
     private val filePickerLauncher = registerForActivityResult(
@@ -106,7 +107,7 @@ class R2Fragment : Fragment() {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-                saveFile(uri)
+                downloadFileToUri(uri)
             }
         }
     }
@@ -467,19 +468,13 @@ class R2Fragment : Fragment() {
     }
     
     private fun downloadObject(bucket: R2Bucket, obj: R2Object) {
-        accountViewModel.defaultAccount.value?.let { account ->
-            r2ViewModel.downloadObject(account, bucket.name, obj.key) { data ->
-                if (data != null) {
-                    // Save to downloads folder
-                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        type = "*/*"
-                        putExtra(Intent.EXTRA_TITLE, obj.key.substringAfterLast('/'))
-                    }
-                    downloadData = data
-                    fileSaverLauncher.launch(intent)
-                }
-            }
+        // 先选择保存位置，再进行流式下载（避免大文件 OOM）
+        currentDownloadObject = bucket to obj
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            type = "*/*"
+            putExtra(Intent.EXTRA_TITLE, obj.key.substringAfterLast('/'))
         }
+        fileSaverLauncher.launch(intent)
     }
     
     private fun formatFileSize(size: Long): String {
@@ -499,13 +494,6 @@ class R2Fragment : Fragment() {
     private fun uploadFile(uri: Uri) {
         val bucket = currentBucket ?: return
         val account = accountViewModel.defaultAccount.value ?: return
-
-        // 上传前提示（用 Toast，显示更久）
-        Toast.makeText(
-            requireContext(),
-            "Cloudflare R2 API 暂不支持带中文或特殊字符文件名上传，建议仅用英文、数字、-_.~，否则可能 500 错误。",
-            Toast.LENGTH_LONG
-        ).show()
 
         try {
             val inputStream = requireContext().contentResolver.openInputStream(uri)
@@ -535,28 +523,47 @@ class R2Fragment : Fragment() {
                 }
             }
             
-            r2ViewModel.uploadObject(account, bucket.name, safeFileName, file)
-            
-            // Clean up temp file after upload
-            file.deleteOnExit()
+            r2ViewModel.uploadObject(account, bucket.name, safeFileName, file) { _ ->
+                // 上传完成后立即删除临时文件
+                if (file.exists()) {
+                    file.delete()
+                }
+            }
             
         } catch (e: Exception) {
             Snackbar.make(binding.root, "文件读取失败: ${e.message}", Snackbar.LENGTH_SHORT).show()
         }
     }
     
-    private fun saveFile(uri: Uri) {
-        val data = downloadData ?: return
+    private fun downloadFileToUri(uri: Uri) {
+        val (bucket, obj) = currentDownloadObject ?: return
+        val account = accountViewModel.defaultAccount.value ?: return
         
         try {
-            requireContext().contentResolver.openOutputStream(uri)?.use { output ->
-                output.write(data)
+            // 创建临时文件用于流式下载
+            val tempFile = File.createTempFile("r2_download_", ".tmp", requireContext().cacheDir)
+            
+            // 流式下载到临时文件，完成后复制到目标 URI
+            r2ViewModel.downloadObjectToFile(account, bucket.name, obj.key, tempFile) { success ->
+                if (success && tempFile.exists()) {
+                    try {
+                        requireContext().contentResolver.openOutputStream(uri)?.use { output ->
+                            tempFile.inputStream().use { input ->
+                                input.copyTo(output)
+                            }
+                        }
+                        Snackbar.make(binding.root, "文件保存成功", Snackbar.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Snackbar.make(binding.root, "保存文件失败: ${e.message}", Snackbar.LENGTH_SHORT).show()
+                    }
+                }
+                // 清理临时文件
+                tempFile.delete()
+                currentDownloadObject = null
             }
-            Snackbar.make(binding.root, "File saved successfully", Snackbar.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            Snackbar.make(binding.root, "Failed to save file: ${e.message}", Snackbar.LENGTH_SHORT).show()
-        } finally {
-            downloadData = null
+            Snackbar.make(binding.root, "下载失败: ${e.message}", Snackbar.LENGTH_SHORT).show()
+            currentDownloadObject = null
         }
     }
     
