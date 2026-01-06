@@ -27,7 +27,8 @@ object DatabaseModule {
                 AppDatabase.MIGRATION_1_2, 
                 AppDatabase.MIGRATION_2_3,
                 AppDatabase.MIGRATION_3_4,
-                AppDatabase.MIGRATION_4_5
+                AppDatabase.MIGRATION_4_5,
+                AppDatabase.MIGRATION_5_6
             )
             // 移除fallbackToDestructiveMigration以保护用户数据
             // 如果迁移失败会抛出异常而不是删除数据
@@ -44,6 +45,12 @@ object DatabaseModule {
     @Singleton
     fun provideWebDavConfigDao(database: AppDatabase): WebDavConfigDao {
         return database.webDavConfigDao()
+    }
+    
+    @Provides
+    @Singleton
+    fun provideR2BackupConfigDao(database: AppDatabase): R2BackupConfigDao {
+        return database.r2BackupConfigDao()
     }
     
     @Provides

@@ -30,8 +30,8 @@ android {
         applicationId = "com.muort.upworker"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2026010401
-        versionName = "7.0"
+        versionCode = 2026010701
+        versionName = "7.1"
         
         vectorDrawables { 
             useSupportLibrary = true

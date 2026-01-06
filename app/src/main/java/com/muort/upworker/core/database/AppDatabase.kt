@@ -6,17 +6,19 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.WebDavConfig
+import com.muort.upworker.core.model.R2BackupConfig
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.model.ScriptVersion
 
 @Database(
-    entities = [Account::class, WebDavConfig::class, Zone::class, ScriptVersion::class],
-    version = 5,
+    entities = [Account::class, WebDavConfig::class, R2BackupConfig::class, Zone::class, ScriptVersion::class],
+    version = 6,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     abstract fun webDavConfigDao(): WebDavConfigDao
+    abstract fun r2BackupConfigDao(): R2BackupConfigDao
     abstract fun zoneDao(): ZoneDao
     abstract fun scriptVersionDao(): ScriptVersionDao
     
@@ -95,6 +97,23 @@ abstract class AppDatabase : RoomDatabase() {
                 // Create indexes for better query performance
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_script_versions_account_script ON script_versions(accountEmail, scriptName)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_script_versions_timestamp ON script_versions(timestamp)")
+            }
+        }
+        
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Create R2 backup config table
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS r2_backup_config (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        accountId INTEGER NOT NULL,
+                        bucketName TEXT NOT NULL,
+                        backupPath TEXT NOT NULL,
+                        autoBackup INTEGER NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )
+                """.trimIndent())
             }
         }
     }
