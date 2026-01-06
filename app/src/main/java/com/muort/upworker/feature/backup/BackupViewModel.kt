@@ -331,7 +331,7 @@ class BackupViewModel @Inject constructor(
                 }
                 
             } catch (e: Exception) {
-                val errorMsg = e.message ?: e.toString() ?: "未知错误"
+                val errorMsg = e.message ?: e.toString()
                 _message.value = "备份失败: $errorMsg"
             } finally {
                 _loadingState.value = false
@@ -359,7 +359,7 @@ class BackupViewModel @Inject constructor(
                 }
                 
             } catch (e: Exception) {
-                val errorMsg = e.message ?: e.toString() ?: "未知错误"
+                val errorMsg = e.message ?: e.toString()
                 _message.value = "恢复失败: $errorMsg"
             } finally {
                 _loadingState.value = false
@@ -393,7 +393,7 @@ class BackupViewModel @Inject constructor(
                 }
                 
             } catch (e: Exception) {
-                val errorMsg = e.message ?: e.toString() ?: "未知错误"
+                val errorMsg = e.message ?: e.toString()
                 _message.value = "加载文件列表失败: $errorMsg"
                 _backupFiles.value = emptyList()
             } finally {
