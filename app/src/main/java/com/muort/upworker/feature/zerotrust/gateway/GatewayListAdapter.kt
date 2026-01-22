@@ -38,7 +38,7 @@ class GatewayListAdapter(
                 "DOMAIN" -> "域名"
                 "IP" -> "IP 地址"
                 "URL" -> "URL"
-                else -> list.type ?: "未知"
+                else -> list.type
             }
             binding.listDescriptionText.text = list.description ?: "无描述"
             binding.itemCountText.text = "项目数: ${list.count ?: 0}"

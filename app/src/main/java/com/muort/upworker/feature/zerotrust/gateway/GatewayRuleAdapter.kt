@@ -51,7 +51,7 @@ class GatewayRuleAdapter(
             
             // Set switch without triggering listener
             binding.enabledSwitch.setOnCheckedChangeListener(null)
-            binding.enabledSwitch.isChecked = rule.enabled ?: true
+            binding.enabledSwitch.isChecked = rule.enabled
             binding.enabledSwitch.setOnCheckedChangeListener { _, isChecked ->
                 onEnabledChange(rule, isChecked)
             }

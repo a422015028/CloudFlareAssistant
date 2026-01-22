@@ -88,7 +88,7 @@ class GatewayRulesFragment : Fragment() {
                 }
 
                 launch {
-                    viewModel.loadingState.collect { isLoading ->
+                    viewModel.loadingState.collect { _ ->
                         // Loading state handled byViewModel
                     }
                 }
@@ -131,10 +131,6 @@ class GatewayRulesFragment : Fragment() {
         val dnsFields = dialogView.findViewById<View>(R.id.dnsFields)
         val httpFields = dialogView.findViewById<View>(R.id.httpFields)
         val l4Fields = dialogView.findViewById<View>(R.id.l4Fields)
-        
-        val dnsHostInput = dialogView.findViewById<TextInputEditText>(R.id.dnsHostInput)
-        val httpHostInput = dialogView.findViewById<TextInputEditText>(R.id.httpHostInput)
-        val l4SourceIpInput = dialogView.findViewById<TextInputEditText>(R.id.l4SourceIpInput)
 
         // Setup type spinner
         val types = listOf("dns" to "DNS", "http" to "HTTP", "l4" to "网络 (L4)")

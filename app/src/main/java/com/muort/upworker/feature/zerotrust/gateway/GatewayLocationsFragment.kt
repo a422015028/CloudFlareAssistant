@@ -85,7 +85,7 @@ class GatewayLocationsFragment : Fragment() {
                 }
 
                 launch {
-                    viewModel.loadingState.collect { isLoading ->
+                    viewModel.loadingState.collect { _ ->
                         // Loading state handled by ViewModel
                     }
                 }
