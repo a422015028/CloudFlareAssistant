@@ -31,8 +31,8 @@ class R2S3Client @Inject constructor(
 ) {
     data class S3Config(
         val accountId: String,
-        val accessKeyId: String,
-        val secretAccessKey: String
+        val accessKeyId: String?,
+        val secretAccessKey: String?
     ) {
         val endpoint: String get() = "https://$accountId.r2.cloudflarestorage.com"
         
@@ -55,7 +55,10 @@ class R2S3Client @Inject constructor(
     }
 
     private fun createS3ClientInternal(config: S3Config): AmazonS3Client {
-        val credentials = BasicAWSCredentials(config.accessKeyId, config.secretAccessKey)
+        val credentials = BasicAWSCredentials(
+            config.accessKeyId ?: throw IllegalArgumentException("accessKeyId cannot be null"),
+            config.secretAccessKey ?: throw IllegalArgumentException("secretAccessKey cannot be null")
+        )
         
         // 兼容性修复：手动实现 Provider 接口
         val credentialsProvider = object : AWSCredentialsProvider {

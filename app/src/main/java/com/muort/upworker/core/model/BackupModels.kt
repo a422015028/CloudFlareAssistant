@@ -4,6 +4,13 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
+// ==================== Storage Type ====================
+
+enum class StorageType {
+    WEBDAV,
+    R2
+}
+
 // ==================== WebDAV Configuration ====================
 
 @Entity(tableName = "webdav_config")
@@ -17,6 +24,28 @@ data class WebDavConfig(
     val autoBackup: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
+)
+
+// ==================== R2 Backup Configuration ====================
+
+@Entity(tableName = "r2_backup_config")
+data class R2BackupConfig(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val accountId: Long,
+    val bucketName: String,
+    val backupPath: String = "backups/",
+    val autoBackup: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
+)
+
+// ==================== Backup Configuration ====================
+
+data class BackupConfig(
+    val storageType: StorageType,
+    val webDavConfig: WebDavConfig? = null,
+    val r2Config: R2BackupConfig? = null
 )
 
 // ==================== Backup Data ====================
