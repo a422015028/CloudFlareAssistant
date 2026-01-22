@@ -83,4 +83,55 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
+    
+    fun createPolicy(account: Account, request: DeviceSettingsPolicyRequest) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.createDevicePolicy(account, request)) {
+                is Resource.Success -> {
+                    _message.emit("策略已创建")
+                    loadPolicies(account)
+                }
+                is Resource.Error -> {
+                    _error.emit("创建策略失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
+    fun updatePolicy(account: Account, policyId: String, request: DeviceSettingsPolicyRequest) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.updateDevicePolicy(account, policyId, request)) {
+                is Resource.Success -> {
+                    _message.emit("策略已更新")
+                    loadPolicies(account)
+                }
+                is Resource.Error -> {
+                    _error.emit("更新策略失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
+    fun deletePolicy(account: Account, policyId: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.deleteDevicePolicy(account, policyId)) {
+                is Resource.Success -> {
+                    _message.emit("策略已删除")
+                    loadPolicies(account)
+                }
+                is Resource.Error -> {
+                    _error.emit("删除策略失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
 }

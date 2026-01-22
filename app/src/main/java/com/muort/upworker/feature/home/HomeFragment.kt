@@ -198,8 +198,8 @@ class HomeFragment : Fragment() {
             binding.kvCard,
             binding.r2Card,
             binding.d1Card,
-            binding.backupCard,
             binding.zeroTrustCard,
+            binding.backupCard,
             binding.logCard,
             binding.accountCard
         )

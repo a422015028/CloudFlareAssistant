@@ -38,7 +38,9 @@ data class AccessApplicationRequest(
     @SerializedName("auto_redirect_to_identity") val autoRedirectToIdentity: Boolean? = null,
     @SerializedName("enable_binding_cookie") val enableBindingCookie: Boolean? = null,
     @SerializedName("app_launcher_visible") val appLauncherVisible: Boolean? = true,
-    @SerializedName("cors_headers") val corsHeaders: CorsHeaders? = null
+    @SerializedName("skip_interstitial") val skipInterstitial: Boolean? = null,
+    @SerializedName("cors_headers") val corsHeaders: CorsHeaders? = null,
+    @SerializedName("saas_app") val saasApp: SaasApplication? = null
 )
 
 data class CorsHeaders(

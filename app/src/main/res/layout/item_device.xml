@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Device Icon -->
+        <ImageView
+            android:id="@+id/deviceIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@android:drawable/ic_menu_myplaces"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/colorPrimary" />
+
+        <!-- Device Name -->
+        <TextView
+            android:id="@+id/deviceNameText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Device Name"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/revokeButton"
+            app:layout_constraintStart_toEndOf="@id/deviceIcon"
+            app:layout_constraintTop_toTopOf="@id/deviceIcon" />
+
+        <!-- Device Type Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/deviceTypeChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:text="Windows"
+            android:textSize="10sp"
+            app:chipMinHeight="24dp"
+            app:layout_constraintStart_toEndOf="@id/deviceIcon"
+            app:layout_constraintTop_toBottomOf="@id/deviceNameText" />
+
+        <!-- Status Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/statusChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="活跃"
+            android:textSize="10sp"
+            app:chipMinHeight="24dp"
+            app:layout_constraintStart_toEndOf="@id/deviceTypeChip"
+            app:layout_constraintTop_toBottomOf="@id/deviceNameText" />
+
+        <!-- User Info -->
+        <TextView
+            android:id="@+id/userInfoText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="用户: user@example.com"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/deviceIcon"
+            app:layout_constraintTop_toBottomOf="@id/deviceTypeChip" />
+
+        <!-- IP Address -->
+        <TextView
+            android:id="@+id/ipAddressText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="IP: 192.168.1.1"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/deviceIcon"
+            app:layout_constraintTop_toBottomOf="@id/userInfoText" />
+
+        <!-- Last Updated -->
+        <TextView
+            android:id="@+id/lastUpdatedText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="更新: 2024-01-01"
+            android:textColor="?android:attr/textColorTertiary"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/deviceIcon"
+            app:layout_constraintTop_toBottomOf="@id/ipAddressText" />
+
+        <!-- Revoke Button -->
+        <ImageButton
+            android:id="@+id/revokeButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="撤销设备"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/colorError" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -938,6 +938,59 @@ class ZeroTrustRepository @Inject constructor(
             }
         }
     
+    /**
+     * Update a device policy
+     */
+    suspend fun updateDevicePolicy(
+        account: Account,
+        policyId: String,
+        request: DeviceSettingsPolicyRequest
+    ): Resource<DeviceSettingsPolicy> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.updateDevicePolicy(
+                    token = "Bearer ${account.token}",
+                    accountId = account.accountId,
+                    policyId = policyId,
+                    policy = request
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val policy = response.body()!!.result!!
+                    Timber.d("Updated device policy: ${policy.name}")
+                    Resource.Success(policy)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to update policy"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+    
+    /**
+     * Delete a device policy
+     */
+    suspend fun deleteDevicePolicy(
+        account: Account,
+        policyId: String
+    ): Resource<Boolean> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.deleteDevicePolicy(
+                    token = "Bearer ${account.token}",
+                    accountId = account.accountId,
+                    policyId = policyId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Timber.d("Deleted device policy: $policyId")
+                    Resource.Success(true)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to delete policy"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+    
     // ==================== Cloudflare Tunnels ====================
     
     /**

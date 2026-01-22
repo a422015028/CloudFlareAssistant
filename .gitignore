@@ -37,3 +37,5 @@ local.properties
 
 # Backup files
 *.zip
+# Documentation
+ZERO_TRUST_IMPLEMENTATION.md

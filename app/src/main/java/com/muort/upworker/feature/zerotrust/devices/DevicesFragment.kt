@@ -4,8 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.google.android.material.tabs.TabLayoutMediator
+import com.muort.upworker.databinding.FragmentDevicesBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -13,17 +14,39 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 @AndroidEntryPoint
 class DevicesFragment : Fragment() {
-    
+
+    private var _binding: FragmentDevicesBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return TextView(requireContext()).apply {
-            text = "设备管理功能即将推出\n\n包含：\n• WARP 设备列表\n• 设备撤销管理\n• 设备策略配置"
-            textSize = 16f
-            setPadding(48, 48, 48, 48)
-            textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-        }
+        _binding = FragmentDevicesBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupViewPager()
+    }
+
+    private fun setupViewPager() {
+        val pagerAdapter = DevicesPagerAdapter(this)
+        binding.viewPager.adapter = pagerAdapter
+
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "设备"
+                1 -> "策略"
+                else -> ""
+            }
+        }.attach()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

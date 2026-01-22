@@ -177,13 +177,39 @@
         <action
             android:id="@+id/action_zeroTrust_to_tunnels"
             app:destination="@id/tunnelsFragment" />
+        
+        <action
+            android:id="@+id/action_zeroTrust_to_groups"
+            app:destination="@id/groupFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/accessFragment"
         android:name="com.muort.upworker.feature.zerotrust.access.AccessFragment"
         android:label="Access 访问控制"
-        tools:layout="@layout/fragment_access" />
+        tools:layout="@layout/fragment_access">
+        
+        <action
+            android:id="@+id/action_access_to_detail"
+            app:destination="@id/accessDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/accessDetailFragment"
+        android:name="com.muort.upworker.feature.zerotrust.access.AccessDetailFragment"
+        android:label="应用详情"
+        tools:layout="@layout/fragment_access_detail">
+        
+        <argument
+            android:name="appId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/groupFragment"
+        android:name="com.muort.upworker.feature.zerotrust.access.GroupFragment"
+        android:label="Access 组管理"
+        tools:layout="@layout/fragment_group_list" />
 
     <fragment
         android:id="@+id/gatewayFragment"

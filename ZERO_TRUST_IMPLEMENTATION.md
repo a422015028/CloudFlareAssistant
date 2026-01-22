@@ -150,16 +150,34 @@ app/src/main/java/com/muort/upworker/
         ├── access/
         │   ├── AccessViewModel.kt      # ✨ 新增
         │   ├── AccessFragment.kt       # ✨ 新增
+        │   ├── AccessDetailFragment.kt # ✨ 新增：应用详情
         │   ├── AccessApplicationAdapter.kt # ✨ 新增
         │   ├── fragment_access.xml     # ✨ 新增
+        │   ├── fragment_access_detail.xml # ✨ 新增
         │   ├── item_access_application.xml # ✨ 新增
         │   └── dialog_create_access_app.xml # ✨ 新增
         ├── gateway/
-        │   └── GatewayViewModel.kt     # ✨ 新增
+        │   ├── GatewayViewModel.kt     # ✨ 新增
+        │   ├── GatewayFragment.kt      # ✨ 新增：主界面 (TabLayout)
+        │   ├── GatewayRulesFragment.kt # ✨ 新增：规则管理
+        │   ├── GatewayListsFragment.kt # ✨ 新增：列表管理
+        │   ├── GatewayLocationsFragment.kt # ✨ 新增：位置管理
+        │   ├── GatewayRuleAdapter.kt   # ✨ 新增
+        │   ├── GatewayListAdapter.kt   # ✨ 新增
+        │   ├── GatewayLocationAdapter.kt # ✨ 新增
+        │   └── GatewayPagerAdapter.kt  # ✨ 新增
         ├── devices/
-        │   └── DevicesViewModel.kt     # ✨ 新增
+        │   ├── DevicesViewModel.kt     # ✨ 新增
+        │   ├── DevicesFragment.kt      # ✨ 新增：主界面 (TabLayout)
+        │   ├── DevicesListFragment.kt  # ✨ 新增：设备列表
+        │   ├── DevicePoliciesFragment.kt # ✨ 新增：策略管理
+        │   ├── DeviceAdapter.kt        # ✨ 新增
+        │   ├── DevicePolicyAdapter.kt  # ✨ 新增
+        │   └── DevicesPagerAdapter.kt  # ✨ 新增
         └── tunnels/
-            └── TunnelsViewModel.kt     # ✨ 新增
+            ├── TunnelsViewModel.kt     # ✨ 新增
+            ├── TunnelsFragment.kt      # ✨ 新增：隧道管理
+            └── TunnelAdapter.kt        # ✨ 新增
 ```
 
 ---
@@ -214,23 +232,23 @@ Gateway、Devices、Tunnels 模块已创建 ViewModel 基础架构，可继续�
 
 ## 🔧 下一步扩展建议
 
-### 优先级 1 - 完善 Access 模块
-- [ ] 添加应用详情页面
-- [ ] 实现策略管理 UI
-- [ ] 实现用户组管理 UI
-- [ ] 支持更多应用类型（SaaS、SSH 等）
+### ~~优先级 1 - 完善 Access 模块~~ ✅ 已完成
+- [x] 添加应用详情页面
+- [x] 实现策略管理 UI
+- [x] 实现用户组管理 UI
+- [x] 支持更多应用类型（SaaS、SSH 等）
 
-### 优先级 2 - 实现 Gateway UI
-- [ ] 创建 Gateway 规则列表界面
-- [ ] 实现规则创建表单（支持 DNS/HTTP/L4）
-- [ ] 实现自定义列表管理
-- [ ] 实现位置管理界面
+### ~~优先级 2 - 实现 Gateway UI~~ ✅ 已完成
+- [x] 创建 Gateway 规则列表界面
+- [x] 实现规则创建表单（支持 DNS/HTTP/L4）
+- [x] 实现自定义列表管理
+- [x] 实现位置管理界面
 
-### 优先级 3 - 完善 Devices 和 Tunnels
-- [ ] 设备列表展示
-- [ ] 设备策略配置界面
-- [ ] Tunnel 列表和状态展示
-- [ ] Tunnel 配置编辑器
+### ~~优先级 3 - 完善 Devices 和 Tunnels~~ ✅ 已完成
+- [x] 设备列表展示
+- [x] 设备策略配置界面
+- [x] Tunnel 列表和状态展示
+- [x] Tunnel 创建和删除
 
 ### 优先级 4 - 高级功能
 - [ ] 支持批量操作

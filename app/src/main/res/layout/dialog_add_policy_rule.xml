@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Rule Type Selector -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择器类型"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp"
+            android:layout_marginBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/ruleTypeSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:minHeight="48dp" />
+
+        <!-- Dynamic Input Container -->
+        <LinearLayout
+            android:id="@+id/dynamicInputContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Email Input (for email type) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/emailLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email 地址"
+                android:visibility="gone"
+                app:endIconMode="clear_text"
+                app:helperText="例如: user@example.com">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/emailInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Email Domain Input (for email_domain type) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/emailDomainLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email 域名"
+                android:visibility="gone"
+                app:endIconMode="clear_text"
+                app:helperText="例如: example.com">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/emailDomainInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- IP Input (for ip type) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ipLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="IP 地址/范围"
+                android:visibility="gone"
+                app:endIconMode="clear_text"
+                app:helperText="例如: 192.168.1.1 或 192.168.1.0/24">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ipInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Group Selector (for access_group type) -->
+            <LinearLayout
+                android:id="@+id/groupLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="选择 Access 组"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="4dp" />
+
+                <Spinner
+                    android:id="@+id/groupSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp" />
+
+            </LinearLayout>
+
+            <!-- Geo Input (for geo type) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/geoLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="国家代码"
+                android:visibility="gone"
+                app:endIconMode="clear_text"
+                app:helperText="ISO 3166-1 alpha-2 代码，例如: CN, US, JP">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/geoInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapCharacters"
+                    android:maxLength="2"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Everyone (no input needed) -->
+            <TextView
+                android:id="@+id/everyoneText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="此规则将应用于所有人"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <!-- Certificate Common Name -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/commonNameLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="证书通用名称"
+                android:visibility="gone"
+                app:endIconMode="clear_text"
+                app:helperText="客户端证书的 CN 字段">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/commonNameInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

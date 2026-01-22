@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Tunnel Icon -->
+        <ImageView
+            android:id="@+id/tunnelIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_share"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/colorPrimary" />
+
+        <!-- Tunnel Name -->
+        <TextView
+            android:id="@+id/tunnelNameText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Tunnel Name"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/deleteButton"
+            app:layout_constraintStart_toEndOf="@id/tunnelIcon"
+            app:layout_constraintTop_toTopOf="@id/tunnelIcon" />
+
+        <!-- Status Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/statusChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:text="活跃"
+            android:textSize="10sp"
+            app:chipMinHeight="24dp"
+            app:layout_constraintStart_toEndOf="@id/tunnelIcon"
+            app:layout_constraintTop_toBottomOf="@id/tunnelNameText" />
+
+        <!-- Tunnel Type Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/tunnelTypeChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="cloudflared"
+            android:textSize="10sp"
+            app:chipMinHeight="24dp"
+            app:layout_constraintStart_toEndOf="@id/statusChip"
+            app:layout_constraintTop_toBottomOf="@id/tunnelNameText" />
+
+        <!-- Connections Info -->
+        <TextView
+            android:id="@+id/connectionsText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="8dp"
+            android:drawablePadding="4dp"
+            android:text="连接数: 0"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="13sp"
+            app:drawableStartCompat="@android:drawable/ic_menu_compass"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tunnelIcon"
+            app:layout_constraintTop_toBottomOf="@id/statusChip" />
+
+        <!-- Connection Details -->
+        <TextView
+            android:id="@+id/connectionDetailsText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Colo: LAX, SJC"
+            android:textColor="?android:attr/textColorTertiary"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tunnelIcon"
+            app:layout_constraintTop_toBottomOf="@id/connectionsText" />
+
+        <!-- Created Date -->
+        <TextView
+            android:id="@+id/createdDateText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:text="创建: 2024-01-01"
+            android:textColor="?android:attr/textColorTertiary"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tunnelIcon"
+            app:layout_constraintTop_toBottomOf="@id/connectionDetailsText" />
+
+        <!-- Config Button -->
+        <ImageButton
+            android:id="@+id/configButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="配置隧道"
+            android:src="@android:drawable/ic_menu_preferences"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@id/deleteButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/colorPrimary" />
+
+        <!-- Delete Button -->
+        <ImageButton
+            android:id="@+id/deleteButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="删除隧道"
+            android:src="@android:drawable/ic_menu_delete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/colorError" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

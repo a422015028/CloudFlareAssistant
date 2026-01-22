@@ -192,6 +192,27 @@ class GatewayViewModel @Inject constructor(
     }
     
     /**
+     * Update a Gateway list
+     */
+    fun updateList(account: Account, listId: String, request: GatewayListRequest) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.updateGatewayList(account, listId, request)) {
+                is Resource.Success -> {
+                    _message.emit("列表更新成功: ${result.data.name}")
+                    loadLists(account)
+                }
+                is Resource.Error -> {
+                    val errorMsg = "更新列表失败: ${result.message}"
+                    _error.emit(errorMsg)
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
+    /**
      * Load all Gateway locations
      */
     fun loadLocations(account: Account) {
@@ -247,6 +268,27 @@ class GatewayViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     val errorMsg = "删除位置失败: ${result.message}"
+                    _error.emit(errorMsg)
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
+    /**
+     * Update a Gateway location
+     */
+    fun updateLocation(account: Account, locationId: String, request: GatewayLocationRequest) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.updateGatewayLocation(account, locationId, request)) {
+                is Resource.Success -> {
+                    _message.emit("位置更新成功: ${result.data.name}")
+                    loadLocations(account)
+                }
+                is Resource.Error -> {
+                    val errorMsg = "更新位置失败: ${result.message}"
                     _error.emit(errorMsg)
                 }
                 is Resource.Loading -> {}

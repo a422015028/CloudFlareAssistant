@@ -919,6 +919,27 @@ interface CloudFlareApi {
         @Body policy: DeviceSettingsPolicyRequest
     ): Response<CloudFlareResponse<DeviceSettingsPolicy>>
     
+    /**
+     * Update Device Settings Profile
+     */
+    @PATCH("accounts/{account_id}/devices/policy/{policy_id}")
+    suspend fun updateDevicePolicy(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("policy_id") policyId: String,
+        @Body policy: DeviceSettingsPolicyRequest
+    ): Response<CloudFlareResponse<DeviceSettingsPolicy>>
+    
+    /**
+     * Delete Device Settings Profile
+     */
+    @DELETE("accounts/{account_id}/devices/policy/{policy_id}")
+    suspend fun deleteDevicePolicy(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("policy_id") policyId: String
+    ): Response<CloudFlareResponse<List<DeviceSettingsPolicy>>>
+    
     // ==================== Zero Trust - Tunnels ====================
     
     /**

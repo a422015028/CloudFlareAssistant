@@ -196,7 +196,7 @@
             android:id="@+id/tvApiTokenGuideContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="所需API权限: \n\n1. 登录 Cloudflare 仪表板\n2. 进入 我的个人资料 → API 令牌\n3. 点击 创建代币\n4. 选择以下权限：\n   • 账户设置：读取\n   • Workers 脚本：编辑\n   • Workers 路由：编辑\n   • Workers R2 存储：编辑\n   • Workers KV 存储：编辑\n   • DNS: 编辑\n   • Cloudflare Pages: 编辑\n   • D1: 编辑\n5. 复制生成的 Token"
+            android:text="所需API权限: \n\n1. 登录 Cloudflare 仪表板\n2. 进入 我的个人资料 → API 令牌\n3. 点击 创建令牌\n4. 选择以下权限：\n\n【账户级别权限】\n   • Account Settings: 读取\n   • Workers Scripts: 编辑\n   • Workers Routes: 编辑\n   • Workers R2 Storage: 编辑\n   • Workers KV Storage: 编辑\n   • Cloudflare Pages: 编辑\n   • D1: 编辑\n   • Account Analytics: 读取\n\n【Zero Trust 权限】\n   • Zero Trust: 编辑\n   • Access: Apps and Policies: 编辑\n   • Access: Service Tokens: 编辑\n   • Gateway: 编辑\n   • Cloudflare Tunnel: 编辑\n\n【Zone 级别权限】\n   • Zone: 读取\n   • DNS: 编辑\n\n5. 账户资源选择：包含所有账户\n6. Zone资源选择：包含所有Zone\n7. 复制生成的 Token"
             android:textColor="?android:textColorSecondary"
             android:textSize="12sp"
             android:lineSpacingExtra="1dp"

@@ -113,6 +113,34 @@ class AccessViewModel @Inject constructor(
     }
     
     /**
+     * Load application detail and its policies
+     */
+    fun loadAppDetail(account: Account, appId: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            // Load application details
+            when (val result = zeroTrustRepository.getAccessApplication(account, appId)) {
+                is Resource.Success -> {
+                    _selectedApp.value = result.data
+                    Timber.d("Loaded app detail: ${result.data.name}")
+                }
+                is Resource.Error -> {
+                    val errorMsg = "加载应用详情失败: ${result.message}"
+                    _error.emit(errorMsg)
+                    Timber.e(errorMsg)
+                }
+                is Resource.Loading -> {}
+            }
+            
+            // Load application policies
+            loadAppPolicies(account, appId)
+            
+            _loadingState.value = false
+        }
+    }
+    
+    /**
      * Select an application
      */
     fun selectApplication(app: AccessApplication?) {
