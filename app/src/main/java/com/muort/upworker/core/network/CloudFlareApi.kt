@@ -516,4 +516,522 @@ interface CloudFlareApi {
         @Header("Authorization") token: String,
         @Body request: AnalyticsGraphQLRequest
     ): Response<AnalyticsGraphQLResponse>
+    
+    // ==================== Zero Trust - Access Applications ====================
+    
+    /**
+     * List Access Applications
+     * https://developers.cloudflare.com/api/resources/zero_trust/subresources/access/subresources/applications/
+     */
+    @GET("accounts/{account_id}/access/apps")
+    suspend fun listAccessApplications(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 50,
+        @Query("page") page: Int = 1
+    ): Response<CloudFlareResponse<List<AccessApplication>>>
+    
+    /**
+     * Get Access Application
+     */
+    @GET("accounts/{account_id}/access/apps/{app_id}")
+    suspend fun getAccessApplication(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("app_id") appId: String
+    ): Response<CloudFlareResponse<AccessApplication>>
+    
+    /**
+     * Create Access Application
+     */
+    @POST("accounts/{account_id}/access/apps")
+    suspend fun createAccessApplication(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body application: AccessApplicationRequest
+    ): Response<CloudFlareResponse<AccessApplication>>
+    
+    /**
+     * Update Access Application
+     */
+    @PUT("accounts/{account_id}/access/apps/{app_id}")
+    suspend fun updateAccessApplication(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("app_id") appId: String,
+        @Body application: AccessApplicationRequest
+    ): Response<CloudFlareResponse<AccessApplication>>
+    
+    /**
+     * Delete Access Application
+     */
+    @DELETE("accounts/{account_id}/access/apps/{app_id}")
+    suspend fun deleteAccessApplication(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("app_id") appId: String
+    ): Response<CloudFlareResponse<Unit>>
+    
+    // ==================== Zero Trust - Access Policies ====================
+    
+    /**
+     * List Access Policies
+     */
+    @GET("accounts/{account_id}/access/policies")
+    suspend fun listAccessPolicies(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<AccessPolicy>>>
+    
+    /**
+     * Create Access Policy
+     */
+    @POST("accounts/{account_id}/access/policies")
+    suspend fun createAccessPolicy(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body policy: AccessPolicyRequest
+    ): Response<CloudFlareResponse<AccessPolicy>>
+    
+    /**
+     * List Application Policies
+     */
+    @GET("accounts/{account_id}/access/apps/{app_id}/policies")
+    suspend fun listAppPolicies(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("app_id") appId: String
+    ): Response<CloudFlareResponse<List<AccessPolicy>>>
+    
+    /**
+     * Create Application Policy
+     */
+    @POST("accounts/{account_id}/access/apps/{app_id}/policies")
+    suspend fun createAppPolicy(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("app_id") appId: String,
+        @Body policy: AccessPolicyRequest
+    ): Response<CloudFlareResponse<AccessPolicy>>
+    
+    /**
+     * Update Application Policy
+     */
+    @PUT("accounts/{account_id}/access/apps/{app_id}/policies/{policy_id}")
+    suspend fun updateAppPolicy(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("app_id") appId: String,
+        @Path("policy_id") policyId: String,
+        @Body policy: AccessPolicyRequest
+    ): Response<CloudFlareResponse<AccessPolicy>>
+    
+    /**
+     * Delete Application Policy
+     */
+    @DELETE("accounts/{account_id}/access/apps/{app_id}/policies/{policy_id}")
+    suspend fun deleteAppPolicy(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("app_id") appId: String,
+        @Path("policy_id") policyId: String
+    ): Response<CloudFlareResponse<Unit>>
+    
+    // ==================== Zero Trust - Access Groups ====================
+    
+    /**
+     * List Access Groups
+     */
+    @GET("accounts/{account_id}/access/groups")
+    suspend fun listAccessGroups(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<AccessGroup>>>
+    
+    /**
+     * Get Access Group
+     */
+    @GET("accounts/{account_id}/access/groups/{group_id}")
+    suspend fun getAccessGroup(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("group_id") groupId: String
+    ): Response<CloudFlareResponse<AccessGroup>>
+    
+    /**
+     * Create Access Group
+     */
+    @POST("accounts/{account_id}/access/groups")
+    suspend fun createAccessGroup(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body group: AccessGroupRequest
+    ): Response<CloudFlareResponse<AccessGroup>>
+    
+    /**
+     * Update Access Group
+     */
+    @PUT("accounts/{account_id}/access/groups/{group_id}")
+    suspend fun updateAccessGroup(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("group_id") groupId: String,
+        @Body group: AccessGroupRequest
+    ): Response<CloudFlareResponse<AccessGroup>>
+    
+    /**
+     * Delete Access Group
+     */
+    @DELETE("accounts/{account_id}/access/groups/{group_id}")
+    suspend fun deleteAccessGroup(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("group_id") groupId: String
+    ): Response<CloudFlareResponse<Unit>>
+    
+    // ==================== Zero Trust - Gateway Rules ====================
+    
+    /**
+     * List Gateway Rules
+     */
+    @GET("accounts/{account_id}/gateway/rules")
+    suspend fun listGatewayRules(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<GatewayRule>>>
+    
+    /**
+     * Create Gateway Rule
+     */
+    @POST("accounts/{account_id}/gateway/rules")
+    suspend fun createGatewayRule(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body rule: GatewayRuleRequest
+    ): Response<CloudFlareResponse<GatewayRule>>
+    
+    /**
+     * Update Gateway Rule
+     */
+    @PUT("accounts/{account_id}/gateway/rules/{rule_id}")
+    suspend fun updateGatewayRule(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("rule_id") ruleId: String,
+        @Body rule: GatewayRuleRequest
+    ): Response<CloudFlareResponse<GatewayRule>>
+    
+    /**
+     * Delete Gateway Rule
+     */
+    @DELETE("accounts/{account_id}/gateway/rules/{rule_id}")
+    suspend fun deleteGatewayRule(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("rule_id") ruleId: String
+    ): Response<CloudFlareResponse<Unit>>
+    
+    // ==================== Zero Trust - Gateway Lists ====================
+    
+    /**
+     * List Gateway Lists
+     */
+    @GET("accounts/{account_id}/gateway/lists")
+    suspend fun listGatewayLists(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<GatewayList>>>
+    
+    /**
+     * Get Gateway List
+     */
+    @GET("accounts/{account_id}/gateway/lists/{list_id}")
+    suspend fun getGatewayList(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("list_id") listId: String
+    ): Response<CloudFlareResponse<GatewayList>>
+    
+    /**
+     * Create Gateway List
+     */
+    @POST("accounts/{account_id}/gateway/lists")
+    suspend fun createGatewayList(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body list: GatewayListRequest
+    ): Response<CloudFlareResponse<GatewayList>>
+    
+    /**
+     * Update Gateway List
+     */
+    @PUT("accounts/{account_id}/gateway/lists/{list_id}")
+    suspend fun updateGatewayList(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("list_id") listId: String,
+        @Body list: GatewayListRequest
+    ): Response<CloudFlareResponse<GatewayList>>
+    
+    /**
+     * Patch Gateway List (Append/Remove items)
+     */
+    @PATCH("accounts/{account_id}/gateway/lists/{list_id}")
+    suspend fun patchGatewayList(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("list_id") listId: String,
+        @Body patch: GatewayListPatchRequest
+    ): Response<CloudFlareResponse<GatewayList>>
+    
+    /**
+     * Delete Gateway List
+     */
+    @DELETE("accounts/{account_id}/gateway/lists/{list_id}")
+    suspend fun deleteGatewayList(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("list_id") listId: String
+    ): Response<CloudFlareResponse<Unit>>
+    
+    // ==================== Zero Trust - Gateway Locations ====================
+    
+    /**
+     * List Gateway Locations
+     */
+    @GET("accounts/{account_id}/gateway/locations")
+    suspend fun listGatewayLocations(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<GatewayLocation>>>
+    
+    /**
+     * Get Gateway Location
+     */
+    @GET("accounts/{account_id}/gateway/locations/{location_id}")
+    suspend fun getGatewayLocation(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("location_id") locationId: String
+    ): Response<CloudFlareResponse<GatewayLocation>>
+    
+    /**
+     * Create Gateway Location
+     */
+    @POST("accounts/{account_id}/gateway/locations")
+    suspend fun createGatewayLocation(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body location: GatewayLocationRequest
+    ): Response<CloudFlareResponse<GatewayLocation>>
+    
+    /**
+     * Update Gateway Location
+     */
+    @PUT("accounts/{account_id}/gateway/locations/{location_id}")
+    suspend fun updateGatewayLocation(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("location_id") locationId: String,
+        @Body location: GatewayLocationRequest
+    ): Response<CloudFlareResponse<GatewayLocation>>
+    
+    /**
+     * Delete Gateway Location
+     */
+    @DELETE("accounts/{account_id}/gateway/locations/{location_id}")
+    suspend fun deleteGatewayLocation(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("location_id") locationId: String
+    ): Response<CloudFlareResponse<Unit>>
+    
+    // ==================== Zero Trust - Devices ====================
+    
+    /**
+     * List Devices
+     */
+    @GET("accounts/{account_id}/devices")
+    suspend fun listDevices(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 50,
+        @Query("page") page: Int = 1
+    ): Response<CloudFlareResponse<List<Device>>>
+    
+    /**
+     * Get Device
+     */
+    @GET("accounts/{account_id}/devices/{device_id}")
+    suspend fun getDevice(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("device_id") deviceId: String
+    ): Response<CloudFlareResponse<Device>>
+    
+    /**
+     * Revoke Device
+     */
+    @DELETE("accounts/{account_id}/devices/{device_id}")
+    suspend fun revokeDevice(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("device_id") deviceId: String
+    ): Response<CloudFlareResponse<Unit>>
+    
+    // ==================== Zero Trust - Device Policies ====================
+    
+    /**
+     * List Device Policies
+     */
+    @GET("accounts/{account_id}/devices/policies")
+    suspend fun listDevicePolicies(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<DeviceSettingsPolicy>>>
+    
+    /**
+     * Get Default Device Policy
+     */
+    @GET("accounts/{account_id}/devices/policy")
+    suspend fun getDefaultDevicePolicy(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<DeviceSettingsPolicy>>
+    
+    /**
+     * Update Default Device Policy
+     */
+    @PATCH("accounts/{account_id}/devices/policy")
+    suspend fun updateDefaultDevicePolicy(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body policy: DevicePolicyUpdate
+    ): Response<CloudFlareResponse<DeviceSettingsPolicy>>
+    
+    /**
+     * Create Device Settings Profile
+     */
+    @POST("accounts/{account_id}/devices/policy")
+    suspend fun createDevicePolicy(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body policy: DeviceSettingsPolicyRequest
+    ): Response<CloudFlareResponse<DeviceSettingsPolicy>>
+    
+    // ==================== Zero Trust - Tunnels ====================
+    
+    /**
+     * List Cloudflare Tunnels
+     */
+    @GET("accounts/{account_id}/cfd_tunnel")
+    suspend fun listCloudflaredTunnels(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 50,
+        @Query("page") page: Int = 1
+    ): Response<CloudFlareResponse<List<CloudflareTunnel>>>
+    
+    /**
+     * Get Cloudflare Tunnel
+     */
+    @GET("accounts/{account_id}/cfd_tunnel/{tunnel_id}")
+    suspend fun getCloudflaredTunnel(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("tunnel_id") tunnelId: String
+    ): Response<CloudFlareResponse<CloudflareTunnel>>
+    
+    /**
+     * Create Cloudflare Tunnel
+     */
+    @POST("accounts/{account_id}/cfd_tunnel")
+    suspend fun createCloudflaredTunnel(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body tunnel: TunnelCreateRequest
+    ): Response<CloudFlareResponse<CloudflareTunnel>>
+    
+    /**
+     * Delete Cloudflare Tunnel
+     */
+    @DELETE("accounts/{account_id}/cfd_tunnel/{tunnel_id}")
+    suspend fun deleteCloudflaredTunnel(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("tunnel_id") tunnelId: String
+    ): Response<CloudFlareResponse<Unit>>
+    
+    /**
+     * List Tunnel Connections
+     */
+    @GET("accounts/{account_id}/cfd_tunnel/{tunnel_id}/connections")
+    suspend fun listTunnelConnections(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("tunnel_id") tunnelId: String
+    ): Response<CloudFlareResponse<List<TunnelConnection>>>
+    
+    /**
+     * Get Tunnel Configuration
+     */
+    @GET("accounts/{account_id}/cfd_tunnel/{tunnel_id}/configurations")
+    suspend fun getTunnelConfiguration(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("tunnel_id") tunnelId: String
+    ): Response<CloudFlareResponse<TunnelConfiguration>>
+    
+    /**
+     * Update Tunnel Configuration
+     */
+    @PUT("accounts/{account_id}/cfd_tunnel/{tunnel_id}/configurations")
+    suspend fun updateTunnelConfiguration(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("tunnel_id") tunnelId: String,
+        @Body config: TunnelConfigurationRequest
+    ): Response<CloudFlareResponse<TunnelConfiguration>>
+    
+    // ==================== Zero Trust - Service Tokens ====================
+    
+    /**
+     * List Service Tokens
+     */
+    @GET("accounts/{account_id}/access/service_tokens")
+    suspend fun listServiceTokens(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<ServiceToken>>>
+    
+    /**
+     * Create Service Token
+     */
+    @POST("accounts/{account_id}/access/service_tokens")
+    suspend fun createServiceToken(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Body request: ServiceTokenRequest
+    ): Response<CloudFlareResponse<ServiceToken>>
+    
+    /**
+     * Update Service Token
+     */
+    @PUT("accounts/{account_id}/access/service_tokens/{token_id}")
+    suspend fun updateServiceToken(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("token_id") tokenId: String,
+        @Body request: ServiceTokenRequest
+    ): Response<CloudFlareResponse<ServiceToken>>
+    
+    /**
+     * Delete Service Token
+     */
+    @DELETE("accounts/{account_id}/access/service_tokens/{token_id}")
+    suspend fun deleteServiceToken(
+        @Header("Authorization") token: String,
+        @Path("account_id") accountId: String,
+        @Path("token_id") tokenId: String
+    ): Response<CloudFlareResponse<Unit>>
 }

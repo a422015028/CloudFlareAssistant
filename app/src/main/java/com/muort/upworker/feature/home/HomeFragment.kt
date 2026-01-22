@@ -175,6 +175,13 @@ class HomeFragment : Fragment() {
             }, 150)
         }
         
+        binding.zeroTrustCard.setOnClickListener {
+            AnimationHelper.scaleDown(it)
+            it.postDelayed({
+                findNavController().navigate(R.id.action_home_to_zerotrust)
+            }, 150)
+        }
+        
         binding.aboutCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             showAboutDialog()
@@ -192,6 +199,7 @@ class HomeFragment : Fragment() {
             binding.r2Card,
             binding.d1Card,
             binding.backupCard,
+            binding.zeroTrustCard,
             binding.logCard,
             binding.accountCard
         )

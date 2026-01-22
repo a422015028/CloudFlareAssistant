@@ -45,6 +45,9 @@
         <action
             android:id="@+id/action_home_to_d1"
             app:destination="@id/d1ManagerFragment" />
+        <action
+            android:id="@+id/action_home_to_zerotrust"
+            app:destination="@id/zeroTrustFragment" />
     </fragment>
 
     <fragment
@@ -151,5 +154,50 @@
         android:name="com.muort.upworker.feature.backup.BackupFragment"
         android:label="备份恢复"
         tools:layout="@layout/fragment_backup" />
+
+    <!-- Zero Trust (Cloudflare One) -->
+    <fragment
+        android:id="@+id/zeroTrustFragment"
+        android:name="com.muort.upworker.feature.zerotrust.ZeroTrustFragment"
+        android:label="Zero Trust"
+        tools:layout="@layout/fragment_zero_trust">
+        
+        <action
+            android:id="@+id/action_zeroTrust_to_access"
+            app:destination="@id/accessFragment" />
+        
+        <action
+            android:id="@+id/action_zeroTrust_to_gateway"
+            app:destination="@id/gatewayFragment" />
+        
+        <action
+            android:id="@+id/action_zeroTrust_to_devices"
+            app:destination="@id/devicesFragment" />
+        
+        <action
+            android:id="@+id/action_zeroTrust_to_tunnels"
+            app:destination="@id/tunnelsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/accessFragment"
+        android:name="com.muort.upworker.feature.zerotrust.access.AccessFragment"
+        android:label="Access 访问控制"
+        tools:layout="@layout/fragment_access" />
+
+    <fragment
+        android:id="@+id/gatewayFragment"
+        android:name="com.muort.upworker.feature.zerotrust.gateway.GatewayFragment"
+        android:label="Gateway 安全网关" />
+
+    <fragment
+        android:id="@+id/devicesFragment"
+        android:name="com.muort.upworker.feature.zerotrust.devices.DevicesFragment"
+        android:label="Devices 设备管理" />
+
+    <fragment
+        android:id="@+id/tunnelsFragment"
+        android:name="com.muort.upworker.feature.zerotrust.tunnels.TunnelsFragment"
+        android:label="Cloudflare Tunnels" />
 
 </navigation>
