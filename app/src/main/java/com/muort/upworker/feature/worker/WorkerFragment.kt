@@ -79,6 +79,10 @@ class WorkerFragment : Fragment() {
     // 缓存脚本大小
     private val scriptSizeCache = mutableMapOf<String, Long>()
     
+    // 批量删除相关属性
+    private var isSelectionMode = false
+    private val selectedScripts = mutableSetOf<String>()
+    
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -155,6 +159,14 @@ class WorkerFragment : Fragment() {
             },
             onConfigSecretsClick = { script ->
                 showConfigSecretsDialog(script)
+            },
+            onSelectionModeClick = { script, isSelected ->
+                if (isSelected) {
+                    selectedScripts.add(script.id)
+                } else {
+                    selectedScripts.remove(script.id)
+                }
+                updateSelectionUI()
             }
         )
         binding.scriptsRecyclerView.apply {
@@ -185,6 +197,47 @@ class WorkerFragment : Fragment() {
         
         binding.refreshBtn.setOnClickListener {
             loadScripts()
+        }
+        
+        // 添加多选模式切换和批量操作按钮
+        setupBatchOperationUI()
+    }
+    
+    private fun setupBatchOperationUI() {
+        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
+            resources.getIdentifier("selectionStatusText", "id", requireContext().packageName)
+        )
+        
+        val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("toggleSelectionModeBtn", "id", requireContext().packageName)
+        )
+        
+        val selectAllBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("selectAllBtn", "id", requireContext().packageName)
+        )
+        
+        val batchDeleteBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("batchDeleteBtn", "id", requireContext().packageName)
+        )
+        
+        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "批量管理"
+        selectAllBtn?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
+        batchDeleteBtn?.visibility = if (isSelectionMode && selectedScripts.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+        selectionStatusText?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
+        selectionStatusText?.text = "已选择 ${selectedScripts.size} 个脚本"
+        
+        toggleSelectionBtn?.setOnClickListener {
+            toggleSelectionMode()
+        }
+        
+        selectAllBtn?.setOnClickListener {
+            selectAllScripts()
+        }
+        
+        batchDeleteBtn?.setOnClickListener {
+            if (selectedScripts.isNotEmpty()) {
+                showBatchDeleteConfirmDialog()
+            }
         }
     }
     
@@ -1239,6 +1292,119 @@ class WorkerFragment : Fragment() {
             .show()
     }
     
+    // ==================== Batch Delete Functions ====================
+    
+    private fun toggleSelectionMode() {
+        isSelectionMode = !isSelectionMode
+        selectedScripts.clear()
+        scriptsAdapter.setSelectionMode(isSelectionMode)
+        updateSelectionUI()
+    }
+    
+    private fun selectAllScripts() {
+        scriptsAdapter.getAllScripts().forEach { script ->
+            selectedScripts.add(script.id)
+        }
+        scriptsAdapter.selectAll()
+        updateSelectionUI()
+    }
+    
+    private fun updateSelectionUI() {
+        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
+            resources.getIdentifier("selectionStatusText", "id", requireContext().packageName)
+        )
+        
+        val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("toggleSelectionModeBtn", "id", requireContext().packageName)
+        )
+        
+        val selectAllBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("selectAllBtn", "id", requireContext().packageName)
+        )
+        
+        val batchDeleteBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("batchDeleteBtn", "id", requireContext().packageName)
+        )
+        
+        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "批量管理"
+        selectAllBtn?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
+        
+        if (isSelectionMode) {
+            selectionStatusText?.visibility = android.view.View.VISIBLE
+            selectionStatusText?.text = "已选择 ${selectedScripts.size} 个脚本"
+            batchDeleteBtn?.isEnabled = selectedScripts.isNotEmpty()
+            batchDeleteBtn?.visibility = if (selectedScripts.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+        } else {
+            selectionStatusText?.visibility = android.view.View.GONE
+            batchDeleteBtn?.visibility = android.view.View.GONE
+        }
+    }
+    
+    private fun showBatchDeleteConfirmDialog() {
+        val message = if (selectedScripts.size == 1) {
+            "确定要删除 1 个脚本吗？\n\n${selectedScripts.first()}\n\n此操作无法撤销。"
+        } else {
+            "确定要删除 ${selectedScripts.size} 个脚本吗？此操作无法撤销。"
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("批量删除脚本")
+            .setMessage(message)
+            .setPositiveButton("删除") { _, _ ->
+                performBatchDelete()
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun performBatchDelete() {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        val scriptsToDelete = selectedScripts.toList()
+        val progressDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("删除中...")
+            .setMessage("正在删除 ${scriptsToDelete.size} 个脚本")
+            .setCancelable(false)
+            .create()
+        progressDialog.show()
+        
+        var deletedCount = 0
+        var failedCount = 0
+        
+        lifecycleScope.launch {
+            scriptsToDelete.forEach { scriptName ->
+                try {
+                    viewModel.deleteWorkerScript(account, scriptName)
+                    deletedCount++
+                } catch (e: Exception) {
+                    failedCount++
+                    Timber.e(e, "Failed to delete script: $scriptName")
+                }
+            }
+            
+            progressDialog.dismiss()
+            
+            selectedScripts.clear()
+            isSelectionMode = false
+            scriptsAdapter.setSelectionMode(false)
+            updateSelectionUI()
+            
+            val message = if (failedCount == 0) {
+                "成功删除 $deletedCount 个脚本"
+            } else {
+                "删除了 $deletedCount 个脚本，$failedCount 个失败"
+            }
+            showToast(message)
+            
+            // 刷新列表
+            loadScripts()
+        }
+    }
+    
     private fun observeViewModels() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -1344,13 +1510,30 @@ class WorkerScriptsAdapter(
     private val onConfigR2Click: (WorkerScript) -> Unit,
     private val onConfigD1Click: (WorkerScript) -> Unit,
     private val onConfigVariablesClick: (WorkerScript) -> Unit,
-    private val onConfigSecretsClick: (WorkerScript) -> Unit
+    private val onConfigSecretsClick: (WorkerScript) -> Unit,
+    private val onSelectionModeClick: (WorkerScript, Boolean) -> Unit = { _, _ -> }
 ) : RecyclerView.Adapter<WorkerScriptsAdapter.ScriptViewHolder>() {
     
     private var scripts = listOf<WorkerScript>()
+    private var selectionMode = false
+    private val selectedItems = mutableSetOf<String>()
     
     fun submitList(newScripts: List<WorkerScript>) {
         scripts = newScripts
+        notifyDataSetChanged()
+    }
+    
+    fun setSelectionMode(enabled: Boolean) {
+        selectionMode = enabled
+        selectedItems.clear()
+        notifyDataSetChanged()
+    }
+    
+    fun getAllScripts(): List<WorkerScript> = scripts
+    
+    fun selectAll() {
+        selectedItems.clear()
+        scripts.forEach { selectedItems.add(it.id) }
         notifyDataSetChanged()
     }
     
@@ -1382,6 +1565,31 @@ class WorkerScriptsAdapter(
             val sizeText = formatSize(size)
             binding.scriptSizeText.text = "$sizeText \u2022 $dateText"
             
+            // 添加多选模式支持 - 通过改变卡片背景色表示选中状态
+            if (selectionMode) {
+                binding.deleteBtn.visibility = android.view.View.GONE
+                binding.viewBtn.visibility = android.view.View.GONE
+                
+                val isSelected = selectedItems.contains(script.id)
+                updateSelectionUI(binding.root, isSelected)
+                
+                binding.root.setOnClickListener {
+                    val newSelected = !selectedItems.contains(script.id)
+                    if (newSelected) {
+                        selectedItems.add(script.id)
+                    } else {
+                        selectedItems.remove(script.id)
+                    }
+                    updateSelectionUI(binding.root, newSelected)
+                    onSelectionModeClick(script, newSelected)
+                }
+            } else {
+                binding.deleteBtn.visibility = android.view.View.VISIBLE
+                binding.viewBtn.visibility = android.view.View.VISIBLE
+                updateSelectionUI(binding.root, false)
+                binding.root.setOnClickListener(null)
+            }
+            
             binding.configKvBtn.setOnClickListener {
                 onConfigKvClick(script)
             }
@@ -1408,6 +1616,17 @@ class WorkerScriptsAdapter(
             
             binding.deleteBtn.setOnClickListener {
                 onDeleteClick(script)
+            }
+        }
+        
+        private fun updateSelectionUI(view: android.view.View, isSelected: Boolean) {
+            if (isSelected) {
+                view.setAlpha(0.8f)
+                val color = view.context.getColor(android.R.color.darker_gray)
+                view.setBackgroundColor(color)
+            } else {
+                view.setAlpha(1.0f)
+                view.setBackgroundColor(android.R.color.transparent)
             }
         }
         

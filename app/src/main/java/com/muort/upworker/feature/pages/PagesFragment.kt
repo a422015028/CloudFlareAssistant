@@ -65,6 +65,10 @@ class PagesFragment : Fragment() {
     
     private var selectedFile: File? = null
     
+    // 批量删除相关属性
+    private var isSelectionMode = false
+    private val selectedProjects = mutableSetOf<String>()
+    
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -173,9 +177,60 @@ class PagesFragment : Fragment() {
                 accountViewModel.defaultAccount.value?.let { account ->
                     showDeploymentsDialogWithLoading(account, project)
                 }
+            },
+            onSelectionModeClick = { project, isSelected ->
+                if (isSelected) {
+                    selectedProjects.add(project.name)
+                } else {
+                    selectedProjects.remove(project.name)
+                }
+                updateSelectionUI()
             }
         )
         binding.projectRecyclerView.adapter = projectAdapter
+        
+        // Setup batch operation buttons
+        setupBatchOperationUI()
+    }
+    
+    private fun setupBatchOperationUI() {
+        // 获取或创建工具栏容器（假设在布局中有相应的容器）
+        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
+            resources.getIdentifier("pagesSelectionStatusText", "id", requireContext().packageName)
+        )
+        
+        val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("pagesToggleSelectionModeBtn", "id", requireContext().packageName)
+        )
+        
+        val selectAllBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("pagesSelectAllBtn", "id", requireContext().packageName)
+        )
+        
+        val batchDeleteBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("pagesBatchDeleteBtn", "id", requireContext().packageName)
+        )
+        
+        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "批量管理"
+        selectAllBtn?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
+        batchDeleteBtn?.visibility = if (isSelectionMode && selectedProjects.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+        selectionStatusText?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
+        selectionStatusText?.text = "已选择 ${selectedProjects.size} 个项目"
+        
+        // 设置按钮点击监听（如果这些视图存在）
+        toggleSelectionBtn?.setOnClickListener {
+            toggleSelectionMode()
+        }
+        
+        selectAllBtn?.setOnClickListener {
+            selectAllProjects()
+        }
+        
+        batchDeleteBtn?.setOnClickListener {
+            if (selectedProjects.isNotEmpty()) {
+                showBatchDeleteConfirmDialog()
+            }
+        }
     }
     
     private fun showProjectManagementDialog(account: Account, project: PagesProject) {
@@ -1149,6 +1204,121 @@ class PagesFragment : Fragment() {
             .show()
     }
     
+    // ==================== Batch Delete Functions ====================
+    
+    private fun toggleSelectionMode() {
+        isSelectionMode = !isSelectionMode
+        selectedProjects.clear()
+        projectAdapter.setSelectionMode(isSelectionMode)
+        updateSelectionUI()
+    }
+    
+    private fun selectAllProjects() {
+        projectAdapter.getAllProjects().forEach { project ->
+            selectedProjects.add(project.name)
+        }
+        projectAdapter.selectAll()
+        updateSelectionUI()
+    }
+    
+    private fun updateSelectionUI() {
+        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
+            resources.getIdentifier("pagesSelectionStatusText", "id", requireContext().packageName)
+        )
+        
+        val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("pagesToggleSelectionModeBtn", "id", requireContext().packageName)
+        )
+        
+        val selectAllBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("pagesSelectAllBtn", "id", requireContext().packageName)
+        )
+        
+        val batchDeleteBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("pagesBatchDeleteBtn", "id", requireContext().packageName)
+        )
+        
+        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "批量管理"
+        selectAllBtn?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
+        
+        if (isSelectionMode) {
+            selectionStatusText?.visibility = android.view.View.VISIBLE
+            selectionStatusText?.text = "已选择 ${selectedProjects.size} 个项目"
+            batchDeleteBtn?.isEnabled = selectedProjects.isNotEmpty()
+            batchDeleteBtn?.visibility = if (selectedProjects.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+        } else {
+            selectionStatusText?.visibility = android.view.View.GONE
+            batchDeleteBtn?.visibility = android.view.View.GONE
+        }
+    }
+    
+    private fun showBatchDeleteConfirmDialog() {
+        val message = if (selectedProjects.size == 1) {
+            "确定要删除 1 个项目吗？\n\n${selectedProjects.first()}\n\n此操作无法撤销。"
+        } else {
+            "确定要删除 ${selectedProjects.size} 个项目吗？此操作无法撤销。"
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("批量删除项目")
+            .setMessage(message)
+            .setPositiveButton("删除") { _, _ ->
+                performBatchDelete()
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun performBatchDelete() {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        val projectsToDelete = selectedProjects.toList()
+        val progressDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("删除中...")
+            .setMessage("正在删除 ${projectsToDelete.size} 个项目")
+            .setCancelable(false)
+            .create()
+        progressDialog.show()
+        
+        var deletedCount = 0
+        var failedCount = 0
+        
+        lifecycleScope.launch {
+            projectsToDelete.forEach { projectName ->
+                try {
+                    pagesViewModel.deleteProject(account, projectName)
+                    deletedCount++
+                } catch (e: Exception) {
+                    failedCount++
+                    Timber.e(e, "Failed to delete project: $projectName")
+                }
+            }
+            
+            progressDialog.dismiss()
+            
+            selectedProjects.clear()
+            isSelectionMode = false
+            projectAdapter.setSelectionMode(false)
+            updateSelectionUI()
+            
+            val message = if (failedCount == 0) {
+                "成功删除 $deletedCount 个项目"
+            } else {
+                "删除了 $deletedCount 个项目，$failedCount 个失败"
+            }
+            showToast(message)
+            
+            // 刷新列表
+            accountViewModel.defaultAccount.value?.let { acc ->
+                pagesViewModel.loadProjects(acc)
+            }
+        }
+    }
+    
     private fun showDeploymentsDialogWithLoading(account: com.muort.upworker.core.model.Account, project: PagesProject) {
         // 显示加载对话框
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
@@ -1303,13 +1473,30 @@ class PagesFragment : Fragment() {
         private val onConfigKvClick: (PagesProject) -> Unit,
         private val onConfigD1Click: (PagesProject) -> Unit,
         private val onConfigR2Click: (PagesProject) -> Unit,
-        private val onViewDeploymentsClick: (PagesProject) -> Unit
+        private val onViewDeploymentsClick: (PagesProject) -> Unit,
+        private val onSelectionModeClick: (PagesProject, Boolean) -> Unit = { _, _ -> }
     ) : RecyclerView.Adapter<ProjectAdapter.ViewHolder>() {
         
         private var projects = listOf<PagesProject>()
+        private var selectionMode = false
+        private val selectedItems = mutableSetOf<String>()
         
         fun submitList(newList: List<PagesProject>) {
             projects = newList
+            notifyDataSetChanged()
+        }
+        
+        fun setSelectionMode(enabled: Boolean) {
+            selectionMode = enabled
+            selectedItems.clear()
+            notifyDataSetChanged()
+        }
+        
+        fun getAllProjects(): List<PagesProject> = projects
+        
+        fun selectAll() {
+            selectedItems.clear()
+            projects.forEach { selectedItems.add(it.name) }
             notifyDataSetChanged()
         }
         
@@ -1336,6 +1523,31 @@ class PagesFragment : Fragment() {
                 val dateText = formatDate(project.createdOn)
                 binding.projectInfoText.text = "${project.productionBranch} 分支 • $dateText"
                 
+                // 添加多选模式支持 - 通过改变卡片背景色表示选中状态
+                if (selectionMode) {
+                    binding.deleteBtn.visibility = android.view.View.GONE
+                    binding.viewDeploymentsBtn.visibility = android.view.View.GONE
+                    
+                    val isSelected = selectedItems.contains(project.name)
+                    updateSelectionUI(binding.root, isSelected)
+                    
+                    binding.root.setOnClickListener {
+                        val newSelected = !selectedItems.contains(project.name)
+                        if (newSelected) {
+                            selectedItems.add(project.name)
+                        } else {
+                            selectedItems.remove(project.name)
+                        }
+                        updateSelectionUI(binding.root, newSelected)
+                        onSelectionModeClick(project, newSelected)
+                    }
+                } else {
+                    binding.deleteBtn.visibility = android.view.View.VISIBLE
+                    binding.viewDeploymentsBtn.visibility = android.view.View.VISIBLE
+                    updateSelectionUI(binding.root, false)
+                    binding.root.setOnClickListener(null)
+                }
+                
                 binding.configEnvBtn.setOnClickListener {
                     onConfigEnvClick(project)
                 }
@@ -1358,6 +1570,17 @@ class PagesFragment : Fragment() {
                 
                 binding.deleteBtn.setOnClickListener {
                     onDeleteClick(project)
+                }
+            }
+            
+            private fun updateSelectionUI(view: android.view.View, isSelected: Boolean) {
+                if (isSelected) {
+                    view.setAlpha(0.8f)
+                    val color = view.context.getColor(android.R.color.darker_gray)
+                    view.setBackgroundColor(color)
+                } else {
+                    view.setAlpha(1.0f)
+                    view.setBackgroundColor(android.R.color.transparent)
                 }
             }
             
