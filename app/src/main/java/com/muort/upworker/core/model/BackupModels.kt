@@ -51,7 +51,7 @@ data class BackupConfig(
 // ==================== Backup Data ====================
 
 data class AccountBackup(
-    @SerializedName("version") val version: String = "1.1",
+    @SerializedName("version") val version: String = "1.2",
     @SerializedName("backupDate") val backupDate: Long = System.currentTimeMillis(),
     @SerializedName("accounts") val accounts: List<AccountData>
 )
@@ -60,6 +60,9 @@ data class AccountData(
     @SerializedName("name") val name: String,
     @SerializedName("accountId") val accountId: String,
     @SerializedName("token") val token: String,
+    @SerializedName("email") val email: String? = null,
+    @SerializedName("globalApiKey") val globalApiKey: String? = null,
+    @SerializedName("authType") val authType: String = "TOKEN",
     @SerializedName("zoneId") val zoneId: String? = null,
     @SerializedName("isDefault") val isDefault: Boolean = false,
     @SerializedName("r2AccessKeyId") val r2AccessKeyId: String? = null,
@@ -74,6 +77,9 @@ fun Account.toAccountData() = AccountData(
     name = name,
     accountId = accountId,
     token = token,
+    email = email,
+    globalApiKey = globalApiKey,
+    authType = authType,
     zoneId = zoneId,
     isDefault = isDefault,
     r2AccessKeyId = r2AccessKeyId,
@@ -87,6 +93,9 @@ fun AccountData.toAccount() = Account(
     name = name,
     accountId = accountId,
     token = token,
+    email = email,
+    globalApiKey = globalApiKey,
+    authType = authType,
     zoneId = zoneId,
     isDefault = isDefault,
     r2AccessKeyId = r2AccessKeyId,
