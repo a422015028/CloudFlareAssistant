@@ -2,7 +2,10 @@ package com.muort.upworker.core.repository
 
 import com.muort.upworker.core.database.AccountDao
 import com.muort.upworker.core.model.Account
+import com.muort.upworker.core.model.AccountInfo
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.network.CloudFlareApi
+import com.muort.upworker.core.util.AuthHelper
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +20,8 @@ import javax.inject.Singleton
 @Singleton
 class AccountRepository @Inject constructor(
     private val accountDao: AccountDao,
-    private val backupRepositoryLazy: Lazy<BackupRepository>
+    private val backupRepositoryLazy: Lazy<BackupRepository>,
+    private val api: CloudFlareApi
 ) {
     
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -160,6 +164,34 @@ class AccountRepository @Inject constructor(
             Timber.d("Updated account $accountId zoneId to $zoneId")
         } catch (e: Exception) {
             Timber.e(e, "Error updating account zoneId")
+        }
+    }
+    
+    /**
+     * 从 Cloudflare API 获取账号列表
+     * 支持 API Token 和 Global API Key 两种认证方式
+     */
+    suspend fun fetchAccountsFromApi(account: Account): Resource<List<AccountInfo>> {
+        return try {
+            val response = api.listAccounts(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account)
+            )
+            
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body?.success == true && body.result != null) {
+                    Resource.Success(body.result)
+                } else {
+                    val errorMsg = body?.errors?.firstOrNull()?.message ?: "获取账号列表失败"
+                    Resource.Error(errorMsg)
+                }
+            } else {
+                Resource.Error("HTTP ${response.code()}: ${response.message()}")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "网络错误")
         }
     }
 }

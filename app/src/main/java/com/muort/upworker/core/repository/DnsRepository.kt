@@ -2,6 +2,7 @@ package com.muort.upworker.core.repository
 
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
+import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -29,7 +30,9 @@ class DnsRepository @Inject constructor(
         safeApiCall {
             Timber.d("Calling DNS API with zoneId: ${account.zoneId}, type: $type, name: $name")
             val response = api.listDnsRecords(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 zoneId = account.zoneId,
                 type = type,
                 name = name
@@ -77,7 +80,9 @@ class DnsRepository @Inject constructor(
         
         safeApiCall {
             val response = api.createDnsRecord(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 zoneId = account.zoneId,
                 record = record
             )
@@ -105,7 +110,9 @@ class DnsRepository @Inject constructor(
         
         safeApiCall {
             val response = api.updateDnsRecord(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 zoneId = account.zoneId,
                 recordId = recordId,
                 record = record
@@ -133,7 +140,9 @@ class DnsRepository @Inject constructor(
         
         safeApiCall {
             val response = api.deleteDnsRecord(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 zoneId = account.zoneId,
                 recordId = recordId
             )

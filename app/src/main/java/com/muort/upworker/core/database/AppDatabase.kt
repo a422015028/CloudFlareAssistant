@@ -12,7 +12,7 @@ import com.muort.upworker.core.model.ScriptVersion
 
 @Database(
     entities = [Account::class, WebDavConfig::class, R2BackupConfig::class, Zone::class, ScriptVersion::class],
-    version = 6,
+    version = 7,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -114,6 +114,15 @@ abstract class AppDatabase : RoomDatabase() {
                         updatedAt INTEGER NOT NULL
                     )
                 """.trimIndent())
+            }
+        }
+        
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Add Global API Key authentication fields to accounts table
+                db.execSQL("ALTER TABLE accounts ADD COLUMN email TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE accounts ADD COLUMN globalApiKey TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE accounts ADD COLUMN authType TEXT NOT NULL DEFAULT 'TOKEN'")
             }
         }
     }

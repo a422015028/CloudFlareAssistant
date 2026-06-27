@@ -2,6 +2,7 @@ package com.muort.upworker.core.repository
 
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
+import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,7 +20,9 @@ class D1Repository @Inject constructor(
             safeApiCall {
                 Timber.d("D1Repository: Starting listDatabases for account ${account.accountId}")
                 val response = api.listD1Databases(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
 
@@ -54,7 +57,9 @@ class D1Repository @Inject constructor(
         safeApiCall {
             val request = D1DatabaseRequest(name = name)
             val response = api.createD1Database(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 database = request
             )
@@ -77,7 +82,9 @@ class D1Repository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.deleteD1Database(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 databaseId = databaseId
             )
@@ -96,7 +103,9 @@ class D1Repository @Inject constructor(
         safeApiCall {
             val sql = "SELECT name FROM sqlite_master WHERE type='table'"
             val response = api.executeD1Query(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 databaseId = databaseId,
                 query = D1QueryRequest(sql)
@@ -118,7 +127,9 @@ class D1Repository @Inject constructor(
                         // PRAGMA table_info 返回字段信息
                         val pragmaSql = "PRAGMA table_info('$tableName')"
                         val pragmaResp = api.executeD1Query(
-                            token = "Bearer ${account.token}",
+                            token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                             accountId = account.accountId,
                             databaseId = databaseId,
                             query = D1QueryRequest(pragmaSql)
@@ -149,7 +160,9 @@ class D1Repository @Inject constructor(
     suspend fun executeQuery(account: Account, databaseId: String, sql: String, params: List<Any>? = null): Resource<D1QueryResult> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.executeD1Query(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 databaseId = databaseId,
                 query = D1QueryRequest(sql, params)
@@ -186,7 +199,9 @@ class D1Repository @Inject constructor(
 
     suspend fun exportDatabase(account: Account, databaseId: String) = withContext(Dispatchers.IO) {
         api.exportD1Database(
-            token = "Bearer ${account.token}",
+            token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
             accountId = account.accountId,
             databaseId = databaseId
         )
@@ -195,7 +210,9 @@ class D1Repository @Inject constructor(
     suspend fun importDatabase(account: Account, databaseId: String, file: okhttp3.MultipartBody.Part): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.importD1Database(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 databaseId = databaseId,
                 file = file

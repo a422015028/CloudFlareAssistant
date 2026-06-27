@@ -3,6 +3,8 @@ package com.muort.upworker.feature.account
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.muort.upworker.core.model.Account
+import com.muort.upworker.core.model.AccountInfo
+import com.muort.upworker.core.model.AuthType
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.repository.AccountRepository
@@ -101,11 +103,37 @@ class AccountViewModel @Inject constructor(
         zoneId: String?,
         isDefault: Boolean = false,
         r2AccessKeyId: String? = null,
-        r2SecretAccessKey: String? = null
+        r2SecretAccessKey: String? = null,
+        email: String? = null,
+        globalApiKey: String? = null,
+        authType: String = AuthType.TOKEN.name
     ) {
-        if (name.isBlank() || accountId.isBlank() || token.isBlank()) {
+        if (name.isBlank() || accountId.isBlank()) {
             viewModelScope.launch {
                 _message.emit("请填写所有必填项")
+            }
+            return
+        }
+        
+        // 根据认证类型验证凭据
+        val authTypeEnum = try {
+            AuthType.valueOf(authType)
+        } catch (e: Exception) {
+            AuthType.TOKEN
+        }
+        
+        val validationError = when (authTypeEnum) {
+            AuthType.TOKEN -> if (token.isBlank()) "API Token 不能为空" else null
+            AuthType.GLOBAL_API_KEY -> {
+                if (email?.isBlank() != false) "邮箱不能为空"
+                else if (globalApiKey?.isBlank() != false) "Global API Key 不能为空"
+                else null
+            }
+        }
+        
+        if (validationError != null) {
+            viewModelScope.launch {
+                _message.emit(validationError)
             }
             return
         }
@@ -118,7 +146,10 @@ class AccountViewModel @Inject constructor(
                 zoneId = zoneId?.takeIf { it.isNotBlank() },
                 isDefault = isDefault,
                 r2AccessKeyId = r2AccessKeyId?.takeIf { it.isNotBlank() },
-                r2SecretAccessKey = r2SecretAccessKey?.takeIf { it.isNotBlank() }
+                r2SecretAccessKey = r2SecretAccessKey?.takeIf { it.isNotBlank() },
+                email = email?.takeIf { it.isNotBlank() },
+                globalApiKey = globalApiKey?.takeIf { it.isNotBlank() },
+                authType = authType
             )
             
             when (val result = accountRepository.insertAccount(account)) {
@@ -222,7 +253,7 @@ class AccountViewModel @Inject constructor(
     fun fetchZonesFromApi(account: Account) {
         viewModelScope.launch {
             _loadingZones.value = true
-            when (val result = zoneRepository.fetchAndSaveZones(account.id, account.token)) {
+            when (val result = zoneRepository.fetchAndSaveZones(account)) {
                 is Resource.Success -> {
                     _message.emit("成功获取 ${result.data.size} 个域名")
                     loadZonesForAccount(account.id)
@@ -246,6 +277,25 @@ class AccountViewModel @Inject constructor(
     
     fun getSelectedZoneId(@Suppress("UNUSED_PARAMETER") accountId: Long): String? {
         return _selectedZone.value?.id
+    }
+    
+    /**
+     * 从 API 获取账号列表
+     * 用于 Global API Key 模式下自动获取 Account ID
+     */
+    fun fetchAccountsFromApi(account: Account, onResult: (List<AccountInfo>) -> Unit) {
+        viewModelScope.launch {
+            when (val result = accountRepository.fetchAccountsFromApi(account)) {
+                is Resource.Success -> {
+                    _message.emit("成功获取 ${result.data.size} 个账号")
+                    onResult(result.data)
+                }
+                is Resource.Error -> {
+                    _message.emit("获取账号列表失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+        }
     }
 }
 

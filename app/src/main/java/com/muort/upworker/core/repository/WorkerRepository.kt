@@ -3,6 +3,7 @@ package com.muort.upworker.core.repository
 import com.google.gson.Gson
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
+import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -27,7 +28,9 @@ class WorkerRepository @Inject constructor(
     ): Resource<CustomDomain> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.updateCustomDomain(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 domainId = domainId,
                 request = request
@@ -118,7 +121,9 @@ class WorkerRepository @Inject constructor(
                 )
                 
                 val response = api.uploadWorkerScriptMultipart(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     scriptName = scriptName,
                     metadata = metadataBody,
@@ -205,7 +210,9 @@ class WorkerRepository @Inject constructor(
             
             val requestBody = scriptFile.asRequestBody(contentType)
             val response = api.uploadWorkerScriptContent(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName,
                 script = requestBody
@@ -254,7 +261,9 @@ class WorkerRepository @Inject constructor(
         safeApiCall {
             val requestBody = scriptFile.asRequestBody("application/javascript".toMediaType())
             val response = api.uploadWorkerScript(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName,
                 script = requestBody
@@ -277,7 +286,9 @@ class WorkerRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listWorkerScripts(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 
@@ -297,7 +308,9 @@ class WorkerRepository @Inject constructor(
     ): Resource<String> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.getWorkerScript(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName
             )
@@ -379,7 +392,9 @@ class WorkerRepository @Inject constructor(
             
             // Call API to update settings
             val response = api.updateWorkerSettings(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName,
                 settings = settingsBody
@@ -455,7 +470,9 @@ class WorkerRepository @Inject constructor(
             
             // Call API to update settings
             val response = api.updateWorkerSettings(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName,
                 settings = settingsBody
@@ -533,7 +550,9 @@ class WorkerRepository @Inject constructor(
             
             // Call API to update settings
             val response = api.updateWorkerSettings(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName,
                 settings = settingsBody
@@ -629,7 +648,9 @@ class WorkerRepository @Inject constructor(
             
             // Call API to update settings
             val response = api.updateWorkerSettings(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName,
                 settings = settingsBody
@@ -705,7 +726,9 @@ class WorkerRepository @Inject constructor(
             
             // Call API to update settings
             val response = api.updateWorkerSettings(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName,
                 settings = settingsBody
@@ -738,7 +761,9 @@ class WorkerRepository @Inject constructor(
     ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.getWorkerSettings(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName
             )
@@ -763,7 +788,9 @@ class WorkerRepository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.deleteWorkerScript(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName
             )
@@ -787,7 +814,9 @@ class WorkerRepository @Inject constructor(
             
             safeApiCall {
                 val response = api.listRoutes(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     zoneId = account.zoneId
                 )
                 
@@ -812,7 +841,9 @@ class WorkerRepository @Inject constructor(
         
         safeApiCall {
             val response = api.createRoute(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 zoneId = account.zoneId,
                 route = RouteRequest(pattern = pattern, script = scriptName)
             )
@@ -841,7 +872,9 @@ class WorkerRepository @Inject constructor(
         
         safeApiCall {
             val response = api.updateRoute(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 zoneId = account.zoneId,
                 routeId = routeId,
                 route = RouteRequest(pattern = pattern, script = scriptName)
@@ -863,7 +896,9 @@ class WorkerRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listCustomDomains(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 
@@ -884,7 +919,9 @@ class WorkerRepository @Inject constructor(
     ): Resource<CustomDomain> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.addCustomDomain(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 request = CustomDomainRequest(
                     hostname = hostname,
@@ -910,7 +947,9 @@ class WorkerRepository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         try {
             val response = api.deleteCustomDomain(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 domainId = domainId
             )
@@ -941,7 +980,9 @@ class WorkerRepository @Inject constructor(
         
         safeApiCall {
             val response = api.deleteRoute(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 zoneId = account.zoneId,
                 routeId = routeId
             )

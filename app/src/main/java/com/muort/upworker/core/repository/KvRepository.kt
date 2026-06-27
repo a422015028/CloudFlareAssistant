@@ -2,6 +2,7 @@ package com.muort.upworker.core.repository
 
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
+import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,7 +21,9 @@ class KvRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listKvNamespaces(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 
@@ -40,7 +43,9 @@ class KvRepository @Inject constructor(
     ): Resource<KvNamespace> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.createKvNamespace(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 namespace = KvNamespaceRequest(title = title)
             )
@@ -63,7 +68,9 @@ class KvRepository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.deleteKvNamespace(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 namespaceId = namespaceId
             )
@@ -84,7 +91,9 @@ class KvRepository @Inject constructor(
     ): Resource<List<KvKey>> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.listKvKeys(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 namespaceId = namespaceId
             )
@@ -106,7 +115,9 @@ class KvRepository @Inject constructor(
     ): Resource<String> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.getKvValue(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 namespaceId = namespaceId,
                 keyName = keyName
@@ -135,7 +146,9 @@ class KvRepository @Inject constructor(
         safeApiCall {
             val requestBody = value.toRequestBody("text/plain".toMediaType())
             val response = api.putKvValue(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 namespaceId = namespaceId,
                 keyName = keyName,
@@ -159,7 +172,9 @@ class KvRepository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.deleteKvValue(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 namespaceId = namespaceId,
                 keyName = keyName

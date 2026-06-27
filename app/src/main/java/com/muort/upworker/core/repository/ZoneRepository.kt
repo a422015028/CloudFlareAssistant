@@ -1,10 +1,12 @@
 package com.muort.upworker.core.repository
 
 import com.muort.upworker.core.database.ZoneDao
+import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.model.ZoneInfo
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.network.CloudFlareApi
+import com.muort.upworker.core.util.AuthHelper
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,16 +26,24 @@ class ZoneRepository @Inject constructor(
         return zoneDao.getSelectedZone(accountId)
     }
     
-    suspend fun fetchAndSaveZones(accountId: Long, token: String): Resource<List<Zone>> {
+    /**
+     * 从 API 获取 Zones 并保存到数据库
+     * 支持两种认证方式：API Token 和 Global API Key
+     */
+    suspend fun fetchAndSaveZones(account: Account): Resource<List<Zone>> {
         return try {
-            val response = api.listZones("Bearer $token")
+            val response = api.listZones(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account)
+            )
             
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body?.success == true && body.result != null) {
                     // Convert API zones to database zones
                     val zones = body.result.map { zoneInfo ->
-                        zoneInfo.toZone(accountId)
+                        zoneInfo.toZone(account.id)
                     }
                     
                     // Save to database

@@ -20,21 +20,63 @@ data class CloudFlareError(
 
 // ==================== Account ====================
 
+/**
+ * 认证类型枚举
+ */
+enum class AuthType {
+    TOKEN,          // API Token (Bearer Token)
+    GLOBAL_API_KEY  // Global API Key + Email
+}
+
 @Entity(tableName = "accounts")
 data class Account(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val name: String,
     val accountId: String,
-    val token: String,
+    val token: String,  // API Token (当 authType = TOKEN 时使用)
     val zoneId: String? = null,
     val isDefault: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
     // R2 S3 API credentials (optional, separate from API token)
     val r2AccessKeyId: String? = null,
-    val r2SecretAccessKey: String? = null
-)
+    val r2SecretAccessKey: String? = null,
+    // Global API Key 认证方式 (当 authType = GLOBAL_API_KEY 时使用)
+    val email: String? = null,  // Cloudflare 账号邮箱
+    val globalApiKey: String? = null,  // Global API Key
+    val authType: String = AuthType.TOKEN.name  // 认证类型：TOKEN 或 GLOBAL_API_KEY
+) {
+    /**
+     * 获取认证类型枚举值
+     */
+    fun getAuthTypeEnum(): AuthType {
+        return try {
+            AuthType.valueOf(authType)
+        } catch (e: Exception) {
+            AuthType.TOKEN // 默认使用 Token 认证
+        }
+    }
+    
+    /**
+     * 判断是否使用 Global API Key 认证
+     */
+    fun useGlobalApiKey(): Boolean {
+        return getAuthTypeEnum() == AuthType.GLOBAL_API_KEY && 
+               email?.isNotBlank() == true && 
+               globalApiKey?.isNotBlank() == true
+    }
+    
+    /**
+     * 判断是否有有效的认证凭据
+     */
+    fun hasValidCredentials(): Boolean {
+        return when (getAuthTypeEnum()) {
+            AuthType.TOKEN -> token.isNotBlank()
+            AuthType.GLOBAL_API_KEY -> email?.isNotBlank() == true && globalApiKey?.isNotBlank() == true
+        }
+    }
+}
 
 // ==================== Zones ====================
 
@@ -78,6 +120,20 @@ data class ZoneInfo(
     @SerializedName("created_on") val createdOn: String? = null,
     @SerializedName("modified_on") val modifiedOn: String? = null,
     @SerializedName("activated_on") val activatedOn: String? = null
+)
+
+// API response model for accounts
+data class AccountInfo(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("type") val type: String? = null,
+    @SerializedName("created_on") val createdOn: String? = null,
+    @SerializedName("settings") val settings: AccountSettings? = null
+)
+
+data class AccountSettings(
+    @SerializedName("enforce_twofactor") val enforceTwofactor: Boolean? = null,
+    @SerializedName("access_approval_expiry") val accessApprovalExpiry: String? = null
 )
 
 // ==================== Workers ====================

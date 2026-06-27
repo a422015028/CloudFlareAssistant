@@ -3,6 +3,7 @@ package com.muort.upworker.core.repository
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.network.R2S3Client
+import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -29,7 +30,9 @@ class R2Repository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listR2Buckets(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 
@@ -51,7 +54,9 @@ class R2Repository @Inject constructor(
     ): Resource<R2Bucket> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.createR2Bucket(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 bucket = R2BucketRequest(
                     name = name,
@@ -77,7 +82,9 @@ class R2Repository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.deleteR2Bucket(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 bucketName = bucketName
             )
@@ -213,7 +220,9 @@ class R2Repository @Inject constructor(
     ): Resource<List<R2CustomDomain>> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.listR2CustomDomains(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 bucketName = bucketName
             )
@@ -245,7 +254,9 @@ class R2Repository @Inject constructor(
             )
             
             val response = api.createR2CustomDomain(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 bucketName = bucketName,
                 request = request
@@ -273,7 +284,9 @@ class R2Repository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.deleteR2CustomDomain(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 bucketName = bucketName,
                 domain = domain

@@ -2,6 +2,7 @@ package com.muort.upworker.core.repository
 
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
+import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,7 +22,9 @@ class PagesRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listPagesProjects(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 
@@ -42,7 +45,9 @@ class PagesRepository @Inject constructor(
     ): Resource<PagesProject> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.createPagesProject(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 project = PagesProjectRequest(
                     name = name,
@@ -68,7 +73,9 @@ class PagesRepository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.deletePagesProject(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName
             )
@@ -89,7 +96,9 @@ class PagesRepository @Inject constructor(
     ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.getPagesProject(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName
             )
@@ -112,7 +121,9 @@ class PagesRepository @Inject constructor(
     ): Resource<List<PagesDeployment>> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.listPagesDeployments(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName
             )
@@ -134,7 +145,9 @@ class PagesRepository @Inject constructor(
     ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.retryPagesDeployment(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName,
                 deploymentId = deploymentId
@@ -159,7 +172,9 @@ class PagesRepository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.deletePagesDeployment(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName,
                 deploymentId = deploymentId
@@ -235,7 +250,9 @@ class PagesRepository @Inject constructor(
             Timber.d("Project: $projectName, Account: ${account.accountId}")
             
             val response = api.createPagesDeployment(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName,
                 manifest = manifestBody,
@@ -286,7 +303,9 @@ class PagesRepository @Inject constructor(
     private suspend fun checkProjectExists(account: Account, projectName: String): Boolean {
         return try {
             val response = api.getPagesProject(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName
             )
@@ -330,7 +349,9 @@ class PagesRepository @Inject constructor(
             val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)
             
             val response = api.updatePagesProject(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName,
                 updateRequest = updateRequest
@@ -376,7 +397,9 @@ class PagesRepository @Inject constructor(
             val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)
             
             val response = api.updatePagesProject(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName,
                 updateRequest = updateRequest
@@ -422,7 +445,9 @@ class PagesRepository @Inject constructor(
             val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)
             
             val response = api.updatePagesProject(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName,
                 updateRequest = updateRequest
@@ -468,7 +493,9 @@ class PagesRepository @Inject constructor(
             val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)
             
             val response = api.updatePagesProject(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName,
                 updateRequest = updateRequest
@@ -494,7 +521,9 @@ class PagesRepository @Inject constructor(
     ): Resource<List<PagesDomain>> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.listPagesDomains(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName
             )
@@ -516,7 +545,9 @@ class PagesRepository @Inject constructor(
     ): Resource<PagesDomain> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.addPagesDomain(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName,
                 request = PagesDomainRequest(name = domainName)
@@ -541,7 +572,9 @@ class PagesRepository @Inject constructor(
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val response = api.deletePagesDomain(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 projectName = projectName,
                 domainName = domainName

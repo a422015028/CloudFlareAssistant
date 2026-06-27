@@ -2,6 +2,7 @@ package com.muort.upworker.core.repository
 
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
+import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -27,7 +28,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listAccessApplications(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -50,7 +53,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.getAccessApplication(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     appId = appId
                 )
@@ -76,7 +81,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.createAccessApplication(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     application = request
                 )
@@ -103,7 +110,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.updateAccessApplication(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     appId = appId,
                     application = request
@@ -127,7 +136,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.deleteAccessApplication(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     appId = appId
                 )
@@ -151,7 +162,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listAccessPolicies(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -173,7 +186,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listAppPolicies(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     appId = appId
                 )
@@ -200,7 +215,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.createAppPolicy(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     appId = appId,
                     policy = request
@@ -229,7 +246,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.updateAppPolicy(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     appId = appId,
                     policyId = policyId,
@@ -258,7 +277,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.deleteAppPolicy(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     appId = appId,
                     policyId = policyId
@@ -283,7 +304,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listAccessGroups(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -305,7 +328,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.getAccessGroup(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     groupId = groupId
                 )
@@ -331,7 +356,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.createAccessGroup(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     group = request
                 )
@@ -358,7 +385,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.updateAccessGroup(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     groupId = groupId,
                     group = request
@@ -382,7 +411,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.deleteAccessGroup(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     groupId = groupId
                 )
@@ -406,7 +437,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listGatewayRules(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -431,7 +464,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.createGatewayRule(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     rule = request
                 )
@@ -458,7 +493,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.updateGatewayRule(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     ruleId = ruleId,
                     rule = request
@@ -482,7 +519,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.deleteGatewayRule(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     ruleId = ruleId
                 )
@@ -506,7 +545,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listGatewayLists(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -528,7 +569,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.getGatewayList(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     listId = listId
                 )
@@ -554,7 +597,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.createGatewayList(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     list = request
                 )
@@ -581,7 +626,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.updateGatewayList(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     listId = listId,
                     list = request
@@ -609,7 +656,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.patchGatewayList(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     listId = listId,
                     patch = patch
@@ -633,7 +682,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.deleteGatewayList(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     listId = listId
                 )
@@ -657,7 +708,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listGatewayLocations(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -679,7 +732,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.getGatewayLocation(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     locationId = locationId
                 )
@@ -705,7 +760,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.createGatewayLocation(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     location = request
                 )
@@ -732,7 +789,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.updateGatewayLocation(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     locationId = locationId,
                     location = request
@@ -756,7 +815,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.deleteGatewayLocation(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     locationId = locationId
                 )
@@ -780,7 +841,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listDevices(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -802,7 +865,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.getDevice(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     deviceId = deviceId
                 )
@@ -825,7 +890,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.revokeDevice(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     deviceId = deviceId
                 )
@@ -849,7 +916,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listDevicePolicies(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -871,7 +940,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.getDefaultDevicePolicy(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -896,7 +967,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.updateDefaultDevicePolicy(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     policy = update
                 )
@@ -922,7 +995,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.createDevicePolicy(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     policy = request
                 )
@@ -949,7 +1024,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.updateDevicePolicy(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     policyId = policyId,
                     policy = request
@@ -976,7 +1053,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.deleteDevicePolicy(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     policyId = policyId
                 )
@@ -1000,7 +1079,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listCloudflaredTunnels(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -1022,7 +1103,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.getCloudflaredTunnel(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     tunnelId = tunnelId
                 )
@@ -1048,7 +1131,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.createCloudflaredTunnel(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     tunnel = request
                 )
@@ -1071,7 +1156,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.deleteCloudflaredTunnel(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     tunnelId = tunnelId
                 )
@@ -1096,7 +1183,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listTunnelConnections(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     tunnelId = tunnelId
                 )
@@ -1122,7 +1211,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.getTunnelConfiguration(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     tunnelId = tunnelId
                 )
@@ -1149,7 +1240,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.updateTunnelConfiguration(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     tunnelId = tunnelId,
                     config = request
@@ -1175,7 +1268,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.listServiceTokens(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -1200,7 +1295,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.createServiceToken(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     request = request
                 )
@@ -1227,7 +1324,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.updateServiceToken(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     tokenId = tokenId,
                     request = request
@@ -1251,7 +1350,9 @@ class ZeroTrustRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             safeApiCall {
                 val response = api.deleteServiceToken(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
                     tokenId = tokenId
                 )

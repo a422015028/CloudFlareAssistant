@@ -2,6 +2,7 @@ package com.muort.upworker.core.repository
 
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
+import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -55,7 +56,9 @@ class AnalyticsRepository @Inject constructor(
                 )
                 
                 val response = api.queryAnalytics(
-                    token = "Bearer ${account.token}",
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                     request = request
                 )
                 
@@ -273,7 +276,9 @@ class AnalyticsRepository @Inject constructor(
     private suspend fun fetchD1DatabaseStats(account: Account): D1Stats {
         return try {
             val response = api.listD1Databases(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId
             )
             
@@ -300,7 +305,9 @@ class AnalyticsRepository @Inject constructor(
     private suspend fun fetchR2BucketStats(account: Account): R2Stats {
         return try {
             val response = api.listR2Buckets(
-                token = "Bearer ${account.token}",
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId
             )
             

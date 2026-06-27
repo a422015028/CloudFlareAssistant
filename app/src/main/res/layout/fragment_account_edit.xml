@@ -26,23 +26,77 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <!-- Account ID 输入 + 自动获取按钮 -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Account ID"
-            app:boxBackgroundMode="outline"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:gravity="bottom">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Account ID"
+                app:boxBackgroundMode="outline">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/accountIdEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:fontFamily="monospace" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/fetchAccountIdBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="从API获取"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <!-- 认证方式选择 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="认证方式"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/authTypeRadioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginBottom="16dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/accountIdEditText"
-                android:layout_width="match_parent"
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/radioToken"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="text"
-                android:fontFamily="monospace" />
+                android:layout_weight="1"
+                android:text="API Token"
+                android:checked="true" />
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/radioGlobalApiKey"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Global API Key" />
 
+        </RadioGroup>
+
+        <!-- API Token 输入 -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tokenInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="API Token"
@@ -58,6 +112,49 @@
                 android:fontFamily="monospace" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Global API Key 认证区域 -->
+        <LinearLayout
+            android:id="@+id/globalApiKeySection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Cloudflare 邮箱"
+                app:boxBackgroundMode="outline"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/emailEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:fontFamily="monospace" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Global API Key"
+                app:boxBackgroundMode="outline"
+                android:layout_marginBottom="16dp"
+                app:endIconMode="password_toggle"
+                app:helperText="在 Cloudflare Dashboard → My Profile → API Tokens → Global API Key 获取">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/globalApiKeyEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:fontFamily="monospace" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"

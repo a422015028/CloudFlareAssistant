@@ -11,6 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.muort.upworker.core.model.AuthType
+import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.FragmentAccountEditBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,6 +27,9 @@ class AccountEditFragment : Fragment() {
     private val viewModel: AccountViewModel by activityViewModels()
     private val args: AccountEditFragmentArgs by navArgs()
     
+    // 当前选择的认证类型
+    private var selectedAuthType: AuthType = AuthType.TOKEN
+    
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -37,10 +42,100 @@ class AccountEditFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        setupAuthTypeDropdown()
+        setupFetchAccountIdButton()
         loadAccountIfEditing()
         setupSaveButton()
         setupZoneButtons()
         observeViewModel()
+    }
+    
+    /**
+     * 设置自动获取 Account ID 按钮
+     */
+    private fun setupFetchAccountIdButton() {
+        binding.fetchAccountIdBtn.setOnClickListener {
+            val token = binding.tokenEditText.text.toString().trim()
+            val email = binding.emailEditText.text.toString().trim()
+            val globalApiKey = binding.globalApiKeyEditText.text.toString().trim()
+            
+            // 检查是否有可用的认证凭据
+            val hasTokenCredentials = token.isNotEmpty()
+            val hasGlobalKeyCredentials = email.isNotEmpty() && globalApiKey.isNotEmpty()
+            
+            if (!hasTokenCredentials && !hasGlobalKeyCredentials) {
+                showToast("请先填写 API Token 或 Global API Key 凭据")
+                return@setOnClickListener
+            }
+            
+            // 使用当前选中的认证方式，或使用有凭据的那种
+            val authTypeToUse = when {
+                selectedAuthType == AuthType.TOKEN && hasTokenCredentials -> AuthType.TOKEN
+                selectedAuthType == AuthType.GLOBAL_API_KEY && hasGlobalKeyCredentials -> AuthType.GLOBAL_API_KEY
+                hasTokenCredentials -> AuthType.TOKEN
+                hasGlobalKeyCredentials -> AuthType.GLOBAL_API_KEY
+                else -> {
+                    showToast("请先填写认证凭据")
+                    return@setOnClickListener
+                }
+            }
+            
+            val tempAccount = com.muort.upworker.core.model.Account(
+                id = 0,
+                name = "临时",
+                accountId = "",
+                token = if (authTypeToUse == AuthType.TOKEN) token else "",
+                email = if (authTypeToUse == AuthType.GLOBAL_API_KEY) email else null,
+                globalApiKey = if (authTypeToUse == AuthType.GLOBAL_API_KEY) globalApiKey else null,
+                authType = authTypeToUse.name
+            )
+            
+            viewModel.fetchAccountsFromApi(tempAccount) { accounts ->
+                if (accounts.size == 1) {
+                    // 只有一个账号，自动填充
+                    binding.accountIdEditText.setText(accounts[0].id)
+                    if (binding.nameEditText.text.toString().isBlank()) {
+                        binding.nameEditText.setText(accounts[0].name)
+                    }
+                    showToast("已自动填充 Account ID")
+                } else {
+                    // 多个账号，弹出选择对话框
+                    showAccountSelectionDialog(accounts)
+                }
+            }
+        }
+    }
+    
+    /**
+     * 显示账号选择对话框
+     */
+    private fun showAccountSelectionDialog(accounts: List<com.muort.upworker.core.model.AccountInfo>) {
+        val items = accounts.map { "${it.name} (${it.id})" }.toTypedArray()
+        
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle("选择账号")
+            .setItems(items) { _, which ->
+                val selected = accounts[which]
+                binding.accountIdEditText.setText(selected.id)
+                if (binding.nameEditText.text.toString().isBlank()) {
+                    binding.nameEditText.setText(selected.name)
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    /**
+     * 设置认证类型选择
+     */
+    private fun setupAuthTypeDropdown() {
+        // 设置 RadioGroup 选中监听，只更新 selectedAuthType（不切换显示/隐藏）
+        binding.authTypeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            selectedAuthType = when (checkedId) {
+                com.muort.upworker.R.id.radioGlobalApiKey -> AuthType.GLOBAL_API_KEY
+                else -> AuthType.TOKEN
+            }
+        }
     }
     
     private fun loadAccountIfEditing() {
@@ -52,10 +147,22 @@ class AccountEditFragment : Fragment() {
                     account?.let {
                         binding.nameEditText.setText(it.name)
                         binding.accountIdEditText.setText(it.accountId)
-                        binding.tokenEditText.setText(it.token)
                         binding.r2AccessKeyIdEditText.setText(it.r2AccessKeyId ?: "")
                         binding.r2SecretAccessKeyEditText.setText(it.r2SecretAccessKey ?: "")
                         binding.defaultSwitch.isChecked = it.isDefault
+                        
+                        // 设置认证类型（当前使用的认证方式）
+                        selectedAuthType = it.getAuthTypeEnum()
+                        val radioId = when (selectedAuthType) {
+                            AuthType.TOKEN -> com.muort.upworker.R.id.radioToken
+                            AuthType.GLOBAL_API_KEY -> com.muort.upworker.R.id.radioGlobalApiKey
+                        }
+                        binding.authTypeRadioGroup.check(radioId)
+                        
+                        // 同时填充所有认证凭据（不再互斥）
+                        binding.tokenEditText.setText(it.token)
+                        binding.emailEditText.setText(it.email ?: "")
+                        binding.globalApiKeyEditText.setText(it.globalApiKey ?: "")
                         
                         // Load zones for this account
                         viewModel.loadZonesForAccount(it.id)
@@ -70,9 +177,17 @@ class AccountEditFragment : Fragment() {
             val name = binding.nameEditText.text.toString().trim()
             val accountId = binding.accountIdEditText.text.toString().trim()
             val token = binding.tokenEditText.text.toString().trim()
+            val email = binding.emailEditText.text.toString().trim()
+            val globalApiKey = binding.globalApiKeyEditText.text.toString().trim()
             
-            if (accountId.isEmpty() || token.isEmpty()) {
-                showToast("请先填写 Account ID 和 API Token")
+            // 根据认证类型验证凭据
+            val hasCredentials = when (selectedAuthType) {
+                AuthType.TOKEN -> token.isNotEmpty()
+                AuthType.GLOBAL_API_KEY -> email.isNotEmpty() && globalApiKey.isNotEmpty()
+            }
+            
+            if (accountId.isEmpty() || !hasCredentials) {
+                showToast("请先填写 Account ID 和当前选中的认证凭据")
                 return@setOnClickListener
             }
             
@@ -81,7 +196,10 @@ class AccountEditFragment : Fragment() {
                 id = if (args.accountId == -1L) 0 else args.accountId,
                 name = name.ifEmpty { "临时" },
                 accountId = accountId,
-                token = token
+                token = token.ifEmpty { "" },
+                email = email.ifEmpty { null },
+                globalApiKey = globalApiKey.ifEmpty { null },
+                authType = selectedAuthType.name
             )
             
             viewModel.fetchZonesFromApi(tempAccount)
@@ -102,6 +220,8 @@ class AccountEditFragment : Fragment() {
             val name = binding.nameEditText.text.toString().trim()
             val accountId = binding.accountIdEditText.text.toString().trim()
             val token = binding.tokenEditText.text.toString().trim()
+            val email = binding.emailEditText.text.toString().trim()
+            val globalApiKey = binding.globalApiKeyEditText.text.toString().trim()
             val r2AccessKeyId = binding.r2AccessKeyIdEditText.text.toString().trim()
             val r2SecretAccessKey = binding.r2SecretAccessKeyEditText.text.toString().trim()
             val isDefault = binding.defaultSwitch.isChecked
@@ -121,9 +241,24 @@ class AccountEditFragment : Fragment() {
                 return@setOnClickListener
             }
             
-            if (token.isEmpty()) {
-                showToast("请输入 API Token")
-                return@setOnClickListener
+            // 根据认证类型验证凭据
+            when (selectedAuthType) {
+                AuthType.TOKEN -> {
+                    if (token.isEmpty()) {
+                        showToast("请输入 API Token")
+                        return@setOnClickListener
+                    }
+                }
+                AuthType.GLOBAL_API_KEY -> {
+                    if (email.isEmpty()) {
+                        showToast("请输入 Cloudflare 邮箱")
+                        return@setOnClickListener
+                    }
+                    if (globalApiKey.isEmpty()) {
+                        showToast("请输入 Global API Key")
+                        return@setOnClickListener
+                    }
+                }
             }
             
             if (args.accountId == -1L) {
@@ -131,11 +266,14 @@ class AccountEditFragment : Fragment() {
                 viewModel.addAccount(
                     name, 
                     accountId, 
-                    token, 
+                    token.ifEmpty { "" },
                     selectedZoneId,
                     isDefault,
                     r2AccessKeyId.ifEmpty { null },
-                    r2SecretAccessKey.ifEmpty { null }
+                    r2SecretAccessKey.ifEmpty { null },
+                    email.ifEmpty { null },
+                    globalApiKey.ifEmpty { null },
+                    selectedAuthType.name
                 )
             } else {
                 // Update existing account
@@ -147,11 +285,14 @@ class AccountEditFragment : Fragment() {
                             account.copy(
                                 name = name,
                                 accountId = accountId,
-                                token = token,
+                                token = token.ifEmpty { "" },
                                 zoneId = selectedZoneId,
                                 isDefault = isDefault,
                                 r2AccessKeyId = r2AccessKeyId.ifEmpty { null },
-                                r2SecretAccessKey = r2SecretAccessKey.ifEmpty { null }
+                                r2SecretAccessKey = r2SecretAccessKey.ifEmpty { null },
+                                email = email.ifEmpty { null },
+                                globalApiKey = globalApiKey.ifEmpty { null },
+                                authType = selectedAuthType.name
                             )
                         )
                     }
