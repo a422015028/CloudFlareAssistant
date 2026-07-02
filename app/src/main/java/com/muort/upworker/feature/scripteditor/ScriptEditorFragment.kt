@@ -456,21 +456,42 @@ class ScriptEditorFragment : Fragment() {
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle("版本详情")
             .setMessage("时间: $date\n类型: $type$desc")
-            .setPositiveButton("恢复此版本") { _, _ ->
+            .setPositiveButton("恢复到编辑器") { _, _ ->
                 setEditorContent(version.content)
                 hasUnsavedChanges = true
                 Toast.makeText(requireContext(), "已恢复到此版本", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("取消", null)
         
-        // 如果是Cloudflare版本，添加删除按钮
+        dialog.setNeutralButton("回滚并上传") { _, _ ->
+            showRollbackConfirmDialog(version)
+        }
+        
         if (version.description == "从Cloudflare加载") {
-            dialog.setNeutralButton("删除") { _, _ ->
+            dialog.setNegativeButton("删除") { _, _ ->
                 showDeleteVersionConfirmDialog(version)
             }
         }
         
         dialog.show()
+    }
+    
+    private fun showRollbackConfirmDialog(version: ScriptVersion) {
+        val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(Date(version.timestamp))
+        val type = when {
+            version.description == "从Cloudflare加载" -> "同步"
+            version.isAutoSave -> "自动保存"
+            else -> "手动保存"
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("确认回滚")
+            .setMessage("确定要回滚到此版本并上传到Cloudflare吗？\n\n时间: $date\n类型: $type\n\n此操作将替换当前部署的脚本。")
+            .setPositiveButton("回滚") { _, _ ->
+                viewModel.rollbackScript(args.accountEmail, args.scriptName, version)
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
     
     private fun showUnsavedChangesDialog() {

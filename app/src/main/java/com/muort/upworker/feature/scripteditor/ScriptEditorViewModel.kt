@@ -264,4 +264,87 @@ class ScriptEditorViewModel @Inject constructor(
             }
         }
     }
+    
+    fun rollbackScript(accountEmail: String, scriptName: String, version: ScriptVersion) {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Uploading
+            _isLoading.value = true
+            
+            try {
+                val account = accountDao.getAllAccountsSync().firstOrNull { it.accountId == accountEmail }
+                
+                if (account == null) {
+                    _error.value = "未找到账号"
+                    _uploadState.value = UploadState.Error("未找到账号")
+                    return@launch
+                }
+                
+                Timber.d("Rolling back script to version ${version.id}, content length: ${version.content.length}")
+                
+                val tempDir = java.io.File(System.getProperty("java.io.tmpdir") ?: System.getenv("TEMP") ?: "/tmp")
+                val tempFile = java.io.File(tempDir, "$scriptName.js")
+                
+                try {
+                    when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
+                        is Resource.Success -> {
+                            val originalBindings = settings.data.bindings
+                            
+                            tempFile.writeText(version.content, Charsets.UTF_8)
+                            
+                            val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
+                            
+                            val metadata = com.muort.upworker.core.model.WorkerMetadata(
+                                mainModule = tempFile.name,
+                                compatibilityDate = "2024-12-01",
+                                bindings = cleanedBindings
+                            )
+                            
+                            when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
+                                is Resource.Success -> {
+                                    _uploadState.value = UploadState.Success
+                                    _uploadSuccess.value = true
+                                    _scriptContent.value = version.content
+                                    
+                                    saveVersion(
+                                        accountEmail = accountEmail,
+                                        scriptName = scriptName,
+                                        content = version.content,
+                                        isAutoSave = false,
+                                        description = "回滚到版本 ${version.id}"
+                                    )
+                                    Timber.d("Script rolled back successfully")
+                                }
+                                is Resource.Error -> {
+                                    _uploadState.value = UploadState.Error(result.message)
+                                    _error.value = "回滚失败: ${result.message}"
+                                    Timber.e("Failed to rollback script: ${result.message}")
+                                }
+                                is Resource.Loading -> {
+                                    _uploadState.value = UploadState.Uploading
+                                }
+                            }
+                        }
+                        is Resource.Error -> {
+                            _uploadState.value = UploadState.Error(settings.message)
+                            _error.value = "获取原有绑定失败: ${settings.message}"
+                        }
+                        is Resource.Loading -> {
+                            _uploadState.value = UploadState.Uploading
+                        }
+                    }
+                } finally {
+                    if (tempFile.exists()) {
+                        tempFile.delete()
+                    }
+                }
+                
+            } catch (e: Exception) {
+                Timber.e(e, "Error rolling back script")
+                _error.value = "回滚失败: ${e.message}"
+                _uploadState.value = UploadState.Error(e.message ?: "未知错误")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 }
