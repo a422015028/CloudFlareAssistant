@@ -1,403 +1,553 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
-    <title>Script Editor</title>
-    
-    <!-- CodeMirror CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Cloudflare Workers Editor</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background-color: #1e1e1e; }
+        body.light-theme { background-color: #ffffff; }
+        #editor-container { width: 100%; height: 100%; }
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #1e1e1e; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 100;
+            transition: background-color 0.3s ease;
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            overflow: hidden;
-            background: var(--bg-color, #1e1e1e);
-            color: var(--text-color, #ffffff);
+        body.light-theme .loading-overlay { background-color: #ffffff; }
+        .loading-spinner {
+            width: 40px; height: 40px; border: 4px solid #333; border-top-color: #007acc;
+            border-radius: 50%; animation: spin 1s linear infinite;
         }
-        
-        #editor-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-        
-        .CodeMirror {
-            height: 100% !important;
-            font-size: 12px;
-            line-height: 1.5;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-        }
-        
-        .CodeMirror-lint-tooltip {
-            z-index: 10000;
-            background-color: var(--tooltip-bg, #2d2d2d);
-            color: var(--text-color, #ffffff);
-            border: 1px solid var(--border-color, #555);
-            border-radius: 4px;
-            padding: 6px 8px;
-            max-width: 400px;
-        }
-        
-        .CodeMirror-lint-mark-error {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='3'%3E%3Cpath d='M0 3L3 0 6 3z' fill='%23f44336'/%3E%3C/svg%3E");
-        }
-        
-        .CodeMirror-lint-mark-warning {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='3'%3E%3Cpath d='M0 3L3 0 6 3z' fill='%23ff9800'/%3E%3C/svg%3E");
-        }
-        
-        /* Search highlight styles */
-        .search-highlight {
-            background-color: rgba(255, 235, 59, 0.3);
-            border-bottom: 2px solid #FFC107;
-        }
-        
-        .search-highlight-active {
-            background-color: rgba(255, 152, 0, 0.5);
-            border-bottom: 2px solid #FF9800;
-        }
-
-        /* Disable unnecessary animations for performance */
-        .CodeMirror-scroll {
-            cursor: text;
-        }
+        body.light-theme .loading-spinner { border-color: #ccc; border-top-color: #007acc; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: #888; margin-top: 16px; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        body.light-theme .loading-text { color: #555; }
+        .error-message { color: #f44336; margin-top: 16px; font-size: 14px; text-align: center; padding: 0 20px; }
+        .search-highlight-inline { background-color: #ffff00; color: #000; }
+        .search-highlight-glyph { background-color: #ffff00; }
     </style>
 </head>
 <body>
+    <div id="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载编辑器...</div>
+    </div>
     <div id="editor-container"></div>
-    
-    <!-- CodeMirror JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-    
-    <!-- CodeMirror Addons -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/brace-fold.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/comment-fold.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/search.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/searchcursor.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.js"></script>
-    
+
     <script>
-        let editor;
-        let currentTheme = 'material-darker';
-        let lastContent = '';
-        let searchCursor = null;
-        let currentSearchQuery = '';
-        let searchMatches = [];
-        let currentMatchIndex = -1;
-        let contentChangeDebounceTimer = null;
-        const DEBOUNCE_DELAY = 500;
+        window._editorTheme = window._editorTheme || 'vs-dark';
+        window._currentContent = '';
         
-        // Initialize CodeMirror
-        function initEditor() {
-            editor = CodeMirror(document.getElementById('editor-container'), {
-                mode: 'javascript',
-                theme: currentTheme,
-                lineNumbers: true,
-                lineWrapping: true,
-                autoCloseBrackets: true,
-                matchBrackets: true,
-                indentUnit: 2,
-                tabSize: 2,
-                indentWithTabs: false,
-                styleActiveLine: true,
-                foldGutter: true,
-                gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
-                cursorBlinkRate: 530,
+        var require = {
+            paths: {
+                'vs': 'monaco/min/vs'
+            },
+            baseUrl: 'file:///android_asset'
+        };
+        
+        window.MonacoEnvironment = {
+            getWorkerUrl: function(moduleId, label) {
+                var basePath = 'file:///android_asset/monaco/min/vs';
+                if (label === 'json') {
+                    return basePath + '/language/json/jsonWorker.js';
+                }
+                if (label === 'css' || label === 'scss' || label === 'less') {
+                    return basePath + '/language/css/cssWorker.js';
+                }
+                if (label === 'html' || label === 'handlebars' || label === 'razor') {
+                    return basePath + '/language/html/htmlWorker.js';
+                }
+                if (label === 'typescript' || label === 'javascript') {
+                    return basePath + '/language/typescript/tsWorker.js';
+                }
+                return basePath + '/base/worker/workerMain.js';
+            }
+        };
+    </script>
+    <script src="monaco/min/vs/loader.js"></script>
+    <script src="monaco/min/vs/editor/editor.main.js"></script>
+
+    <script>
+        var editor = null;
+        var contentChangeDebounceTimer = null;
+        var searchModel = null;
+        var currentSearchIndex = -1;
+        var isEditorReady = false;
+        var decorationIds = [];
+
+        var DEFAULT_WORKERS_TYPES = `interface Env {
+    KV?: KVNamespace;
+    D1?: D1Database;
+    R2?: R2Bucket;
+    DurableObject?: DurableObjectNamespace;
+    AnalyticsEngine?: AnalyticsEngineDataset;
+    Queue?: Queue;
+    Vectorize?: VectorizeIndex;
+    Email?: EmailAdapter;
+    Hyperdrive?: HyperdriveDatabase;
+}
+
+interface KVNamespace {
+    get(key: string, type?: 'text'): Promise<string | null>;
+    get(key: string, type: 'json'): Promise<any | null>;
+    get(key: string, type: 'arrayBuffer'): Promise<ArrayBuffer | null>;
+    get(key: string, type: 'stream'): Promise<ReadableStream | null>;
+    put(key: string, value: string | ArrayBuffer | ReadableStream, options?: { expiration?: number; expirationTtl?: number }): Promise<void>;
+    delete(key: string): Promise<void>;
+    list(options?: { prefix?: string; limit?: number; cursor?: string }): Promise<{ keys: Array<{ name: string; expiration?: number }>; cursor?: string; list_complete: boolean }>;
+}
+
+interface D1Database {
+    prepare(query: string): D1PreparedStatement;
+    batch(statements: D1PreparedStatement[]): Promise<D1Result[]>;
+    dump(): Promise<ArrayBuffer>;
+}
+
+interface D1PreparedStatement {
+    bind(...args: any[]): D1PreparedStatement;
+    all(): Promise<D1Result>;
+    run(): Promise<D1Result>;
+    first<T = Record<string, any>>(): Promise<T | null>;
+    raw<T = any[]>(): Promise<T[]>;
+    iterate<T = Record<string, any>>(): AsyncIterableIterator<T>;
+}
+
+interface D1Result {
+    results: Record<string, any>[];
+    success: boolean;
+    meta: { duration: number; changes: number; last_row_id?: number };
+}
+
+interface R2Bucket {
+    put(key: string, value: ReadableStream | ArrayBuffer | string | Blob, options?: R2PutOptions): Promise<R2Object | null>;
+    get(key: string, options?: R2GetOptions): Promise<R2Object | null>;
+    delete(key: string): Promise<void>;
+    head(key: string): Promise<R2Object | null>;
+    list(options?: R2ListOptions): Promise<R2ListResult>;
+    createMultipartUpload(key: string, options?: R2MultipartOptions): Promise<R2MultipartUpload>;
+}
+
+interface R2Object {
+    key: string; version: string; size: number; etag: string; httpEtag: string;
+    lastModified: Date; httpMetadata: R2HttpMetadata; customMetadata: Record<string, string>;
+    writeHttpMetadata(metadata: R2HttpMetadata): R2Object;
+    body: ReadableStream | null; bodyUsed: boolean;
+}
+
+interface R2HttpMetadata {
+    contentType?: string; contentLanguage?: string; contentDisposition?: string;
+    contentEncoding?: string; contentRange?: string; cacheControl?: string; expires?: Date;
+}
+
+interface R2PutOptions { httpMetadata?: R2HttpMetadata; customMetadata?: Record<string, string>; md5?: ArrayBuffer; }
+
+interface R2GetOptions { range?: R2Range; onlyIf?: R2Conditional; }
+
+interface R2Range { offset?: number; length?: number; }
+
+interface R2Conditional { etagMatches?: string; etagDoesNotMatch?: string; uploadedBefore?: Date; uploadedAfter?: Date; }
+
+interface R2ListOptions { prefix?: string; delimiter?: string; cursor?: string; limit?: number; }
+
+interface R2ListResult { objects: R2Object[]; truncated: boolean; cursor?: string; delimiter?: string; prefix?: string; }
+
+interface R2MultipartUpload {
+    key: string; uploadId: string;
+    abort(): Promise<void>;
+    uploadPart(partNumber: number, value: ReadableStream | ArrayBuffer | string | Blob): Promise<R2UploadedPart>;
+    complete(parts: R2UploadedPart[]): Promise<R2Object>;
+}
+
+interface R2UploadedPart { partNumber: number; etag: string; }
+
+interface DurableObjectNamespace {
+    idFromName(name: string): DurableObjectId;
+    idFromString(id: string): DurableObjectId;
+    newUniqueId(): Promise<DurableObjectId>;
+    get(id: DurableObjectId): DurableObjectStub;
+}
+
+interface DurableObjectId { toString(): string; equals(other: DurableObjectId): boolean; }
+
+interface DurableObjectStub { fetch(request: Request | string, init?: RequestInit): Promise<Response>; }
+
+interface AnalyticsEngineDataset {
+    writeDataPoint(dataPoint: Record<string, any>): Promise<void>;
+    writeDataPoints(dataPoints: Record<string, any>[]): Promise<void>;
+}
+
+interface Queue { send(body: string | ArrayBuffer | ReadableStream | FormData | URLSearchParams, options?: { delay?: number }): Promise<void>; }
+
+interface VectorizeIndex {
+    query(query: string, options?: { topK?: number; returnVectors?: boolean }): Promise<VectorizeQueryResult>;
+}
+
+interface VectorizeQueryResult { matches: VectorizeMatch[]; }
+
+interface VectorizeMatch { id: string; score: number; values?: number[]; metadata?: Record<string, any>; }
+
+interface EmailAdapter { send(message: EmailMessage): Promise<EmailSendResult>; }
+
+interface EmailMessage { to: string | string[]; from: string; subject: string; text?: string; html?: string; headers?: Record<string, string>; }
+
+interface EmailSendResult { success: boolean; message?: string; }
+
+interface HyperdriveDatabase { prepare(query: string): HyperdrivePreparedStatement; }
+
+interface HyperdrivePreparedStatement {
+    bind(...args: any[]): HyperdrivePreparedStatement;
+    all(): Promise<{ results: Record<string, any>[]; meta: Record<string, any> }>;
+    run(): Promise<{ meta: Record<string, any> }>;
+    first<T = Record<string, any>>(): Promise<T | null>;
+}
+
+type ExportedHandler = {
+    fetch: (request: Request, env: Env, ctx: ExecutionContext) => Promise<Response>;
+    scheduled?: (event: ScheduledEvent, env: Env, ctx: ExecutionContext) => Promise<void>;
+    queue?: (batch: MessageBatch, env: Env, ctx: ExecutionContext) => Promise<void>;
+    durableObject?: DurableObjectConstructor;
+};
+
+interface ExecutionContext { waitUntil(promise: Promise<any>): void; passThroughOnException(): void; }
+
+interface ScheduledEvent { scheduledTime: number; cron: string | null; }
+
+interface MessageBatch { messages: Message[]; }
+
+interface Message { body: string; timestamp: number; id: string; }
+
+interface DurableObjectConstructor { new(state: DurableObjectState, env: Env): DurableObject; }
+
+interface DurableObjectState {
+    id: DurableObjectId; storage: DurableObjectStorage;
+    blockConcurrencyWhile<T>(fn: () => Promise<T>): Promise<T>;
+}
+
+interface DurableObjectStorage {
+    put(key: string, value: any, options?: { expiration?: number }): Promise<void>;
+    get(key: string): Promise<any>;
+    delete(key: string): Promise<void>;
+    list(options?: { prefix?: string }): Promise<Map<string, any>>;
+}
+
+declare global { const ENV: Env; }
+
+export type { Env, ExportedHandler, ExecutionContext };
+`;
+
+        function loadWorkersTypes(callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'file:///android_asset/monaco/workers-types.d.ts', true);
+            xhr.onload = function() {
+                if (xhr.status === 200 || xhr.status === 0) {
+                    callback(xhr.responseText);
+                } else {
+                    callback(DEFAULT_WORKERS_TYPES);
+                }
+            };
+            xhr.onerror = function() { callback(DEFAULT_WORKERS_TYPES); };
+            xhr.send();
+        }
+
+        require(['vs/editor/editor.main'], function() {
+            loadWorkersTypes(function(typesContent) {
+                initEditor(typesContent);
+            });
+        }, function(err) {
+            document.getElementById('loading').innerHTML = 
+                '<div class="error-message">加载编辑器失败，请检查网络连接或重新安装应用。</div>';
+            console.error('Failed to load Monaco Editor:', err);
+        });
+
+        function initEditor(typesContent) {
+            monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+                target: monaco.languages.typescript.ScriptTarget.ESNext,
+                lib: ['ESNext'],
+                allowNonTsExtensions: true,
+                checkJs: true,
+                strict: false,
+                moduleResolution: monaco.languages.typescript.ModuleResolutionKind.Bundler
+            });
+
+            monaco.languages.typescript.javascriptDefaults.addExtraLib(typesContent, 'file:///android_asset/monaco/workers-types.d.ts');
+
+            var isDark = window._editorTheme === 'vs-dark';
+            
+            if (isDark) {
+                document.body.classList.remove('light-theme');
+            } else {
+                document.body.classList.add('light-theme');
+            }
+
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: window._currentContent || '',
+                language: 'javascript',
+                theme: window._editorTheme,
+                fontSize: 14,
+                fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+                lineNumbers: 'on',
+                minimap: { enabled: false },
+                folding: true,
+                wordWrap: 'on',
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                smoothScrolling: true,
+                cursorBlinking: 'smooth',
                 cursorScrollMargin: 3,
-                viewportMargin: Infinity,
-                extraKeys: {
-                    "Ctrl-F": function() { notifyAndroidSearch(); },
-                    "Cmd-F": function() { notifyAndroidSearch(); },
-                    "Ctrl-S": function() { notifyAndroidSave(); },
-                    "Cmd-S": function() { notifyAndroidSave(); }
-                }
+                cursorSurroundingLines: 3,
+                find: { seedSearchStringFromSelection: true },
+                suggest: { enabled: true, snippetsPreventQuickSuggestions: false },
+                tabSize: 4,
+                insertSpaces: true,
+                renderLineHighlight: 'line',
+                scrollbar: {
+                    verticalScrollbarSize: 8,
+                    horizontalScrollbarSize: 8,
+                    verticalHasArrows: false,
+                    horizontalHasArrows: false
+                },
+                padding: { top: 8, bottom: 8 },
+                contextmenu: false
             });
-            
-            editor.on('change', function() {
-                const currentContent = editor.getValue();
-                if (currentContent !== lastContent) {
-                    lastContent = currentContent;
-                    debounceContentChanged();
-                }
+
+            editor.onDidChangeModelContent(function() {
+                window._currentContent = editor.getValue();
+                debounceContentChanged();
             });
-            
+
+            window.addEventListener('resize', function() {
+                if (editor) editor.layout();
+            });
+
+            document.getElementById('loading').style.display = 'none';
+            isEditorReady = true;
+
             if (window.AndroidBridge) {
-                window.AndroidBridge.onEditorReady();
+                try { window.AndroidBridge.onEditorReady(); } catch (e) { console.log('AndroidBridge not ready'); }
             }
         }
-        
+
+        const DEBOUNCE_DELAY = 500;
+
         function debounceContentChanged() {
-            if (contentChangeDebounceTimer) {
-                clearTimeout(contentChangeDebounceTimer);
-            }
+            if (contentChangeDebounceTimer) clearTimeout(contentChangeDebounceTimer);
             contentChangeDebounceTimer = setTimeout(function() {
-                notifyAndroidContentChanged();
+                if (window.AndroidBridge) {
+                    try { window.AndroidBridge.onContentChanged(); } catch (e) {}
+                }
             }, DEBOUNCE_DELAY);
         }
-        
-        // Set content from Android
-        function setContent(content) {
-            if (editor) {
-                lastContent = content;
-                editor.setValue(content);
-                editor.clearHistory();
-            }
-        }
-        
-        // Get current content
-        function getContent() {
-            return editor ? editor.getValue() : '';
-        }
-        
-        // Force refresh editor display (fixes white screen issue)
-        function refreshEditor() {
-            if (editor) {
-                editor.refresh();
-                editor.focus();
-            }
-        }
-        
-        // Set theme
-        function setTheme(isDark) {
-            currentTheme = isDark ? 'material-darker' : 'eclipse';
-            if (editor) {
-                editor.setOption('theme', currentTheme);
-            }
-            
-            // Update CSS variables
-            if (isDark) {
-                document.documentElement.style.setProperty('--bg-color', '#1e1e1e');
-                document.documentElement.style.setProperty('--text-color', '#ffffff');
-                document.documentElement.style.setProperty('--tooltip-bg', '#2d2d2d');
-                document.documentElement.style.setProperty('--border-color', '#555');
-            } else {
-                document.documentElement.style.setProperty('--bg-color', '#ffffff');
-                document.documentElement.style.setProperty('--text-color', '#000000');
-                document.documentElement.style.setProperty('--tooltip-bg', '#f0f0f0');
-                document.documentElement.style.setProperty('--border-color', '#ccc');
-            }
-        }
-        
 
-        
-        // Notify Android of content changes
-        function notifyAndroidContentChanged() {
-            if (window.AndroidBridge) {
-                window.AndroidBridge.onContentChanged();
+        function setContent(code) {
+            if (contentChangeDebounceTimer) clearTimeout(contentChangeDebounceTimer);
+            if (!editor) {
+                window._currentContent = code;
+                return;
+            }
+            editor.setValue(code);
+            window._currentContent = code;
+        }
+
+        function getContent() {
+            return editor ? editor.getValue() : window._currentContent || '';
+        }
+
+        function setTheme(isDark) {
+            window._editorTheme = isDark ? 'vs-dark' : 'vs-light';
+            if (isDark) {
+                document.body.classList.remove('light-theme');
+            } else {
+                document.body.classList.add('light-theme');
+            }
+            if (editor) {
+                editor.setTheme(window._editorTheme);
             }
         }
-        
-        // Notify Android to save
-        function notifyAndroidSave() {
-            if (window.AndroidBridge) {
-                window.AndroidBridge.onSaveRequested(getContent());
-            }
-            return false; // Prevent default
-        }
-        
-        // Copy content to clipboard
-        function copyToClipboard() {
-            const content = getContent();
-            if (window.AndroidBridge) {
-                window.AndroidBridge.onCopyRequested(content);
-            }
-        }
-        
-        // Get lint errors
-        function getLintErrors() {
-            if (!editor) return [];
-            
-            const errors = [];
-            const markers = editor.state.lint.marked;
-            if (markers) {
-                markers.forEach(function(mark) {
-                    const pos = mark.find();
-                    if (pos) {
-                        errors.push({
-                            line: pos.from.line + 1,
-                            column: pos.from.ch,
-                            message: mark.__annotation.message,
-                            severity: mark.__annotation.severity
-                        });
-                    }
-                });
-            }
-            return errors;
-        }
-        
-        // Focus editor
+
         function focusEditor() {
-            if (editor) {
-                editor.focus();
-            }
+            if (editor) editor.focus();
         }
-        
-        // Select all content
+
         function selectAll() {
-            if (editor) {
-                editor.execCommand('selectAll');
-                editor.focus();
-            }
+            if (!editor) return;
+            var model = editor.getModel();
+            if (!model) return;
+            var firstLine = 1;
+            var lastLine = model.getLineCount();
+            var firstColumn = 1;
+            var lastColumn = model.getLineLength(lastLine) + 1;
+            editor.setSelection(new monaco.Selection(firstLine, firstColumn, lastLine, lastColumn));
+            editor.revealRangeInCenter(new monaco.Range(firstLine, firstColumn, lastLine, lastColumn));
+            editor.focus();
         }
-        
-        // Search in editor
-        function notifyAndroidSearch() {
-            if (editor && window.AndroidBridge) {
-                window.AndroidBridge.onShowSearch();
-            }
-        }
-        
-        // Custom search function
+
         function customSearch(query, caseSensitive) {
             if (!editor || !query) {
                 clearSearchHighlights();
                 return 0;
             }
+            var matches = [];
+            var model = editor.getModel();
+            var text = model.getValue();
+            var regexFlags = caseSensitive ? 'g' : 'gi';
+            var escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            var regex = new RegExp(escapedQuery, regexFlags);
+            var match;
             
-            currentSearchQuery = query;
-            clearSearchHighlights();
-            searchMatches = [];
-            
-            const searchOptions = {
-                caseFold: !caseSensitive
-            };
-            
-            const cursor = editor.getSearchCursor(query, null, searchOptions);
-            let matchCount = 0;
-            
-            while (cursor.findNext()) {
-                const from = cursor.from();
-                const to = cursor.to();
-                searchMatches.push({ from: from, to: to });
-                
-                // Highlight match
-                editor.markText(from, to, {
-                    className: 'search-highlight',
-                    clearOnEnter: false
-                });
-                matchCount++;
-            }
-            
-            if (matchCount > 0) {
-                currentMatchIndex = 0;
-                jumpToMatch(0);
-            }
-            
-            return matchCount;
-        }
-        
-        // Jump to specific match
-        function jumpToMatch(index) {
-            if (searchMatches.length === 0 || index < 0 || index >= searchMatches.length) {
-                return;
-            }
-            
-            currentMatchIndex = index;
-            const match = searchMatches[index];
-            
-            // Clear previous active highlight
-            const marks = editor.getAllMarks();
-            marks.forEach(mark => {
-                if (mark.className === 'search-highlight-active') {
-                    mark.clear();
+            while ((match = regex.exec(text)) !== null) {
+                if (match[0].length > 0) {
+                    matches.push({
+                        start: model.getPositionAt(match.index),
+                        end: model.getPositionAt(match.index + match[0].length)
+                    });
                 }
-            });
+                if (match[0].length === 0) {
+                    regex.lastIndex++;
+                }
+            }
             
-            // Highlight current match
-            editor.markText(match.from, match.to, {
-                className: 'search-highlight-active',
-                clearOnEnter: false
-            });
+            currentSearchIndex = 0;
+            highlightMatches(matches);
             
-            // Scroll to match and center it
-            editor.scrollIntoView(match.from, 100);
-            editor.setCursor(match.from);
-            editor.focus();
+            if (matches.length > 0) {
+                editor.revealPositionInCenter(matches[0].start);
+                editor.setSelection(new monaco.Selection(
+                    matches[0].start.lineNumber, matches[0].start.column,
+                    matches[0].end.lineNumber, matches[0].end.column
+                ));
+            }
+            searchModel = { matches: matches, query: query };
+            return matches.length;
         }
-        
-        // Find next match
+
+        function highlightMatches(matches) {
+            if (!editor || !matches || matches.length === 0) return;
+            
+            editor.deltaDecorations(decorationIds, []);
+            decorationIds = [];
+            
+            var decorations = matches.map(function(m) {
+                return {
+                    range: new monaco.Range(
+                        m.start.lineNumber, m.start.column,
+                        m.end.lineNumber, m.end.column
+                    ),
+                    options: {
+                        isWholeLine: false,
+                        inlineClassName: 'search-highlight-inline',
+                        glyphMarginClassName: 'search-highlight-glyph'
+                    }
+                };
+            });
+            
+            decorationIds = editor.deltaDecorations([], decorations);
+        }
+
         function findNext() {
-            if (searchMatches.length === 0) return;
-            currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
-            jumpToMatch(currentMatchIndex);
+            if (!searchModel || searchModel.matches.length === 0) return;
+            currentSearchIndex = (currentSearchIndex + 1) % searchModel.matches.length;
+            var match = searchModel.matches[currentSearchIndex];
+            editor.revealPositionInCenter(match.start);
+            editor.setSelection(new monaco.Selection(
+                match.start.lineNumber, match.start.column,
+                match.end.lineNumber, match.end.column
+            ));
         }
-        
-        // Find previous match
+
         function findPrev() {
-            if (searchMatches.length === 0) return;
-            currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
-            jumpToMatch(currentMatchIndex);
+            if (!searchModel || searchModel.matches.length === 0) return;
+            currentSearchIndex = (currentSearchIndex - 1 + searchModel.matches.length) % searchModel.matches.length;
+            var match = searchModel.matches[currentSearchIndex];
+            editor.revealPositionInCenter(match.start);
+            editor.setSelection(new monaco.Selection(
+                match.start.lineNumber, match.start.column,
+                match.end.lineNumber, match.end.column
+            ));
         }
-        
-        // Clear search highlights
+
         function clearSearchHighlights() {
             if (!editor) return;
-            
-            const marks = editor.getAllMarks();
-            marks.forEach(mark => {
-                if (mark.className === 'search-highlight' || mark.className === 'search-highlight-active') {
-                    mark.clear();
-                }
-            });
-            
-            searchMatches = [];
-            currentMatchIndex = -1;
-            currentSearchQuery = '';
+            editor.deltaDecorations(decorationIds, []);
+            decorationIds = [];
+            searchModel = null;
+            currentSearchIndex = -1;
         }
-        
-        // Zoom functionality
-        let currentFontSize = 14;
-        const minFontSize = 10;
-        const maxFontSize = 30;
-        
+
         function zoomIn() {
-            if (currentFontSize < maxFontSize) {
-                currentFontSize += 2;
-                updateFontSize();
-            }
+            if (!editor) return;
+            var fs = editor.getOption(monaco.editor.EditorOption.fontSize);
+            editor.updateOptions({ fontSize: Math.min(fs + 2, 32) });
         }
-        
+
         function zoomOut() {
-            if (currentFontSize > minFontSize) {
-                currentFontSize -= 2;
-                updateFontSize();
-            }
+            if (!editor) return;
+            var fs = editor.getOption(monaco.editor.EditorOption.fontSize);
+            editor.updateOptions({ fontSize: Math.max(fs - 2, 10) });
         }
-        
+
         function resetZoom() {
-            currentFontSize = 14;
-            updateFontSize();
+            if (!editor) return;
+            editor.updateOptions({ fontSize: 14 });
         }
-        
-        function updateFontSize() {
-            if (editor) {
-                const wrapper = editor.getWrapperElement();
-                wrapper.style.fontSize = currentFontSize + 'px';
-                editor.refresh();
+
+        function refreshEditor() {
+            if (!editor) return;
+            try {
+                editor.layout();
+                editor.focus();
+                var pos = editor.getPosition();
+                if (pos) editor.revealLineInCenter(pos.lineNumber);
+            } catch (e) {
+                console.error('refreshEditor failed:', e);
             }
         }
-        
-        // Initialize on load
-        window.addEventListener('load', initEditor);
+
+        function destroyEditor() {
+            if (editor) {
+                editor.dispose();
+                editor = null;
+            }
+        }
+
+        function getLintErrors() {
+            if (!editor) return [];
+            var model = editor.getModel();
+            var diagnostics = monaco.editor.getModelMarkers({ resource: model.uri });
+            return diagnostics.map(function(d) {
+                return { message: d.message, severity: d.severity, line: d.startLineNumber, column: d.startColumn };
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            var isCtrl = e.ctrlKey || e.metaKey;
+            
+            if (isCtrl && e.key === 's') {
+                e.preventDefault();
+                if (window.AndroidBridge) {
+                    try { window.AndroidBridge.onSaveRequested(getContent()); } catch (ex) {}
+                }
+            }
+            
+            if (isCtrl && e.key === 'f') {
+                e.preventDefault();
+                if (window.AndroidBridge) {
+                    try { window.AndroidBridge.onShowSearch(); } catch (ex) {}
+                }
+            }
+            
+            if (isCtrl && e.key === 'c' && window.getSelection().toString() === '') {
+                e.preventDefault();
+                if (window.AndroidBridge) {
+                    try { window.AndroidBridge.onCopyRequested(getContent()); } catch (ex) {}
+                }
+            }
+        });
+
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
     </script>
 </body>
 </html>

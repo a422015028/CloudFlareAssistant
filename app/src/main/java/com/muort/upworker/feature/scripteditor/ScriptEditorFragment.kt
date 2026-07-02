@@ -5,9 +5,12 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -90,6 +93,7 @@ class ScriptEditorFragment : Fragment() {
     }
     
     @SuppressLint("SetJavaScriptEnabled")
+    @Suppress("DEPRECATION")
     private fun setupWebView() {
         binding.webView.apply {
             settings.apply {
@@ -101,14 +105,26 @@ class ScriptEditorFragment : Fragment() {
                 builtInZoomControls = true
                 displayZoomControls = false
                 javaScriptCanOpenWindowsAutomatically = false
-                allowFileAccess = false
-                allowContentAccess = false
+                allowFileAccess = true
+                allowContentAccess = true
                 mediaPlaybackRequiresUserGesture = true
                 cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
                 mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                setAllowFileAccessFromFileURLs(true)
+                setAllowUniversalAccessFromFileURLs(true)
+                setSupportMultipleWindows(true)
             }
             
             addJavascriptInterface(JavaScriptBridge(), "AndroidBridge")
+            
+            setOnLongClickListener {
+                false
+            }
+            
+            setOnTouchListener { _, event ->
+                handleTouchEvent(event)
+                false
+            }
             
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
@@ -132,6 +148,15 @@ class ScriptEditorFragment : Fragment() {
                     return true
                 }
             }
+            
+            val isDarkMode = when (resources.configuration.uiMode and 
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) {
+                android.content.res.Configuration.UI_MODE_NIGHT_YES -> true
+                else -> false
+            }
+            
+            val themeScript = "window._editorTheme = '${if (isDarkMode) "vs-dark" else "vs-light"}';"
+            evaluateJavascript(themeScript, null)
             
             loadUrl("file:///android_asset/script_editor.html")
         }
@@ -158,6 +183,12 @@ class ScriptEditorFragment : Fragment() {
         
         binding.btnSearch.setOnClickListener {
             toggleSearchBar()
+        }
+        
+        binding.webViewContainer.setOnClickListener {
+            if (binding.searchBar.visibility == View.VISIBLE) {
+                hideSearchBar()
+            }
         }
         
         binding.btnVersionHistory.setOnClickListener {
@@ -362,6 +393,9 @@ class ScriptEditorFragment : Fragment() {
             description = description
         )
         
+        hasUnsavedChanges = false
+        originalContent = content
+        
         if (!isAutoSave) {
             Toast.makeText(requireContext(), "手动保存成功", Toast.LENGTH_SHORT).show()
         }
@@ -505,9 +539,48 @@ class ScriptEditorFragment : Fragment() {
             .show()
     }
     
+    private var lastTouchY = 0f
+    private var isScrolling = false
+    
+    private fun handleTouchEvent(event: MotionEvent) {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                lastTouchY = event.y
+                isScrolling = false
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val deltaY = Math.abs(event.y - lastTouchY)
+                if (deltaY > 10) {
+                    isScrolling = true
+                    hideKeyboard()
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                if (!isScrolling) {
+                    showKeyboard()
+                }
+            }
+        }
+    }
+    
+    private fun showKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        binding.webView.requestFocus()
+        imm.showSoftInput(binding.webView, InputMethodManager.SHOW_IMPLICIT)
+        executeJavaScript("focusEditor()")
+    }
+    
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.webView.windowToken, 0)
+    }
+    
     override fun onResume() {
         super.onResume()
-        executeJavaScript("refreshEditor()")
+        setEditorTheme()
+        binding.webView.postDelayed({
+            executeJavaScript("refreshEditor()")
+        }, 100)
     }
     
     override fun onDestroyView() {
