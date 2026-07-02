@@ -15,9 +15,6 @@ kotlin {
 kapt {
     arguments {
         arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
-        arg("dagger.hilt.android.internal.projectType", "app")
-        arg("dagger.hilt.internal.useAggregatingRootProcessor", "enabled")
-        // 移除了未被识别的 kapt 参数 dagger.fastInit 和 kapt.kotlin.generated
     }
 }
 
@@ -148,8 +145,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     
     // Hilt Dependency Injection
-    implementation("com.google.dagger:hilt-android:2.48")
-    kapt("com.google.dagger:hilt-compiler:2.48")
+    implementation("com.google.dagger:hilt-android:2.52")
+    kapt("com.google.dagger:hilt-compiler:2.52")
     
     // Retrofit & Network
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

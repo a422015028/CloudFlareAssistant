@@ -49,7 +49,6 @@ class GatewayListsFragment : Fragment() {
         setupRecyclerView()
         setupClickListeners()
         observeViewModel()
-        loadLists()
     }
 
     private fun setupRecyclerView() {
@@ -114,6 +113,11 @@ class GatewayListsFragment : Fragment() {
         }
 
         viewModel.loadLists(account)
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        loadLists()
     }
 
     private fun showCreateListDialog(existingList: GatewayList? = null) {

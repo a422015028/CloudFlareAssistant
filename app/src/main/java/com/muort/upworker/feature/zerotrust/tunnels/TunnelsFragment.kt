@@ -57,7 +57,6 @@ class TunnelsFragment : Fragment() {
         setupRecyclerView()
         setupClickListeners()
         observeViewModel()
-        loadTunnels()
     }
 
     private fun setupRecyclerView() {
@@ -70,6 +69,9 @@ class TunnelsFragment : Fragment() {
             },
             onConfigClick = { tunnel ->
                 showTunnelConfigDialog(tunnel)
+            },
+            onRunCommandClick = { tunnel ->
+                showRunCommandDialog(tunnel)
             }
         )
         
@@ -115,6 +117,11 @@ class TunnelsFragment : Fragment() {
         accountViewModel.defaultAccount.value?.let { account ->
             viewModel.loadTunnels(account)
         }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        loadTunnels()
     }
 
     private fun showCreateTunnelDialog() {
@@ -234,6 +241,50 @@ class TunnelsFragment : Fragment() {
             deletedAtText.visibility = View.GONE
         }
         
+        // Token section
+        val tokenText = dialogView.findViewById<TextView>(R.id.tunnelTokenText)
+        val hideTokenButton = dialogView.findViewById<android.widget.Button>(R.id.hideTokenButton)
+        val copyCommandButton = dialogView.findViewById<android.widget.Button>(R.id.copyCommandButton)
+        
+        if (tunnel.deletedAt == null) {
+            val account = accountViewModel.defaultAccount.value
+            account?.let { acc ->
+                viewModel.getTunnelToken(acc, tunnel.id) { token ->
+                    if (token != null) {
+                        val fullCommand = "cloudflared service install $token"
+                        var isTokenHidden = true
+                        tokenText.text = "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
+                        hideTokenButton.setText("显示令牌")
+                        
+                        hideTokenButton.setOnClickListener {
+                            isTokenHidden = !isTokenHidden
+                            tokenText.text = if (isTokenHidden) "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else fullCommand
+                            hideTokenButton.setText(if (isTokenHidden) "显示令牌" else "隐藏令牌")
+                        }
+                        
+                        copyCommandButton.setOnClickListener {
+                            val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            val clip = android.content.ClipData.newPlainText("Cloudflared Service Command", fullCommand)
+                            clipboard.setPrimaryClip(clip)
+                            Snackbar.make(binding.root, "命令已复制", Snackbar.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        tokenText.text = "获取令牌失败"
+                        hideTokenButton.visibility = View.GONE
+                        copyCommandButton.visibility = View.GONE
+                    }
+                }
+            } ?: run {
+                tokenText.text = "请先选择账号"
+                hideTokenButton.visibility = View.GONE
+                copyCommandButton.visibility = View.GONE
+            }
+        } else {
+            tokenText.visibility = View.GONE
+            hideTokenButton.visibility = View.GONE
+            copyCommandButton.visibility = View.GONE
+        }
+        
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle("隧道详情")
             .setView(dialogView)
@@ -241,14 +292,14 @@ class TunnelsFragment : Fragment() {
         
         // Add config button for remote config tunnels
         if (tunnel.remoteConfig == true && tunnel.deletedAt == null) {
-            builder.setNeutralButton("配置") { _, _ ->
+            builder.setPositiveButton("配置") { _, _ ->
                 showTunnelConfigDialog(tunnel)
             }
         }
         
         // Add delete button if not deleted
         if (tunnel.deletedAt == null) {
-            builder.setPositiveButton("删除") { _, _ ->
+            builder.setNeutralButton("删除") { _, _ ->
                 confirmDeleteTunnel(tunnel.id, tunnel.name)
             }
         }
@@ -369,6 +420,44 @@ class TunnelsFragment : Fragment() {
             }
             .setNegativeButton("取消", null)
             .show()
+    }
+    
+    private fun showRunCommandDialog(tunnel: CloudflareTunnel) {
+        val account = accountViewModel.defaultAccount.value ?: return
+        
+        viewModel.getTunnelToken(account, tunnel.id) { token ->
+            if (token == null) return@getTunnelToken
+            
+            val dialogView = layoutInflater.inflate(R.layout.dialog_tunnel_run_command, null)
+            
+            val tokenTextView = dialogView.findViewById<TextView>(R.id.tokenTextView)
+            val commandTextView = dialogView.findViewById<TextView>(R.id.commandTextView)
+            val copyCommandButton = dialogView.findViewById<android.widget.Button>(R.id.copyCommandButton)
+            val hideTokenButton = dialogView.findViewById<android.widget.Button>(R.id.hideTokenButton)
+            
+            tokenTextView.text = token
+            commandTextView.text = "cloudflared service install $token"
+            
+            var isTokenHidden = false
+            hideTokenButton.setOnClickListener {
+                isTokenHidden = !isTokenHidden
+                tokenTextView.text = if (isTokenHidden) "●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else token
+                hideTokenButton.setText(if (isTokenHidden) "显示令牌" else "隐藏令牌")
+            }
+            
+            copyCommandButton.setOnClickListener {
+                val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                val clip = android.content.ClipData.newPlainText("Cloudflared Service Command", "cloudflared service install $token")
+                clipboard.setPrimaryClip(clip)
+                Snackbar.make(binding.root, "命令已复制", Snackbar.LENGTH_SHORT).show()
+            }
+            
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("运行命令")
+                .setView(dialogView)
+                .setPositiveButton("关闭", null)
+                .show()
+        }
     }
 
     private fun getStatusLabel(status: String): String {

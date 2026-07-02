@@ -12,14 +12,15 @@ import com.muort.upworker.databinding.ItemTunnelBinding
 class TunnelAdapter(
     private val onDeleteClick: (CloudflareTunnel) -> Unit,
     private val onItemClick: (CloudflareTunnel) -> Unit,
-    private val onConfigClick: (CloudflareTunnel) -> Unit
+    private val onConfigClick: (CloudflareTunnel) -> Unit,
+    private val onRunCommandClick: (CloudflareTunnel) -> Unit
 ) : ListAdapter<CloudflareTunnel, TunnelAdapter.TunnelViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TunnelViewHolder {
         val binding = ItemTunnelBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return TunnelViewHolder(binding, onDeleteClick, onItemClick, onConfigClick)
+        return TunnelViewHolder(binding, onDeleteClick, onItemClick, onConfigClick, onRunCommandClick)
     }
 
     override fun onBindViewHolder(holder: TunnelViewHolder, position: Int) {
@@ -30,7 +31,8 @@ class TunnelAdapter(
         private val binding: ItemTunnelBinding,
         private val onDeleteClick: (CloudflareTunnel) -> Unit,
         private val onItemClick: (CloudflareTunnel) -> Unit,
-        private val onConfigClick: (CloudflareTunnel) -> Unit
+        private val onConfigClick: (CloudflareTunnel) -> Unit,
+        private val onRunCommandClick: (CloudflareTunnel) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(tunnel: CloudflareTunnel) {
@@ -70,6 +72,10 @@ class TunnelAdapter(
             val isRemoteConfig = tunnel.remoteConfig == true
             binding.configButton.visibility = if (isRemoteConfig && !isDeleted) View.VISIBLE else View.GONE
             binding.configButton.setOnClickListener { onConfigClick(tunnel) }
+            
+            // Run command button - only show if not deleted
+            binding.runCommandButton.visibility = if (isDeleted) View.GONE else View.VISIBLE
+            binding.runCommandButton.setOnClickListener { onRunCommandClick(tunnel) }
             
             // Item click for detail
             binding.root.setOnClickListener { onItemClick(tunnel) }

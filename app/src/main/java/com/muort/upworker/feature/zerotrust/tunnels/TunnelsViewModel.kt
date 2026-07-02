@@ -160,6 +160,21 @@ class TunnelsViewModel @Inject constructor(
         }
     }
     
+    fun getTunnelToken(account: Account, tunnelId: String, callback: (String?) -> Unit) {
+        viewModelScope.launch {
+            when (val result = zeroTrustRepository.getTunnelToken(account, tunnelId)) {
+                is Resource.Success -> {
+                    callback(result.data)
+                }
+                is Resource.Error -> {
+                    _error.emit("获取隧道令牌失败: ${result.message}")
+                    callback(null)
+                }
+                is Resource.Loading -> {}
+            }
+        }
+    }
+    
     fun clearSelectedTunnel() {
         _selectedTunnel.value = null
         _tunnelConnections.value = emptyList()

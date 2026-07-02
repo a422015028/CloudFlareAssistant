@@ -445,6 +445,11 @@ data class OriginRequest(
     @SerializedName("proxyType") val proxyType: String? = null
 )
 
+data class TunnelToken(
+    @SerializedName("token") val token: String,
+    @SerializedName("expires_at") val expiresAt: String? = null
+)
+
 // ==================== Zero Trust - Service Tokens ====================
 
 /**

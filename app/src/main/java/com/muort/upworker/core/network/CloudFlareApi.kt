@@ -1249,6 +1249,15 @@ interface CloudFlareApi {
         @Body config: TunnelConfigurationRequest
     ): Response<CloudFlareResponse<TunnelConfiguration>>
     
+    @GET("accounts/{account_id}/cfd_tunnel/{tunnel_id}/token")
+    suspend fun getTunnelToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("tunnel_id") tunnelId: String
+    ): Response<CloudFlareResponse<String>>
+    
     // ==================== Zero Trust - Service Tokens ====================
     
     /**

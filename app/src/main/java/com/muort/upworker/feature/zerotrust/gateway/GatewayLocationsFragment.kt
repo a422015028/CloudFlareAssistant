@@ -48,7 +48,6 @@ class GatewayLocationsFragment : Fragment() {
         setupRecyclerView()
         setupClickListeners()
         observeViewModel()
-        loadLocations()
     }
 
     private fun setupRecyclerView() {
@@ -113,6 +112,11 @@ class GatewayLocationsFragment : Fragment() {
         }
 
         viewModel.loadLocations(account)
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        loadLocations()
     }
 
     private fun showCreateLocationDialog(existingLocation: GatewayLocation? = null) {

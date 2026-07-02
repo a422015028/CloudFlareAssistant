@@ -47,7 +47,6 @@ class DevicesListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         observeViewModel()
-        loadDevices()
     }
 
     private fun setupRecyclerView() {
@@ -96,6 +95,11 @@ class DevicesListFragment : Fragment() {
         accountViewModel.defaultAccount.value?.let { account ->
             viewModel.loadDevices(account)
         }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        loadDevices()
     }
 
     private fun showDeviceDetailDialog(device: Device) {

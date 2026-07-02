@@ -1259,6 +1259,31 @@ class ZeroTrustRepository @Inject constructor(
             }
         }
     
+    /**
+     * Get tunnel token for running cloudflared service
+     */
+    suspend fun getTunnelToken(account: Account, tunnelId: String): Resource<String> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.getTunnelToken(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    tunnelId = tunnelId
+                )
+                if (response.isSuccessful && response.body()?.success == true && response.body()?.result != null) {
+                    val token = response.body()!!.result!!
+                    Timber.d("Got tunnel token for tunnel $tunnelId")
+                    Resource.Success(token)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to get tunnel token"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+    
     // ==================== Service Tokens ====================
     
     /**

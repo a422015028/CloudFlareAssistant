@@ -109,6 +109,18 @@
             app:layout_constraintStart_toEndOf="@id/tunnelIcon"
             app:layout_constraintTop_toBottomOf="@id/connectionDetailsText" />
 
+        <!-- Run Command Button -->
+        <ImageButton
+            android:id="@+id/runCommandButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="运行命令"
+            android:src="@android:drawable/ic_media_play"
+            app:layout_constraintEnd_toStartOf="@id/configButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/colorPrimary" />
+
         <!-- Config Button -->
         <ImageButton
             android:id="@+id/configButton"

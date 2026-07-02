@@ -56,8 +56,10 @@ class AccessFragment : Fragment() {
         setupRecyclerView()
         setupClickListeners()
         observeViewModel()
-        
-        // Load data
+    }
+    
+    override fun onResume() {
+        super.onResume()
         accountViewModel.defaultAccount.value?.let { account ->
             accessViewModel.loadApplications(account)
         }

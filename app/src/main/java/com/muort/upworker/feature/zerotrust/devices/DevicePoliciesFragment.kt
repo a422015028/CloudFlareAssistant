@@ -47,7 +47,6 @@ class DevicePoliciesFragment : Fragment() {
         setupRecyclerView()
         setupClickListeners()
         observeViewModel()
-        loadPolicies()
     }
 
     private fun setupRecyclerView() {
@@ -107,6 +106,11 @@ class DevicePoliciesFragment : Fragment() {
         accountViewModel.defaultAccount.value?.let { account ->
             viewModel.loadPolicies(account)
         }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        loadPolicies()
     }
 
     private fun showPolicyDialog(existingPolicy: DeviceSettingsPolicy?) {

@@ -48,7 +48,6 @@ class GatewayRulesFragment : Fragment() {
         setupRecyclerView()
         setupClickListeners()
         observeViewModel()
-        loadRules()
     }
 
     private fun setupRecyclerView() {
@@ -116,6 +115,11 @@ class GatewayRulesFragment : Fragment() {
         }
 
         viewModel.loadRules(account)
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        loadRules()
     }
 
     private fun showCreateRuleDialog(existingRule: GatewayRule? = null) {

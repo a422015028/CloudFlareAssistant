@@ -168,6 +168,14 @@
             return editor ? editor.getValue() : '';
         }
         
+        // Force refresh editor display (fixes white screen issue)
+        function refreshEditor() {
+            if (editor) {
+                editor.refresh();
+                editor.focus();
+            }
+        }
+        
         // Set theme
         function setTheme(isDark) {
             currentTheme = isDark ? 'material-darker' : 'eclipse';

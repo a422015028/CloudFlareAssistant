@@ -505,6 +505,11 @@ class ScriptEditorFragment : Fragment() {
             .show()
     }
     
+    override fun onResume() {
+        super.onResume()
+        executeJavaScript("refreshEditor()")
+    }
+    
     override fun onDestroyView() {
         binding.webView.apply {
             stopLoading()

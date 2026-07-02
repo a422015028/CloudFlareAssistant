@@ -166,5 +166,71 @@
             android:textColor="@android:color/holo_red_light"
             android:visibility="gone" />
 
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="?android:attr/listDivider" />
+
+        <!-- Run Command Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="运行命令"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="在目标机器上安装cloudflared,并以管理员身份运行下面的命令，隧道即可连接。"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tunnelTokenText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textSize="12sp"
+            android:textColor="?attr/colorPrimary"
+            android:background="?attr/colorSurfaceContainer"
+            android:padding="12dp"
+            android:textIsSelectable="true"
+            android:fontFamily="monospace" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/hideTokenButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="隐藏令牌" />
+
+            <Button
+                android:id="@+id/copyCommandButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="复制命令" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="令牌等同于隧道凭据，请妥善保管，不要公开分享。"
+            android:textSize="12sp"
+            android:textColor="?attr/colorError" />
+
     </LinearLayout>
 </ScrollView>
