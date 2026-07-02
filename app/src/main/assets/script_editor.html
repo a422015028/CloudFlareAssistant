@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
     
@@ -70,6 +69,11 @@
             background-color: rgba(255, 152, 0, 0.5);
             border-bottom: 2px solid #FF9800;
         }
+
+        /* Disable unnecessary animations for performance */
+        .CodeMirror-scroll {
+            cursor: text;
+        }
     </style>
 </head>
 <body>
@@ -90,21 +94,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/search.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/searchcursor.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/javascript-lint.min.js"></script>
-    
-    <!-- JSHint for syntax checking -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js"></script>
     
     <script>
         let editor;
         let currentTheme = 'material-darker';
-        let autoSaveTimer;
         let lastContent = '';
         let searchCursor = null;
         let currentSearchQuery = '';
         let searchMatches = [];
         let currentMatchIndex = -1;
+        let contentChangeDebounceTimer = null;
+        const DEBOUNCE_DELAY = 500;
         
         // Initialize CodeMirror
         function initEditor() {
@@ -120,38 +120,38 @@
                 indentWithTabs: false,
                 styleActiveLine: true,
                 foldGutter: true,
-                gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
-                lint: {
-                    options: {
-                        esversion: 11,  // Support modern JavaScript
-                        asi: true,      // Allow automatic semicolon insertion
-                        boss: true,     // Allow assignments in conditions
-                        sub: true,      // Allow subscript notation
-                        supernew: true, // Allow new function() { ... } syntax
-                        validthis: true // Allow 'this' in non-constructor functions
-                    }
-                },
+                gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+                cursorBlinkRate: 530,
+                cursorScrollMargin: 3,
+                viewportMargin: Infinity,
                 extraKeys: {
-                    "Ctrl-F": "findPersistent",
-                    "Cmd-F": "findPersistent",
+                    "Ctrl-F": function() { notifyAndroidSearch(); },
+                    "Cmd-F": function() { notifyAndroidSearch(); },
                     "Ctrl-S": function() { notifyAndroidSave(); },
                     "Cmd-S": function() { notifyAndroidSave(); }
                 }
             });
             
-            // Listen for content changes
             editor.on('change', function() {
                 const currentContent = editor.getValue();
                 if (currentContent !== lastContent) {
                     lastContent = currentContent;
-                    notifyAndroidContentChanged();
+                    debounceContentChanged();
                 }
             });
             
-            // Notify Android that editor is ready
             if (window.AndroidBridge) {
                 window.AndroidBridge.onEditorReady();
             }
+        }
+        
+        function debounceContentChanged() {
+            if (contentChangeDebounceTimer) {
+                clearTimeout(contentChangeDebounceTimer);
+            }
+            contentChangeDebounceTimer = setTimeout(function() {
+                notifyAndroidContentChanged();
+            }, DEBOUNCE_DELAY);
         }
         
         // Set content from Android
@@ -252,12 +252,9 @@
         }
         
         // Search in editor
-        function search() {
-            if (editor) {
-                // Notify Android to show search bar
-                if (window.Android) {
-                    Android.onShowSearch();
-                }
+        function notifyAndroidSearch() {
+            if (editor && window.AndroidBridge) {
+                window.AndroidBridge.onShowSearch();
             }
         }
         

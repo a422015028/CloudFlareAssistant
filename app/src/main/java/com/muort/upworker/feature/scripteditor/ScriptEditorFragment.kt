@@ -12,12 +12,11 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.launch
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -25,8 +24,6 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.ScriptVersion
 import com.muort.upworker.databinding.FragmentScriptEditorBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
@@ -103,6 +100,12 @@ class ScriptEditorFragment : Fragment() {
                 setSupportZoom(true)
                 builtInZoomControls = true
                 displayZoomControls = false
+                javaScriptCanOpenWindowsAutomatically = false
+                allowFileAccess = false
+                allowContentAccess = false
+                mediaPlaybackRequiresUserGesture = true
+                cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
+                mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
             }
             
             addJavascriptInterface(JavaScriptBridge(), "AndroidBridge")
@@ -110,8 +113,23 @@ class ScriptEditorFragment : Fragment() {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    // Set theme based on current app theme
                     setEditorTheme()
+                }
+                
+                override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                    return true
+                }
+            }
+            
+            webChromeClient = object : android.webkit.WebChromeClient() {
+                override fun onJsAlert(view: WebView?, url: String?, message: String?, result: android.webkit.JsResult?): Boolean {
+                    result?.cancel()
+                    return true
+                }
+                
+                override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: android.webkit.JsResult?): Boolean {
+                    result?.cancel()
+                    return true
                 }
             }
             
@@ -467,8 +485,15 @@ class ScriptEditorFragment : Fragment() {
     }
     
     override fun onDestroyView() {
-        super.onDestroyView()
+        binding.webView.apply {
+            stopLoading()
+            removeJavascriptInterface("AndroidBridge")
+            webViewClient = WebViewClient()
+            (parent as? ViewGroup)?.removeView(this)
+            destroy()
+        }
         _binding = null
+        super.onDestroyView()
     }
     
     /**
@@ -478,11 +503,9 @@ class ScriptEditorFragment : Fragment() {
         
         @JavascriptInterface
         fun onEditorReady() {
-            lifecycleScope.launch {
+            requireActivity().runOnUiThread {
                 isEditorReady = true
                 Timber.d("Editor ready")
-                
-                // Load content if available
                 viewModel.scriptContent.value?.let { content ->
                     setEditorContent(content)
                 }
@@ -491,14 +514,14 @@ class ScriptEditorFragment : Fragment() {
         
         @JavascriptInterface
         fun onContentChanged() {
-            viewLifecycleOwner.lifecycleScope.launch {
+            requireActivity().runOnUiThread {
                 hasUnsavedChanges = true
             }
         }
         
         @JavascriptInterface
         fun onSaveRequested(content: String) {
-            viewLifecycleOwner.lifecycleScope.launch {
+            requireActivity().runOnUiThread {
                 Timber.d("Manual save requested")
                 saveVersion(content, isAutoSave = false)
             }
@@ -506,17 +529,15 @@ class ScriptEditorFragment : Fragment() {
         
         @JavascriptInterface
         fun onCopyRequested(content: String) {
-            lifecycleScope.launch {
+            requireActivity().runOnUiThread {
                 copyToClipboard(content)
             }
         }
         
         @JavascriptInterface
         fun onShowSearch() {
-            viewLifecycleOwner.lifecycleScope.launch {
-                requireActivity().runOnUiThread {
-                    showSearchBar()
-                }
+            requireActivity().runOnUiThread {
+                showSearchBar()
             }
         }
     }
