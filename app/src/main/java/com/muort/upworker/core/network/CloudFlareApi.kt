@@ -406,6 +406,16 @@ interface CloudFlareApi {
         @Path("deployment_id") deploymentId: String
     ): Response<CloudFlareResponse<Unit>>
     
+    @POST("accounts/{account_id}/pages/projects/{project_name}/deployments/{deployment_id}/rollback")
+    suspend fun rollbackPagesDeployment(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Path("deployment_id") deploymentId: String
+    ): Response<CloudFlareResponse<PagesDeployment>>
+    
     /**
      * Update Pages project configuration (environment variables, bindings, etc.)
      * https://developers.cloudflare.com/api/operations/pages-project-update-project

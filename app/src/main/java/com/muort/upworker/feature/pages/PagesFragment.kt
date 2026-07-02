@@ -1414,14 +1414,25 @@ class PagesFragment : Fragment() {
             .setMessage(details)
             .setPositiveButton("关闭", null)
             .setNeutralButton("访问") { _, _ ->
-                // 打开部署URL
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deployment.url))
                 startActivity(intent)
             }
         
-        // 只有非最新的部署才能删除
+        val status = deployment.latestStage?.status ?: "unknown"
+        if (status != "success" && !isLatest) {
+            dialog.setNegativeButton("重新部署") { _, _ ->
+                showRetryDeploymentConfirmDialog(project, deployment)
+            }
+        }
+        
         if (!isLatest) {
-            dialog.setNegativeButton("删除") { _, _ ->
+            if (status == "success") {
+                dialog.setNegativeButton("回滚") { _, _ ->
+                    showRollbackDeploymentConfirmDialog(project, deployment)
+                }
+            }
+            
+            dialog.setNeutralButton("删除") { _, _ ->
                 showDeleteDeploymentConfirmDialog(project, deployment)
             }
         }
@@ -1436,6 +1447,32 @@ class PagesFragment : Fragment() {
             .setPositiveButton("删除") { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     pagesViewModel.deleteDeployment(account, project.name, deployment.id)
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun showRetryDeploymentConfirmDialog(project: PagesProject, deployment: PagesDeployment) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("重新部署")
+            .setMessage("确定要重新发起部署 ${deployment.shortId} 吗？\n\n这将重新执行整个部署流程。")
+            .setPositiveButton("重新部署") { _, _ ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    pagesViewModel.retryDeployment(account, project.name, deployment.id)
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun showRollbackDeploymentConfirmDialog(project: PagesProject, deployment: PagesDeployment) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("回滚部署")
+            .setMessage("确定要回滚到部署 ${deployment.shortId} 吗？\n\n这将使此部署成为活动部署。")
+            .setPositiveButton("回滚") { _, _ ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    pagesViewModel.rollbackDeployment(account, project.name, deployment.id)
                 }
             }
             .setNegativeButton("取消", null)

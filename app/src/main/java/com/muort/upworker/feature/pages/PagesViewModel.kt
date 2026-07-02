@@ -186,6 +186,25 @@ class PagesViewModel @Inject constructor(
         }
     }
     
+    fun rollbackDeployment(account: Account, projectName: String, deploymentId: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            when (val result = pagesRepository.rollbackDeployment(account, projectName, deploymentId)) {
+                is Resource.Success -> {
+                    _message.emit("已回滚到此部署")
+                    loadDeployments(account, projectName)
+                }
+                is Resource.Error -> {
+                    _message.emit("回滚失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
     fun createDeployment(
         account: Account,
         projectName: String,

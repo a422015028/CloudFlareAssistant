@@ -190,6 +190,33 @@ class PagesRepository @Inject constructor(
         }
     }
     
+    suspend fun rollbackDeployment(
+        account: Account,
+        projectName: String,
+        deploymentId: String
+    ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val response = api.rollbackPagesDeployment(
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                projectName = projectName,
+                deploymentId = deploymentId
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("Deployment rolled back but no result returned")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Resource.Error("Failed to rollback deployment: $errorMsg")
+            }
+        }
+    }
+    
     suspend fun createDeployment(
         account: Account,
         projectName: String,
