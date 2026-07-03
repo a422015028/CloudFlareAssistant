@@ -24,6 +24,7 @@ import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.KvNamespace
 import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.WorkerScript
+import com.muort.upworker.core.model.DEFAULT_COMPATIBILITY_DATE
 import com.muort.upworker.core.repository.KvRepository
 import com.muort.upworker.core.repository.R2Repository
 import com.muort.upworker.core.repository.D1Repository
@@ -269,15 +270,19 @@ class WorkerFragment : Fragment() {
             .create()
         checkingDialog.show()
 
+        // 获取用户输入的兼容性日期，为空时使用默认值
+        val customCompatibilityDate = binding.compatibilityDateEdit.text.toString().trim()
+            .takeIf { it.isNotEmpty() } ?: DEFAULT_COMPATIBILITY_DATE
+        
         // 直接从云端检查 Worker 是否存在，而不是依赖本地缓存列表
         // 这样即使本地列表为空（如刚打开 App），也能正确识别已存在的 Worker 并保留绑定
         // silent = true: 新脚本不存在时不显示错误提示
         viewModel.getWorkerSettings(account, workerName, silent = true) { result ->
             checkingDialog.dismiss()
             if (result is com.muort.upworker.core.model.Resource.Success) {
-                viewModel.uploadWorkerScriptWithBindings(account, workerName, file)
+                viewModel.uploadWorkerScriptWithBindings(account, workerName, file, customCompatibilityDate)
             } else {
-                viewModel.uploadWorkerScript(account, workerName, file)
+                viewModel.uploadWorkerScript(account, workerName, file, customCompatibilityDate)
             }
         }
     }

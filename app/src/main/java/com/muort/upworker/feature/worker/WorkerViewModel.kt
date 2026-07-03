@@ -23,8 +23,9 @@ class WorkerViewModel @Inject constructor(
     /**
      * 上传脚本内容并自动保留原有 bindings（KV/R2/变量等）
      * 使用与编辑器相同的上传逻辑
+     * @param customCompatibilityDate 用户自定义的兼容性日期，为空时保留原有配置或使用默认值
      */
-    fun uploadWorkerScriptWithBindings(account: Account, scriptName: String, scriptFile: File) {
+    fun uploadWorkerScriptWithBindings(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null) {
         viewModelScope.launch {
             _uploadState.value = UploadState.Uploading
             
@@ -37,7 +38,7 @@ class WorkerViewModel @Inject constructor(
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
                 
                 try {
-                    // 获取原有配置以保留bindings和compatibilityDate（新脚本可能没有配置，失败时使用空配置继续上传）
+                    // 获取原有配置以保留bindings（新脚本可能没有配置，失败时使用空配置继续上传）
                     val (originalBindings, originalCompatibilityDate) = when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
                         is Resource.Success -> {
                             Pair(settings.data.bindings, settings.data.compatibilityDate)
@@ -57,9 +58,13 @@ class WorkerViewModel @Inject constructor(
                     // 过滤掉 secret_text bindings（无法获取值）
                     val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
                     
-                    // 创建metadata并保留清理后的bindings和原有compatibilityDate（脚本类型由Repository自动检测）
+                    // 用户自定义日期 > 原有日期 > 默认值
+                    val finalCompatibilityDate = customCompatibilityDate?.takeIf { it.isNotBlank() } 
+                        ?: originalCompatibilityDate
+                    
+                    // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
                     val metadata = com.muort.upworker.core.model.WorkerMetadata(
-                        compatibilityDate = originalCompatibilityDate,
+                        compatibilityDate = finalCompatibilityDate,
                         bindings = cleanedBindings
                     )
                     
@@ -111,25 +116,40 @@ class WorkerViewModel @Inject constructor(
     private val _message = MutableSharedFlow<String>()
     val message: SharedFlow<String> = _message.asSharedFlow()
     
-    fun uploadWorkerScript(account: Account, scriptName: String, scriptFile: File) {
+    fun uploadWorkerScript(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null) {
         viewModelScope.launch {
             _uploadState.value = UploadState.Uploading
             
-            when (val result = workerRepository.uploadWorkerScript(account, scriptName, scriptFile)) {
-                is Resource.Success -> {
-                    _uploadState.value = UploadState.Success
-                    _message.emit("Worker 脚本上传成功")
-                    Timber.d("Script uploaded: $scriptName")
-                    // 重新加载脚本列表
-                    loadWorkerScripts(account)
+            val content = scriptFile.readText(Charsets.UTF_8)
+            val tempDir = java.io.File(System.getProperty("java.io.tmpdir") ?: System.getenv("TEMP") ?: "/tmp")
+            val tempFile = java.io.File(tempDir, "$scriptName.js")
+            
+            try {
+                tempFile.writeText(content, Charsets.UTF_8)
+                
+                val metadata = com.muort.upworker.core.model.WorkerMetadata(
+                    compatibilityDate = customCompatibilityDate?.takeIf { it.isNotBlank() }
+                )
+                
+                when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
+                    is Resource.Success -> {
+                        _uploadState.value = UploadState.Success
+                        _message.emit("Worker 脚本上传成功")
+                        Timber.d("Script uploaded: $scriptName")
+                        loadWorkerScripts(account)
+                    }
+                    is Resource.Error -> {
+                        _uploadState.value = UploadState.Error(result.message)
+                        _message.emit("上传失败: ${result.message}")
+                        Timber.e("Failed to upload script: ${result.message}")
+                    }
+                    is Resource.Loading -> {
+                        _uploadState.value = UploadState.Uploading
+                    }
                 }
-                is Resource.Error -> {
-                    _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("上传失败: ${result.message}")
-                    Timber.e("Failed to upload script: ${result.message}")
-                }
-                is Resource.Loading -> {
-                    _uploadState.value = UploadState.Uploading
+            } finally {
+                if (tempFile.exists()) {
+                    tempFile.delete()
                 }
             }
         }

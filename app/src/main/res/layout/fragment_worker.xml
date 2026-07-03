@@ -60,7 +60,7 @@
                         app:boxBackgroundMode="outline"
                         app:endIconMode="custom"
                         app:endIconDrawable="@android:drawable/ic_menu_search"
-                        android:layout_marginBottom="16dp">
+                        android:layout_marginBottom="12dp">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/filePathEdit"
@@ -69,6 +69,22 @@
                             android:inputType="none"
                             android:focusable="false"
                             android:clickable="true" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="默认兼容日期 2026-07-01"
+                        app:placeholderText="输入格式：2026-07-01"
+                        app:boxBackgroundMode="outline"
+                        android:layout_marginBottom="16dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/compatibilityDateEdit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="date" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
