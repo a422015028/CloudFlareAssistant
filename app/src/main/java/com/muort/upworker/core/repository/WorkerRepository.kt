@@ -161,41 +161,6 @@ class WorkerRepository @Inject constructor(
     }
     
     /**
-     * Upload Worker Script with KV Namespace bindings
-     * Convenience method that creates metadata with KV bindings
-     */
-    suspend fun uploadWorkerScriptWithKvBindings(
-        account: Account,
-        scriptName: String,
-        scriptFile: File,
-        kvBindings: List<Pair<String, String>> // List of (binding_name, namespace_id) pairs
-    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
-        Timber.d("Uploading worker with ${kvBindings.size} KV bindings")
-        
-        // Convert KV bindings to WorkerBinding objects
-        val bindings = kvBindings.map { (name, namespaceId) ->
-            Timber.d("Adding KV binding: $name -> $namespaceId")
-            WorkerBinding(
-                type = "kv_namespace",
-                name = name,
-                namespaceId = namespaceId
-            )
-        }
-        
-        // Create metadata with KV bindings（脚本类型由uploadWorkerScriptMultipart自动检测）
-        val metadata = WorkerMetadata(
-            compatibilityDate = "2022-01-01",
-            bindings = bindings
-        )
-        
-        // Log metadata for debugging
-        Timber.d("Metadata: ${gson.toJson(metadata)}")
-        
-        // Use the multipart upload method with metadata
-        uploadWorkerScriptMultipart(account, scriptName, scriptFile, metadata)
-    }
-    
-    /**
      * Upload Worker Script content only (without metadata)
      * Faster method when you only need to update the script code
      */

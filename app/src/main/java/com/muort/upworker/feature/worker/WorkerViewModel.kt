@@ -136,41 +136,6 @@ class WorkerViewModel @Inject constructor(
     }
     
     /**
-     * Upload Worker Script with KV Namespace bindings
-     * @param kvBindings List of pairs containing (binding_name, namespace_id)
-     */
-    fun uploadWorkerScriptWithKvBindings(
-        account: Account,
-        scriptName: String,
-        scriptFile: File,
-        kvBindings: List<Pair<String, String>>
-    ) {
-        viewModelScope.launch {
-            _uploadState.value = UploadState.Uploading
-            
-            when (val result = workerRepository.uploadWorkerScriptWithKvBindings(
-                account, scriptName, scriptFile, kvBindings
-            )) {
-                is Resource.Success -> {
-                    _uploadState.value = UploadState.Success
-                    _message.emit("Worker 脚本上传成功（保留原有绑定）")
-                    Timber.d("Script with KV bindings uploaded: $scriptName")
-                    // 重新加载脚本列表
-                    loadWorkerScripts(account)
-                }
-                is Resource.Error -> {
-                    _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("上传失败: ${result.message}")
-                    Timber.e("Failed to upload script with KV bindings: ${result.message}")
-                }
-                is Resource.Loading -> {
-                    _uploadState.value = UploadState.Uploading
-                }
-            }
-        }
-    }
-    
-    /**
      * Update KV bindings for an existing Worker Script
      * Only updates the bindings configuration, does NOT re-upload script code
      * @param scriptName Name of the existing script
