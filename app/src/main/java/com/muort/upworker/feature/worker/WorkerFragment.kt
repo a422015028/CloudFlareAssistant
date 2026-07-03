@@ -271,7 +271,8 @@ class WorkerFragment : Fragment() {
 
         // 直接从云端检查 Worker 是否存在，而不是依赖本地缓存列表
         // 这样即使本地列表为空（如刚打开 App），也能正确识别已存在的 Worker 并保留绑定
-        viewModel.getWorkerSettings(account, workerName) { result ->
+        // silent = true: 新脚本不存在时不显示错误提示
+        viewModel.getWorkerSettings(account, workerName, silent = true) { result ->
             checkingDialog.dismiss()
             if (result is com.muort.upworker.core.model.Resource.Success) {
                 viewModel.uploadWorkerScriptWithBindings(account, workerName, file)

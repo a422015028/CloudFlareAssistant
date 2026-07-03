@@ -37,45 +37,43 @@ class WorkerViewModel @Inject constructor(
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
                 
                 try {
-                    // 获取原有配置以保留bindings
-                    when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
+                    // 获取原有配置以保留bindings（新脚本可能没有配置，失败时使用空配置继续上传）
+                    val originalBindings = when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
                         is Resource.Success -> {
-                            val originalBindings = settings.data.bindings
-                            
-                            // 直接使用原始内容，不做任何转换
-                            tempFile.writeText(content, Charsets.UTF_8)
-                            
-                            Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
-                            
-                            // 过滤掉 secret_text bindings（无法获取值）
-                            val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
-                            
-                            // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
-                            val metadata = com.muort.upworker.core.model.WorkerMetadata(
-                                compatibilityDate = "2024-12-01",
-                                bindings = cleanedBindings
-                            )
-                            
-                            when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
-                                is Resource.Success -> {
-                                    _uploadState.value = UploadState.Success
-                                    _message.emit("Worker 脚本上传成功（保留原有绑定）")
-                                    Timber.d("Script uploaded with preserved bindings: $scriptName")
-                                    loadWorkerScripts(account)
-                                }
-                                is Resource.Error -> {
-                                    _uploadState.value = UploadState.Error(result.message)
-                                    _message.emit("上传失败: ${result.message}")
-                                    Timber.e("Failed to upload script: ${result.message}")
-                                }
-                                is Resource.Loading -> {
-                                    _uploadState.value = UploadState.Uploading
-                                }
-                            }
+                            settings.data.bindings
                         }
                         is Resource.Error -> {
-                            _uploadState.value = UploadState.Error(settings.message)
-                            _message.emit("获取原有绑定失败: ${settings.message}")
+                            Timber.w("No existing settings found for script '$scriptName' (new script?), proceeding with empty bindings")
+                            null
+                        }
+                        else -> null
+                    }
+                    
+                    // 直接使用原始内容，不做任何转换
+                    tempFile.writeText(content, Charsets.UTF_8)
+                    
+                    Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
+                    
+                    // 过滤掉 secret_text bindings（无法获取值）
+                    val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
+                    
+                    // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
+                    val metadata = com.muort.upworker.core.model.WorkerMetadata(
+                        compatibilityDate = "2024-12-01",
+                        bindings = cleanedBindings
+                    )
+                    
+                    when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
+                        is Resource.Success -> {
+                            _uploadState.value = UploadState.Success
+                            _message.emit("Worker 脚本上传成功（保留原有绑定）")
+                            Timber.d("Script uploaded with preserved bindings: $scriptName")
+                            loadWorkerScripts(account)
+                        }
+                        is Resource.Error -> {
+                            _uploadState.value = UploadState.Error(result.message)
+                            _message.emit("上传失败: ${result.message}")
+                            Timber.e("Failed to upload script: ${result.message}")
                         }
                         is Resource.Loading -> {
                             _uploadState.value = UploadState.Uploading
@@ -401,6 +399,7 @@ class WorkerViewModel @Inject constructor(
     fun getWorkerSettings(
         account: Account,
         scriptName: String,
+        silent: Boolean = false,
         onResult: (Resource<WorkerScript>) -> Unit
     ) {
         viewModelScope.launch {
@@ -411,7 +410,9 @@ class WorkerViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     Timber.e("Failed to fetch settings: ${result.message}")
-                    _message.emit("加载脚本设置失败: ${result.message}")
+                    if (!silent) {
+                        _message.emit("加载脚本设置失败: ${result.message}")
+                    }
                     onResult(result)
                 }
                 is Resource.Loading -> {

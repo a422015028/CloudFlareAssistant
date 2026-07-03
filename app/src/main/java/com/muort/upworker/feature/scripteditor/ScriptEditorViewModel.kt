@@ -163,45 +163,42 @@ class ScriptEditorViewModel @Inject constructor(
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
                 
                 try {
-                    // 获取原有配置以保留bindings
-                    when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
+                    // 获取原有配置以保留bindings（新脚本可能没有配置，失败时使用空配置继续上传）
+                    val originalBindings = when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
                         is Resource.Success -> {
-                            val originalBindings = settings.data.bindings
-                            
-                            // 直接使用原始内容，不做任何转换
-                            tempFile.writeText(content, Charsets.UTF_8)
-                            
-                            Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
-                            
-
-                            // 过滤掉 secret_text bindings（无法获取值）
-                            val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
-                            
-                            // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
-                            val metadata = com.muort.upworker.core.model.WorkerMetadata(
-                                compatibilityDate = "2024-12-01",
-                                bindings = cleanedBindings
-                            )
-                            
-                            when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
-                                is Resource.Success -> {
-                                    _uploadState.value = UploadState.Success
-                                    _uploadSuccess.value = true
-                                    Timber.d("Script uploaded with preserved bindings: $scriptName")
-                                }
-                                is Resource.Error -> {
-                                    _uploadState.value = UploadState.Error(result.message)
-                                    _error.value = "上传失败: ${result.message}"
-                                    Timber.e("Failed to upload script: ${result.message}")
-                                }
-                                is Resource.Loading -> {
-                                    _uploadState.value = UploadState.Uploading
-                                }
-                            }
+                            settings.data.bindings
                         }
                         is Resource.Error -> {
-                            _uploadState.value = UploadState.Error(settings.message)
-                            _error.value = "获取原有绑定失败: ${settings.message}"
+                            Timber.w("No existing settings found for script '$scriptName' (new script?), proceeding with empty bindings")
+                            null
+                        }
+                        else -> null
+                    }
+                    
+                    // 直接使用原始内容，不做任何转换
+                    tempFile.writeText(content, Charsets.UTF_8)
+                    
+                    Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
+                    
+                    // 过滤掉 secret_text bindings（无法获取值）
+                    val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
+                    
+                    // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
+                    val metadata = com.muort.upworker.core.model.WorkerMetadata(
+                        compatibilityDate = "2024-12-01",
+                        bindings = cleanedBindings
+                    )
+                    
+                    when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
+                        is Resource.Success -> {
+                            _uploadState.value = UploadState.Success
+                            _uploadSuccess.value = true
+                            Timber.d("Script uploaded with preserved bindings: $scriptName")
+                        }
+                        is Resource.Error -> {
+                            _uploadState.value = UploadState.Error(result.message)
+                            _error.value = "上传失败: ${result.message}"
+                            Timber.e("Failed to upload script: ${result.message}")
                         }
                         is Resource.Loading -> {
                             _uploadState.value = UploadState.Uploading
@@ -284,48 +281,47 @@ class ScriptEditorViewModel @Inject constructor(
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
                 
                 try {
-                    when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
+                    // 获取原有配置以保留bindings（脚本不存在时使用空配置继续回滚）
+                    val originalBindings = when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
                         is Resource.Success -> {
-                            val originalBindings = settings.data.bindings
-                            
-                            tempFile.writeText(version.content, Charsets.UTF_8)
-                            
-                            val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
-                            
-                            // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
-                            val metadata = com.muort.upworker.core.model.WorkerMetadata(
-                                compatibilityDate = "2024-12-01",
-                                bindings = cleanedBindings
-                            )
-                            
-                            when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
-                                is Resource.Success -> {
-                                    _uploadState.value = UploadState.Success
-                                    _uploadSuccess.value = true
-                                    _scriptContent.value = version.content
-                                    
-                                    saveVersion(
-                                        accountEmail = accountEmail,
-                                        scriptName = scriptName,
-                                        content = version.content,
-                                        isAutoSave = false,
-                                        description = "回滚到版本 ${version.id}"
-                                    )
-                                    Timber.d("Script rolled back successfully")
-                                }
-                                is Resource.Error -> {
-                                    _uploadState.value = UploadState.Error(result.message)
-                                    _error.value = "回滚失败: ${result.message}"
-                                    Timber.e("Failed to rollback script: ${result.message}")
-                                }
-                                is Resource.Loading -> {
-                                    _uploadState.value = UploadState.Uploading
-                                }
-                            }
+                            settings.data.bindings
                         }
                         is Resource.Error -> {
-                            _uploadState.value = UploadState.Error(settings.message)
-                            _error.value = "获取原有绑定失败: ${settings.message}"
+                            Timber.w("No existing settings found for script '$scriptName', proceeding with empty bindings")
+                            null
+                        }
+                        else -> null
+                    }
+                    
+                    tempFile.writeText(version.content, Charsets.UTF_8)
+                    
+                    val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
+                    
+                    // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
+                    val metadata = com.muort.upworker.core.model.WorkerMetadata(
+                        compatibilityDate = "2024-12-01",
+                        bindings = cleanedBindings
+                    )
+                    
+                    when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
+                        is Resource.Success -> {
+                            _uploadState.value = UploadState.Success
+                            _uploadSuccess.value = true
+                            _scriptContent.value = version.content
+                            
+                            saveVersion(
+                                accountEmail = accountEmail,
+                                scriptName = scriptName,
+                                content = version.content,
+                                isAutoSave = false,
+                                description = "回滚到版本 ${version.id}"
+                            )
+                            Timber.d("Script rolled back successfully")
+                        }
+                        is Resource.Error -> {
+                            _uploadState.value = UploadState.Error(result.message)
+                            _error.value = "回滚失败: ${result.message}"
+                            Timber.e("Failed to rollback script: ${result.message}")
                         }
                         is Resource.Loading -> {
                             _uploadState.value = UploadState.Uploading

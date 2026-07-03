@@ -182,9 +182,8 @@ class WorkerRepository @Inject constructor(
             )
         }
         
-        // Create metadata with KV bindings
+        // Create metadata with KV bindings（脚本类型由uploadWorkerScriptMultipart自动检测）
         val metadata = WorkerMetadata(
-            mainModule = scriptFile.name,
             compatibilityDate = "2022-01-01",
             bindings = bindings
         )
