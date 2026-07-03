@@ -138,13 +138,16 @@ data class AccountSettings(
 
 // ==================== Workers ====================
 
+const val DEFAULT_COMPATIBILITY_DATE = "2026-07-01"
+
 data class WorkerScript(
     @SerializedName("id") val id: String,
     @SerializedName("created_on") val createdOn: String?,
     @SerializedName("modified_on") val modifiedOn: String?,
     @SerializedName("etag") val etag: String?,
     @SerializedName("size") val size: Long? = null,
-    @SerializedName("bindings") val bindings: List<WorkerBinding>? = null
+    @SerializedName("bindings") val bindings: List<WorkerBinding>? = null,
+    @SerializedName("compatibility_date") val compatibilityDate: String? = null
 )
 
 /**

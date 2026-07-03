@@ -65,7 +65,7 @@ class WorkerRepository @Inject constructor(
             val finalMetadata = WorkerMetadata(
                 mainModule = if (isESModule) scriptFile.name else null,
                 bodyPart = if (isServiceWorker || !isESModule) scriptFile.name else null,
-                compatibilityDate = metadata?.compatibilityDate ?: "2022-01-01",
+                compatibilityDate = metadata?.compatibilityDate ?: DEFAULT_COMPATIBILITY_DATE,
                 bindings = metadata?.bindings,
                 usageModel = metadata?.usageModel,
                 compatibilityFlags = metadata?.compatibilityFlags,
@@ -320,8 +320,9 @@ class WorkerRepository @Inject constructor(
         safeApiCall {
             Timber.d("Updating KV bindings for script '$scriptName' with ${kvBindings.size} bindings")
             
-            // First, get existing settings to preserve other bindings
+            // First, get existing settings to preserve other bindings and compatibilityDate
             val existingBindings = mutableListOf<WorkerBinding>()
+            var existingCompatibilityDate: String? = null
             val settingsResult = getWorkerSettings(account, scriptName)
             if (settingsResult is Resource.Success) {
                 settingsResult.data.bindings?.forEach { binding ->
@@ -330,6 +331,7 @@ class WorkerRepository @Inject constructor(
                         existingBindings.add(binding)
                     }
                 }
+                existingCompatibilityDate = settingsResult.data.compatibilityDate
             }
             
             // Convert pairs to WorkerBinding objects
@@ -346,10 +348,10 @@ class WorkerRepository @Inject constructor(
             val allBindings = existingBindings + kvBindingsList
             Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${kvBindingsList.size} KV)")
             
-            // Create settings request
+            // Create settings request with preserved compatibilityDate
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = "2022-01-01"
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
             )
             
             val settingsJson = gson.toJson(settingsRequest)
@@ -398,8 +400,9 @@ class WorkerRepository @Inject constructor(
         safeApiCall {
             Timber.d("Updating R2 bindings for script '$scriptName' with ${r2Bindings.size} bindings")
             
-            // First, get existing settings to preserve other bindings
+            // First, get existing settings to preserve other bindings and compatibilityDate
             val existingBindings = mutableListOf<WorkerBinding>()
+            var existingCompatibilityDate: String? = null
             val settingsResult = getWorkerSettings(account, scriptName)
             if (settingsResult is Resource.Success) {
                 settingsResult.data.bindings?.forEach { binding ->
@@ -408,6 +411,7 @@ class WorkerRepository @Inject constructor(
                         existingBindings.add(binding)
                     }
                 }
+                existingCompatibilityDate = settingsResult.data.compatibilityDate
             }
             
             // Convert pairs to WorkerBinding objects
@@ -424,10 +428,10 @@ class WorkerRepository @Inject constructor(
             val allBindings = existingBindings + r2BindingsList
             Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${r2BindingsList.size} R2)")
             
-            // Create settings request
+            // Create settings request with preserved compatibilityDate
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = "2022-01-01"
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
             )
             
             val settingsJson = gson.toJson(settingsRequest)
@@ -477,8 +481,9 @@ class WorkerRepository @Inject constructor(
         safeApiCall {
             Timber.d("Updating D1 bindings for script '$scriptName' with ${d1Bindings.size} bindings")
             
-            // First, get existing settings to preserve other bindings
+            // First, get existing settings to preserve other bindings and compatibilityDate
             val existingBindings = mutableListOf<WorkerBinding>()
+            var existingCompatibilityDate: String? = null
             val settingsResult = getWorkerSettings(account, scriptName)
             if (settingsResult is Resource.Success) {
                 settingsResult.data.bindings?.forEach { binding ->
@@ -487,6 +492,7 @@ class WorkerRepository @Inject constructor(
                         existingBindings.add(binding)
                     }
                 }
+                existingCompatibilityDate = settingsResult.data.compatibilityDate
             }
             
             // Convert pairs to WorkerBinding objects
@@ -503,10 +509,10 @@ class WorkerRepository @Inject constructor(
             val allBindings = existingBindings + d1BindingsList
             Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${d1BindingsList.size} D1)")
             
-            // Create settings request
+            // Create settings request with preserved compatibilityDate
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = "2022-01-01"
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
             )
             
             Timber.d("D1 Settings request: $settingsRequest")
@@ -556,8 +562,9 @@ class WorkerRepository @Inject constructor(
         safeApiCall {
             Timber.d("Updating variables for script '$scriptName' with ${variables.size} variables")
             
-            // First, get existing settings to preserve other bindings
+            // First, get existing settings to preserve other bindings and compatibilityDate
             val existingBindings = mutableListOf<WorkerBinding>()
+            var existingCompatibilityDate: String? = null
             val settingsResult = getWorkerSettings(account, scriptName)
             if (settingsResult is Resource.Success) {
                 settingsResult.data.bindings?.forEach { binding ->
@@ -566,6 +573,7 @@ class WorkerRepository @Inject constructor(
                         existingBindings.add(binding)
                     }
                 }
+                existingCompatibilityDate = settingsResult.data.compatibilityDate
             }
             
             // Convert triples to WorkerBinding objects
@@ -602,10 +610,10 @@ class WorkerRepository @Inject constructor(
             val allBindings = existingBindings + variableBindings
             Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${variableBindings.size} variables)")
             
-            // Create settings request
+            // Create settings request with preserved compatibilityDate
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = "2022-01-01"
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
             )
             
             val settingsJson = gson.toJson(settingsRequest)
@@ -654,8 +662,9 @@ class WorkerRepository @Inject constructor(
         safeApiCall {
             Timber.d("Updating secrets for script '$scriptName' with ${secrets.size} secrets")
             
-            // First, get existing settings to preserve other bindings
+            // First, get existing settings to preserve other bindings and compatibilityDate
             val existingBindings = mutableListOf<WorkerBinding>()
+            var existingCompatibilityDate: String? = null
             val settingsResult = getWorkerSettings(account, scriptName)
             if (settingsResult is Resource.Success) {
                 settingsResult.data.bindings?.forEach { binding ->
@@ -664,6 +673,7 @@ class WorkerRepository @Inject constructor(
                         existingBindings.add(binding)
                     }
                 }
+                existingCompatibilityDate = settingsResult.data.compatibilityDate
             }
             
             // Convert pairs to WorkerBinding objects
@@ -680,10 +690,10 @@ class WorkerRepository @Inject constructor(
             val allBindings = existingBindings + secretBindings
             Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${secretBindings.size} secrets)")
             
-            // Create settings request
+            // Create settings request with preserved compatibilityDate
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = "2022-01-01"
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
             )
             
             val settingsJson = gson.toJson(settingsRequest)
