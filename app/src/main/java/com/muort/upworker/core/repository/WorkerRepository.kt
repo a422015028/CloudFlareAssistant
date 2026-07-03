@@ -58,21 +58,25 @@ class WorkerRepository @Inject constructor(
         metadata: WorkerMetadata? = null
     ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
         safeApiCall {
-            // Create metadata or use default
-            val finalMetadata = metadata ?: WorkerMetadata(
-                mainModule = scriptFile.name,
-                compatibilityDate = "2022-01-01" // Use stable compatibility date
-            )
-            
-            // Convert metadata to JSON RequestBody
-            val metadataJson = gson.toJson(finalMetadata)
-            Timber.d("Upload metadata JSON: $metadataJson")
-            val metadataBody = metadataJson.toRequestBody("application/json".toMediaType())
-            
-            // 读取文件内容以检测脚本类型
             val scriptContent = scriptFile.readText()
             val isESModule = scriptContent.contains("export default") || scriptContent.contains("export {")
             val isServiceWorker = !isESModule && scriptContent.contains("addEventListener")
+            
+            val finalMetadata = WorkerMetadata(
+                mainModule = if (isESModule) scriptFile.name else null,
+                bodyPart = if (isServiceWorker || !isESModule) scriptFile.name else null,
+                compatibilityDate = metadata?.compatibilityDate ?: "2022-01-01",
+                bindings = metadata?.bindings,
+                usageModel = metadata?.usageModel,
+                compatibilityFlags = metadata?.compatibilityFlags,
+                vars = metadata?.vars,
+                logpush = metadata?.logpush,
+                tailConsumers = metadata?.tailConsumers
+            )
+            
+            val metadataJson = gson.toJson(finalMetadata)
+            Timber.d("Upload metadata JSON: $metadataJson")
+            val metadataBody = metadataJson.toRequestBody("application/json".toMediaType())
             
             // 定义可能的 content type 列表（按优先级排序）
             val contentTypesToTry = mutableListOf<String>()

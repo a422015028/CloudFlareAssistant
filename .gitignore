@@ -39,3 +39,4 @@ local.properties
 *.zip
 # Documentation
 ZERO_TRUST_IMPLEMENTATION.md
+CLAUDE.md

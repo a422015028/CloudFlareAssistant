@@ -177,9 +177,8 @@ class ScriptEditorViewModel @Inject constructor(
                             // 过滤掉 secret_text bindings（无法获取值）
                             val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
                             
-                            // 创建metadata并保留清理后的bindings
+                            // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
                             val metadata = com.muort.upworker.core.model.WorkerMetadata(
-                                mainModule = tempFile.name,
                                 compatibilityDate = "2024-12-01",
                                 bindings = cleanedBindings
                             )
@@ -293,8 +292,8 @@ class ScriptEditorViewModel @Inject constructor(
                             
                             val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
                             
+                            // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
                             val metadata = com.muort.upworker.core.model.WorkerMetadata(
-                                mainModule = tempFile.name,
                                 compatibilityDate = "2024-12-01",
                                 bindings = cleanedBindings
                             )
