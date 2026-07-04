@@ -300,7 +300,8 @@ class PagesRepository @Inject constructor(
                     val md5 = manifestMap[relativePath] ?: ""
                     val base64Str = android.util.Base64.encodeToString(currentFile.readBytes(), android.util.Base64.NO_WRAP)
                     
-                    val contentType = when (currentFile.extension.lowercase()) {
+                    val ext = currentFile.extension.lowercase()
+                    val contentType = when (ext) {
                         "html", "htm"       -> "text/html"
                         "css"               -> "text/css"
                         "txt"               -> "text/plain"
@@ -329,7 +330,8 @@ class PagesRepository @Inject constructor(
                         "mp3"               -> "audio/mpeg"
 
                         // 兜底配置
-                        else          -> "application/octet-stream"
+                        else -> android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) 
+                                ?: "application/octet-stream" // 3. 查不到才兜底
                 }
 
                     PagesAssetPayload(key = md5, value = base64Str, metadata = AssetMeta(contentType))
