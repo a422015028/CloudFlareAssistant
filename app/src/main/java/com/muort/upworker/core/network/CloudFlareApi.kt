@@ -451,12 +451,12 @@ interface CloudFlareApi {
     @Multipart
     @POST("accounts/{account_id}/pages/projects/{project_name}/deployments")
     suspend fun createPagesDeploymentManifestOnly(
-       @Header("Authorization") token: String?,
-       @Header("X-Auth-Email") email: String?,
-       @Header("X-Auth-Key") apiKey: String?,
-       @Path("account_id") accountId: String,
-       @Path("project_name") projectName: String,
-       @Part("manifest") manifest: RequestBody
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Part("manifest") manifest: RequestBody
     ): Response<CloudFlareResponse<PagesDeployment>>
     
     // ==================== Pages Domains ====================

@@ -301,38 +301,32 @@ class PagesRepository @Inject constructor(
                     val base64Str = android.util.Base64.encodeToString(currentFile.readBytes(), android.util.Base64.NO_WRAP)
                     
                     val contentType = when (currentFile.extension.lowercase()) {
-                        // 文本与页面结构
-                        "html", "htm" -> "text/html"
-                        "css"         -> "text/css"
-                        "txt"         -> "text/plain"
-                        "xml"         -> "text/xml"
-
-                        // 核心脚本与数据
-                        "js", "mjs"   -> "application/javascript"
-                        "json"        -> "application/json"
-                        "map"         -> "application/json" // 源码映射文件 SourceMap
-                        "wasm"        -> "application/wasm" // WebAssembly 组件（非常重要）
-
-                        // 图片与图标
-                        "png"         -> "image/png"
-                        "jpg", "jpeg" -> "image/jpeg"
-                        "gif"         -> "image/gif"
-                        "svg"         -> "image/svg+xml"
-                        "webp"        -> "image/webp"  // 现代网页标配图片格式
-                        "avif"        -> "image/avif"  // 下一代高效图片格式
-                        "ico"         -> "image/x-icon" // 网站标配 Favicon 图标
-
-                        // 网页字体（如果缺少，页面图标/特殊字体会变方块）
-                        "woff2"       -> "font/woff2"
-                        "woff"        -> "font/woff"
-                        "ttf"         -> "font/ttf"
-                        "otf"         -> "font/otf"
-                        "eot"         -> "application/vnd.ms-fontobject"
-
-                        // 视音频媒体
-                        "mp4"         -> "video/mp4"
-                        "webm"        -> "video/webm"
-                        "mp3"         -> "audio/mpeg"
+                        "html", "htm"       -> "text/html"
+                        "css"               -> "text/css"
+                        "txt"               -> "text/plain"
+                        "xml"               -> "text/xml"
+                        "js", "mjs", "cjs"  -> "application/javascript"
+                        "json"              -> "application/json"
+                        "map"               -> "application/json"
+                        "wasm"              -> "application/wasm"
+                        "webmanifest"       -> "application/manifest+json"
+                        "png"               -> "image/png"
+                        "jpg", "jpeg"       -> "image/jpeg"
+                        "gif"               -> "image/gif"
+                        "svg"               -> "image/svg+xml"
+                        "webp"              -> "image/webp"
+                        "avif"              -> "image/avif"
+                        "ico"               -> "image/x-icon"
+                        "woff2"             -> "font/woff2"
+                        "woff"              -> "font/woff"
+                        "ttf"               -> "font/ttf"
+                        "otf"               -> "font/otf"
+                        "eot"               -> "application/vnd.ms-fontobject"
+                        "yaml", "yml"       -> "text/yaml"
+                        "toml"              -> "text/toml"
+                        "mp4"               -> "video/mp4"
+                        "webm"              -> "video/webm"
+                        "mp3"               -> "audio/mpeg"
 
                         // 兜底配置
                         else          -> "application/octet-stream"
