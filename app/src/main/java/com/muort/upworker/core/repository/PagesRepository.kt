@@ -276,8 +276,8 @@ class PagesRepository @Inject constructor(
                         allFiles.add(currentFile)
                         // 注意：Wrangler 规范中，此处需要添加领先斜杠 "/" 来做 CDN 映射路径！
                         val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
-                        val md5 = getMd5Hash(currentFile)
-                        manifestMap[relativePath] = md5
+                        val cfHash = getCfHash(currentFile)
+                        manifestMap[relativePath] = cfHash
                     }
                 }
                 baseDir.listFiles()?.forEach { collectFiles(it) }
@@ -297,7 +297,7 @@ class PagesRepository @Inject constructor(
                 // 3. 【Wrangler 步骤二】把本地解压出的文件转为 Base64 对象批量上传至资源库
                 val assetPayloads = allFiles.map { currentFile ->
                     val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
-                    val md5 = manifestMap[relativePath] ?: ""
+                    val cfHash = manifestMap[relativePath] ?: ""
                     val base64Str = android.util.Base64.encodeToString(currentFile.readBytes(), android.util.Base64.NO_WRAP)
                     
                     val ext = currentFile.extension.lowercase()
@@ -334,7 +334,7 @@ class PagesRepository @Inject constructor(
                                 ?: "application/octet-stream" // 3. 查不到才兜底
                 }
 
-                    PagesAssetPayload(key = md5, value = base64Str, metadata = AssetMeta(contentType))
+                    PagesAssetPayload(key = cfHash, value = base64Str, metadata = AssetMeta(contentType))
                 }
 
                 // 执行资产库推送
@@ -656,16 +656,14 @@ class PagesRepository @Inject constructor(
         }
     }
 
-    private fun getMd5Hash(file: File): String {
-        val digest = MessageDigest.getInstance("MD5")
-        FileInputStream(file).use { fis ->
-            val buffer = ByteArray(8192)
-            var bytesRead = fis.read(buffer)
-            while (bytesRead != -1) {
-                digest.update(buffer, 0, bytesRead)
-                bytesRead = fis.read(buffer)
-            }
-        }
-        return digest.digest().joinToString("") { "%02x".format(it) }
+    private fun getCfHash(file: File): String {
+        val bytes = file.readBytes()
+        val base64Content = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+        val ext = file.extension.lowercase()
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.update(base64Content.toByteArray(Charsets.UTF_8))
+        digest.update(ext.toByteArray(Charsets.UTF_8))
+        val hashBytes = digest.digest()
+        return hashBytes.joinToString("") { "%02x".format(it) }.substring(0, 32)
     }
 }
