@@ -447,6 +447,13 @@ interface CloudFlareApi {
         @Body assets: List<PagesAssetPayload>
     ): Response<ResponseBody>
 
+    // 2.b 更新资产哈希列表（upsert-hashes），即使没有静态资产也需要调用以初始化部署会话
+    @POST("https://api.cloudflare.com/client/v4/pages/assets/upsert-hashes")
+    suspend fun upsertPagesAssetHashes(
+        @Header("Authorization") jwtToken: String,
+        @Body body: PagesUpsertHashesPayload
+    ): Response<ResponseBody>
+
     // 3. 完美的最终盖章接口：只提交 Manifest 清单映射，不携带任何实体文件
     @Multipart
     @POST("accounts/{account_id}/pages/projects/{project_name}/deployments")
@@ -457,6 +464,19 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String,
         @Path("project_name") projectName: String,
         @Part("manifest") manifest: RequestBody
+    ): Response<CloudFlareResponse<PagesDeployment>>
+
+    // 3.b 支持 _worker.bundle (Advanced Mode) 的部署：manifest + _worker.bundle
+    @Multipart
+    @POST("accounts/{account_id}/pages/projects/{project_name}/deployments")
+    suspend fun createPagesDeploymentWithWorker(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Part("manifest") manifest: RequestBody,
+        @Part workerBundle: MultipartBody.Part
     ): Response<CloudFlareResponse<PagesDeployment>>
     
     // ==================== Pages Domains ====================

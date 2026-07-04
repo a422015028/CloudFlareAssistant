@@ -286,6 +286,7 @@ data class PagesAssetPayload(
     val base64: Boolean = true
 )
 data class AssetMeta(val contentType: String)
+data class PagesUpsertHashesPayload(val hashes: List<String>)
 
 data class PagesProject(
     @SerializedName("id") val id: String,

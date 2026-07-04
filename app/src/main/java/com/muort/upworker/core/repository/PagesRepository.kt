@@ -12,6 +12,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.security.MessageDigest
@@ -264,6 +265,7 @@ class PagesRepository @Inject constructor(
 
                 val allFiles = mutableListOf<File>()
                 val manifestMap = mutableMapOf<String, String>()
+                var workerJsFile: File? = null
 
                 fun collectFiles(currentFile: File) {
                     if (currentFile.isDirectory) {
@@ -273,8 +275,12 @@ class PagesRepository @Inject constructor(
                         if (name == ".DS_Store" || currentFile.absolutePath.contains("__MACOSX") || name.startsWith(".")) {
                             return
                         }
+                        if (name == "_worker.js") {
+                            Timber.d("collectFiles: 找到 _worker.js, 路径=${currentFile.absolutePath}, 大小=${currentFile.length()}字节")
+                            workerJsFile = currentFile
+                            return
+                        }
                         allFiles.add(currentFile)
-                        // 注意：Wrangler 规范中，此处需要添加领先斜杠 "/" 来做 CDN 映射路径！
                         val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
                         val cfHash = getCfHash(currentFile)
                         manifestMap[relativePath] = cfHash
@@ -282,9 +288,12 @@ class PagesRepository @Inject constructor(
                 }
                 baseDir.listFiles()?.forEach { collectFiles(it) }
 
-                if (allFiles.isEmpty()) return@safeApiCall Resource.Error("压缩包内无有效文件")
+                if (allFiles.isEmpty() && workerJsFile == null) {
+                    return@safeApiCall Resource.Error("压缩包内无有效文件")
+                }
 
                 // 2. 【Wrangler 步骤一】向 Cloudflare 申请专属资源上传 JWT Token
+                // 如果只有 _worker.js 没有静态资产，也需要获取 token（资产库为空时也可创建部署）
                 val tokenResponse = api.getPagesUploadToken(
                     token = AuthHelper.getBearerToken(account),  
                     email = AuthHelper.getEmail(account),  
@@ -295,52 +304,64 @@ class PagesRepository @Inject constructor(
                 val jwt = tokenResponse.body()?.result?.jwt ?: return@safeApiCall Resource.Error("无法获取资产上传 Token")
 
                 // 3. 【Wrangler 步骤二】把本地解压出的文件转为 Base64 对象批量上传至资源库
-                val assetPayloads = allFiles.map { currentFile ->
-                    val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
-                    val cfHash = manifestMap[relativePath] ?: ""
-                    val base64Str = android.util.Base64.encodeToString(currentFile.readBytes(), android.util.Base64.NO_WRAP)
-                    
-                    val ext = currentFile.extension.lowercase()
-                    val contentType = when (ext) {
-                        "html", "htm"       -> "text/html"
-                        "css"               -> "text/css"
-                        "txt"               -> "text/plain"
-                        "xml"               -> "text/xml"
-                        "js", "mjs", "cjs"  -> "application/javascript"
-                        "json"              -> "application/json"
-                        "map"               -> "application/json"
-                        "wasm"              -> "application/wasm"
-                        "webmanifest"       -> "application/manifest+json"
-                        "png"               -> "image/png"
-                        "jpg", "jpeg"       -> "image/jpeg"
-                        "gif"               -> "image/gif"
-                        "svg"               -> "image/svg+xml"
-                        "webp"              -> "image/webp"
-                        "avif"              -> "image/avif"
-                        "ico"               -> "image/x-icon"
-                        "woff2"             -> "font/woff2"
-                        "woff"              -> "font/woff"
-                        "ttf"               -> "font/ttf"
-                        "otf"               -> "font/otf"
-                        "eot"               -> "application/vnd.ms-fontobject"
-                        "yaml", "yml"       -> "text/yaml"
-                        "toml"              -> "text/toml"
-                        "mp4"               -> "video/mp4"
-                        "webm"              -> "video/webm"
-                        "mp3"               -> "audio/mpeg"
+                if (allFiles.isNotEmpty()) {
+                    val assetPayloads = allFiles.map { currentFile ->
+                        val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
+                        val cfHash = manifestMap[relativePath] ?: ""
+                        val base64Str = android.util.Base64.encodeToString(currentFile.readBytes(), android.util.Base64.NO_WRAP)
+                        
+                        val ext = currentFile.extension.lowercase()
+                        val contentType = when (ext) {
+                            "html", "htm"       -> "text/html"
+                            "css"               -> "text/css"
+                            "txt"               -> "text/plain"
+                            "xml"               -> "text/xml"
+                            "js", "mjs", "cjs"  -> "application/javascript"
+                            "json"              -> "application/json"
+                            "map"               -> "application/json"
+                            "wasm"              -> "application/wasm"
+                            "webmanifest"       -> "application/manifest+json"
+                            "png"               -> "image/png"
+                            "jpg", "jpeg"       -> "image/jpeg"
+                            "gif"               -> "image/gif"
+                            "svg"               -> "image/svg+xml"
+                            "webp"              -> "image/webp"
+                            "avif"              -> "image/avif"
+                            "ico"               -> "image/x-icon"
+                            "woff2"             -> "font/woff2"
+                            "woff"              -> "font/woff"
+                            "ttf"               -> "font/ttf"
+                            "otf"               -> "font/otf"
+                            "eot"               -> "application/vnd.ms-fontobject"
+                            "yaml", "yml"       -> "text/yaml"
+                            "toml"              -> "text/toml"
+                            "mp4"               -> "video/mp4"
+                            "webm"              -> "video/webm"
+                            "mp3"               -> "audio/mpeg"
 
-                        // 兜底配置
-                        else -> android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) 
-                                ?: "application/octet-stream" // 3. 查不到才兜底
+                            // 兜底配置
+                            else -> android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) 
+                                    ?: "application/octet-stream" // 3. 查不到才兜底
+                    }
+
+                        PagesAssetPayload(key = cfHash, value = base64Str, metadata = AssetMeta(contentType))
+                    }
+
+                    // 执行资产库推送
+                    val uploadResponse = api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = assetPayloads)
+                    if (!uploadResponse.isSuccessful) {
+                        return@safeApiCall Resource.Error("资产原子层同步失败，HTTP Code: ${uploadResponse.code()}")
+                    }
                 }
 
-                    PagesAssetPayload(key = cfHash, value = base64Str, metadata = AssetMeta(contentType))
-                }
-
-                // 执行资产库推送
-                val uploadResponse = api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = assetPayloads)
-                if (!uploadResponse.isSuccessful) {
-                    return@safeApiCall Resource.Error("资产原子层同步失败，HTTP Code: ${uploadResponse.code()}")
+                // 3.b 【Wrangler upsert-hashes】更新资产哈希列表，初始化部署会话（即使没有静态资产也需要）
+                val allHashes = manifestMap.values.toList()
+                val upsertResponse = api.upsertPagesAssetHashes(
+                    jwtToken = "Bearer $jwt",
+                    body = PagesUpsertHashesPayload(hashes = allHashes)
+                )
+                if (!upsertResponse.isSuccessful) {
+                    Timber.w("upsert-hashes 返回非成功状态: HTTP ${upsertResponse.code()}，继续尝试部署")
                 }
 
                 // 4. 【Wrangler 步骤三】组装纯清单 Manifest JSON 触发 CDN 全球路由刷新
@@ -349,22 +370,50 @@ class PagesRepository @Inject constructor(
                 }
                 val manifestBody = manifestJson.toRequestBody("application/json".toMediaType())
 
-                // 最终盖章：通知部署完成
-                val response = api.createPagesDeploymentManifestOnly(  
-                    token = AuthHelper.getBearerToken(account),  
-                    email = AuthHelper.getEmail(account),  
-                    apiKey = AuthHelper.getGlobalApiKey(account),  
-                    accountId = account.accountId,  
-                    projectName = projectName,  
-                    manifest = manifestBody
-                )  
+                // 最终盖章：通知部署完成（根据是否有 _worker.js 选择不同接口）
+                val response = if (workerJsFile != null) {
+                    val workerFileSize = workerJsFile!!.length()
+                    Timber.d("workerJsFile 路径: ${workerJsFile!!.absolutePath}")
+                    Timber.d("workerJsFile 文件大小: $workerFileSize 字节")
+                    if (workerFileSize == 0L) {
+                        return@safeApiCall Resource.Error("_worker.js 文件内容为空（0字节），请检查 zip 包中的文件是否完整")
+                    }
+                    // 构建 _worker.bundle: 手动构建 multipart 字节流
+                    val workerBundle = buildWorkerBundle(workerJsFile!!)
+                    Timber.d("_worker.bundle 大小: ${workerBundle.contentLength()} 字节")
+                    val workerBundlePart = MultipartBody.Part.createFormData(
+                        "_worker.bundle", "_worker.bundle", workerBundle
+                    )
+                    api.createPagesDeploymentWithWorker(
+                        token = AuthHelper.getBearerToken(account),
+                        email = AuthHelper.getEmail(account),
+                        apiKey = AuthHelper.getGlobalApiKey(account),
+                        accountId = account.accountId,
+                        projectName = projectName,
+                        manifest = manifestBody,
+                        workerBundle = workerBundlePart
+                    )
+                } else {
+                    api.createPagesDeploymentManifestOnly(
+                        token = AuthHelper.getBearerToken(account),
+                        email = AuthHelper.getEmail(account),
+                        apiKey = AuthHelper.getGlobalApiKey(account),
+                        accountId = account.accountId,
+                        projectName = projectName,
+                        manifest = manifestBody
+                    )
+                }
                   
                 if (response.isSuccessful && response.body()?.success == true) {  
                     response.body()?.result?.let {  
                         Resource.Success(it)  
                     } ?: Resource.Error("部署创建成功，但没有返回结果")  
                 } else {  
-                    Resource.Error("最终部署盖章失败: ${response.message()}")  
+                    val errorBody = response.errorBody()?.string() ?: "无错误响应体"
+                    val apiErrors = response.body()?.errors?.joinToString("; ") { "${it.code}: ${it.message}" }
+                    val errorMsg = "部署失败: HTTP ${response.code()}, ${response.message()}. API错误: $apiErrors. 响应体: $errorBody"
+                    Timber.e(errorMsg)
+                    Resource.Error(errorMsg)  
                 }
             } finally { 
                 tempDir.deleteRecursively() // 彻底清理碎片
@@ -388,6 +437,35 @@ class PagesRepository @Inject constructor(
         }  
     }  
       
+    private fun buildWorkerBundle(workerJsFile: File): RequestBody {
+        val boundary = "----CloudFlareWorkerBundle${System.currentTimeMillis()}----"
+        val metadataJson = """{"main_module":"_worker.js"}"""
+        val workerContent = workerJsFile.readBytes()
+        Timber.d("buildWorkerBundle: 读取到 ${workerContent.size} 字节, 文件路径: ${workerJsFile.absolutePath}")
+
+        val baos = ByteArrayOutputStream()
+        // metadata part
+        baos.write("--$boundary\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("Content-Disposition: form-data; name=\"metadata\"\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("Content-Type: application/json\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("\r\n".toByteArray(Charsets.UTF_8))
+        baos.write(metadataJson.toByteArray(Charsets.UTF_8))
+        baos.write("\r\n".toByteArray(Charsets.UTF_8))
+        // _worker.js part
+        baos.write("--$boundary\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("Content-Disposition: form-data; name=\"_worker.js\"; filename=\"_worker.js\"\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("Content-Type: application/javascript+module\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("\r\n".toByteArray(Charsets.UTF_8))
+        baos.write(workerContent)
+        baos.write("\r\n".toByteArray(Charsets.UTF_8))
+        // closing boundary
+        baos.write("--$boundary--\r\n".toByteArray(Charsets.UTF_8))
+
+        val bundleBytes = baos.toByteArray()
+        Timber.d("buildWorkerBundle: bundle 总大小 ${bundleBytes.size} 字节")
+        return bundleBytes.toRequestBody("multipart/form-data; boundary=$boundary".toMediaType())
+    }
+
     // ==================== Project Configuration Management ====================  
       
     suspend fun updateEnvironmentVariables(  
@@ -638,16 +716,19 @@ class PagesRepository @Inject constructor(
     }
 
     private fun unzip(zipFile: File, targetDir: File) {
+        Timber.d("unzip: zip文件大小=${zipFile.length()}字节, 路径=${zipFile.absolutePath}")
         ZipInputStream(FileInputStream(zipFile)).use { zis ->
             var entry = zis.nextEntry
             while (entry != null) {
                 val newFile = File(targetDir, entry.name)
+                Timber.d("unzip: entry=${entry.name}, size=${entry.size}, compressedSize=${entry.compressedSize}, isDirectory=${entry.isDirectory}")
                 if (entry.isDirectory) {
                     newFile.mkdirs()
                 } else {
                     newFile.parentFile?.mkdirs()
                     newFile.outputStream().use { fos ->
-                        zis.copyTo(fos)
+                        val copied = zis.copyTo(fos)
+                        Timber.d("unzip: 解压 ${entry.name} 完成, 复制了 $copied 字节, 文件大小=${newFile.length()}")
                     }
                 }
                 zis.closeEntry()
