@@ -224,7 +224,10 @@ class PagesViewModel @Inject constructor(
                 }
                 is Resource.Loading -> {}
             }
-            
+
+            // 清理临时 zip 文件
+            file.delete()
+
             _loadingState.value = false
         }
     }
