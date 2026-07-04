@@ -430,21 +430,33 @@ interface CloudFlareApi {
         @Body updateRequest: PagesProjectUpdateRequest
     ): Response<CloudFlareResponse<PagesProjectDetail>>
     
-    /**
-     * Create a Pages deployment via Direct Upload
-     * https://developers.cloudflare.com/api/operations/pages-deployment-create-deployment
-     * Direct Upload 需要 manifest 字段描述文件结构
-     */
-    @Multipart
-    @POST("accounts/{account_id}/pages/projects/{project_name}/deployments")
-    suspend fun createPagesDeployment(
+    // 1. 获取上传资产专用的临时 JWT Token
+    @GET("accounts/{account_id}/pages/projects/{project_name}/upload-token")
+    suspend fun getPagesUploadToken(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
-        @Path("project_name") projectName: String,
-        @Part("manifest") manifest: RequestBody,
-        @Part file: MultipartBody.Part
+        @Path("project_name") projectName: String
+    ): Response<CloudFlareResponse<PagesTokenPayload>>
+
+    // 2. 将文件转换为 Base64 独立上载到 Cloudflare 的资产原子库中（注意：此处使用专属的全局全路径 URL）
+    @POST("https://api.cloudflare.com/client/v4/pages/assets/upload")
+    suspend fun uploadPagesAssets(
+        @Header("Authorization") jwtToken: String, // 格式必须为: "Bearer <返回的jwt>"
+        @Body assets: List<PagesAssetPayload>
+    ): Response<ResponseBody>
+
+    // 3. 完美的最终盖章接口：只提交 Manifest 清单映射，不携带任何实体文件
+    @Multipart
+    @POST("accounts/{account_id}/pages/projects/{project_name}/deployments")
+    suspend fun createPagesDeploymentManifestOnly(
+       @Header("Authorization") token: String?,
+       @Header("X-Auth-Email") email: String?,
+       @Header("X-Auth-Key") apiKey: String?,
+       @Path("account_id") accountId: String,
+       @Path("project_name") projectName: String,
+       @Part("manifest") manifest: RequestBody
     ): Response<CloudFlareResponse<PagesDeployment>>
     
     // ==================== Pages Domains ====================

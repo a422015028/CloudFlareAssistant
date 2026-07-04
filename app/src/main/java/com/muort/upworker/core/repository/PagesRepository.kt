@@ -7,9 +7,15 @@ import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
+import java.io.File
+import java.io.FileInputStream
+import java.security.MessageDigest
+import java.util.zip.ZipInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,603 +23,653 @@ import javax.inject.Singleton
 class PagesRepository @Inject constructor(
     private val api: CloudFlareApi
 ) {
-    
-    suspend fun listProjects(account: Account): Resource<List<PagesProject>> = 
-        withContext(Dispatchers.IO) {
-            safeApiCall {
-                val response = api.listPagesProjects(
-                    token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                    accountId = account.accountId
-                )
-                
-                if (response.isSuccessful && response.body()?.success == true) {
-                    Resource.Success(response.body()?.result ?: emptyList())
-                } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                        ?: response.message()
-                    Resource.Error("Failed to list projects: $errorMsg")
-                }
-            }
-        }
-    
-    suspend fun createProject(
-        account: Account,
-        name: String,
+
+    suspend fun listProjects(account: Account): Resource<List<PagesProject>> =   
+        withContext(Dispatchers.IO) {  
+            safeApiCall {  
+                val response = api.listPagesProjects(  
+                    token = AuthHelper.getBearerToken(account),  
+                    email = AuthHelper.getEmail(account),  
+                    apiKey = AuthHelper.getGlobalApiKey(account),  
+                    accountId = account.accountId  
+                )  
+                  
+                if (response.isSuccessful && response.body()?.success == true) {  
+                    Resource.Success(response.body()?.result ?: emptyList())  
+                } else {  
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                        ?: response.message()  
+                    Resource.Error("Failed to list projects: $errorMsg")  
+                }  
+            }  
+        }  
+      
+    suspend fun createProject(  
+        account: Account,  
+        name: String,  
         productionBranch: String = "main"
-    ): Resource<PagesProject> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val response = api.createPagesProject(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                project = PagesProjectRequest(
-                    name = name,
+    ): Resource<PagesProject> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.createPagesProject(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                project = PagesProjectRequest(  
+                    name = name,  
                     productionBranch = productionBranch
+                )  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                response.body()?.result?.let {  
+                    Resource.Success(it)  
+                } ?: Resource.Error("Project created but no result returned")  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to create project: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun deleteProject(  
+        account: Account,  
+        projectName: String  
+    ): Resource<Unit> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.deletePagesProject(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                Resource.Success(Unit)  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to delete project: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun getProject(  
+        account: Account,  
+        projectName: String  
+    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.getPagesProject(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                response.body()?.result?.let {  
+                    Resource.Success(it)  
+                } ?: Resource.Error("Project not found")  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to get project: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun listDeployments(  
+        account: Account,  
+        projectName: String  
+    ): Resource<List<PagesDeployment>> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.listPagesDeployments(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                Resource.Success(response.body()?.result ?: emptyList())  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to list deployments: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun retryDeployment(  
+        account: Account,  
+        projectName: String,  
+        deploymentId: String  
+    ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.retryPagesDeployment(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName,  
+                deploymentId = deploymentId  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                response.body()?.result?.let {  
+                    Resource.Success(it)  
+                } ?: Resource.Error("Deployment retried but no result returned")  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to retry deployment: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun deleteDeployment(  
+        account: Account,  
+        projectName: String,  
+        deploymentId: String  
+    ): Resource<Unit> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.deletePagesDeployment(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName,  
+                deploymentId = deploymentId  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                Resource.Success(Unit)  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to delete deployment: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun rollbackDeployment(  
+        account: Account,  
+        projectName: String,  
+        deploymentId: String  
+    ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.rollbackPagesDeployment(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName,  
+                deploymentId = deploymentId  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                response.body()?.result?.let {  
+                    Resource.Success(it)  
+                } ?: Resource.Error("Deployment rolled back but no result returned")  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to rollback deployment: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun createDeployment(  
+        account: Account,  
+        projectName: String,  
+        branch: String,  
+        file: java.io.File  
+    ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            if (!file.name.endsWith(".zip", ignoreCase = true)) {  
+                return@safeApiCall Resource.Error("仅支持 .zip 文件部署。")  
+            }  
+            if (!file.exists()) {  
+                return@safeApiCall Resource.Error("文件不存在")  
+            }  
+              
+            // 1. 校验并创建项目
+            val projectExists = checkProjectExists(account, projectName)  
+            if (!projectExists) {  
+                createProject(account, projectName, branch)
+            }  
+
+            val tempDir = File(file.parentFile, "cf_pages_unzipped_${System.currentTimeMillis()}")
+            tempDir.mkdirs()
+
+            try {
+                unzip(file, tempDir)
+
+                // 智能穿透嵌套目录
+                var baseDir = tempDir
+                while (true) {
+                    val validFiles = baseDir.listFiles()?.filter { 
+                        it.name != ".DS_Store" && it.name != "__MACOSX" && !it.name.startsWith(".")
+                    }
+                    if (validFiles != null && validFiles.size == 1 && validFiles[0].isDirectory) {
+                        baseDir = validFiles[0]
+                    } else {
+                        break
+                    }
+                }
+
+                val allFiles = mutableListOf<File>()
+                val manifestMap = mutableMapOf<String, String>()
+
+                fun collectFiles(currentFile: File) {
+                    if (currentFile.isDirectory) {
+                        currentFile.listFiles()?.forEach { collectFiles(it) }
+                    } else {
+                        val name = currentFile.name
+                        if (name == ".DS_Store" || currentFile.absolutePath.contains("__MACOSX") || name.startsWith(".")) {
+                            return
+                        }
+                        allFiles.add(currentFile)
+                        // 注意：Wrangler 规范中，此处需要添加领先斜杠 "/" 来做 CDN 映射路径！
+                        val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
+                        val md5 = getMd5Hash(currentFile)
+                        manifestMap[relativePath] = md5
+                    }
+                }
+                baseDir.listFiles()?.forEach { collectFiles(it) }
+
+                if (allFiles.isEmpty()) return@safeApiCall Resource.Error("压缩包内无有效文件")
+
+                // 2. 【Wrangler 步骤一】向 Cloudflare 申请专属资源上传 JWT Token
+                val tokenResponse = api.getPagesUploadToken(
+                    token = AuthHelper.getBearerToken(account),  
+                    email = AuthHelper.getEmail(account),  
+                    apiKey = AuthHelper.getGlobalApiKey(account),  
+                    accountId = account.accountId,  
+                    projectName = projectName
                 )
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Resource.Success(it)
-                } ?: Resource.Error("Project created but no result returned")
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to create project: $errorMsg")
+                val jwt = tokenResponse.body()?.result?.jwt ?: return@safeApiCall Resource.Error("无法获取资产上传 Token")
+
+                // 3. 【Wrangler 步骤二】把本地解压出的文件转为 Base64 对象批量上传至资源库
+                val assetPayloads = allFiles.map { currentFile ->
+                    val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
+                    val md5 = manifestMap[relativePath] ?: ""
+                    val base64Str = android.util.Base64.encodeToString(currentFile.readBytes(), android.util.Base64.NO_WRAP)
+                    
+                    val contentType = when (currentFile.extension.lowercase()) {
+                        // 文本与页面结构
+                        "html", "htm" -> "text/html"
+                        "css"         -> "text/css"
+                        "txt"         -> "text/plain"
+                        "xml"         -> "text/xml"
+
+                        // 核心脚本与数据
+                        "js", "mjs"   -> "application/javascript"
+                        "json"        -> "application/json"
+                        "map"         -> "application/json" // 源码映射文件 SourceMap
+                        "wasm"        -> "application/wasm" // WebAssembly 组件（非常重要）
+
+                        // 图片与图标
+                        "png"         -> "image/png"
+                        "jpg", "jpeg" -> "image/jpeg"
+                        "gif"         -> "image/gif"
+                        "svg"         -> "image/svg+xml"
+                        "webp"        -> "image/webp"  // 现代网页标配图片格式
+                        "avif"        -> "image/avif"  // 下一代高效图片格式
+                        "ico"         -> "image/x-icon" // 网站标配 Favicon 图标
+
+                        // 网页字体（如果缺少，页面图标/特殊字体会变方块）
+                        "woff2"       -> "font/woff2"
+                        "woff"        -> "font/woff"
+                        "ttf"         -> "font/ttf"
+                        "otf"         -> "font/otf"
+                        "eot"         -> "application/vnd.ms-fontobject"
+
+                        // 视音频媒体
+                        "mp4"         -> "video/mp4"
+                        "webm"        -> "video/webm"
+                        "mp3"         -> "audio/mpeg"
+
+                        // 兜底配置
+                        else          -> "application/octet-stream"
+                }
+
+                    PagesAssetPayload(key = md5, value = base64Str, metadata = AssetMeta(contentType))
+                }
+
+                // 执行资产库推送
+                val uploadResponse = api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = assetPayloads)
+                if (!uploadResponse.isSuccessful) {
+                    return@safeApiCall Resource.Error("资产原子层同步失败，HTTP Code: ${uploadResponse.code()}")
+                }
+
+                // 4. 【Wrangler 步骤三】组装纯清单 Manifest JSON 触发 CDN 全球路由刷新
+                val manifestJson = manifestMap.entries.joinToString(",", "{", "}") { entry ->
+                   "\"${entry.key}\":\"${entry.value}\""
+                }
+                val manifestBody = manifestJson.toRequestBody("application/json".toMediaType())
+
+                // 最终盖章：通知部署完成
+                val response = api.createPagesDeploymentManifestOnly(  
+                    token = AuthHelper.getBearerToken(account),  
+                    email = AuthHelper.getEmail(account),  
+                    apiKey = AuthHelper.getGlobalApiKey(account),  
+                    accountId = account.accountId,  
+                    projectName = projectName,  
+                    manifest = manifestBody
+                )  
+                  
+                if (response.isSuccessful && response.body()?.success == true) {  
+                    response.body()?.result?.let {  
+                        Resource.Success(it)  
+                    } ?: Resource.Error("部署创建成功，但没有返回结果")  
+                } else {  
+                    Resource.Error("最终部署盖章失败: ${response.message()}")  
+                }
+            } finally { 
+                tempDir.deleteRecursively() // 彻底清理碎片
             }
-        }
+        }  
+    } 
+      
+    private suspend fun checkProjectExists(account: Account, projectName: String): Boolean {  
+        return try {  
+            val response = api.getPagesProject(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName  
+            )  
+            response.isSuccessful && response.body()?.success == true  
+        } catch (e: Exception) {  
+            Timber.e(e, "Error checking if project exists")  
+            false  
+        }  
+    }  
+      
+    // ==================== Project Configuration Management ====================  
+      
+    suspend fun updateEnvironmentVariables(  
+        account: Account,  
+        projectName: String,  
+        environment: String,  
+        variables: Map<String, Pair<String, String>?>  
+    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val envVarsMap = variables.mapValues { (_, value) ->  
+                value?.let { (type, varValue) ->  
+                    EnvVarUpdate(type = type, value = varValue)  
+                }  
+            }  
+              
+            val envConfig = EnvironmentConfigUpdate(envVars = envVarsMap)  
+              
+            val deploymentConfigs = if (environment == "production") {  
+                DeploymentConfigsUpdate(production = envConfig)  
+            } else {  
+                DeploymentConfigsUpdate(preview = envConfig)  
+            }  
+              
+            val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)  
+              
+            val response = api.updatePagesProject(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName,  
+                updateRequest = updateRequest  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                response.body()?.result?.let {  
+                    Resource.Success(it)  
+                } ?: Resource.Error("Variables updated but no result returned")  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to update variables: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun updateKvBindings(  
+        account: Account,  
+        projectName: String,  
+        environment: String,  
+        bindings: Map<String, String?>  
+    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val kvNamespacesMap = bindings.mapValues { (_, namespaceId) ->  
+                namespaceId?.let { KvBindingUpdate(namespaceId = it) }  
+            }  
+              
+            val envConfig = EnvironmentConfigUpdate(kvNamespaces = kvNamespacesMap)  
+              
+            val deploymentConfigs = if (environment == "production") {  
+                DeploymentConfigsUpdate(production = envConfig)  
+            } else {  
+                DeploymentConfigsUpdate(preview = envConfig)  
+            }  
+              
+            val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)  
+              
+            val response = api.updatePagesProject(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName,  
+                updateRequest = updateRequest  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                response.body()?.result?.let {  
+                    Resource.Success(it)  
+                } ?: Resource.Error("KV bindings updated but no result returned")  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to update KV bindings: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun updateR2Bindings(  
+        account: Account,  
+        projectName: String,  
+        environment: String,  
+        bindings: Map<String, String?>  
+    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val r2BucketsMap = bindings.mapValues { (_, bucketName) ->  
+                bucketName?.let { R2BindingUpdate(name = it) }  
+            }  
+              
+            val envConfig = EnvironmentConfigUpdate(r2Buckets = r2BucketsMap)  
+              
+            val deploymentConfigs = if (environment == "production") {  
+                DeploymentConfigsUpdate(production = envConfig)  
+            } else {  
+                DeploymentConfigsUpdate(preview = envConfig)  
+            }  
+              
+            val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)  
+              
+            val response = api.updatePagesProject(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName,  
+                updateRequest = updateRequest  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                response.body()?.result?.let {  
+                    Resource.Success(it)  
+                } ?: Resource.Error("R2 bindings updated but no result returned")  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to update R2 bindings: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun updateD1Bindings(  
+        account: Account,  
+        projectName: String,  
+        environment: String,  
+        bindings: Map<String, String?>  
+    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val d1DatabasesMap = bindings.mapValues { (_, databaseId) ->  
+                databaseId?.let { D1BindingUpdate(id = it) }  
+            }  
+              
+            val envConfig = EnvironmentConfigUpdate(d1Databases = d1DatabasesMap)  
+              
+            val deploymentConfigs = if (environment == "production") {  
+                DeploymentConfigsUpdate(production = envConfig)  
+            } else {  
+                DeploymentConfigsUpdate(preview = envConfig)  
+            }  
+              
+            val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)  
+              
+            val response = api.updatePagesProject(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName,  
+                updateRequest = updateRequest  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                response.body()?.result?.let {  
+                    Resource.Success(it)  
+                } ?: Resource.Error("D1 bindings updated but no result returned")  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to update D1 bindings: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    // ==================== Pages Domains ====================  
+      
+    suspend fun listDomains(  
+        account: Account,  
+        projectName: String  
+    ): Resource<List<PagesDomain>> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.listPagesDomains(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                Resource.Success(response.body()?.result ?: emptyList())  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to list domains: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun addDomain(  
+        account: Account,  
+        projectName: String,  
+        domainName: String  
+    ): Resource<PagesDomain> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.addPagesDomain(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName,  
+                request = PagesDomainRequest(name = domainName)  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                response.body()?.result?.let {  
+                    Resource.Success(it)  
+                } ?: Resource.Error("Domain added but no result returned")  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to add domain: $errorMsg")  
+            }  
+        }  
+    }  
+      
+    suspend fun deleteDomain(  
+        account: Account,  
+        projectName: String,  
+        domainName: String  
+    ): Resource<Unit> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.deletePagesDomain(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName,  
+                domainName = domainName  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                Resource.Success(Unit)  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to delete domain: $errorMsg")  
+            }  
+        }  
     }
-    
-    suspend fun deleteProject(
-        account: Account,
-        projectName: String
-    ): Resource<Unit> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val response = api.deletePagesProject(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                Resource.Success(Unit)
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to delete project: $errorMsg")
-            }
-        }
-    }
-    
-    suspend fun getProject(
-        account: Account,
-        projectName: String
-    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val response = api.getPagesProject(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Resource.Success(it)
-                } ?: Resource.Error("Project not found")
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to get project: $errorMsg")
-            }
-        }
-    }
-    
-    suspend fun listDeployments(
-        account: Account,
-        projectName: String
-    ): Resource<List<PagesDeployment>> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val response = api.listPagesDeployments(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                Resource.Success(response.body()?.result ?: emptyList())
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to list deployments: $errorMsg")
-            }
-        }
-    }
-    
-    suspend fun retryDeployment(
-        account: Account,
-        projectName: String,
-        deploymentId: String
-    ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val response = api.retryPagesDeployment(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName,
-                deploymentId = deploymentId
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Resource.Success(it)
-                } ?: Resource.Error("Deployment retried but no result returned")
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to retry deployment: $errorMsg")
-            }
-        }
-    }
-    
-    suspend fun deleteDeployment(
-        account: Account,
-        projectName: String,
-        deploymentId: String
-    ): Resource<Unit> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val response = api.deletePagesDeployment(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName,
-                deploymentId = deploymentId
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                Resource.Success(Unit)
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to delete deployment: $errorMsg")
-            }
-        }
-    }
-    
-    suspend fun rollbackDeployment(
-        account: Account,
-        projectName: String,
-        deploymentId: String
-    ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val response = api.rollbackPagesDeployment(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName,
-                deploymentId = deploymentId
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Resource.Success(it)
-                } ?: Resource.Error("Deployment rolled back but no result returned")
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to rollback deployment: $errorMsg")
-            }
-        }
-    }
-    
-    suspend fun createDeployment(
-        account: Account,
-        projectName: String,
-        branch: String,
-        file: java.io.File
-    ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            Timber.d("Creating deployment for project: $projectName, branch: $branch, file: ${file.name}")
-            
-            // CloudFlare Pages 只支持 .zip 文件部署
-            if (!file.name.endsWith(".zip", ignoreCase = true)) {
-                return@safeApiCall Resource.Error("仅支持 .zip 文件部署。请上传包含构建输出的 .zip 文件。")
-            }
-            
-            if (!file.exists()) {
-                return@safeApiCall Resource.Error("文件不存在: ${file.absolutePath}")
-            }
-            
-            Timber.d("File exists: ${file.exists()}, size: ${file.length()} bytes")
-            
-            // 先检查项目是否存在，如果不存在则创建
-            val projectExists = checkProjectExists(account, projectName)
-            if (!projectExists) {
-                Timber.d("Project $projectName does not exist, creating it first...")
-                when (val createResult = createProject(account, projectName, branch)) {
-                    is Resource.Success -> {
-                        Timber.d("Project created successfully: ${createResult.data.name}")
+
+    private fun unzip(zipFile: File, targetDir: File) {
+        ZipInputStream(FileInputStream(zipFile)).use { zis ->
+            var entry = zis.nextEntry
+            while (entry != null) {
+                val newFile = File(targetDir, entry.name)
+                if (entry.isDirectory) {
+                    newFile.mkdirs()
+                } else {
+                    newFile.parentFile?.mkdirs()
+                    newFile.outputStream().use { fos ->
+                        zis.copyTo(fos)
                     }
-                    is Resource.Error -> {
-                        return@safeApiCall Resource.Error("无法创建项目：${createResult.message}")
-                    }
-                    is Resource.Loading -> {}
                 }
-            }
-            
-            // 创建 manifest - CloudFlare Pages 需要这个字段来描述上传的文件
-            // manifest 是一个 JSON 字符串，描述文件路径映射
-            val manifestJson = """
-                {
-                  "/": "${file.name}"
-                }
-            """.trimIndent()
-            
-            val manifestBody = manifestJson.toRequestBody("application/json".toMediaType())
-            
-            val requestBody = file.asRequestBody("application/octet-stream".toMediaType())
-            
-            // 文件 part 名称必须与 manifest 中的路径对应
-            val filePart = okhttp3.MultipartBody.Part.createFormData(
-                file.name, // 使用文件名作为 part name
-                file.name,
-                requestBody
-            )
-            
-            Timber.d("Sending deployment request to CloudFlare API (Direct Upload)...")
-            Timber.d("File: ${file.name}, Size: ${file.length()} bytes")
-            Timber.d("Manifest: $manifestJson")
-            Timber.d("Project: $projectName, Account: ${account.accountId}")
-            
-            val response = api.createPagesDeployment(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName,
-                manifest = manifestBody,
-                file = filePart
-            )
-            
-            Timber.d("API Response - Code: ${response.code()}, Success: ${response.isSuccessful}")
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Timber.d("Deployment created successfully: ${it.id}")
-                    Resource.Success(it)
-                } ?: Resource.Error("部署已创建但未返回结果")
-            } else {
-                val body = response.body()
-                val errors = body?.errors
-                val errorMsg = errors?.firstOrNull()?.message ?: response.message()
-                
-                Timber.e("Deployment failed - Code: ${response.code()}")
-                Timber.e("Response body: ${response.errorBody()?.string()}")
-                errors?.forEach { error ->
-                    Timber.e("Error: code=${error.code}, message=${error.message}")
-                }
-                
-                // 详细的错误信息用于调试
-                val detailedError = buildString {
-                    append("HTTP ${response.code()}: $errorMsg")
-                    errors?.forEach { error ->
-                        append("\n- ${error.code}: ${error.message}")
-                    }
-                }
-                Timber.e("Complete error details: $detailedError")
-                
-                val friendlyMsg = when (response.code()) {
-                    400 -> "请求参数错误：$errorMsg\n\n详细信息：\n$detailedError"
-                    401 -> "认证失败：API Token 无效或已过期"
-                    403 -> "权限不足：API Token 没有部署 Pages 项目的权限"
-                    404 -> "项目不存在（这不应该发生，因为已自动创建）"
-                    413 -> "文件太大：请确保 .zip 文件小于 25MB"
-                    else -> "部署失败：$errorMsg"
-                }
-                
-                Resource.Error(friendlyMsg)
+                zis.closeEntry()
+                entry = zis.nextEntry
             }
         }
     }
-    
-    private suspend fun checkProjectExists(account: Account, projectName: String): Boolean {
-        return try {
-            val response = api.getPagesProject(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName
-            )
-            response.isSuccessful && response.body()?.success == true
-        } catch (e: Exception) {
-            Timber.e(e, "Error checking if project exists")
-            false
-        }
-    }
-    
-    // ==================== Project Configuration Management ====================
-    
-    /**
-     * Update Pages project environment variables
-     * @param environment "production" or "preview"
-     * @param variables Map of variable name to (type, value) pairs
-     *                 To delete a variable, set its value to null
-     */
-    suspend fun updateEnvironmentVariables(
-        account: Account,
-        projectName: String,
-        environment: String,  // "production" or "preview"
-        variables: Map<String, Pair<String, String>?>  // Map<name, (type, value)?>
-    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            // Convert variables to EnvVarUpdate map
-            val envVarsMap = variables.mapValues { (_, value) ->
-                value?.let { (type, varValue) ->
-                    EnvVarUpdate(type = type, value = varValue)
-                }
-            }
-            
-            val envConfig = EnvironmentConfigUpdate(envVars = envVarsMap)
-            
-            val deploymentConfigs = if (environment == "production") {
-                DeploymentConfigsUpdate(production = envConfig)
-            } else {
-                DeploymentConfigsUpdate(preview = envConfig)
-            }
-            
-            val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)
-            
-            val response = api.updatePagesProject(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName,
-                updateRequest = updateRequest
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Resource.Success(it)
-                } ?: Resource.Error("Variables updated but no result returned")
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to update variables: $errorMsg")
+
+    private fun getMd5Hash(file: File): String {
+        val digest = MessageDigest.getInstance("MD5")
+        FileInputStream(file).use { fis ->
+            val buffer = ByteArray(8192)
+            var bytesRead = fis.read(buffer)
+            while (bytesRead != -1) {
+                digest.update(buffer, 0, bytesRead)
+                bytesRead = fis.read(buffer)
             }
         }
-    }
-    
-    /**
-     * Update Pages project KV namespace bindings
-     * @param environment "production" or "preview"
-     * @param bindings Map of binding name to namespace ID
-     *                To delete a binding, set its value to null
-     */
-    suspend fun updateKvBindings(
-        account: Account,
-        projectName: String,
-        environment: String,
-        bindings: Map<String, String?>  // Map<binding_name, namespace_id?>
-    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val kvNamespacesMap = bindings.mapValues { (_, namespaceId) ->
-                namespaceId?.let { KvBindingUpdate(namespaceId = it) }
-            }
-            
-            val envConfig = EnvironmentConfigUpdate(kvNamespaces = kvNamespacesMap)
-            
-            val deploymentConfigs = if (environment == "production") {
-                DeploymentConfigsUpdate(production = envConfig)
-            } else {
-                DeploymentConfigsUpdate(preview = envConfig)
-            }
-            
-            val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)
-            
-            val response = api.updatePagesProject(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName,
-                updateRequest = updateRequest
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Resource.Success(it)
-                } ?: Resource.Error("KV bindings updated but no result returned")
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to update KV bindings: $errorMsg")
-            }
-        }
-    }
-    
-    /**
-     * Update Pages project R2 bucket bindings
-     * @param environment "production" or "preview"
-     * @param bindings Map of binding name to bucket name
-     *                To delete a binding, set its value to null
-     */
-    suspend fun updateR2Bindings(
-        account: Account,
-        projectName: String,
-        environment: String,
-        bindings: Map<String, String?>  // Map<binding_name, bucket_name?>
-    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val r2BucketsMap = bindings.mapValues { (_, bucketName) ->
-                bucketName?.let { R2BindingUpdate(name = it) }
-            }
-            
-            val envConfig = EnvironmentConfigUpdate(r2Buckets = r2BucketsMap)
-            
-            val deploymentConfigs = if (environment == "production") {
-                DeploymentConfigsUpdate(production = envConfig)
-            } else {
-                DeploymentConfigsUpdate(preview = envConfig)
-            }
-            
-            val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)
-            
-            val response = api.updatePagesProject(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName,
-                updateRequest = updateRequest
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Resource.Success(it)
-                } ?: Resource.Error("R2 bindings updated but no result returned")
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to update R2 bindings: $errorMsg")
-            }
-        }
-    }
-    
-    /**
-     * Update Pages project D1 database bindings
-     * @param environment "production" or "preview"
-     * @param bindings Map of binding name to database ID
-     *                To delete a binding, set its value to null
-     */
-    suspend fun updateD1Bindings(
-        account: Account,
-        projectName: String,
-        environment: String,
-        bindings: Map<String, String?>  // Map<binding_name, database_id?>
-    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val d1DatabasesMap = bindings.mapValues { (_, databaseId) ->
-                databaseId?.let { D1BindingUpdate(id = it) }
-            }
-            
-            val envConfig = EnvironmentConfigUpdate(d1Databases = d1DatabasesMap)
-            
-            val deploymentConfigs = if (environment == "production") {
-                DeploymentConfigsUpdate(production = envConfig)
-            } else {
-                DeploymentConfigsUpdate(preview = envConfig)
-            }
-            
-            val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)
-            
-            val response = api.updatePagesProject(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName,
-                updateRequest = updateRequest
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Resource.Success(it)
-                } ?: Resource.Error("D1 bindings updated but no result returned")
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to update D1 bindings: $errorMsg")
-            }
-        }
-    }
-    
-    // ==================== Pages Domains ====================
-    
-    suspend fun listDomains(
-        account: Account,
-        projectName: String
-    ): Resource<List<PagesDomain>> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val response = api.listPagesDomains(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                Resource.Success(response.body()?.result ?: emptyList())
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to list domains: $errorMsg")
-            }
-        }
-    }
-    
-    suspend fun addDomain(
-        account: Account,
-        projectName: String,
-        domainName: String
-    ): Resource<PagesDomain> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val response = api.addPagesDomain(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName,
-                request = PagesDomainRequest(name = domainName)
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                response.body()?.result?.let {
-                    Resource.Success(it)
-                } ?: Resource.Error("Domain added but no result returned")
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to add domain: $errorMsg")
-            }
-        }
-    }
-    
-    suspend fun deleteDomain(
-        account: Account,
-        projectName: String,
-        domainName: String
-    ): Resource<Unit> = withContext(Dispatchers.IO) {
-        safeApiCall {
-            val response = api.deletePagesDomain(
-                token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                accountId = account.accountId,
-                projectName = projectName,
-                domainName = domainName
-            )
-            
-            if (response.isSuccessful && response.body()?.success == true) {
-                Resource.Success(Unit)
-            } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Resource.Error("Failed to delete domain: $errorMsg")
-            }
-        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 }

@@ -278,6 +278,14 @@ data class KvKey(
 )
 
 // ==================== Pages ====================
+data class PagesTokenPayload(val jwt: String)
+data class PagesAssetPayload(
+    val key: String,         // 文件的 MD5 哈希
+    val value: String,       // 文件的 Base64 编码字符串
+    val metadata: AssetMeta, 
+    val base64: Boolean = true
+)
+data class AssetMeta(val contentType: String)
 
 data class PagesProject(
     @SerializedName("id") val id: String,
