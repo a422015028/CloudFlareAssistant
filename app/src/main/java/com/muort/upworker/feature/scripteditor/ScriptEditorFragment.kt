@@ -5,8 +5,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -99,6 +97,8 @@ class ScriptEditorFragment : Fragment() {
     @Suppress("DEPRECATION")
     private fun setupWebView() {
         binding.webView.apply {
+            // 软件渲染：避免Fragment生命周期变化时GPU渲染表面被回收导致闪屏
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null)
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
@@ -297,15 +297,20 @@ class ScriptEditorFragment : Fragment() {
         }
     }
     
+    private var lastAppliedDarkMode: Boolean? = null
+
     private fun setEditorTheme() {
         val isDarkMode = when (resources.configuration.uiMode and 
             android.content.res.Configuration.UI_MODE_NIGHT_MASK) {
             android.content.res.Configuration.UI_MODE_NIGHT_YES -> true
             else -> false
         }
+        // 只在主题真正变化时才操作WebView，避免不必要的重绘导致闪屏
+        if (lastAppliedDarkMode == isDarkMode) return
+        lastAppliedDarkMode = isDarkMode
+
         val bgColor = if (isDarkMode) 0xFF282a36.toInt() else 0xFFFFFFFF.toInt()
         binding.webView.setBackgroundColor(bgColor)
-        binding.flashShield.setBackgroundColor(bgColor)
         executeJavaScript("setTheme($isDarkMode)")
     }
     
@@ -546,47 +551,18 @@ class ScriptEditorFragment : Fragment() {
                 lastLayoutWidth = width
                 lastLayoutHeight = height
                 if (isEditorReady) {
-                    // 显示遮罩避免分屏/尺寸变化时闪烁
-                    b.flashShield.visibility = View.VISIBLE
                     b.webView.evaluateJavascript("doLayout()", null)
-                    b.webView.postDelayed({
-                        _binding?.flashShield?.visibility = View.GONE
-                    }, 150)
                 }
             }
         }
     }
 
-    private var flashShieldHandler: Handler? = null
-    private var flashShieldRunnable: Runnable? = null
-
-    override fun onPause() {
-        super.onPause()
-        // 显示遮罩，遮盖恢复时的闪屏
-        if (_binding != null) {
-            binding.flashShield.visibility = View.VISIBLE
-        }
-        // 取消可能存在的延迟隐藏
-        flashShieldRunnable?.let { flashShieldHandler?.removeCallbacks(it) }
-    }
-
     override fun onResume() {
         super.onResume()
         setEditorTheme()
-        // 延迟隐藏遮罩，等WebView渲染完成
-        if (binding.flashShield.visibility == View.VISIBLE) {
-            flashShieldHandler = flashShieldHandler ?: Handler(Looper.getMainLooper())
-            flashShieldRunnable = Runnable {
-                _binding?.let { it.flashShield.visibility = View.GONE }
-            }
-            flashShieldHandler?.postDelayed(flashShieldRunnable!!, 200)
-        }
     }
-    
+
     override fun onDestroyView() {
-        flashShieldRunnable?.let { flashShieldHandler?.removeCallbacks(it) }
-        flashShieldHandler = null
-        flashShieldRunnable = null
         binding.webView.apply {
             stopLoading()
             removeJavascriptInterface("AndroidBridge")

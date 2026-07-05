@@ -240,7 +240,9 @@
             if (!editor) return;
             if (layoutDebounceTimer) clearTimeout(layoutDebounceTimer);
             layoutDebounceTimer = setTimeout(function() {
-                try { editor.refresh(); } catch (e) {}
+                requestAnimationFrame(function() {
+                    try { editor.refresh(); } catch (e) {}
+                });
             }, 50);
         }
 
