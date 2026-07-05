@@ -1085,4 +1085,72 @@ class WorkerRepository @Inject constructor(
             }
         }
     }
+
+    suspend fun createTail(account: Account, scriptName: String): Resource<TailResult> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.createTail(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    scriptName = scriptName,
+                    body = emptyMap()
+                )
+                
+                if (response.isSuccessful && response.body()?.success == true) {
+                    response.body()?.result?.let {
+                        Resource.Success(it)
+                    } ?: Resource.Error("创建日志通道失败: 无返回结果")
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                        ?: response.message()
+                    Resource.Error("创建日志通道失败: $errorMsg")
+                }
+            }
+        }
+
+    suspend fun listSchedules(account: Account, scriptName: String): Resource<List<Schedule>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.listSchedules(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    scriptName = scriptName
+                )
+                
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()?.result?.schedules ?: emptyList())
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                        ?: response.message()
+                    Resource.Error("获取触发器列表失败: $errorMsg")
+                }
+            }
+        }
+
+    suspend fun updateSchedules(account: Account, scriptName: String, schedules: List<String>): Resource<List<Schedule>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val request = schedules.map { ScheduleRequest(it) }
+                val response = api.updateSchedules(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    scriptName = scriptName,
+                    schedules = request
+                )
+                
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()?.result?.schedules ?: emptyList())
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                        ?: response.message()
+                    Resource.Error("更新触发器失败: $errorMsg")
+                }
+            }
+        }
 }

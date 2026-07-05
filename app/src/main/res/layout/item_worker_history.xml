@@ -92,20 +92,6 @@
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/rollbackBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="回滚"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
-                app:icon="@android:drawable/ic_media_play"
-                app:iconSize="14dp"
-                app:iconPadding="2dp" />
-
-            <com.google.android.material.button.MaterialButton
                 android:id="@+id/deleteBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -114,7 +100,6 @@
                 android:minWidth="48dp"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                android:layout_marginStart="4dp"
                 style="@style/Widget.Material3.Button.TextButton.Icon"
                 app:icon="@android:drawable/ic_delete"
                 app:iconSize="14dp"

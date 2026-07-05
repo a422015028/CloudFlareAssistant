@@ -29,6 +29,7 @@ import com.muort.upworker.core.model.DEFAULT_COMPATIBILITY_DATE
 import com.muort.upworker.core.repository.KvRepository
 import com.muort.upworker.core.repository.R2Repository
 import com.muort.upworker.core.repository.D1Repository
+import com.muort.upworker.core.repository.AccountRepository
 import timber.log.Timber
 import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.DialogAddSecretBinding
@@ -76,6 +77,9 @@ class WorkerFragment : Fragment() {
     
     @Inject
     lateinit var d1Repository: D1Repository
+    
+    @Inject
+    lateinit var accountRepository: AccountRepository
     
     private var selectedFile: File? = null
     private lateinit var scriptsAdapter: WorkerScriptsAdapter
@@ -163,6 +167,12 @@ class WorkerFragment : Fragment() {
             },
             onEditClick = { script ->
                 editScript(script)
+            },
+            onTriggerClick = { script ->
+                showBuildTriggersDialog(script)
+            },
+            onLogsClick = { script ->
+                showWorkerLogs(script)
             },
             onConfigKvClick = { script ->
                 showConfigKvBindingsDialog(script)
@@ -1322,9 +1332,6 @@ class WorkerFragment : Fragment() {
                             onItemClick = { version ->
                                 showVersionDetailDialog(script, version, runningVersionId == version.id)
                             },
-                            onRollbackClick = { version ->
-                                showRollbackConfirmDialog(script, version)
-                            },
                             onDeleteClick = { version ->
                                 showDeleteVersionConfirmDialog(script, version)
                             }
@@ -1357,20 +1364,6 @@ class WorkerFragment : Fragment() {
         }
     }
     
-    private fun showRollbackConfirmDialog(script: WorkerScript, version: WorkerVersion) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("回滚版本")
-            .setMessage("确定要回滚到版本 #${version.number} 吗？")
-            .setPositiveButton("回滚") { _, _ ->
-                val account = accountViewModel.defaultAccount.value
-                if (account != null) {
-                    viewModel.deployWorkerVersion(account, script.id, version.id)
-                }
-            }
-            .setNegativeButton("取消", null)
-            .show()
-    }
-
     private fun showDeleteVersionConfirmDialog(script: WorkerScript, version: WorkerVersion) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("删除版本")
@@ -1398,6 +1391,213 @@ class WorkerFragment : Fragment() {
             .show()
     }
 
+    private var triggersDialog: android.app.Dialog? = null
+
+    private fun showWorkerLogs(script: WorkerScript) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("加载中...")
+            .setMessage("正在创建日志通道")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+
+        lifecycleScope.launch {
+            val result = viewModel.createTail(account, script.id)
+            loadingDialog.dismiss()
+
+            when (result) {
+                is Resource.Success -> {
+                    WorkerLogsActivity.start(requireContext(), script.id, result.data.url)
+                }
+                is Resource.Error -> {
+                    showToast("${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+        }
+    }
+
+    private fun showBuildTriggersDialog(script: WorkerScript) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("加载中...")
+            .setMessage("正在获取触发器列表")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+
+        lifecycleScope.launch {
+            val result = viewModel.fetchSchedules(account, script.id)
+            loadingDialog.dismiss()
+
+            when (result) {
+                is Resource.Success -> {
+                    showTriggersDialog(script, result.data)
+                }
+                is Resource.Error -> {
+                    showToast("${result.message}")
+                    showTriggersDialog(script, emptyList())
+                }
+                is Resource.Loading -> {}
+            }
+        }
+    }
+
+    private fun showTriggersDialog(script: WorkerScript, schedules: List<com.muort.upworker.core.model.Schedule>) {
+        triggersDialog?.dismiss()
+
+        val dialogView = layoutInflater.inflate(R.layout.dialog_build_triggers, null)
+        val addTriggerBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.addTriggerBtn)
+        val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
+        val recyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.triggersRecyclerView)
+
+        val adapter = BuildTriggersAdapter(
+            schedules = schedules,
+            formatDate = { formatDate(it) },
+            onDeleteClick = { schedule ->
+                showDeleteTriggerConfirmDialog(script, schedule)
+            }
+        )
+        recyclerView.apply {
+            this.adapter = adapter
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        }
+
+        triggersDialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        addTriggerBtn.setOnClickListener {
+            showAddTriggerDialog(script)
+        }
+
+        closeBtn.setOnClickListener {
+            triggersDialog?.dismiss()
+            triggersDialog = null
+        }
+
+        triggersDialog?.show()
+    }
+
+    private fun showAddTriggerDialog(script: WorkerScript) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_trigger, null)
+        val cronEditText = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.cronEditText)
+        val saveBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.saveBtn)
+        val cancelBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.cancelBtn)
+
+        val cronItems = listOf(
+            dialogView.findViewById<android.view.View>(R.id.cronItem1) to "*/5 * * * *",
+            dialogView.findViewById<android.view.View>(R.id.cronItem2) to "0 * * * *",
+            dialogView.findViewById<android.view.View>(R.id.cronItem3) to "0 0 * * *",
+            dialogView.findViewById<android.view.View>(R.id.cronItem4) to "0 0 * * 1",
+            dialogView.findViewById<android.view.View>(R.id.cronItem5) to "0 12 * * *",
+            dialogView.findViewById<android.view.View>(R.id.cronItem6) to "0 8,18 * * *",
+            dialogView.findViewById<android.view.View>(R.id.cronItem7) to "0 0 1 * *",
+            dialogView.findViewById<android.view.View>(R.id.cronItem8) to "0 0 * * 0",
+            dialogView.findViewById<android.view.View>(R.id.cronItem9) to "*/30 * * * *",
+            dialogView.findViewById<android.view.View>(R.id.cronItem10) to "0 0 15 * *"
+        )
+
+        cronItems.forEach { (view, cron) ->
+            view.setOnClickListener {
+                cronEditText.setText(cron)
+            }
+        }
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        saveBtn.setOnClickListener {
+            val cron = cronEditText.text?.toString()?.trim() ?: ""
+
+            if (cron.isEmpty()) {
+                showToast("请输入Cron表达式")
+                return@setOnClickListener
+            }
+
+            val account = accountViewModel.defaultAccount.value
+            if (account != null) {
+                lifecycleScope.launch {
+                    val fetchResult = viewModel.fetchSchedules(account, script.id)
+                    val currentCronList = if (fetchResult is Resource.Success) {
+                        fetchResult.data.map { it.cron }
+                    } else {
+                        emptyList()
+                    }
+                    
+                    val newCronList = currentCronList + cron
+                    val result = viewModel.updateSchedules(account, script.id, newCronList)
+                    
+                    when (result) {
+                        is Resource.Success -> {
+                            showToast("创建成功")
+                            dialog.dismiss()
+                            triggersDialog?.dismiss()
+                            showBuildTriggersDialog(script)
+                        }
+                        is Resource.Error -> {
+                            showToast("${result.message}")
+                        }
+                        is Resource.Loading -> {}
+                    }
+                }
+            }
+        }
+
+        cancelBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showDeleteTriggerConfirmDialog(script: WorkerScript, schedule: com.muort.upworker.core.model.Schedule) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("删除触发器")
+            .setMessage("确定要删除触发器 \"${schedule.cron}\" 吗？")
+            .setPositiveButton("删除") { _, _ ->
+                val account = accountViewModel.defaultAccount.value
+                if (account != null) {
+                    lifecycleScope.launch {
+                        val fetchResult = viewModel.fetchSchedules(account, script.id)
+                        if (fetchResult is Resource.Success) {
+                            val currentCronList = fetchResult.data.map { it.cron }.toMutableList()
+                            currentCronList.remove(schedule.cron)
+                            
+                            val result = viewModel.updateSchedules(account, script.id, currentCronList)
+                            when (result) {
+                                is Resource.Success -> {
+                                    showToast("删除成功")
+                                    triggersDialog?.dismiss()
+                                    showBuildTriggersDialog(script)
+                                }
+                                is Resource.Error -> {
+                                    showToast("${result.message}")
+                                }
+                                is Resource.Loading -> {}
+                            }
+                        } else {
+                            showToast("获取触发器列表失败")
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
     private fun showVersionDetailDialog(script: WorkerScript, version: WorkerVersion, isRunning: Boolean) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
@@ -1405,88 +1605,110 @@ class WorkerFragment : Fragment() {
             return
         }
 
-        val dialogView = layoutInflater.inflate(R.layout.dialog_worker_version_detail, null)
-        val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
-        val versionNumberText = dialogView.findViewById<android.widget.TextView>(R.id.versionNumberText)
-        val versionIdText = dialogView.findViewById<android.widget.TextView>(R.id.versionIdText)
-        val createTimeText = dialogView.findViewById<android.widget.TextView>(R.id.createTimeText)
-        val sourceText = dialogView.findViewById<android.widget.TextView>(R.id.sourceText)
-        val urlText = dialogView.findViewById<android.widget.TextView>(R.id.urlText)
-        val authorText = dialogView.findViewById<android.widget.TextView>(R.id.authorText)
-        val statusBadge = dialogView.findViewById<android.widget.LinearLayout>(R.id.statusBadge)
-        val deleteBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
-        val accessBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.accessBtn)
-        val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("加载中...")
+            .setMessage("正在获取账号信息")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
 
-        titleText.text = "${script.id} - 版本详情"
-        versionNumberText.text = "#${version.number}"
-        versionIdText.text = version.id
-        createTimeText.text = formatDate(version.metadata?.createdOn)
-        sourceText.text = version.metadata?.source ?: "未知"
-        urlText.text = "${script.id}.${account.accountId}.workers.dev"
-        authorText.text = version.metadata?.authorEmail ?: "未知"
+        lifecycleScope.launch {
+            val accountInfoResult = accountRepository.fetchAccountsFromApi(account)
+            loadingDialog.dismiss()
 
-        if (isRunning) {
-            val statusIcon = android.widget.ImageView(requireContext()).apply {
-                setImageResource(R.drawable.ic_running)
-                layoutParams = android.widget.LinearLayout.LayoutParams(14, 14)
+            val accountName = when (accountInfoResult) {
+                is Resource.Success -> {
+                    accountInfoResult.data.firstOrNull { it.id == account.accountId }?.name ?: account.name
+                }
+                else -> account.name
             }
-            val statusText = android.widget.TextView(requireContext()).apply {
-                text = "运行中"
-                textSize = 11f
-                setTextColor(resources.getColor(R.color.red_500, requireContext().theme))
-                layoutParams = android.widget.LinearLayout.LayoutParams(
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { marginStart = 4 }
+
+            val emailMatch = Regex("([^@]+)@").find(accountName)
+            val emailPrefix = (emailMatch?.groupValues?.get(1) ?: account.name).lowercase()
+
+            val dialogView = layoutInflater.inflate(R.layout.dialog_worker_version_detail, null)
+            val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
+            val versionNumberText = dialogView.findViewById<android.widget.TextView>(R.id.versionNumberText)
+            val versionIdText = dialogView.findViewById<android.widget.TextView>(R.id.versionIdText)
+            val createTimeText = dialogView.findViewById<android.widget.TextView>(R.id.createTimeText)
+            val sourceText = dialogView.findViewById<android.widget.TextView>(R.id.sourceText)
+            val urlText = dialogView.findViewById<android.widget.TextView>(R.id.urlText)
+            val authorText = dialogView.findViewById<android.widget.TextView>(R.id.authorText)
+            val statusBadge = dialogView.findViewById<android.widget.LinearLayout>(R.id.statusBadge)
+            val deleteBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
+            val accessBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.accessBtn)
+            val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
+
+            titleText.text = "${script.id} - 版本详情"
+            versionNumberText.text = "#${version.number}"
+            versionIdText.text = version.id
+            createTimeText.text = formatDate(version.metadata?.createdOn)
+            sourceText.text = version.metadata?.source ?: "未知"
+            urlText.text = "https://${script.id}.${emailPrefix}.workers.dev"
+            authorText.text = version.metadata?.authorEmail ?: "未知"
+
+            if (isRunning) {
+                val statusIcon = android.widget.ImageView(requireContext()).apply {
+                    setImageResource(R.drawable.ic_running)
+                    layoutParams = android.widget.LinearLayout.LayoutParams(14, 14)
+                }
+                val statusText = android.widget.TextView(requireContext()).apply {
+                    text = "运行中"
+                    textSize = 11f
+                    setTextColor(resources.getColor(R.color.red_500, requireContext().theme))
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { marginStart = 4 }
+                }
+                statusBadge.addView(statusIcon)
+                statusBadge.addView(statusText)
+            } else {
+                statusBadge.visibility = android.view.View.GONE
             }
-            statusBadge.addView(statusIcon)
-            statusBadge.addView(statusText)
-        } else {
-            statusBadge.visibility = android.view.View.GONE
-        }
 
-        accessBtn.visibility = if (isRunning) android.view.View.VISIBLE else android.view.View.GONE
-        deleteBtn.visibility = android.view.View.VISIBLE
+            accessBtn.visibility = if (isRunning) android.view.View.VISIBLE else android.view.View.GONE
+            deleteBtn.visibility = android.view.View.VISIBLE
 
-        accessBtn.setOnClickListener {
-            val url = "https://${script.id}.${account.accountId}.workers.dev"
-            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
-            requireContext().startActivity(intent)
-        }
+            accessBtn.setOnClickListener {
+                val url = "https://${script.id}.${emailPrefix}.workers.dev"
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                requireContext().startActivity(intent)
+            }
 
-        deleteBtn.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("删除版本")
-                .setMessage("确定要删除版本 #${version.number} 吗？")
-                .setPositiveButton("删除") { _, _ ->
-                    lifecycleScope.launch {
-                        val result = viewModel.deleteWorkerVersion(account, script.id, version.id)
-                        when (result) {
-                            is Resource.Success -> {
-                                showToast("删除成功")
-                                showScriptHistoryDialog(script)
+            deleteBtn.setOnClickListener {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("删除版本")
+                    .setMessage("确定要删除版本 #${version.number} 吗？")
+                    .setPositiveButton("删除") { _, _ ->
+                        lifecycleScope.launch {
+                            val result = viewModel.deleteWorkerVersion(account, script.id, version.id)
+                            when (result) {
+                                is Resource.Success -> {
+                                    showToast("删除成功")
+                                    showScriptHistoryDialog(script)
+                                }
+                                is Resource.Error -> {
+                                    showToast("${result.message}")
+                                }
+                                is Resource.Loading -> {}
                             }
-                            is Resource.Error -> {
-                                showToast("${result.message}")
-                            }
-                            is Resource.Loading -> {}
                         }
                     }
-                }
-                .setNegativeButton("取消", null)
-                .show()
+                    .setNegativeButton("取消", null)
+                    .show()
+            }
+
+            val dialog = MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .create()
+
+            closeBtn.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            dialog.show()
         }
-
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogView)
-            .create()
-
-        closeBtn.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.show()
     }
     
     private fun editScript(script: WorkerScript) {
@@ -1758,6 +1980,8 @@ class WorkerScriptsAdapter(
     private val onDeleteClick: (WorkerScript) -> Unit,
     private val onHistoryClick: (WorkerScript) -> Unit,
     private val onEditClick: (WorkerScript) -> Unit,
+    private val onTriggerClick: (WorkerScript) -> Unit,
+    private val onLogsClick: (WorkerScript) -> Unit,
     private val onConfigKvClick: (WorkerScript) -> Unit,
     private val onConfigR2Click: (WorkerScript) -> Unit,
     private val onConfigD1Click: (WorkerScript) -> Unit,
@@ -1822,6 +2046,8 @@ class WorkerScriptsAdapter(
                 binding.deleteBtn.visibility = android.view.View.GONE
                 binding.historyBtn.visibility = android.view.View.GONE
                 binding.editBtn.visibility = android.view.View.GONE
+                binding.triggerBtn.visibility = android.view.View.GONE
+                binding.logsBtn.visibility = android.view.View.GONE
                 
                 val isSelected = selectedItems.contains(script.id)
                 updateSelectionUI(binding.root, isSelected)
@@ -1840,6 +2066,8 @@ class WorkerScriptsAdapter(
                 binding.deleteBtn.visibility = android.view.View.VISIBLE
                 binding.historyBtn.visibility = android.view.View.VISIBLE
                 binding.editBtn.visibility = android.view.View.VISIBLE
+                binding.triggerBtn.visibility = android.view.View.VISIBLE
+                binding.logsBtn.visibility = android.view.View.VISIBLE
                 updateSelectionUI(binding.root, false)
                 binding.root.setOnClickListener(null)
             }
@@ -1862,6 +2090,14 @@ class WorkerScriptsAdapter(
             
             binding.configSecretsBtn.setOnClickListener {
                 onConfigSecretsClick(script)
+            }
+            
+            binding.logsBtn.setOnClickListener {
+                onLogsClick(script)
+            }
+            
+            binding.triggerBtn.setOnClickListener {
+                onTriggerClick(script)
             }
             
             binding.historyBtn.setOnClickListener {

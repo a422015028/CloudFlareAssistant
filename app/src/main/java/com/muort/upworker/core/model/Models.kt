@@ -927,3 +927,27 @@ enum class HealthStatus {
     WARNING,      // 警告 (错误率 5-10%)
     CRITICAL      // 严重 (错误率 > 10% 或 D1 超限)
 }
+
+// ==================== Workers Tails (Real-time Logs) ====================
+
+data class TailResult(
+    @SerializedName("id") val id: String,
+    @SerializedName("url") val url: String,
+    @SerializedName("expires_at") val expiresAt: String
+)
+
+// ==================== Workers Schedules ====================
+
+data class Schedule(
+    @SerializedName("cron") val cron: String,
+    @SerializedName("created_on") val createdOn: String?,
+    @SerializedName("modified_on") val modifiedOn: String?
+)
+
+data class SchedulesResponse(
+    @SerializedName("schedules") val schedules: List<Schedule>
+)
+
+data class ScheduleRequest(
+    @SerializedName("cron") val cron: String
+)

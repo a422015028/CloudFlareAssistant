@@ -637,6 +637,18 @@ class WorkerViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
+
+    suspend fun createTail(account: Account, scriptName: String): Resource<com.muort.upworker.core.model.TailResult> {
+        return workerRepository.createTail(account, scriptName)
+    }
+
+    suspend fun fetchSchedules(account: Account, scriptName: String): Resource<List<com.muort.upworker.core.model.Schedule>> {
+        return workerRepository.listSchedules(account, scriptName)
+    }
+
+    suspend fun updateSchedules(account: Account, scriptName: String, schedules: List<String>): Resource<List<com.muort.upworker.core.model.Schedule>> {
+        return workerRepository.updateSchedules(account, scriptName, schedules)
+    }
 }
 
 sealed class UploadState {

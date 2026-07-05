@@ -20,14 +20,37 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/scriptNameText"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorOnSurface"
-                tools:text="my-worker" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/scriptNameText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    tools:text="my-worker" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/logsBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="日志"
+                    android:textSize="11sp"
+                    android:minWidth="48dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    style="@style/Widget.Material3.Button.TextButton.Icon"
+                    app:icon="@android:drawable/ic_menu_info_details"
+                    app:iconSize="16dp"
+                    app:iconPadding="2dp" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/scriptSizeText"
@@ -131,6 +154,21 @@
             android:orientation="horizontal"
             android:gravity="end"
             android:layout_marginTop="4dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/triggerBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="触发器"
+                android:textSize="11sp"
+                android:minWidth="48dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                app:icon="@android:drawable/ic_menu_today"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/historyBtn"

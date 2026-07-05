@@ -224,6 +224,42 @@ interface CloudFlareApi {
         @Path("version_id") versionId: String
     ): Response<CloudFlareResponse<Void>>
     
+    // ==================== Workers Tails (Real-time Logs) ====================
+    
+    @Headers("Accept: application/json")
+    @POST("accounts/{account_id}/workers/scripts/{script_name}/tails")
+    suspend fun createTail(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Body body: Map<String, String>
+    ): Response<CloudFlareResponse<TailResult>>
+    
+    // ==================== Workers Schedules ====================
+    
+    @Headers("Accept: application/json")
+    @GET("accounts/{account_id}/workers/scripts/{script_name}/schedules")
+    suspend fun listSchedules(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String
+    ): Response<CloudFlareResponse<SchedulesResponse>>
+    
+    @Headers("Accept: application/json")
+    @PUT("accounts/{account_id}/workers/scripts/{script_name}/schedules")
+    suspend fun updateSchedules(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Body schedules: List<ScheduleRequest>
+    ): Response<CloudFlareResponse<SchedulesResponse>>
+    
     // ==================== Routes ====================
     
     @GET("zones/{zone_id}/workers/routes")

@@ -14,7 +14,6 @@ class WorkerHistoryAdapter(
     private val runningVersionId: String?,
     private val formatDate: (String?) -> String,
     private val onItemClick: (WorkerVersion) -> Unit,
-    private val onRollbackClick: (WorkerVersion) -> Unit,
     private val onDeleteClick: (WorkerVersion) -> Unit
 ) : RecyclerView.Adapter<WorkerHistoryAdapter.ViewHolder>() {
 
@@ -23,53 +22,42 @@ class WorkerHistoryAdapter(
         private val revisionSourceText = itemView.findViewById<TextView>(R.id.revisionSourceText)
         private val revisionTimeText = itemView.findViewById<TextView>(R.id.revisionTimeText)
         private val runningBadge = itemView.findViewById<LinearLayout>(R.id.runningBadge)
-        private val rollbackBtn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.rollbackBtn)
         private val deleteBtn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
 
-        fun bind(version: WorkerVersion) {
+        fun bind(version: WorkerVersion, position: Int) {
             val shortId = version.id.take(8)
-            revisionIdText.text = "#${version.number} - $shortId"
+            val time = formatDate(version.metadata?.createdOn)
+            
+            revisionIdText.text = "#${versions.size - position} - $shortId"
+            revisionTimeText.text = time
             
             val source = version.metadata?.source ?: "unknown"
-            val sourceText = when (source.lowercase()) {
-                "api" -> "来源: api"
-                "dash" -> "来源: dash"
-                "wrangler" -> "来源: wrangler"
-                else -> "来源: $source"
-            }
-            revisionSourceText.text = sourceText
+            revisionSourceText.text = "来源: $source"
             
-            revisionTimeText.text = formatDate(version.metadata?.createdOn)
-            
-            val isRunning = version.id == runningVersionId || version.number == versions.firstOrNull()?.number
+            val isRunning = version.id == runningVersionId
             runningBadge.visibility = if (isRunning) View.VISIBLE else View.GONE
             
-            rollbackBtn.visibility = if (isRunning) View.GONE else View.VISIBLE
             deleteBtn.visibility = if (isRunning) View.GONE else View.VISIBLE
-            
-            itemView.setOnClickListener {
-                onItemClick(version)
-            }
-            
-            rollbackBtn.setOnClickListener {
-                onRollbackClick(version)
-            }
             
             deleteBtn.setOnClickListener {
                 onDeleteClick(version)
+            }
+            
+            itemView.setOnClickListener {
+                onItemClick(version)
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
+        val itemView = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_worker_history, parent, false)
-        return ViewHolder(view)
+        return ViewHolder(itemView)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(versions[position])
+        holder.bind(versions[position], position)
     }
 
-    override fun getItemCount() = versions.size
+    override fun getItemCount(): Int = versions.size
 }

@@ -36,6 +36,9 @@
         <!-- 注册日志页面 -->
         <activity android:name="com.muort.upworker.feature.log.LogActivity" android:exported="false" />
         
+        <!-- 注册 Worker 实时日志页面 -->
+        <activity android:name="com.muort.upworker.feature.worker.WorkerLogsActivity" android:exported="false" />
+        
         <!-- FileProvider for sharing script files -->
         <provider
             android:name="androidx.core.content.FileProvider"
