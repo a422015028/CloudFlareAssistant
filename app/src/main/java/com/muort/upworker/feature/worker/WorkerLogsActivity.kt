@@ -148,7 +148,16 @@ class WorkerLogsActivity : AppCompatActivity() {
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                Log.d("WorkerLogs", "Received raw message: $text")
+                Log.d("WorkerLogs", "Received text message: $text")
+                processMessage(text)
+            }
+
+            override fun onMessage(webSocket: WebSocket, bytes: okio.ByteString) {
+                Log.d("WorkerLogs", "Received binary message (${bytes.size} bytes)")
+                processMessage(bytes.utf8())
+            }
+
+            private fun processMessage(text: String) {
                 if (!isPaused) {
                     try {
                         val traceItem = Gson().fromJson(text, TailTraceItem::class.java)

@@ -41,3 +41,4 @@ local.properties
 ZERO_TRUST_IMPLEMENTATION.md
 CLAUDE.md
 _worker.js
+test-worker.js
