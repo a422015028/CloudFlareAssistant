@@ -1130,7 +1130,8 @@ class WorkerRepository @Inject constructor(
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
-                    scriptName = scriptName
+                    scriptName = scriptName,
+                    body = CreateTailRequest()
                 )
                 
                 if (response.isSuccessful && response.body()?.success == true) {

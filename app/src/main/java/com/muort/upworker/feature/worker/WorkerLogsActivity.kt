@@ -137,6 +137,8 @@ class WorkerLogsActivity : AppCompatActivity() {
         Log.d("WorkerLogs", "WebSocket request URL: $url")
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
+                Log.d("WorkerLogs", "WebSocket opened, response code: ${response.code}")
+                Log.d("WorkerLogs", "Sending filters: {\"filters\":[],\"debug\":false}")
                 webSocket.send("{\"filters\":[],\"debug\":false}")
                 runOnUiThread {
                     isConnected = true
@@ -146,10 +148,16 @@ class WorkerLogsActivity : AppCompatActivity() {
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
+                Log.d("WorkerLogs", "Received raw message: $text")
                 if (!isPaused) {
                     try {
                         val traceItem = Gson().fromJson(text, TailTraceItem::class.java)
+                        Log.d("WorkerLogs", "Parsed outcome: ${traceItem.outcome}")
+                        Log.d("WorkerLogs", "Parsed logs count: ${traceItem.logs?.size ?: 0}")
+                        Log.d("WorkerLogs", "Parsed exceptions count: ${traceItem.exceptions?.size ?: 0}")
+                        Log.d("WorkerLogs", "Parsed event type: ${traceItem.event?.cron ?: traceItem.event?.request?.method}")
                         val logLines = formatTraceItem(traceItem)
+                        Log.d("WorkerLogs", "Formatted ${logLines.size} lines")
                         runOnUiThread {
                             waitingText.visibility = View.GONE
                             logsText.visibility = View.VISIBLE

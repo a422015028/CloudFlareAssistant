@@ -243,7 +243,8 @@ interface CloudFlareApi {
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
-        @Path("script_name") scriptName: String
+        @Path("script_name") scriptName: String,
+        @Body body: CreateTailRequest
     ): Response<CloudFlareResponse<TailResult>>
     
     @Headers("Accept: application/json")

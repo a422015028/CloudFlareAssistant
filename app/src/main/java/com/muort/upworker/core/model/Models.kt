@@ -936,6 +936,11 @@ data class TailResult(
     @SerializedName("expires_at") val expiresAt: String
 )
 
+data class CreateTailRequest(
+    val filters: List<String> = emptyList(),
+    val debug: Boolean = false
+)
+
 // ==================== Workers Schedules ====================
 
 data class Schedule(
