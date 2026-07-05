@@ -115,8 +115,11 @@ class PagesFragment : Fragment() {
                 binding.filePathEdit.setText(cacheFile.name)
                 
                 // Auto-populate project name from file name if empty
+                // 格式：原文件名-4位随机字母 (如: test-hfdh)
                 if (binding.projectNameEdit.text.isNullOrEmpty()) {
-                    val projectName = fileName.substringBeforeLast(".")
+                    val baseName = fileName.substringBeforeLast(".")
+                    val randomSuffix = generateRandomSuffix()
+                    val projectName = "$baseName-$randomSuffix"
                     binding.projectNameEdit.setText(projectName)
                 }
                 
@@ -139,6 +142,11 @@ class PagesFragment : Fragment() {
             }
         }
         return fileName
+    }
+
+    private fun generateRandomSuffix(): String {
+        val chars = ('a'..'z').toList()
+        return (1..4).map { chars.random() }.joinToString("")
     }
     
     private fun showToast(message: String) {
@@ -1109,14 +1117,17 @@ class PagesFragment : Fragment() {
             showToast("请先选择账号")
             return
         }
+
+        val customCompatibilityDate = binding.compatibilityDateEdit.text.toString().trim()
+            .takeIf { it.isNotEmpty() }
         
         // Show progress
         binding.uploadProgress.visibility = View.VISIBLE
         binding.deployBtn.isEnabled = false
         
-        Timber.d("Deploying project: $projectName, branch: $branch, file: ${file?.name}")
+        Timber.d("Deploying project: $projectName, branch: $branch, file: ${file?.name}, compatibilityDate: $customCompatibilityDate")
         
-        pagesViewModel.createDeployment(account, projectName, branch, file!!)
+        pagesViewModel.createDeployment(account, projectName, branch, file!!, customCompatibilityDate)
         
         // Hide progress after a delay (will be handled by loading state)
         viewLifecycleOwner.lifecycleScope.launch {

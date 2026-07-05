@@ -113,11 +113,20 @@ class WorkerFragment : Fragment() {
                 selectedFile = tempFile
                 binding.filePathEdit.setText(tempFile.absolutePath)
                 
-                val workerName = Regex("""(.+?)(?:-Worker|\.worker)?\.js""", RegexOption.IGNORE_CASE)
-                    .find(fileName)?.groupValues?.get(1)
-                workerName?.let { binding.workerNameEdit.setText(it) }
+                // Auto-populate worker name from file name if empty
+                // 格式：原文件名-4位随机字母 (如: test-hfdh)
+                if (binding.workerNameEdit.text.isNullOrEmpty()) {
+                    val baseName = fileName.substringBeforeLast(".")
+                    val randomSuffix = generateRandomSuffix()
+                    binding.workerNameEdit.setText("$baseName-$randomSuffix")
+                }
             }
         }
+    }
+
+    private fun generateRandomSuffix(): String {
+        val chars = ('a'..'z').toList()
+        return (1..4).map { chars.random() }.joinToString("")
     }
     
     override fun onCreateView(

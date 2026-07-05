@@ -45,12 +45,50 @@ class PagesRepository @Inject constructor(
             }  
         }  
       
+    /**
+     * 更新项目的兼容性日期
+     */
+    private suspend fun updateProjectCompatibilityDate(
+        account: Account,
+        projectName: String,
+        compatibilityDate: String
+    ) {
+        try {
+            val updateRequest = PagesProjectUpdateRequest(
+                deploymentConfigs = DeploymentConfigsUpdate(
+                    preview = EnvironmentConfigUpdate(compatibilityDate = compatibilityDate),
+                    production = EnvironmentConfigUpdate(compatibilityDate = compatibilityDate)
+                )
+            )
+            api.updatePagesProject(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                projectName = projectName,
+                updateRequest = updateRequest
+            )
+            Timber.d("项目 $projectName 的 compatibility_date 更新为 $compatibilityDate")
+        } catch (e: Exception) {
+            Timber.w("更新项目 compatibility_date 失败: ${e.message}")
+        }
+    }
+
     suspend fun createProject(  
         account: Account,  
         name: String,  
-        productionBranch: String = "main"
+        productionBranch: String = "main",
+        compatibilityDate: String? = null
     ): Resource<PagesProject> = withContext(Dispatchers.IO) {  
         safeApiCall {  
+            val deploymentConfigs = if (compatibilityDate != null) {
+                PagesDeploymentConfigs(
+                    preview = PagesDeploymentConfig(compatibilityDate = compatibilityDate),
+                    production = PagesDeploymentConfig(compatibilityDate = compatibilityDate)
+                )
+            } else {
+                null
+            }
             val response = api.createPagesProject(  
                 token = AuthHelper.getBearerToken(account),  
                 email = AuthHelper.getEmail(account),  
@@ -58,7 +96,8 @@ class PagesRepository @Inject constructor(
                 accountId = account.accountId,  
                 project = PagesProjectRequest(  
                     name = name,  
-                    productionBranch = productionBranch
+                    productionBranch = productionBranch,
+                    deploymentConfigs = deploymentConfigs
                 )  
             )  
               
@@ -228,7 +267,8 @@ class PagesRepository @Inject constructor(
         account: Account,  
         projectName: String,  
         branch: String,  
-        file: java.io.File  
+        file: java.io.File,
+        customCompatibilityDate: String? = null
     ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {  
         safeApiCall {  
             if (!file.exists()) {  
@@ -242,21 +282,29 @@ class PagesRepository @Inject constructor(
             if (!isZip && !isJs && !isHtml) {
                 return@safeApiCall Resource.Error("仅支持 .zip、.js 或 .html 文件部署。")
             }
+
+            val finalCompatibilityDate = customCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
               
             // 1. 校验并创建项目
             val projectExists = checkProjectExists(account, projectName)  
             if (!projectExists) {  
-                createProject(account, projectName, branch)
+                // 新项目：用户自定义日期 > 默认兼容日期
+                createProject(account, projectName, branch, finalCompatibilityDate)
+            } else {
+                // 已有项目：只有用户自定义日期时才更新，没有自定义则不修改
+                customCompatibilityDate?.let {
+                    updateProjectCompatibilityDate(account, projectName, it)
+                }
             }  
 
             // 单文件 .js 部署：直接作为 Worker 脚本上传（bundle 接口）
             if (isJs) {
-                return@safeApiCall deployWorkerOnly(account, projectName, file)
+                return@safeApiCall deployWorkerOnly(account, projectName, file, finalCompatibilityDate)
             }
 
             // 单文件 .htm/.html 部署：走原有 manifest-only 流程
             if (isHtml) {
-                return@safeApiCall deployStaticAssetOnly(account, projectName, file)
+                return@safeApiCall deployStaticAssetOnly(account, projectName, file, finalCompatibilityDate)
             }
 
             // zip 文件部署
@@ -460,7 +508,8 @@ class PagesRepository @Inject constructor(
     private suspend fun deployStaticAssetOnly(
         account: Account,
         projectName: String,
-        htmlFile: File
+        htmlFile: File,
+        compatibilityDate: String
     ): Resource<PagesDeployment> {
         if (htmlFile.length() == 0L) {
             return Resource.Error("文件内容为空（0字节）")
@@ -529,7 +578,8 @@ class PagesRepository @Inject constructor(
     private suspend fun deployWorkerOnly(
         account: Account,
         projectName: String,
-        workerFile: File
+        workerFile: File,
+        compatibilityDate: String
     ): Resource<PagesDeployment> {
         if (workerFile.length() == 0L) {
             return Resource.Error("Worker 脚本文件内容为空（0字节）")

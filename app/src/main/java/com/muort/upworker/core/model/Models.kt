@@ -297,9 +297,19 @@ data class PagesProject(
     @SerializedName("production_branch") val productionBranch: String?
 )
 
+data class PagesDeploymentConfig(
+    @SerializedName("compatibility_date") val compatibilityDate: String? = null
+)
+
+data class PagesDeploymentConfigs(
+    @SerializedName("preview") val preview: PagesDeploymentConfig? = null,
+    @SerializedName("production") val production: PagesDeploymentConfig? = null
+)
+
 data class PagesProjectRequest(
     @SerializedName("name") val name: String,
-    @SerializedName("production_branch") val productionBranch: String = "main"
+    @SerializedName("production_branch") val productionBranch: String = "main",
+    @SerializedName("deployment_configs") val deploymentConfigs: PagesDeploymentConfigs? = null
 )
 
 data class PagesDeployment(
@@ -453,7 +463,8 @@ data class EnvironmentConfigUpdate(
     @SerializedName("r2_buckets") val r2Buckets: Map<String, R2BindingUpdate?>? = null,
     @SerializedName("d1_databases") val d1Databases: Map<String, D1BindingUpdate?>? = null,
     @SerializedName("durable_objects") val durableObjects: Map<String, DurableObjectBindingUpdate?>? = null,
-    @SerializedName("services") val services: Map<String, ServiceBindingUpdate?>? = null
+    @SerializedName("services") val services: Map<String, ServiceBindingUpdate?>? = null,
+    @SerializedName("compatibility_date") val compatibilityDate: String? = null
 )
 
 data class EnvVarUpdate(

@@ -122,7 +122,7 @@
                 android:id="@+id/viewDeploymentsBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="部署"
+                android:text="查看"
                 android:textSize="11sp"
                 android:minWidth="48dp"
                 android:paddingStart="8dp"

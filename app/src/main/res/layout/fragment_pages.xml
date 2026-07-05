@@ -72,7 +72,23 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="部署文件 (.zip)"
+                        android:hint="默认兼容日期 2026-06-16"
+                        app:placeholderText="输入格式：2026-06-16"
+                        app:boxBackgroundMode="outline"
+                        android:layout_marginBottom="12dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/compatibilityDateEdit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="date" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="项目文件(仅支持：.zip .js .htm .html )"
                         app:boxBackgroundMode="outline"
                         app:endIconMode="custom"
                         app:endIconDrawable="@android:drawable/ic_menu_search"
