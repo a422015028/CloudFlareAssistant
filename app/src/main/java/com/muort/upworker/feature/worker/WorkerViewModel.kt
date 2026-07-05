@@ -6,6 +6,7 @@ import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.CustomDomain
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.Route
+import com.muort.upworker.core.model.WorkerVersion
 import com.muort.upworker.core.model.WorkerScript
 import com.muort.upworker.core.repository.WorkerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -565,6 +566,53 @@ class WorkerViewModel @Inject constructor(
     
     fun resetUploadState() {
         _uploadState.value = UploadState.Idle
+    }
+
+    private val _versions = MutableStateFlow<List<WorkerVersion>>(emptyList())
+    val versions: StateFlow<List<WorkerVersion>> = _versions
+
+    fun loadWorkerVersions(account: Account, scriptName: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            val result = workerRepository.listWorkerVersions(account, scriptName)
+            when (result) {
+                is Resource.Success -> {
+                    _versions.value = result.data
+                }
+                is Resource.Error -> {
+                    _message.emit("获取版本历史失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+
+    suspend fun fetchWorkerVersions(account: Account, scriptName: String): Resource<List<WorkerVersion>> {
+        return workerRepository.listWorkerVersions(account, scriptName)
+    }
+
+    fun deployWorkerVersion(account: Account, scriptName: String, versionId: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            val result = workerRepository.deployWorkerVersion(account, scriptName, versionId)
+            when (result) {
+                is Resource.Success -> {
+                    _message.emit("回滚成功")
+                    loadWorkerVersions(account, scriptName)
+                    loadWorkerScripts(account)
+                }
+                is Resource.Error -> {
+                    _message.emit("回滚失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+
+    suspend fun deleteWorkerVersion(account: Account, scriptName: String, versionId: String): Resource<Unit> {
+        return workerRepository.deleteWorkerVersion(account, scriptName, versionId)
     }
 
     fun updateCustomDomain(account: Account, domainId: String, hostname: String, scriptName: String) {

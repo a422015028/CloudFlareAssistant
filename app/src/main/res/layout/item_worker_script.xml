@@ -104,7 +104,7 @@
                 android:paddingEnd="8dp"
                 android:layout_marginEnd="4dp"
                 style="@style/Widget.Material3.Button.TextButton.Icon"
-                app:icon="@android:drawable/ic_menu_edit"
+                app:icon="@android:drawable/ic_menu_add"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
@@ -133,17 +133,32 @@
             android:layout_marginTop="4dp">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/viewBtn"
+                android:id="@+id/historyBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="查看"
+                android:text="部署记录"
                 android:textSize="11sp"
                 android:minWidth="48dp"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
                 android:layout_marginEnd="4dp"
                 style="@style/Widget.Material3.Button.TextButton.Icon"
-                app:icon="@android:drawable/ic_menu_view"
+                app:icon="@android:drawable/ic_menu_recent_history"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/editBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="编辑脚本"
+                android:textSize="11sp"
+                android:minWidth="48dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                app:icon="@android:drawable/ic_menu_edit"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 

@@ -189,8 +189,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     
     // Hilt Dependency Injection
-    implementation("com.google.dagger:hilt-android:2.52")
-    kapt("com.google.dagger:hilt-compiler:2.52")
+    implementation("com.google.dagger:hilt-android:2.54")
+    kapt("com.google.dagger:hilt-compiler:2.54")
     
     // Retrofit & Network
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

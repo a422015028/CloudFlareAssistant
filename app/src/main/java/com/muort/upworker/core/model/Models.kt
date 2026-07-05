@@ -150,6 +150,33 @@ data class WorkerScript(
     @SerializedName("compatibility_date") val compatibilityDate: String? = null
 )
 
+data class WorkerVersion(
+    @SerializedName("id") val id: String,
+    @SerializedName("number") val number: Int,
+    @SerializedName("metadata") val metadata: WorkerVersionMetadata?,
+    @SerializedName("annotations") val annotations: Map<String, String>? = null
+)
+
+data class WorkerVersionMetadata(
+    @SerializedName("created_on") val createdOn: String?,
+    @SerializedName("source") val source: String?,
+    @SerializedName("author_id") val authorId: String?,
+    @SerializedName("author_email") val authorEmail: String?,
+    @SerializedName("has_preview") val hasPreview: Boolean?
+)
+
+data class WorkerVersionsResult(
+    @SerializedName("items") val items: List<WorkerVersion>,
+    @SerializedName("result_info") val resultInfo: ResultInfo?
+)
+
+data class ResultInfo(
+    @SerializedName("page") val page: Int,
+    @SerializedName("per_page") val perPage: Int,
+    @SerializedName("count") val count: Int,
+    @SerializedName("total_count") val totalCount: Int
+)
+
 /**
  * Metadata for Worker Script multipart upload
  * https://developers.cloudflare.com/workers/configuration/multipart-upload-metadata/
@@ -353,7 +380,9 @@ data class PagesProjectDetail(
     @SerializedName("source") val source: ProjectSource?,
     @SerializedName("build_config") val buildConfig: BuildConfig?,
     @SerializedName("deployment_configs") val deploymentConfigs: DeploymentConfigs?,
-    @SerializedName("latest_deployment") val latestDeployment: PagesDeployment?
+    @SerializedName("latest_deployment") val latestDeployment: PagesDeployment?,
+    @SerializedName("canonical_deployment") val canonicalDeployment: PagesDeployment?,
+    @SerializedName("preview_deployment") val previewDeployment: PagesDeployment?
 )
 
 data class ProjectSource(

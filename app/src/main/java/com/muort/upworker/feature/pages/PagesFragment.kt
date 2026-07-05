@@ -69,6 +69,9 @@ class PagesFragment : Fragment() {
     private var isSelectionMode = false
     private val selectedProjects = mutableSetOf<String>()
     
+    // 部署记录对话框引用
+    private var deploymentsDialog: android.app.Dialog? = null
+    
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -1161,6 +1164,11 @@ class PagesFragment : Fragment() {
                 launch {
                     pagesViewModel.message.collect { message ->
                         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        if (message == "部署创建成功") {
+                            binding.projectNameEdit.text?.clear()
+                            binding.filePathEdit.text?.clear()
+                            selectedFile = null
+                        }
                     }
                 }
                 
@@ -1335,31 +1343,34 @@ class PagesFragment : Fragment() {
     }
     
     private fun showDeploymentsDialogWithLoading(account: com.muort.upworker.core.model.Account, project: PagesProject) {
-        // 显示加载对话框
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("${project.name} - 部署列表")
+            .setTitle("${project.name} - 部署记录")
             .setMessage("加载中...")
             .setCancelable(true)
             .create()
         loadingDialog.show()
         
-        // 加载并等待完成
         viewLifecycleOwner.lifecycleScope.launch {
-            // 开始加载
             pagesViewModel.selectProject(project)
             pagesViewModel.loadDeployments(account, project.name)
             
-            // 等待加载开始 (loading = true)
             pagesViewModel.loadingState.first { it }
-            // 然后等待加载完成 (loading = false)
             pagesViewModel.loadingState.first { !it }
             
+            var runningDeploymentId: String? = null
+            
+            val projectDetailResult = pagesViewModel.getProjectDetailSuspend(account, project.name)
+            if (projectDetailResult is Resource.Success) {
+                val detail = projectDetailResult.data
+                runningDeploymentId = detail.canonicalDeployment?.id ?: detail.previewDeployment?.id
+            }
+            
             loadingDialog.dismiss()
-            showDeploymentsDialog(project)
+            showDeploymentsDialog(project, runningDeploymentId)
         }
     }
     
-    private fun showDeploymentsDialog(project: PagesProject) {
+    private fun showDeploymentsDialog(project: PagesProject, runningDeploymentId: String?) {
         val deployments = pagesViewModel.deployments.value
         
         if (deployments.isEmpty()) {
@@ -1367,91 +1378,120 @@ class PagesFragment : Fragment() {
             return
         }
         
-        val items = deployments.map { deployment ->
-            val status = deployment.latestStage?.status ?: "unknown"
-            val env = deployment.environment
-            val time = formatDeploymentDate(deployment.createdOn)
-            "${deployment.shortId} - $status ($env) - $time"
-        }.toTypedArray()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_pages_deployments, null)
+        val closeBtn = dialogView.findViewById<android.widget.Button>(R.id.closeBtn)
+        val recyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.deploymentsRecyclerView)
         
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("${project.name} - 部署列表")
-            .setItems(items) { _, which ->
-                if (which < deployments.size) {
-                    // 第一个部署是最新的
-                    val isLatest = which == 0
-                    showDeploymentDetailDialog(project, deployments[which], isLatest)
-                }
-            }
-            .setNegativeButton("关闭", null)
-            .show()
-    }
-    
-    private fun showDeploymentDetailDialog(project: PagesProject, deployment: PagesDeployment, isLatest: Boolean) {
-        val details = buildString {
-            append("ID: ${deployment.id}\n\n")
-            append("短ID: ${deployment.shortId}\n\n")
-            append("环境: ${deployment.environment}\n\n")
-            append("URL: ${deployment.url}\n\n")
-            append("状态: ${deployment.latestStage?.status ?: "未知"}\n\n")
-            append("阶段: ${deployment.latestStage?.name ?: "未知"}\n\n")
-            append("创建时间: ${formatDeploymentDate(deployment.createdOn)}\n\n")
-            append("修改时间: ${formatDeploymentDate(deployment.modifiedOn)}\n\n")
-            
-            deployment.deploymentTrigger?.metadata?.let { meta ->
-                append("分支: ${meta.branch}\n\n")
-                if (!meta.commitHash.isNullOrEmpty()) {
-                    append("提交: ${meta.commitHash}\n\n")
-                }
-                if (!meta.commitMessage.isNullOrEmpty()) {
-                    append("提交信息: ${meta.commitMessage}\n\n")
-                }
-            }
-            
-            // 显示所有阶段信息
-            if (!deployment.stages.isNullOrEmpty()) {
-                append("===== 部署阶段 =====\n\n")
-                deployment.stages.forEach { stage ->
-                    append("• ${stage.name}: ${stage.status ?: "未知"}\n")
-                    if (stage.startedOn != null) {
-                        append("  开始: ${formatDeploymentDate(stage.startedOn)}\n")
-                    }
-                    if (stage.endedOn != null) {
-                        append("  结束: ${formatDeploymentDate(stage.endedOn)}\n")
-                    }
-                    append("\n")
-                }
-            }
-        }
-        
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("部署详情")
-            .setMessage(details)
-            .setPositiveButton("关闭", null)
-            .setNeutralButton("访问") { _, _ ->
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deployment.url))
-                startActivity(intent)
-            }
-        
-        val status = deployment.latestStage?.status ?: "unknown"
-        if (status != "success" && !isLatest) {
-            dialog.setNegativeButton("重新部署") { _, _ ->
-                showRetryDeploymentConfirmDialog(project, deployment)
-            }
-        }
-        
-        if (!isLatest) {
-            if (status == "success") {
-                dialog.setNegativeButton("回滚") { _, _ ->
-                    showRollbackDeploymentConfirmDialog(project, deployment)
-                }
-            }
-            
-            dialog.setNeutralButton("删除") { _, _ ->
+        val adapter = PagesDeploymentsAdapter(
+            deployments = deployments,
+            runningDeploymentId = runningDeploymentId,
+            formatDate = { formatDeploymentDate(it) },
+            onItemClick = { deployment ->
+                showDeploymentDetailDialog(project, deployment, runningDeploymentId == deployment.id)
+            },
+            onRollbackClick = { deployment ->
+                showRollbackDeploymentConfirmDialog(project, deployment)
+            },
+            onDeleteClick = { deployment ->
                 showDeleteDeploymentConfirmDialog(project, deployment)
             }
+        )
+        
+        recyclerView.apply {
+            this.adapter = adapter
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         }
         
+        deploymentsDialog?.dismiss()
+        deploymentsDialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+        
+        closeBtn.setOnClickListener {
+            deploymentsDialog?.dismiss()
+            deploymentsDialog = null
+        }
+        
+        deploymentsDialog?.show()
+    }
+    
+    private fun showDeploymentDetailDialog(project: PagesProject, deployment: PagesDeployment, isRunning: Boolean) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_pages_deployment_detail, null)
+        val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
+        val deploymentIdText = dialogView.findViewById<android.widget.TextView>(R.id.deploymentIdText)
+        val shortIdText = dialogView.findViewById<android.widget.TextView>(R.id.shortIdText)
+        val projectNameText = dialogView.findViewById<android.widget.TextView>(R.id.projectNameText)
+        val environmentText = dialogView.findViewById<android.widget.TextView>(R.id.environmentText)
+        val urlText = dialogView.findViewById<android.widget.TextView>(R.id.urlText)
+        val statusBadge = dialogView.findViewById<android.widget.LinearLayout>(R.id.statusBadge)
+        val stageNameText = dialogView.findViewById<android.widget.TextView>(R.id.stageNameText)
+        val createTimeText = dialogView.findViewById<android.widget.TextView>(R.id.createTimeText)
+        val modifiedTimeText = dialogView.findViewById<android.widget.TextView>(R.id.modifiedTimeText)
+        val triggerTypeText = dialogView.findViewById<android.widget.TextView>(R.id.triggerTypeText)
+        val branchText = dialogView.findViewById<android.widget.TextView>(R.id.branchText)
+        val commitHashText = dialogView.findViewById<android.widget.TextView>(R.id.commitHashText)
+        val commitMessageText = dialogView.findViewById<android.widget.TextView>(R.id.commitMessageText)
+        val deleteBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
+        val accessBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.accessBtn)
+        val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
+
+        titleText.text = "${project.name} - 部署详情"
+        deploymentIdText.text = deployment.id
+        shortIdText.text = deployment.shortId ?: "未知"
+        projectNameText.text = deployment.projectName ?: project.name
+        environmentText.text = deployment.environment ?: "未知"
+        urlText.text = deployment.url ?: ""
+        stageNameText.text = deployment.latestStage?.name ?: "未知"
+        createTimeText.text = formatDeploymentDate(deployment.createdOn)
+        modifiedTimeText.text = formatDeploymentDate(deployment.modifiedOn)
+        triggerTypeText.text = deployment.deploymentTrigger?.type ?: "未知"
+        branchText.text = deployment.deploymentTrigger?.metadata?.branch ?: "未知"
+        commitHashText.text = deployment.deploymentTrigger?.metadata?.commitHash ?: "未知"
+        commitMessageText.text = deployment.deploymentTrigger?.metadata?.commitMessage ?: "未知"
+
+        if (isRunning) {
+            val statusIcon = android.widget.ImageView(requireContext()).apply {
+                setImageResource(R.drawable.ic_running)
+                layoutParams = android.widget.LinearLayout.LayoutParams(14, 14)
+            }
+            val statusText = android.widget.TextView(requireContext()).apply {
+                text = "运行中"
+                textSize = 11f
+                setTextColor(resources.getColor(R.color.red_500, requireContext().theme))
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = 4 }
+            }
+            statusBadge.addView(statusIcon)
+            statusBadge.addView(statusText)
+        } else {
+            statusBadge.visibility = android.view.View.GONE
+        }
+
+        accessBtn.visibility = if (isRunning) android.view.View.VISIBLE else android.view.View.GONE
+        deleteBtn.visibility = android.view.View.VISIBLE
+
+        accessBtn.setOnClickListener {
+            val url = deployment.url ?: ""
+            if (url.isNotEmpty()) {
+                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                requireContext().startActivity(intent)
+            }
+        }
+
+        deleteBtn.setOnClickListener {
+            showDeleteDeploymentConfirmDialog(project, deployment)
+        }
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        closeBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+
         dialog.show()
     }
     
@@ -1461,7 +1501,11 @@ class PagesFragment : Fragment() {
             .setMessage("确定要删除部署 ${deployment.shortId} 吗？\n\n此操作不可恢复。")
             .setPositiveButton("删除") { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
-                    pagesViewModel.deleteDeployment(account, project.name, deployment.id)
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        pagesViewModel.deleteDeployment(account, project.name, deployment.id)
+                        deploymentsDialog?.dismiss()
+                        showDeploymentsDialogWithLoading(account, project)
+                    }
                 }
             }
             .setNegativeButton("取消", null)
@@ -1487,7 +1531,11 @@ class PagesFragment : Fragment() {
             .setMessage("确定要回滚到部署 ${deployment.shortId} 吗？\n\n这将使此部署成为活动部署。")
             .setPositiveButton("回滚") { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
-                    pagesViewModel.rollbackDeployment(account, project.name, deployment.id)
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        pagesViewModel.rollbackDeployment(account, project.name, deployment.id)
+                        deploymentsDialog?.dismiss()
+                        showDeploymentsDialogWithLoading(account, project)
+                    }
                 }
             }
             .setNegativeButton("取消", null)

@@ -23,6 +23,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.KvNamespace
 import com.muort.upworker.core.model.R2Bucket
+import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.WorkerScript
 import com.muort.upworker.core.model.DEFAULT_COMPATIBILITY_DATE
 import com.muort.upworker.core.repository.KvRepository
@@ -41,6 +42,8 @@ import com.muort.upworker.databinding.ItemSecretBinding
 import com.muort.upworker.databinding.ItemVariableBinding
 import com.muort.upworker.databinding.ItemWorkerScriptBinding
 import com.muort.upworker.feature.account.AccountViewModel
+import com.muort.upworker.R
+import com.muort.upworker.core.model.WorkerVersion
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
@@ -83,6 +86,9 @@ class WorkerFragment : Fragment() {
     // 批量删除相关属性
     private var isSelectionMode = false
     private val selectedScripts = mutableSetOf<String>()
+    
+    // 版本历史对话框引用
+    private var historyDialog: android.app.Dialog? = null
     
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -149,11 +155,14 @@ class WorkerFragment : Fragment() {
     private fun setupUI() {
         scriptsAdapter = WorkerScriptsAdapter(
             scriptSizeCache,
-            onViewClick = { script ->
-                viewScriptContent(script)
-            },
             onDeleteClick = { script ->
                 showDeleteConfirmDialog(script)
+            },
+            onHistoryClick = { script ->
+                showScriptHistoryDialog(script)
+            },
+            onEditClick = { script ->
+                editScript(script)
             },
             onConfigKvClick = { script ->
                 showConfigKvBindingsDialog(script)
@@ -1278,19 +1287,246 @@ class WorkerFragment : Fragment() {
         }
     }
     
-    private fun viewScriptContent(script: WorkerScript) {
+    private fun showScriptHistoryDialog(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
             showToast("请先选择账号")
             return
         }
         
-        // 导航到脚本编辑器
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("加载中...")
+            .setMessage("正在获取版本历史")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        lifecycleScope.launch {
+            val result = viewModel.fetchWorkerVersions(account, script.id)
+            loadingDialog.dismiss()
+            
+            when (result) {
+                is Resource.Success -> {
+                    val versions = result.data
+                    if (versions.isNotEmpty()) {
+                        val runningVersionId = versions.firstOrNull()?.id
+                        
+                        val dialogView = layoutInflater.inflate(R.layout.dialog_worker_history, null)
+                        val closeBtn = dialogView.findViewById<android.widget.Button>(R.id.closeBtn)
+                        val recyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.historyRecyclerView)
+                        
+                        val adapter = WorkerHistoryAdapter(
+                            versions = versions,
+                            runningVersionId = runningVersionId,
+                            formatDate = { formatDate(it) },
+                            onItemClick = { version ->
+                                showVersionDetailDialog(script, version, runningVersionId == version.id)
+                            },
+                            onRollbackClick = { version ->
+                                showRollbackConfirmDialog(script, version)
+                            },
+                            onDeleteClick = { version ->
+                                showDeleteVersionConfirmDialog(script, version)
+                            }
+                        )
+                        recyclerView.apply {
+                            this.adapter = adapter
+                            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+                        }
+                        
+                        historyDialog?.dismiss()
+                        historyDialog = MaterialAlertDialogBuilder(requireContext())
+                            .setView(dialogView)
+                            .create()
+                        
+                        closeBtn.setOnClickListener {
+                            historyDialog?.dismiss()
+                            historyDialog = null
+                        }
+                        
+                        historyDialog?.show()
+                    } else {
+                        showToast("暂无版本历史")
+                    }
+                }
+                is Resource.Error -> {
+                    showToast("${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+        }
+    }
+    
+    private fun showRollbackConfirmDialog(script: WorkerScript, version: WorkerVersion) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("回滚版本")
+            .setMessage("确定要回滚到版本 #${version.number} 吗？")
+            .setPositiveButton("回滚") { _, _ ->
+                val account = accountViewModel.defaultAccount.value
+                if (account != null) {
+                    viewModel.deployWorkerVersion(account, script.id, version.id)
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun showDeleteVersionConfirmDialog(script: WorkerScript, version: WorkerVersion) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("删除版本")
+            .setMessage("确定要删除版本 #${version.number} 吗？")
+            .setPositiveButton("删除") { _, _ ->
+                val account = accountViewModel.defaultAccount.value
+                if (account != null) {
+                    lifecycleScope.launch {
+                        val result = viewModel.deleteWorkerVersion(account, script.id, version.id)
+                        when (result) {
+                            is Resource.Success -> {
+                                showToast("删除成功")
+                                historyDialog?.dismiss()
+                                showScriptHistoryDialog(script)
+                            }
+                            is Resource.Error -> {
+                                showToast("${result.message}")
+                            }
+                            is Resource.Loading -> {}
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun showVersionDetailDialog(script: WorkerScript, version: WorkerVersion, isRunning: Boolean) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+
+        val dialogView = layoutInflater.inflate(R.layout.dialog_worker_version_detail, null)
+        val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
+        val versionNumberText = dialogView.findViewById<android.widget.TextView>(R.id.versionNumberText)
+        val versionIdText = dialogView.findViewById<android.widget.TextView>(R.id.versionIdText)
+        val createTimeText = dialogView.findViewById<android.widget.TextView>(R.id.createTimeText)
+        val sourceText = dialogView.findViewById<android.widget.TextView>(R.id.sourceText)
+        val urlText = dialogView.findViewById<android.widget.TextView>(R.id.urlText)
+        val authorText = dialogView.findViewById<android.widget.TextView>(R.id.authorText)
+        val statusBadge = dialogView.findViewById<android.widget.LinearLayout>(R.id.statusBadge)
+        val deleteBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
+        val accessBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.accessBtn)
+        val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
+
+        titleText.text = "${script.id} - 版本详情"
+        versionNumberText.text = "#${version.number}"
+        versionIdText.text = version.id
+        createTimeText.text = formatDate(version.metadata?.createdOn)
+        sourceText.text = version.metadata?.source ?: "未知"
+        urlText.text = "${script.id}.${account.accountId}.workers.dev"
+        authorText.text = version.metadata?.authorEmail ?: "未知"
+
+        if (isRunning) {
+            val statusIcon = android.widget.ImageView(requireContext()).apply {
+                setImageResource(R.drawable.ic_running)
+                layoutParams = android.widget.LinearLayout.LayoutParams(14, 14)
+            }
+            val statusText = android.widget.TextView(requireContext()).apply {
+                text = "运行中"
+                textSize = 11f
+                setTextColor(resources.getColor(R.color.red_500, requireContext().theme))
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = 4 }
+            }
+            statusBadge.addView(statusIcon)
+            statusBadge.addView(statusText)
+        } else {
+            statusBadge.visibility = android.view.View.GONE
+        }
+
+        accessBtn.visibility = if (isRunning) android.view.View.VISIBLE else android.view.View.GONE
+        deleteBtn.visibility = android.view.View.VISIBLE
+
+        accessBtn.setOnClickListener {
+            val url = "https://${script.id}.${account.accountId}.workers.dev"
+            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+            requireContext().startActivity(intent)
+        }
+
+        deleteBtn.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("删除版本")
+                .setMessage("确定要删除版本 #${version.number} 吗？")
+                .setPositiveButton("删除") { _, _ ->
+                    lifecycleScope.launch {
+                        val result = viewModel.deleteWorkerVersion(account, script.id, version.id)
+                        when (result) {
+                            is Resource.Success -> {
+                                showToast("删除成功")
+                                showScriptHistoryDialog(script)
+                            }
+                            is Resource.Error -> {
+                                showToast("${result.message}")
+                            }
+                            is Resource.Loading -> {}
+                        }
+                    }
+                }
+                .setNegativeButton("取消", null)
+                .show()
+        }
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        closeBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+    
+    private fun editScript(script: WorkerScript) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
         val action = WorkerFragmentDirections.actionWorkerToScriptEditor(
             accountEmail = account.accountId,
             scriptName = script.id
         )
         findNavController().navigate(action)
+    }
+    
+    private fun formatDate(dateString: String?): String {
+        if (dateString == null) return "未知日期"
+        
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+            inputFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+            
+            val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA)
+            outputFormat.timeZone = java.util.TimeZone.getTimeZone("Asia/Shanghai")
+            
+            val date = inputFormat.parse(dateString)
+            date?.let { outputFormat.format(it) } ?: dateString
+        } catch (e: Exception) {
+            dateString.substringBefore('T')
+        }
+    }
+    
+    private fun formatSize(size: Long): String {
+        return when {
+            size < 1024 -> "${size}B"
+            size < 1024 * 1024 -> String.format("%.2f KB", size / 1024.0)
+            size < 1024 * 1024 * 1024 -> String.format("%.2f MB", size / (1024.0 * 1024))
+            else -> String.format("%.2f GB", size / (1024.0 * 1024 * 1024))
+        }
     }
     
     private fun showDeleteConfirmDialog(script: WorkerScript) {
@@ -1519,8 +1755,9 @@ class WorkerFragment : Fragment() {
 
 class WorkerScriptsAdapter(
     private val scriptSizeCache: Map<String, Long>,
-    private val onViewClick: (WorkerScript) -> Unit,
     private val onDeleteClick: (WorkerScript) -> Unit,
+    private val onHistoryClick: (WorkerScript) -> Unit,
+    private val onEditClick: (WorkerScript) -> Unit,
     private val onConfigKvClick: (WorkerScript) -> Unit,
     private val onConfigR2Click: (WorkerScript) -> Unit,
     private val onConfigD1Click: (WorkerScript) -> Unit,
@@ -1583,7 +1820,8 @@ class WorkerScriptsAdapter(
             // 添加多选模式支持 - 通过改变卡片背景色表示选中状态
             if (selectionMode) {
                 binding.deleteBtn.visibility = android.view.View.GONE
-                binding.viewBtn.visibility = android.view.View.GONE
+                binding.historyBtn.visibility = android.view.View.GONE
+                binding.editBtn.visibility = android.view.View.GONE
                 
                 val isSelected = selectedItems.contains(script.id)
                 updateSelectionUI(binding.root, isSelected)
@@ -1600,7 +1838,8 @@ class WorkerScriptsAdapter(
                 }
             } else {
                 binding.deleteBtn.visibility = android.view.View.VISIBLE
-                binding.viewBtn.visibility = android.view.View.VISIBLE
+                binding.historyBtn.visibility = android.view.View.VISIBLE
+                binding.editBtn.visibility = android.view.View.VISIBLE
                 updateSelectionUI(binding.root, false)
                 binding.root.setOnClickListener(null)
             }
@@ -1625,8 +1864,12 @@ class WorkerScriptsAdapter(
                 onConfigSecretsClick(script)
             }
             
-            binding.viewBtn.setOnClickListener {
-                onViewClick(script)
+            binding.historyBtn.setOnClickListener {
+                onHistoryClick(script)
+            }
+            
+            binding.editBtn.setOnClickListener {
+                onEditClick(script)
             }
             
             binding.deleteBtn.setOnClickListener {

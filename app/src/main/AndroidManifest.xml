@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- 拥有完全的网络访问权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 所有文件访问权限 -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <!-- 读取您共享存储空间中的内容 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- 修改或删除您共享存储空间中的内容 -->

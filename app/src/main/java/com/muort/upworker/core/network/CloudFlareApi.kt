@@ -165,6 +165,64 @@ interface CloudFlareApi {
         @Path("script_name") scriptName: String,
         @Part("settings") settings: RequestBody
     ): Response<CloudFlareResponse<WorkerScript>>
+
+    /**
+     * List Worker Script versions (beta)
+     * https://developers.cloudflare.com/api/resources/workers/subresources/beta/subresources/workers/subresources/versions/methods/list
+     */
+    @Headers("Accept: application/json")
+    @GET("accounts/{account_id}/workers/scripts/{script_name}/versions")
+    suspend fun listWorkerVersions(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Query("per_page") perPage: Int = 50
+    ): Response<CloudFlareResponse<WorkerVersionsResult>>
+
+    /**
+     * Get a specific Worker Script version (beta)
+     * https://developers.cloudflare.com/api/resources/workers/subresources/beta/subresources/workers/subresources/versions/methods/get
+     */
+    @Headers("Accept: application/json")
+    @GET("accounts/{account_id}/workers/scripts/{script_name}/versions/{version_id}")
+    suspend fun getWorkerVersion(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Path("version_id") versionId: String
+    ): Response<CloudFlareResponse<WorkerVersion>>
+
+    /**
+     * Deploy a Worker Script version (rollback) (beta)
+     */
+    @Headers("Accept: application/json")
+    @POST("accounts/{account_id}/workers/scripts/{script_name}/versions/{version_id}/deploy")
+    suspend fun deployWorkerVersion(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Path("version_id") versionId: String
+    ): Response<CloudFlareResponse<WorkerVersion>>
+
+    /**
+     * Delete a Worker Script version (beta)
+     */
+    @Headers("Accept: application/json")
+    @DELETE("accounts/{account_id}/workers/workers/{worker_id}/versions/{version_id}")
+    suspend fun deleteWorkerVersion(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("worker_id") workerId: String,
+        @Path("version_id") versionId: String
+    ): Response<CloudFlareResponse<Void>>
     
     // ==================== Routes ====================
     

@@ -373,6 +373,10 @@ class PagesViewModel @Inject constructor(
         }
     }
     
+    suspend fun getProjectDetailSuspend(account: Account, projectName: String): Resource<PagesProjectDetail> {
+        return pagesRepository.getProject(account, projectName)
+    }
+    
     // ==================== Pages Domains ====================
     
     /**

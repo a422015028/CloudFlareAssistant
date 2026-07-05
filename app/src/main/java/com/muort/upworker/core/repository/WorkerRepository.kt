@@ -782,6 +782,117 @@ class WorkerRepository @Inject constructor(
             }
         }
     }
+
+    suspend fun listWorkerVersions(
+        account: Account,
+        scriptName: String
+    ): Resource<List<WorkerVersion>> = withContext(Dispatchers.IO) {
+        try {
+            Timber.d("Fetching worker versions for account: ${account.accountId}, script: $scriptName")
+            Timber.d("Auth - Token: ${AuthHelper.getBearerToken(account) != null}, Email: ${AuthHelper.getEmail(account) != null}, API Key: ${AuthHelper.getGlobalApiKey(account) != null}")
+            
+            val response = api.listWorkerVersions(
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                val versions = response.body()?.result?.items ?: emptyList()
+                Timber.d("Successfully fetched ${versions.size} versions")
+                Resource.Success(versions)
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Timber.e("Failed to list versions: $errorMsg, code: ${response.code()}")
+                Resource.Error("获取版本历史失败: $errorMsg")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Exception when fetching worker versions for script: $scriptName")
+            Resource.Error("获取版本历史失败: ${e.javaClass.simpleName}: ${e.message}")
+        }
+    }
+
+    suspend fun getWorkerVersion(
+        account: Account,
+        scriptName: String,
+        versionId: String
+    ): Resource<WorkerVersion> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val response = api.getWorkerVersion(
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName,
+                versionId = versionId
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("No version returned")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Resource.Error("Failed to get version: $errorMsg")
+            }
+        }
+    }
+
+    suspend fun deployWorkerVersion(
+        account: Account,
+        scriptName: String,
+        versionId: String
+    ): Resource<WorkerVersion> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val response = api.deployWorkerVersion(
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName,
+                versionId = versionId
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("No version returned")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Resource.Error("Failed to deploy version: $errorMsg")
+            }
+        }
+    }
+
+    suspend fun deleteWorkerVersion(
+        account: Account,
+        scriptName: String,
+        versionId: String
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val response = api.deleteWorkerVersion(
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                workerId = scriptName,
+                versionId = versionId
+            )
+            
+            if (response.isSuccessful && response.body()?.success == true) {
+                Resource.Success(Unit)
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Resource.Error("删除版本失败: $errorMsg")
+            }
+        }
+    }
     
     // Routes
     suspend fun listRoutes(account: Account): Resource<List<Route>> = 
