@@ -79,6 +79,13 @@
                 android:layout_height="match_parent"
                 android:background="#282a36" />
 
+            <View
+                android:id="@+id/flashShield"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#282a36"
+                android:visibility="gone" />
+
             <!-- Search Bar Overlay -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/searchBar"
