@@ -56,13 +56,14 @@ class ScriptEditorFragment : Fragment() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         setupToolbar()
         setupBackPressHandler()
         setupWebView()
         setupButtons()
         observeViewModel()
-        
+        setupLayoutListener()
+
         // Load script content
         viewModel.loadScript(args.accountEmail, args.scriptName)
     }
@@ -99,20 +100,9 @@ class ScriptEditorFragment : Fragment() {
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
-                loadWithOverviewMode = true
-                useWideViewPort = true
-                setSupportZoom(true)
-                builtInZoomControls = true
-                displayZoomControls = false
-                javaScriptCanOpenWindowsAutomatically = false
                 allowFileAccess = true
                 allowContentAccess = true
-                mediaPlaybackRequiresUserGesture = true
                 cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
-                mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
-                setAllowFileAccessFromFileURLs(true)
-                setAllowUniversalAccessFromFileURLs(true)
-                setSupportMultipleWindows(true)
             }
             
             addJavascriptInterface(JavaScriptBridge(), "AndroidBridge")
@@ -129,9 +119,9 @@ class ScriptEditorFragment : Fragment() {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    setEditorTheme()
+                    // CodeMirror在window.load时自动初始化，无需在此设置主题
                 }
-                
+
                 override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
                     return true
                 }
@@ -155,10 +145,10 @@ class ScriptEditorFragment : Fragment() {
                 else -> false
             }
             
-            val themeScript = "window._editorTheme = '${if (isDarkMode) "vs-dark" else "vs-light"}';"
+            val themeScript = "window._editorTheme = '${if (isDarkMode) "dracula" else "default"}';"
             evaluateJavascript(themeScript, null)
             
-            loadUrl("file:///android_asset/script_editor.html")
+            loadUrl("file:///android_asset/code_editor.html")
         }
     }
     
@@ -316,61 +306,25 @@ class ScriptEditorFragment : Fragment() {
     
     private fun setEditorContent(content: String) {
         Timber.d("setEditorContent: Setting ${content.length} chars")
-        Timber.d("First 100 chars: ${content.take(100)}")
-        
-        // 按正确顺序转义，确保可逆
-        val escapedContent = content
-            .replace("\\", "\\\\")     // 反斜杠必须最先处理
-            .replace("\r", "\\r")      // 回车
-            .replace("\n", "\\n")      // 换行
-            .replace("\t", "\\t")      // 制表符
-            .replace("'", "\\'")       // 单引号（用于 JavaScript 字符串）
-        
-        executeJavaScript("setContent('$escapedContent')")
+        // 使用JSON.stringify确保所有特殊字符正确转义
+        val jsonContent = org.json.JSONObject().apply {
+            put("c", content)
+        }.toString()
+        executeJavaScript("setContentFromJSON($jsonContent)")
     }
     
     private fun getEditorContent(callback: (String) -> Unit) {
         binding.webView.evaluateJavascript("getContent()") { result ->
-            Timber.d("getEditorContent raw result: ${result?.take(100)}")
-            // Remove quotes from JSON string
-            val content = result?.trim('"')?.let { unescapeJavaScript(it) } ?: ""
-            Timber.d("getEditorContent after unescape: ${content.length} chars")
-            Timber.d("First 100 chars: ${content.take(100)}")
+            val content = if (!result.isNullOrEmpty() && result != "null") {
+                try {
+                    // evaluateJavascript返回JSON编码的字符串，包装为对象解析以正确反转义
+                    org.json.JSONObject("{\"v\":$result}").getString("v")
+                } catch (e: Exception) {
+                    result.removeSurrounding("\"")
+                }
+            } else ""
             callback(content)
         }
-    }
-    
-    private fun unescapeJavaScript(text: String): String {
-        var result = text
-        
-        // 1. 先处理 Unicode 转义序列 (如 \u003C -> <)
-        val unicodePattern = Regex("""\\u([0-9a-fA-F]{4})""")
-        result = unicodePattern.replace(result) { matchResult ->
-            val hexCode = matchResult.groupValues[1]
-            hexCode.toInt(16).toChar().toString()
-        }
-        
-        // 2. 处理 \x 转义序列（如 \x3C）
-        val hexPattern = Regex("""\\x([0-9a-fA-F]{2})""")
-        result = hexPattern.replace(result) { matchResult ->
-            val hexCode = matchResult.groupValues[1]
-            hexCode.toInt(16).toChar().toString()
-        }
-        
-        // 3. 处理其他转义序列（但不处理反斜杠，避免破坏后续处理）
-        result = result
-            .replace("\\n", "\n")
-            .replace("\\r", "\r")
-            .replace("\\t", "\t")
-            .replace("\\b", "\b")
-            .replace("\\f", "\u000C")
-            .replace("\\'", "'")
-            .replace("\\\"", "\"")
-        
-        // 4. 最后处理双反斜杠
-        result = result.replace("\\\\", "\\")
-        
-        return result
     }
     
     private fun executeJavaScript(script: String) {
@@ -575,12 +529,32 @@ class ScriptEditorFragment : Fragment() {
         imm.hideSoftInputFromWindow(binding.webView.windowToken, 0)
     }
     
+    private var lastLayoutWidth = 0
+    private var lastLayoutHeight = 0
+
+    private fun setupLayoutListener() {
+        binding.webViewContainer.viewTreeObserver.addOnGlobalLayoutListener {
+            val b = _binding ?: return@addOnGlobalLayoutListener
+            val width = b.webViewContainer.width
+            val height = b.webViewContainer.height
+            if (width > 0 && height > 0 && (width != lastLayoutWidth || height != lastLayoutHeight)) {
+                lastLayoutWidth = width
+                lastLayoutHeight = height
+                if (isEditorReady) {
+                    b.webView.evaluateJavascript("doLayout()", null)
+                }
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         setEditorTheme()
-        binding.webView.postDelayed({
-            executeJavaScript("refreshEditor()")
-        }, 100)
+        binding.webView.post {
+            if (isEditorReady) {
+                executeJavaScript("doLayout()")
+            }
+        }
     }
     
     override fun onDestroyView() {
@@ -596,7 +570,7 @@ class ScriptEditorFragment : Fragment() {
     }
     
     /**
-     * JavaScript Bridge for communication with CodeMirror
+     * JavaScript Bridge for communication with CodeMirror editor
      */
     inner class JavaScriptBridge {
         

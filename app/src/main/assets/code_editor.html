@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Code Editor</title>
+    <link rel="stylesheet" href="file:///android_asset/codemirror/codemirror.min.css">
+    <link rel="stylesheet" href="file:///android_asset/codemirror/dracula.min.css">
+    <link rel="stylesheet" href="file:///android_asset/codemirror/dialog.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body { background-color: #282a36; }
+        body.light-theme { background-color: #ffffff; }
+        .CodeMirror {
+            height: 100%;
+            font-size: 14px;
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            line-height: 1.5;
+        }
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #282a36; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 100;
+        }
+        body.light-theme .loading-overlay { background-color: #ffffff; }
+        .loading-spinner {
+            width: 40px; height: 40px; border: 4px solid #444; border-top-color: #007acc;
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        body.light-theme .loading-spinner { border-color: #ccc; border-top-color: #007acc; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: #888; margin-top: 16px; font-size: 14px; font-family: sans-serif; }
+        body.light-theme .loading-text { color: #555; }
+        .cm-search-highlight { background-color: rgba(255, 255, 0, 0.3); }
+        .cm-search-highlight-current { background-color: rgba(255, 140, 0, 0.5); }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载编辑器...</div>
+    </div>
+    <textarea id="editor"></textarea>
+
+    <script src="file:///android_asset/codemirror/codemirror.min.js"></script>
+    <script src="file:///android_asset/codemirror/javascript.min.js"></script>
+    <script src="file:///android_asset/codemirror/dialog.min.js"></script>
+    <script src="file:///android_asset/codemirror/searchcursor.min.js"></script>
+    <script src="file:///android_asset/codemirror/search.min.js"></script>
+
+    <script>
+        window._editorTheme = window._editorTheme || 'dracula';
+        window._currentContent = '';
+
+        var editor = null;
+        var isEditorReady = false;
+        var contentChangeDebounceTimer = null;
+        var searchOverlay = null;
+
+        CodeMirror.defineMode("js-worker", function(config) {
+            return CodeMirror.getMode(config, { name: "javascript", json: false });
+        });
+
+        function initEditor() {
+            var isDark = window._editorTheme === 'dracula';
+
+            if (!isDark) {
+                document.body.classList.add('light-theme');
+            }
+
+            editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+                mode: "javascript",
+                theme: isDark ? 'dracula' : 'default',
+                lineNumbers: true,
+                lineWrapping: true,
+                indentUnit: 4,
+                tabSize: 4,
+                indentWithTabs: false,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                styleActiveLine: true,
+                extraKeys: {
+                    "Ctrl-S": function(cm) {
+                        if (window.AndroidBridge) {
+                            try { window.AndroidBridge.onSaveRequested(cm.getValue()); } catch (e) {}
+                        }
+                    },
+                    "Ctrl-F": function(cm) {
+                        if (window.AndroidBridge) {
+                            try { window.AndroidBridge.onShowSearch(); } catch (e) {}
+                        }
+                    }
+                }
+            });
+
+            editor.on('change', function() {
+                window._currentContent = editor.getValue();
+                debounceContentChanged();
+            });
+
+            document.getElementById('loading').style.display = 'none';
+            isEditorReady = true;
+
+            if (window.AndroidBridge) {
+                try { window.AndroidBridge.onEditorReady(); } catch (e) { console.log('AndroidBridge not ready'); }
+            }
+        }
+
+        var DEBOUNCE_DELAY = 500;
+
+        function debounceContentChanged() {
+            if (contentChangeDebounceTimer) clearTimeout(contentChangeDebounceTimer);
+            contentChangeDebounceTimer = setTimeout(function() {
+                if (window.AndroidBridge) {
+                    try { window.AndroidBridge.onContentChanged(); } catch (e) {}
+                }
+            }, DEBOUNCE_DELAY);
+        }
+
+        function setContent(code) {
+            if (contentChangeDebounceTimer) clearTimeout(contentChangeDebounceTimer);
+            if (!editor) {
+                window._currentContent = code;
+                return;
+            }
+            editor.setValue(code);
+            window._currentContent = code;
+        }
+
+        function setContentFromJSON(jsonObj) {
+            var code = jsonObj.c;
+            if (contentChangeDebounceTimer) clearTimeout(contentChangeDebounceTimer);
+            if (!editor) {
+                window._currentContent = code;
+                return;
+            }
+            editor.setValue(code);
+            window._currentContent = code;
+        }
+
+        function getContent() {
+            return editor ? editor.getValue() : window._currentContent || '';
+        }
+
+        function setTheme(isDark) {
+            window._editorTheme = isDark ? 'dracula' : 'default';
+            if (isDark) {
+                document.body.classList.remove('light-theme');
+            } else {
+                document.body.classList.add('light-theme');
+            }
+            if (editor) {
+                editor.setOption('theme', isDark ? 'dracula' : 'default');
+            }
+        }
+
+        function focusEditor() {
+            if (editor) editor.focus();
+        }
+
+        function selectAll() {
+            if (!editor) return;
+            editor.setSelection({ line: 0, ch: 0 }, { line: editor.lineCount(), ch: 0 });
+            editor.focus();
+        }
+
+        var searchMatches = [];
+        var searchIndex = -1;
+
+        function customSearch(query, caseSensitive) {
+            if (!editor || !query) {
+                clearSearchHighlights();
+                return 0;
+            }
+            clearSearchHighlights();
+
+            var cursor = editor.getSearchCursor(query, { line: 0, ch: 0 }, !caseSensitive);
+            var matches = [];
+            while (cursor.findNext()) {
+                matches.push({ from: cursor.from(), to: cursor.to() });
+            }
+
+            searchMatches = matches;
+            searchIndex = 0;
+
+            if (matches.length > 0) {
+                var marks = matches.map(function(m, i) {
+                    return editor.markText(m.from, m.to, {
+                        className: i === 0 ? 'cm-search-highlight-current' : 'cm-search-highlight'
+                    });
+                });
+                searchOverlay = marks;
+                editor.scrollIntoView(matches[0].from);
+                editor.setSelection(matches[0].from, matches[0].to);
+            }
+
+            return matches.length;
+        }
+
+        function findNext() {
+            if (searchMatches.length === 0) return;
+            searchIndex = (searchIndex + 1) % searchMatches.length;
+            updateSearchHighlight();
+        }
+
+        function findPrev() {
+            if (searchMatches.length === 0) return;
+            searchIndex = (searchIndex - 1 + searchMatches.length) % searchMatches.length;
+            updateSearchHighlight();
+        }
+
+        function updateSearchHighlight() {
+            if (searchOverlay) {
+                searchOverlay.forEach(function(m) { m.clear(); });
+            }
+            searchOverlay = searchMatches.map(function(m, i) {
+                return editor.markText(m.from, m.to, {
+                    className: i === searchIndex ? 'cm-search-highlight-current' : 'cm-search-highlight'
+                });
+            });
+            var match = searchMatches[searchIndex];
+            editor.scrollIntoView(match.from);
+            editor.setSelection(match.from, match.to);
+        }
+
+        function clearSearchHighlights() {
+            if (searchOverlay) {
+                searchOverlay.forEach(function(m) { m.clear(); });
+                searchOverlay = null;
+            }
+            searchMatches = [];
+            searchIndex = -1;
+        }
+
+        var layoutDebounceTimer = null;
+        function doLayout() {
+            if (!editor) return;
+            if (layoutDebounceTimer) clearTimeout(layoutDebounceTimer);
+            layoutDebounceTimer = setTimeout(function() {
+                try { editor.refresh(); } catch (e) {}
+            }, 50);
+        }
+
+        function refreshEditor() {
+            doLayout();
+        }
+
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        window.addEventListener('load', initEditor);
+    </script>
+</body>
+</html>
