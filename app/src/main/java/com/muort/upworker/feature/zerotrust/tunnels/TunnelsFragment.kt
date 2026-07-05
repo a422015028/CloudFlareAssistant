@@ -431,23 +431,23 @@ class TunnelsFragment : Fragment() {
             val dialogView = layoutInflater.inflate(R.layout.dialog_tunnel_run_command, null)
             
             val tokenTextView = dialogView.findViewById<TextView>(R.id.tokenTextView)
-            val commandTextView = dialogView.findViewById<TextView>(R.id.commandTextView)
             val copyCommandButton = dialogView.findViewById<android.widget.Button>(R.id.copyCommandButton)
             val hideTokenButton = dialogView.findViewById<android.widget.Button>(R.id.hideTokenButton)
             
-            tokenTextView.text = token
-            commandTextView.text = "cloudflared service install $token"
+            val fullCommand = "cloudflared service install $token"
+            var isTokenHidden = true
+            tokenTextView.text = "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
+            hideTokenButton.setText("显示令牌")
             
-            var isTokenHidden = false
             hideTokenButton.setOnClickListener {
                 isTokenHidden = !isTokenHidden
-                tokenTextView.text = if (isTokenHidden) "●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else token
+                tokenTextView.text = if (isTokenHidden) "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else fullCommand
                 hideTokenButton.setText(if (isTokenHidden) "显示令牌" else "隐藏令牌")
             }
             
             copyCommandButton.setOnClickListener {
                 val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                val clip = android.content.ClipData.newPlainText("Cloudflared Service Command", "cloudflared service install $token")
+                val clip = android.content.ClipData.newPlainText("Cloudflared Service Command", fullCommand)
                 clipboard.setPrimaryClip(clip)
                 Snackbar.make(binding.root, "命令已复制", Snackbar.LENGTH_SHORT).show()
             }

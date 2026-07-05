@@ -181,6 +181,15 @@ class AccessViewModel @Inject constructor(
             when (val result = zeroTrustRepository.updateAccessApplication(account, appId, request)) {
                 is Resource.Success -> {
                     _message.emit("应用更新成功: ${result.data.name}")
+                    // Cloudflare API响应可能不包含所有字段(如enable_binding_cookie等)，
+                    // 用请求数据填充响应中缺失的字段
+                    val mergedApp = result.data.copy(
+                        appLauncherVisible = result.data.appLauncherVisible ?: request.appLauncherVisible,
+                        autoRedirectToIdentity = result.data.autoRedirectToIdentity ?: request.autoRedirectToIdentity,
+                        enableBindingCookie = result.data.enableBindingCookie ?: request.enableBindingCookie,
+                        skipInterstitial = result.data.skipInterstitial ?: request.skipInterstitial
+                    )
+                    _selectedApp.value = mergedApp
                     loadApplications(account)
                 }
                 is Resource.Error -> {

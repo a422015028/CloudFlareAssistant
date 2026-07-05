@@ -51,28 +51,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="cloudflared service install"
-        android:textSize="14sp"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        android:layout_marginBottom="8dp"/>
-
-    <TextView
-        android:id="@+id/commandTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textColor="?attr/colorPrimary"
-        android:background="?attr/colorSurfaceContainer"
-        android:padding="12dp"
-        android:textIsSelectable="true"
-        android:fontFamily="monospace"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="令牌等同于隧道凭据，请妥善保管，不要公开分享。"
         android:textSize="12sp"
-        android:textColor="?attr/colorError"
-        android:layout_marginTop="16dp"/>
+        android:textColor="?attr/colorError"/>
 
 </LinearLayout>

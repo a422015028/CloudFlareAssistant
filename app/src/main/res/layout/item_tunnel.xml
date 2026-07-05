@@ -34,7 +34,7 @@
             android:text="Tunnel Name"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/deleteButton"
+            app:layout_constraintEnd_toStartOf="@id/runCommandButton"
             app:layout_constraintStart_toEndOf="@id/tunnelIcon"
             app:layout_constraintTop_toTopOf="@id/tunnelIcon" />
 
@@ -61,7 +61,7 @@
             android:textSize="10sp"
             app:chipMinHeight="24dp"
             app:layout_constraintStart_toEndOf="@id/statusChip"
-            app:layout_constraintTop_toBottomOf="@id/tunnelNameText" />
+            app:layout_constraintTop_toTopOf="@id/statusChip" />
 
         <!-- Connections Info -->
         <TextView
@@ -117,7 +117,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="运行命令"
             android:src="@android:drawable/ic_media_play"
-            app:layout_constraintEnd_toStartOf="@id/configButton"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="?attr/colorPrimary" />
 
@@ -130,8 +130,8 @@
             android:contentDescription="配置隧道"
             android:src="@android:drawable/ic_menu_preferences"
             android:visibility="gone"
-            app:layout_constraintEnd_toStartOf="@id/deleteButton"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/runCommandButton"
             app:tint="?attr/colorPrimary" />
 
         <!-- Delete Button -->
@@ -143,7 +143,7 @@
             android:contentDescription="删除隧道"
             android:src="@android:drawable/ic_menu_delete"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/configButton"
             app:tint="?attr/colorError" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

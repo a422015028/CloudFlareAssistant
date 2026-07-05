@@ -34,6 +34,9 @@ class WorkerLogsActivity : AppCompatActivity() {
     private lateinit var pauseBtn: MaterialButton
     private lateinit var clearBtn: MaterialButton
     private lateinit var refreshBtn: MaterialButton
+    private lateinit var selectAllBtn: MaterialButton
+    private lateinit var copyBtn: MaterialButton
+    private lateinit var closeBtn: MaterialButton
     private lateinit var waitingText: TextView
     private lateinit var logsText: TextView
 
@@ -71,6 +74,9 @@ class WorkerLogsActivity : AppCompatActivity() {
         pauseBtn = findViewById<MaterialButton>(R.id.pauseBtn)
         clearBtn = findViewById<MaterialButton>(R.id.clearBtn)
         refreshBtn = findViewById<MaterialButton>(R.id.refreshBtn)
+        selectAllBtn = findViewById<MaterialButton>(R.id.selectAllBtn)
+        copyBtn = findViewById<MaterialButton>(R.id.copyBtn)
+        closeBtn = findViewById<MaterialButton>(R.id.closeBtn)
         waitingText = findViewById<TextView>(R.id.waitingText)
         logsText = findViewById<TextView>(R.id.logsText)
 
@@ -110,6 +116,9 @@ class WorkerLogsActivity : AppCompatActivity() {
         pauseBtn.setOnClickListener { togglePause() }
         clearBtn.setOnClickListener { clearLogs() }
         refreshBtn.setOnClickListener { refreshConnection() }
+        selectAllBtn.setOnClickListener { selectAllLogs() }
+        copyBtn.setOnClickListener { copyLogs() }
+        closeBtn.setOnClickListener { finish() }
 
         val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
         if (wssUrl.isNullOrEmpty()) {
@@ -243,6 +252,26 @@ class WorkerLogsActivity : AppCompatActivity() {
         logsText.text = ""
         waitingText.visibility = View.VISIBLE
         logsText.visibility = View.GONE
+    }
+
+    private fun selectAllLogs() {
+        if (logsText.text != null) {
+            val editable = logsText.editableText
+            if (editable != null) {
+                android.text.Selection.setSelection(editable, 0, editable.length)
+            }
+        }
+    }
+
+    private fun copyLogs() {
+        val text = logsText.text.toString()
+        if (text.isNotEmpty()) {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Worker logs", text))
+            showToast("日志已复制")
+        } else {
+            showToast("没有日志可复制")
+        }
     }
 
     private fun isColorLight(color: Int): Boolean {

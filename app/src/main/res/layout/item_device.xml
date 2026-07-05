@@ -61,7 +61,7 @@
             android:textSize="10sp"
             app:chipMinHeight="24dp"
             app:layout_constraintStart_toEndOf="@id/deviceTypeChip"
-            app:layout_constraintTop_toBottomOf="@id/deviceNameText" />
+            app:layout_constraintTop_toTopOf="@id/deviceTypeChip" />
 
         <!-- User Info -->
         <TextView
@@ -118,10 +118,9 @@
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="撤销设备"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:src="@drawable/ic_delete"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="?attr/colorError" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

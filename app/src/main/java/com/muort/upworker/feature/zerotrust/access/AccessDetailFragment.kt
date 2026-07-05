@@ -87,7 +87,10 @@ class AccessDetailFragment : Fragment() {
             confirmDeleteApplication()
         }
 
-        // Advanced config switches
+        setupSwitchListeners()
+    }
+
+    private fun setupSwitchListeners() {
         binding.appLauncherSwitch.setOnCheckedChangeListener { _, isChecked ->
             updateAppConfig("appLauncherVisible", isChecked)
         }
@@ -169,11 +172,19 @@ class AccessDetailFragment : Fragment() {
         binding.sessionDurationText.text = app.sessionDuration ?: "默认"
         binding.createdAtText.text = app.createdAt ?: "未知"
 
-        // Advanced config
+        // Advanced config - 先移除listener防止程序设置触发更新
+        binding.appLauncherSwitch.setOnCheckedChangeListener(null)
+        binding.autoRedirectSwitch.setOnCheckedChangeListener(null)
+        binding.bindingCookieSwitch.setOnCheckedChangeListener(null)
+        binding.skipInterstitialSwitch.setOnCheckedChangeListener(null)
+
         binding.appLauncherSwitch.isChecked = app.appLauncherVisible ?: false
         binding.autoRedirectSwitch.isChecked = app.autoRedirectToIdentity ?: false
         binding.bindingCookieSwitch.isChecked = app.enableBindingCookie ?: false
         binding.skipInterstitialSwitch.isChecked = app.skipInterstitial ?: false
+
+        // 恢复listener
+        setupSwitchListeners()
 
         // SaaS config
         if (app.type == "saas" && app.saasApp != null) {
@@ -204,36 +215,16 @@ class AccessDetailFragment : Fragment() {
         val account = accountViewModel.defaultAccount.value ?: return
         val app = viewModel.selectedApp.value ?: return
 
-        val updateRequest = when (field) {
-            "appLauncherVisible" -> AccessApplicationRequest(
-                name = app.name,
-                domain = app.domain,
-                type = app.type,
-                appLauncherVisible = value
-            )
-            "autoRedirectToIdentity" -> AccessApplicationRequest(
-                name = app.name,
-                domain = app.domain,
-                type = app.type,
-                autoRedirectToIdentity = value
-            )
-            "enableBindingCookie" -> AccessApplicationRequest(
-                name = app.name,
-                domain = app.domain,
-                type = app.type,
-                enableBindingCookie = value
-            )
-            "skipInterstitial" -> AccessApplicationRequest(
-                name = app.name,
-                domain = app.domain,
-                type = app.type,
-                skipInterstitial = value
-            )
-            else -> {
-                Snackbar.make(binding.root, "未知配置字段", Snackbar.LENGTH_SHORT).show()
-                return
-            }
-        }
+        val updateRequest = AccessApplicationRequest(
+            name = app.name,
+            domain = app.domain,
+            type = app.type,
+            sessionDuration = app.sessionDuration,
+            appLauncherVisible = if (field == "appLauncherVisible") value else (app.appLauncherVisible ?: false),
+            autoRedirectToIdentity = if (field == "autoRedirectToIdentity") value else (app.autoRedirectToIdentity ?: false),
+            enableBindingCookie = if (field == "enableBindingCookie") value else (app.enableBindingCookie ?: false),
+            skipInterstitial = if (field == "skipInterstitial") value else (app.skipInterstitial ?: false)
+        )
 
         viewModel.updateApplication(account, app.id, updateRequest)
         Timber.d("Update $field = $value for app ${app.id}")
@@ -379,8 +370,10 @@ class AccessDetailFragment : Fragment() {
                     domain = domain?.takeIf { it.isNotBlank() },
                     type = type,
                     sessionDuration = sessionDuration?.takeIf { it.isNotBlank() },
-                    appLauncherVisible = appLauncherSwitch?.isChecked,
-                    autoRedirectToIdentity = autoRedirectSwitch?.isChecked,
+                    appLauncherVisible = appLauncherSwitch?.isChecked ?: app.appLauncherVisible,
+                    autoRedirectToIdentity = autoRedirectSwitch?.isChecked ?: app.autoRedirectToIdentity,
+                    enableBindingCookie = app.enableBindingCookie,
+                    skipInterstitial = app.skipInterstitial,
                     saasApp = saasApp
                 )
 
