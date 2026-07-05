@@ -301,6 +301,9 @@ class ScriptEditorFragment : Fragment() {
             android.content.res.Configuration.UI_MODE_NIGHT_YES -> true
             else -> false
         }
+        // 设置WebView背景色与编辑器一致，避免恢复时白屏闪烁
+        val bgColor = if (isDarkMode) 0xFF282a36.toInt() else 0xFFFFFFFF.toInt()
+        binding.webView.setBackgroundColor(bgColor)
         executeJavaScript("setTheme($isDarkMode)")
     }
     
@@ -550,11 +553,6 @@ class ScriptEditorFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         setEditorTheme()
-        binding.webView.post {
-            if (isEditorReady) {
-                executeJavaScript("doLayout()")
-            }
-        }
     }
     
     override fun onDestroyView() {
