@@ -86,11 +86,7 @@ class ScriptEditorFragment : Fragment() {
     }
     
     private fun handleBackNavigation() {
-        if (hasUnsavedChanges) {
-            showUnsavedChangesDialog()
-        } else {
-            findNavController().navigateUp()
-        }
+        findNavController().navigateUp()
     }
     
     @SuppressLint("SetJavaScriptEnabled")
@@ -487,17 +483,6 @@ class ScriptEditorFragment : Fragment() {
             .setMessage("确定要回滚到此版本并上传到Cloudflare吗？\n\n时间: $date\n类型: $type\n\n此操作将替换当前部署的脚本。")
             .setPositiveButton("回滚") { _, _ ->
                 viewModel.rollbackScript(args.accountEmail, args.scriptName, version)
-            }
-            .setNegativeButton("取消", null)
-            .show()
-    }
-    
-    private fun showUnsavedChangesDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("确认离开")
-            .setMessage("确定要离开编辑器吗？\n\n未保存的修改将丢失。")
-            .setPositiveButton("离开") { _, _ ->
-                findNavController().navigateUp()
             }
             .setNegativeButton("取消", null)
             .show()
