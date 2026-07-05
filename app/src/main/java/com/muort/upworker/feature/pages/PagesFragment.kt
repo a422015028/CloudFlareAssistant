@@ -1060,6 +1060,7 @@ class PagesFragment : Fragment() {
                 "application/zip",
                 "application/x-zip-compressed",
                 "application/javascript",
+                "text/html",
                 "text/javascript",
                 "text/plain"
             ))
@@ -1090,8 +1091,11 @@ class PagesFragment : Fragment() {
                 showToast("文件不存在")
                 return
             }
-            !file.name.endsWith(".zip", ignoreCase = true) -> {
-                showToast("仅支持 .zip 文件，请上传包含构建输出的压缩包")
+            !file.name.endsWith(".zip", ignoreCase = true) &&
+            !file.name.endsWith(".js", ignoreCase = true) &&
+            !file.name.endsWith(".htm", ignoreCase = true) &&
+            !file.name.endsWith(".html", ignoreCase = true) -> {
+                showToast("仅支持 .zip、.js 或 .html 文件")
                 return
             }
             file.length() > 25 * 1024 * 1024 -> {

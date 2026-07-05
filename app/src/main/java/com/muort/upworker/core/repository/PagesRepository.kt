@@ -231,12 +231,17 @@ class PagesRepository @Inject constructor(
         file: java.io.File  
     ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {  
         safeApiCall {  
-            if (!file.name.endsWith(".zip", ignoreCase = true)) {  
-                return@safeApiCall Resource.Error("仅支持 .zip 文件部署。")  
-            }  
             if (!file.exists()) {  
                 return@safeApiCall Resource.Error("文件不存在")  
-            }  
+            }
+
+            val isZip = file.name.endsWith(".zip", ignoreCase = true)
+            val isJs = file.name.endsWith(".js", ignoreCase = true)
+            val isHtml = file.name.endsWith(".htm", ignoreCase = true) ||
+                         file.name.endsWith(".html", ignoreCase = true)
+            if (!isZip && !isJs && !isHtml) {
+                return@safeApiCall Resource.Error("仅支持 .zip、.js 或 .html 文件部署。")
+            }
               
             // 1. 校验并创建项目
             val projectExists = checkProjectExists(account, projectName)  
@@ -244,6 +249,17 @@ class PagesRepository @Inject constructor(
                 createProject(account, projectName, branch)
             }  
 
+            // 单文件 .js 部署：直接作为 Worker 脚本上传（bundle 接口）
+            if (isJs) {
+                return@safeApiCall deployWorkerOnly(account, projectName, file)
+            }
+
+            // 单文件 .htm/.html 部署：走原有 manifest-only 流程
+            if (isHtml) {
+                return@safeApiCall deployStaticAssetOnly(account, projectName, file)
+            }
+
+            // zip 文件部署
             val tempDir = File(file.parentFile, "cf_pages_unzipped_${System.currentTimeMillis()}")
             tempDir.mkdirs()
 
@@ -275,6 +291,7 @@ class PagesRepository @Inject constructor(
                         if (name == ".DS_Store" || currentFile.absolutePath.contains("__MACOSX") || name.startsWith(".")) {
                             return
                         }
+                        // zip 中只匹配 _worker.js 作为 Worker 脚本
                         if (name == "_worker.js") {
                             Timber.d("collectFiles: 找到 _worker.js, 路径=${currentFile.absolutePath}, 大小=${currentFile.length()}字节")
                             workerJsFile = currentFile
@@ -437,6 +454,129 @@ class PagesRepository @Inject constructor(
         }  
     }  
       
+    /**
+     * 单文件 .htm/.html 部署：走原有 manifest-only 流程（作为静态资产上传）
+     */
+    private suspend fun deployStaticAssetOnly(
+        account: Account,
+        projectName: String,
+        htmlFile: File
+    ): Resource<PagesDeployment> {
+        if (htmlFile.length() == 0L) {
+            return Resource.Error("文件内容为空（0字节）")
+        }
+
+        // 1. 获取 upload token
+        val tokenResponse = api.getPagesUploadToken(
+            token = AuthHelper.getBearerToken(account),
+            email = AuthHelper.getEmail(account),
+            apiKey = AuthHelper.getGlobalApiKey(account),
+            accountId = account.accountId,
+            projectName = projectName
+        )
+        val jwt = tokenResponse.body()?.result?.jwt
+            ?: return Resource.Error("无法获取资产上传 Token")
+
+        // 2. 计算文件 hash，构建 manifest
+        val relativePath = "/index.html"
+        val cfHash = getCfHash(htmlFile)
+        val manifestMap = mapOf(relativePath to cfHash)
+
+        // 3. 上传资产（Base64）
+        val base64Str = android.util.Base64.encodeToString(htmlFile.readBytes(), android.util.Base64.NO_WRAP)
+        val assetPayload = PagesAssetPayload(
+            key = cfHash,
+            value = base64Str,
+            metadata = AssetMeta(contentType = "text/html")
+        )
+        val uploadResponse = api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = listOf(assetPayload))
+        if (!uploadResponse.isSuccessful) {
+            return Resource.Error("资产上传失败，HTTP Code: ${uploadResponse.code()}")
+        }
+
+        // 4. upsert-hashes
+        api.upsertPagesAssetHashes(
+            jwtToken = "Bearer $jwt",
+            body = PagesUpsertHashesPayload(hashes = manifestMap.values.toList())
+        )
+
+        // 5. 创建部署（manifest-only）
+        val manifestJson = manifestMap.entries.joinToString(",", "{", "}") { entry ->
+            "\"${entry.key}\":\"${entry.value}\""
+        }
+        val manifestBody = manifestJson.toRequestBody("application/json".toMediaType())
+        val response = api.createPagesDeploymentManifestOnly(
+            token = AuthHelper.getBearerToken(account),
+            email = AuthHelper.getEmail(account),
+            apiKey = AuthHelper.getGlobalApiKey(account),
+            accountId = account.accountId,
+            projectName = projectName,
+            manifest = manifestBody
+        )
+
+        return if (response.isSuccessful && response.body()?.success == true) {
+            response.body()?.result?.let { Resource.Success(it) }
+                ?: Resource.Error("部署创建成功，但没有返回结果")
+        } else {
+            val errorBody = response.errorBody()?.string() ?: "无错误响应体"
+            Resource.Error("部署失败: HTTP ${response.code()}, ${response.message()}. 响应体: $errorBody")
+        }
+    }
+
+    /**
+     * 单文件 .js 部署：直接作为 Worker 脚本上传（无静态资产）
+     */
+    private suspend fun deployWorkerOnly(
+        account: Account,
+        projectName: String,
+        workerFile: File
+    ): Resource<PagesDeployment> {
+        if (workerFile.length() == 0L) {
+            return Resource.Error("Worker 脚本文件内容为空（0字节）")
+        }
+
+        // 获取 upload token（即使没有静态资产也需要）
+        val tokenResponse = api.getPagesUploadToken(
+            token = AuthHelper.getBearerToken(account),
+            email = AuthHelper.getEmail(account),
+            apiKey = AuthHelper.getGlobalApiKey(account),
+            accountId = account.accountId,
+            projectName = projectName
+        )
+        val jwt = tokenResponse.body()?.result?.jwt
+            ?: return Resource.Error("无法获取资产上传 Token")
+
+        // upsert-hashes（空列表，初始化部署会话）
+        api.upsertPagesAssetHashes(
+            jwtToken = "Bearer $jwt",
+            body = PagesUpsertHashesPayload(hashes = emptyList())
+        )
+
+        // 空 manifest + _worker.bundle
+        val manifestBody = "{}".toRequestBody("application/json".toMediaType())
+        val workerBundle = buildWorkerBundle(workerFile)
+        val workerBundlePart = MultipartBody.Part.createFormData(
+            "_worker.bundle", "_worker.bundle", workerBundle
+        )
+        val response = api.createPagesDeploymentWithWorker(
+            token = AuthHelper.getBearerToken(account),
+            email = AuthHelper.getEmail(account),
+            apiKey = AuthHelper.getGlobalApiKey(account),
+            accountId = account.accountId,
+            projectName = projectName,
+            manifest = manifestBody,
+            workerBundle = workerBundlePart
+        )
+
+        return if (response.isSuccessful && response.body()?.success == true) {
+            response.body()?.result?.let { Resource.Success(it) }
+                ?: Resource.Error("部署创建成功，但没有返回结果")
+        } else {
+            val errorBody = response.errorBody()?.string() ?: "无错误响应体"
+            Resource.Error("部署失败: HTTP ${response.code()}, ${response.message()}. 响应体: $errorBody")
+        }
+    }
+
     private fun buildWorkerBundle(workerJsFile: File): RequestBody {
         val boundary = "----CloudFlareWorkerBundle${System.currentTimeMillis()}----"
         val metadataJson = """{"main_module":"_worker.js"}"""
