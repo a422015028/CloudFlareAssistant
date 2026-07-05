@@ -1086,16 +1086,51 @@ class WorkerRepository @Inject constructor(
         }
     }
 
+    suspend fun listTails(account: Account, scriptName: String): Resource<List<TailResult>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.listTails(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    scriptName = scriptName
+                )
+                
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()?.result ?: emptyList())
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                        ?: response.message()
+                    Resource.Error("获取日志通道失败: $errorMsg")
+                }
+            }
+        }
+
     suspend fun createTail(account: Account, scriptName: String): Resource<TailResult> =
         withContext(Dispatchers.IO) {
             safeApiCall {
+                listTails(account, scriptName).let { listResult ->
+                    if (listResult is Resource.Success && listResult.data.isNotEmpty()) {
+                        listResult.data.first().id.let { tailId ->
+                            api.deleteTail(
+                                token = AuthHelper.getBearerToken(account),
+                                email = AuthHelper.getEmail(account),
+                                apiKey = AuthHelper.getGlobalApiKey(account),
+                                accountId = account.accountId,
+                                scriptName = scriptName,
+                                id = tailId
+                            )
+                        }
+                    }
+                }
+                
                 val response = api.createTail(
                     token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
-                    scriptName = scriptName,
-                    body = emptyMap()
+                    scriptName = scriptName
                 )
                 
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -1106,6 +1141,28 @@ class WorkerRepository @Inject constructor(
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
                     Resource.Error("创建日志通道失败: $errorMsg")
+                }
+            }
+        }
+
+    suspend fun deleteTail(account: Account, scriptName: String, tailId: String): Resource<Unit> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.deleteTail(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    scriptName = scriptName,
+                    id = tailId
+                )
+                
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(Unit)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                        ?: response.message()
+                    Resource.Error("删除日志通道失败: $errorMsg")
                 }
             }
         }

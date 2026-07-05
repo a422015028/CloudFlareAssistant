@@ -638,8 +638,16 @@ class WorkerViewModel @Inject constructor(
         }
     }
 
+    suspend fun listTails(account: Account, scriptName: String): Resource<List<com.muort.upworker.core.model.TailResult>> {
+        return workerRepository.listTails(account, scriptName)
+    }
+
     suspend fun createTail(account: Account, scriptName: String): Resource<com.muort.upworker.core.model.TailResult> {
         return workerRepository.createTail(account, scriptName)
+    }
+
+    suspend fun deleteTail(account: Account, scriptName: String, tailId: String): Resource<Unit> {
+        return workerRepository.deleteTail(account, scriptName, tailId)
     }
 
     suspend fun fetchSchedules(account: Account, scriptName: String): Resource<List<com.muort.upworker.core.model.Schedule>> {

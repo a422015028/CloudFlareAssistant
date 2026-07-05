@@ -227,15 +227,35 @@ interface CloudFlareApi {
     // ==================== Workers Tails (Real-time Logs) ====================
     
     @Headers("Accept: application/json")
+    @GET("accounts/{account_id}/workers/scripts/{script_name}/tails")
+    suspend fun listTails(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String
+    ): Response<CloudFlareResponse<List<TailResult>>>
+    
+    @Headers("Accept: application/json")
     @POST("accounts/{account_id}/workers/scripts/{script_name}/tails")
     suspend fun createTail(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
-        @Path("script_name") scriptName: String,
-        @Body body: Map<String, String>
+        @Path("script_name") scriptName: String
     ): Response<CloudFlareResponse<TailResult>>
+    
+    @Headers("Accept: application/json")
+    @DELETE("accounts/{account_id}/workers/scripts/{script_name}/tails/{id}")
+    suspend fun deleteTail(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Path("id") id: String
+    ): Response<CloudFlareResponse<Void>>
     
     // ==================== Workers Schedules ====================
     
