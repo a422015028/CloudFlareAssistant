@@ -172,6 +172,37 @@
             android:textSize="14sp" />
     </LinearLayout>
 
+    <!-- 本应用官网 -->
+    <LinearLayout
+        android:id="@+id/layoutAppWebsite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🚀 本应用官网"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvAppWebsiteLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="访问 →"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="14sp" />
+    </LinearLayout>
+
     <!-- 获取API令牌说明（可展开） -->
     <LinearLayout
         android:id="@+id/layoutApiTokenGuide"

@@ -631,13 +631,18 @@ class RouteFragment : Fragment() {
     }
     
     private fun showDnsConfigDialog(domain: PagesDomain, subdomain: String) {
-        val verification = domain.verificationData
-        val recordType = verification?.type ?: "CNAME"
-        val recordName = verification?.name ?: domain.name
-        // 如果API没有返回验证数据，使用项目的subdomain（已包含.pages.dev）
-        val recordValue = verification?.value?.takeIf { it.isNotEmpty() } 
+        val validation = domain.validationData
+        // 根据验证方式决定记录类型：txt 方式用 TXT 记录，http 方式用 CNAME 记录
+        val recordType = when (validation?.method) {
+            "txt" -> "TXT"
+            else -> "CNAME"
+        }
+        // txt_name 用于 TXT 验证，否则使用域名本身
+        val recordName = validation?.txtName?.takeIf { it.isNotEmpty() } ?: domain.name
+        // txt_value 用于 TXT 验证值，CNAME 方式使用 subdomain
+        val recordValue = validation?.txtValue?.takeIf { it.isNotEmpty() }
             ?: subdomain
-        
+
         val message = buildString {
             appendLine("域名添加成功！")
             appendLine()
@@ -649,7 +654,7 @@ class RouteFragment : Fragment() {
             appendLine("名称: $recordName")
             appendLine("目标: $recordValue")
             appendLine()
-            if (verification?.value?.isNotEmpty() == true) {
+            if (!validation?.txtValue.isNullOrEmpty()) {
                 appendLine("点击【自动配置 DNS】按钮，系统将自动在 CloudFlare DNS 中添加此记录。")
             } else {
                 appendLine("点击【自动配置 DNS】按钮，系统将使用默认配置自动添加 DNS 记录。")

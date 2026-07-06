@@ -221,6 +221,21 @@ class PagesViewModel @Inject constructor(
         return pagesRepository.getDeploymentLogs(account, projectName, deploymentId)
     }
     
+    suspend fun listDomainsSuspend(
+        account: Account,
+        projectName: String
+    ): Resource<List<PagesDomain>> {
+        return pagesRepository.listDomains(account, projectName)
+    }
+
+    suspend fun deleteDomainSuspend(
+        account: Account,
+        projectName: String,
+        domainName: String
+    ): Resource<Unit> {
+        return pagesRepository.deleteDomain(account, projectName, domainName)
+    }
+    
     fun createDeployment(
         account: Account,
         projectName: String,

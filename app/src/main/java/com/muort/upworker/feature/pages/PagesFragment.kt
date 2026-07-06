@@ -26,9 +26,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
+import com.muort.upworker.core.model.DnsRecordRequest
 import com.muort.upworker.core.model.PagesDeployment
 import com.muort.upworker.core.model.PagesDeploymentLogLine
 import com.muort.upworker.core.model.PagesDeploymentLogs
+import com.muort.upworker.core.model.PagesDomain
 import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.repository.KvRepository
@@ -62,6 +64,9 @@ class PagesFragment : Fragment() {
     
     @Inject
     lateinit var d1Repository: D1Repository
+    
+    @Inject
+    lateinit var dnsRepository: com.muort.upworker.core.repository.DnsRepository
     
     private lateinit var projectAdapter: ProjectAdapter
     
@@ -189,6 +194,16 @@ class PagesFragment : Fragment() {
             onViewDeploymentsClick = { project ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     showDeploymentsDialogWithLoading(account, project)
+                }
+            },
+            onViewDomainsClick = { project ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showDomainsDialog(account, project)
+                }
+            },
+            onAddDomainClick = { project ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showAddDomainDialog(account, project)
                 }
             },
             onLogsClick = { project ->
@@ -1769,6 +1784,266 @@ class PagesFragment : Fragment() {
         }
     }
     
+    private fun showAddDomainDialog(account: Account, project: PagesProject) {
+        val context = requireContext()
+        val container = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(
+                (context.resources.displayMetrics.density * 24).toInt(),
+                (context.resources.displayMetrics.density * 16).toInt(),
+                (context.resources.displayMetrics.density * 24).toInt(),
+                (context.resources.displayMetrics.density * 8).toInt()
+            )
+        }
+        val inputLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
+            hint = "自定义域名（例如：app.example.com）"
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+        }
+        val editText = com.google.android.material.textfield.TextInputEditText(inputLayout.context).apply {
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI
+        }
+        inputLayout.addView(editText)
+        container.addView(inputLayout)
+
+        MaterialAlertDialogBuilder(context)
+            .setTitle("为 ${project.name} 添加域名")
+            .setView(container)
+            .setPositiveButton("添加") { _, _ ->
+                val hostname = editText.text?.toString()?.trim().orEmpty()
+                if (hostname.isEmpty()) {
+                    Snackbar.make(binding.root, "域名不能为空", Snackbar.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                val subdomain = "${project.name}.pages.dev"
+                pagesViewModel.addCustomDomain(account, project.name, hostname) { result ->
+                    if (result is Resource.Success) {
+                        // 添加成功后直接自动配置 DNS，不弹窗询问
+                        autoConfigureDnsForDomain(account, result.data, subdomain)
+                    }
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun autoConfigureDnsForDomain(account: Account, domain: PagesDomain, subdomain: String) {
+        if (account.zoneId.isNullOrBlank()) {
+            Snackbar.make(
+                binding.root,
+                "域名已添加，但账号未配置 Zone ID，无法自动添加 DNS 记录，请手动配置",
+                Snackbar.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        val validation = domain.validationData
+        val recordType = when (validation?.method) {
+            "txt" -> "TXT"
+            else -> "CNAME"
+        }
+        val recordName = validation?.txtName?.takeIf { it.isNotEmpty() } ?: domain.name
+        val recordValue = validation?.txtValue?.takeIf { it.isNotEmpty() } ?: subdomain
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            Snackbar.make(binding.root, "正在自动配置 DNS 记录...", Snackbar.LENGTH_SHORT).show()
+            val dnsRequest = DnsRecordRequest(
+                type = recordType,
+                name = recordName,
+                content = recordValue,
+                proxied = true,
+                ttl = 1
+            )
+            when (val result = dnsRepository.createDnsRecord(account, dnsRequest)) {
+                is Resource.Success -> {
+                    Snackbar.make(
+                        binding.root,
+                        "域名添加成功，DNS 记录已自动配置，验证可能需要几分钟",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
+                is Resource.Error -> {
+                    Snackbar.make(
+                        binding.root,
+                        "域名已添加，DNS 自动配置失败: ${result.message}，请手动添加 $recordType 记录",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
+                is Resource.Loading -> {}
+            }
+        }
+    }
+
+    private fun showDomainsDialog(account: com.muort.upworker.core.model.Account, project: PagesProject) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_pages_domains, null)
+        val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
+        val loadingProgress = dialogView.findViewById<android.widget.ProgressBar>(R.id.loadingProgress)
+        val domainsRecyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.domainsRecyclerView)
+        val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
+
+        titleText.text = "${project.name} - 域名"
+        loadingProgress.visibility = android.view.View.VISIBLE
+        domainsRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        closeBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        val previewDomain = "${project.name}.pages.dev"
+
+        fun loadDomains() {
+            loadingProgress.visibility = android.view.View.VISIBLE
+            lifecycleScope.launch {
+                val result = pagesViewModel.listDomainsSuspend(account, project.name)
+                loadingProgress.visibility = android.view.View.GONE
+                if (result is Resource.Success<*>) {
+                    val domains = result.data as? List<PagesDomain> ?: emptyList()
+                    domainsRecyclerView.adapter = DomainAdapter(previewDomain, domains) { domain ->
+                        confirmDeleteDomain(account, project, domain) {
+                            loadDomains()
+                        }
+                    }
+                } else {
+                    domainsRecyclerView.adapter = DomainAdapter(previewDomain, emptyList()) { domain ->
+                        confirmDeleteDomain(account, project, domain) {
+                            loadDomains()
+                        }
+                    }
+                }
+            }
+        }
+
+        loadDomains()
+        dialog.show()
+    }
+
+    private fun confirmDeleteDomain(
+        account: Account,
+        project: PagesProject,
+        domain: PagesDomain,
+        onDeleted: () -> Unit
+    ) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("删除域名")
+            .setMessage("确定要删除域名 \"${domain.name}\" 吗？\n\n此操作不可恢复。")
+            .setPositiveButton("删除") { _, _ ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    when (val result = pagesViewModel.deleteDomainSuspend(account, project.name, domain.name)) {
+                        is Resource.Success -> {
+                            Snackbar.make(binding.root, "域名删除成功", Snackbar.LENGTH_SHORT).show()
+                            onDeleted()
+                        }
+                        is Resource.Error -> {
+                            Snackbar.make(binding.root, "删除失败: ${result.message}", Snackbar.LENGTH_LONG).show()
+                        }
+                        is Resource.Loading -> {}
+                    }
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private class DomainAdapter(
+        private val previewDomain: String,
+        private val customDomains: List<PagesDomain>,
+        private val onDeleteClick: (PagesDomain) -> Unit
+    ) : RecyclerView.Adapter<DomainAdapter.ViewHolder>() {
+
+        private val PREVIEW_TYPE = 0
+        private val CUSTOM_TYPE = 1
+
+        override fun getItemViewType(position: Int): Int {
+            return if (position == 0) PREVIEW_TYPE else CUSTOM_TYPE
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = android.view.LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_pages_domain, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            if (position == 0) {
+                holder.bindPreview(previewDomain)
+            } else {
+                holder.bindCustom(customDomains[position - 1])
+            }
+        }
+
+        override fun getItemCount() = 1 + customDomains.size
+
+        inner class ViewHolder(itemView: android.view.View) : RecyclerView.ViewHolder(itemView) {
+            private val nameText = itemView.findViewById<android.widget.TextView>(R.id.domainNameText)
+            private val statusText = itemView.findViewById<android.widget.TextView>(R.id.domainStatusText)
+            private val infoText = itemView.findViewById<android.widget.TextView>(R.id.domainInfoText)
+            private val errorText = itemView.findViewById<android.widget.TextView>(R.id.domainErrorText)
+            private val deleteBtn = itemView.findViewById<android.widget.ImageButton>(R.id.deleteDomainBtn)
+
+            fun bindPreview(domain: String) {
+                nameText.text = domain
+                nameText.setOnClickListener {
+                    copyToClipboard("https://$domain", "预览域名已复制")
+                }
+                statusText.text = "预览"
+                statusText.setBackgroundColor(0xFF2196F3.toInt())
+                statusText.setTextColor(0xFFFFFFFF.toInt())
+                infoText.text = "Pages 默认域名"
+                errorText.visibility = android.view.View.GONE
+                // 预览域名不可删除
+                deleteBtn.visibility = android.view.View.GONE
+            }
+
+            fun bindCustom(domain: PagesDomain) {
+                nameText.text = domain.name
+                nameText.setOnClickListener {
+                    copyToClipboard("https://${domain.name}", "域名已复制")
+                }
+                statusText.text = domain.status ?: "未知"
+
+                val statusColor = when (domain.status) {
+                    "active" -> 0xFF4CAF50.toInt()
+                    "pending", "initializing" -> 0xFFFF9800.toInt()
+                    "error", "blocked" -> 0xFFF44336.toInt()
+                    "deactivated" -> 0xFF9E9E9E.toInt()
+                    else -> 0xFF9E9E9E.toInt()
+                }
+                statusText.setBackgroundColor(statusColor)
+                statusText.setTextColor(0xFFFFFFFF.toInt())
+
+                val method = domain.validationData?.method ?: "未知"
+                val createdDate = domain.createdOn?.substringBefore('T') ?: "未知时间"
+                infoText.text = "验证方式: $method • 创建于: $createdDate"
+
+                val validationError = domain.validationData?.errorMessage
+                val verificationError = domain.verificationData?.errorMessage
+                val errorStatus = domain.verificationData?.status
+                val errorToShow = validationError ?: verificationError
+                if (errorToShow != null || errorStatus == "error" || errorStatus == "blocked") {
+                    errorText.text = errorToShow ?: "状态异常: ${errorStatus ?: "未知"}"
+                    errorText.visibility = android.view.View.VISIBLE
+                } else {
+                    errorText.visibility = android.view.View.GONE
+                }
+                // 自定义域名显示删除按钮
+                deleteBtn.visibility = android.view.View.VISIBLE
+                deleteBtn.setOnClickListener {
+                    onDeleteClick(domain)
+                }
+            }
+
+            private fun copyToClipboard(text: String, message: String) {
+                val clipboard = itemView.context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                val clip = android.content.ClipData.newPlainText("url", text)
+                clipboard.setPrimaryClip(clip)
+                android.widget.Toast.makeText(itemView.context, message, android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
     private fun showDeleteDeploymentConfirmDialog(project: PagesProject, deployment: PagesDeployment) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("删除部署")
@@ -1852,6 +2127,8 @@ class PagesFragment : Fragment() {
         private val onConfigD1Click: (PagesProject) -> Unit,
         private val onConfigR2Click: (PagesProject) -> Unit,
         private val onViewDeploymentsClick: (PagesProject) -> Unit,
+        private val onViewDomainsClick: (PagesProject) -> Unit,
+        private val onAddDomainClick: (PagesProject) -> Unit,
         private val onLogsClick: (PagesProject) -> Unit,
         private val onSelectionModeClick: (PagesProject, Boolean) -> Unit = { _, _ -> }
     ) : RecyclerView.Adapter<ProjectAdapter.ViewHolder>() {
@@ -1906,6 +2183,8 @@ class PagesFragment : Fragment() {
                 if (selectionMode) {
                     binding.deleteBtn.visibility = android.view.View.GONE
                     binding.viewDeploymentsBtn.visibility = android.view.View.GONE
+                    binding.viewDomainsBtn.visibility = android.view.View.GONE
+                    binding.addDomainBtn.visibility = android.view.View.GONE
                     binding.logsBtn.visibility = android.view.View.GONE
                     
                     val isSelected = selectedItems.contains(project.name)
@@ -1924,6 +2203,8 @@ class PagesFragment : Fragment() {
                 } else {
                     binding.deleteBtn.visibility = android.view.View.VISIBLE
                     binding.viewDeploymentsBtn.visibility = android.view.View.VISIBLE
+                    binding.viewDomainsBtn.visibility = android.view.View.VISIBLE
+                    binding.addDomainBtn.visibility = android.view.View.VISIBLE
                     binding.logsBtn.visibility = android.view.View.VISIBLE
                     updateSelectionUI(binding.root, false)
                     binding.root.setOnClickListener(null)
@@ -1947,6 +2228,14 @@ class PagesFragment : Fragment() {
                 
                 binding.viewDeploymentsBtn.setOnClickListener {
                     onViewDeploymentsClick(project)
+                }
+                
+                binding.viewDomainsBtn.setOnClickListener {
+                    onViewDomainsClick(project)
+                }
+                
+                binding.addDomainBtn.setOnClickListener {
+                    onAddDomainClick(project)
                 }
                 
                 binding.logsBtn.setOnClickListener {

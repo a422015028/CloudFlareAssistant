@@ -561,6 +561,8 @@ data class PagesDomain(
     @SerializedName("id") val id: String?,
     @SerializedName("name") val name: String,
     @SerializedName("status") val status: String?,
+    @SerializedName("certificate_authority") val certificateAuthority: String?,
+    @SerializedName("domain_id") val domainId: String?,
     @SerializedName("validation_data") val validationData: DomainValidationData?,
     @SerializedName("verification_data") val verificationData: DomainVerificationData?,
     @SerializedName("zone_tag") val zoneTag: String?,
@@ -569,13 +571,15 @@ data class PagesDomain(
 
 data class DomainValidationData(
     @SerializedName("status") val status: String?,
-    @SerializedName("method") val method: String?
+    @SerializedName("method") val method: String?,
+    @SerializedName("error_message") val errorMessage: String?,
+    @SerializedName("txt_name") val txtName: String?,
+    @SerializedName("txt_value") val txtValue: String?
 )
 
 data class DomainVerificationData(
-    @SerializedName("type") val type: String?,
-    @SerializedName("name") val name: String?,
-    @SerializedName("value") val value: String?
+    @SerializedName("status") val status: String?,
+    @SerializedName("error_message") val errorMessage: String?
 )
 
 data class PagesDomainRequest(
