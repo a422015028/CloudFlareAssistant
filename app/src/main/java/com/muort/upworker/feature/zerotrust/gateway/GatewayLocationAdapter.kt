@@ -1,7 +1,11 @@
 package com.muort.upworker.feature.zerotrust.gateway
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -35,19 +39,65 @@ class GatewayLocationAdapter(
         fun bind(location: GatewayLocation) {
             binding.locationNameText.text = location.name
             
-            val networks = location.networks?.joinToString(", ") { it.network } ?: "无网络"
-            binding.locationNetworksText.text = "网络: $networks"
+            binding.defaultChip.visibility = if (location.clientDefault == true) {
+                android.view.View.VISIBLE
+            } else {
+                android.view.View.GONE
+            }
             
-            binding.locationClientsText.text = "客户端: ${location.clientDefault ?: false}"
+            binding.ecsChip.visibility = if (location.ecsSupport == true) {
+                android.view.View.VISIBLE
+            } else {
+                android.view.View.GONE
+            }
+            
+            val networks = location.networks?.joinToString(", ") { it.network } ?: "无"
+            binding.locationNetworksText.text = "来源 IP 白名单: $networks"
+            
+            binding.locationClientsText.text = "客户端: ${location.clientCount ?: 0}"
             
             val ipv4 = location.ipv4Destination
             val ipv6 = location.ip
             
             binding.dnsIpv4Text.text = "IPv4: ${ipv4 ?: "未分配"}"
             binding.dnsIpv6Text.text = "IPv6: ${ipv6 ?: "未分配"}"
+            binding.dnsDohText.text = "DoH: ${location.dohSubdomain?.let { "https://$it.cloudflare-gateway.com/dns-query" } ?: "未分配"}"
+
+            binding.dnsIpv4Text.setOnClickListener {
+                if (!ipv4.isNullOrBlank()) {
+                    copyToClipboard(binding.root.context, ipv4, "IPv4 地址")
+                }
+            }
+            
+            binding.dnsIpv6Text.setOnClickListener {
+                if (!ipv6.isNullOrBlank()) {
+                    copyToClipboard(binding.root.context, ipv6, "IPv6 地址")
+                }
+            }
+            
+            binding.dnsDohText.setOnClickListener {
+                val dohUrl = location.dohSubdomain?.let { "https://$it.cloudflare-gateway.com/dns-query" }
+                if (!dohUrl.isNullOrBlank()) {
+                    copyToClipboard(binding.root.context, dohUrl, "DoH 地址")
+                }
+            }
 
             binding.editButton.setOnClickListener { onEditClick(location) }
-            binding.deleteButton.setOnClickListener { onDeleteClick(location) }
+            
+            binding.deleteButton.setOnClickListener {
+                if (location.clientDefault == true) {
+                    Toast.makeText(binding.root.context, "无法删除默认位置，请先设置其他位置为默认", Toast.LENGTH_SHORT).show()
+                } else {
+                    onDeleteClick(location)
+                }
+            }
+        }
+        
+        private fun copyToClipboard(context: Context, text: String, label: String) {
+            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipData = ClipData.newPlainText(label, text)
+            clipboardManager.setPrimaryClip(clipData)
+            Toast.makeText(context, "$label 已复制到剪贴板", Toast.LENGTH_SHORT).show()
         }
     }
 

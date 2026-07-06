@@ -9,11 +9,19 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="网关位置用于定义 DNS 查询的来源网络，便于应用不同的 DNS 策略。"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
         <!-- 位置名称 -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="位置名称">
+            android:layout_marginTop="16dp"
+            android:hint="位置名称 *">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/locationNameInput"
@@ -23,31 +31,80 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 网络 -->
+        <!-- 来源 IP 白名单 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="网络 (每行一个 IP/CIDR)"
+            android:text="来源 IP 白名单（可选）"
             android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="限制只有这些公网 IP 范围内的设备可以使用此端点。"
+            android:textSize="11sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="注意：填写的是路由器的公网 IP（如 123.45.67.89/32），而非私有地址（192.168.x.x）。"
+            android:textSize="11sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="留空则允许所有来源 IP，推荐初学者留空。"
+            android:textSize="11sp"
             android:textColor="?android:attr/textColorSecondary" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="例如: 192.168.1.0/24">
+            android:hint="例如: 123.45.67.89/32">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/networksInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
-                android:lines="5"
+                android:lines="3"
                 android:gravity="top|start" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- 默认位置 -->
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/defaultSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="设为默认位置" />
+
+        <!-- EDNS 支持 -->
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ecsSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="启用 EDNS 客户端子网" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="发送用户 IP 地理位置信息，帮助优化 DNS 解析延迟。"
+            android:textSize="11sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <!-- DNS 端点信息 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -60,7 +117,39 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="创建位置后，系统将自动生成 DNS 端点地址供您使用。"
+            android:text="创建位置后，系统将自动分配以下 DNS 端点："
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="• IPv4 DNS 地址（如 162.159.36.1）"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="• IPv6 DNS 地址"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="• DNS over HTTPS (DoH) 地址"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="请在路由器或设备上配置这些 DNS 地址以启用网关过滤。"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 

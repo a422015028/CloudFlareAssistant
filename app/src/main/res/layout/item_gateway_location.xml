@@ -13,36 +13,69 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/locationNameText"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="位置名称"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/locationNameText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="位置名称"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/defaultChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="默认"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ecsChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EDNS"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/locationClientsText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="客户端: 5"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/locationNetworksText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="网络: 192.168.1.0/24"
+            android:text="来源 IP 白名单: 无"
             android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/locationClientsText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="客户端: 5"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/locationDnsText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:text="DNS 端点"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -54,7 +87,10 @@
             android:layout_marginTop="4dp"
             android:text="IPv4: 162.159.36.1"
             android:textSize="12sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="monospace"
+            android:textColor="?attr/colorPrimary"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackground" />
 
         <TextView
             android:id="@+id/dnsIpv6Text"
@@ -63,7 +99,22 @@
             android:layout_marginTop="2dp"
             android:text="IPv6: 2606:4700:4700::1111"
             android:textSize="12sp"
-            android:fontFamily="monospace" />
+            android:fontFamily="monospace"
+            android:textColor="?attr/colorPrimary"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackground" />
+
+        <TextView
+            android:id="@+id/dnsDohText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="DoH: https://xxx.cloudflare-gateway.com/dns-query"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:textColor="?attr/colorPrimary"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackground" />
 
         <LinearLayout
             android:layout_width="match_parent"

@@ -281,14 +281,15 @@ data class GatewayLocation(
     @SerializedName("name") val name: String,
     @SerializedName("networks") val networks: List<LocationNetwork>? = null,
     @SerializedName("policy_ids") val policyIds: List<String>? = null,
-    @SerializedName("ip") val ip: String? = null, // IPv4 address
+    @SerializedName("ip") val ip: String? = null,
     @SerializedName("doh_subdomain") val dohSubdomain: String? = null,
     @SerializedName("anonymized_logs_enabled") val anonymizedLogsEnabled: Boolean? = null,
     @SerializedName("ipv4_destination") val ipv4Destination: String? = null,
     @SerializedName("client_default") val clientDefault: Boolean? = null,
     @SerializedName("ecs_support") val ecsSupport: Boolean? = null,
     @SerializedName("created_at") val createdAt: String? = null,
-    @SerializedName("updated_at") val updatedAt: String? = null
+    @SerializedName("updated_at") val updatedAt: String? = null,
+    @SerializedName("client_count") val clientCount: Int? = null
 )
 
 @JsonAdapter(GatewayLocationRequestAdapter::class)

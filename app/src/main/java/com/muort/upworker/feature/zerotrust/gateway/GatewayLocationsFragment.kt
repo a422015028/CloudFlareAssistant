@@ -124,11 +124,15 @@ class GatewayLocationsFragment : Fragment() {
         
         val nameInput = dialogView.findViewById<TextInputEditText>(R.id.locationNameInput)
         val networksInput = dialogView.findViewById<TextInputEditText>(R.id.networksInput)
+        val defaultSwitch = dialogView.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.defaultSwitch)
+        val ecsSwitch = dialogView.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.ecsSwitch)
 
         // Populate existing location
         existingLocation?.let { location ->
             nameInput.setText(location.name)
-            networksInput.setText(location.networks?.joinToString("\n") ?: "")
+            networksInput.setText(location.networks?.joinToString("\n") { it.network } ?: "")
+            defaultSwitch.isChecked = location.clientDefault ?: false
+            ecsSwitch.isChecked = location.ecsSupport ?: false
         }
 
         MaterialAlertDialogBuilder(requireContext())
@@ -144,16 +148,21 @@ class GatewayLocationsFragment : Fragment() {
                     return@setPositiveButton
                 }
 
-                if (networksText.isNullOrBlank()) {
-                    Snackbar.make(binding.root, "网络不能为空", Snackbar.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                val networks = networksText?.split("\n")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()
+                
+                for (network in networks) {
+                    val validation = validateNetwork(network)
+                    if (validation.isNotEmpty()) {
+                        Snackbar.make(binding.root, "网络 $network $validation", Snackbar.LENGTH_LONG).show()
+                        return@setPositiveButton
+                    }
                 }
-
-                val networks = networksText.split("\n").map { it.trim() }.filter { it.isNotBlank() }
                 
                 val request = GatewayLocationRequest(
                     name = name,
-                    networks = networks.map { LocationNetwork(network = it) }
+                    clientDefault = if (defaultSwitch.isChecked) true else null,
+                    ecsSupport = if (ecsSwitch.isChecked) true else null,
+                    networks = if (networks.isNotEmpty()) networks.map { LocationNetwork(network = normalizeCidr(it)) } else null
                 )
 
                 if (existingLocation == null) {
@@ -180,6 +189,71 @@ class GatewayLocationsFragment : Fragment() {
     private fun deleteLocation(locationId: String) {
         val account = accountViewModel.defaultAccount.value ?: return
         viewModel.deleteLocation(account, locationId)
+    }
+
+    private fun validateNetwork(cidr: String): String {
+        val parts = cidr.split("/")
+        if (parts.size != 2) {
+            return "格式错误，需要 CIDR 格式（如 123.45.67.89/32）"
+        }
+        
+        val ip = parts[0]
+        val prefix = parts[1].toIntOrNull()
+        
+        if (prefix == null || prefix < 8 || prefix > 32) {
+            return "前缀必须在 8-32 之间"
+        }
+        
+        if (prefix < 24) {
+            return "网络太大，最大支持 /24（如 /24, /28, /32）"
+        }
+        
+        val ipParts = ip.split(".").mapNotNull { it.toIntOrNull() }
+        if (ipParts.size != 4 || ipParts.any { it < 0 || it > 255 }) {
+            return "IP 地址格式错误"
+        }
+        
+        val firstOctet = ipParts[0]
+        val secondOctet = ipParts[1]
+        
+        if (firstOctet == 10 ||
+            (firstOctet == 172 && secondOctet in 16..31) ||
+            (firstOctet == 192 && secondOctet == 168)) {
+            return "请填写公网 IP，私有地址（10.x.x.x、172.16-31.x.x、192.168.x.x）不支持"
+        }
+        
+        if (firstOctet == 0 || firstOctet == 127 || firstOctet == 169) {
+            return "保留地址不支持，请使用公网 IP 地址"
+        }
+        
+        if (firstOctet >= 224) {
+            return "组播/特殊地址不支持，请使用公网 IP 地址"
+        }
+        
+        return ""
+    }
+
+    private fun normalizeCidr(cidr: String): String {
+        val parts = cidr.split("/")
+        if (parts.size != 2) return cidr
+        
+        val ip = parts[0]
+        val prefix = parts[1].toIntOrNull() ?: return cidr
+        
+        val ipParts = ip.split(".").map { it.toInt() }.toMutableList()
+        
+        val fullBytes = prefix / 8
+        val remainingBits = prefix % 8
+        
+        for (i in fullBytes until 4) {
+            ipParts[i] = 0
+        }
+        
+        if (fullBytes < 4 && remainingBits < 8) {
+            ipParts[fullBytes] = ipParts[fullBytes] and (0xFF shl (8 - remainingBits))
+        }
+        
+        return "${ipParts.joinToString(".")}/$prefix"
     }
 
     override fun onDestroyView() {
