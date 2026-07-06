@@ -24,22 +24,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@android:color/transparent"
+                android:contentInsetStart="0dp"
+                android:contentInsetLeft="0dp"
+                app:contentInsetStart="0dp"
+                app:contentInsetLeft="0dp"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:title="@string/app_name"
                 app:titleTextAppearance="@style/ToolbarTitleTextAppearance">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/accountsButton"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="账号"
+                        android:textSize="14sp"/>
                     
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:gravity="center">
+                        android:gravity="start"
+                        android:paddingStart="8dp">
                         
                         <TextView
                             android:id="@+id/currentAccountText"
@@ -50,7 +62,10 @@
                             android:textSize="14sp"
                             android:maxLines="1"
                             android:ellipsize="end"
-                            android:gravity="center" />
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground" />
                     </LinearLayout>
                     
                     <com.google.android.material.button.MaterialButton

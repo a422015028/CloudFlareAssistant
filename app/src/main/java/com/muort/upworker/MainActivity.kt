@@ -215,6 +215,22 @@ class MainActivity : AppCompatActivity() {
         
         setupActionBarWithNavController(navController, appBarConfiguration)
         
+        binding.accountsButton.setOnClickListener {
+            navController.navigate(R.id.accountListFragment)
+        }
+        
+        binding.currentAccountText.setOnClickListener {
+            val accountId = accountViewModel.defaultAccount.value?.id ?: -1L
+            if (accountId != -1L) {
+                navController.navigate(
+                    R.id.accountEditFragment,
+                    android.os.Bundle().apply { putLong("accountId", accountId) }
+                )
+            } else {
+                navController.navigate(R.id.accountListFragment)
+            }
+        }
+        
         // 监听导航变化，确保返回按钮/菜单图标颜色在页面切换后依然正确
         navController.addOnDestinationChangedListener { _, _, _ ->
             val typedValue = TypedValue()

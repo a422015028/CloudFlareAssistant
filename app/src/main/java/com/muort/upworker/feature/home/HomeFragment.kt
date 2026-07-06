@@ -92,30 +92,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupUI() {
-                binding.aboutBtn.setOnClickListener {
-                    showAboutDialog()
-                }
-        animateFeatureCards()
-        
-        binding.manageAccountsBtn.setOnClickListener {
-            findNavController().navigate(R.id.action_home_to_accounts)
-        }
-
-                // 点击整个账号卡片也可进入账号管理/编辑
-                binding.accountCard.setOnClickListener {
+                binding.aboutCard.setOnClickListener {
                     AnimationHelper.scaleDown(it)
                     it.postDelayed({
-                        val accountId = accountViewModel.defaultAccount.value?.id ?: -1L
-                        if (accountId != -1L) {
-                            // 跳转到 AccountEditFragment 并传递 accountId
-                            findNavController().navigate(
-                                R.id.accountEditFragment,
-                                android.os.Bundle().apply { putLong("accountId", accountId) }
-                            )
-                        } else {
-                            // 没有账号时跳转到账号管理
-                            findNavController().navigate(R.id.action_home_to_accounts)
-                        }
+                        showAboutDialog()
                     }, 150)
                 }
         
@@ -188,34 +168,6 @@ class HomeFragment : Fragment() {
         }
     }
     
-    private fun animateFeatureCards() {
-        val cards = listOf(
-            binding.dashboardCard,
-            binding.workerCard,
-            binding.pagesCard,
-            binding.dnsCard,
-            binding.routeCard,
-            binding.kvCard,
-            binding.r2Card,
-            binding.d1Card,
-            binding.zeroTrustCard,
-            binding.backupCard,
-            binding.logCard,
-            binding.accountCard
-        )
-        
-        cards.forEachIndexed { index, card ->
-            card.alpha = 0f
-            card.postDelayed({
-                card.animate()
-                    .alpha(1f)
-                    .translationYBy(-30f)
-                    .setDuration(300)
-                    .start()
-            }, (index * 50).toLong())
-        }
-    }
-    
     private fun showAboutDialog() {
         val dialogBinding = DialogAboutBinding.inflate(LayoutInflater.from(requireContext()))
         
@@ -281,8 +233,6 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     accountViewModel.defaultAccount.collect { account ->
-                        binding.accountNameText.text = account?.name ?: "未选择账号"
-                        
                         // 仅在仪表盘开关开启时加载数据
                         if (account != null && binding.dashboardCard.isDashboardEnabled()) {
                             dashboardViewModel.loadDashboard(account)
