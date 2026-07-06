@@ -1392,8 +1392,8 @@ class PagesFragment : Fragment() {
             onRollbackClick = { deployment ->
                 showRollbackDeploymentConfirmDialog(project, deployment)
             },
-            onDeleteClick = { deployment ->
-                showDeleteDeploymentConfirmDialog(project, deployment)
+            onRetryClick = { deployment ->
+                showRetryDeploymentConfirmDialog(project, deployment)
             }
         )
         
@@ -1431,6 +1431,16 @@ class PagesFragment : Fragment() {
         val branchText = dialogView.findViewById<android.widget.TextView>(R.id.branchText)
         val commitHashText = dialogView.findViewById<android.widget.TextView>(R.id.commitHashText)
         val commitMessageText = dialogView.findViewById<android.widget.TextView>(R.id.commitMessageText)
+        val projectIdText = dialogView.findViewById<android.widget.TextView>(R.id.projectIdText)
+        val aliasesText = dialogView.findViewById<android.widget.TextView>(R.id.aliasesText)
+        val isSkippedText = dialogView.findViewById<android.widget.TextView>(R.id.isSkippedText)
+        val usesFunctionsText = dialogView.findViewById<android.widget.TextView>(R.id.usesFunctionsText)
+        val commitDirtyText = dialogView.findViewById<android.widget.TextView>(R.id.commitDirtyText)
+        val buildCommandText = dialogView.findViewById<android.widget.TextView>(R.id.buildCommandText)
+        val destinationDirText = dialogView.findViewById<android.widget.TextView>(R.id.destinationDirText)
+        val rootDirText = dialogView.findViewById<android.widget.TextView>(R.id.rootDirText)
+        val sourceTypeText = dialogView.findViewById<android.widget.TextView>(R.id.sourceTypeText)
+        val repoInfoText = dialogView.findViewById<android.widget.TextView>(R.id.repoInfoText)
         val deleteBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
         val accessBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.accessBtn)
         val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
@@ -1448,6 +1458,173 @@ class PagesFragment : Fragment() {
         branchText.text = deployment.deploymentTrigger?.metadata?.branch ?: "未知"
         commitHashText.text = deployment.deploymentTrigger?.metadata?.commitHash ?: "未知"
         commitMessageText.text = deployment.deploymentTrigger?.metadata?.commitMessage ?: "未知"
+        projectIdText.text = deployment.projectId ?: "未知"
+        aliasesText.text = deployment.aliases?.takeIf { it.isNotEmpty() }?.joinToString("\n") ?: "无"
+        isSkippedText.text = deployment.isSkipped?.let { if (it) "是" else "否" } ?: "未知"
+        usesFunctionsText.text = deployment.usesFunctions?.let { if (it) "是" else "否" } ?: "未知"
+        commitDirtyText.text = deployment.deploymentTrigger?.metadata?.commitDirty?.let { if (it) "是" else "否" } ?: "未知"
+        buildCommandText.text = deployment.buildConfig?.buildCommand ?: "无"
+        destinationDirText.text = deployment.buildConfig?.destinationDir ?: "无"
+        rootDirText.text = deployment.buildConfig?.rootDir ?: "无"
+        sourceTypeText.text = deployment.source?.type ?: "无"
+        repoInfoText.text = deployment.source?.config?.let { cfg ->
+            val owner = cfg.owner ?: ""
+            val repo = cfg.repoName ?: ""
+            if (owner.isEmpty() && repo.isEmpty()) "无" else "$owner/$repo"
+        } ?: "无"
+
+        // 阶段详情
+        val stageNameDetailText = dialogView.findViewById<android.widget.TextView>(R.id.stageNameDetailText)
+        val stageStatusText = dialogView.findViewById<android.widget.TextView>(R.id.stageStatusText)
+        val stageStartedText = dialogView.findViewById<android.widget.TextView>(R.id.stageStartedText)
+        val stageEndedText = dialogView.findViewById<android.widget.TextView>(R.id.stageEndedText)
+        val stagesContainer = dialogView.findViewById<android.widget.LinearLayout>(R.id.stagesContainer)
+
+        stageNameDetailText.text = deployment.latestStage?.name ?: "未知"
+        stageStatusText.text = deployment.latestStage?.status ?: "未知"
+        stageStartedText.text = formatDeploymentDate(deployment.latestStage?.startedOn)
+        stageEndedText.text = formatDeploymentDate(deployment.latestStage?.endedOn)
+
+        // 所有阶段列表
+        deployment.stages?.takeIf { it.isNotEmpty() }?.let { stageList ->
+            for (stage in stageList) {
+                val stageRow = android.widget.LinearLayout(requireContext()).apply {
+                    orientation = android.widget.LinearLayout.HORIZONTAL
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        topMargin = 4
+                    }
+                }
+                val nameTv = android.widget.TextView(requireContext()).apply {
+                    text = stage.name ?: ""
+                    textSize = 14f
+                    layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                }
+                val statusTv = android.widget.TextView(requireContext()).apply {
+                    text = stage.status ?: ""
+                    textSize = 14f
+                    setTextColor(
+                        when (stage.status) {
+                            "success" -> android.graphics.Color.parseColor("#22c55e")
+                            "failure" -> android.graphics.Color.parseColor("#ef4444")
+                            "active" -> android.graphics.Color.parseColor("#f59e0b")
+                            "canceled" -> android.graphics.Color.parseColor("#6b7280")
+                            else -> resources.getColor(android.R.color.tab_indicator_text, requireContext().theme)
+                        }
+                    )
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                }
+                stageRow.addView(nameTv)
+                stageRow.addView(statusTv)
+                stagesContainer.addView(stageRow)
+            }
+        }
+
+        // 构建配置补充字段
+        val buildCachingText = dialogView.findViewById<android.widget.TextView>(R.id.buildCachingText)
+        val webAnalyticsTagText = dialogView.findViewById<android.widget.TextView>(R.id.webAnalyticsTagText)
+        val webAnalyticsTokenText = dialogView.findViewById<android.widget.TextView>(R.id.webAnalyticsTokenText)
+
+        buildCachingText.text = deployment.buildConfig?.buildCaching?.let { if (it) "启用" else "禁用" } ?: "未知"
+        webAnalyticsTagText.text = deployment.buildConfig?.webAnalyticsTag ?: "无"
+        webAnalyticsTokenText.text = deployment.buildConfig?.webAnalyticsToken ?: "无"
+
+        // 源码配置补充字段
+        val ownerIdText = dialogView.findViewById<android.widget.TextView>(R.id.ownerIdText)
+        val repoIdText = dialogView.findViewById<android.widget.TextView>(R.id.repoIdText)
+        val productionBranchText = dialogView.findViewById<android.widget.TextView>(R.id.productionBranchText)
+        val deploymentsEnabledText = dialogView.findViewById<android.widget.TextView>(R.id.deploymentsEnabledText)
+        val prodDeploymentsText = dialogView.findViewById<android.widget.TextView>(R.id.prodDeploymentsText)
+        val prCommentsText = dialogView.findViewById<android.widget.TextView>(R.id.prCommentsText)
+        val previewDeploySettingText = dialogView.findViewById<android.widget.TextView>(R.id.previewDeploySettingText)
+        val pathExcludesSection = dialogView.findViewById<android.widget.LinearLayout>(R.id.pathExcludesSection)
+        val pathExcludesText = dialogView.findViewById<android.widget.TextView>(R.id.pathExcludesText)
+        val pathIncludesSection = dialogView.findViewById<android.widget.LinearLayout>(R.id.pathIncludesSection)
+        val pathIncludesText = dialogView.findViewById<android.widget.TextView>(R.id.pathIncludesText)
+        val previewBranchExcludesSection = dialogView.findViewById<android.widget.LinearLayout>(R.id.previewBranchExcludesSection)
+        val previewBranchExcludesText = dialogView.findViewById<android.widget.TextView>(R.id.previewBranchExcludesText)
+        val previewBranchIncludesSection = dialogView.findViewById<android.widget.LinearLayout>(R.id.previewBranchIncludesSection)
+        val previewBranchIncludesText = dialogView.findViewById<android.widget.TextView>(R.id.previewBranchIncludesText)
+
+        val srcCfg = deployment.source?.config
+        ownerIdText.text = srcCfg?.ownerId ?: "未知"
+        repoIdText.text = srcCfg?.repoId ?: "未知"
+        productionBranchText.text = srcCfg?.productionBranch ?: "未知"
+        deploymentsEnabledText.text = srcCfg?.deploymentsEnabled?.let { if (it) "启用" else "禁用" } ?: "未知"
+        prodDeploymentsText.text = srcCfg?.productionDeploymentsEnabled?.let { if (it) "启用" else "禁用" } ?: "未知"
+        prCommentsText.text = srcCfg?.prCommentsEnabled?.let { if (it) "启用" else "禁用" } ?: "未知"
+        previewDeploySettingText.text = srcCfg?.previewDeploymentSetting ?: "未知"
+
+        pathExcludesSection.visibility = if (srcCfg?.pathExcludes?.isNotEmpty() == true)
+            android.view.View.VISIBLE else android.view.View.GONE
+        pathExcludesText.text = srcCfg?.pathExcludes?.joinToString("\n") ?: ""
+
+        pathIncludesSection.visibility = if (srcCfg?.pathIncludes?.isNotEmpty() == true)
+            android.view.View.VISIBLE else android.view.View.GONE
+        pathIncludesText.text = srcCfg?.pathIncludes?.joinToString("\n") ?: ""
+
+        previewBranchExcludesSection.visibility = if (srcCfg?.previewBranchExcludes?.isNotEmpty() == true)
+            android.view.View.VISIBLE else android.view.View.GONE
+        previewBranchExcludesText.text = srcCfg?.previewBranchExcludes?.joinToString("\n") ?: ""
+
+        previewBranchIncludesSection.visibility = if (srcCfg?.previewBranchIncludes?.isNotEmpty() == true)
+            android.view.View.VISIBLE else android.view.View.GONE
+        previewBranchIncludesText.text = srcCfg?.previewBranchIncludes?.joinToString("\n") ?: ""
+
+        // 环境变量
+        val envVarsSection = dialogView.findViewById<android.widget.LinearLayout>(R.id.envVarsSection)
+        val envVarsContainer = dialogView.findViewById<android.widget.LinearLayout>(R.id.envVarsContainer)
+
+        val envVars = deployment.envVars
+        if (envVars != null && envVars.isNotEmpty()) {
+            envVarsSection.visibility = android.view.View.VISIBLE
+            for ((key, value) in envVars) {
+                val envRow = android.widget.LinearLayout(requireContext()).apply {
+                    orientation = android.widget.LinearLayout.VERTICAL
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        bottomMargin = 8
+                    }
+                    setBackgroundResource(R.drawable.bg_list_item_border)
+                    setPadding(12, 8, 12, 8)
+                }
+                val keyTv = android.widget.TextView(requireContext()).apply {
+                    text = key
+                    textSize = 13f
+                    setTypeface(null, android.graphics.Typeface.BOLD)
+                }
+                val typeTv = android.widget.TextView(requireContext()).apply {
+                    text = if (value.type == "secret_text") "🔒 加密" else "📝 明文"
+                    textSize = 12f
+                    setTextColor(resources.getColor(R.color.red_500, requireContext().theme))
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { topMargin = 2 }
+                }
+                val valueTv = android.widget.TextView(requireContext()).apply {
+                    text = if (value.type == "secret_text") "••••••••" else (value.value ?: "")
+                    textSize = 13f
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { topMargin = 4 }
+                }
+                envRow.addView(keyTv)
+                envRow.addView(typeTv)
+                envRow.addView(valueTv)
+                envVarsContainer.addView(envRow)
+            }
+        } else {
+            envVarsSection.visibility = android.view.View.GONE
+        }
 
         if (isRunning) {
             val statusIcon = android.widget.ImageView(requireContext()).apply {
@@ -1511,20 +1688,7 @@ class PagesFragment : Fragment() {
             .setNegativeButton("取消", null)
             .show()
     }
-    
-    private fun showRetryDeploymentConfirmDialog(project: PagesProject, deployment: PagesDeployment) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("重新部署")
-            .setMessage("确定要重新发起部署 ${deployment.shortId} 吗？\n\n这将重新执行整个部署流程。")
-            .setPositiveButton("重新部署") { _, _ ->
-                accountViewModel.defaultAccount.value?.let { account ->
-                    pagesViewModel.retryDeployment(account, project.name, deployment.id)
-                }
-            }
-            .setNegativeButton("取消", null)
-            .show()
-    }
-    
+
     private fun showRollbackDeploymentConfirmDialog(project: PagesProject, deployment: PagesDeployment) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("回滚部署")
@@ -1533,6 +1697,23 @@ class PagesFragment : Fragment() {
                 accountViewModel.defaultAccount.value?.let { account ->
                     viewLifecycleOwner.lifecycleScope.launch {
                         pagesViewModel.rollbackDeployment(account, project.name, deployment.id)
+                        deploymentsDialog?.dismiss()
+                        showDeploymentsDialogWithLoading(account, project)
+                    }
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun showRetryDeploymentConfirmDialog(project: PagesProject, deployment: PagesDeployment) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("重新部署")
+            .setMessage("确定要重新部署 ${deployment.shortId} 吗？\n\n将基于此部署的配置重新发起一次部署。")
+            .setPositiveButton("重新部署") { _, _ ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        pagesViewModel.retryDeployment(account, project.name, deployment.id)
                         deploymentsDialog?.dismiss()
                         showDeploymentsDialogWithLoading(account, project)
                     }

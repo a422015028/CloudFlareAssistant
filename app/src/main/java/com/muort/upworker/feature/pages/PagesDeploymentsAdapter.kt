@@ -15,7 +15,7 @@ class PagesDeploymentsAdapter(
     private val formatDate: (String?) -> String,
     private val onItemClick: (PagesDeployment) -> Unit,
     private val onRollbackClick: (PagesDeployment) -> Unit,
-    private val onDeleteClick: (PagesDeployment) -> Unit
+    private val onRetryClick: (PagesDeployment) -> Unit
 ) : RecyclerView.Adapter<PagesDeploymentsAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -24,7 +24,7 @@ class PagesDeploymentsAdapter(
         private val deploymentTimeText = itemView.findViewById<TextView>(R.id.deploymentTimeText)
         private val runningBadge = itemView.findViewById<LinearLayout>(R.id.runningBadge)
         private val rollbackBtn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.rollbackBtn)
-        private val deleteBtn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
+        private val retryBtn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.retryBtn)
 
         fun bind(deployment: PagesDeployment, position: Int) {
             val status = deployment.latestStage?.status ?: "unknown"
@@ -59,14 +59,14 @@ class PagesDeploymentsAdapter(
                 View.GONE
             }
             
-            deleteBtn.visibility = if (isRunning) View.GONE else View.VISIBLE
-            
+            retryBtn.visibility = View.VISIBLE
+
             rollbackBtn.setOnClickListener {
                 onRollbackClick(deployment)
             }
-            
-            deleteBtn.setOnClickListener {
-                onDeleteClick(deployment)
+
+            retryBtn.setOnClickListener {
+                onRetryClick(deployment)
             }
             
             itemView.setOnClickListener {

@@ -887,13 +887,81 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Resource.Error("删除版本失败: $errorMsg")
             }
         }
     }
-    
+
+    /**
+     * 列出 Worker 脚本的部署记录
+     * GET /accounts/{account_id}/workers/scripts/{script_name}/deployments
+     */
+    suspend fun listWorkerDeployments(
+        account: Account,
+        scriptName: String
+    ): Resource<List<WorkerDeployment>> = withContext(Dispatchers.IO) {
+        try {
+            val response = api.listWorkerDeployments(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName
+            )
+
+            if (response.isSuccessful && response.body()?.success == true) {
+                val deployments = response.body()?.result ?: emptyList()
+                Timber.d("Successfully fetched ${deployments.size} deployments for script: $scriptName")
+                Resource.Success(deployments)
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.message()
+                Timber.e("Failed to list deployments: $errorMsg, code: ${response.code()}")
+                Resource.Error("获取部署记录失败: $errorMsg")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Exception when fetching worker deployments for script: $scriptName")
+            Resource.Error("获取部署记录失败: ${e.javaClass.simpleName}: ${e.message}")
+        }
+    }
+
+    /**
+     * 获取 Worker 脚本的特定部署详情
+     * GET /accounts/{account_id}/workers/scripts/{script_name}/deployments/{deployment_id}
+     */
+    suspend fun getWorkerDeployment(
+        account: Account,
+        scriptName: String,
+        deploymentId: String
+    ): Resource<WorkerDeployment> = withContext(Dispatchers.IO) {
+        try {
+            val response = api.getWorkerDeployment(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName,
+                deploymentId = deploymentId
+            )
+
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("未返回部署详情")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.message()
+                Timber.e("Failed to get deployment: $errorMsg, code: ${response.code()}")
+                Resource.Error("获取部署详情失败: $errorMsg")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Exception when fetching worker deployment: $scriptName/$deploymentId")
+            Resource.Error("获取部署详情失败: ${e.javaClass.simpleName}: ${e.message}")
+        }
+    }
+
     // Routes
     suspend fun listRoutes(account: Account): Resource<List<Route>> = 
         withContext(Dispatchers.IO) {

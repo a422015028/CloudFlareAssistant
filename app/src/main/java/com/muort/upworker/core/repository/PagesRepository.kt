@@ -299,12 +299,12 @@ class PagesRepository @Inject constructor(
 
             // 单文件 .js 部署：直接作为 Worker 脚本上传（bundle 接口）
             if (isJs) {
-                return@safeApiCall deployWorkerOnly(account, projectName, file, finalCompatibilityDate)
+                return@safeApiCall deployWorkerOnly(account, projectName, file)
             }
 
             // 单文件 .htm/.html 部署：走原有 manifest-only 流程
             if (isHtml) {
-                return@safeApiCall deployStaticAssetOnly(account, projectName, file, finalCompatibilityDate)
+                return@safeApiCall deployStaticAssetOnly(account, projectName, file)
             }
 
             // zip 文件部署
@@ -508,8 +508,7 @@ class PagesRepository @Inject constructor(
     private suspend fun deployStaticAssetOnly(
         account: Account,
         projectName: String,
-        htmlFile: File,
-        compatibilityDate: String
+        htmlFile: File
     ): Resource<PagesDeployment> {
         if (htmlFile.length() == 0L) {
             return Resource.Error("文件内容为空（0字节）")
@@ -578,8 +577,7 @@ class PagesRepository @Inject constructor(
     private suspend fun deployWorkerOnly(
         account: Account,
         projectName: String,
-        workerFile: File,
-        compatibilityDate: String
+        workerFile: File
     ): Resource<PagesDeployment> {
         if (workerFile.length() == 0L) {
             return Resource.Error("Worker 脚本文件内容为空（0字节）")

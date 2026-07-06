@@ -223,7 +223,36 @@ interface CloudFlareApi {
         @Path("worker_id") workerId: String,
         @Path("version_id") versionId: String
     ): Response<CloudFlareResponse<Void>>
-    
+
+    /**
+     * List Worker Script deployments
+     * GET /accounts/{account_id}/workers/scripts/{script_name}/deployments
+     */
+    @Headers("Accept: application/json")
+    @GET("accounts/{account_id}/workers/scripts/{script_name}/deployments")
+    suspend fun listWorkerDeployments(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String
+    ): Response<CloudFlareResponse<List<WorkerDeployment>>>
+
+    /**
+     * Get a specific Worker Script deployment
+     * GET /accounts/{account_id}/workers/scripts/{script_name}/deployments/{deployment_id}
+     */
+    @Headers("Accept: application/json")
+    @GET("accounts/{account_id}/workers/scripts/{script_name}/deployments/{deployment_id}")
+    suspend fun getWorkerDeployment(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Path("deployment_id") deploymentId: String
+    ): Response<CloudFlareResponse<WorkerDeployment>>
+
     // ==================== Workers Tails (Real-time Logs) ====================
     
     @Headers("Accept: application/json")

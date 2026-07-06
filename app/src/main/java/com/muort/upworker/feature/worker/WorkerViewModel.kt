@@ -8,6 +8,7 @@ import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.Route
 import com.muort.upworker.core.model.WorkerVersion
 import com.muort.upworker.core.model.WorkerScript
+import com.muort.upworker.core.model.WorkerDeployment
 import com.muort.upworker.core.repository.WorkerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -590,6 +591,14 @@ class WorkerViewModel @Inject constructor(
 
     suspend fun fetchWorkerVersions(account: Account, scriptName: String): Resource<List<WorkerVersion>> {
         return workerRepository.listWorkerVersions(account, scriptName)
+    }
+
+    suspend fun listWorkerDeployments(account: Account, scriptName: String): Resource<List<WorkerDeployment>> {
+        return workerRepository.listWorkerDeployments(account, scriptName)
+    }
+
+    suspend fun getWorkerDeployment(account: Account, scriptName: String, deploymentId: String): Resource<WorkerDeployment> {
+        return workerRepository.getWorkerDeployment(account, scriptName, deploymentId)
     }
 
     fun deployWorkerVersion(account: Account, scriptName: String, versionId: String) {

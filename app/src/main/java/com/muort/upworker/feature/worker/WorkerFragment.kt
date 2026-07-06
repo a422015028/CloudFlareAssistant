@@ -1607,14 +1607,13 @@ class WorkerFragment : Fragment() {
 
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle("加载中...")
-            .setMessage("正在获取账号信息")
+            .setMessage("正在获取详情信息")
             .setCancelable(false)
             .create()
         loadingDialog.show()
 
         lifecycleScope.launch {
             val accountInfoResult = accountRepository.fetchAccountsFromApi(account)
-            loadingDialog.dismiss()
 
             val accountName = when (accountInfoResult) {
                 is Resource.Success -> {
@@ -1626,6 +1625,11 @@ class WorkerFragment : Fragment() {
             val emailMatch = Regex("([^@]+)@").find(accountName)
             val emailPrefix = (emailMatch?.groupValues?.get(1) ?: account.name).lowercase()
 
+            // 并行获取部署记录
+            val deploymentsResult = viewModel.listWorkerDeployments(account, script.id)
+
+            loadingDialog.dismiss()
+
             val dialogView = layoutInflater.inflate(R.layout.dialog_worker_version_detail, null)
             val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
             val versionNumberText = dialogView.findViewById<android.widget.TextView>(R.id.versionNumberText)
@@ -1635,6 +1639,17 @@ class WorkerFragment : Fragment() {
             val urlText = dialogView.findViewById<android.widget.TextView>(R.id.urlText)
             val authorText = dialogView.findViewById<android.widget.TextView>(R.id.authorText)
             val statusBadge = dialogView.findViewById<android.widget.LinearLayout>(R.id.statusBadge)
+            val authorIdText = dialogView.findViewById<android.widget.TextView>(R.id.authorIdText)
+            val hasPreviewText = dialogView.findViewById<android.widget.TextView>(R.id.hasPreviewText)
+            val deploymentMessageText = dialogView.findViewById<android.widget.TextView>(R.id.deploymentMessageText)
+            val triggeredByText = dialogView.findViewById<android.widget.TextView>(R.id.triggeredByText)
+            val deploymentInfoSection = dialogView.findViewById<android.widget.LinearLayout>(R.id.deploymentInfoSection)
+            val deploymentIdText = dialogView.findViewById<android.widget.TextView>(R.id.deploymentIdText)
+            val deploymentCreatedText = dialogView.findViewById<android.widget.TextView>(R.id.deploymentCreatedText)
+            val deploymentSourceText = dialogView.findViewById<android.widget.TextView>(R.id.deploymentSourceText)
+            val deploymentStrategyText = dialogView.findViewById<android.widget.TextView>(R.id.deploymentStrategyText)
+            val deploymentPercentageText = dialogView.findViewById<android.widget.TextView>(R.id.deploymentPercentageText)
+            val deploymentAuthorText = dialogView.findViewById<android.widget.TextView>(R.id.deploymentAuthorText)
             val deleteBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
             val accessBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.accessBtn)
             val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
@@ -1646,6 +1661,49 @@ class WorkerFragment : Fragment() {
             sourceText.text = version.metadata?.source ?: "未知"
             urlText.text = "https://${script.id}.${emailPrefix}.workers.dev"
             authorText.text = version.metadata?.authorEmail ?: "未知"
+            authorIdText.text = version.metadata?.authorId ?: "未知"
+            hasPreviewText.text = version.metadata?.hasPreview?.let { if (it) "是" else "否" } ?: "未知"
+
+            // 版本注解（workers/message, workers/triggered_by）
+            val versionAnnotations = version.annotations
+            deploymentMessageText.text = versionAnnotations?.get("workers/message") ?: "无"
+            triggeredByText.text = versionAnnotations?.get("workers/triggered_by") ?: "无"
+
+            // 查找包含当前版本的部署
+            var matchedDeployment: com.muort.upworker.core.model.WorkerDeployment? = null
+            var versionPercentage: Int? = null
+            if (deploymentsResult is Resource.Success) {
+                val deployments = deploymentsResult.data
+                for (deployment in deployments) {
+                    val versionInfo = deployment.versions?.find { it.versionId == version.id }
+                    if (versionInfo != null) {
+                        matchedDeployment = deployment
+                        versionPercentage = versionInfo.percentage
+                        break
+                    }
+                }
+            }
+
+            // 填充部署信息
+            if (matchedDeployment != null) {
+                deploymentInfoSection.visibility = android.view.View.VISIBLE
+                deploymentIdText.text = matchedDeployment.id
+                deploymentCreatedText.text = formatDate(matchedDeployment.createdOn)
+                deploymentSourceText.text = matchedDeployment.source ?: "未知"
+                deploymentStrategyText.text = matchedDeployment.strategy ?: "未知"
+                deploymentPercentageText.text = versionPercentage?.let { "$it%" } ?: "未知"
+                deploymentAuthorText.text = matchedDeployment.authorEmail ?: "未知"
+
+                // 部署注解覆盖版本注解（如果存在）
+                matchedDeployment.annotations?.get("workers/message")?.let {
+                    deploymentMessageText.text = it
+                }
+                matchedDeployment.annotations?.get("workers/triggered_by")?.let {
+                    triggeredByText.text = it
+                }
+            } else {
+                deploymentInfoSection.visibility = android.view.View.GONE
+            }
 
             if (isRunning) {
                 val statusIcon = android.widget.ImageView(requireContext()).apply {

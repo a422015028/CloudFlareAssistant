@@ -157,6 +157,25 @@ data class WorkerVersion(
     @SerializedName("annotations") val annotations: Map<String, String>? = null
 )
 
+/**
+ * Worker 部署模型
+ * 对应 API: GET /accounts/{account_id}/workers/scripts/{script_name}/deployments/{deployment_id}
+ */
+data class WorkerDeployment(
+    @SerializedName("id") val id: String,
+    @SerializedName("created_on") val createdOn: String?,
+    @SerializedName("source") val source: String?,
+    @SerializedName("strategy") val strategy: String?,
+    @SerializedName("versions") val versions: List<WorkerDeploymentVersion>?,
+    @SerializedName("annotations") val annotations: Map<String, String>?,
+    @SerializedName("author_email") val authorEmail: String?
+)
+
+data class WorkerDeploymentVersion(
+    @SerializedName("percentage") val percentage: Int?,
+    @SerializedName("version_id") val versionId: String?
+)
+
 data class WorkerVersionMetadata(
     @SerializedName("created_on") val createdOn: String?,
     @SerializedName("source") val source: String?,
@@ -343,13 +362,20 @@ data class PagesDeployment(
     @SerializedName("id") val id: String,
     @SerializedName("short_id") val shortId: String?,
     @SerializedName("project_name") val projectName: String?,
+    @SerializedName("project_id") val projectId: String?,
     @SerializedName("environment") val environment: String?,
     @SerializedName("url") val url: String?,
+    @SerializedName("aliases") val aliases: List<String>?,
     @SerializedName("created_on") val createdOn: String?,
     @SerializedName("modified_on") val modifiedOn: String?,
     @SerializedName("latest_stage") val latestStage: DeploymentStage?,
     @SerializedName("deployment_trigger") val deploymentTrigger: DeploymentTrigger?,
-    @SerializedName("stages") val stages: List<DeploymentStage>?
+    @SerializedName("stages") val stages: List<DeploymentStage>?,
+    @SerializedName("is_skipped") val isSkipped: Boolean?,
+    @SerializedName("uses_functions") val usesFunctions: Boolean?,
+    @SerializedName("env_vars") val envVars: Map<String, EnvVar>?,
+    @SerializedName("build_config") val buildConfig: BuildConfig?,
+    @SerializedName("source") val source: ProjectSource?
 )
 
 data class DeploymentStage(
@@ -367,7 +393,8 @@ data class DeploymentTrigger(
 data class DeploymentMetadata(
     @SerializedName("branch") val branch: String?,
     @SerializedName("commit_hash") val commitHash: String?,
-    @SerializedName("commit_message") val commitMessage: String?
+    @SerializedName("commit_message") val commitMessage: String?,
+    @SerializedName("commit_dirty") val commitDirty: Boolean?
 )
 
 data class PagesProjectDetail(
@@ -377,6 +404,11 @@ data class PagesProjectDetail(
     @SerializedName("domains") val domains: List<String>?,
     @SerializedName("created_on") val createdOn: String?,
     @SerializedName("production_branch") val productionBranch: String?,
+    @SerializedName("framework") val framework: String?,
+    @SerializedName("framework_version") val frameworkVersion: String?,
+    @SerializedName("uses_functions") val usesFunctions: Boolean?,
+    @SerializedName("preview_script_name") val previewScriptName: String?,
+    @SerializedName("production_script_name") val productionScriptName: String?,
     @SerializedName("source") val source: ProjectSource?,
     @SerializedName("build_config") val buildConfig: BuildConfig?,
     @SerializedName("deployment_configs") val deploymentConfigs: DeploymentConfigs?,
@@ -392,14 +424,25 @@ data class ProjectSource(
 
 data class SourceConfig(
     @SerializedName("owner") val owner: String?,
+    @SerializedName("owner_id") val ownerId: String?,
     @SerializedName("repo_name") val repoName: String?,
-    @SerializedName("production_branch") val productionBranch: String?
+    @SerializedName("repo_id") val repoId: String?,
+    @SerializedName("production_branch") val productionBranch: String?,
+    @SerializedName("deployments_enabled") val deploymentsEnabled: Boolean?,
+    @SerializedName("production_deployments_enabled") val productionDeploymentsEnabled: Boolean?,
+    @SerializedName("pr_comments_enabled") val prCommentsEnabled: Boolean?,
+    @SerializedName("preview_deployment_setting") val previewDeploymentSetting: String?,
+    @SerializedName("path_excludes") val pathExcludes: List<String>?,
+    @SerializedName("path_includes") val pathIncludes: List<String>?,
+    @SerializedName("preview_branch_excludes") val previewBranchExcludes: List<String>?,
+    @SerializedName("preview_branch_includes") val previewBranchIncludes: List<String>?
 )
 
 data class BuildConfig(
     @SerializedName("build_command") val buildCommand: String?,
     @SerializedName("destination_dir") val destinationDir: String?,
     @SerializedName("root_dir") val rootDir: String?,
+    @SerializedName("build_caching") val buildCaching: Boolean?,
     @SerializedName("web_analytics_tag") val webAnalyticsTag: String?,
     @SerializedName("web_analytics_token") val webAnalyticsToken: String?
 )
