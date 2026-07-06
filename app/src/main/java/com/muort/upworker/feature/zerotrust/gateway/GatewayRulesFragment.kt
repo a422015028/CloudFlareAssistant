@@ -137,7 +137,7 @@ class GatewayRulesFragment : Fragment() {
         val l4Fields = dialogView.findViewById<View>(R.id.l4Fields)
 
         // Setup type spinner
-        val types = listOf("dns" to "DNS", "http" to "HTTP", "l4" to "网络 (L4)")
+        val types = listOf("dns" to "DNS", "http" to "HTTP", "l4" to "网络 (L4)", "egress" to "出站", "dns_resolver" to "DNS解析器")
         val typeAdapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_item,
@@ -156,7 +156,22 @@ class GatewayRulesFragment : Fragment() {
         }
 
         // Setup action spinner
-        val actions = listOf("allow" to "允许", "block" to "阻止", "safe_search" to "安全搜索")
+        val actions = listOf(
+            "allow" to "允许",
+            "block" to "阻止",
+            "scan" to "扫描",
+            "noscan" to "不扫描",
+            "safesearch" to "安全搜索",
+            "ytrestricted" to "YouTube限制",
+            "isolate" to "隔离",
+            "noisolate" to "不隔离",
+            "override" to "覆盖",
+            "l4_override" to "L4覆盖",
+            "egress" to "出站",
+            "resolve" to "解析",
+            "quarantine" to "隔离",
+            "redirect" to "重定向"
+        )
         val actionAdapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_item,
@@ -226,13 +241,13 @@ class GatewayRulesFragment : Fragment() {
             "dns" -> {
                 val host = dialogView.findViewById<TextInputEditText>(R.id.dnsHostInput)?.text?.toString()
                 if (!host.isNullOrBlank()) {
-                    "dns.fqdn == \"$host\" or dns.fqdn =~ \".*\\.$host\""
+                    "dns.fqdn == \"$host\" or dns.fqdn matches \".*\\.$host\""
                 } else null
             }
             "http" -> {
                 val host = dialogView.findViewById<TextInputEditText>(R.id.httpHostInput)?.text?.toString()
                 if (!host.isNullOrBlank()) {
-                    "http.host == \"$host\" or http.host =~ \".*\\.$host\""
+                    "http.request.host == \"$host\" or http.request.host matches \".*\\.$host\""
                 } else null
             }
             "l4" -> {

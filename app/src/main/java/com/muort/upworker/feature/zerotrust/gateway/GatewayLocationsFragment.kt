@@ -153,8 +153,7 @@ class GatewayLocationsFragment : Fragment() {
                 
                 val request = GatewayLocationRequest(
                     name = name,
-                    networks = networks.map { LocationNetwork(network = it) },
-                    clientDefault = false
+                    networks = networks.map { LocationNetwork(network = it) }
                 )
 
                 if (existingLocation == null) {

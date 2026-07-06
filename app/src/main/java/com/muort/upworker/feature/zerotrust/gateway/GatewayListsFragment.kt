@@ -129,7 +129,17 @@ class GatewayListsFragment : Fragment() {
         val itemsInput = dialogView.findViewById<TextInputEditText>(R.id.itemsInput)
 
         // Setup type spinner
-        val types = listOf("DOMAIN" to "域名", "IP" to "IP 地址", "URL" to "URL")
+        val types = listOf(
+            "DOMAIN" to "域名",
+            "IP" to "IP 地址",
+            "URL" to "URL",
+            "SERIAL" to "序列号",
+            "EMAIL" to "邮箱",
+            "CATEGORY" to "类别",
+            "LOCATION" to "位置",
+            "DEVICE" to "设备",
+            "AAGUID" to "AAGUID"
+        )
         val typeAdapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_item,
@@ -166,12 +176,23 @@ class GatewayListsFragment : Fragment() {
                 }
 
                 val listType = types[typeSpinner.selectedItemPosition].first
-                val items = itemsText.split("\n").map { it.trim() }.filter { it.isNotBlank() }
+                var items = itemsText.split("\n").map { it.trim() }.filter { it.isNotBlank() }
+                
+                if (listType == "DOMAIN") {
+                    items = items.map { item ->
+                        item.replace("*\\.", "").replace(".*\\.", "").replace(".*", "").replace("~", "").trim()
+                    }.filter { it.isNotBlank() }
+                }
+                
+                if (items.isEmpty()) {
+                    Snackbar.make(binding.root, "列表项不能为空", Snackbar.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
                 
                 val request = GatewayListRequest(
                     name = name,
                     type = listType,
-                    description = descriptionInput.text?.toString(),
+                    description = descriptionInput.text?.toString()?.takeIf { it.isNotBlank() },
                     items = items.map { GatewayListItem(value = it) }
                 )
 

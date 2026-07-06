@@ -163,16 +163,20 @@ data class GatewayRule(
     @SerializedName("deleted_at") val deletedAt: String? = null
 )
 
+@JsonAdapter(GatewayRuleRequestAdapter::class)
 data class GatewayRuleRequest(
     @SerializedName("name") val name: String,
     @SerializedName("description") val description: String? = null,
     @SerializedName("action") val action: String,
-    @SerializedName("enabled") val enabled: Boolean = true,
+    @SerializedName("enabled") val enabled: Boolean? = null,
     @SerializedName("filters") val filters: List<String>,
     @SerializedName("traffic") val traffic: String? = null,
     @SerializedName("identity") val identity: String? = null,
+    @SerializedName("device_posture") val devicePosture: String? = null,
     @SerializedName("precedence") val precedence: Int? = null,
-    @SerializedName("rule_settings") val ruleSettings: GatewayRuleSettings? = null
+    @SerializedName("rule_settings") val ruleSettings: GatewayRuleSettings? = null,
+    @SerializedName("expiration") val expiration: GatewayRuleExpiration? = null,
+    @SerializedName("schedule") val schedule: GatewayRuleSchedule? = null
 )
 
 data class GatewayRuleSettings(
@@ -204,6 +208,22 @@ data class CheckSession(
     @SerializedName("duration") val duration: String? = null
 )
 
+data class GatewayRuleExpiration(
+    @SerializedName("expires_at") val expiresAt: String? = null,
+    @SerializedName("duration") val duration: Int? = null,
+    @SerializedName("expired") val expired: Boolean? = null
+)
+
+data class GatewayRuleSchedule(
+    @SerializedName("mon") val monday: String? = null,
+    @SerializedName("tue") val tuesday: String? = null,
+    @SerializedName("wed") val wednesday: String? = null,
+    @SerializedName("thu") val thursday: String? = null,
+    @SerializedName("fri") val friday: String? = null,
+    @SerializedName("sat") val saturday: String? = null,
+    @SerializedName("sun") val sunday: String? = null
+)
+
 data class RuleSchedule(
     @SerializedName("time_zone") val timeZone: String? = null,
     @SerializedName("mon") val monday: String? = null,
@@ -231,6 +251,7 @@ data class GatewayList(
     @SerializedName("updated_at") val updatedAt: String? = null
 )
 
+@JsonAdapter(GatewayListRequestAdapter::class)
 data class GatewayListRequest(
     @SerializedName("name") val name: String,
     @SerializedName("description") val description: String? = null,
@@ -238,6 +259,7 @@ data class GatewayListRequest(
     @SerializedName("items") val items: List<GatewayListItem>
 )
 
+@JsonAdapter(GatewayListItemAdapter::class)
 data class GatewayListItem(
     @SerializedName("value") val value: String,
     @SerializedName("description") val description: String? = null,
@@ -269,15 +291,55 @@ data class GatewayLocation(
     @SerializedName("updated_at") val updatedAt: String? = null
 )
 
+@JsonAdapter(GatewayLocationRequestAdapter::class)
 data class GatewayLocationRequest(
     @SerializedName("name") val name: String,
+    @SerializedName("client_default") val clientDefault: Boolean? = null,
+    @SerializedName("dns_destination_ips_id") val dnsDestinationIpsId: String? = null,
+    @SerializedName("ecs_support") val ecsSupport: Boolean? = null,
     @SerializedName("networks") val networks: List<LocationNetwork>? = null,
-    @SerializedName("client_default") val clientDefault: Boolean? = false,
-    @SerializedName("ecs_support") val ecsSupport: Boolean? = false
+    @SerializedName("endpoints") val endpoints: LocationEndpoints? = null,
+    @SerializedName("max_ttl") val maxTtl: LocationMaxTtl? = null
 )
 
 data class LocationNetwork(
-    @SerializedName("network") val network: String // CIDR notation
+    @SerializedName("network") val network: String
+)
+
+data class LocationEndpoints(
+    @SerializedName("doh") val doh: DOHEndpoint? = null,
+    @SerializedName("dot") val dot: DOTEndpoint? = null,
+    @SerializedName("ipv4") val ipv4: IPV4Endpoint? = null,
+    @SerializedName("ipv6") val ipv6: IPV6Endpoint? = null
+)
+
+data class DOHEndpoint(
+    @SerializedName("enabled") val enabled: Boolean? = null,
+    @SerializedName("networks") val networks: List<LocationNetwork>? = null,
+    @SerializedName("require_token") val requireToken: Boolean? = null
+)
+
+data class DOTEndpoint(
+    @SerializedName("enabled") val enabled: Boolean? = null,
+    @SerializedName("networks") val networks: List<LocationNetwork>? = null
+)
+
+data class IPV4Endpoint(
+    @SerializedName("enabled") val enabled: Boolean? = null
+)
+
+data class IPV6Endpoint(
+    @SerializedName("enabled") val enabled: Boolean? = null,
+    @SerializedName("networks") val networks: List<IPV6Network>? = null
+)
+
+data class IPV6Network(
+    @SerializedName("network") val network: String
+)
+
+data class LocationMaxTtl(
+    @SerializedName("mode") val mode: String? = null,
+    @SerializedName("ttl_secs") val ttlSecs: Int? = null
 )
 
 // ==================== Zero Trust - Devices ====================
