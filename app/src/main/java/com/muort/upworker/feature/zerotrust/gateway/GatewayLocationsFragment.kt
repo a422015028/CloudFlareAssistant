@@ -84,20 +84,16 @@ class GatewayLocationsFragment : Fragment() {
                 }
 
                 launch {
-                    viewModel.loadingState.collect { _ ->
-                        // Loading state handled by ViewModel
-                    }
-                }
-
-                launch {
                     viewModel.message.collect { message ->
                         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                     }
                 }
 
                 launch {
-                    viewModel.error.collect { error ->
-                        Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+                    viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                        viewModel.error.collect { error ->
+                            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+                        }
                     }
                 }
             }

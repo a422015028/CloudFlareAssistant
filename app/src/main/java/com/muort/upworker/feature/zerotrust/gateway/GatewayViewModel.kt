@@ -128,7 +128,7 @@ class GatewayViewModel @Inject constructor(
     }
     
     /**
-     * Load all Gateway lists
+     * Load all Gateway lists with details
      */
     fun loadLists(account: Account) {
         viewModelScope.launch {
@@ -137,6 +137,19 @@ class GatewayViewModel @Inject constructor(
                 is Resource.Success -> {
                     _lists.value = result.data
                     Timber.d("Loaded ${result.data.size} Gateway lists")
+                    
+                    launch {
+                        val listsWithDetails = result.data.map { list ->
+                            val detail = zeroTrustRepository.getGatewayList(account, list.id)
+                            if (detail is Resource.Success) {
+                                detail.data
+                            } else {
+                                list
+                            }
+                        }
+                        _lists.value = listsWithDetails
+                        Timber.d("Loaded details for ${listsWithDetails.size} lists")
+                    }
                 }
                 is Resource.Error -> {
                     val errorMsg = "加载列表失败: ${result.message}"
@@ -191,6 +204,18 @@ class GatewayViewModel @Inject constructor(
         }
     }
     
+    /**
+     * Get Gateway list details
+     */
+    suspend fun getList(account: Account, listId: String): GatewayList? {
+        return when (val result = zeroTrustRepository.getGatewayList(account, listId)) {
+            is Resource.Success -> {
+                result.data
+            }
+            else -> null
+        }
+    }
+
     /**
      * Update a Gateway list
      */

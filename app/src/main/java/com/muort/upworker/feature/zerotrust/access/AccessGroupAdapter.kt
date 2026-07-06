@@ -13,6 +13,7 @@ import com.muort.upworker.databinding.ItemAccessGroupBinding
  * Adapter for Access Group list
  */
 class AccessGroupAdapter(
+    private val onEditClick: (AccessGroup) -> Unit,
     private val onDeleteClick: (AccessGroup) -> Unit
 ) : ListAdapter<AccessGroup, AccessGroupAdapter.ViewHolder>(DiffCallback()) {
 
@@ -22,7 +23,7 @@ class AccessGroupAdapter(
             parent,
             false
         )
-        return ViewHolder(binding, onDeleteClick)
+        return ViewHolder(binding, onEditClick, onDeleteClick)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -31,6 +32,7 @@ class AccessGroupAdapter(
 
     class ViewHolder(
         private val binding: ItemAccessGroupBinding,
+        private val onEditClick: (AccessGroup) -> Unit,
         private val onDeleteClick: (AccessGroup) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -38,17 +40,21 @@ class AccessGroupAdapter(
             binding.groupNameText.text = group.name
 
             val rulesInfo = buildString {
-                append("Include: ${group.include.size} 规则")
+                append("包含规则: ${group.include.size}")
                 if (!group.exclude.isNullOrEmpty()) {
-                    append(" • Exclude: ${group.exclude.size} 规则")
+                    append(" • 排除规则: ${group.exclude.size}")
                 }
                 if (!group.require.isNullOrEmpty()) {
-                    append(" • Require: ${group.require.size} 规则")
+                    append(" • 必须规则: ${group.require.size}")
                 }
             }
             binding.groupRulesText.text = rulesInfo
 
             binding.groupDefaultChip.visibility = if (group.isDefault == true) View.VISIBLE else View.GONE
+
+            binding.editGroupButton.setOnClickListener {
+                onEditClick(group)
+            }
 
             binding.deleteGroupButton.setOnClickListener {
                 onDeleteClick(group)

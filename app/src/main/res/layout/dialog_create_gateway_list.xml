@@ -8,12 +8,61 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="列表用于分组管理域名、IP 等，可在规则中引用"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <!-- 快速模板 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="快速模板"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <Button
+                android:id="@+id/templateDomainBtn"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="域名列表" />
+
+            <Button
+                android:id="@+id/templateIpBtn"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="IP列表" />
+
+            <Button
+                android:id="@+id/templateUrlBtn"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="URL列表" />
+
+        </LinearLayout>
 
         <!-- 列表名称 -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="列表名称">
+            android:layout_marginTop="16dp"
+            android:hint="列表名称 *">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/listNameInput"
@@ -30,6 +79,14 @@
             android:layout_marginTop="16dp"
             android:text="列表类型"
             android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="域名: 匹配网站域名 | IP: 匹配 IP 地址 | URL: 匹配完整网址"
+            android:textSize="11sp"
             android:textColor="?android:attr/textColorSecondary" />
 
         <Spinner
@@ -50,7 +107,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
-                android:lines="3" />
+                android:lines="2" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -59,34 +116,60 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="列表项 (每行一个)"
+            android:text="列表项"
             android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:id="@+id/itemsHintText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="每行输入一个，例如:\nexample.com\nwww.example.com"
+            android:textSize="11sp"
             android:textColor="?android:attr/textColorSecondary" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="例如: example.com 或 192.168.1.1">
+            android:hint="列表项内容">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/itemsInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
-                android:lines="8"
+                android:lines="6"
                 android:gravity="top|start" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- 示例 -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="提示: 域名列表支持通配符，如 *.example.com"
-            android:textSize="12sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textStyle="italic" />
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="输入示例"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/exampleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="example.com\napi.example.com\n*.example.com"
+                android:textSize="11sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:fontFamily="monospace" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -57,6 +57,9 @@ class GroupFragment : Fragment() {
 
     private fun setupRecyclerView() {
         groupAdapter = AccessGroupAdapter(
+            onEditClick = { group ->
+                showEditGroupDialog(group)
+            },
             onDeleteClick = { group ->
                 confirmDeleteGroup(group.id, group.name)
             }
@@ -82,13 +85,6 @@ class GroupFragment : Fragment() {
                     viewModel.groups.collect { groups ->
                         groupAdapter.submitList(groups)
                         binding.emptyView.visibility = if (groups.isEmpty()) View.VISIBLE else View.GONE
-                    }
-                }
-
-                // Loading state
-                launch {
-                    viewModel.loadingState.collect { isLoading ->
-                        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
                     }
                 }
 
@@ -132,6 +128,7 @@ class GroupFragment : Fragment() {
         val addIncludeButton = dialogView.findViewById<Button>(R.id.addIncludeRuleButton)
         val addExcludeButton = dialogView.findViewById<Button>(R.id.addExcludeRuleButton)
         val addRequireButton = dialogView.findViewById<Button>(R.id.addRequireRuleButton)
+        val isDefaultSwitch = dialogView.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.isDefaultSwitch)
 
         val includeRules = mutableListOf<com.muort.upworker.core.model.AccessRule>()
         val excludeRules = mutableListOf<com.muort.upworker.core.model.AccessRule>()
@@ -204,10 +201,118 @@ class GroupFragment : Fragment() {
                     name = name,
                     include = includeRules,
                     exclude = excludeRules,
-                    require = requireRules
+                    require = requireRules,
+                    isDefault = isDefaultSwitch?.isChecked == true
                 )
 
                 viewModel.createGroup(account, request)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun showEditGroupDialog(group: com.muort.upworker.core.model.AccessGroup) {
+        val account = accountViewModel.defaultAccount.value ?: return
+
+        val dialogView = layoutInflater.inflate(R.layout.dialog_group_edit, null)
+        val nameInput = dialogView.findViewById<TextInputEditText>(R.id.groupNameInput)
+        
+        val includeRecyclerView = dialogView.findViewById<RecyclerView>(R.id.includeRulesRecyclerView)
+        val excludeRecyclerView = dialogView.findViewById<RecyclerView>(R.id.excludeRulesRecyclerView)
+        val requireRecyclerView = dialogView.findViewById<RecyclerView>(R.id.requireRulesRecyclerView)
+        
+        val addIncludeButton = dialogView.findViewById<Button>(R.id.addIncludeRuleButton)
+        val addExcludeButton = dialogView.findViewById<Button>(R.id.addExcludeRuleButton)
+        val addRequireButton = dialogView.findViewById<Button>(R.id.addRequireRuleButton)
+        val isDefaultSwitch = dialogView.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.isDefaultSwitch)
+
+        nameInput.setText(group.name)
+        isDefaultSwitch?.isChecked = group.isDefault == true
+
+        val includeRules = mutableListOf<com.muort.upworker.core.model.AccessRule>()
+        val excludeRules = mutableListOf<com.muort.upworker.core.model.AccessRule>()
+        val requireRules = mutableListOf<com.muort.upworker.core.model.AccessRule>()
+
+        group.include.forEach { includeRules.add(it) }
+        group.exclude?.forEach { excludeRules.add(it) }
+        group.require?.forEach { requireRules.add(it) }
+
+        lateinit var includeAdapter: PolicyRuleAdapter
+        lateinit var excludeAdapter: PolicyRuleAdapter
+        lateinit var requireAdapter: PolicyRuleAdapter
+        
+        includeAdapter = PolicyRuleAdapter { rule -> 
+            includeRules.remove(rule)
+            includeAdapter.submitList(includeRules.toList())
+        }
+        excludeAdapter = PolicyRuleAdapter { rule ->
+            excludeRules.remove(rule)
+            excludeAdapter.submitList(excludeRules.toList())
+        }
+        requireAdapter = PolicyRuleAdapter { rule ->
+            requireRules.remove(rule)
+            requireAdapter.submitList(requireRules.toList())
+        }
+
+        includeRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+        excludeRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+        requireRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+        
+        includeRecyclerView?.adapter = includeAdapter
+        excludeRecyclerView?.adapter = excludeAdapter
+        requireRecyclerView?.adapter = requireAdapter
+
+        includeAdapter.submitList(includeRules.toList())
+        excludeAdapter.submitList(excludeRules.toList())
+        requireAdapter.submitList(requireRules.toList())
+
+        val ruleHelper = PolicyRuleDialogHelper(requireContext())
+
+        addIncludeButton?.setOnClickListener {
+            ruleHelper.showAddRuleDialog(viewModel.groups.value) { rule ->
+                includeRules.add(rule)
+                includeAdapter.submitList(includeRules.toList())
+            }
+        }
+
+        addExcludeButton?.setOnClickListener {
+            ruleHelper.showAddRuleDialog(viewModel.groups.value) { rule ->
+                excludeRules.add(rule)
+                excludeAdapter.submitList(excludeRules.toList())
+            }
+        }
+
+        addRequireButton?.setOnClickListener {
+            ruleHelper.showAddRuleDialog(viewModel.groups.value) { rule ->
+                requireRules.add(rule)
+                requireAdapter.submitList(requireRules.toList())
+            }
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("编辑 Access 组")
+            .setView(dialogView)
+            .setPositiveButton("保存") { _, _ ->
+                val name = nameInput?.text?.toString()
+                if (name.isNullOrBlank()) {
+                    Snackbar.make(binding.root, "请输入组名称", Snackbar.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (includeRules.isEmpty()) {
+                    Snackbar.make(binding.root, "至少需要一条包含规则", Snackbar.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val request = AccessGroupRequest(
+                    name = name,
+                    include = includeRules,
+                    exclude = excludeRules,
+                    require = requireRules,
+                    isDefault = isDefaultSwitch?.isChecked == true
+                )
+
+                viewModel.updateGroup(account, group.id, request)
             }
             .setNegativeButton("取消", null)
             .show()

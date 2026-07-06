@@ -9,11 +9,61 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="规则用于控制网络流量，支持 DNS、HTTP 和网络层匹配。"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <!-- 快速模板 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="快速模板"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <Button
+                android:id="@+id/templateBlockBtn"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="阻止域名" />
+
+            <Button
+                android:id="@+id/templateAllowBtn"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="允许域名" />
+
+            <Button
+                android:id="@+id/templateSafeBtn"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="安全搜索" />
+
+        </LinearLayout>
+
         <!-- 规则名称 -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="规则名称">
+            android:layout_marginTop="16dp"
+            android:hint="规则名称 *">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ruleNameInput"
@@ -32,6 +82,14 @@
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="DNS规则: 匹配域名查询 | URL规则: 匹配网站访问 | IP规则: 匹配 IP 和端口"
+            android:textSize="11sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
         <Spinner
             android:id="@+id/ruleTypeSpinner"
             android:layout_width="match_parent"
@@ -47,27 +105,19 @@
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="允许: 放行流量 | 阻止: 拒绝访问 | 安全搜索: 过滤不良内容"
+            android:textSize="11sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
         <Spinner
             android:id="@+id/actionSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp" />
-
-        <!-- 优先级 -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="优先级">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/precedenceInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="0" />
-
-        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- DNS 规则字段 -->
         <LinearLayout
@@ -81,15 +131,48 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="DNS 查询匹配"
+                android:text="DNS 规则"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <com.google.android.material.textfield.TextInputLayout
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="匹配域名查询，支持主域名和所有子域名"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <RadioGroup
+                android:id="@+id/dnsMatchTypeGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="域名 (example.com)">
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/dnsMatchSingle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="单个域名"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/dnsMatchList"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="域名列表" />
+
+            </RadioGroup>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dnsHostLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="域名 (如: example.com)">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/dnsHostInput"
@@ -99,19 +182,12 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            <Spinner
+                android:id="@+id/dnsListSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="查询类型 (可选，如: A, AAAA)">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/dnsQueryTypeInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text" />
-
-            </com.google.android.material.textfield.TextInputLayout>
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -127,15 +203,24 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="HTTP 请求匹配"
+                android:text="HTTP 规则"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="匹配网站访问，支持主机名和 URL 路径"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary" />
+
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/httpHostLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="主机名 (example.com)">
+                android:hint="主机名 (如: example.com)">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/httpHostInput"
@@ -146,6 +231,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/httpPathLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -159,19 +245,50 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            <RadioGroup
+                android:id="@+id/httpMatchTypeGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="HTTP 方法 (可选，如: GET, POST)">
+                android:orientation="horizontal">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/httpMethodInput"
-                    android:layout_width="match_parent"
+                <RadioButton
+                    android:id="@+id/httpMatchSingle"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:layout_weight="1"
+                    android:text="单个主机"
+                    android:checked="true" />
 
-            </com.google.android.material.textfield.TextInputLayout>
+                <RadioButton
+                    android:id="@+id/httpMatchDomainList"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="域名列表" />
+
+                <RadioButton
+                    android:id="@+id/httpMatchUrlList"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="URL列表" />
+
+            </RadioGroup>
+
+            <Spinner
+                android:id="@+id/httpDomainListSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone" />
+
+            <Spinner
+                android:id="@+id/httpUrlListSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -187,15 +304,24 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="网络层匹配"
+                android:text="网络规则"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="匹配网络层流量，支持 IP 地址和端口"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary" />
+
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/l4SourceIpLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="源 IP/CIDR (如: 192.168.1.0/24)">
+                android:hint="目标 IP/CIDR (如: 192.168.1.0/24)">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/l4SourceIpInput"
@@ -206,6 +332,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/l4DestPortLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -219,35 +346,83 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            <RadioGroup
+                android:id="@+id/l4MatchTypeGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="协议 (可选，如: tcp, udp)">
+                android:orientation="horizontal">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/l4ProtocolInput"
-                    android:layout_width="match_parent"
+                <RadioButton
+                    android:id="@+id/l4MatchSingle"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:layout_weight="1"
+                    android:text="单个IP"
+                    android:checked="true" />
 
-            </com.google.android.material.textfield.TextInputLayout>
+                <RadioButton
+                    android:id="@+id/l4MatchList"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="IP列表" />
+
+            </RadioGroup>
+
+            <Spinner
+                android:id="@+id/l4ListSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone" />
 
         </LinearLayout>
 
-        <!-- 描述 -->
+        <!-- 流量表达式预览 -->
+        <LinearLayout
+            android:id="@+id/trafficPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="生成的规则表达式"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <TextView
+                android:id="@+id/trafficExpressionText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="dns.fqdn == &quot;example.com&quot;"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:textColor="?attr/colorPrimary"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:padding="8dp" />
+
+        </LinearLayout>
+
+        <!-- 优先级 -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="描述 (可选)">
+            android:hint="优先级 (越小越高)">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/descriptionInput"
+                android:id="@+id/precedenceInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:lines="3" />
+                android:inputType="number"
+                android:text="0" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

@@ -1,8 +1,12 @@
 package com.muort.upworker.feature.zerotrust.gateway
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -37,19 +41,31 @@ class GatewayRuleAdapter(
 
         fun bind(rule: GatewayRule) {
             binding.ruleNameText.text = rule.name
+            
             val ruleType = rule.filters.firstOrNull() ?: "unknown"
             binding.ruleTypeChip.text = when (ruleType) {
                 "dns" -> "DNS"
                 "http" -> "HTTP"
-                "l4" -> "网络 (L4)"
+                "l4" -> "网络"
                 else -> ruleType.uppercase()
             }
-            binding.ruleDescriptionText.text = rule.description ?: "无描述"
-            binding.ruleDescriptionText.visibility = if (rule.description.isNullOrBlank()) View.GONE else View.VISIBLE
-            binding.ruleActionText.text = "动作: ${getActionLabel(rule.action)}"
+            
+            binding.ruleActionChip.text = getActionLabel(rule.action)
+            
+            binding.ruleTrafficText.text = rule.traffic ?: "无匹配条件"
+            binding.ruleTrafficText.visibility = if (rule.traffic.isNullOrBlank()) View.GONE else View.VISIBLE
+            
+            binding.ruleTrafficText.setOnClickListener {
+                if (!rule.traffic.isNullOrBlank()) {
+                    val clipboard = binding.root.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText("规则表达式", rule.traffic)
+                    clipboard.setPrimaryClip(clip)
+                    Toast.makeText(binding.root.context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+                }
+            }
+            
             binding.rulePrecedenceText.text = "优先级: ${rule.precedence ?: 0}"
             
-            // Set switch without triggering listener
             binding.enabledSwitch.setOnCheckedChangeListener(null)
             binding.enabledSwitch.isChecked = rule.enabled
             binding.enabledSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -64,10 +80,8 @@ class GatewayRuleAdapter(
             return when (action) {
                 "allow" -> "允许"
                 "block" -> "阻止"
-                "safe_search" -> "安全搜索"
-                "ytrestricted" -> "YouTube 受限"
-                "on" -> "开启"
-                "off" -> "关闭"
+                "safesearch" -> "安全搜索"
+                "ytrestricted" -> "YouTube限制"
                 "isolate" -> "隔离"
                 "noscan" -> "不扫描"
                 else -> action ?: "未知"

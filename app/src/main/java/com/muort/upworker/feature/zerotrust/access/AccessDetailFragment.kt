@@ -129,13 +129,6 @@ class AccessDetailFragment : Fragment() {
                     }
                 }
 
-                // Observe loading state
-                launch {
-                    viewModel.loadingState.collect { isLoading ->
-                        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-                    }
-                }
-
                 // Observe messages
                 launch {
                     viewModel.message.collect { message ->

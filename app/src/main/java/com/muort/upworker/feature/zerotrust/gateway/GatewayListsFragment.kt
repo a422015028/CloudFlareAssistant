@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -85,20 +88,16 @@ class GatewayListsFragment : Fragment() {
                 }
 
                 launch {
-                    viewModel.loadingState.collect { _ ->
-                        // Loading state handled by ViewModel
-                    }
-                }
-
-                launch {
                     viewModel.message.collect { message ->
                         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                     }
                 }
 
                 launch {
-                    viewModel.error.collect { error ->
-                        Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+                    viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                        viewModel.error.collect { error ->
+                            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+                        }
                     }
                 }
             }
@@ -124,21 +123,20 @@ class GatewayListsFragment : Fragment() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_create_gateway_list, null)
         
         val nameInput = dialogView.findViewById<TextInputEditText>(R.id.listNameInput)
-        val typeSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.listTypeSpinner)
+        val typeSpinner = dialogView.findViewById<Spinner>(R.id.listTypeSpinner)
         val descriptionInput = dialogView.findViewById<TextInputEditText>(R.id.descriptionInput)
         val itemsInput = dialogView.findViewById<TextInputEditText>(R.id.itemsInput)
+        val exampleText = dialogView.findViewById<TextView>(R.id.exampleText)
+        val itemsHintText = dialogView.findViewById<TextView>(R.id.itemsHintText)
 
-        // Setup type spinner
+        val templateDomainBtn = dialogView.findViewById<Button>(R.id.templateDomainBtn)
+        val templateIpBtn = dialogView.findViewById<Button>(R.id.templateIpBtn)
+        val templateUrlBtn = dialogView.findViewById<Button>(R.id.templateUrlBtn)
+
         val types = listOf(
             "DOMAIN" to "域名",
             "IP" to "IP 地址",
-            "URL" to "URL",
-            "SERIAL" to "序列号",
-            "EMAIL" to "邮箱",
-            "CATEGORY" to "类别",
-            "LOCATION" to "位置",
-            "DEVICE" to "设备",
-            "AAGUID" to "AAGUID"
+            "URL" to "URL"
         )
         val typeAdapter = ArrayAdapter(
             requireContext(),
@@ -148,13 +146,56 @@ class GatewayListsFragment : Fragment() {
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         typeSpinner.adapter = typeAdapter
 
-        // Populate existing list
+        fun updateExample() {
+            val listType = types[typeSpinner.selectedItemPosition].first
+            when (listType) {
+                "DOMAIN" -> {
+                    exampleText.text = "example.com\napi.example.com\n*.example.com"
+                    itemsHintText.text = "每行输入一个域名，例如:\nexample.com\nwww.example.com"
+                }
+                "IP" -> {
+                    exampleText.text = "192.168.1.1\n10.0.0.0/24\n172.16.0.0/12"
+                    itemsHintText.text = "每行输入一个 IP 或 CIDR，例如:\n192.168.1.1\n10.0.0.0/24"
+                }
+                "URL" -> {
+                    exampleText.text = "https://example.com/path\nhttps://*.example.com/*"
+                    itemsHintText.text = "每行输入一个 URL，例如:\nhttps://example.com/path"
+                }
+            }
+        }
+
+        typeSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateExample()
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
+        templateDomainBtn.setOnClickListener {
+            typeSpinner.setSelection(0)
+            nameInput.setText("域名列表")
+        }
+
+        templateIpBtn.setOnClickListener {
+            typeSpinner.setSelection(1)
+            nameInput.setText("IP列表")
+        }
+
+        templateUrlBtn.setOnClickListener {
+            typeSpinner.setSelection(2)
+            nameInput.setText("URL列表")
+        }
+
         existingList?.let { list ->
             nameInput.setText(list.name)
             descriptionInput.setText(list.description ?: "")
             
             val typeIndex = types.indexOfFirst { it.first == list.type }
             if (typeIndex >= 0) typeSpinner.setSelection(typeIndex)
+            
+            list.items?.let { items ->
+                itemsInput.setText(items.joinToString("\n") { it.value })
+            }
         }
 
         MaterialAlertDialogBuilder(requireContext())
@@ -176,7 +217,7 @@ class GatewayListsFragment : Fragment() {
                 }
 
                 val listType = types[typeSpinner.selectedItemPosition].first
-                var items = itemsText.split("\n").map { it.trim() }.filter { it.isNotBlank() }
+                var items = itemsText.split(Regex("[\n,;]")).map { it.trim() }.filter { it.isNotBlank() }
                 
                 if (listType == "DOMAIN") {
                     items = items.map { item ->
