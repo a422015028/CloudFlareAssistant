@@ -1,5 +1,6 @@
 package com.muort.upworker.core.model
 
+import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
 
 // ==================== Zero Trust - Access Applications ====================
@@ -86,8 +87,8 @@ data class AccessPolicyRequest(
     @SerializedName("name") val name: String,
     @SerializedName("decision") val decision: String,
     @SerializedName("include") val include: List<AccessRule>,
-    @SerializedName("exclude") val exclude: List<AccessRule>? = null,
-    @SerializedName("require") val require: List<AccessRule>? = null,
+    @SerializedName("exclude") val exclude: List<AccessRule> = emptyList(),
+    @SerializedName("require") val require: List<AccessRule> = emptyList(),
     @SerializedName("precedence") val precedence: Int? = null,
     @SerializedName("session_duration") val sessionDuration: String? = null
 )
@@ -96,6 +97,7 @@ data class AccessPolicyRequest(
  * Access Rule - Supports multiple selector types
  * Only one field should be set per rule
  */
+@JsonAdapter(AccessRuleAdapter::class)
 data class AccessRule(
     // Identity selectors
     @SerializedName("email") val email: Map<String, String>? = null, // {"email": "user@example.com"}
@@ -134,8 +136,8 @@ data class AccessGroup(
 data class AccessGroupRequest(
     @SerializedName("name") val name: String,
     @SerializedName("include") val include: List<AccessRule>,
-    @SerializedName("exclude") val exclude: List<AccessRule>? = null,
-    @SerializedName("require") val require: List<AccessRule>? = null,
+    @SerializedName("exclude") val exclude: List<AccessRule> = emptyList(),
+    @SerializedName("require") val require: List<AccessRule> = emptyList(),
     @SerializedName("is_default") val isDefault: Boolean? = false
 )
 

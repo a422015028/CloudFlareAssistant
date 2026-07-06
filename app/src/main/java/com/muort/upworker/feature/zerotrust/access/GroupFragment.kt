@@ -203,8 +203,8 @@ class GroupFragment : Fragment() {
                 val request = AccessGroupRequest(
                     name = name,
                     include = includeRules,
-                    exclude = excludeRules.takeIf { it.isNotEmpty() },
-                    require = requireRules.takeIf { it.isNotEmpty() }
+                    exclude = excludeRules,
+                    require = requireRules
                 )
 
                 viewModel.createGroup(account, request)

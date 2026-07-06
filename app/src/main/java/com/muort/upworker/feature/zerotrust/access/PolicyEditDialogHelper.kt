@@ -203,9 +203,9 @@ class PolicyEditDialogHelper(private val context: Context) {
                     name = name,
                     decision = decision,
                     include = includeRules,
-                    exclude = excludeRules.ifEmpty { null },
-                    require = requireRules.ifEmpty { null },
-                    precedence = precedence,
+                    exclude = excludeRules,
+                    require = requireRules,
+                    precedence = if (precedence > 0) precedence else null,
                     sessionDuration = sessionDuration
                 )
 
