@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.PagesDomain
 import com.muort.upworker.core.model.PagesDeployment
+import com.muort.upworker.core.model.PagesDeploymentLogs
 import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.PagesProjectDetail
 import com.muort.upworker.core.model.Resource
@@ -203,6 +204,21 @@ class PagesViewModel @Inject constructor(
             
             _loadingState.value = false
         }
+    }
+    
+    suspend fun getDeploymentListSuspend(
+        account: Account,
+        projectName: String
+    ): Resource<List<PagesDeployment>> {
+        return pagesRepository.listDeployments(account, projectName)
+    }
+    
+    suspend fun getDeploymentLogs(
+        account: Account,
+        projectName: String,
+        deploymentId: String
+    ): Resource<PagesDeploymentLogs> {
+        return pagesRepository.getDeploymentLogs(account, projectName, deploymentId)
     }
     
     fun createDeployment(

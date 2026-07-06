@@ -263,6 +263,33 @@ class PagesRepository @Inject constructor(
         }  
     }  
       
+    suspend fun getDeploymentLogs(  
+        account: Account,  
+        projectName: String,  
+        deploymentId: String  
+    ): Resource<PagesDeploymentLogs> = withContext(Dispatchers.IO) {  
+        safeApiCall {  
+            val response = api.getPagesDeploymentLogs(  
+                token = AuthHelper.getBearerToken(account),  
+                email = AuthHelper.getEmail(account),  
+                apiKey = AuthHelper.getGlobalApiKey(account),  
+                accountId = account.accountId,  
+                projectName = projectName,  
+                deploymentId = deploymentId  
+            )  
+              
+            if (response.isSuccessful && response.body()?.success == true) {  
+                response.body()?.result?.let {  
+                    Resource.Success(it)  
+                } ?: Resource.Error("Logs fetched but no result returned")  
+            } else {  
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    ?: response.message()  
+                Resource.Error("Failed to get deployment logs: $errorMsg")  
+            }  
+        }  
+    }  
+      
     suspend fun createDeployment(  
         account: Account,  
         projectName: String,  

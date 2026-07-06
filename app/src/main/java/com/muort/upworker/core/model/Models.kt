@@ -378,6 +378,17 @@ data class PagesDeployment(
     @SerializedName("source") val source: ProjectSource?
 )
 
+data class PagesDeploymentLogLine(
+    @SerializedName("line") val line: String?,
+    @SerializedName("ts") val ts: String?
+)
+
+data class PagesDeploymentLogs(
+    @SerializedName("data") val data: List<PagesDeploymentLogLine>?,
+    @SerializedName("includes_container_logs") val includesContainerLogs: Boolean?,
+    @SerializedName("total") val total: Int?
+)
+
 data class DeploymentStage(
     @SerializedName("name") val name: String?,
     @SerializedName("status") val status: String?,

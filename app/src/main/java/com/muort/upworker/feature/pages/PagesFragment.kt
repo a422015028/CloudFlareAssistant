@@ -27,6 +27,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.PagesDeployment
+import com.muort.upworker.core.model.PagesDeploymentLogLine
+import com.muort.upworker.core.model.PagesDeploymentLogs
 import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.repository.KvRepository
@@ -187,6 +189,11 @@ class PagesFragment : Fragment() {
             onViewDeploymentsClick = { project ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     showDeploymentsDialogWithLoading(account, project)
+                }
+            },
+            onLogsClick = { project ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showProjectLogsDialog(account, project)
                 }
             },
             onSelectionModeClick = { project, isSelected ->
@@ -1672,6 +1679,96 @@ class PagesFragment : Fragment() {
         dialog.show()
     }
     
+    private fun showProjectLogsDialog(account: com.muort.upworker.core.model.Account, project: PagesProject) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_pages_logs, null)
+        val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
+        val deploymentSelector = dialogView.findViewById<android.widget.AutoCompleteTextView>(R.id.deploymentSelector)
+        val logContent = dialogView.findViewById<android.widget.TextView>(R.id.logContent)
+        val logInfoText = dialogView.findViewById<android.widget.TextView>(R.id.logInfoText)
+        val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
+
+        titleText.text = "${project.name} - 部署日志"
+        logContent.text = "加载中..."
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        closeBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        var deploymentList: List<PagesDeployment> = emptyList()
+
+        lifecycleScope.launch {
+            val result = pagesViewModel.getDeploymentListSuspend(account, project.name)
+            if (result is Resource.Success<*>) {
+                val data = result.data as? List<PagesDeployment>
+                if (data != null) {
+                    deploymentList = data
+                    val displayItems = deploymentList.map { dep ->
+                        val shortId = dep.shortId ?: dep.id.take(8)
+                        val env = if (dep.environment == "production") "生产" else "预览"
+                        val date = dep.createdOn?.substringBefore('T') ?: "未知时间"
+                        "$shortId • $env • $date"
+                    }
+                    val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, displayItems)
+                    deploymentSelector.setAdapter(adapter)
+
+                    if (deploymentList.isNotEmpty()) {
+                        deploymentSelector.setText(displayItems[0], false)
+                        loadDeploymentLogs(account, project.name, deploymentList[0].id, logContent, logInfoText)
+                    }
+
+                    deploymentSelector.setOnItemClickListener { _, _, position, _ ->
+                        if (position < deploymentList.size) {
+                            logContent.text = "加载中..."
+                            loadDeploymentLogs(account, project.name, deploymentList[position].id, logContent, logInfoText)
+                        }
+                    }
+                } else {
+                    logContent.text = "加载部署列表失败"
+                }
+            } else {
+                logContent.text = "加载部署列表失败"
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun loadDeploymentLogs(
+        account: com.muort.upworker.core.model.Account,
+        projectName: String,
+        deploymentId: String,
+        logContent: android.widget.TextView,
+        logInfoText: android.widget.TextView
+    ) {
+        lifecycleScope.launch {
+            val result = pagesViewModel.getDeploymentLogs(account, projectName, deploymentId)
+            when (result) {
+                is Resource.Success<*> -> {
+                    val logs = result.data as? PagesDeploymentLogs
+                    val lines: List<PagesDeploymentLogLine> = logs?.data ?: emptyList()
+                    if (lines.isEmpty()) {
+                        logContent.text = "暂无日志"
+                    } else {
+                        val logText = lines.joinToString("\n") { line -> line.line ?: "" }
+                        logContent.text = logText
+                    }
+                    val total = logs?.total ?: lines.size
+                    val containerLogs = if (logs?.includesContainerLogs == true) "包含容器日志" else "仅构建日志"
+                    logInfoText.text = "共 $total 条 • $containerLogs"
+                }
+                is Resource.Error -> {
+                    logContent.text = "加载日志失败: ${result.message}"
+                    logInfoText.text = ""
+                }
+                is Resource.Loading -> {}
+            }
+        }
+    }
+    
     private fun showDeleteDeploymentConfirmDialog(project: PagesProject, deployment: PagesDeployment) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("删除部署")
@@ -1755,6 +1852,7 @@ class PagesFragment : Fragment() {
         private val onConfigD1Click: (PagesProject) -> Unit,
         private val onConfigR2Click: (PagesProject) -> Unit,
         private val onViewDeploymentsClick: (PagesProject) -> Unit,
+        private val onLogsClick: (PagesProject) -> Unit,
         private val onSelectionModeClick: (PagesProject, Boolean) -> Unit = { _, _ -> }
     ) : RecyclerView.Adapter<ProjectAdapter.ViewHolder>() {
         
@@ -1808,6 +1906,7 @@ class PagesFragment : Fragment() {
                 if (selectionMode) {
                     binding.deleteBtn.visibility = android.view.View.GONE
                     binding.viewDeploymentsBtn.visibility = android.view.View.GONE
+                    binding.logsBtn.visibility = android.view.View.GONE
                     
                     val isSelected = selectedItems.contains(project.name)
                     updateSelectionUI(binding.root, isSelected)
@@ -1825,6 +1924,7 @@ class PagesFragment : Fragment() {
                 } else {
                     binding.deleteBtn.visibility = android.view.View.VISIBLE
                     binding.viewDeploymentsBtn.visibility = android.view.View.VISIBLE
+                    binding.logsBtn.visibility = android.view.View.VISIBLE
                     updateSelectionUI(binding.root, false)
                     binding.root.setOnClickListener(null)
                 }
@@ -1847,6 +1947,10 @@ class PagesFragment : Fragment() {
                 
                 binding.viewDeploymentsBtn.setOnClickListener {
                     onViewDeploymentsClick(project)
+                }
+                
+                binding.logsBtn.setOnClickListener {
+                    onLogsClick(project)
                 }
                 
                 binding.deleteBtn.setOnClickListener {

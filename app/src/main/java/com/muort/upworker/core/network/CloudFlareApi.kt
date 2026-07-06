@@ -560,6 +560,16 @@ interface CloudFlareApi {
         @Path("deployment_id") deploymentId: String
     ): Response<CloudFlareResponse<PagesDeployment>>
     
+    @GET("accounts/{account_id}/pages/projects/{project_name}/deployments/{deployment_id}/history/logs")
+    suspend fun getPagesDeploymentLogs(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Path("deployment_id") deploymentId: String
+    ): Response<CloudFlareResponse<PagesDeploymentLogs>>
+    
     /**
      * Update Pages project configuration (environment variables, bindings, etc.)
      * https://developers.cloudflare.com/api/operations/pages-project-update-project
