@@ -59,7 +59,9 @@ class PagesDeploymentsAdapter(
                 View.GONE
             }
             
-            retryBtn.visibility = View.VISIBLE
+            // 仅源码构建的部署支持重试（Direct Upload 不支持）
+            val isBuildDeployment = deployment.source != null
+            retryBtn.visibility = if (isBuildDeployment) View.VISIBLE else View.GONE
 
             rollbackBtn.setOnClickListener {
                 onRollbackClick(deployment)
