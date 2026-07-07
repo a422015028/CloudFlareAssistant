@@ -386,14 +386,13 @@ class PagesRepository @Inject constructor(
                         if (name == ".DS_Store" || currentFile.absolutePath.contains("__MACOSX") || name.startsWith(".")) {
                             return
                         }
-                        // zip 中只匹配 _worker.js 作为 Worker 脚本
-                        if (name == "_worker.js") {
-                            Timber.d("collectFiles: 找到 _worker.js, 路径=${currentFile.absolutePath}, 大小=${currentFile.length()}字节")
+                        val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
+                        if (name == "_worker.js" && relativePath == "/_worker.js") {
+                            Timber.d("collectFiles: 找到根目录 _worker.js, 路径=${currentFile.absolutePath}, 大小=${currentFile.length()}字节")
                             workerJsFile = currentFile
                             return
                         }
                         allFiles.add(currentFile)
-                        val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
                         val cfHash = getCfHash(currentFile)
                         manifestMap[relativePath] = cfHash
                     }
