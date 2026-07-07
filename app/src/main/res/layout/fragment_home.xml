@@ -163,7 +163,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="路由/域名"
+                        android:text="路由/自定义域"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" />

@@ -78,9 +78,27 @@ class PagesRepository @Inject constructor(
         account: Account,  
         name: String,  
         productionBranch: String = "main",
+        buildCommand: String? = null,
+        destinationDir: String? = null,
+        rootDir: String? = null,
+        buildCaching: Boolean? = null,
         compatibilityDate: String? = null
     ): Resource<PagesProject> = withContext(Dispatchers.IO) {  
         safeApiCall {  
+            val buildConfig = if (buildCommand != null || destinationDir != null || 
+                rootDir != null || buildCaching != null) {
+                BuildConfig(
+                    buildCommand = buildCommand,
+                    destinationDir = destinationDir,
+                    rootDir = rootDir,
+                    buildCaching = buildCaching,
+                    webAnalyticsTag = null,
+                    webAnalyticsToken = null
+                )
+            } else {
+                null
+            }
+
             val deploymentConfigs = if (compatibilityDate != null) {
                 PagesDeploymentConfigs(
                     preview = PagesDeploymentConfig(compatibilityDate = compatibilityDate),
@@ -89,6 +107,7 @@ class PagesRepository @Inject constructor(
             } else {
                 null
             }
+
             val response = api.createPagesProject(  
                 token = AuthHelper.getBearerToken(account),  
                 email = AuthHelper.getEmail(account),  
@@ -97,6 +116,7 @@ class PagesRepository @Inject constructor(
                 project = PagesProjectRequest(  
                     name = name,  
                     productionBranch = productionBranch,
+                    buildConfig = buildConfig,
                     deploymentConfigs = deploymentConfigs
                 )  
             )  

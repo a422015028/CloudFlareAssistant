@@ -355,7 +355,30 @@ data class PagesDeploymentConfigs(
 data class PagesProjectRequest(
     @SerializedName("name") val name: String,
     @SerializedName("production_branch") val productionBranch: String = "main",
-    @SerializedName("deployment_configs") val deploymentConfigs: PagesDeploymentConfigs? = null
+    @SerializedName("build_config") val buildConfig: BuildConfig? = null,
+    @SerializedName("deployment_configs") val deploymentConfigs: PagesDeploymentConfigs? = null,
+    @SerializedName("source") val source: ProjectSourceRequest? = null
+)
+
+data class ProjectSourceRequest(
+    @SerializedName("type") val type: String?,
+    @SerializedName("config") val SourceConfigRequest: SourceConfigRequest?
+)
+
+data class SourceConfigRequest(
+    @SerializedName("deployments_enabled") val deploymentsEnabled: Boolean?,
+    @SerializedName("owner") val owner: String?,
+    @SerializedName("owner_id") val ownerId: String?,
+    @SerializedName("path_excludes") val pathExcludes: List<String>?,
+    @SerializedName("path_includes") val pathIncludes: List<String>?,
+    @SerializedName("pr_comments_enabled") val prCommentsEnabled: Boolean?,
+    @SerializedName("preview_branch_excludes") val previewBranchExcludes: List<String>?,
+    @SerializedName("preview_branch_includes") val previewBranchIncludes: List<String>?,
+    @SerializedName("preview_deployment_setting") val previewDeploymentSetting: String?,
+    @SerializedName("production_branch") val productionBranch: String?,
+    @SerializedName("production_deployments_enabled") val productionDeploymentsEnabled: Boolean?,
+    @SerializedName("repo_id") val repoId: String?,
+    @SerializedName("repo_name") val repoName: String?
 )
 
 data class PagesDeployment(

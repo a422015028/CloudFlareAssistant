@@ -59,7 +59,16 @@ class PagesViewModel @Inject constructor(
         }
     }
     
-    fun createProject(account: Account, name: String, productionBranch: String = "main") {
+    fun createProject(
+        account: Account,
+        name: String,
+        productionBranch: String = "main",
+        buildCommand: String? = null,
+        destinationDir: String? = null,
+        rootDir: String? = null,
+        buildCaching: Boolean? = null,
+        compatibilityDate: String? = null
+    ) {
         if (name.isBlank()) {
             viewModelScope.launch {
                 _message.emit("请输入项目名称")
@@ -70,7 +79,16 @@ class PagesViewModel @Inject constructor(
         viewModelScope.launch {
             _loadingState.value = true
             
-            when (val result = pagesRepository.createProject(account, name, productionBranch)) {
+            when (val result = pagesRepository.createProject(
+                account = account,
+                name = name,
+                productionBranch = productionBranch,
+                buildCommand = buildCommand,
+                destinationDir = destinationDir,
+                rootDir = rootDir,
+                buildCaching = buildCaching,
+                compatibilityDate = compatibilityDate
+            )) {
                 is Resource.Success -> {
                     _message.emit("项目创建成功")
                     loadProjects(account)

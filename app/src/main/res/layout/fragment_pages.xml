@@ -112,13 +112,31 @@
                         android:layout_marginBottom="16dp"
                         style="@style/Widget.Material3.Button.OutlinedButton" />
 
-                    <Button
-                        android:id="@+id/deployBtn"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:text="部署项目"
-                        android:textSize="16sp"
-                        style="@style/Widget.Material3.Button" />
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/createProjectBtn"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_weight="1"
+                            android:text="创建项目"
+                            android:textSize="16sp"
+                            android:layout_marginEnd="8dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                        <Button
+                            android:id="@+id/deployBtn"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_weight="1"
+                            android:text="部署项目"
+                            android:textSize="16sp"
+                            style="@style/Widget.Material3.Button" />
+
+                    </LinearLayout>
 
                     <ProgressBar
                         android:id="@+id/uploadProgress"

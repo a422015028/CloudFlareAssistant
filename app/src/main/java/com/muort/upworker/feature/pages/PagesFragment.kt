@@ -31,6 +31,7 @@ import com.muort.upworker.core.model.PagesDeployment
 import com.muort.upworker.core.model.PagesDeploymentLogLine
 import com.muort.upworker.core.model.PagesDeploymentLogs
 import com.muort.upworker.core.model.PagesDomain
+import com.muort.upworker.core.model.DEFAULT_COMPATIBILITY_DATE
 import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.repository.KvRepository
@@ -1073,6 +1074,11 @@ class PagesFragment : Fragment() {
             selectFile()
         }
         
+        // Create project button
+        binding.createProjectBtn.setOnClickListener {
+            showCreateProjectDialog()
+        }
+        
         // Deploy button
         binding.deployBtn.setOnClickListener {
             deployProject()
@@ -1160,6 +1166,52 @@ class PagesFragment : Fragment() {
             binding.uploadProgress.visibility = View.GONE
             binding.deployBtn.isEnabled = true
         }
+    }
+    
+    private fun showCreateProjectDialog() {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        val dialogBinding = com.muort.upworker.databinding.DialogPagesCreateProjectBinding.inflate(layoutInflater)
+        dialogBinding.compatibilityDateInput.setText(DEFAULT_COMPATIBILITY_DATE)
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .setPositiveButton("创建") { _, _ ->
+                val projectName = dialogBinding.projectNameInput.text.toString().trim()
+                val productionBranch = dialogBinding.productionBranchInput.text.toString().trim()
+                val buildCommand = dialogBinding.buildCommandInput.text.toString().trim().takeIf { it.isNotEmpty() }
+                val destinationDir = dialogBinding.destinationDirInput.text.toString().trim().takeIf { it.isNotEmpty() }
+                val rootDir = dialogBinding.rootDirInput.text.toString().trim().takeIf { it.isNotEmpty() }
+                val buildCaching = dialogBinding.buildCachingCheck.isChecked.takeIf { it }
+                val compatibilityDate = dialogBinding.compatibilityDateInput.text.toString().trim().takeIf { it.isNotEmpty() }
+                
+                if (projectName.isEmpty()) {
+                    showToast("请输入项目名称")
+                    return@setPositiveButton
+                }
+                
+                if (productionBranch.isEmpty()) {
+                    showToast("请输入生产分支")
+                    return@setPositiveButton
+                }
+                
+                pagesViewModel.createProject(
+                    account = account,
+                    name = projectName,
+                    productionBranch = productionBranch,
+                    buildCommand = buildCommand,
+                    destinationDir = destinationDir,
+                    rootDir = rootDir,
+                    buildCaching = buildCaching,
+                    compatibilityDate = compatibilityDate
+                )
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
     
     private fun observeViewModel() {
@@ -1713,36 +1765,30 @@ class PagesFragment : Fragment() {
             dialog.dismiss()
         }
 
-        var deploymentList: List<PagesDeployment> = emptyList()
-
         lifecycleScope.launch {
             val result = pagesViewModel.getDeploymentListSuspend(account, project.name)
             if (result is Resource.Success<*>) {
-                val data = result.data as? List<PagesDeployment>
-                if (data != null) {
-                    deploymentList = data
-                    val displayItems = deploymentList.map { dep ->
-                        val shortId = dep.shortId ?: dep.id.take(8)
-                        val env = if (dep.environment == "production") "生产" else "预览"
-                        val date = dep.createdOn?.substringBefore('T') ?: "未知时间"
-                        "$shortId • $env • $date"
-                    }
-                    val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, displayItems)
-                    deploymentSelector.setAdapter(adapter)
+                @Suppress("UNCHECKED_CAST")
+                val deploymentList = result.data as List<PagesDeployment>
+                val displayItems = deploymentList.map { dep ->
+                    val shortId = dep.shortId ?: dep.id.take(8)
+                    val env = if (dep.environment == "production") "生产" else "预览"
+                    val date = dep.createdOn?.substringBefore('T') ?: "未知时间"
+                    "$shortId • $env • $date"
+                }
+                val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, displayItems)
+                deploymentSelector.setAdapter(adapter)
 
-                    if (deploymentList.isNotEmpty()) {
-                        deploymentSelector.setText(displayItems[0], false)
-                        loadDeploymentLogs(account, project.name, deploymentList[0].id, logContent, logInfoText)
-                    }
+                if (deploymentList.isNotEmpty()) {
+                    deploymentSelector.setText(displayItems[0], false)
+                    loadDeploymentLogs(account, project.name, deploymentList[0].id, logContent, logInfoText)
+                }
 
-                    deploymentSelector.setOnItemClickListener { _, _, position, _ ->
-                        if (position < deploymentList.size) {
-                            logContent.text = "加载中..."
-                            loadDeploymentLogs(account, project.name, deploymentList[position].id, logContent, logInfoText)
-                        }
+                deploymentSelector.setOnItemClickListener { _, _, position, _ ->
+                    if (position < deploymentList.size) {
+                        logContent.text = "加载中..."
+                        loadDeploymentLogs(account, project.name, deploymentList[position].id, logContent, logInfoText)
                     }
-                } else {
-                    logContent.text = "加载部署列表失败"
                 }
             } else {
                 logContent.text = "加载部署列表失败"
@@ -1900,7 +1946,8 @@ class PagesFragment : Fragment() {
                 val result = pagesViewModel.listDomainsSuspend(account, project.name)
                 loadingProgress.visibility = android.view.View.GONE
                 if (result is Resource.Success<*>) {
-                    val domains = result.data as? List<PagesDomain> ?: emptyList()
+                    @Suppress("UNCHECKED_CAST")
+                    val domains = result.data as List<PagesDomain>
                     domainsRecyclerView.adapter = DomainAdapter(previewDomain, domains) { domain ->
                         confirmDeleteDomain(account, project, domain) {
                             loadDomains()
