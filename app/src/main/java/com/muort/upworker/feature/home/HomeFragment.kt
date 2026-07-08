@@ -289,7 +289,7 @@ class HomeFragment : Fragment() {
                     .build()
                 
                 val request = Request.Builder()
-                    .url("https://cfd.390202.xyz/version.json")
+                    .url("https://cfd.390202.xyz/version")
                     .get()
                     .build()
                 

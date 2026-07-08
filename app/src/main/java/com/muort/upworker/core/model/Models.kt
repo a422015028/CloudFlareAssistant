@@ -232,9 +232,40 @@ data class WorkerBinding(
             text != null -> text
             json != null -> {
                 // If json is a string, return it directly; otherwise convert to JSON string
-                if (json is String) json else com.google.gson.Gson().toJson(json)
+                if (json is String) {
+                    json
+                } else if (json is Number) {
+                    formatNumber(json)
+                } else {
+                    val gson = com.google.gson.GsonBuilder()
+                        .setObjectToNumberStrategy(com.google.gson.ToNumberPolicy.LONG_OR_DOUBLE)
+                        .create()
+                    gson.toJson(json)
+                }
             }
             else -> null
+        }
+    }
+    
+    private fun formatNumber(num: Number): String {
+        return when (num) {
+            is Int -> num.toString()
+            is Long -> num.toString()
+            is Double -> {
+                if (num == num.toLong().toDouble()) {
+                    num.toLong().toString()
+                } else {
+                    num.toBigDecimal().toPlainString()
+                }
+            }
+            is Float -> {
+                if (num == num.toInt().toFloat()) {
+                    num.toInt().toString()
+                } else {
+                    num.toBigDecimal().toPlainString()
+                }
+            }
+            else -> num.toString()
         }
     }
 }

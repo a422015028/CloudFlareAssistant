@@ -31,6 +31,25 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class DevicePoliciesFragment : Fragment() {
 
+    companion object {
+        private const val DEFAULT_SPLIT_TUNNEL_EXCLUDE = """10.0.0.0/8
+100.64.0.0/10
+169.254.0.0/16
+172.16.0.0/12
+192.0.0.0/24
+192.168.0.0/16
+224.0.0.0/24
+240.0.0.0/4
+255.255.255.255/32
+fe80::/10
+fd00::/8
+ff01::/16
+ff02::/16
+ff03::/16
+ff04::/16
+ff05::/16"""
+    }
+
     private var _binding: FragmentDevicePoliciesBinding? = null
     private val binding get() = _binding!!
 
@@ -201,6 +220,14 @@ class DevicePoliciesFragment : Fragment() {
                     0 -> {
                         splitTunnelExcludeLayout.visibility = View.VISIBLE
                         splitTunnelIncludeLayout.visibility = View.GONE
+                        if (splitTunnelExcludeInput.text.isNullOrBlank()) {
+                            splitTunnelExcludeInput.setText(DEFAULT_SPLIT_TUNNEL_EXCLUDE)
+                            com.google.android.material.snackbar.Snackbar.make(
+                                dialogView,
+                                "已自动填入默认排除列表，请检查后点击保存",
+                                com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                            ).show()
+                        }
                     }
                     1 -> {
                         splitTunnelExcludeLayout.visibility = View.GONE

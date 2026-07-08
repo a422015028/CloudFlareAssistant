@@ -3,6 +3,7 @@ package com.muort.upworker.core.network
 import com.muort.upworker.core.network.LogOkHttpInterceptor
 
 import com.google.gson.GsonBuilder
+import com.google.gson.ToNumberPolicy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -46,7 +47,8 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         val gson = GsonBuilder()
-            .serializeNulls()  // 重要：序列化null值，用于删除Pages绑定
+            .serializeNulls()
+            .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
             .create()
         
         return Retrofit.Builder()
