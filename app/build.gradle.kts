@@ -107,54 +107,6 @@ android {
     }
 }
 
-tasks.register("downloadMonacoEditor") {
-    group = "build"
-    description = "Download Monaco Editor and copy to assets"
-    
-    doLast {
-        val nodeModulesDir = file("$buildDir/node_modules")
-        val monacoDest = file("$projectDir/src/main/assets/monaco")
-        
-        if (!nodeModulesDir.exists()) {
-            exec {
-                commandLine("npm", "install", "monaco-editor@0.45.0")
-                workingDir = file("$buildDir")
-            }
-        }
-        
-        copy {
-            from("$buildDir/node_modules/monaco-editor/min/vs")
-            into("$projectDir/src/main/assets/monaco/min/vs")
-        }
-        
-        println("Monaco Editor downloaded successfully!")
-    }
-}
-
-tasks.register("downloadWorkersTypes") {
-    group = "build"
-    description = "Download @cloudflare/workers-types and copy to assets"
-    
-    doLast {
-        val nodeModulesDir = file("$buildDir/node_modules")
-        
-        if (!nodeModulesDir.exists()) {
-            exec {
-                commandLine("npm", "install", "@cloudflare/workers-types@4.20240423.0")
-                workingDir = file("$buildDir")
-            }
-        }
-        
-        copy {
-            from("$buildDir/node_modules/@cloudflare/workers-types/index.d.ts")
-            into("$projectDir/src/main/assets/monaco")
-            rename { "workers-types.d.ts" }
-        }
-        
-        println("Workers types downloaded successfully!")
-    }
-}
-
 dependencies {
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
