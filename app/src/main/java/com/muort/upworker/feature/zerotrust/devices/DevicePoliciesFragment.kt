@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.View.VISIBLE
 import android.view.View.GONE
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -149,6 +150,12 @@ ff05::/16"""
         val nameInputLayout = dialogView.findViewById<TextInputLayout>(R.id.policyNameLayout)
         val descriptionInputLayout = dialogView.findViewById<TextInputLayout>(R.id.policyDescriptionLayout)
         val matchInputLayout = dialogView.findViewById<TextInputLayout>(R.id.policyMatchLayout)
+        val matchBuilderLayout = dialogView.findViewById<LinearLayout>(R.id.matchBuilderLayout)
+        val matchSelectorSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.matchSelectorSpinner)
+        val matchOperatorSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.matchOperatorSpinner)
+        val matchValueInput = dialogView.findViewById<TextInputEditText>(R.id.matchValueInput)
+        val matchValueLayout = dialogView.findViewById<TextInputLayout>(R.id.matchValueLayout)
+        val matchAdvancedToggle = dialogView.findViewById<android.widget.TextView>(R.id.matchAdvancedToggle)
         val precedenceInputLayout = dialogView.findViewById<TextInputLayout>(R.id.policyPrecedenceLayout)
         val nameInput = dialogView.findViewById<TextInputEditText>(R.id.policyNameInput)
         val descriptionInput = dialogView.findViewById<TextInputEditText>(R.id.policyDescriptionInput)
@@ -185,6 +192,122 @@ ff05::/16"""
         val protocolAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, protocolOptions)
         protocolAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         protocolSpinner.adapter = protocolAdapter
+        
+        val osSelectorLayout = dialogView.findViewById<LinearLayout>(R.id.osSelectorLayout)
+        val osWindows = dialogView.findViewById<android.widget.CheckBox>(R.id.osWindows)
+        val osMacos = dialogView.findViewById<android.widget.CheckBox>(R.id.osMacos)
+        val osLinux = dialogView.findViewById<android.widget.CheckBox>(R.id.osLinux)
+        val osIos = dialogView.findViewById<android.widget.CheckBox>(R.id.osIos)
+        val osAndroid = dialogView.findViewById<android.widget.CheckBox>(R.id.osAndroid)
+        val osChromeOs = dialogView.findViewById<android.widget.CheckBox>(R.id.osChromeOs)
+        
+        // Match expression selectors and operators
+        val matchSelectorOptions = arrayOf(
+            "用户电子邮件",
+            "操作系统"
+        )
+        val matchSelectorAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item_left, matchSelectorOptions)
+        matchSelectorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        matchSelectorSpinner.adapter = matchSelectorAdapter
+        
+        val emailOperatorOptions = arrayOf("是", "在", "不在", "匹配")
+        val osOperatorOptions = arrayOf("是", "在", "不在")
+        
+        val matchOperatorAdapter = android.widget.ArrayAdapter(
+            requireContext(),
+            R.layout.spinner_item,
+            arrayListOf(*emailOperatorOptions)
+        )
+        matchOperatorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        matchOperatorSpinner.adapter = matchOperatorAdapter
+        
+        fun updateOperatorOptions(selectorIndex: Int, preserveSelection: Boolean = true) {
+            val prevOperatorIdx = matchOperatorSpinner.selectedItemPosition
+            val newOptions = if (selectorIndex == 0) {
+                emailOperatorOptions
+            } else {
+                osOperatorOptions
+            }
+            matchOperatorAdapter.clear()
+            matchOperatorAdapter.addAll(*newOptions)
+            matchOperatorAdapter.notifyDataSetChanged()
+            if (preserveSelection && prevOperatorIdx < newOptions.size) {
+                matchOperatorSpinner.setSelection(prevOperatorIdx)
+            } else {
+                matchOperatorSpinner.setSelection(0)
+            }
+        }
+        
+        // Toggle OS selector based on selector
+        matchSelectorSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>, view: View?, position: Int, id: Long) {
+                updateOperatorOptions(position)
+                if (position == 1) {
+                    osSelectorLayout.visibility = View.VISIBLE
+                    matchValueLayout.visibility = View.GONE
+                } else {
+                    osSelectorLayout.visibility = View.GONE
+                    matchValueLayout.visibility = View.VISIBLE
+                }
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>) {}
+        }
+        
+        // Advanced mode toggle
+        var isAdvancedMode = false
+        
+        fun getSelectedOsValuesLocal(): String {
+            val osList = mutableListOf<String>()
+            if (osWindows.isChecked) osList.add("windows")
+            if (osMacos.isChecked) osList.add("macos")
+            if (osLinux.isChecked) osList.add("linux")
+            if (osIos.isChecked) osList.add("ios")
+            if (osAndroid.isChecked) osList.add("android")
+            if (osChromeOs.isChecked) osList.add("chrome")
+            return osList.joinToString(", ")
+        }
+        
+        fun setOsCheckboxesFromValues(values: String) {
+            val osList = values.split(",").map { it.trim().lowercase() }
+            osWindows.isChecked = osList.contains("windows")
+            osMacos.isChecked = osList.contains("macos")
+            osLinux.isChecked = osList.contains("linux")
+            osIos.isChecked = osList.contains("ios")
+            osAndroid.isChecked = osList.contains("android")
+            osChromeOs.isChecked = osList.contains("chrome")
+        }
+        
+        matchAdvancedToggle.setOnClickListener {
+            isAdvancedMode = !isAdvancedMode
+            if (isAdvancedMode) {
+                matchBuilderLayout.visibility = View.GONE
+                matchInputLayout.visibility = View.VISIBLE
+                matchAdvancedToggle.text = "简化模式"
+                val value = if (matchSelectorSpinner.selectedItemPosition == 1) {
+                    getSelectedOsValuesLocal()
+                } else {
+                    matchValueInput.text?.toString()
+                }
+                matchInput.setText(buildMatchExpressionFromBuilder(
+                    matchSelectorSpinner.selectedItemPosition,
+                    matchOperatorSpinner.selectedItemPosition,
+                    value
+                ))
+            } else {
+                matchBuilderLayout.visibility = View.VISIBLE
+                matchInputLayout.visibility = View.GONE
+                matchAdvancedToggle.text = "高级：直接编辑表达式"
+                parseMatchExpressionToBuilder(matchInput.text?.toString())?.let { (selectorIdx, operatorIdx, value) ->
+                    matchSelectorSpinner.setSelection(selectorIdx)
+                    matchOperatorSpinner.setSelection(operatorIdx)
+                    if (selectorIdx == 1) {
+                        setOsCheckboxesFromValues(value)
+                    } else {
+                        matchValueInput.setText(value)
+                    }
+                }
+            }
+        }
         
         val serviceModeOptions = arrayOf("流量和 DNS 模式", "纯 DNS 模式", "本地代理模式", "纯态势模式")
         val serviceModeAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, serviceModeOptions)
@@ -244,6 +367,8 @@ ff05::/16"""
             nameInputLayout.visibility = View.GONE
             descriptionInputLayout.visibility = View.GONE
             matchInputLayout.visibility = View.GONE
+            matchBuilderLayout.visibility = View.GONE
+            matchAdvancedToggle.visibility = View.GONE
             precedenceInputLayout.visibility = View.GONE
             enabledSwitch.visibility = View.GONE
         }
@@ -252,9 +377,25 @@ ff05::/16"""
             if (!isDefault) {
                 nameInput.setText(policy.name ?: "")
                 descriptionInput.setText(policy.description ?: "")
-                matchInput.setText(simplifyMatchExpression(policy.match))
+                matchInput.setText(policy.match ?: "")
                 precedenceInput.setText(policy.precedence?.toString() ?: "100")
                 enabledSwitch.isChecked = policy.enabled ?: true
+                
+                parseMatchExpressionToBuilder(policy.match)?.let { (selectorIdx, operatorIdx, value) ->
+                    matchSelectorSpinner.setSelection(selectorIdx)
+                    matchOperatorSpinner.setSelection(operatorIdx)
+                    if (selectorIdx == 1) {
+                        val osList = value.split(",").map { it.trim().lowercase() }
+                        osWindows.isChecked = osList.contains("windows")
+                        osMacos.isChecked = osList.contains("macos")
+                        osLinux.isChecked = osList.contains("linux")
+                        osIos.isChecked = osList.contains("ios")
+                        osAndroid.isChecked = osList.contains("android")
+                        osChromeOs.isChecked = osList.contains("chrome")
+                    } else {
+                        matchValueInput.setText(value)
+                    }
+                }
             }
             
             captivePortalSwitch.isChecked = (policy.captivePortal ?: 0) > 0
@@ -320,6 +461,33 @@ ff05::/16"""
                 
                 val serviceModeV2 = if (serviceMode != null) ServiceModeV2(mode = serviceMode) else null
                 
+                fun getSelectedOsValues(): String {
+                    val osList = mutableListOf<String>()
+                    if (osWindows.isChecked) osList.add("windows")
+                    if (osMacos.isChecked) osList.add("macos")
+                    if (osLinux.isChecked) osList.add("linux")
+                    if (osIos.isChecked) osList.add("ios")
+                    if (osAndroid.isChecked) osList.add("android")
+                    if (osChromeOs.isChecked) osList.add("chrome")
+                    return osList.joinToString(", ")
+                }
+                
+                fun getMatchExpression(): String? {
+                    return if (isAdvancedMode) {
+                        buildMatchExpression(matchInput.text?.toString())
+                    } else {
+                        val selectorIdx = matchSelectorSpinner.selectedItemPosition
+                        val operatorIdx = matchOperatorSpinner.selectedItemPosition
+                        val value = if (selectorIdx == 1) {
+                            getSelectedOsValues()
+                        } else {
+                            matchValueInput.text?.toString()
+                        }
+                        val expr = buildMatchExpressionFromBuilder(selectorIdx, operatorIdx, value)
+                        expr.ifBlank { null }
+                    }
+                }
+                
                 if (existingPolicy == null) {
                     val name = nameInput.text?.toString()
                     if (name.isNullOrBlank()) {
@@ -328,7 +496,7 @@ ff05::/16"""
                     }
                     
                     val description = descriptionInput.text?.toString()?.takeIf { it.isNotBlank() }
-                    val match = buildMatchExpression(matchInput.text?.toString())
+                    val match = getMatchExpression()
                     val precedence = precedenceInput.text?.toString()?.toIntOrNull() ?: 100
                     val enabled = enabledSwitch.isChecked
                     
@@ -383,7 +551,7 @@ ff05::/16"""
                         }
                         
                         val description = descriptionInput.text?.toString()?.takeIf { it.isNotBlank() }
-                        val match = buildMatchExpression(matchInput.text?.toString())
+                        val match = getMatchExpression()
                         val precedence = precedenceInput.text?.toString()?.toIntOrNull() ?: 100
                         val enabled = enabledSwitch.isChecked
                         
@@ -622,21 +790,122 @@ ff05::/16"""
 
     private fun simplifyMatchExpression(match: String?): String {
         if (match.isNullOrBlank()) return ""
-        val emailRegex = Regex("identity\\.email\\s+(==|in)\\s+\\{?\"?([^\"]+)\"?\\}?")
-        val matchResult = emailRegex.find(match)
-        if (matchResult != null) {
-            return matchResult.groupValues[2]
-        }
         return match
     }
     
     private fun buildMatchExpression(input: String?): String? {
         if (input.isNullOrBlank()) return null
-        val trimmed = input.trim()
-        if (trimmed.contains("@")) {
-            return "identity.email == \"$trimmed\""
+        return input.trim()
+    }
+    
+    private fun getMatchSelectorField(selectorIndex: Int): String {
+        return when (selectorIndex) {
+            0 -> "identity.email"
+            1 -> "os.name"
+            else -> "identity.email"
         }
-        return trimmed
+    }
+    
+    private fun getMatchOperatorSymbol(selectorIndex: Int, operatorIndex: Int): String {
+        return when (selectorIndex) {
+            0 -> when (operatorIndex) {
+                0 -> "=="
+                1 -> "in"
+                2 -> "not in"
+                3 -> "matches"
+                else -> "=="
+            }
+            1 -> when (operatorIndex) {
+                0 -> "=="
+                1 -> "in"
+                2 -> "not in"
+                else -> "=="
+            }
+            else -> "=="
+        }
+    }
+    
+    private fun getSelectorIndexFromField(field: String): Int {
+        return when (field) {
+            "identity.email" -> 0
+            "os.name" -> 1
+            else -> -1
+        }
+    }
+    
+    private fun getOperatorIndexFromSymbol(selectorIndex: Int, operator: String): Int {
+        return when (selectorIndex) {
+            0 -> when (operator) {
+                "==" -> 0
+                "in" -> 1
+                "not in" -> 2
+                "matches" -> 3
+                else -> -1
+            }
+            1 -> when (operator) {
+                "==" -> 0
+                "in" -> 1
+                "not in" -> 2
+                else -> -1
+            }
+            else -> -1
+        }
+    }
+    
+    private fun buildMatchExpressionFromBuilder(selectorIndex: Int, operatorIndex: Int, value: String?): String {
+        if (value.isNullOrBlank()) return ""
+        val field = getMatchSelectorField(selectorIndex)
+        val operator = getMatchOperatorSymbol(selectorIndex, operatorIndex)
+        
+        if (operator == "in" || operator == "not in") {
+            val values = value.split(",").map { it.trim() }.filter { it.isNotBlank() }
+            if (values.isEmpty()) return ""
+            val quotedValues = values.joinToString(", ") { "\"$it\"" }
+            return "$field $operator { $quotedValues }"
+        } else {
+            return "$field $operator \"${value.trim()}\""
+        }
+    }
+    
+    private fun parseMatchExpressionToBuilder(expression: String?): Triple<Int, Int, String>? {
+        if (expression.isNullOrBlank()) return null
+        
+        val trimmed = expression.trim()
+        
+        val inPattern = Regex("^(\\S+(?:\\.\\S+)*)\\s+(in|not in)\\s+\\{(.+)\\}$", RegexOption.IGNORE_CASE)
+        val inMatch = inPattern.find(trimmed)
+        if (inMatch != null) {
+            val field = inMatch.groupValues[1]
+            val operator = inMatch.groupValues[2].lowercase()
+            val valuesStr = inMatch.groupValues[3]
+            val values = valuesStr.split(",").map { 
+                it.trim().removeSurrounding("\"") 
+            }.filter { it.isNotBlank() }
+            
+            val selectorIdx = getSelectorIndexFromField(field)
+            val operatorIdx = getOperatorIndexFromSymbol(selectorIdx, operator)
+            
+            if (selectorIdx >= 0 && operatorIdx >= 0) {
+                return Triple(selectorIdx, operatorIdx, values.joinToString(", "))
+            }
+        }
+        
+        val eqPattern = Regex("^(\\S+(?:\\.\\S+)*)\\s+(==|!=|matches)\\s+\"(.+)\"$", RegexOption.IGNORE_CASE)
+        val eqMatch = eqPattern.find(trimmed)
+        if (eqMatch != null) {
+            val field = eqMatch.groupValues[1]
+            val operator = eqMatch.groupValues[2].lowercase()
+            val value = eqMatch.groupValues[3]
+            
+            val selectorIdx = getSelectorIndexFromField(field)
+            val operatorIdx = getOperatorIndexFromSymbol(selectorIdx, operator)
+            
+            if (selectorIdx >= 0 && operatorIdx >= 0) {
+                return Triple(selectorIdx, operatorIdx, value)
+            }
+        }
+        
+        return null
     }
 
     private fun parseSplitTunnelAddresses(input: String?): List<SplitTunnel>? {

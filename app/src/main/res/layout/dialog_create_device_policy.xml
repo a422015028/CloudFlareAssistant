@@ -48,24 +48,169 @@
                 android:textSize="13sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Match Expression -->
+        <!-- Match Expression Builder -->
+        <LinearLayout
+            android:id="@+id/matchBuilderLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="匹配规则"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary" />
+
+            <!-- Selector + Operator Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <Spinner
+                    android:id="@+id/matchSelectorSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:spinnerMode="dropdown"
+                    android:background="@drawable/bg_spinner_border" />
+
+                <Spinner
+                    android:id="@+id/matchOperatorSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:spinnerMode="dropdown"
+                    android:background="@drawable/bg_spinner_border" />
+            </LinearLayout>
+
+            <!-- OS Selector (hidden by default) -->
+            <LinearLayout
+                android:id="@+id/osSelectorLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="选择操作系统"
+                    android:textSize="12sp"
+                    android:textColor="?android:textColorSecondary" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="vertical">
+
+                    <CheckBox
+                        android:id="@+id/osWindows"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Windows"
+                        android:textSize="13sp"
+                        android:paddingVertical="2dp" />
+
+                    <CheckBox
+                        android:id="@+id/osMacos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="macOS"
+                        android:textSize="13sp"
+                        android:paddingVertical="2dp" />
+
+                    <CheckBox
+                        android:id="@+id/osLinux"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Linux"
+                        android:textSize="13sp"
+                        android:paddingVertical="2dp" />
+
+                    <CheckBox
+                        android:id="@+id/osIos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="iOS"
+                        android:textSize="13sp"
+                        android:paddingVertical="2dp" />
+
+                    <CheckBox
+                        android:id="@+id/osAndroid"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Android"
+                        android:textSize="13sp"
+                        android:paddingVertical="2dp" />
+
+                    <CheckBox
+                        android:id="@+id/osChromeOs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="ChromeOS"
+                        android:textSize="13sp"
+                        android:paddingVertical="2dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Value Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/matchValueLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="匹配值"
+                app:boxBackgroundMode="outline"
+                app:helperText="多个值用逗号分隔（in 运算符）"
+                app:helperTextEnabled="true"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/matchValueInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Advanced Toggle -->
+            <TextView
+                android:id="@+id/matchAdvancedToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="高级：直接编辑表达式"
+                android:textSize="12sp"
+                android:textColor="?attr/colorPrimary" />
+        </LinearLayout>
+
+        <!-- Advanced Match Input (hidden by default) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/policyMatchLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:hint="匹配规则"
+            android:hint="匹配表达式（高级）"
+            android:visibility="gone"
             app:boxBackgroundMode="outline"
-            app:helperText="直接输入邮箱地址"
-            app:helperTextEnabled="true"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/policyMatchInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
-                android:maxLines="1"
+                android:inputType="textMultiLine"
+                android:minLines="2"
+                android:maxLines="4"
                 android:textSize="13sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
