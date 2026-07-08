@@ -21,7 +21,7 @@
             android:id="@+id/emptyText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="暂无设备策略"
+            android:text="暂无设备配置文件"
             android:textAlignment="center"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="16sp"
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="创建策略"
+        android:contentDescription="创建配置文件"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

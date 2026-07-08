@@ -123,7 +123,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="查看和管理 WARP 客户端设备及设备策略"
+                    android:text="查看和管理 WARP 客户端设备及设备配置文件"
                     android:textSize="14sp" />
 
             </LinearLayout>

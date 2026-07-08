@@ -8,13 +8,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="16dp">
 
         <!-- Policy Name -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="策略名称"
+            android:hint="配置文件名称"
             app:boxBackgroundMode="outline"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -23,14 +23,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:textSize="13sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Description -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="10dp"
             android:hint="描述（可选）"
             app:boxBackgroundMode="outline"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -41,17 +42,18 @@
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
                 android:minLines="2"
-                android:maxLines="4" />
+                android:maxLines="3"
+                android:textSize="13sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Match Expression -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="匹配表达式"
+            android:layout_marginTop="10dp"
+            android:hint="匹配规则"
             app:boxBackgroundMode="outline"
-            app:helperText="例如: identity.email == &quot;user@example.com&quot;"
+            app:helperText="直接输入邮箱地址"
             app:helperTextEnabled="true"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -60,14 +62,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:maxLines="2" />
+                android:maxLines="1"
+                android:textSize="13sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Precedence -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="10dp"
             android:hint="优先级"
             app:boxBackgroundMode="outline"
             app:helperText="数值越小优先级越高"
@@ -80,17 +83,299 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:maxLines="1"
-                android:text="100" />
+                android:text="100"
+                android:textSize="13sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Enabled Switch -->
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="10dp"
+            android:background="?android:attr/listDivider" />
+
+        <!-- Settings Section Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="配置文件设置"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorPrimary" />
+
+        <!-- 强制网络门户检测 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="强制网络门户检测"
+                android:textSize="13sp"
+                android:textColor="?android:textColorPrimary"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp" />
+            <Spinner
+                android:id="@+id/captivePortalSpinner"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
+        <!-- 模式切换 -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/allowModeSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:checked="true"
+            android:text="模式切换"
+            android:textSize="13sp" />
+
+        <!-- 设备隧道协议 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="设备隧道协议"
+                android:textSize="13sp"
+                android:textColor="?android:textColorPrimary"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp" />
+            <Spinner
+                android:id="@+id/protocolSpinner"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
+        <!-- 锁定设备客户端开关 -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchLockedSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="锁定设备客户端"
+            android:textSize="13sp" />
+
+        <!-- 允许设备离开组织 -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/allowedToLeaveSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="允许设备离开组织"
+            android:textSize="13sp" />
+
+        <!-- 允许更新 -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/allowUpdatesSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:checked="true"
+            android:text="允许更新"
+            android:textSize="13sp" />
+
+        <!-- 自动连接 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="自动连接"
+                android:textSize="13sp"
+                android:textColor="?android:textColorPrimary"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp" />
+            <Spinner
+                android:id="@+id/autoConnectSpinner"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
+        <!-- 支持 URL -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="支持 URL"
+            app:boxBackgroundMode="outline"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/supportUrlInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textUri"
+                android:maxLines="1"
+                android:textSize="13sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 服务模式 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="服务模式"
+                android:textSize="13sp"
+                android:textColor="?android:textColorPrimary"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp" />
+            <Spinner
+                android:id="@+id/serviceModeSpinner"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
+        <!-- 拆分隧道 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="拆分隧道"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorPrimary" />
+
+        <!-- 拆分隧道排除 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:hint="排除（每行一个地址）"
+            app:boxBackgroundMode="outline"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/splitTunnelExcludeInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:maxLines="5"
+                android:textSize="13sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 拆分隧道包含 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="包含（每行一个地址）"
+            app:boxBackgroundMode="outline"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/splitTunnelIncludeInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:maxLines="5"
+                android:textSize="13sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 直接路由 Microsoft 365 流量 -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/excludeOfficeIpsSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="直接路由 Microsoft 365 流量"
+            android:textSize="13sp" />
+
+        <!-- 允许用户以启用本地网络排除 -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/localNetworkExcludeSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="允许用户以启用本地网络排除"
+            android:textSize="13sp" />
+
+        <!-- 设备客户端接口 IP DNS 注册 -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/ipDnsRegistrationSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="设备客户端接口 IP DNS 注册"
+            android:textSize="13sp" />
+
+        <!-- SCCM VPN 边界支持 -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/sccmVpnBoundarySupportSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="SCCM VPN 边界支持"
+            android:textSize="13sp" />
+
+        <!-- 开启 NETBT（TCP/IP 上的 NetBIOS） -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/netbtEnabledSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="开启 NETBT（TCP/IP 上的 NetBIOS）"
+            android:textSize="13sp" />
+
+        <!-- 网关ID -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="网关ID（自动勿填）"
+            app:boxBackgroundMode="outline"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/gatewayUniqueIdInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1"
+                android:textSize="13sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 启用配置文件 -->
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/policyEnabledSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:checked="true"
-            android:text="启用策略" />
+            android:text="启用配置文件"
+            android:textSize="13sp" />
 
     </LinearLayout>
 </ScrollView>

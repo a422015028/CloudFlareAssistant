@@ -197,6 +197,34 @@
             android:layout_marginVertical="16dp"
             android:background="?android:attr/listDivider" />
 
+        <!-- Policy Info -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="配置文件"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:id="@+id/policyNameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="16sp"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="italic"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="?android:attr/listDivider" />
+
         <!-- Time Info -->
         <TextView
             android:layout_width="match_parent"

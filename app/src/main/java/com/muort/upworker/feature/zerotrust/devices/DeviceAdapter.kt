@@ -12,14 +12,15 @@ import com.muort.upworker.databinding.ItemDeviceBinding
 
 class DeviceAdapter(
     private val onRevokeClick: (Device) -> Unit,
-    private val onItemClick: (Device) -> Unit
+    private val onItemClick: (Device) -> Unit,
+    private val onPolicyClick: (Device) -> Unit
 ) : ListAdapter<Device, DeviceAdapter.DeviceViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeviceViewHolder {
         val binding = ItemDeviceBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return DeviceViewHolder(binding, onRevokeClick, onItemClick)
+        return DeviceViewHolder(binding, onRevokeClick, onItemClick, onPolicyClick)
     }
 
     override fun onBindViewHolder(holder: DeviceViewHolder, position: Int) {
@@ -29,7 +30,8 @@ class DeviceAdapter(
     class DeviceViewHolder(
         private val binding: ItemDeviceBinding,
         private val onRevokeClick: (Device) -> Unit,
-        private val onItemClick: (Device) -> Unit
+        private val onItemClick: (Device) -> Unit,
+        private val onPolicyClick: (Device) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(device: Device) {
@@ -51,6 +53,11 @@ class DeviceAdapter(
             val userEmail = device.user?.email ?: device.user?.name
             binding.userInfoText.text = "用户: ${userEmail ?: "未知"}"
             binding.userInfoText.visibility = if (userEmail != null) View.VISIBLE else View.GONE
+            
+            // Policy info
+            binding.policyNameText.text = "配置文件: ${device.policyName ?: "默认"}"
+            binding.policyNameText.visibility = if (device.policyName != null) View.VISIBLE else View.GONE
+            binding.policyNameText.setOnClickListener { onPolicyClick(device) }
             
             // IP address
             binding.ipAddressText.text = "IP: ${device.ip ?: "未知"}"

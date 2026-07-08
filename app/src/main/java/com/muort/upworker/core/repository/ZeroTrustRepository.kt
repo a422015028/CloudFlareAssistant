@@ -907,6 +907,28 @@ class ZeroTrustRepository @Inject constructor(
             }
         }
     
+    suspend fun updateDevicePolicyAssignment(account: Account, deviceId: String, policyId: String): Resource<Device?> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.updateDevicePolicyAssignment(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    deviceId = deviceId,
+                    request = DeviceUpdateRequest(policyId)
+                )
+                if (response.isSuccessful) {
+                    Timber.d("Updated device policy assignment: $deviceId -> $policyId")
+                    Resource.Success(response.body()?.result)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to update device policy"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+    
     // ==================== Device Policies ====================
     
     /**

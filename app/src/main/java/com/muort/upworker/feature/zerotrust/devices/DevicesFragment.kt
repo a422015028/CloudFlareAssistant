@@ -39,7 +39,7 @@ class DevicesFragment : Fragment() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> "设备"
-                1 -> "策略"
+                1 -> "设备配置文件"
                 else -> ""
             }
         }.attach()

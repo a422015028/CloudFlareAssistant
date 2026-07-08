@@ -67,6 +67,23 @@ class DevicesViewModel @Inject constructor(
         }
     }
     
+    fun updateDevicePolicyAssignment(account: Account, deviceId: String, policyId: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.updateDevicePolicyAssignment(account, deviceId, policyId)) {
+                is Resource.Success -> {
+                    _message.emit("配置文件已更新")
+                    loadDevices(account)
+                }
+                is Resource.Error -> {
+                    _error.emit("更新配置文件失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
     fun loadPolicies(account: Account) {
         viewModelScope.launch {
             _loadingState.value = true
@@ -76,7 +93,7 @@ class DevicesViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} device policies")
                 }
                 is Resource.Error -> {
-                    _error.emit("加载策略失败: ${result.message}")
+                    _error.emit("加载配置文件失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -89,11 +106,11 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.createDevicePolicy(account, request)) {
                 is Resource.Success -> {
-                    _message.emit("策略已创建")
+                    _message.emit("配置文件已创建")
                     loadPolicies(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("创建策略失败: ${result.message}")
+                    _error.emit("创建配置文件失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -106,11 +123,11 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.updateDevicePolicy(account, policyId, request)) {
                 is Resource.Success -> {
-                    _message.emit("策略已更新")
+                    _message.emit("配置文件已更新")
                     loadPolicies(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("更新策略失败: ${result.message}")
+                    _error.emit("更新配置文件失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -123,11 +140,11 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.deleteDevicePolicy(account, policyId)) {
                 is Resource.Success -> {
-                    _message.emit("策略已删除")
+                    _message.emit("配置文件已删除")
                     loadPolicies(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("删除策略失败: ${result.message}")
+                    _error.emit("删除配置文件失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }

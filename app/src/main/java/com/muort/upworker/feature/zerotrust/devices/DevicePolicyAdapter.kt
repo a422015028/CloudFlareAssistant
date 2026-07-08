@@ -33,7 +33,7 @@ class DevicePolicyAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(policy: DeviceSettingsPolicy) {
-            binding.policyNameText.text = policy.name ?: "未命名策略"
+            binding.policyNameText.text = policy.name ?: "未命名配置文件"
             binding.policyDescriptionText.text = policy.description ?: "无描述"
             
             // Match rule

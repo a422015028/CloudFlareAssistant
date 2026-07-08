@@ -56,6 +56,9 @@ class DevicesListFragment : Fragment() {
             },
             onItemClick = { device ->
                 showDeviceDetailDialog(device)
+            },
+            onPolicyClick = { device ->
+                showPolicySelectionDialog(device)
             }
         )
         
@@ -155,6 +158,13 @@ class DevicesListFragment : Fragment() {
             revokedText.visibility = View.GONE
         }
         
+        // Policy Info
+        val policyNameText = dialogView.findViewById<TextView>(R.id.policyNameText)
+        policyNameText.text = device.policyName ?: "默认"
+        policyNameText.setOnClickListener {
+            showPolicySelectionDialog(device)
+        }
+        
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle("设备详情")
             .setView(dialogView)
@@ -191,6 +201,36 @@ class DevicesListFragment : Fragment() {
             "ios" -> "iOS"
             "chromeos" -> "ChromeOS"
             else -> type?.uppercase() ?: "未知"
+        }
+    }
+
+    private fun showPolicySelectionDialog(device: Device) {
+        val account = accountViewModel.defaultAccount.value ?: return
+        
+        viewModel.loadPolicies(account)
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            val policies = viewModel.policies.value
+            if (policies.isEmpty()) {
+                Snackbar.make(binding.root, "暂无配置文件", Snackbar.LENGTH_SHORT).show()
+                return@launch
+            }
+            
+            val policyNames = policies.map { it.name ?: "未命名配置文件" }.toTypedArray()
+            val policyIds = policies.map { it.policyId ?: "" }.toTypedArray()
+            val currentPolicyIndex = policies.indexOfFirst { it.policyId == device.policyId }
+            
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("选择配置文件")
+                .setSingleChoiceItems(policyNames, currentPolicyIndex) { dialog, which ->
+                    val selectedPolicyId = policyIds[which]
+                    if (selectedPolicyId.isNotBlank()) {
+                        viewModel.updateDevicePolicyAssignment(account, device.id, selectedPolicyId)
+                    }
+                    dialog.dismiss()
+                }
+                .setNegativeButton("取消", null)
+                .show()
         }
     }
 

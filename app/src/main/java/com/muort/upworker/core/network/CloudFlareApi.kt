@@ -1274,6 +1274,19 @@ interface CloudFlareApi {
         @Path("device_id") deviceId: String
     ): Response<CloudFlareResponse<Unit>>
     
+    /**
+     * Update Device Policy Assignment
+     */
+    @PATCH("accounts/{account_id}/devices/{device_id}")
+    suspend fun updateDevicePolicyAssignment(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("device_id") deviceId: String,
+        @Body request: DeviceUpdateRequest
+    ): Response<CloudFlareResponse<Device>>
+    
     // ==================== Zero Trust - Device Policies ====================
     
     /**

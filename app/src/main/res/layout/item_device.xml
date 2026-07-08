@@ -79,6 +79,26 @@
             app:layout_constraintStart_toEndOf="@id/deviceIcon"
             app:layout_constraintTop_toBottomOf="@id/deviceTypeChip" />
 
+        <!-- Policy Info -->
+        <TextView
+            android:id="@+id/policyNameText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="配置文件: 默认"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/deviceIcon"
+            app:layout_constraintTop_toBottomOf="@id/userInfoText" />
+
         <!-- IP Address -->
         <TextView
             android:id="@+id/ipAddressText"
@@ -93,7 +113,7 @@
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/deviceIcon"
-            app:layout_constraintTop_toBottomOf="@id/userInfoText" />
+            app:layout_constraintTop_toBottomOf="@id/policyNameText" />
 
         <!-- Last Updated -->
         <TextView
