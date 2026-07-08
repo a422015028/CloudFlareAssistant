@@ -25,7 +25,6 @@ class DeviceSettingsPolicyRequestAdapter : JsonSerializer<DeviceSettingsPolicyRe
         if (src.allowedToLeave != null) jsonObject.addProperty("allowed_to_leave", src.allowedToLeave)
         if (src.allowUpdates != null) jsonObject.addProperty("allow_updates", src.allowUpdates)
         if (src.autoConnect != null) jsonObject.addProperty("auto_connect", src.autoConnect)
-        src.supportUrl?.takeIf { it.isNotBlank() }?.let { jsonObject.addProperty("support_url", it) }
         
         if (src.serviceModeV2 != null && src.serviceModeV2.mode != null) {
             val serviceModeObj = JsonObject()
@@ -61,7 +60,13 @@ class DeviceSettingsPolicyRequestAdapter : JsonSerializer<DeviceSettingsPolicyRe
         if (src.registerInterfaceIpWithDns != null) jsonObject.addProperty("register_interface_ip_with_dns", src.registerInterfaceIpWithDns)
         if (src.sccmVpnBoundarySupport != null) jsonObject.addProperty("sccm_vpn_boundary_support", src.sccmVpnBoundarySupport)
         if (src.netbtEnabled != null) jsonObject.addProperty("enable_netbt", src.netbtEnabled)
-        if (src.lanAllowMinutes != null) jsonObject.addProperty("lan_allow_minutes", src.lanAllowMinutes)
+        if (src.lanAllowMinutes != null) {
+            if (src.lanAllowMinutes == 0) {
+                jsonObject.add("lan_allow_minutes", JsonNull.INSTANCE)
+            } else {
+                jsonObject.addProperty("lan_allow_minutes", src.lanAllowMinutes)
+            }
+        }
         
         return jsonObject
     }
@@ -88,7 +93,6 @@ class DeviceSettingsPolicyRequestAdapter : JsonSerializer<DeviceSettingsPolicyRe
             switchLocked = if (obj.has("switch_locked") && !obj.get("switch_locked").isJsonNull) obj.get("switch_locked").asBoolean else null,
             excludeOfficeIps = if (obj.has("exclude_office_ips") && !obj.get("exclude_office_ips").isJsonNull) obj.get("exclude_office_ips").asBoolean else null,
             allowedToLeave = if (obj.has("allowed_to_leave") && !obj.get("allowed_to_leave").isJsonNull) obj.get("allowed_to_leave").asBoolean else null,
-            supportUrl = if (obj.has("support_url") && !obj.get("support_url").isJsonNull) obj.get("support_url").asString else null,
             captivePortal = if (obj.has("captive_portal") && !obj.get("captive_portal").isJsonNull) obj.get("captive_portal").asInt else null,
             disableAutoFallback = if (obj.has("disable_auto_fallback") && !obj.get("disable_auto_fallback").isJsonNull) obj.get("disable_auto_fallback").asBoolean else null,
             gatewayUniqueId = if (obj.has("gateway_unique_id") && !obj.get("gateway_unique_id").isJsonNull) obj.get("gateway_unique_id").asString else null,

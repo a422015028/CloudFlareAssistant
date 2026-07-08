@@ -109,28 +109,13 @@
             android:textColor="?attr/colorPrimary" />
 
         <!-- 强制网络门户检测 -->
-        <LinearLayout
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/captivePortalSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="强制网络门户检测"
-                android:textSize="13sp"
-                android:textColor="?android:textColorPrimary"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp" />
-            <Spinner
-                android:id="@+id/captivePortalSpinner"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                android:spinnerMode="dropdown"
-                android:background="@android:color/transparent" />
-        </LinearLayout>
+            android:text="强制网络门户检测"
+            android:textSize="13sp" />
 
         <!-- 模式切换 -->
         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -195,46 +180,13 @@
             android:textSize="13sp" />
 
         <!-- 自动连接 -->
-        <LinearLayout
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/autoConnectSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="自动连接"
-                android:textSize="13sp"
-                android:textColor="?android:textColorPrimary"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp" />
-            <Spinner
-                android:id="@+id/autoConnectSpinner"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                android:spinnerMode="dropdown"
-                android:background="@android:color/transparent" />
-        </LinearLayout>
-
-        <!-- 支持 URL -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:hint="支持 URL"
-            app:boxBackgroundMode="outline"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/supportUrlInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textUri"
-                android:maxLines="1"
-                android:textSize="13sp" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:text="自动连接"
+            android:textSize="13sp" />
 
         <!-- 服务模式 -->
         <LinearLayout

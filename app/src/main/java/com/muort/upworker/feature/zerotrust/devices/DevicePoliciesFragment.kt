@@ -137,13 +137,12 @@ class DevicePoliciesFragment : Fragment() {
         val precedenceInput = dialogView.findViewById<TextInputEditText>(R.id.policyPrecedenceInput)
         val enabledSwitch = dialogView.findViewById<SwitchMaterial>(R.id.policyEnabledSwitch)
         
-        val autoConnectSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.autoConnectSpinner)
+        val autoConnectSwitch = dialogView.findViewById<SwitchMaterial>(R.id.autoConnectSwitch)
         val allowModeSwitch = dialogView.findViewById<SwitchMaterial>(R.id.allowModeSwitch)
         val switchLockedSwitch = dialogView.findViewById<SwitchMaterial>(R.id.switchLockedSwitch)
         val excludeOfficeIpsSwitch = dialogView.findViewById<SwitchMaterial>(R.id.excludeOfficeIpsSwitch)
         val allowedToLeaveSwitch = dialogView.findViewById<SwitchMaterial>(R.id.allowedToLeaveSwitch)
-        val supportUrlInput = dialogView.findViewById<TextInputEditText>(R.id.supportUrlInput)
-        val captivePortalSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.captivePortalSpinner)
+        val captivePortalSwitch = dialogView.findViewById<SwitchMaterial>(R.id.captivePortalSwitch)
         val gatewayUniqueIdInput = dialogView.findViewById<TextInputEditText>(R.id.gatewayUniqueIdInput)
         
         val protocolSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.protocolSpinner)
@@ -160,22 +159,12 @@ class DevicePoliciesFragment : Fragment() {
         val splitTunnelModeSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.splitTunnelModeSpinner)
         
         // Setup Spinner adapters
-        val autoConnectOptions = arrayOf("关闭", "开启")
-        val autoConnectAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, autoConnectOptions)
-        autoConnectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        autoConnectSpinner.adapter = autoConnectAdapter
-        
-        val captivePortalOptions = arrayOf("关闭", "开启")
-        val captivePortalAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, captivePortalOptions)
-        captivePortalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        captivePortalSpinner.adapter = captivePortalAdapter
-        
         val protocolOptions = arrayOf("WireGuard", "MASQUE")
         val protocolAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, protocolOptions)
         protocolAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         protocolSpinner.adapter = protocolAdapter
         
-        val serviceModeOptions = arrayOf("流量和 DNS 模式", "纯 DNS 模式", "纯流量模式", "纯态势模式")
+        val serviceModeOptions = arrayOf("流量和 DNS 模式", "纯 DNS 模式", "本地代理模式", "纯态势模式")
         val serviceModeAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, serviceModeOptions)
         serviceModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         serviceModeSpinner.adapter = serviceModeAdapter
@@ -220,14 +209,13 @@ class DevicePoliciesFragment : Fragment() {
                 enabledSwitch.isChecked = policy.enabled ?: true
             }
             
-            captivePortalSpinner.setSelection(getCaptivePortalIndex(policy.captivePortal))
+            captivePortalSwitch.isChecked = (policy.captivePortal ?: 0) > 0
             allowModeSwitch.isChecked = policy.allowModeSwitch ?: true
             protocolSpinner.setSelection(getProtocolIndex(policy.tunnelProtocol))
             switchLockedSwitch.isChecked = policy.switchLocked ?: false
             allowedToLeaveSwitch.isChecked = policy.allowedToLeave ?: true
             allowUpdatesSwitch.isChecked = policy.allowUpdates ?: true
-            autoConnectSpinner.setSelection(getAutoConnectIndex(policy.autoConnect))
-            supportUrlInput.setText(policy.supportUrl ?: "")
+            autoConnectSwitch.isChecked = (policy.autoConnect ?: 0) > 0
             serviceModeSpinner.setSelection(getServiceModeIndex(policy.serviceModeV2?.mode))
             
             excludeOfficeIpsSwitch.isChecked = policy.excludeOfficeIps ?: false
@@ -254,14 +242,13 @@ class DevicePoliciesFragment : Fragment() {
             .setPositiveButton(if (existingPolicy == null) "创建" else "保存") { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
                 
-                val captivePortal = getCaptivePortalValue(captivePortalSpinner.selectedItem?.toString())
+                val captivePortal = if (captivePortalSwitch.isChecked) 180 else 0
                 val allowModeSwitchValue = allowModeSwitch.isChecked
                 val tunnelProtocol = getProtocolValue(protocolSpinner.selectedItem?.toString())
                 val switchLocked = switchLockedSwitch.isChecked
                 val allowedToLeave = allowedToLeaveSwitch.isChecked
                 val allowUpdates = allowUpdatesSwitch.isChecked
-                val autoConnect = getAutoConnectValue(autoConnectSpinner.selectedItem?.toString())
-                val supportUrl = supportUrlInput.text?.toString()?.takeIf { it.isNotBlank() }
+                val autoConnect = if (autoConnectSwitch.isChecked) 180 else 0
                 val serviceMode = getServiceModeValue(serviceModeSpinner.selectedItem?.toString())
                 
                 val excludeOfficeIps = excludeOfficeIpsSwitch.isChecked
@@ -301,7 +288,6 @@ class DevicePoliciesFragment : Fragment() {
                         allowedToLeave = allowedToLeave,
                         allowUpdates = allowUpdates,
                         autoConnect = autoConnect,
-                        supportUrl = supportUrl,
                         serviceModeV2 = serviceModeV2,
                         excludeOfficeIps = excludeOfficeIps,
                         registerInterfaceIpWithDns = registerInterfaceIpWithDns,
@@ -325,10 +311,10 @@ class DevicePoliciesFragment : Fragment() {
                             registerInterfaceIpWithDns = registerInterfaceIpWithDns,
                             sccmVpnBoundarySupport = sccmVpnBoundarySupport,
                             serviceModeV2 = serviceModeV2,
-                            supportUrl = supportUrl,
                             switchLocked = switchLocked,
                             tunnelProtocol = tunnelProtocol,
-                            lanAllowMinutes = lanAllowMinutes
+                            lanAllowMinutes = lanAllowMinutes,
+                            netbtEnabled = netbtEnabled
                         )
                         viewModel.updateDefaultPolicy(account, update)
                         viewModel.setSplitTunnel(account, null, splitTunnelExclude, splitTunnelInclude)
@@ -357,7 +343,6 @@ class DevicePoliciesFragment : Fragment() {
                         allowedToLeave = allowedToLeave,
                         allowUpdates = allowUpdates,
                         autoConnect = autoConnect,
-                        supportUrl = supportUrl,
                         serviceModeV2 = serviceModeV2,
                         excludeOfficeIps = excludeOfficeIps,
                         registerInterfaceIpWithDns = registerInterfaceIpWithDns,
@@ -375,52 +360,6 @@ class DevicePoliciesFragment : Fragment() {
             }
             .setNegativeButton("取消", null)
             .show()
-    }
-    
-    private fun getAutoConnectLabel(autoConnect: Int?): String {
-        return when (autoConnect) {
-            0 -> "关闭"
-            180 -> "开启"
-            else -> if (autoConnect != null && autoConnect > 0) "${autoConnect / 60}分钟" else "关闭"
-        }
-    }
-    
-    private fun getAutoConnectValue(label: String?): Int? {
-        return when (label) {
-            "关闭" -> 0
-            "开启" -> 180
-            else -> 180
-        }
-    }
-    
-    private fun getAutoConnectIndex(autoConnect: Int?): Int {
-        return when (autoConnect) {
-            0 -> 0
-            else -> 1
-        }
-    }
-    
-    private fun getCaptivePortalLabel(captivePortal: Int?): String {
-        return when (captivePortal) {
-            0 -> "关闭"
-            180 -> "开启"
-            else -> if (captivePortal != null && captivePortal > 0) "${captivePortal / 60}分钟" else "关闭"
-        }
-    }
-    
-    private fun getCaptivePortalValue(label: String?): Int? {
-        return when (label) {
-            "关闭" -> 0
-            "开启" -> 180
-            else -> 0
-        }
-    }
-    
-    private fun getCaptivePortalIndex(captivePortal: Int?): Int {
-        return when (captivePortal) {
-            0 -> 0
-            else -> 1
-        }
     }
     
     private fun getProtocolLabel(protocol: String?): String {
@@ -450,8 +389,8 @@ class DevicePoliciesFragment : Fragment() {
     private fun getServiceModeLabel(serviceMode: String?): String {
         return when (serviceMode) {
             "warp" -> "流量和 DNS 模式"
-            "dns" -> "纯 DNS 模式"
-            "warp_only" -> "纯流量模式"
+            "1dot1" -> "纯 DNS 模式"
+            "proxy" -> "本地代理模式"
             "posture_only" -> "纯态势模式"
             else -> "流量和 DNS 模式"
         }
@@ -460,8 +399,8 @@ class DevicePoliciesFragment : Fragment() {
     private fun getServiceModeIndex(serviceMode: String?): Int {
         return when (serviceMode) {
             "warp" -> 0
-            "dns" -> 1
-            "warp_only" -> 2
+            "1dot1" -> 1
+            "proxy" -> 2
             "posture_only" -> 3
             else -> 0
         }
@@ -470,8 +409,8 @@ class DevicePoliciesFragment : Fragment() {
     private fun getServiceModeValue(label: String?): String? {
         return when (label) {
             "流量和 DNS 模式" -> "warp"
-            "纯 DNS 模式" -> "dns"
-            "纯流量模式" -> "warp_only"
+            "纯 DNS 模式" -> "1dot1"
+            "本地代理模式" -> "proxy"
             "纯态势模式" -> "posture_only"
             else -> "warp"
         }
@@ -487,16 +426,14 @@ class DevicePoliciesFragment : Fragment() {
                 allowedToLeave = policy.allowedToLeave,
                 autoConnect = policy.autoConnect,
                 captivePortal = policy.captivePortal,
-                exclude = policy.exclude,
                 excludeOfficeIps = policy.excludeOfficeIps,
-                include = policy.include,
                 registerInterfaceIpWithDns = policy.registerInterfaceIpWithDns,
                 sccmVpnBoundarySupport = policy.sccmVpnBoundarySupport,
                 serviceModeV2 = policy.serviceModeV2,
-                supportUrl = policy.supportUrl,
                 switchLocked = policy.switchLocked,
                 tunnelProtocol = policy.tunnelProtocol,
-                lanAllowMinutes = policy.lanAllowMinutes
+                lanAllowMinutes = policy.lanAllowMinutes,
+                netbtEnabled = policy.netbtEnabled
             )
             viewModel.updateDefaultPolicy(account, update)
         } else {
@@ -512,7 +449,6 @@ class DevicePoliciesFragment : Fragment() {
                     switchLocked = policy.switchLocked,
                     excludeOfficeIps = policy.excludeOfficeIps,
                     allowedToLeave = policy.allowedToLeave,
-                    supportUrl = policy.supportUrl,
                     captivePortal = policy.captivePortal,
                     disableAutoFallback = policy.disableAutoFallback,
                     tunnelProtocol = policy.tunnelProtocol,
