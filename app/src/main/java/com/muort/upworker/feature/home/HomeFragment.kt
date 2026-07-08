@@ -26,8 +26,15 @@ import com.muort.upworker.feature.account.AccountViewModel
 import com.muort.upworker.feature.dashboard.DashboardState
 import com.muort.upworker.feature.dashboard.DashboardViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
 import timber.log.Timber
+import java.time.Year
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -173,11 +180,15 @@ class HomeFragment : Fragment() {
         
         // 自动读取版本号
         try {
-            val versionName = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).versionName
+            val packageInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+            val versionName = packageInfo.versionName
             dialogBinding.tvVersion.text = "版本 $versionName"
         } catch (e: Exception) {
             Timber.e(e, "Failed to get version name")
         }
+        
+        // 动态设置版权年份
+        dialogBinding.tvCopyright.text = "© ${Year.now().value} CloudFlare Assistant\nMIT License"
         
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
@@ -220,8 +231,96 @@ class HomeFragment : Fragment() {
             }
         }
         
+        // 检查更新按钮点击
+        dialogBinding.btnCheckUpdate.setOnClickListener {
+            checkForUpdates(dialogBinding.pbLoading, dialogBinding.tvCheckUpdate)
+        }
+        
         dialog.show()
     }
+    
+    private fun checkForUpdates(progressBar: android.widget.ProgressBar, textView: android.widget.TextView) {
+        val currentVersionCode = try {
+            requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).longVersionCode
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get version code")
+            return
+        }
+        
+        // 显示加载动画
+        progressBar.visibility = android.view.View.VISIBLE
+        textView.text = "检查中..."
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val updateInfo = fetchVersionInfo()
+                
+                // 恢复按钮状态
+                progressBar.visibility = android.view.View.GONE
+                textView.text = "检查更新"
+                
+                if (updateInfo != null) {
+                    val latestVersionCode = updateInfo.versionCode
+                    if (latestVersionCode > currentVersionCode) {
+                        showUpdateDialog(updateInfo.versionName)
+                    } else {
+                        requireContext().showToast("当前已是最新版本")
+                    }
+                } else {
+                    requireContext().showToast("检查更新失败")
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Check update error")
+                requireContext().showToast("检查更新失败")
+                
+                // 恢复按钮状态
+                progressBar.visibility = android.view.View.GONE
+                textView.text = "检查更新"
+            }
+        }
+    }
+    
+    private suspend fun fetchVersionInfo(): VersionInfo? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val client = OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
+                    .build()
+                
+                val request = Request.Builder()
+                    .url("https://cfd.390202.xyz/version.json")
+                    .get()
+                    .build()
+                
+                val response = client.newCall(request).execute()
+                if (response.isSuccessful && response.body != null) {
+                    val json = JSONObject(response.body!!.string())
+                    val versionName = json.optString("versionName", "")
+                    val versionCode = json.optLong("versionCode", 0)
+                    if (versionCode > 0) {
+                        return@withContext VersionInfo(versionName, versionCode)
+                    }
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Fetch version info error")
+            }
+            return@withContext null
+        }
+    }
+    
+    private fun showUpdateDialog(versionName: String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("发现新版本")
+            .setMessage("版本 $versionName 可用，是否立即更新？")
+            .setPositiveButton("更新") { _, _ ->
+                openUrl("https://cfd.390202.xyz/CloudFlareAssistant.apk")
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private data class VersionInfo(val versionName: String, val versionCode: Long)
     
     private fun openUrl(url: String) {
         try {

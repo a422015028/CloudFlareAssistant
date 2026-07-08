@@ -40,6 +40,36 @@
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp" />
 
+    <!-- Check Update Button -->
+    <LinearLayout
+        android:id="@+id/btnCheckUpdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <ProgressBar
+            android:id="@+id/pbLoading"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvCheckUpdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="检查更新"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="14sp" />
+    </LinearLayout>
+
     <!-- Divider -->
     <View
         android:layout_width="match_parent"
@@ -245,6 +275,7 @@
 
     <!-- Copyright -->
     <TextView
+        android:id="@+id/tvCopyright"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
