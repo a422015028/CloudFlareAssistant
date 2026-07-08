@@ -311,14 +311,21 @@ class AccessDetailFragment : Fragment() {
         autoRedirectSwitch?.isChecked = app.autoRedirectToIdentity ?: false
 
         // Set spinner type
-        val types = listOf("self_hosted", "saas", "ssh", "vnc", "app_launcher", "warp", "biso", "bookmark")
-        val typePosition = types.indexOf(app.type).coerceAtLeast(0)
+        val types = listOf("self_hosted" to "自托管应用", "saas" to "SaaS 应用", "ssh" to "SSH", "vnc" to "VNC", "app_launcher" to "应用启动器", "warp" to "WARP", "biso" to "浏览器隔离", "bookmark" to "书签")
+        val typeAdapter = android.widget.ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            types.map { it.second }
+        )
+        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        typeSpinner?.adapter = typeAdapter
+        val typePosition = types.indexOfFirst { it.first == app.type }.coerceAtLeast(0)
         typeSpinner?.setSelection(typePosition)
 
         // Handle SaaS config visibility
         typeSpinner?.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
-                saasConfigCard?.visibility = if (types[position] == "saas") View.VISIBLE else View.GONE
+                saasConfigCard?.visibility = if (types[position].first == "saas") View.VISIBLE else View.GONE
             }
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         }
@@ -337,7 +344,7 @@ class AccessDetailFragment : Fragment() {
             .setPositiveButton("保存") { _, _ ->
                 val name = nameInput?.text?.toString()
                 val domain = domainInput?.text?.toString()
-                val type = types[typeSpinner?.selectedItemPosition ?: 0]
+                val type = types[typeSpinner?.selectedItemPosition ?: 0].first
                 val sessionDuration = sessionDurationInput?.text?.toString()
 
                 if (name.isNullOrBlank()) {

@@ -12,22 +12,11 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- Tunnel Icon -->
-        <ImageView
-            android:id="@+id/tunnelIcon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@android:drawable/ic_menu_share"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="?attr/colorPrimary" />
-
         <!-- Tunnel Name -->
         <TextView
             android:id="@+id/tunnelNameText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
             android:layout_marginEnd="8dp"
             android:ellipsize="end"
             android:maxLines="1"
@@ -35,20 +24,19 @@
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/runCommandButton"
-            app:layout_constraintStart_toEndOf="@id/tunnelIcon"
-            app:layout_constraintTop_toTopOf="@id/tunnelIcon" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Status Chip -->
         <com.google.android.material.chip.Chip
             android:id="@+id/statusChip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
             android:layout_marginTop="4dp"
             android:text="活跃"
             android:textSize="10sp"
             app:chipMinHeight="24dp"
-            app:layout_constraintStart_toEndOf="@id/tunnelIcon"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tunnelNameText" />
 
         <!-- Tunnel Type Chip -->
@@ -68,7 +56,6 @@
             android:id="@+id/connectionsText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
             android:layout_marginTop="8dp"
             android:drawablePadding="4dp"
             android:text="连接数: 0"
@@ -76,7 +63,7 @@
             android:textSize="13sp"
             app:drawableStartCompat="@android:drawable/ic_menu_compass"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tunnelIcon"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/statusChip" />
 
         <!-- Connection Details -->
@@ -84,7 +71,6 @@
             android:id="@+id/connectionDetailsText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
             android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="2"
@@ -92,7 +78,7 @@
             android:textColor="?android:attr/textColorTertiary"
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tunnelIcon"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/connectionsText" />
 
         <!-- Created Date -->
@@ -100,13 +86,12 @@
             android:id="@+id/createdDateText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
             android:layout_marginTop="4dp"
             android:text="创建: 2024-01-01"
             android:textColor="?android:attr/textColorTertiary"
             android:textSize="11sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tunnelIcon"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/connectionDetailsText" />
 
         <!-- Run Command Button -->

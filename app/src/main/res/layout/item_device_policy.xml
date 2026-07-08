@@ -104,23 +104,31 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/settingsRow">
 
-            <ImageButton
+            <TextView
                 android:id="@+id/editButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="编辑"
-                android:src="@android:drawable/ic_menu_edit"
-                app:tint="?attr/colorPrimary" />
+                android:paddingStart="12dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="8dp"
+                android:text="编辑"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="14sp" />
 
-            <ImageButton
+            <TextView
                 android:id="@+id/deleteButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="删除"
-                android:src="@android:drawable/ic_menu_delete"
-                app:tint="?attr/colorError" />
+                android:paddingStart="12dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="8dp"
+                android:text="删除"
+                android:textColor="?attr/colorError"
+                android:textSize="14sp" />
 
         </LinearLayout>
 

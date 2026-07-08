@@ -69,22 +69,32 @@
 
         </LinearLayout>
 
-        <ImageButton
+        <TextView
             android:id="@+id/editPolicyButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="编辑策略"
-            android:src="@android:drawable/ic_menu_edit"
+            android:paddingStart="12dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="8dp"
+            android:text="编辑"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="14sp"
             android:layout_marginEnd="4dp" />
 
-        <ImageButton
+        <TextView
             android:id="@+id/deletePolicyButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="删除策略"
-            android:src="@android:drawable/ic_menu_delete" />
+            android:paddingStart="12dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="8dp"
+            android:text="删除"
+            android:textColor="?attr/colorError"
+            android:textSize="14sp" />
 
     </LinearLayout>
 
