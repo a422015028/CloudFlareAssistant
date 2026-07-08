@@ -387,6 +387,7 @@ data class DeviceSettingsPolicy(
     @SerializedName("match") val match: String? = null,
     @SerializedName("precedence") val precedence: Int? = null,
     @SerializedName("enabled") val enabled: Boolean? = null,
+    @SerializedName("default") val isDefault: Boolean? = null,
     @SerializedName("exclude_office_ips") val excludeOfficeIps: Boolean? = null,
     @SerializedName("allow_mode_switch") val allowModeSwitch: Boolean? = null,
     @SerializedName("switch_locked") val switchLocked: Boolean? = null,
@@ -406,7 +407,7 @@ data class DeviceSettingsPolicy(
     @SerializedName("register_interface_ip_with_dns") val registerInterfaceIpWithDns: Boolean? = null,
     @SerializedName("sccm_vpn_boundary_support") val sccmVpnBoundarySupport: Boolean? = null,
     @SerializedName("enable_netbt") val netbtEnabled: Boolean? = null,
-    @SerializedName("allow_local_network_exclusion") val allowLocalNetworkExclusion: Boolean? = null
+    @SerializedName("lan_allow_minutes") val lanAllowMinutes: Int? = null
 )
 
 data class ServiceModeV2(
@@ -435,18 +436,28 @@ data class DeviceSettingsPolicyRequest(
     @SerializedName("register_interface_ip_with_dns") val registerInterfaceIpWithDns: Boolean? = null,
     @SerializedName("sccm_vpn_boundary_support") val sccmVpnBoundarySupport: Boolean? = null,
     @SerializedName("enable_netbt") val netbtEnabled: Boolean? = null,
+    @SerializedName("lan_allow_minutes") val lanAllowMinutes: Int? = null,
     @SerializedName("exclude") val exclude: List<SplitTunnel>? = null,
-    @SerializedName("include") val include: List<SplitTunnel>? = null,
-    @SerializedName("allow_local_network_exclusion") val allowLocalNetworkExclusion: Boolean? = null
+    @SerializedName("include") val include: List<SplitTunnel>? = null
 )
 
 data class DevicePolicyUpdate(
     @SerializedName("allow_mode_switch") val allowModeSwitch: Boolean? = null,
-    @SerializedName("switch_locked") val switchLocked: Boolean? = null,
+    @SerializedName("allow_updates") val allowUpdates: Boolean? = null,
+    @SerializedName("allowed_to_leave") val allowedToLeave: Boolean? = null,
     @SerializedName("auto_connect") val autoConnect: Int? = null,
+    @SerializedName("captive_portal") val captivePortal: Int? = null,
     @SerializedName("disable_auto_fallback") val disableAutoFallback: Boolean? = null,
     @SerializedName("exclude") val exclude: List<SplitTunnel>? = null,
-    @SerializedName("include") val include: List<SplitTunnel>? = null
+    @SerializedName("exclude_office_ips") val excludeOfficeIps: Boolean? = null,
+    @SerializedName("include") val include: List<SplitTunnel>? = null,
+    @SerializedName("register_interface_ip_with_dns") val registerInterfaceIpWithDns: Boolean? = null,
+    @SerializedName("sccm_vpn_boundary_support") val sccmVpnBoundarySupport: Boolean? = null,
+    @SerializedName("service_mode_v2") val serviceModeV2: ServiceModeV2? = null,
+    @SerializedName("support_url") val supportUrl: String? = null,
+    @SerializedName("switch_locked") val switchLocked: Boolean? = null,
+    @SerializedName("tunnel_protocol") val tunnelProtocol: String? = null,
+    @SerializedName("lan_allow_minutes") val lanAllowMinutes: Int? = null
 )
 
 data class DeviceUpdateRequest(

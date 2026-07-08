@@ -12,6 +12,7 @@
 
         <!-- Policy Name -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/policyNameLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="配置文件名称"
@@ -29,6 +30,7 @@
 
         <!-- Description -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/policyDescriptionLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -48,6 +50,7 @@
 
         <!-- Match Expression -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/policyMatchLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -68,6 +71,7 @@
 
         <!-- Precedence -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/policyPrecedenceLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -266,8 +270,31 @@
             android:textStyle="bold"
             android:textColor="?attr/colorPrimary" />
 
+        <!-- 拆分隧道模式选择 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="模式"
+                android:textSize="13sp"
+                android:textColor="?android:textColorPrimary" />
+            <Spinner
+                android:id="@+id/splitTunnelModeSpinner"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
         <!-- 拆分隧道排除 -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/splitTunnelExcludeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -287,6 +314,7 @@
 
         <!-- 拆分隧道包含 -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/splitTunnelIncludeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"

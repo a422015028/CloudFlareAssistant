@@ -33,16 +33,18 @@ class DevicePolicyAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(policy: DeviceSettingsPolicy) {
-            binding.policyNameText.text = policy.name ?: "未命名配置文件"
-            binding.policyDescriptionText.text = policy.description ?: "无描述"
+            val isDefault = policy.isDefault == true
             
-            // Match rule
-            binding.matchRuleText.text = "匹配规则: ${policy.match ?: "any"}"
+            binding.policyNameText.text = if (isDefault) "默认配置文件" else (policy.name ?: "未命名配置文件")
+            binding.policyDescriptionText.text = policy.description ?: (if (isDefault) "应用于所有未匹配其他配置文件的设备" else "无描述")
+            
+            // Match rule - default policy doesn't have match
+            binding.matchRuleText.text = if (isDefault) "匹配规则: 所有设备" else "匹配规则: ${policy.match ?: "any"}"
             
             // Settings
             binding.autoConnectText.text = "自动连接: ${getAutoConnectLabel(policy.autoConnect)}"
             binding.modeSwitchText.text = "模式切换: ${if (policy.allowModeSwitch == true) "允许" else "禁止"}"
-            binding.precedenceText.text = "优先级: ${policy.precedence ?: 0}"
+            binding.precedenceText.text = if (isDefault) "优先级: 默认" else "优先级: ${policy.precedence ?: 0}"
             
             // Enabled switch
             binding.enabledSwitch.setOnCheckedChangeListener(null)
@@ -52,7 +54,14 @@ class DevicePolicyAdapter(
             }
             
             binding.editButton.setOnClickListener { onEditClick(policy) }
-            binding.deleteButton.setOnClickListener { onDeleteClick(policy) }
+            
+            // Default policy cannot be deleted
+            if (isDefault) {
+                binding.deleteButton.visibility = android.view.View.GONE
+            } else {
+                binding.deleteButton.visibility = android.view.View.VISIBLE
+                binding.deleteButton.setOnClickListener { onDeleteClick(policy) }
+            }
         }
 
         private fun getAutoConnectLabel(autoConnect: Int?): String {
@@ -67,6 +76,9 @@ class DevicePolicyAdapter(
 
     private class DiffCallback : DiffUtil.ItemCallback<DeviceSettingsPolicy>() {
         override fun areItemsTheSame(oldItem: DeviceSettingsPolicy, newItem: DeviceSettingsPolicy): Boolean {
+            val oldIsDefault = oldItem.isDefault == true
+            val newIsDefault = newItem.isDefault == true
+            if (oldIsDefault && newIsDefault) return true
             return oldItem.policyId == newItem.policyId
         }
 

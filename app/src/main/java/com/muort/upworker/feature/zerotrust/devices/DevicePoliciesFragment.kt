@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.View.VISIBLE
+import android.view.View.GONE
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -14,7 +16,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.muort.upworker.R
+import com.muort.upworker.core.model.DevicePolicyUpdate
 import com.muort.upworker.core.model.DeviceSettingsPolicy
 import com.muort.upworker.core.model.DeviceSettingsPolicyRequest
 import com.muort.upworker.core.model.ServiceModeV2
@@ -71,6 +75,10 @@ class DevicePoliciesFragment : Fragment() {
             adapter = policyAdapter
         }
     }
+    
+    private fun isDefaultPolicy(policy: DeviceSettingsPolicy): Boolean {
+        return policy.isDefault == true
+    }
 
     private fun setupClickListeners() {
         binding.fabAddPolicy.setOnClickListener {
@@ -119,6 +127,10 @@ class DevicePoliciesFragment : Fragment() {
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_create_device_policy, null)
         
+        val nameInputLayout = dialogView.findViewById<TextInputLayout>(R.id.policyNameLayout)
+        val descriptionInputLayout = dialogView.findViewById<TextInputLayout>(R.id.policyDescriptionLayout)
+        val matchInputLayout = dialogView.findViewById<TextInputLayout>(R.id.policyMatchLayout)
+        val precedenceInputLayout = dialogView.findViewById<TextInputLayout>(R.id.policyPrecedenceLayout)
         val nameInput = dialogView.findViewById<TextInputEditText>(R.id.policyNameInput)
         val descriptionInput = dialogView.findViewById<TextInputEditText>(R.id.policyDescriptionInput)
         val matchInput = dialogView.findViewById<TextInputEditText>(R.id.policyMatchInput)
@@ -143,14 +155,17 @@ class DevicePoliciesFragment : Fragment() {
         val localNetworkExcludeSwitch = dialogView.findViewById<SwitchMaterial>(R.id.localNetworkExcludeSwitch)
         val splitTunnelExcludeInput = dialogView.findViewById<TextInputEditText>(R.id.splitTunnelExcludeInput)
         val splitTunnelIncludeInput = dialogView.findViewById<TextInputEditText>(R.id.splitTunnelIncludeInput)
+        val splitTunnelExcludeLayout = dialogView.findViewById<TextInputLayout>(R.id.splitTunnelExcludeLayout)
+        val splitTunnelIncludeLayout = dialogView.findViewById<TextInputLayout>(R.id.splitTunnelIncludeLayout)
+        val splitTunnelModeSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.splitTunnelModeSpinner)
         
         // Setup Spinner adapters
-        val autoConnectOptions = arrayOf("关闭", "开启", "强制")
+        val autoConnectOptions = arrayOf("关闭", "开启")
         val autoConnectAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, autoConnectOptions)
         autoConnectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         autoConnectSpinner.adapter = autoConnectAdapter
         
-        val captivePortalOptions = arrayOf("关闭", "开启", "强制")
+        val captivePortalOptions = arrayOf("关闭", "开启")
         val captivePortalAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, captivePortalOptions)
         captivePortalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         captivePortalSpinner.adapter = captivePortalAdapter
@@ -165,13 +180,45 @@ class DevicePoliciesFragment : Fragment() {
         serviceModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         serviceModeSpinner.adapter = serviceModeAdapter
         
-        // Populate existing data
+        val splitTunnelModeOptions = arrayOf("排除模式", "包含模式")
+        val splitTunnelModeAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, splitTunnelModeOptions)
+        splitTunnelModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        splitTunnelModeSpinner.adapter = splitTunnelModeAdapter
+        
+        splitTunnelModeSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>, view: View?, position: Int, id: Long) {
+                when (position) {
+                    0 -> {
+                        splitTunnelExcludeLayout.visibility = View.VISIBLE
+                        splitTunnelIncludeLayout.visibility = View.GONE
+                    }
+                    1 -> {
+                        splitTunnelExcludeLayout.visibility = View.GONE
+                        splitTunnelIncludeLayout.visibility = View.VISIBLE
+                    }
+                }
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>) {}
+        }
+        
+        val isDefault = existingPolicy != null && isDefaultPolicy(existingPolicy)
+        
+        if (isDefault) {
+            nameInputLayout.visibility = View.GONE
+            descriptionInputLayout.visibility = View.GONE
+            matchInputLayout.visibility = View.GONE
+            precedenceInputLayout.visibility = View.GONE
+            enabledSwitch.visibility = View.GONE
+        }
+        
         existingPolicy?.let { policy ->
-            nameInput.setText(policy.name ?: "")
-            descriptionInput.setText(policy.description ?: "")
-            matchInput.setText(simplifyMatchExpression(policy.match))
-            precedenceInput.setText(policy.precedence?.toString() ?: "100")
-            enabledSwitch.isChecked = policy.enabled ?: true
+            if (!isDefault) {
+                nameInput.setText(policy.name ?: "")
+                descriptionInput.setText(policy.description ?: "")
+                matchInput.setText(simplifyMatchExpression(policy.match))
+                precedenceInput.setText(policy.precedence?.toString() ?: "100")
+                enabledSwitch.isChecked = policy.enabled ?: true
+            }
             
             captivePortalSpinner.setSelection(getCaptivePortalIndex(policy.captivePortal))
             allowModeSwitch.isChecked = policy.allowModeSwitch ?: true
@@ -184,11 +231,21 @@ class DevicePoliciesFragment : Fragment() {
             serviceModeSpinner.setSelection(getServiceModeIndex(policy.serviceModeV2?.mode))
             
             excludeOfficeIpsSwitch.isChecked = policy.excludeOfficeIps ?: false
-            localNetworkExcludeSwitch.isChecked = policy.allowLocalNetworkExclusion ?: false
+            localNetworkExcludeSwitch.isChecked = (policy.lanAllowMinutes ?: 0) > 0
             ipDnsRegistrationSwitch.isChecked = policy.registerInterfaceIpWithDns ?: false
             sccmVpnBoundarySupportSwitch.isChecked = policy.sccmVpnBoundarySupport ?: false
             netbtEnabledSwitch.isChecked = policy.netbtEnabled ?: false
             gatewayUniqueIdInput.setText(policy.gatewayUniqueId ?: "")
+            
+            splitTunnelExcludeInput.setText(formatSplitTunnelAddresses(policy.exclude))
+            splitTunnelIncludeInput.setText(formatSplitTunnelAddresses(policy.include))
+            
+            val hasInclude = policy.include?.isNotEmpty() == true
+            if (hasInclude) {
+                splitTunnelModeSpinner.setSelection(1)
+            } else {
+                splitTunnelModeSpinner.setSelection(0)
+            }
         }
         
         MaterialAlertDialogBuilder(requireContext())
@@ -196,17 +253,6 @@ class DevicePoliciesFragment : Fragment() {
             .setView(dialogView)
             .setPositiveButton(if (existingPolicy == null) "创建" else "保存") { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
-                val name = nameInput.text?.toString()
-                
-                if (name.isNullOrBlank()) {
-                    Snackbar.make(binding.root, "配置文件名称不能为空", Snackbar.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                
-                val description = descriptionInput.text?.toString()?.takeIf { it.isNotBlank() }
-                val match = buildMatchExpression(matchInput.text?.toString())
-                val precedence = precedenceInput.text?.toString()?.toIntOrNull() ?: 100
-                val enabled = enabledSwitch.isChecked
                 
                 val captivePortal = getCaptivePortalValue(captivePortalSpinner.selectedItem?.toString())
                 val allowModeSwitchValue = allowModeSwitch.isChecked
@@ -219,48 +265,112 @@ class DevicePoliciesFragment : Fragment() {
                 val serviceMode = getServiceModeValue(serviceModeSpinner.selectedItem?.toString())
                 
                 val excludeOfficeIps = excludeOfficeIpsSwitch.isChecked
-                val localNetworkExclude = localNetworkExcludeSwitch.isChecked
                 val registerInterfaceIpWithDns = ipDnsRegistrationSwitch.isChecked
                 val sccmVpnBoundarySupport = sccmVpnBoundarySupportSwitch.isChecked
                 val netbtEnabled = netbtEnabledSwitch.isChecked
-                val gatewayUniqueId = gatewayUniqueIdInput.text?.toString()?.takeIf { it.isNotBlank() }
+                val lanAllowMinutes = if (localNetworkExcludeSwitch.isChecked) 60 else 0
                 
-                val splitTunnelExclude = parseSplitTunnelAddresses(splitTunnelExcludeInput.text?.toString())
-                val splitTunnelInclude = parseSplitTunnelAddresses(splitTunnelIncludeInput.text?.toString())
+                val splitTunnelMode = splitTunnelModeSpinner.selectedItemPosition
+                val splitTunnelExclude = if (splitTunnelMode == 0) parseSplitTunnelAddresses(splitTunnelExcludeInput.text?.toString()) else null
+                val splitTunnelInclude = if (splitTunnelMode == 1) parseSplitTunnelAddresses(splitTunnelIncludeInput.text?.toString()) else null
                 
                 val serviceModeV2 = if (serviceMode != null) ServiceModeV2(mode = serviceMode) else null
                 
-                val request = DeviceSettingsPolicyRequest(
-                    name = name,
-                    description = description,
-                    match = match,
-                    precedence = precedence,
-                    enabled = enabled,
-                    captivePortal = captivePortal,
-                    allowModeSwitch = allowModeSwitchValue,
-                    tunnelProtocol = tunnelProtocol,
-                    switchLocked = switchLocked,
-                    allowedToLeave = allowedToLeave,
-                    allowUpdates = allowUpdates,
-                    autoConnect = autoConnect,
-                    supportUrl = supportUrl,
-                    serviceModeV2 = serviceModeV2,
-                    excludeOfficeIps = excludeOfficeIps,
-                    allowLocalNetworkExclusion = localNetworkExclude,
-                    registerInterfaceIpWithDns = registerInterfaceIpWithDns,
-                    sccmVpnBoundarySupport = sccmVpnBoundarySupport,
-                    netbtEnabled = netbtEnabled,
-                    gatewayUniqueId = gatewayUniqueId,
-                    exclude = splitTunnelExclude,
-                    include = splitTunnelInclude
-                )
-                
                 if (existingPolicy == null) {
+                    val name = nameInput.text?.toString()
+                    if (name.isNullOrBlank()) {
+                        Snackbar.make(binding.root, "配置文件名称不能为空", Snackbar.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
+                    
+                    val description = descriptionInput.text?.toString()?.takeIf { it.isNotBlank() }
+                    val match = buildMatchExpression(matchInput.text?.toString())
+                    val precedence = precedenceInput.text?.toString()?.toIntOrNull() ?: 100
+                    val enabled = enabledSwitch.isChecked
+                    
+                    val request = DeviceSettingsPolicyRequest(
+                        name = name,
+                        description = description,
+                        match = match,
+                        precedence = precedence,
+                        enabled = enabled,
+                        captivePortal = captivePortal,
+                        allowModeSwitch = allowModeSwitchValue,
+                        tunnelProtocol = tunnelProtocol,
+                        switchLocked = switchLocked,
+                        allowedToLeave = allowedToLeave,
+                        allowUpdates = allowUpdates,
+                        autoConnect = autoConnect,
+                        supportUrl = supportUrl,
+                        serviceModeV2 = serviceModeV2,
+                        excludeOfficeIps = excludeOfficeIps,
+                        registerInterfaceIpWithDns = registerInterfaceIpWithDns,
+                        sccmVpnBoundarySupport = sccmVpnBoundarySupport,
+                        netbtEnabled = netbtEnabled,
+                        lanAllowMinutes = lanAllowMinutes
+                    )
+                    
                     viewModel.createPolicy(account, request)
+                    
+                    viewModel.setSplitTunnel(account, null, splitTunnelExclude, splitTunnelInclude)
                 } else {
+                    if (isDefaultPolicy(existingPolicy)) {
+                        val update = DevicePolicyUpdate(
+                            allowModeSwitch = allowModeSwitchValue,
+                            allowUpdates = allowUpdates,
+                            allowedToLeave = allowedToLeave,
+                            autoConnect = autoConnect,
+                            captivePortal = captivePortal,
+                            excludeOfficeIps = excludeOfficeIps,
+                            registerInterfaceIpWithDns = registerInterfaceIpWithDns,
+                            sccmVpnBoundarySupport = sccmVpnBoundarySupport,
+                            serviceModeV2 = serviceModeV2,
+                            supportUrl = supportUrl,
+                            switchLocked = switchLocked,
+                            tunnelProtocol = tunnelProtocol,
+                            lanAllowMinutes = lanAllowMinutes
+                        )
+                        viewModel.updateDefaultPolicy(account, update)
+                        viewModel.setSplitTunnel(account, null, splitTunnelExclude, splitTunnelInclude)
+                    } else {
+                        val name = nameInput.text?.toString()
+                        if (name.isNullOrBlank()) {
+                            Snackbar.make(binding.root, "配置文件名称不能为空", Snackbar.LENGTH_SHORT).show()
+                            return@setPositiveButton
+                        }
+                        
+                        val description = descriptionInput.text?.toString()?.takeIf { it.isNotBlank() }
+                        val match = buildMatchExpression(matchInput.text?.toString())
+                        val precedence = precedenceInput.text?.toString()?.toIntOrNull() ?: 100
+                        val enabled = enabledSwitch.isChecked
+                        
+                        val request = DeviceSettingsPolicyRequest(
+                        name = name,
+                        description = description,
+                        match = match,
+                        precedence = precedence,
+                        enabled = enabled,
+                        captivePortal = captivePortal,
+                        allowModeSwitch = allowModeSwitchValue,
+                        tunnelProtocol = tunnelProtocol,
+                        switchLocked = switchLocked,
+                        allowedToLeave = allowedToLeave,
+                        allowUpdates = allowUpdates,
+                        autoConnect = autoConnect,
+                        supportUrl = supportUrl,
+                        serviceModeV2 = serviceModeV2,
+                        excludeOfficeIps = excludeOfficeIps,
+                        registerInterfaceIpWithDns = registerInterfaceIpWithDns,
+                        sccmVpnBoundarySupport = sccmVpnBoundarySupport,
+                        netbtEnabled = netbtEnabled,
+                        lanAllowMinutes = lanAllowMinutes
+                    )
+                    
                     existingPolicy.policyId?.let { policyId ->
                         viewModel.updatePolicy(account, policyId, request)
+                        viewModel.setSplitTunnel(account, policyId, splitTunnelExclude, splitTunnelInclude)
                     }
+                }
                 }
             }
             .setNegativeButton("取消", null)
@@ -270,26 +380,22 @@ class DevicePoliciesFragment : Fragment() {
     private fun getAutoConnectLabel(autoConnect: Int?): String {
         return when (autoConnect) {
             0 -> "关闭"
-            1 -> "开启"
-            2 -> "强制"
-            else -> "开启"
+            180 -> "开启"
+            else -> if (autoConnect != null && autoConnect > 0) "${autoConnect / 60}分钟" else "关闭"
         }
     }
     
     private fun getAutoConnectValue(label: String?): Int? {
         return when (label) {
             "关闭" -> 0
-            "开启" -> 1
-            "强制" -> 2
-            else -> 1
+            "开启" -> 180
+            else -> 180
         }
     }
     
     private fun getAutoConnectIndex(autoConnect: Int?): Int {
         return when (autoConnect) {
             0 -> 0
-            1 -> 1
-            2 -> 2
             else -> 1
         }
     }
@@ -297,17 +403,15 @@ class DevicePoliciesFragment : Fragment() {
     private fun getCaptivePortalLabel(captivePortal: Int?): String {
         return when (captivePortal) {
             0 -> "关闭"
-            1 -> "开启"
-            2 -> "强制"
-            else -> "关闭"
+            180 -> "开启"
+            else -> if (captivePortal != null && captivePortal > 0) "${captivePortal / 60}分钟" else "关闭"
         }
     }
     
     private fun getCaptivePortalValue(label: String?): Int? {
         return when (label) {
             "关闭" -> 0
-            "开启" -> 1
-            "强制" -> 2
+            "开启" -> 180
             else -> 0
         }
     }
@@ -315,9 +419,7 @@ class DevicePoliciesFragment : Fragment() {
     private fun getCaptivePortalIndex(captivePortal: Int?): Int {
         return when (captivePortal) {
             0 -> 0
-            1 -> 1
-            2 -> 2
-            else -> 0
+            else -> 1
         }
     }
     
@@ -377,30 +479,54 @@ class DevicePoliciesFragment : Fragment() {
 
     private fun updatePolicyEnabled(policy: DeviceSettingsPolicy, enabled: Boolean) {
         val account = accountViewModel.defaultAccount.value ?: return
-        policy.policyId?.let { policyId ->
-            val request = DeviceSettingsPolicyRequest(
-                name = policy.name ?: "",
-                description = policy.description,
-                match = policy.match,
-                precedence = policy.precedence,
-                enabled = enabled,
-                autoConnect = policy.autoConnect,
+        
+        if (isDefaultPolicy(policy)) {
+            val update = DevicePolicyUpdate(
                 allowModeSwitch = policy.allowModeSwitch,
-                switchLocked = policy.switchLocked,
-                excludeOfficeIps = policy.excludeOfficeIps,
-                allowedToLeave = policy.allowedToLeave,
-                supportUrl = policy.supportUrl,
-                captivePortal = policy.captivePortal,
-                disableAutoFallback = policy.disableAutoFallback,
-                gatewayUniqueId = policy.gatewayUniqueId,
-                tunnelProtocol = policy.tunnelProtocol,
                 allowUpdates = policy.allowUpdates,
-                serviceModeV2 = policy.serviceModeV2,
+                allowedToLeave = policy.allowedToLeave,
+                autoConnect = policy.autoConnect,
+                captivePortal = policy.captivePortal,
+                exclude = policy.exclude,
+                excludeOfficeIps = policy.excludeOfficeIps,
+                include = policy.include,
                 registerInterfaceIpWithDns = policy.registerInterfaceIpWithDns,
                 sccmVpnBoundarySupport = policy.sccmVpnBoundarySupport,
-                netbtEnabled = policy.netbtEnabled
+                serviceModeV2 = policy.serviceModeV2,
+                supportUrl = policy.supportUrl,
+                switchLocked = policy.switchLocked,
+                tunnelProtocol = policy.tunnelProtocol,
+                lanAllowMinutes = policy.lanAllowMinutes
             )
-            viewModel.updatePolicy(account, policyId, request)
+            viewModel.updateDefaultPolicy(account, update)
+        } else {
+            policy.policyId?.let { policyId ->
+                val request = DeviceSettingsPolicyRequest(
+                    name = policy.name ?: "",
+                    description = policy.description,
+                    match = policy.match,
+                    precedence = policy.precedence,
+                    enabled = enabled,
+                    autoConnect = policy.autoConnect,
+                    allowModeSwitch = policy.allowModeSwitch,
+                    switchLocked = policy.switchLocked,
+                    excludeOfficeIps = policy.excludeOfficeIps,
+                    allowedToLeave = policy.allowedToLeave,
+                    supportUrl = policy.supportUrl,
+                    captivePortal = policy.captivePortal,
+                    disableAutoFallback = policy.disableAutoFallback,
+                    tunnelProtocol = policy.tunnelProtocol,
+                    allowUpdates = policy.allowUpdates,
+                    serviceModeV2 = policy.serviceModeV2,
+                    registerInterfaceIpWithDns = policy.registerInterfaceIpWithDns,
+                    sccmVpnBoundarySupport = policy.sccmVpnBoundarySupport,
+                    netbtEnabled = policy.netbtEnabled,
+                    lanAllowMinutes = policy.lanAllowMinutes,
+                    exclude = policy.exclude,
+                    include = policy.include
+                )
+                viewModel.updatePolicy(account, policyId, request)
+            }
         }
     }
 
@@ -441,9 +567,26 @@ class DevicePoliciesFragment : Fragment() {
         return input.split("\n")
             .map { it.trim() }
             .filter { it.isNotBlank() }
-            .map { address ->
-                SplitTunnel(address = address)
+            .map { item ->
+                if (isValidIpAddress(item)) {
+                    SplitTunnel(address = item)
+                } else {
+                    SplitTunnel(host = item)
+                }
             }
+    }
+
+    private fun formatSplitTunnelAddresses(items: List<SplitTunnel>?): String {
+        if (items.isNullOrEmpty()) return ""
+        return items.joinToString("\n") { item ->
+            item.address ?: item.host ?: ""
+        }
+    }
+
+    private fun isValidIpAddress(input: String): Boolean {
+        val ipv4Regex = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/[0-9]{1,2})?$"
+        val ipv6Regex = "^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}(?:/[0-9]{1,3})?$"
+        return input.matches(ipv4Regex.toRegex()) || input.matches(ipv6Regex.toRegex())
     }
 
     override fun onDestroyView() {

@@ -151,4 +151,71 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
+    
+    fun updateDefaultPolicy(account: Account, update: DevicePolicyUpdate) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.updateDefaultDevicePolicy(account, update)) {
+                is Resource.Success -> {
+                    _message.emit("默认配置文件已更新")
+                    loadPolicies(account)
+                }
+                is Resource.Error -> {
+                    _error.emit("更新默认配置文件失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+    
+    fun setSplitTunnel(
+        account: Account,
+        policyId: String?,
+        excludeItems: List<SplitTunnel>?,
+        includeItems: List<SplitTunnel>?
+    ) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            
+            if (policyId.isNullOrBlank()) {
+                if (excludeItems != null) {
+                    when (val result = zeroTrustRepository.setDefaultSplitTunnelExclude(account, excludeItems)) {
+                        is Resource.Error -> {
+                            _error.emit("更新拆分隧道排除列表失败: ${result.message}")
+                        }
+                        else -> {}
+                    }
+                }
+                if (includeItems != null) {
+                    when (val result = zeroTrustRepository.setDefaultSplitTunnelInclude(account, includeItems)) {
+                        is Resource.Error -> {
+                            _error.emit("更新拆分隧道包含列表失败: ${result.message}")
+                        }
+                        else -> {}
+                    }
+                }
+            } else {
+                if (excludeItems != null) {
+                    when (val result = zeroTrustRepository.setSplitTunnelExclude(account, policyId, excludeItems)) {
+                        is Resource.Error -> {
+                            _error.emit("更新拆分隧道排除列表失败: ${result.message}")
+                        }
+                        else -> {}
+                    }
+                }
+                if (includeItems != null) {
+                    when (val result = zeroTrustRepository.setSplitTunnelInclude(account, policyId, includeItems)) {
+                        is Resource.Error -> {
+                            _error.emit("更新拆分隧道包含列表失败: ${result.message}")
+                        }
+                        else -> {}
+                    }
+                }
+            }
+            
+            loadPolicies(account)
+            _loadingState.value = false
+        }
+    }
 }

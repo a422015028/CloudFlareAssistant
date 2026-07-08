@@ -58,11 +58,10 @@ class DeviceSettingsPolicyRequestAdapter : JsonSerializer<DeviceSettingsPolicyRe
         }
         
         if (src.excludeOfficeIps != null) jsonObject.addProperty("exclude_office_ips", src.excludeOfficeIps)
-        if (src.allowLocalNetworkExclusion != null) jsonObject.addProperty("allow_local_network_exclusion", src.allowLocalNetworkExclusion)
         if (src.registerInterfaceIpWithDns != null) jsonObject.addProperty("register_interface_ip_with_dns", src.registerInterfaceIpWithDns)
         if (src.sccmVpnBoundarySupport != null) jsonObject.addProperty("sccm_vpn_boundary_support", src.sccmVpnBoundarySupport)
         if (src.netbtEnabled != null) jsonObject.addProperty("enable_netbt", src.netbtEnabled)
-        src.gatewayUniqueId?.takeIf { it.isNotBlank() }?.let { jsonObject.addProperty("gateway_unique_id", it) }
+        if (src.lanAllowMinutes != null) jsonObject.addProperty("lan_allow_minutes", src.lanAllowMinutes)
         
         return jsonObject
     }
@@ -101,7 +100,8 @@ class DeviceSettingsPolicyRequestAdapter : JsonSerializer<DeviceSettingsPolicyRe
             } else null,
             registerInterfaceIpWithDns = if (obj.has("register_interface_ip_with_dns") && !obj.get("register_interface_ip_with_dns").isJsonNull) obj.get("register_interface_ip_with_dns").asBoolean else null,
             sccmVpnBoundarySupport = if (obj.has("sccm_vpn_boundary_support") && !obj.get("sccm_vpn_boundary_support").isJsonNull) obj.get("sccm_vpn_boundary_support").asBoolean else null,
-            netbtEnabled = if (obj.has("enable_netbt") && !obj.get("enable_netbt").isJsonNull) obj.get("enable_netbt").asBoolean else null
+            netbtEnabled = if (obj.has("enable_netbt") && !obj.get("enable_netbt").isJsonNull) obj.get("enable_netbt").asBoolean else null,
+            lanAllowMinutes = if (obj.has("lan_allow_minutes") && !obj.get("lan_allow_minutes").isJsonNull) obj.get("lan_allow_minutes").asInt else null
         )
     }
 }

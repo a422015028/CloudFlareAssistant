@@ -1360,6 +1360,56 @@ interface CloudFlareApi {
         @Path("policy_id") policyId: String
     ): Response<CloudFlareResponse<List<DeviceSettingsPolicy>>>
     
+    /**
+     * Set Split Tunnel exclude list for default policy
+     */
+    @PUT("accounts/{account_id}/devices/policy/exclude")
+    suspend fun setDefaultSplitTunnelExclude(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body items: List<SplitTunnel>
+    ): Response<CloudFlareResponse<List<SplitTunnel>>>
+    
+    /**
+     * Set Split Tunnel include list for default policy
+     */
+    @PUT("accounts/{account_id}/devices/policy/include")
+    suspend fun setDefaultSplitTunnelInclude(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body items: List<SplitTunnel>
+    ): Response<CloudFlareResponse<List<SplitTunnel>>>
+    
+    /**
+     * Set Split Tunnel exclude list for a device policy
+     */
+    @PUT("accounts/{account_id}/devices/policy/{policy_id}/exclude")
+    suspend fun setSplitTunnelExclude(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("policy_id") policyId: String,
+        @Body items: List<SplitTunnel>
+    ): Response<CloudFlareResponse<List<SplitTunnel>>>
+    
+    /**
+     * Set Split Tunnel include list for a device policy
+     */
+    @PUT("accounts/{account_id}/devices/policy/{policy_id}/include")
+    suspend fun setSplitTunnelInclude(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("policy_id") policyId: String,
+        @Body items: List<SplitTunnel>
+    ): Response<CloudFlareResponse<List<SplitTunnel>>>
+    
     // ==================== Zero Trust - Tunnels ====================
     
     /**

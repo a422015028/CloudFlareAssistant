@@ -1065,6 +1065,102 @@ class ZeroTrustRepository @Inject constructor(
             }
         }
     
+    suspend fun setDefaultSplitTunnelExclude(
+        account: Account,
+        items: List<SplitTunnel>
+    ): Resource<List<SplitTunnel>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.setDefaultSplitTunnelExclude(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    items = items
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result!!)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to set split tunnel exclude"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+    
+    suspend fun setDefaultSplitTunnelInclude(
+        account: Account,
+        items: List<SplitTunnel>
+    ): Resource<List<SplitTunnel>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.setDefaultSplitTunnelInclude(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    items = items
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result!!)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to set split tunnel include"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+    
+    suspend fun setSplitTunnelExclude(
+        account: Account,
+        policyId: String,
+        items: List<SplitTunnel>
+    ): Resource<List<SplitTunnel>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.setSplitTunnelExclude(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    policyId = policyId,
+                    items = items
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result!!)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to set split tunnel exclude"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+    
+    suspend fun setSplitTunnelInclude(
+        account: Account,
+        policyId: String,
+        items: List<SplitTunnel>
+    ): Resource<List<SplitTunnel>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.setSplitTunnelInclude(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    policyId = policyId,
+                    items = items
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result!!)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to set split tunnel include"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+    
     /**
      * Delete a device policy
      */
