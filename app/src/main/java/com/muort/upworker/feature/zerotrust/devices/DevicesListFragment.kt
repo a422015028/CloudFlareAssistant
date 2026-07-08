@@ -56,12 +56,8 @@ class DevicesListFragment : Fragment() {
             },
             onItemClick = { device ->
                 showDeviceDetailDialog(device)
-            },
-            onPolicyClick = { device ->
-                showPolicySelectionDialog(device)
             }
         )
-        
         binding.devicesRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = deviceAdapter
@@ -108,16 +104,16 @@ class DevicesListFragment : Fragment() {
     private fun showDeviceDetailDialog(device: Device) {
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_device_detail, null)
-        
+
         // Device Name
-        dialogView.findViewById<TextView>(R.id.deviceNameText).text = 
+        dialogView.findViewById<TextView>(R.id.deviceNameText).text =
             device.name ?: device.model ?: "未知设备"
-        
+
         // Device Type Chip
         val deviceType = device.type ?: device.deviceType
         val typeChip = dialogView.findViewById<Chip>(R.id.deviceTypeChip)
         typeChip.text = getDeviceTypeLabel(deviceType)
-        
+
         // Status Chip
         val isRevoked = device.revokedAt != null
         val statusChip = dialogView.findViewById<Chip>(R.id.statusChip)
@@ -125,30 +121,56 @@ class DevicesListFragment : Fragment() {
         statusChip.setChipBackgroundColorResource(
             if (isRevoked) android.R.color.holo_red_light else android.R.color.holo_green_light
         )
-        
-        // User Info
-        dialogView.findViewById<TextView>(R.id.userEmailText).text = 
-            device.user?.email ?: device.user?.name ?: "未知用户"
-        dialogView.findViewById<TextView>(R.id.userIdText).text = 
-            "ID: ${device.user?.id ?: "N/A"}"
-        
+
+        // Active Registrations Chip
+        val activeRegChip = dialogView.findViewById<Chip>(R.id.activeRegChip)
+        activeRegChip.text = "活跃注册: ${device.activeRegistrations ?: 0}"
+
+        // User Info - last_seen_user preferred
+        val user = device.lastSeenUser ?: device.user
+        dialogView.findViewById<TextView>(R.id.userEmailText).text =
+            user?.email ?: user?.name ?: "未知用户"
+        dialogView.findViewById<TextView>(R.id.userIdText).text =
+            "ID: ${user?.id ?: "N/A"}"
+
         // Device Info
         dialogView.findViewById<TextView>(R.id.modelText).text = device.model ?: "N/A"
         dialogView.findViewById<TextView>(R.id.manufacturerText).text = device.manufacturer ?: "N/A"
         dialogView.findViewById<TextView>(R.id.osVersionText).text = device.osVersion ?: "N/A"
+        dialogView.findViewById<TextView>(R.id.osVersionExtraText).text = device.osVersionExtra ?: "N/A"
         dialogView.findViewById<TextView>(R.id.serialText).text = device.serialNumber ?: "N/A"
         dialogView.findViewById<TextView>(R.id.macAddressText).text = device.macAddress ?: "N/A"
-        
+        dialogView.findViewById<TextView>(R.id.hardwareIdText).text = device.hardwareId ?: "N/A"
+        dialogView.findViewById<TextView>(R.id.clientVersionText).text =
+            device.clientVersion ?: device.version ?: "N/A"
+        dialogView.findViewById<TextView>(R.id.deviceIdText).text = device.id
+
         // Network Info
-        dialogView.findViewById<TextView>(R.id.ipAddressText).text = 
-            "IP: ${device.ip ?: "未知"}"
-        
+        val ipAddr = device.publicIp ?: device.ip
+        dialogView.findViewById<TextView>(R.id.ipAddressText).text =
+            "IP: ${ipAddr ?: "未知"}"
+
+        // Policy Info - last_seen_registration.policy
+        val policy = device.lastSeenRegistration?.policy
+        dialogView.findViewById<TextView>(R.id.policyNameText).text =
+            policy?.name ?: device.policyName ?: "默认"
+        dialogView.findViewById<TextView>(R.id.policyDefaultText).text =
+            if (policy?.default == true) "是" else "否"
+        dialogView.findViewById<TextView>(R.id.policyDeletedText).text =
+            if (policy?.deleted == true) "是" else "否"
+        dialogView.findViewById<TextView>(R.id.policyUpdatedAtText).text =
+            formatDateTime(policy?.updatedAt)
+
         // Time Info
-        dialogView.findViewById<TextView>(R.id.createdAtText).text = 
-            "创建时间: ${formatDateTime(device.created)}"
-        dialogView.findViewById<TextView>(R.id.updatedAtText).text = 
-            "更新时间: ${formatDateTime(device.updated)}"
-        
+        val createdTime = device.createdAt ?: device.created
+        val updatedTime = device.updatedAt ?: device.updated
+        dialogView.findViewById<TextView>(R.id.createdAtText).text =
+            "创建时间: ${formatDateTime(createdTime)}"
+        dialogView.findViewById<TextView>(R.id.updatedAtText).text =
+            "更新时间: ${formatDateTime(updatedTime)}"
+        dialogView.findViewById<TextView>(R.id.lastSeenAtText).text =
+            "最后活跃: ${formatDateTime(device.lastSeenAt)}"
+
         // Revoked Info
         val revokedText = dialogView.findViewById<TextView>(R.id.revokedAtText)
         if (isRevoked) {
@@ -157,25 +179,27 @@ class DevicesListFragment : Fragment() {
         } else {
             revokedText.visibility = View.GONE
         }
-        
-        // Policy Info
-        val policyNameText = dialogView.findViewById<TextView>(R.id.policyNameText)
-        policyNameText.text = device.policyName ?: "默认"
-        policyNameText.setOnClickListener {
-            showPolicySelectionDialog(device)
+
+        // Deleted Info
+        val deletedText = dialogView.findViewById<TextView>(R.id.deletedAtText)
+        if (device.deletedAt != null) {
+            deletedText.visibility = View.VISIBLE
+            deletedText.text = "删除时间: ${formatDateTime(device.deletedAt)}"
+        } else {
+            deletedText.visibility = View.GONE
         }
-        
+
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle("设备详情")
             .setView(dialogView)
             .setNegativeButton("关闭", null)
-        
+
         if (!isRevoked) {
             builder.setPositiveButton("撤销设备") { _, _ ->
                 confirmRevokeDevice(device.id, device.name ?: device.model ?: "设备")
             }
         }
-        
+
         builder.show()
     }
 
@@ -201,36 +225,6 @@ class DevicesListFragment : Fragment() {
             "ios" -> "iOS"
             "chromeos" -> "ChromeOS"
             else -> type?.uppercase() ?: "未知"
-        }
-    }
-
-    private fun showPolicySelectionDialog(device: Device) {
-        val account = accountViewModel.defaultAccount.value ?: return
-        
-        viewModel.loadPolicies(account)
-        
-        viewLifecycleOwner.lifecycleScope.launch {
-            val policies = viewModel.policies.value
-            if (policies.isEmpty()) {
-                Snackbar.make(binding.root, "暂无配置文件", Snackbar.LENGTH_SHORT).show()
-                return@launch
-            }
-            
-            val policyNames = policies.map { it.name ?: "未命名配置文件" }.toTypedArray()
-            val policyIds = policies.map { it.policyId ?: "" }.toTypedArray()
-            val currentPolicyIndex = policies.indexOfFirst { it.policyId == device.policyId }
-            
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("选择配置文件")
-                .setSingleChoiceItems(policyNames, currentPolicyIndex) { dialog, which ->
-                    val selectedPolicyId = policyIds[which]
-                    if (selectedPolicyId.isNotBlank()) {
-                        viewModel.updateDevicePolicyAssignment(account, device.id, selectedPolicyId)
-                    }
-                    dialog.dismiss()
-                }
-                .setNegativeButton("取消", null)
-                .show()
         }
     }
 

@@ -353,26 +353,50 @@ data class Device(
     @SerializedName("key") val key: String? = null,
     @SerializedName("name") val name: String? = null,
     @SerializedName("model") val model: String? = null,
-    @SerializedName("type") val type: String? = null, // "windows", "mac", "linux", "android", "ios"
+    @SerializedName("type") val type: String? = null,
+    @SerializedName("device_type") val deviceType: String? = null,
     @SerializedName("os_version") val osVersion: String? = null,
+    @SerializedName("os_version_extra") val osVersionExtra: String? = null,
     @SerializedName("serial_number") val serialNumber: String? = null,
-    @SerializedName("user") val user: DeviceUser? = null,
-    @SerializedName("ip") val ip: String? = null,
     @SerializedName("mac_address") val macAddress: String? = null,
+    @SerializedName("manufacturer") val manufacturer: String? = null,
+    @SerializedName("client_version") val clientVersion: String? = null,
+    @SerializedName("version") val version: String? = null,
+    @SerializedName("hardware_id") val hardwareId: String? = null,
+    @SerializedName("active_registrations") val activeRegistrations: Int? = null,
+    @SerializedName("public_ip") val publicIp: String? = null,
+    @SerializedName("ip") val ip: String? = null,
     @SerializedName("created") val created: String? = null,
     @SerializedName("updated") val updated: String? = null,
+    @SerializedName("created_at") val createdAt: String? = null,
+    @SerializedName("updated_at") val updatedAt: String? = null,
+    @SerializedName("last_seen_at") val lastSeenAt: String? = null,
+    @SerializedName("deleted_at") val deletedAt: String? = null,
     @SerializedName("revoked_at") val revokedAt: String? = null,
-    @SerializedName("device_type") val deviceType: String? = null,
-    @SerializedName("manufacturer") val manufacturer: String? = null,
-    @SerializedName("version") val version: String? = null,
+    @SerializedName("user") val user: DeviceUser? = null,
+    @SerializedName("last_seen_user") val lastSeenUser: DeviceUser? = null,
+    @SerializedName("last_seen_registration") val lastSeenRegistration: LastSeenRegistration? = null,
     @SerializedName("policy_id") val policyId: String? = null,
-    @SerializedName("policy_name") val policyName: String? = null
+    @SerializedName("policy_name") val policyName: String? = null,
+    @SerializedName("gateway_device_id") val gatewayDeviceId: String? = null
 )
 
 data class DeviceUser(
     @SerializedName("id") val id: String,
     @SerializedName("name") val name: String? = null,
     @SerializedName("email") val email: String? = null
+)
+
+data class LastSeenRegistration(
+    @SerializedName("policy") val policy: DevicePolicySummary? = null
+)
+
+data class DevicePolicySummary(
+    @SerializedName("id") val id: String? = null,
+    @SerializedName("default") val default: Boolean? = null,
+    @SerializedName("deleted") val deleted: Boolean? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("updated_at") val updatedAt: String? = null
 )
 
 // ==================== Zero Trust - Device Policies ====================

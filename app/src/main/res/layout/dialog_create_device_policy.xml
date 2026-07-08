@@ -109,13 +109,30 @@
             android:textColor="?attr/colorPrimary" />
 
         <!-- 强制网络门户检测 -->
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/captivePortalSwitch"
+        <LinearLayout
+            android:id="@+id/captivePortalLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="强制网络门户检测"
-            android:textSize="13sp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="强制网络门户检测"
+                android:textSize="13sp" />
+            <Spinner
+                android:id="@+id/captivePortalMinutesSpinner"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown"
+                android:background="@android:color/transparent" />
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/captivePortalSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <!-- 模式切换 -->
         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -180,13 +197,30 @@
             android:textSize="13sp" />
 
         <!-- 自动连接 -->
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/autoConnectSwitch"
+        <LinearLayout
+            android:id="@+id/autoConnectLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="自动连接"
-            android:textSize="13sp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="自动连接"
+                android:textSize="13sp" />
+            <Spinner
+                android:id="@+id/autoConnectMinutesSpinner"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown"
+                android:background="@android:color/transparent" />
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/autoConnectSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <!-- 服务模式 -->
         <LinearLayout
@@ -294,13 +328,30 @@
             android:textSize="13sp" />
 
         <!-- 允许用户以启用本地网络排除 -->
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/localNetworkExcludeSwitch"
+        <LinearLayout
+            android:id="@+id/localNetworkExcludeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="允许用户以启用本地网络排除"
-            android:textSize="13sp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="允许用户以启用本地网络排除"
+                android:textSize="13sp" />
+            <Spinner
+                android:id="@+id/localNetworkExcludeMinutesSpinner"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown"
+                android:background="@android:color/transparent" />
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/localNetworkExcludeSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <!-- 设备客户端接口 IP DNS 注册 -->
         <com.google.android.material.switchmaterial.SwitchMaterial

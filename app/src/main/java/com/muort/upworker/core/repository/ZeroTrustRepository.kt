@@ -906,29 +906,31 @@ class ZeroTrustRepository @Inject constructor(
                 }
             }
         }
-    
-    suspend fun updateDevicePolicyAssignment(account: Account, deviceId: String, policyId: String): Resource<Device?> =
+
+    /**
+     * Delete a device
+     */
+    suspend fun deleteDevice(account: Account, deviceId: String): Resource<Unit> =
         withContext(Dispatchers.IO) {
             safeApiCall {
-                val response = api.updateDevicePolicyAssignment(
+                val response = api.deleteDevice(
                     token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
-                    deviceId = deviceId,
-                    request = DeviceUpdateRequest(policyId)
+                    deviceId = deviceId
                 )
                 if (response.isSuccessful) {
-                    Timber.d("Updated device policy assignment: $deviceId -> $policyId")
-                    Resource.Success(response.body()?.result)
+                    Timber.d("Deleted device: $deviceId")
+                    Resource.Success(Unit)
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message
-                        ?: "Failed to update device policy"
+                        ?: "Failed to delete device"
                     Resource.Error(errorMsg)
                 }
             }
         }
-    
+
     // ==================== Device Policies ====================
     
     /**

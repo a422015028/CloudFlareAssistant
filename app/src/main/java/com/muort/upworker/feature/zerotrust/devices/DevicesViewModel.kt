@@ -66,17 +66,17 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
-    
-    fun updateDevicePolicyAssignment(account: Account, deviceId: String, policyId: String) {
+
+    fun deleteDevice(account: Account, deviceId: String) {
         viewModelScope.launch {
             _loadingState.value = true
-            when (val result = zeroTrustRepository.updateDevicePolicyAssignment(account, deviceId, policyId)) {
+            when (val result = zeroTrustRepository.deleteDevice(account, deviceId)) {
                 is Resource.Success -> {
-                    _message.emit("配置文件已更新")
+                    _message.emit("设备已删除")
                     loadDevices(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("更新配置文件失败: ${result.message}")
+                    _error.emit("删除设备失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }

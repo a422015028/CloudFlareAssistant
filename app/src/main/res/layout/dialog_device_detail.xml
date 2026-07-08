@@ -38,6 +38,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 style="@style/Widget.Material3.Chip.Assist" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/activeRegChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                style="@style/Widget.Material3.Chip.Assist" />
         </LinearLayout>
 
         <!-- Divider -->
@@ -51,7 +58,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="用户信息"
+            android:text="最后活跃用户"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />
@@ -139,6 +146,20 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="系统版本附加"
+                    android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:id="@+id/osVersionExtraText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textAlignment="textEnd" />
+            </TableRow>
+
+            <TableRow android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="序列号"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
@@ -161,6 +182,49 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:textAlignment="textEnd" />
+            </TableRow>
+
+            <TableRow android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="硬件 ID"
+                    android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:id="@+id/hardwareIdText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textAlignment="textEnd" />
+            </TableRow>
+
+            <TableRow android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="客户端版本"
+                    android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:id="@+id/clientVersionText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textAlignment="textEnd" />
+            </TableRow>
+
+            <TableRow android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="设备 ID"
+                    android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:id="@+id/deviceIdText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textAlignment="textEnd"
+                    android:textSize="12sp" />
             </TableRow>
 
         </TableLayout>
@@ -201,22 +265,76 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="配置文件"
+            android:text="最后活跃的设备配置文件"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />
 
-        <TextView
-            android:id="@+id/policyNameText"
+        <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:textSize="16sp"
-            android:textColor="?attr/colorPrimary"
-            android:textStyle="italic"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="4dp" />
+            android:stretchColumns="1">
+
+            <TableRow android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="配置文件名称"
+                    android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:id="@+id/policyNameText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textAlignment="textEnd"
+                    android:textColor="?attr/colorPrimary"
+                    android:textStyle="italic" />
+            </TableRow>
+
+            <TableRow android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="是否默认"
+                    android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:id="@+id/policyDefaultText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textAlignment="textEnd" />
+            </TableRow>
+
+            <TableRow android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="是否已删除"
+                    android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:id="@+id/policyDeletedText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textAlignment="textEnd" />
+            </TableRow>
+
+            <TableRow android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="配置文件更新时间"
+                    android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:id="@+id/policyUpdatedAtText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textAlignment="textEnd" />
+            </TableRow>
+
+        </TableLayout>
 
         <!-- Divider -->
         <View
@@ -249,7 +367,23 @@
             android:textSize="14sp" />
 
         <TextView
+            android:id="@+id/lastSeenAtText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp" />
+
+        <TextView
             android:id="@+id/revokedAtText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/holo_red_light"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/deletedAtText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"

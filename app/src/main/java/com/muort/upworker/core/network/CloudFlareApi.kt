@@ -1240,32 +1240,32 @@ interface CloudFlareApi {
     /**
      * List Devices
      */
-    @GET("accounts/{account_id}/devices")
+    @GET("accounts/{account_id}/devices/physical-devices")
     suspend fun listDevices(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
-        @Query("per_page") perPage: Int = 50,
-        @Query("page") page: Int = 1
+        @Query("include") include: String = "last_seen_registration.policy"
     ): Response<CloudFlareResponse<List<Device>>>
-    
+
     /**
      * Get Device
      */
-    @GET("accounts/{account_id}/devices/{device_id}")
+    @GET("accounts/{account_id}/devices/physical-devices/{device_id}")
     suspend fun getDevice(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
-        @Path("device_id") deviceId: String
+        @Path("device_id") deviceId: String,
+        @Query("include") include: String = "last_seen_registration.policy"
     ): Response<CloudFlareResponse<Device>>
-    
+
     /**
-     * Revoke Device
+     * Revoke Device (POST revoke endpoint)
      */
-    @DELETE("accounts/{account_id}/devices/{device_id}")
+    @POST("accounts/{account_id}/devices/physical-devices/{device_id}/revoke")
     suspend fun revokeDevice(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
@@ -1273,19 +1273,18 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String,
         @Path("device_id") deviceId: String
     ): Response<CloudFlareResponse<Unit>>
-    
+
     /**
-     * Update Device Policy Assignment
+     * Delete Device
      */
-    @PATCH("accounts/{account_id}/devices/{device_id}")
-    suspend fun updateDevicePolicyAssignment(
+    @DELETE("accounts/{account_id}/devices/physical-devices/{device_id}")
+    suspend fun deleteDevice(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
-        @Path("device_id") deviceId: String,
-        @Body request: DeviceUpdateRequest
-    ): Response<CloudFlareResponse<Device>>
+        @Path("device_id") deviceId: String
+    ): Response<CloudFlareResponse<Unit>>
     
     // ==================== Zero Trust - Device Policies ====================
     

@@ -138,11 +138,13 @@ class DevicePoliciesFragment : Fragment() {
         val enabledSwitch = dialogView.findViewById<SwitchMaterial>(R.id.policyEnabledSwitch)
         
         val autoConnectSwitch = dialogView.findViewById<SwitchMaterial>(R.id.autoConnectSwitch)
+        val autoConnectMinutesSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.autoConnectMinutesSpinner)
         val allowModeSwitch = dialogView.findViewById<SwitchMaterial>(R.id.allowModeSwitch)
         val switchLockedSwitch = dialogView.findViewById<SwitchMaterial>(R.id.switchLockedSwitch)
         val excludeOfficeIpsSwitch = dialogView.findViewById<SwitchMaterial>(R.id.excludeOfficeIpsSwitch)
         val allowedToLeaveSwitch = dialogView.findViewById<SwitchMaterial>(R.id.allowedToLeaveSwitch)
         val captivePortalSwitch = dialogView.findViewById<SwitchMaterial>(R.id.captivePortalSwitch)
+        val captivePortalMinutesSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.captivePortalMinutesSpinner)
         val gatewayUniqueIdInput = dialogView.findViewById<TextInputEditText>(R.id.gatewayUniqueIdInput)
         
         val protocolSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.protocolSpinner)
@@ -152,6 +154,7 @@ class DevicePoliciesFragment : Fragment() {
         val sccmVpnBoundarySupportSwitch = dialogView.findViewById<SwitchMaterial>(R.id.sccmVpnBoundarySupportSwitch)
         val netbtEnabledSwitch = dialogView.findViewById<SwitchMaterial>(R.id.netbtEnabledSwitch)
         val localNetworkExcludeSwitch = dialogView.findViewById<SwitchMaterial>(R.id.localNetworkExcludeSwitch)
+        val localNetworkExcludeMinutesSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.localNetworkExcludeMinutesSpinner)
         val splitTunnelExcludeInput = dialogView.findViewById<TextInputEditText>(R.id.splitTunnelExcludeInput)
         val splitTunnelIncludeInput = dialogView.findViewById<TextInputEditText>(R.id.splitTunnelIncludeInput)
         val splitTunnelExcludeLayout = dialogView.findViewById<TextInputLayout>(R.id.splitTunnelExcludeLayout)
@@ -168,6 +171,24 @@ class DevicePoliciesFragment : Fragment() {
         val serviceModeAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, serviceModeOptions)
         serviceModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         serviceModeSpinner.adapter = serviceModeAdapter
+        
+        // 强制网络门户检测: 仅支持 3、5、10 分钟
+        val captivePortalOptions = arrayOf("3 分钟", "5 分钟", "10 分钟")
+        val captivePortalAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, captivePortalOptions)
+        captivePortalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        captivePortalMinutesSpinner.adapter = captivePortalAdapter
+        
+        // 自动连接: 1-1440 分钟，常用选项
+        val autoConnectOptions = arrayOf("3 分钟", "5 分钟", "10 分钟", "15 分钟", "30 分钟", "60 分钟", "120 分钟", "240 分钟", "480 分钟", "720 分钟", "1440 分钟")
+        val autoConnectAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, autoConnectOptions)
+        autoConnectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        autoConnectMinutesSpinner.adapter = autoConnectAdapter
+        
+        // 本地网络排除: 1-120 分钟，常用选项
+        val localNetworkExcludeOptions = arrayOf("5 分钟", "10 分钟", "15 分钟", "30 分钟", "60 分钟", "90 分钟", "120 分钟")
+        val localNetworkExcludeAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, localNetworkExcludeOptions)
+        localNetworkExcludeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        localNetworkExcludeMinutesSpinner.adapter = localNetworkExcludeAdapter
         
         val splitTunnelModeOptions = arrayOf("排除模式", "包含模式")
         val splitTunnelModeAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, splitTunnelModeOptions)
@@ -210,16 +231,19 @@ class DevicePoliciesFragment : Fragment() {
             }
             
             captivePortalSwitch.isChecked = (policy.captivePortal ?: 0) > 0
+            captivePortalMinutesSpinner.setSelection(getCaptivePortalIndex(policy.captivePortal))
             allowModeSwitch.isChecked = policy.allowModeSwitch ?: true
             protocolSpinner.setSelection(getProtocolIndex(policy.tunnelProtocol))
             switchLockedSwitch.isChecked = policy.switchLocked ?: false
             allowedToLeaveSwitch.isChecked = policy.allowedToLeave ?: true
             allowUpdatesSwitch.isChecked = policy.allowUpdates ?: true
             autoConnectSwitch.isChecked = (policy.autoConnect ?: 0) > 0
+            autoConnectMinutesSpinner.setSelection(getAutoConnectIndex(policy.autoConnect))
             serviceModeSpinner.setSelection(getServiceModeIndex(policy.serviceModeV2?.mode))
             
             excludeOfficeIpsSwitch.isChecked = policy.excludeOfficeIps ?: false
             localNetworkExcludeSwitch.isChecked = (policy.lanAllowMinutes ?: 0) > 0
+            localNetworkExcludeMinutesSpinner.setSelection(getLocalNetworkExcludeIndex(policy.lanAllowMinutes))
             ipDnsRegistrationSwitch.isChecked = policy.registerInterfaceIpWithDns ?: false
             sccmVpnBoundarySupportSwitch.isChecked = policy.sccmVpnBoundarySupport ?: false
             netbtEnabledSwitch.isChecked = policy.netbtEnabled ?: false
@@ -242,20 +266,26 @@ class DevicePoliciesFragment : Fragment() {
             .setPositiveButton(if (existingPolicy == null) "创建" else "保存") { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
                 
-                val captivePortal = if (captivePortalSwitch.isChecked) 180 else 0
+                val captivePortalMinutes = getCaptivePortalMinutes(captivePortalMinutesSpinner.selectedItemPosition)
+                val captivePortal = if (captivePortalSwitch.isChecked) captivePortalMinutes * 60 else 0
                 val allowModeSwitchValue = allowModeSwitch.isChecked
                 val tunnelProtocol = getProtocolValue(protocolSpinner.selectedItem?.toString())
                 val switchLocked = switchLockedSwitch.isChecked
                 val allowedToLeave = allowedToLeaveSwitch.isChecked
                 val allowUpdates = allowUpdatesSwitch.isChecked
-                val autoConnect = if (autoConnectSwitch.isChecked) 180 else 0
+                val autoConnectMinutes = getAutoConnectMinutes(autoConnectMinutesSpinner.selectedItemPosition)
+                val autoConnect = if (autoConnectSwitch.isChecked) autoConnectMinutes * 60 else 0
                 val serviceMode = getServiceModeValue(serviceModeSpinner.selectedItem?.toString())
                 
                 val excludeOfficeIps = excludeOfficeIpsSwitch.isChecked
                 val registerInterfaceIpWithDns = ipDnsRegistrationSwitch.isChecked
                 val sccmVpnBoundarySupport = sccmVpnBoundarySupportSwitch.isChecked
                 val netbtEnabled = netbtEnabledSwitch.isChecked
-                val lanAllowMinutes = if (localNetworkExcludeSwitch.isChecked) 60 else 0
+                val lanAllowMinutes = if (localNetworkExcludeSwitch.isChecked) {
+                    getLocalNetworkExcludeMinutes(localNetworkExcludeMinutesSpinner.selectedItemPosition)
+                } else {
+                    0
+                }
                 
                 val splitTunnelMode = splitTunnelModeSpinner.selectedItemPosition
                 val splitTunnelExclude = if (splitTunnelMode == 0) parseSplitTunnelAddresses(splitTunnelExcludeInput.text?.toString()) else null
@@ -383,6 +413,90 @@ class DevicePoliciesFragment : Fragment() {
             "wireguard" -> 0
             "masque" -> 1
             else -> 0
+        }
+    }
+
+    // captive_portal: API单位是秒，UI显示分钟
+    private fun getCaptivePortalMinutes(position: Int): Int {
+        return when (position) {
+            0 -> 3
+            1 -> 5
+            2 -> 10
+            else -> 3
+        }
+    }
+
+    private fun getCaptivePortalIndex(captivePortal: Int?): Int {
+        val minutes = (captivePortal ?: 0) / 60
+        return when (minutes) {
+            3 -> 0
+            5 -> 1
+            10 -> 2
+            else -> 0
+        }
+    }
+
+    // auto_connect: API单位是秒，UI显示分钟
+    private fun getAutoConnectMinutes(position: Int): Int {
+        return when (position) {
+            0 -> 3
+            1 -> 5
+            2 -> 10
+            3 -> 15
+            4 -> 30
+            5 -> 60
+            6 -> 120
+            7 -> 240
+            8 -> 480
+            9 -> 720
+            10 -> 1440
+            else -> 3
+        }
+    }
+
+    private fun getAutoConnectIndex(autoConnect: Int?): Int {
+        val minutes = (autoConnect ?: 0) / 60
+        return when (minutes) {
+            3 -> 0
+            5 -> 1
+            10 -> 2
+            15 -> 3
+            30 -> 4
+            60 -> 5
+            120 -> 6
+            240 -> 7
+            480 -> 8
+            720 -> 9
+            1440 -> 10
+            else -> 0
+        }
+    }
+
+    // lan_allow_minutes: API单位是分钟
+    private fun getLocalNetworkExcludeMinutes(position: Int): Int {
+        return when (position) {
+            0 -> 5
+            1 -> 10
+            2 -> 15
+            3 -> 30
+            4 -> 60
+            5 -> 90
+            6 -> 120
+            else -> 60
+        }
+    }
+
+    private fun getLocalNetworkExcludeIndex(lanAllowMinutes: Int?): Int {
+        val minutes = lanAllowMinutes ?: 0
+        return when (minutes) {
+            5 -> 0
+            10 -> 1
+            15 -> 2
+            30 -> 3
+            60 -> 4
+            90 -> 5
+            120 -> 6
+            else -> 4
         }
     }
     

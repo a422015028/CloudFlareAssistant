@@ -12,15 +12,14 @@ import com.muort.upworker.databinding.ItemDeviceBinding
 
 class DeviceAdapter(
     private val onRevokeClick: (Device) -> Unit,
-    private val onItemClick: (Device) -> Unit,
-    private val onPolicyClick: (Device) -> Unit
+    private val onItemClick: (Device) -> Unit
 ) : ListAdapter<Device, DeviceAdapter.DeviceViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeviceViewHolder {
         val binding = ItemDeviceBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return DeviceViewHolder(binding, onRevokeClick, onItemClick, onPolicyClick)
+        return DeviceViewHolder(binding, onRevokeClick, onItemClick)
     }
 
     override fun onBindViewHolder(holder: DeviceViewHolder, position: Int) {
@@ -30,47 +29,50 @@ class DeviceAdapter(
     class DeviceViewHolder(
         private val binding: ItemDeviceBinding,
         private val onRevokeClick: (Device) -> Unit,
-        private val onItemClick: (Device) -> Unit,
-        private val onPolicyClick: (Device) -> Unit
+        private val onItemClick: (Device) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(device: Device) {
             binding.deviceNameText.text = device.name ?: device.model ?: "未知设备"
-            
+
             // Device type chip
             val deviceType = device.type ?: device.deviceType
             binding.deviceTypeChip.text = getDeviceTypeLabel(deviceType)
             binding.deviceTypeChip.setChipIconResource(getDeviceTypeIcon(deviceType))
-            
+
             // Status chip
             val isRevoked = device.revokedAt != null
             binding.statusChip.text = if (isRevoked) "已撤销" else "活跃"
             binding.statusChip.setChipBackgroundColorResource(
                 if (isRevoked) android.R.color.holo_red_light else android.R.color.holo_green_light
             )
-            
+
             // User info
-            val userEmail = device.user?.email ?: device.user?.name
+            val userEmail = device.lastSeenUser?.email ?: device.user?.email
+                ?: device.lastSeenUser?.name ?: device.user?.name
             binding.userInfoText.text = "用户: ${userEmail ?: "未知"}"
             binding.userInfoText.visibility = if (userEmail != null) View.VISIBLE else View.GONE
-            
-            // Policy info
-            binding.policyNameText.text = "配置文件: ${device.policyName ?: "默认"}"
-            binding.policyNameText.visibility = if (device.policyName != null) View.VISIBLE else View.GONE
-            binding.policyNameText.setOnClickListener { onPolicyClick(device) }
-            
+
+            // Policy info - 最后活跃的设备配置文件
+            val policyName = device.lastSeenRegistration?.policy?.name
+                ?: device.policyName
+                ?: "默认"
+            binding.policyNameText.text = "最后活跃的设备配置文件: $policyName"
+            binding.policyNameText.visibility = View.VISIBLE
+
             // IP address
-            binding.ipAddressText.text = "IP: ${device.ip ?: "未知"}"
-            binding.ipAddressText.visibility = if (device.ip != null) View.VISIBLE else View.GONE
-            
-            // Last updated
-            val updated = device.updated ?: device.created
-            binding.lastUpdatedText.text = "更新: ${formatDate(updated)}"
-            
+            val ipAddr = device.publicIp ?: device.ip
+            binding.ipAddressText.text = "IP: ${ipAddr ?: "未知"}"
+            binding.ipAddressText.visibility = if (ipAddr != null) View.VISIBLE else View.GONE
+
+            // Last seen
+            val lastSeen = device.lastSeenAt ?: device.updatedAt ?: device.updated
+            binding.lastUpdatedText.text = "最后活跃: ${formatDate(lastSeen)}"
+
             // Revoke button - hide if already revoked
             binding.revokeButton.visibility = if (isRevoked) View.GONE else View.VISIBLE
             binding.revokeButton.setOnClickListener { onRevokeClick(device) }
-            
+
             // Item click for detail dialog
             binding.root.setOnClickListener { onItemClick(device) }
         }
