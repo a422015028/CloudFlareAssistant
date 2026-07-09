@@ -44,6 +44,7 @@ import com.muort.upworker.databinding.ItemPagesProjectBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
@@ -2388,6 +2389,13 @@ class PagesFragment : Fragment() {
             .setPositiveButton("确定清理") { dialog, _ ->
                 dialog.dismiss()
                 
+                // 显示加载对话框
+                val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("正在清理")
+                    .setMessage("正在清理旧部署，请稍候...")
+                    .setCancelable(false)
+                    .show()
+                
                 if (isAllProjects) {
                     pagesViewModel.cleanupDeploymentsForAllProjects(account, retainCount)
                 } else {
@@ -2397,10 +2405,13 @@ class PagesFragment : Fragment() {
                 }
                 
                 viewLifecycleOwner.lifecycleScope.launch {
-                    pagesViewModel.cleanupResults.collect { results ->
-                        if (results.isNotEmpty()) {
-                            showCleanupResultsDialog(results)
-                        }
+                    // 等待清理完成：先跳过初始的 false，等到 true 后再等 false
+                    pagesViewModel.loadingState.dropWhile { !it }.first { !it }
+                    loadingDialog.dismiss()
+                    val results = pagesViewModel.cleanupResults.value
+                    if (results.isNotEmpty()) {
+                        showCleanupResultsDialog(results)
+                        pagesViewModel.clearCleanupResults()
                     }
                 }
             }
@@ -2420,7 +2431,7 @@ class PagesFragment : Fragment() {
                 val status = if (result.deletedCount > 0) {
                     "成功清理 ${result.deletedCount} 个旧部署"
                 } else {
-                    "无需清理（当前 ${result.totalDeployments} 个部署，已 ≤ 保留数量）"
+                    "无需清理（当前 ${result.totalDeployments} 个部署 ≤ 保留数量）"
                 }
                 resultBuilder.append("• ${result.projectName}: $status\n")
             } else {

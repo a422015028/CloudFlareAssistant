@@ -50,6 +50,10 @@ class PagesViewModel @Inject constructor(
     private val _cleanupResults = MutableStateFlow<List<CleanupResult>>(emptyList())
     val cleanupResults: StateFlow<List<CleanupResult>> = _cleanupResults.asStateFlow()
     
+    fun clearCleanupResults() {
+        _cleanupResults.value = emptyList()
+    }
+    
     fun loadProjects(account: Account) {
         viewModelScope.launch {
             _loadingState.value = true
@@ -508,8 +512,9 @@ class PagesViewModel @Inject constructor(
             projects.value.forEach { project ->
                 val result = cleanupDeploymentsForProject(account, project.name, retainCount)
                 results.add(result)
-                _cleanupResults.value = results.toList()
             }
+            
+            _cleanupResults.value = results.toList()
             
             val totalDeleted = results.sumOf { it.deletedCount }
             _message.emit("清理完成！共清理了 $totalDeleted 个旧部署")
