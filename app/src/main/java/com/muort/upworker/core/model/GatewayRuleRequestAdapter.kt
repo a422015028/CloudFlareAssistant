@@ -51,12 +51,12 @@ class GatewayRuleRequestAdapter : JsonSerializer<GatewayRuleRequest>, JsonDeseri
             identity = if (obj.has("identity") && !obj.get("identity").isJsonNull) obj.get("identity").asString else null,
             devicePosture = if (obj.has("device_posture") && !obj.get("device_posture").isJsonNull) obj.get("device_posture").asString else null,
             precedence = if (obj.has("precedence") && !obj.get("precedence").isJsonNull) obj.get("precedence").asInt else null,
-            ruleSettings = if (obj.has("rule_settings") && !obj.get("rule_settings").isJsonNull) 
-                context?.deserialize(obj.get("rule_settings"), GatewayRuleSettings::class.java) else null,
-            expiration = if (obj.has("expiration") && !obj.get("expiration").isJsonNull) 
-                context?.deserialize(obj.get("expiration"), GatewayRuleExpiration::class.java) else null,
-            schedule = if (obj.has("schedule") && !obj.get("schedule").isJsonNull) 
-                context?.deserialize(obj.get("schedule"), GatewayRuleSchedule::class.java) else null
+            ruleSettings = if (obj.has("rule_settings") && !obj.get("rule_settings").isJsonNull)
+                context?.deserialize<GatewayRuleSettings>(obj.get("rule_settings"), GatewayRuleSettings::class.java) else null,
+            expiration = if (obj.has("expiration") && !obj.get("expiration").isJsonNull)
+                context?.deserialize<GatewayRuleExpiration>(obj.get("expiration"), GatewayRuleExpiration::class.java) else null,
+            schedule = if (obj.has("schedule") && !obj.get("schedule").isJsonNull)
+                context?.deserialize<GatewayRuleSchedule>(obj.get("schedule"), GatewayRuleSchedule::class.java) else null
         )
     }
 }

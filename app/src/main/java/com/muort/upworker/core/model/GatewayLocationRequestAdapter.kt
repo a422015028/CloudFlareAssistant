@@ -42,10 +42,10 @@ class GatewayLocationRequestAdapter : JsonSerializer<GatewayLocationRequest>, Js
             ecsSupport = if (obj.has("ecs_support") && !obj.get("ecs_support").isJsonNull) obj.get("ecs_support").asBoolean else null,
             networks = if (obj.has("networks") && !obj.get("networks").isJsonNull) 
                 context?.deserialize(obj.get("networks"), List::class.java) as? List<LocationNetwork> else null,
-            endpoints = if (obj.has("endpoints") && !obj.get("endpoints").isJsonNull) 
-                context?.deserialize(obj.get("endpoints"), LocationEndpoints::class.java) else null,
-            maxTtl = if (obj.has("max_ttl") && !obj.get("max_ttl").isJsonNull) 
-                context?.deserialize(obj.get("max_ttl"), LocationMaxTtl::class.java) else null
+            endpoints = if (obj.has("endpoints") && !obj.get("endpoints").isJsonNull)
+                context?.deserialize<LocationEndpoints>(obj.get("endpoints"), LocationEndpoints::class.java) else null,
+            maxTtl = if (obj.has("max_ttl") && !obj.get("max_ttl").isJsonNull)
+                context?.deserialize<LocationMaxTtl>(obj.get("max_ttl"), LocationMaxTtl::class.java) else null
         )
     }
 }
