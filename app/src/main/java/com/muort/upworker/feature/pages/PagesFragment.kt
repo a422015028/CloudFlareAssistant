@@ -1068,13 +1068,20 @@ class PagesFragment : Fragment() {
     
 
     private var isDeployCardExpanded = false
+    private val prefs by lazy { requireContext().getSharedPreferences("pages_prefs", android.content.Context.MODE_PRIVATE) }
 
     private fun setupClickListeners() {
+        // 恢复卡片展开状态
+        isDeployCardExpanded = prefs.getBoolean("deploy_card_expanded", false)
+        binding.deployCardContent.visibility = if (isDeployCardExpanded) android.view.View.VISIBLE else android.view.View.GONE
+        binding.deployCardArrow.rotation = if (isDeployCardExpanded) 180f else 0f
+        
         // Deploy card expand/collapse
         binding.deployCardHeader.setOnClickListener {
             isDeployCardExpanded = !isDeployCardExpanded
             binding.deployCardContent.visibility = if (isDeployCardExpanded) android.view.View.VISIBLE else android.view.View.GONE
             binding.deployCardArrow.rotation = if (isDeployCardExpanded) 180f else 0f
+            prefs.edit().putBoolean("deploy_card_expanded", isDeployCardExpanded).apply()
         }
         
         // File selection

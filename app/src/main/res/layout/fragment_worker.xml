@@ -17,6 +17,7 @@
 
             <!-- Upload Section -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/deployCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -26,91 +27,120 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="部署 Worker 脚本"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="16dp" />
-
-                    <com.google.android.material.textfield.TextInputLayout
+                    <LinearLayout
+                        android:id="@+id/deployCardHeader"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Worker 名称"
-                        app:boxBackgroundMode="outline"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
 
-                        <AutoCompleteTextView
-                            android:id="@+id/workerNameEdit"
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="部署 Worker 脚本"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/deployCardArrow"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_arrow_down"
+                            android:rotation="0" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/deployCardContent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp"
+                        android:visibility="gone">
+
+                        <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="text" />
+                            android:hint="Worker 名称"
+                            app:boxBackgroundMode="outline"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_marginBottom="10dp">
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                            <AutoCompleteTextView
+                                android:id="@+id/workerNameEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="脚本文件(仅支持：.js)"
-                        app:boxBackgroundMode="outline"
-                        app:endIconMode="custom"
-                        app:endIconDrawable="@android:drawable/ic_menu_search"
-                        android:layout_marginBottom="12dp">
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/filePathEdit"
+                        <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:focusable="false"
-                            android:clickable="true" />
+                            android:hint="脚本文件(仅支持：.js)"
+                            app:boxBackgroundMode="outline"
+                            app:endIconMode="custom"
+                            app:endIconDrawable="@android:drawable/ic_menu_search"
+                            android:layout_marginBottom="10dp">
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/filePathEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none"
+                                android:focusable="false"
+                                android:clickable="true" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="默认兼容日期 2026-06-16"
-                        app:placeholderText="输入格式：2026-06-16"
-                        app:boxBackgroundMode="outline"
-                        android:layout_marginBottom="16dp">
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/compatibilityDateEdit"
+                        <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="date" />
+                            android:hint="默认兼容日期 2026-06-16"
+                            app:placeholderText="输入格式：2026-06-16"
+                            app:boxBackgroundMode="outline"
+                            android:layout_marginBottom="12dp">
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/compatibilityDateEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="date" />
 
-                    <Button
-                        android:id="@+id/selectFileBtn"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="选择文件"
-                        android:layout_marginBottom="16dp"
-                        style="@style/Widget.Material3.Button.OutlinedButton" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                    <Button
-                        android:id="@+id/uploadBtn"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:text="部署脚本"
-                        android:textSize="16sp"
-                        style="@style/Widget.Material3.Button" />
+                        <Button
+                            android:id="@+id/selectFileBtn"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="选择文件"
+                            android:layout_marginBottom="12dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
 
-                    <ProgressBar
-                        android:id="@+id/uploadProgress"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:visibility="gone"
-                        style="?android:attr/progressBarStyleHorizontal" />
+                        <Button
+                            android:id="@+id/uploadBtn"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:text="部署脚本"
+                            android:textSize="14sp"
+                            style="@style/Widget.Material3.Button" />
+
+                        <ProgressBar
+                            android:id="@+id/uploadProgress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:visibility="gone"
+                            style="?android:attr/progressBarStyleHorizontal" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 

@@ -203,6 +203,18 @@ class WorkerFragment : Fragment() {
             adapter = scriptsAdapter
         }
         
+        // 部署卡片折叠功能
+        val prefs = requireContext().getSharedPreferences("worker_prefs", android.content.Context.MODE_PRIVATE)
+        var isExpanded = prefs.getBoolean("deploy_card_expanded", false)
+        binding.deployCardContent.visibility = if (isExpanded) android.view.View.VISIBLE else android.view.View.GONE
+        binding.deployCardArrow.rotation = if (isExpanded) 180f else 0f
+        binding.deployCardHeader.setOnClickListener {
+            isExpanded = !isExpanded
+            binding.deployCardContent.visibility = if (isExpanded) android.view.View.VISIBLE else android.view.View.GONE
+            binding.deployCardArrow.rotation = if (isExpanded) 180f else 0f
+            prefs.edit().putBoolean("deploy_card_expanded", isExpanded).apply()
+        }
+        
         binding.selectFileBtn.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "*/*"
