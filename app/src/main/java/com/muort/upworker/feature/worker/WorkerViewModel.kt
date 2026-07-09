@@ -118,6 +118,13 @@ class WorkerViewModel @Inject constructor(
     private val _message = MutableSharedFlow<String>()
     val message: SharedFlow<String> = _message.asSharedFlow()
     
+    private val _cleanupResults = MutableStateFlow<List<WorkerCleanupResult>>(emptyList())
+    val cleanupResults: StateFlow<List<WorkerCleanupResult>> = _cleanupResults.asStateFlow()
+    
+    fun clearCleanupResults() {
+        _cleanupResults.value = emptyList()
+    }
+    
     fun uploadWorkerScript(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null) {
         viewModelScope.launch {
             _uploadState.value = UploadState.Uploading
@@ -666,7 +673,95 @@ class WorkerViewModel @Inject constructor(
     suspend fun updateSchedules(account: Account, scriptName: String, schedules: List<String>): Resource<List<com.muort.upworker.core.model.Schedule>> {
         return workerRepository.updateSchedules(account, scriptName, schedules)
     }
+
+    fun cleanupVersionsForAllScripts(account: Account, retainCount: Int) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            _cleanupResults.value = emptyList()
+
+            val results = mutableListOf<WorkerCleanupResult>()
+
+            _scripts.value.forEach { script ->
+                val result = cleanupVersionsForScript(account, script.id, retainCount)
+                results.add(result)
+            }
+
+            _cleanupResults.value = results.toList()
+
+            val totalDeleted = results.sumOf { it.deletedCount }
+            _message.emit("清理完成！共清理了 $totalDeleted 个旧版本")
+
+            _loadingState.value = false
+        }
+    }
+
+    fun cleanupVersionsForSingleScript(account: Account, scriptName: String, retainCount: Int) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            _cleanupResults.value = emptyList()
+
+            val result = cleanupVersionsForScript(account, scriptName, retainCount)
+            _cleanupResults.value = listOf(result)
+
+            if (result.success) {
+                _message.emit("脚本 ${result.scriptName} 清理完成！成功清理了 ${result.deletedCount} 个旧版本")
+            } else {
+                _message.emit("清理失败: ${result.errorMessage}")
+            }
+
+            _loadingState.value = false
+        }
+    }
+
+    private suspend fun cleanupVersionsForScript(account: Account, scriptName: String, retainCount: Int): WorkerCleanupResult {
+        return try {
+            when (val result = workerRepository.listWorkerVersions(account, scriptName)) {
+                is Resource.Success -> {
+                    val versions = result.data
+                    val totalVersions = versions.size
+
+                    if (totalVersions <= retainCount) {
+                        WorkerCleanupResult(scriptName, totalVersions, 0, true)
+                    } else {
+                        val sortedVersions = versions.sortedByDescending { it.number }
+                        val versionsToDelete = sortedVersions.drop(retainCount)
+                        var deletedCount = 0
+
+                        versionsToDelete.forEach { version ->
+                            when (val deleteResult = workerRepository.deleteWorkerVersion(account, scriptName, version.id)) {
+                                is Resource.Success -> {
+                                    deletedCount++
+                                }
+                                is Resource.Error -> {
+                                    Timber.e("Failed to delete version ${version.id} in script $scriptName: ${deleteResult.message}")
+                                }
+                                is Resource.Loading -> {}
+                            }
+                        }
+
+                        WorkerCleanupResult(scriptName, totalVersions, deletedCount, true)
+                    }
+                }
+                is Resource.Error -> {
+                    WorkerCleanupResult(scriptName, 0, 0, false, result.message)
+                }
+                is Resource.Loading -> {
+                    WorkerCleanupResult(scriptName, 0, 0, false, "加载版本列表中")
+                }
+            }
+        } catch (e: Exception) {
+            WorkerCleanupResult(scriptName, 0, 0, false, e.message ?: "未知错误")
+        }
+    }
 }
+
+data class WorkerCleanupResult(
+    val scriptName: String,
+    val totalVersions: Int,
+    val deletedCount: Int,
+    val success: Boolean,
+    val errorMessage: String? = null
+)
 
 sealed class UploadState {
     object Idle : UploadState()

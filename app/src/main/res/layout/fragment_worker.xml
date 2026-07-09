@@ -170,9 +170,25 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="已部署的脚本"
+                            android:text="脚本"
                             android:textSize="18sp"
                             android:textStyle="bold" />
+                        
+                        <Button
+                            android:id="@+id/cleanupDeploymentsBtn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="管理版本"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_marginEnd="8dp" />
+
+                        <Button
+                            android:id="@+id/toggleSelectionModeBtn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="管理脚本"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_marginEnd="8dp" />
 
                         <Button
                             android:id="@+id/refreshBtn"
@@ -184,12 +200,13 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/selectionActionsLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:layout_marginBottom="12dp"
-                        android:visibility="visible">
+                        android:visibility="gone">
 
                         <TextView
                             android:id="@+id/selectionStatusText"
@@ -197,16 +214,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="已选择 0 个脚本"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:visibility="gone" />
-
-                        <Button
-                            android:id="@+id/toggleSelectionModeBtn"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="批量管理"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_marginEnd="8dp" />
+                            android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                         <Button
                             android:id="@+id/selectAllBtn"
@@ -221,8 +229,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="批量删除"
-                            style="@style/Widget.Material3.Button"
-                            android:visibility="gone" />
+                            style="@style/Widget.Material3.Button" />
 
                     </LinearLayout>
 

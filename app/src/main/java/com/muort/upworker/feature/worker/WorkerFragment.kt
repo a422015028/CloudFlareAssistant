@@ -47,6 +47,8 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.WorkerVersion
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.dropWhile
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -245,12 +247,16 @@ class WorkerFragment : Fragment() {
     }
     
     private fun setupBatchOperationUI() {
-        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
-            resources.getIdentifier("selectionStatusText", "id", requireContext().packageName)
-        )
-        
         val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
             resources.getIdentifier("toggleSelectionModeBtn", "id", requireContext().packageName)
+        )
+        
+        val selectionActionsLayout = binding.root.findViewById<android.widget.LinearLayout>(
+            resources.getIdentifier("selectionActionsLayout", "id", requireContext().packageName)
+        )
+        
+        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
+            resources.getIdentifier("selectionStatusText", "id", requireContext().packageName)
         )
         
         val selectAllBtn = binding.root.findViewById<android.widget.Button>(
@@ -261,11 +267,14 @@ class WorkerFragment : Fragment() {
             resources.getIdentifier("batchDeleteBtn", "id", requireContext().packageName)
         )
         
-        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "批量管理"
-        selectAllBtn?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
-        batchDeleteBtn?.visibility = if (isSelectionMode && selectedScripts.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
-        selectionStatusText?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
+        val cleanupBtn = binding.root.findViewById<android.widget.Button>(
+            resources.getIdentifier("cleanupDeploymentsBtn", "id", requireContext().packageName)
+        )
+        
+        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "管理脚本"
+        selectionActionsLayout?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
         selectionStatusText?.text = "已选择 ${selectedScripts.size} 个脚本"
+        batchDeleteBtn?.isEnabled = selectedScripts.isNotEmpty()
         
         toggleSelectionBtn?.setOnClickListener {
             toggleSelectionMode()
@@ -279,6 +288,10 @@ class WorkerFragment : Fragment() {
             if (selectedScripts.isNotEmpty()) {
                 showBatchDeleteConfirmDialog()
             }
+        }
+        
+        cleanupBtn?.setOnClickListener {
+            showCleanupVersionsDialog()
         }
     }
     
@@ -1853,34 +1866,26 @@ class WorkerFragment : Fragment() {
     }
     
     private fun updateSelectionUI() {
-        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
-            resources.getIdentifier("selectionStatusText", "id", requireContext().packageName)
+        val selectionActionsLayout = binding.root.findViewById<android.widget.LinearLayout>(
+            resources.getIdentifier("selectionActionsLayout", "id", requireContext().packageName)
         )
         
         val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
             resources.getIdentifier("toggleSelectionModeBtn", "id", requireContext().packageName)
         )
         
-        val selectAllBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("selectAllBtn", "id", requireContext().packageName)
+        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
+            resources.getIdentifier("selectionStatusText", "id", requireContext().packageName)
         )
         
         val batchDeleteBtn = binding.root.findViewById<android.widget.Button>(
             resources.getIdentifier("batchDeleteBtn", "id", requireContext().packageName)
         )
         
-        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "批量管理"
-        selectAllBtn?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
-        
-        if (isSelectionMode) {
-            selectionStatusText?.visibility = android.view.View.VISIBLE
-            selectionStatusText?.text = "已选择 ${selectedScripts.size} 个脚本"
-            batchDeleteBtn?.isEnabled = selectedScripts.isNotEmpty()
-            batchDeleteBtn?.visibility = if (selectedScripts.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
-        } else {
-            selectionStatusText?.visibility = android.view.View.GONE
-            batchDeleteBtn?.visibility = android.view.View.GONE
-        }
+        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "管理脚本"
+        selectionActionsLayout?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
+        selectionStatusText?.text = "已选择 ${selectedScripts.size} 个脚本"
+        batchDeleteBtn?.isEnabled = selectedScripts.isNotEmpty()
     }
     
     private fun showBatchDeleteConfirmDialog() {
@@ -2037,6 +2042,120 @@ class WorkerFragment : Fragment() {
         binding.workerNameEdit.setOnClickListener {
             binding.workerNameEdit.showDropDown()
         }
+    }
+    
+    private fun showCleanupVersionsDialog() {
+        val scripts = viewModel.scripts.value
+        
+        if (scripts.isEmpty()) {
+            showToast("暂无脚本")
+            return
+        }
+        
+        val dialogBinding = com.muort.upworker.databinding.DialogCleanupDeploymentsBinding.inflate(layoutInflater)
+        
+        val scriptNames = scripts.map { it.id }
+        val spinnerAdapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, scriptNames)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        dialogBinding.projectSpinner.adapter = spinnerAdapter
+        
+        dialogBinding.cleanupModeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            dialogBinding.singleProjectContainer.visibility = 
+                if (checkedId == com.muort.upworker.R.id.cleanupSingleProjectRadio) android.view.View.VISIBLE else android.view.View.GONE
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("清理旧版本")
+            .setView(dialogBinding.root)
+            .setPositiveButton("开始清理") { _, _ ->
+                val retainCount = dialogBinding.retainCountEdit.text.toString().trim().toIntOrNull() ?: 10
+                
+                if (dialogBinding.cleanupAllProjectsRadio.isChecked) {
+                    showCleanupConfirmDialog(true, null, retainCount)
+                } else {
+                    val selectedScriptName = dialogBinding.projectSpinner.selectedItem?.toString()
+                    if (selectedScriptName.isNullOrEmpty()) {
+                        showToast("请选择脚本")
+                        return@setPositiveButton
+                    }
+                    showCleanupConfirmDialog(false, selectedScriptName, retainCount)
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun showCleanupConfirmDialog(isAllScripts: Boolean, scriptName: String?, retainCount: Int) {
+        val account = accountViewModel.defaultAccount.value ?: return
+        
+        val title = if (isAllScripts) "清理所有脚本的旧版本" else "清理脚本 \"$scriptName\" 的旧版本"
+        val message = if (isAllScripts) {
+            "将清理账号下所有 Worker 脚本的旧版本，每个脚本保留最新 $retainCount 个版本。\n\n此操作不可撤销，确定继续吗？"
+        } else {
+            "将清理脚本 \"$scriptName\" 的旧版本，保留最新 $retainCount 个版本。\n\n此操作不可撤销，确定继续吗？"
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("确定清理") { dialog, _ ->
+                dialog.dismiss()
+                
+                val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("正在清理")
+                    .setMessage("正在清理旧版本，请稍候...")
+                    .setCancelable(false)
+                    .show()
+                
+                if (isAllScripts) {
+                    viewModel.cleanupVersionsForAllScripts(account, retainCount)
+                } else {
+                    scriptName?.let {
+                        viewModel.cleanupVersionsForSingleScript(account, it, retainCount)
+                    }
+                }
+                
+                viewLifecycleOwner.lifecycleScope.launch {
+                    viewModel.loadingState.dropWhile { !it }.first { !it }
+                    loadingDialog.dismiss()
+                    val results = viewModel.cleanupResults.value
+                    if (results.isNotEmpty()) {
+                        showCleanupResultsDialog(results)
+                        viewModel.clearCleanupResults()
+                    }
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun showCleanupResultsDialog(results: List<WorkerCleanupResult>) {
+        val totalDeleted = results.sumOf { it.deletedCount }
+        val totalScripts = results.size
+        
+        val resultBuilder = StringBuilder()
+        resultBuilder.append("清理结果：\n\n")
+        
+        results.forEach { result ->
+            if (result.success) {
+                val status = if (result.deletedCount > 0) {
+                    "成功清理 ${result.deletedCount} 个旧版本"
+                } else {
+                    "无需清理（当前 ${result.totalVersions} 个版本 ≤ 保留数量）"
+                }
+                resultBuilder.append("• ${result.scriptName}: $status\n")
+            } else {
+                resultBuilder.append("• ${result.scriptName}: 失败 - ${result.errorMessage}\n")
+            }
+        }
+        
+        resultBuilder.append("\n总计：处理 $totalScripts 个脚本，成功清理 $totalDeleted 个旧版本")
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("清理完成")
+            .setMessage(resultBuilder.toString())
+            .setPositiveButton("关闭", null)
+            .show()
     }
     
     override fun onDestroyView() {
