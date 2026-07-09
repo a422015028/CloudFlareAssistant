@@ -2052,7 +2052,7 @@ class WorkerFragment : Fragment() {
             return
         }
         
-        val dialogBinding = com.muort.upworker.databinding.DialogCleanupDeploymentsBinding.inflate(layoutInflater)
+        val dialogBinding = com.muort.upworker.databinding.DialogCleanupVersionsBinding.inflate(layoutInflater)
         
         val scriptNames = scripts.map { it.id }
         val spinnerAdapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, scriptNames)
@@ -2065,7 +2065,6 @@ class WorkerFragment : Fragment() {
         }
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("清理旧版本")
             .setView(dialogBinding.root)
             .setPositiveButton("开始清理") { _, _ ->
                 val retainCount = dialogBinding.retainCountEdit.text.toString().trim().toIntOrNull() ?: 10
