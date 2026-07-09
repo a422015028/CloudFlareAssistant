@@ -502,10 +502,18 @@ class PagesFragment : Fragment() {
         
         // Convert to Map format for API
         // Include all new variables and secrets with their values and types
-        val variablesMap: MutableMap<String, Pair<String, String>?> = newVariables.associate { (name, value, type) ->
-            name to (type to value)
-        }.toMutableMap()
-        
+        // 注意：机密加密保存无法获取，加载时值设为空字符串。
+        // 对于机密类型且值为空的项（表示用户未编辑的现有机密），跳过不发送，
+        // 否则会用空字符串覆盖原机密值。只有用户新增/编辑过（值非空）的机密才发送。
+        val variablesMap: MutableMap<String, Pair<String, String>?> = mutableMapOf()
+        newVariables.forEach { (name, value, type) ->
+            if (type == "secret_text" && value.isEmpty()) {
+                Timber.d("Skipping unedited secret (empty value): $name")
+                return@forEach
+            }
+            variablesMap[name] = (type to value)
+        }
+
         // Add deleted variables with null values
         val newVariableNames = newVariables.map { it.first }.toSet()
         originalVariables.forEach { (name, _, _) ->
