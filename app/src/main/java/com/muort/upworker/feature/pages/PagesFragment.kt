@@ -34,6 +34,7 @@ import com.muort.upworker.core.model.PagesDomain
 import com.muort.upworker.core.model.DEFAULT_COMPATIBILITY_DATE
 import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.feature.pages.CleanupResult
 import com.muort.upworker.core.repository.KvRepository
 import com.muort.upworker.core.repository.R2Repository
 import com.muort.upworker.core.repository.D1Repository
@@ -228,13 +229,16 @@ class PagesFragment : Fragment() {
     }
     
     private fun setupBatchOperationUI() {
-        // 获取或创建工具栏容器（假设在布局中有相应的容器）
-        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
-            resources.getIdentifier("pagesSelectionStatusText", "id", requireContext().packageName)
+        val selectionActionsLayout = binding.root.findViewById<android.widget.LinearLayout>(
+            resources.getIdentifier("pagesSelectionActionsLayout", "id", requireContext().packageName)
         )
         
         val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
             resources.getIdentifier("pagesToggleSelectionModeBtn", "id", requireContext().packageName)
+        )
+        
+        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
+            resources.getIdentifier("pagesSelectionStatusText", "id", requireContext().packageName)
         )
         
         val selectAllBtn = binding.root.findViewById<android.widget.Button>(
@@ -245,13 +249,11 @@ class PagesFragment : Fragment() {
             resources.getIdentifier("pagesBatchDeleteBtn", "id", requireContext().packageName)
         )
         
-        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "批量管理"
-        selectAllBtn?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
-        batchDeleteBtn?.visibility = if (isSelectionMode && selectedProjects.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
-        selectionStatusText?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
+        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "管理项目"
+        selectionActionsLayout?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
         selectionStatusText?.text = "已选择 ${selectedProjects.size} 个项目"
+        batchDeleteBtn?.isEnabled = selectedProjects.isNotEmpty()
         
-        // 设置按钮点击监听（如果这些视图存在）
         toggleSelectionBtn?.setOnClickListener {
             toggleSelectionMode()
         }
@@ -1064,7 +1066,16 @@ class PagesFragment : Fragment() {
     }
     
 
+    private var isDeployCardExpanded = false
+
     private fun setupClickListeners() {
+        // Deploy card expand/collapse
+        binding.deployCardHeader.setOnClickListener {
+            isDeployCardExpanded = !isDeployCardExpanded
+            binding.deployCardContent.visibility = if (isDeployCardExpanded) android.view.View.VISIBLE else android.view.View.GONE
+            binding.deployCardArrow.rotation = if (isDeployCardExpanded) 180f else 0f
+        }
+        
         // File selection
         binding.selectFileBtn.setOnClickListener {
             selectFile()
@@ -1089,6 +1100,11 @@ class PagesFragment : Fragment() {
             accountViewModel.defaultAccount.value?.let { account ->
                 pagesViewModel.loadProjects(account)
             }
+        }
+        
+        // Cleanup deployments button
+        binding.pagesCleanupDeploymentsBtn.setOnClickListener {
+            showCleanupDeploymentsDialog()
         }
     }
     
@@ -1319,34 +1335,26 @@ class PagesFragment : Fragment() {
     }
     
     private fun updateSelectionUI() {
-        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
-            resources.getIdentifier("pagesSelectionStatusText", "id", requireContext().packageName)
+        val selectionActionsLayout = binding.root.findViewById<android.widget.LinearLayout>(
+            resources.getIdentifier("pagesSelectionActionsLayout", "id", requireContext().packageName)
         )
         
         val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
             resources.getIdentifier("pagesToggleSelectionModeBtn", "id", requireContext().packageName)
         )
         
-        val selectAllBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("pagesSelectAllBtn", "id", requireContext().packageName)
+        val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
+            resources.getIdentifier("pagesSelectionStatusText", "id", requireContext().packageName)
         )
         
         val batchDeleteBtn = binding.root.findViewById<android.widget.Button>(
             resources.getIdentifier("pagesBatchDeleteBtn", "id", requireContext().packageName)
         )
         
-        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "批量管理"
-        selectAllBtn?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
-        
-        if (isSelectionMode) {
-            selectionStatusText?.visibility = android.view.View.VISIBLE
-            selectionStatusText?.text = "已选择 ${selectedProjects.size} 个项目"
-            batchDeleteBtn?.isEnabled = selectedProjects.isNotEmpty()
-            batchDeleteBtn?.visibility = if (selectedProjects.isNotEmpty()) android.view.View.VISIBLE else android.view.View.GONE
-        } else {
-            selectionStatusText?.visibility = android.view.View.GONE
-            batchDeleteBtn?.visibility = android.view.View.GONE
-        }
+        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "管理项目"
+        selectionActionsLayout?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
+        selectionStatusText?.text = "已选择 ${selectedProjects.size} 个项目"
+        batchDeleteBtn?.isEnabled = selectedProjects.isNotEmpty()
     }
     
     private fun showBatchDeleteConfirmDialog() {
@@ -2322,6 +2330,111 @@ class PagesFragment : Fragment() {
                 }
             }
         }
+    }
+    
+    private fun showCleanupDeploymentsDialog() {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        val dialogBinding = com.muort.upworker.databinding.DialogCleanupDeploymentsBinding.inflate(layoutInflater)
+        
+        val projectNames = pagesViewModel.projects.value.map { it.name }
+        val projectAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, projectNames)
+        projectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        dialogBinding.projectSpinner.adapter = projectAdapter
+        
+        dialogBinding.cleanupModeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            dialogBinding.singleProjectContainer.visibility = 
+                if (checkedId == R.id.cleanupSingleProjectRadio) View.VISIBLE else View.GONE
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .setPositiveButton("开始清理") { _, _ ->
+                val retainCountStr = dialogBinding.retainCountEdit.text.toString().trim()
+                val retainCount = retainCountStr.toIntOrNull() ?: 10
+                
+                if (dialogBinding.cleanupAllProjectsRadio.isChecked) {
+                    showCleanupConfirmDialog(true, null, retainCount)
+                } else {
+                    val selectedProjectName = dialogBinding.projectSpinner.selectedItem?.toString()
+                    if (selectedProjectName.isNullOrEmpty()) {
+                        showToast("请选择项目")
+                        return@setPositiveButton
+                    }
+                    showCleanupConfirmDialog(false, selectedProjectName, retainCount)
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun showCleanupConfirmDialog(isAllProjects: Boolean, projectName: String?, retainCount: Int) {
+        val account = accountViewModel.defaultAccount.value ?: return
+        
+        val title = if (isAllProjects) "清理所有项目的旧部署" else "清理项目 \"$projectName\" 的旧部署"
+        val message = if (isAllProjects) {
+            "将清理账号下所有 Pages 项目的旧部署，每个项目保留最新 $retainCount 个部署记录。\n\n此操作不可撤销，确定继续吗？"
+        } else {
+            "将清理项目 \"$projectName\" 的旧部署，保留最新 $retainCount 个部署记录。\n\n此操作不可撤销，确定继续吗？"
+        }
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("确定清理") { dialog, _ ->
+                dialog.dismiss()
+                
+                if (isAllProjects) {
+                    pagesViewModel.cleanupDeploymentsForAllProjects(account, retainCount)
+                } else {
+                    projectName?.let {
+                        pagesViewModel.cleanupDeploymentsForSingleProject(account, it, retainCount)
+                    }
+                }
+                
+                viewLifecycleOwner.lifecycleScope.launch {
+                    pagesViewModel.cleanupResults.collect { results ->
+                        if (results.isNotEmpty()) {
+                            showCleanupResultsDialog(results)
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun showCleanupResultsDialog(results: List<CleanupResult>) {
+        val totalDeleted = results.sumOf { it.deletedCount }
+        val totalProjects = results.size
+        
+        val resultBuilder = StringBuilder()
+        resultBuilder.append("清理结果：\n\n")
+        
+        results.forEach { result ->
+            if (result.success) {
+                val status = if (result.deletedCount > 0) {
+                    "成功清理 ${result.deletedCount} 个旧部署"
+                } else {
+                    "无需清理（当前 ${result.totalDeployments} 个部署，已 ≤ 保留数量）"
+                }
+                resultBuilder.append("• ${result.projectName}: $status\n")
+            } else {
+                resultBuilder.append("• ${result.projectName}: ❌ 失败 - ${result.errorMessage}\n")
+            }
+        }
+        
+        resultBuilder.append("\n总计：处理 $totalProjects 个项目，成功清理 $totalDeleted 个旧部署")
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("清理完成")
+            .setMessage(resultBuilder.toString())
+            .setPositiveButton("关闭", null)
+            .show()
     }
 }
 

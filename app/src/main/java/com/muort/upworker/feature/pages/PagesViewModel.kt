@@ -16,6 +16,14 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+data class CleanupResult(
+    val projectName: String,
+    val totalDeployments: Int,
+    val deletedCount: Int,
+    val success: Boolean,
+    val errorMessage: String? = null
+)
+
 @HiltViewModel
 class PagesViewModel @Inject constructor(
     private val pagesRepository: PagesRepository
@@ -38,6 +46,9 @@ class PagesViewModel @Inject constructor(
     
     private val _message = MutableSharedFlow<String>()
     val message: SharedFlow<String> = _message.asSharedFlow()
+    
+    private val _cleanupResults = MutableStateFlow<List<CleanupResult>>(emptyList())
+    val cleanupResults: StateFlow<List<CleanupResult>> = _cleanupResults.asStateFlow()
     
     fun loadProjects(account: Account) {
         viewModelScope.launch {
@@ -484,6 +495,86 @@ class PagesViewModel @Inject constructor(
             }
             
             _loadingState.value = false
+        }
+    }
+    
+    fun cleanupDeploymentsForAllProjects(account: Account, retainCount: Int) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            _cleanupResults.value = emptyList()
+            
+            val results = mutableListOf<CleanupResult>()
+            
+            projects.value.forEach { project ->
+                val result = cleanupDeploymentsForProject(account, project.name, retainCount)
+                results.add(result)
+                _cleanupResults.value = results.toList()
+            }
+            
+            val totalDeleted = results.sumOf { it.deletedCount }
+            _message.emit("清理完成！共清理了 $totalDeleted 个旧部署")
+            
+            _loadingState.value = false
+        }
+    }
+    
+    fun cleanupDeploymentsForSingleProject(account: Account, projectName: String, retainCount: Int) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            _cleanupResults.value = emptyList()
+            
+            val result = cleanupDeploymentsForProject(account, projectName, retainCount)
+            _cleanupResults.value = listOf(result)
+            
+            if (result.success) {
+                _message.emit("项目 ${result.projectName} 清理完成！成功清理了 ${result.deletedCount} 个旧部署")
+            } else {
+                _message.emit("清理失败: ${result.errorMessage}")
+            }
+            
+            _loadingState.value = false
+        }
+    }
+    
+    private suspend fun cleanupDeploymentsForProject(account: Account, projectName: String, retainCount: Int): CleanupResult {
+        return try {
+            when (val result = pagesRepository.listDeployments(account, projectName)) {
+                is Resource.Success -> {
+                    val deployments = result.data
+                    val totalDeployments = deployments.size
+                    
+                    if (totalDeployments <= retainCount) {
+                        CleanupResult(projectName, totalDeployments, 0, true)
+                    } else {
+                        val sortedDeployments = deployments.sortedByDescending { it.createdOn }
+                        val deploymentsToDelete = sortedDeployments.drop(retainCount)
+                        var deletedCount = 0
+                        
+                        deploymentsToDelete.forEach { deployment ->
+                            when (val deleteResult = pagesRepository.deleteDeployment(account, projectName, deployment.id)) {
+                                is Resource.Success -> {
+                                    deletedCount++
+                                }
+                                is Resource.Error -> {
+                                    Timber.e("Failed to delete deployment ${deployment.id} in project $projectName: ${deleteResult.message}")
+                                }
+                                is Resource.Loading -> {}
+                            }
+                        }
+                        
+                        CleanupResult(projectName, totalDeployments, deletedCount, true)
+                    }
+                }
+                is Resource.Error -> {
+                    CleanupResult(projectName, 0, 0, false, result.message)
+                }
+                is Resource.Loading -> {
+                    CleanupResult(projectName, 0, 0, false, "加载部署列表中")
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error cleaning up deployments for project $projectName")
+            CleanupResult(projectName, 0, 0, false, e.message)
         }
     }
 }

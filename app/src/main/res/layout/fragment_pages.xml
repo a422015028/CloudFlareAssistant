@@ -17,6 +17,7 @@
 
             <!-- Upload Section -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/deployCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -26,125 +27,154 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="部署 Pages 项目"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="16dp" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="项目名称"
-                        app:boxBackgroundMode="outline"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/projectNameEdit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="text" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="生产分支"
-                        app:boxBackgroundMode="outline"
-                        android:layout_marginBottom="12dp">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/branchEdit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="text"
-                            android:text="main" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="默认兼容日期 2026-06-16"
-                        app:placeholderText="输入格式：2026-06-16"
-                        app:boxBackgroundMode="outline"
-                        android:layout_marginBottom="12dp">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/compatibilityDateEdit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="date" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="项目文件(仅支持：.zip .js .htm .html )"
-                        app:boxBackgroundMode="outline"
-                        app:endIconMode="custom"
-                        app:endIconDrawable="@android:drawable/ic_menu_search"
-                        android:layout_marginBottom="16dp">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/filePathEdit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:focusable="false"
-                            android:clickable="true" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <Button
-                        android:id="@+id/selectFileBtn"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="选择文件"
-                        android:layout_marginBottom="16dp"
-                        style="@style/Widget.Material3.Button.OutlinedButton" />
+                    android:orientation="vertical">
 
                     <LinearLayout
+                        android:id="@+id/deployCardHeader"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
 
-                        <Button
-                            android:id="@+id/createProjectBtn"
+                        <TextView
                             android:layout_width="0dp"
-                            android:layout_height="60dp"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="创建项目"
+                            android:text="部署 Pages 项目"
                             android:textSize="16sp"
-                            android:layout_marginEnd="8dp"
-                            style="@style/Widget.Material3.Button.OutlinedButton" />
+                            android:textStyle="bold" />
 
-                        <Button
-                            android:id="@+id/deployBtn"
-                            android:layout_width="0dp"
-                            android:layout_height="60dp"
-                            android:layout_weight="1"
-                            android:text="部署项目"
-                            android:textSize="16sp"
-                            style="@style/Widget.Material3.Button" />
+                        <ImageView
+                            android:id="@+id/deployCardArrow"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_arrow_down"
+                            android:rotation="0" />
 
                     </LinearLayout>
 
-                    <ProgressBar
-                        android:id="@+id/uploadProgress"
+                    <LinearLayout
+                        android:id="@+id/deployCardContent"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:visibility="gone"
-                        style="?android:attr/progressBarStyleHorizontal" />
+                        android:orientation="vertical"
+                        android:padding="12dp"
+                        android:visibility="gone">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="项目名称"
+                            app:boxBackgroundMode="outline"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_marginBottom="10dp">
+
+                            <AutoCompleteTextView
+                                android:id="@+id/projectNameEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="生产分支"
+                            app:boxBackgroundMode="outline"
+                            android:layout_marginBottom="10dp">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/branchEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text"
+                                android:text="main" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="默认兼容日期 2026-06-16"
+                            app:placeholderText="输入格式：2026-06-16"
+                            app:boxBackgroundMode="outline"
+                            android:layout_marginBottom="10dp">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/compatibilityDateEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="date" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="项目文件(仅支持：.zip .js .htm .html )"
+                            app:boxBackgroundMode="outline"
+                            app:endIconMode="custom"
+                            app:endIconDrawable="@android:drawable/ic_menu_search"
+                            android:layout_marginBottom="12dp">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/filePathEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none"
+                                android:focusable="false"
+                                android:clickable="true" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <Button
+                            android:id="@+id/selectFileBtn"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="选择文件"
+                            android:layout_marginBottom="12dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <Button
+                                android:id="@+id/createProjectBtn"
+                                android:layout_width="0dp"
+                                android:layout_height="50dp"
+                                android:layout_weight="1"
+                                android:text="创建项目"
+                                android:textSize="14sp"
+                                android:layout_marginEnd="8dp"
+                                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                            <Button
+                                android:id="@+id/deployBtn"
+                                android:layout_width="0dp"
+                                android:layout_height="50dp"
+                                android:layout_weight="1"
+                                android:text="部署项目"
+                                android:textSize="14sp"
+                                style="@style/Widget.Material3.Button" />
+
+                        </LinearLayout>
+
+                        <ProgressBar
+                            android:id="@+id/uploadProgress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:visibility="gone"
+                            style="?android:attr/progressBarStyleHorizontal" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -174,9 +204,26 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="已部署的项目"
+                            android:text="项目"
                             android:textSize="18sp"
                             android:textStyle="bold" />
+                        
+                        <Button
+                            android:id="@+id/pagesCleanupDeploymentsBtn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="管理部署"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_marginEnd="8dp" />
+
+
+                        <Button
+                            android:id="@+id/pagesToggleSelectionModeBtn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="管理项目"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_marginEnd="8dp" />
 
                         <Button
                             android:id="@+id/refreshBtn"
@@ -188,12 +235,13 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/pagesSelectionActionsLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:layout_marginBottom="12dp"
-                        android:visibility="visible">
+                        android:visibility="gone">
 
                         <TextView
                             android:id="@+id/pagesSelectionStatusText"
@@ -201,16 +249,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="已选择 0 个项目"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:visibility="gone" />
-
-                        <Button
-                            android:id="@+id/pagesToggleSelectionModeBtn"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="批量管理"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_marginEnd="8dp" />
+                            android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                         <Button
                             android:id="@+id/pagesSelectAllBtn"
@@ -225,8 +264,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="批量删除"
-                            style="@style/Widget.Material3.Button"
-                            android:visibility="gone" />
+                            style="@style/Widget.Material3.Button" />
 
                     </LinearLayout>
 
