@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -179,6 +178,11 @@ class PagesFragment : Fragment() {
                     showConfigDialog(account, project, "production", "env")
                 }
             },
+            onConfigSecretClick = { project ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showConfigDialog(account, project, "production", "secret")
+                }
+            },
             onConfigKvClick = { project ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     showConfigDialog(account, project, "production", "kv")
@@ -275,12 +279,13 @@ class PagesFragment : Fragment() {
             "查看部署",
             "环境变量 (生产)",
             "环境变量 (预览)",
+            "机密 (生产)",
+            "机密 (预览)",
             "KV 绑定",
             "R2 绑定",
-            "D1 绑定",
-            "机密 (Secrets)"
+            "D1 绑定"
         )
-        
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("${project.name} - 项目管理")
             .setItems(options) { _, which ->
@@ -288,19 +293,21 @@ class PagesFragment : Fragment() {
                     0 -> showDeploymentsDialogWithLoading(account, project)
                     1 -> showConfigDialog(account, project, "production", "env")
                     2 -> showConfigDialog(account, project, "preview", "env")
-                    3 -> showConfigDialog(account, project, "production", "kv")
-                    4 -> showConfigDialog(account, project, "production", "r2")
-                    5 -> showConfigDialog(account, project, "production", "d1")
-                    6 -> showConfigDialog(account, project, "production", "secret")
+                    3 -> showConfigDialog(account, project, "production", "secret")
+                    4 -> showConfigDialog(account, project, "preview", "secret")
+                    5 -> showConfigDialog(account, project, "production", "kv")
+                    6 -> showConfigDialog(account, project, "production", "r2")
+                    7 -> showConfigDialog(account, project, "production", "d1")
                 }
             }
             .setNegativeButton("关闭", null)
             .show()
     }
-    
+
     private fun showConfigDialog(account: Account, project: PagesProject, environment: String, configType: String) {
         when (configType) {
             "env" -> showVariablesDialog(account, project, environment)
+            "secret" -> showSecretsDialog(account, project, environment)
             "kv" -> showKvBindingsDialog(account, project, environment)
             "r2" -> showR2BindingsDialog(account, project, environment)
             "d1" -> showD1BindingsDialog(account, project, environment)
@@ -315,23 +322,25 @@ class PagesFragment : Fragment() {
             .setCancelable(false)
             .create()
         loadingDialog.show()
-        
+
         // Fetch current project detail to get existing variables
         viewLifecycleOwner.lifecycleScope.launch {
             pagesViewModel.getProjectDetail(account, project.name) { projectResult ->
                 loadingDialog.dismiss()
-                
+
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesVariablesBinding.inflate(layoutInflater)
-                
+
                 // Setup title
+                dialogBinding.titleText.text = "配置 Pages 项目的环境变量"
                 dialogBinding.projectNameText.text = "项目名称: ${project.name} (${if (environment == "production") "生产" else "预览"}环境)"
-                
-                // Temporary lists for this dialog - initialize with existing variables and secrets
-                // Triple<名称, 值, 类型>: 类型为 "plain_text" 表示环境变量，"secret_text" 表示机密
+                dialogBinding.listTitleText.text = "环境变量列表"
+                dialogBinding.noVariablesText.text = "暂无环境变量"
+
+                // Triple<名称, 值, 类型>: 环境变量对话框只管理 plain_text 类型
                 val tempVariables = mutableListOf<Triple<String, String, String>>()
                 val originalVariables = mutableListOf<Triple<String, String, String>>()
-                
-                // Load existing environment variables and secrets from project settings
+
+                // Load existing plain_text variables from project settings
                 if (projectResult is Resource.Success) {
                     val envConfig = if (environment == "production") {
                         projectResult.data.deploymentConfigs?.production
@@ -339,15 +348,17 @@ class PagesFragment : Fragment() {
                         projectResult.data.deploymentConfigs?.preview
                     }
                     envConfig?.envVars?.forEach { (varName, varValue) ->
-                        val value = varValue.value ?: ""
                         val type = varValue.type ?: "plain_text"
-                        val variable = Triple(varName, if (type == "secret_text") "" else value, type)
-                        tempVariables.add(variable)
-                        originalVariables.add(variable)
-                        Timber.d("Loaded existing variable: $varName (type=$type), value=${if (type == "secret_text") "***" else value}")
+                        if (type == "plain_text") {
+                            val value = varValue.value ?: ""
+                            val variable = Triple(varName, value, type)
+                            tempVariables.add(variable)
+                            originalVariables.add(variable)
+                            Timber.d("Loaded existing variable: $varName, value=$value")
+                        }
                     }
                 }
-                
+
                 // Setup adapter
                 lateinit var tempAdapter: PagesVariablesAndSecretsAdapter
                 tempAdapter = PagesVariablesAndSecretsAdapter(
@@ -367,25 +378,116 @@ class PagesFragment : Fragment() {
                     layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
                     adapter = tempAdapter
                 }
-                
+
                 // Add variable button
                 dialogBinding.addVariableBtn.apply {
-                    text = "+ 添加变量/机密"
+                    text = "+ 添加变量"
                     setOnClickListener {
-                        showAddVariableOrSecretDialogForPages(tempVariables) {
+                        showAddVariableOrSecretDialogForPages(tempVariables, isSecret = false) {
                             tempAdapter.submitList(tempVariables.toList())
                             updateVariablesDialogUI(dialogBinding, tempAdapter, tempVariables)
                         }
                     }
                 }
-                
+
                 updateVariablesDialogUI(dialogBinding, tempAdapter, tempVariables)
-                
+
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
                     .setPositiveButton("应用配置") { _, _ ->
                         applyVariablesToPages(account, project, environment, originalVariables, tempVariables)
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            }
+        }
+    }
+
+    private fun showSecretsDialog(account: Account, project: PagesProject, environment: String) {
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("加载中...")
+            .setMessage("正在获取当前机密配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+
+        // Fetch current project detail to get existing secrets
+        viewLifecycleOwner.lifecycleScope.launch {
+            pagesViewModel.getProjectDetail(account, project.name) { projectResult ->
+                loadingDialog.dismiss()
+
+                val dialogBinding = com.muort.upworker.databinding.DialogPagesVariablesBinding.inflate(layoutInflater)
+
+                // Setup title
+                dialogBinding.titleText.text = "配置 Pages 项目的机密"
+                dialogBinding.projectNameText.text = "项目名称: ${project.name} (${if (environment == "production") "生产" else "预览"}环境)"
+                dialogBinding.listTitleText.text = "机密列表"
+                dialogBinding.noVariablesText.text = "暂无机密"
+
+                // Triple<名称, 值, 类型>: 机密对话框只管理 secret_text 类型
+                // 机密加密保存无法获取，加载时值设为空字符串
+                val tempSecrets = mutableListOf<Triple<String, String, String>>()
+                val originalSecrets = mutableListOf<Triple<String, String, String>>()
+
+                // Load existing secret_text from project settings
+                if (projectResult is Resource.Success) {
+                    val envConfig = if (environment == "production") {
+                        projectResult.data.deploymentConfigs?.production
+                    } else {
+                        projectResult.data.deploymentConfigs?.preview
+                    }
+                    envConfig?.envVars?.forEach { (varName, varValue) ->
+                        val type = varValue.type ?: "plain_text"
+                        if (type == "secret_text") {
+                            // Secret values are encrypted and cannot be retrieved
+                            val secret = Triple(varName, "", type)
+                            tempSecrets.add(secret)
+                            originalSecrets.add(secret)
+                            Timber.d("Loaded existing secret: $varName")
+                        }
+                    }
+                }
+
+                // Setup adapter
+                lateinit var tempAdapter: PagesVariablesAndSecretsAdapter
+                tempAdapter = PagesVariablesAndSecretsAdapter(
+                    onEditClick = { variable ->
+                        showEditVariableOrSecretDialogForPages(tempSecrets, variable) {
+                            tempAdapter.submitList(tempSecrets.toList())
+                            updateVariablesDialogUI(dialogBinding, tempAdapter, tempSecrets)
+                        }
+                    },
+                    onDeleteClick = { variable ->
+                        tempSecrets.remove(variable)
+                        tempAdapter.submitList(tempSecrets.toList())
+                        updateVariablesDialogUI(dialogBinding, tempAdapter, tempSecrets)
+                    }
+                )
+                dialogBinding.variablesRecyclerView.apply {
+                    layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+                    adapter = tempAdapter
+                }
+
+                // Add secret button
+                dialogBinding.addVariableBtn.apply {
+                    text = "+ 添加机密"
+                    setOnClickListener {
+                        showAddVariableOrSecretDialogForPages(tempSecrets, isSecret = true) {
+                            tempAdapter.submitList(tempSecrets.toList())
+                            updateVariablesDialogUI(dialogBinding, tempAdapter, tempSecrets)
+                        }
+                    }
+                }
+
+                updateVariablesDialogUI(dialogBinding, tempAdapter, tempSecrets)
+
+                // Show dialog
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("应用配置") { _, _ ->
+                        applySecretsToPages(account, project, environment, originalSecrets, tempSecrets)
                     }
                     .setNegativeButton("取消", null)
                     .show()
@@ -410,30 +512,36 @@ class PagesFragment : Fragment() {
     
     private fun showAddVariableOrSecretDialogForPages(
         tempVariables: MutableList<Triple<String, String, String>>,
+        isSecret: Boolean = false,
         onAdded: () -> Unit
     ) {
         val dialogBinding = com.muort.upworker.databinding.DialogAddPagesVariableBinding.inflate(layoutInflater)
-        
+
+        val type = if (isSecret) "secret_text" else "plain_text"
+        val label = if (isSecret) "机密" else "变量"
+
+        dialogBinding.dialogTitleText.text = "添加${label}"
+        dialogBinding.variableTypeText.text = if (isSecret) "secret" else "txt"
+
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
             .setPositiveButton("添加") { _, _ ->
                 val name = dialogBinding.variableNameEdit.text.toString().trim()
                 val value = dialogBinding.variableValueEdit.text.toString().trim()
-                val type = if (dialogBinding.typeSecretRadio.isChecked) "secret_text" else "plain_text"
-                
+
                 if (name.isEmpty()) {
-                    showToast("请输入变量名称")
+                    showToast("请输入${label}名称")
                     return@setPositiveButton
                 }
-                
+
                 if (value.isEmpty()) {
-                    showToast("请输入变量值")
+                    showToast("请输入${label}值")
                     return@setPositiveButton
                 }
-                
+
                 tempVariables.add(Triple(name, value, type))
                 onAdded()
-                showToast(if (type == "secret_text") "机密已添加" else "环境变量已添加")
+                showToast(if (isSecret) "机密已添加" else "环境变量已添加")
             }
             .setNegativeButton("取消", null)
             .show()
@@ -445,30 +553,32 @@ class PagesFragment : Fragment() {
         onEdited: () -> Unit
     ) {
         val dialogBinding = com.muort.upworker.databinding.DialogAddPagesVariableBinding.inflate(layoutInflater)
-        
+
         val isSecret = variable.third == "secret_text"
-        val title = if (isSecret) "编辑机密" else "编辑环境变量"
-        
+        val label = if (isSecret) "机密" else "变量"
+
+        dialogBinding.dialogTitleText.text = "编辑${label}"
+        dialogBinding.variableTypeText.text = if (isSecret) "secret" else "txt"
+
         // Pre-fill with existing values
         dialogBinding.variableNameEdit.setText(variable.first)
         dialogBinding.variableNameEdit.isEnabled = false  // Can't change name
-        
+
         // For secrets, don't show the old value (it's encrypted)
         if (!isSecret) {
             dialogBinding.variableValueEdit.setText(variable.second)
         }
-        
+
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(title)
             .setView(dialogBinding.root)
             .setPositiveButton("保存") { _, _ ->
                 val newValue = dialogBinding.variableValueEdit.text.toString().trim()
-                
+
                 if (newValue.isEmpty()) {
                     showToast("请输入值")
                     return@setPositiveButton
                 }
-                
+
                 // Find and update the variable
                 val index = tempVariables.indexOf(variable)
                 if (index >= 0) {
@@ -488,48 +598,85 @@ class PagesFragment : Fragment() {
         originalVariables: List<Triple<String, String, String>>,
         newVariables: List<Triple<String, String, String>>
     ) {
-        val plainTextCount = newVariables.count { it.third == "plain_text" }
-        val secretCount = newVariables.count { it.third == "secret_text" }
-        Timber.d("Applying $plainTextCount environment variables and $secretCount secrets to Pages project '${project.name}' ($environment)")
-        
+        Timber.d("Applying ${newVariables.size} environment variables to Pages project '${project.name}' ($environment)")
+
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle("正在更新...")
-            .setMessage("正在更新环境变量和机密配置")
+            .setMessage("正在更新环境变量配置")
             .setCancelable(false)
             .create()
         loadingDialog.show()
-        
-        // Convert to Map format for API
-        // Include all new variables and secrets with their values and types
-        // 注意：机密加密保存无法获取，加载时值设为空字符串。
-        // 对于机密类型且值为空的项（表示用户未编辑的现有机密），跳过不发送，
-        // 否则会用空字符串覆盖原机密值。只有用户新增/编辑过（值非空）的机密才发送。
-        val variablesMap: MutableMap<String, Pair<String, String>?> = mutableMapOf()
-        newVariables.forEach { (name, value, type) ->
-            if (type == "secret_text" && value.isEmpty()) {
-                Timber.d("Skipping unedited secret (empty value): $name")
-                return@forEach
-            }
-            variablesMap[name] = (type to value)
-        }
+
+        // Convert to Map format for API (all plain_text, values are directly available)
+        val variablesMap: MutableMap<String, Pair<String, String>?> = newVariables.associate { (name, value, type) ->
+            name to (type to value)
+        }.toMutableMap()
 
         // Add deleted variables with null values
         val newVariableNames = newVariables.map { it.first }.toSet()
         originalVariables.forEach { (name, _, _) ->
             if (name !in newVariableNames) {
                 variablesMap[name] = null
-                Timber.d("Marking variable/secret for deletion: $name")
+                Timber.d("Marking variable for deletion: $name")
             }
         }
-        
+
         pagesViewModel.updateEnvironmentVariables(account, project.name, environment, variablesMap)
-        
+
         // Dismiss loading dialog after a short delay
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("环境变量和机密配置已更新")
+            showToast("环境变量配置已更新")
+        }
+    }
+
+    private fun applySecretsToPages(
+        account: Account,
+        project: PagesProject,
+        environment: String,
+        originalSecrets: List<Triple<String, String, String>>,
+        newSecrets: List<Triple<String, String, String>>
+    ) {
+        Timber.d("Applying ${newSecrets.size} secrets to Pages project '${project.name}' ($environment)")
+
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在更新...")
+            .setMessage("正在更新机密配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+
+        // 机密加密保存无法获取，加载时值设为空字符串。
+        // 对于值为空的项（表示用户未编辑的现有机密），跳过不发送，
+        // 否则会用空字符串覆盖原机密值。只有用户新增/编辑过（值非空）的机密才发送。
+        val secretsMap: MutableMap<String, Pair<String, String>?> = mutableMapOf()
+        newSecrets.forEach { (name, value, type) ->
+            if (value.isEmpty()) {
+                Timber.d("Skipping unedited secret (empty value): $name")
+                return@forEach
+            }
+            secretsMap[name] = (type to value)
+        }
+
+        // Add deleted secrets with null values
+        val newSecretNames = newSecrets.map { it.first }.toSet()
+        originalSecrets.forEach { (name, _, _) ->
+            if (name !in newSecretNames) {
+                secretsMap[name] = null
+                Timber.d("Marking secret for deletion: $name")
+            }
+        }
+
+        pagesViewModel.updateEnvironmentVariables(account, project.name, environment, secretsMap)
+
+        // Dismiss loading dialog after a short delay
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(500)
+            loadingDialog.dismiss()
+            showToast("机密配置已更新")
         }
     }
     
@@ -2194,6 +2341,7 @@ class PagesFragment : Fragment() {
         private val onProjectClick: (PagesProject) -> Unit,
         private val onDeleteClick: (PagesProject) -> Unit,
         private val onConfigEnvClick: (PagesProject) -> Unit,
+        private val onConfigSecretClick: (PagesProject) -> Unit,
         private val onConfigKvClick: (PagesProject) -> Unit,
         private val onConfigD1Click: (PagesProject) -> Unit,
         private val onConfigR2Click: (PagesProject) -> Unit,
@@ -2284,7 +2432,11 @@ class PagesFragment : Fragment() {
                 binding.configEnvBtn.setOnClickListener {
                     onConfigEnvClick(project)
                 }
-                
+
+                binding.configSecretBtn.setOnClickListener {
+                    onConfigSecretClick(project)
+                }
+
                 binding.configKvBtn.setOnClickListener {
                     onConfigKvClick(project)
                 }
@@ -2589,53 +2741,6 @@ class PagesD1BindingsAdapter(
     }
 }
 
-class PagesVariablesAdapter(
-    private val onEditClick: (Pair<String, String>) -> Unit,
-    private val onDeleteClick: (Pair<String, String>) -> Unit
-) : RecyclerView.Adapter<PagesVariablesAdapter.VariableViewHolder>() {
-    
-    private var variables = listOf<Pair<String, String>>()
-    
-    fun submitList(newVariables: List<Pair<String, String>>) {
-        variables = newVariables
-        notifyDataSetChanged()
-    }
-    
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VariableViewHolder {
-        val binding = com.muort.upworker.databinding.ItemVariableBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
-        return VariableViewHolder(binding)
-    }
-    
-    override fun onBindViewHolder(holder: VariableViewHolder, position: Int) {
-        holder.bind(variables[position])
-    }
-    
-    override fun getItemCount() = variables.size
-    
-    inner class VariableViewHolder(
-        private val binding: com.muort.upworker.databinding.ItemVariableBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
-        
-        fun bind(variable: Pair<String, String>) {
-            binding.variableNameText.text = variable.first
-            binding.variableValueText.text = variable.second
-            binding.variableTypeText.visibility = View.GONE  // Pages 只支持文本类型，不显示类型标签
-            
-            binding.editVariableBtn.setOnClickListener {
-                onEditClick(variable)
-            }
-            
-            binding.deleteVariableBtn.setOnClickListener {
-                onDeleteClick(variable)
-            }
-        }
-    }
-}
-
 // Adapter for combined variables and secrets (Triple: name, value, type)
 class PagesVariablesAndSecretsAdapter(
     private val onEditClick: (Triple<String, String, String>) -> Unit,
@@ -2671,29 +2776,23 @@ class PagesVariablesAndSecretsAdapter(
         fun bind(variable: Triple<String, String, String>) {
             val (name, value, type) = variable
             val isSecret = type == "secret_text"
-            
+
             binding.variableNameText.text = name
-            
+
             // For secrets, show encrypted indicator; for plain text, show value
             if (isSecret) {
                 binding.variableValueText.text = "🔒 加密存储，无法查看"
                 binding.variableValueText.setTypeface(null, Typeface.ITALIC)
-                binding.variableValueText.setTextColor(
-                    binding.root.context.getColor(android.R.color.darker_gray)
-                )
             } else {
                 binding.variableValueText.text = value
                 binding.variableValueText.setTypeface(null, Typeface.NORMAL)
-                val typedValue = TypedValue()
-                binding.root.context.theme.resolveAttribute(android.R.attr.textColorPrimary, typedValue, true)
-                binding.variableValueText.setTextColor(typedValue.data)
             }
-            
+
             // Show type label
             binding.variableTypeText.visibility = View.VISIBLE
             binding.variableTypeText.text = if (isSecret) "机密" else "变量"
             binding.variableTypeText.setBackgroundColor(
-                if (isSecret) 
+                if (isSecret)
                     binding.root.context.getColor(android.R.color.holo_red_light)
                 else
                     binding.root.context.getColor(android.R.color.holo_blue_light)

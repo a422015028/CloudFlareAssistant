@@ -7,9 +7,10 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/dialogTitleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="添加变量/机密"
+        android:text="添加变量"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
@@ -30,37 +31,34 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="变量类型"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp" />
-
-    <RadioGroup
-        android:id="@+id/variableTypeGroup"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:layout_marginBottom="12dp">
 
-        <RadioButton
-            android:id="@+id/typePlainTextRadio"
-            android:layout_width="0dp"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="环境变量"
-            android:checked="true" />
+            android:text="类型: "
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
-        <RadioButton
-            android:id="@+id/typeSecretRadio"
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/variableTypeText"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="机密" />
+            android:text="txt"
+            android:textSize="14sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:background="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorSecondary" />
 
-    </RadioGroup>
+    </LinearLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
@@ -73,10 +71,10 @@
             android:id="@+id/variableValueEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
+            android:inputType="textMultiLine"
             android:gravity="top|start"
-            android:minLines="3"
-            android:maxLines="5" />
+            android:minLines="1"
+            android:maxLines="8" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
