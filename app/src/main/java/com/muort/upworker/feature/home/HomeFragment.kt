@@ -262,7 +262,7 @@ class HomeFragment : Fragment() {
                 if (updateInfo != null) {
                     val latestVersionCode = updateInfo.versionCode
                     if (latestVersionCode > currentVersionCode) {
-                        showUpdateDialog(updateInfo.versionName)
+                        showUpdateDialog(updateInfo.versionName, updateInfo.updateContent)
                     } else {
                         requireContext().showToast("当前已是最新版本")
                     }
@@ -298,8 +298,9 @@ class HomeFragment : Fragment() {
                     val json = JSONObject(response.body!!.string())
                     val versionName = json.optString("versionName", "")
                     val versionCode = json.optLong("versionCode", 0)
+                    val updateContent = json.optString("updateContent", "")
                     if (versionCode > 0) {
-                        return@withContext VersionInfo(versionName, versionCode)
+                        return@withContext VersionInfo(versionName, versionCode, updateContent)
                     }
                 }
             } catch (e: Exception) {
@@ -309,18 +310,23 @@ class HomeFragment : Fragment() {
         }
     }
     
-    private fun showUpdateDialog(versionName: String) {
+    private fun showUpdateDialog(versionName: String, updateContent: String) {
+        val message = if (updateContent.isNotBlank()) {
+            "版本 $versionName\n\n$updateContent"
+        } else {
+            "版本 $versionName 可用，是否立即更新？"
+        }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("发现新版本")
-            .setMessage("版本 $versionName 可用，是否立即更新？")
+            .setMessage(message)
             .setPositiveButton("更新") { _, _ ->
                 openUrl("https://cfd.390202.xyz/CloudFlareAssistant.apk")
             }
             .setNegativeButton("取消", null)
             .show()
     }
-    
-    private data class VersionInfo(val versionName: String, val versionCode: Long)
+
+    private data class VersionInfo(val versionName: String, val versionCode: Long, val updateContent: String)
     
     private fun openUrl(url: String) {
         try {

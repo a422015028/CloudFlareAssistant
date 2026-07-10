@@ -648,81 +648,94 @@ class WorkerRepository @Inject constructor(
     }
     
     /**
-     * Update secrets for an existing Worker Script
+     * Update secrets for an existing Worker Script using bulk secrets API
+     * Uses PATCH /secrets-bulk endpoint which supports:
+     * - Create/update: set secret object {type, name, text}
+     * - Delete: set to null
+     * - Unchanged: omit from request
+     *
      * @param account The Cloudflare account
      * @param scriptName Name of the existing script
-     * @param secrets List of (secret name, secret value) pairs
+     * @param secrets List of (secret name, secret value) pairs. Empty value means unchanged existing secret.
      * @return Resource indicating success or error
      */
     suspend fun updateWorkerSecrets(
         account: Account,
         scriptName: String,
         secrets: List<Pair<String, String>>
-    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             Timber.d("Updating secrets for script '$scriptName' with ${secrets.size} secrets")
-            
-            // First, get existing settings to preserve other bindings and compatibilityDate
-            val existingBindings = mutableListOf<WorkerBinding>()
-            var existingCompatibilityDate: String? = null
+
+            // 1. Get existing secret_text binding names
+            val existingSecretNames = mutableSetOf<String>()
             val settingsResult = getWorkerSettings(account, scriptName)
             if (settingsResult is Resource.Success) {
                 settingsResult.data.bindings?.forEach { binding ->
-                    // Keep all non-secret bindings
-                    if (binding.type != "secret_text") {
-                        existingBindings.add(binding)
+                    if (binding.type == "secret_text") {
+                        existingSecretNames.add(binding.name)
                     }
                 }
-                existingCompatibilityDate = settingsResult.data.compatibilityDate
             }
-            
-            // Convert pairs to WorkerBinding objects
-            val secretBindings = secrets.map { (name, value) ->
-                Timber.d("Adding secret: $name")
-                WorkerBinding(
-                    type = "secret_text",
-                    name = name,
-                    text = value
-                )
+
+            // 2. Build secrets-bulk request map
+            val newSecretNames = secrets.map { it.first }.toSet()
+            val secretsMap = mutableMapOf<String, Any?>()
+
+            // Deleted secrets: existed before but not in new list -> set to null
+            for (name in existingSecretNames) {
+                if (name !in newSecretNames) {
+                    secretsMap[name] = null
+                    Timber.d("Marking secret for deletion: $name")
+                }
             }
-            
-            // Combine existing bindings with new secrets
-            val allBindings = existingBindings + secretBindings
-            Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${secretBindings.size} secrets)")
-            
-            // Create settings request with preserved compatibilityDate
-            val settingsRequest = WorkerSettingsRequest(
-                bindings = allBindings,
-                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
-            )
-            
-            val settingsJson = gson.toJson(settingsRequest)
-            Timber.d("Settings request (secrets hidden): bindings count = ${allBindings.size}")
-            
-            // Convert to RequestBody for multipart
-            val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
-            
-            // Call API to update settings
-            val response = api.updateWorkerSettings(
+
+            // Created/updated secrets: have non-empty value -> set secret object
+            for ((name, value) in secrets) {
+                if (value.isNotEmpty()) {
+                    secretsMap[name] = mapOf(
+                        "type" to "secret_text",
+                        "name" to name,
+                        "text" to value
+                    )
+                    Timber.d("Adding/updating secret: $name")
+                }
+                // Empty value = unchanged existing secret, omit from request
+            }
+
+            // No changes needed
+            if (secretsMap.isEmpty()) {
+                Timber.d("No secret changes for '$scriptName'")
+                return@safeApiCall Resource.Success(Unit)
+            }
+
+            Timber.d("Secrets bulk update: ${secretsMap.size} operations for '$scriptName'")
+
+            // 3. Build JSON request body
+            // Need serializeNulls() so deleted secrets (set to null) are included in JSON
+            val bulkGson = com.google.gson.GsonBuilder().serializeNulls().create()
+            val requestBody = bulkGson.toJson(mapOf("secrets" to secretsMap))
+            val body = requestBody.toRequestBody("application/json".toMediaType())
+
+            // 4. Call bulk secrets API
+            val response = api.updateSecretsBulk(
                 token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
                 scriptName = scriptName,
-                settings = settingsBody
+                body = body
             )
-            
+
             if (response.isSuccessful && response.body()?.success == true) {
                 Timber.d("Successfully updated secrets for '$scriptName'")
-                response.body()?.result?.let {
-                    Resource.Success(it)
-                } ?: Resource.Error("Update successful but no result returned")
+                Resource.Success(Unit)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Failed to update secrets: Response code: ${response.code()}, Error body: $errorBody")
-                Resource.Error("Failed to update secrets: $errorMsg")
+                Resource.Error("更新机密失败: $errorMsg")
             }
         }
     }

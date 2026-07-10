@@ -167,6 +167,24 @@ interface CloudFlareApi {
     ): Response<CloudFlareResponse<WorkerScript>>
 
     /**
+     * Bulk update secrets (create/update/delete in a single request)
+     * https://developers.cloudflare.com/api/resources/workers/subresources/scripts/subresources/secrets/methods/bulk_update/
+     * - Set secret object to create/update
+     * - Set null to delete
+     * - Omit to leave unchanged
+     */
+    @Headers("Content-Type: application/json")
+    @PATCH("accounts/{account_id}/workers/scripts/{script_name}/secrets-bulk")
+    suspend fun updateSecretsBulk(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Body body: RequestBody
+    ): Response<CloudFlareResponse<Unit>>
+
+    /**
      * List Worker Script versions (beta)
      * https://developers.cloudflare.com/api/resources/workers/subresources/beta/subresources/workers/subresources/versions/methods/list
      */

@@ -57,17 +57,8 @@ class WorkerViewModel @Inject constructor(
                     
                     Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
                     
-                    // secret_text 值不可获取，用 inherit 类型从上一版本继承，避免被删除
-                    val cleanedBindings = originalBindings?.map { binding ->
-                        if (binding.type == "secret_text") {
-                            com.muort.upworker.core.model.WorkerBinding(
-                                type = "inherit",
-                                name = binding.name
-                            )
-                        } else {
-                            binding
-                        }
-                    }
+                    // 过滤掉 secret_text bindings（无法获取值）
+                    val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
                     
                     // 用户自定义日期 > 原有日期 > 默认值
                     val finalCompatibilityDate = customCompatibilityDate?.takeIf { it.isNotBlank() } 
