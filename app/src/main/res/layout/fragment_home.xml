@@ -194,7 +194,7 @@
                     <ImageView
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:src="@android:drawable/ic_menu_save"
+                        android:src="@android:drawable/ic_menu_sort_alphabetically"
                         android:tint="?attr/colorPrimary" />
 
                     <TextView
@@ -379,7 +379,7 @@
                     <ImageView
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:src="@android:drawable/ic_menu_info_details"
+                        android:src="@android:drawable/ic_menu_recent_history"
                         android:tint="?attr/colorPrimary" />
 
                     <TextView
