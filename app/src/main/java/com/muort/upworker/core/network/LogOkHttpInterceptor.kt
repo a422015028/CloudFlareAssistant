@@ -15,6 +15,14 @@ class LogOkHttpInterceptor @Inject constructor() : Interceptor {
             append("URL: ${request.url}\n")
             append("Method: ${request.method}\n")
             request.headers.forEach { append("Header: ${it.first}: ${it.second}\n") }
+            request.body?.let { body ->
+                val buffer = okio.Buffer()
+                body.writeTo(buffer)
+                val bodyStr = buffer.readUtf8()
+                if (bodyStr.isNotEmpty()) {
+                    append("Body: $bodyStr\n")
+                }
+            }
         }
         LogRepository.appendLog(requestLog)
         val response = try {
