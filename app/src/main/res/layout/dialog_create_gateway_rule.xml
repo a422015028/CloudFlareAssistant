@@ -188,11 +188,17 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <Spinner
-                android:id="@+id/dnsListSpinner"
+            <TextView
+                android:id="@+id/dnsListSelector"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:text="选择列表"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
                 android:visibility="gone" />
 
             <CheckBox
@@ -297,11 +303,17 @@
 
             </RadioGroup>
 
-            <Spinner
-                android:id="@+id/httpDomainListSpinner"
+            <TextView
+                android:id="@+id/httpDomainListSelector"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:text="选择列表"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
                 android:visibility="gone" />
 
             <CheckBox
@@ -313,11 +325,17 @@
                 android:textSize="12sp"
                 android:visibility="gone" />
 
-            <Spinner
-                android:id="@+id/httpUrlListSpinner"
+            <TextView
+                android:id="@+id/httpUrlListSelector"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:text="选择列表"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
                 android:visibility="gone" />
 
             <CheckBox
@@ -415,11 +433,17 @@
 
             </RadioGroup>
 
-            <Spinner
-                android:id="@+id/l4ListSpinner"
+            <TextView
+                android:id="@+id/l4ListSelector"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:text="选择列表"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
                 android:visibility="gone" />
 
             <CheckBox
