@@ -120,56 +120,21 @@
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 
-        <TextView
-            android:id="@+id/itemsHintText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="每行输入一个，例如:\nexample.com\nwww.example.com"
-            android:textSize="11sp"
-            android:textColor="?android:attr/textColorSecondary" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="列表项内容">
+            android:hint="列表项内容 (每个项占一行) *">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/itemsInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
-                android:lines="6"
+                android:minLines="4"
                 android:gravity="top|start" />
 
         </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- 示例 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="输入示例"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/exampleText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="example.com\napi.example.com\n*.example.com"
-                android:textSize="11sp"
-                android:textColor="?android:attr/textColorSecondary"
-                android:fontFamily="monospace" />
-
-        </LinearLayout>
 
     </LinearLayout>
 

@@ -1140,6 +1140,19 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String,
         @Path("list_id") listId: String
     ): Response<CloudFlareResponse<GatewayList>>
+
+    /**
+     * Get Gateway List Items
+     */
+    @GET("accounts/{account_id}/gateway/lists/{list_id}/items")
+    suspend fun listGatewayListItems(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("list_id") listId: String,
+        @Query("per_page") perPage: Int = 10000
+    ): Response<CloudFlareResponse<List<GatewayListItem>>>
     
     /**
      * Create Gateway List

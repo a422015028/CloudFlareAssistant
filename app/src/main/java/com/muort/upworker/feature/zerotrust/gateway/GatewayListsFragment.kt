@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -121,13 +120,11 @@ class GatewayListsFragment : Fragment() {
 
     private fun showCreateListDialog(existingList: GatewayList? = null) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_create_gateway_list, null)
-        
+
         val nameInput = dialogView.findViewById<TextInputEditText>(R.id.listNameInput)
         val typeSpinner = dialogView.findViewById<Spinner>(R.id.listTypeSpinner)
         val descriptionInput = dialogView.findViewById<TextInputEditText>(R.id.descriptionInput)
         val itemsInput = dialogView.findViewById<TextInputEditText>(R.id.itemsInput)
-        val exampleText = dialogView.findViewById<TextView>(R.id.exampleText)
-        val itemsHintText = dialogView.findViewById<TextView>(R.id.itemsHintText)
 
         val templateDomainBtn = dialogView.findViewById<Button>(R.id.templateDomainBtn)
         val templateIpBtn = dialogView.findViewById<Button>(R.id.templateIpBtn)
@@ -145,31 +142,6 @@ class GatewayListsFragment : Fragment() {
         )
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         typeSpinner.adapter = typeAdapter
-
-        fun updateExample() {
-            val listType = types[typeSpinner.selectedItemPosition].first
-            when (listType) {
-                "DOMAIN" -> {
-                    exampleText.text = "example.com\napi.example.com\n*.example.com"
-                    itemsHintText.text = "每行输入一个域名，例如:\nexample.com\nwww.example.com"
-                }
-                "IP" -> {
-                    exampleText.text = "192.168.1.1\n10.0.0.0/24\n172.16.0.0/12"
-                    itemsHintText.text = "每行输入一个 IP 或 CIDR，例如:\n192.168.1.1\n10.0.0.0/24"
-                }
-                "URL" -> {
-                    exampleText.text = "https://example.com/path\nhttps://*.example.com/*"
-                    itemsHintText.text = "每行输入一个 URL，例如:\nhttps://example.com/path"
-                }
-            }
-        }
-
-        typeSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
-                updateExample()
-            }
-            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
-        }
 
         templateDomainBtn.setOnClickListener {
             typeSpinner.setSelection(0)
@@ -189,12 +161,26 @@ class GatewayListsFragment : Fragment() {
         existingList?.let { list ->
             nameInput.setText(list.name)
             descriptionInput.setText(list.description ?: "")
-            
+
             val typeIndex = types.indexOfFirst { it.first == list.type }
             if (typeIndex >= 0) typeSpinner.setSelection(typeIndex)
-            
-            list.items?.let { items ->
-                itemsInput.setText(items.joinToString("\n") { it.value })
+
+            val items = list.items
+            if (items != null && items.isNotEmpty()) {
+                val text = items.joinToString("\n") { it.value }
+                itemsInput.setText(text)
+                adjustItemsInputHeight(itemsInput, text)
+            } else {
+                itemsInput.hint = "加载中..."
+                val account = accountViewModel.defaultAccount.value
+                if (account != null) {
+                    viewModel.loadListItems(account, list.id) { loadedItems ->
+                        val text = loadedItems.joinToString("\n") { it.value }
+                        itemsInput.setText(text)
+                        itemsInput.hint = "列表项内容"
+                        adjustItemsInputHeight(itemsInput, text)
+                    }
+                }
             }
         }
 
@@ -205,7 +191,7 @@ class GatewayListsFragment : Fragment() {
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
                 val name = nameInput.text?.toString()
                 val itemsText = itemsInput.text?.toString()
-                
+
                 if (name.isNullOrBlank()) {
                     Snackbar.make(binding.root, "列表名称不能为空", Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
@@ -218,18 +204,18 @@ class GatewayListsFragment : Fragment() {
 
                 val listType = types[typeSpinner.selectedItemPosition].first
                 var items = itemsText.split(Regex("[\n,;]")).map { it.trim() }.filter { it.isNotBlank() }
-                
+
                 if (listType == "DOMAIN") {
                     items = items.map { item ->
                         item.replace("*\\.", "").replace(".*\\.", "").replace(".*", "").replace("~", "").trim()
                     }.filter { it.isNotBlank() }
                 }
-                
+
                 if (items.isEmpty()) {
                     Snackbar.make(binding.root, "列表项不能为空", Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                
+
                 val request = GatewayListRequest(
                     name = name,
                     type = listType,
@@ -245,6 +231,12 @@ class GatewayListsFragment : Fragment() {
             }
             .setNegativeButton("取消", null)
             .show()
+    }
+
+    private fun adjustItemsInputHeight(input: TextInputEditText, text: String) {
+        val lineCount = text.split("\n").size
+        input.minLines = lineCount.coerceIn(4, 25)
+        input.requestLayout()
     }
 
     private fun confirmDeleteList(listId: String, listName: String) {

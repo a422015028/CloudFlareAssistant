@@ -141,10 +141,12 @@ class GatewayViewModel @Inject constructor(
                     launch {
                         val listsWithDetails = result.data.map { list ->
                             val detail = zeroTrustRepository.getGatewayList(account, list.id)
+                            val itemsResult = zeroTrustRepository.getGatewayListItems(account, list.id)
+                            val items = (itemsResult as? Resource.Success)?.data
                             if (detail is Resource.Success) {
-                                detail.data
+                                detail.data.copy(items = items ?: detail.data.items)
                             } else {
-                                list
+                                list.copy(items = items ?: list.items)
                             }
                         }
                         _lists.value = listsWithDetails
@@ -161,7 +163,25 @@ class GatewayViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
-    
+
+    /**
+     * Load items for a single list (on-demand fetch for editing)
+     */
+    fun loadListItems(account: Account, listId: String, onLoaded: (List<GatewayListItem>) -> Unit) {
+        viewModelScope.launch {
+            val result = zeroTrustRepository.getGatewayListItems(account, listId)
+            if (result is Resource.Success) {
+                val updatedLists = _lists.value.map { list ->
+                    if (list.id == listId) list.copy(items = result.data) else list
+                }
+                _lists.value = updatedLists
+                onLoaded(result.data)
+            } else {
+                onLoaded(emptyList())
+            }
+        }
+    }
+
     /**
      * Create a Gateway list
      */

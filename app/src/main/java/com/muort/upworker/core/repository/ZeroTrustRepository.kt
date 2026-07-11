@@ -586,7 +586,32 @@ class ZeroTrustRepository @Inject constructor(
                 }
             }
         }
-    
+
+    /**
+     * Get items of a specific Gateway list
+     */
+    suspend fun getGatewayListItems(account: Account, listId: String): Resource<List<GatewayListItem>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.listGatewayListItems(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    listId = listId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val items = response.body()!!.result ?: emptyList()
+                    Timber.d("Loaded ${items.size} items for list $listId")
+                    Resource.Success(items)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to get list items"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
     /**
      * Create a Gateway list
      */

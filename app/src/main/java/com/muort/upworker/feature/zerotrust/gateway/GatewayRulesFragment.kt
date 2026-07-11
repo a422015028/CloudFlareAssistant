@@ -307,7 +307,7 @@ class GatewayRulesFragment : Fragment() {
 
         fun updateListSelectorText(selector: TextView, selectedIds: Set<String>, lists: List<com.muort.upworker.core.model.GatewayList>) {
             val names = lists.filter { selectedIds.contains(it.id) }.map { it.name }
-            selector.text = if (names.isEmpty()) "选择列表" else names.joinToString(", ")
+            selector.text = if (names.isEmpty()) "点击选择列表" else names.joinToString(", ")
         }
 
         fun showMultiListDialog(
