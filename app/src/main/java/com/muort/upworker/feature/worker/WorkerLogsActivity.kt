@@ -21,12 +21,17 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.TailException
 import com.muort.upworker.core.model.TailLog
 import com.muort.upworker.core.model.TailTraceItem
+import com.muort.upworker.core.util.DisplaySizeHelper
 import okhttp3.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 class WorkerLogsActivity : AppCompatActivity() {
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(DisplaySizeHelper.wrap(newBase))
+    }
 
     private lateinit var toolbar: MaterialToolbar
     private lateinit var connectionStatusDot: View

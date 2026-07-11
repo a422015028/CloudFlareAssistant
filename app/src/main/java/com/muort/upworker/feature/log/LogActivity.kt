@@ -1,5 +1,6 @@
 package com.muort.upworker.feature.log
 
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
@@ -9,13 +10,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.muort.upworker.R
 import com.muort.upworker.core.log.LogRepository
+import com.muort.upworker.core.util.DisplaySizeHelper
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class LogActivity : AppCompatActivity() {
-    
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(DisplaySizeHelper.wrap(newBase))
+    }
+
     // 保证状态栏样式与主界面一致
     override fun getTheme(): android.content.res.Resources.Theme {
         val theme = super.getTheme()

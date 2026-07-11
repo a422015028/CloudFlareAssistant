@@ -1,6 +1,8 @@
 package com.muort.upworker.core.util
 
 import android.content.Context
+import android.content.res.Configuration
+import android.util.DisplayMetrics
 
 /**
  * 全局显示大小（字体缩放）偏好管理
@@ -37,4 +39,26 @@ object DisplaySizeHelper {
         val current = getFontScale(context)
         return OPTIONS.indexOfFirst { it.second == current }.let { if (it < 0) 1 else it }
     }
+
+    /**
+     * 包装 Context：将密度归一化到设备原生密度再缩小 1.2 倍，避免系统"显示大小"设置导致布局溢出；
+     * 同时应用应用内字体缩放偏好。
+     */
+    fun wrap(context: Context): Context {
+        val dm = context.resources.displayMetrics
+        val stableDpi = DisplayMetrics.DENSITY_DEVICE_STABLE
+        val targetDpi = if (stableDpi > 0) (stableDpi / 1.2f).toInt() else dm.densityDpi
+        val fontScale = getFontScale(context)
+        val needFix = dm.densityDpi != targetDpi || fontScale != 1.0f
+
+        return if (needFix) {
+            val config = Configuration(context.resources.configuration)
+            config.densityDpi = targetDpi
+            config.fontScale = fontScale
+            context.createConfigurationContext(config)
+        } else {
+            context
+        }
+    }
 }
+

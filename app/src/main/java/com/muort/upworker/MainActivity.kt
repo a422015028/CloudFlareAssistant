@@ -47,14 +47,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var migrationHelper: DataMigrationHelper
 
     override fun attachBaseContext(newBase: Context) {
-        val fontScale = DisplaySizeHelper.getFontScale(newBase)
-        if (fontScale != 1.0f) {
-            val config = Configuration(newBase.resources.configuration)
-            config.fontScale = fontScale
-            super.attachBaseContext(newBase.createConfigurationContext(config))
-        } else {
-            super.attachBaseContext(newBase)
-        }
+        super.attachBaseContext(DisplaySizeHelper.wrap(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
