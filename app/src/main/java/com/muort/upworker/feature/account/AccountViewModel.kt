@@ -244,22 +244,27 @@ class AccountViewModel @Inject constructor(
             zoneRepository.getZonesByAccount(accountId).collect { zones ->
                 _zones.value = zones
                 // Load selected zone
-                val selected = zoneRepository.getSelectedZone(accountId)
+                var selected = zoneRepository.getSelectedZone(accountId)
+                // 首次加载时如果没有选中域名，自动选中第一个
+                if (selected == null && zones.isNotEmpty()) {
+                    zoneRepository.setSelectedZone(accountId, zones[0].id)
+                    selected = zones[0]
+                }
                 _selectedZone.value = selected
             }
         }
     }
     
-    fun fetchZonesFromApi(account: Account) {
+    fun fetchZonesFromApi(account: Account, silent: Boolean = false) {
         viewModelScope.launch {
             _loadingZones.value = true
             when (val result = zoneRepository.fetchAndSaveZones(account)) {
                 is Resource.Success -> {
-                    _message.emit("成功获取 ${result.data.size} 个域名")
+                    if (!silent) _message.emit("成功获取 ${result.data.size} 个域名")
                     loadZonesForAccount(account.id)
                 }
                 is Resource.Error -> {
-                    _message.emit("获取域名失败: ${result.message}")
+                    if (!silent) _message.emit("获取域名失败: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }

@@ -12,7 +12,7 @@ import com.muort.upworker.core.model.ScriptVersion
 
 @Database(
     entities = [Account::class, WebDavConfig::class, R2BackupConfig::class, Zone::class, ScriptVersion::class],
-    version = 7,
+    version = 8,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -123,6 +123,14 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE accounts ADD COLUMN email TEXT DEFAULT NULL")
                 db.execSQL("ALTER TABLE accounts ADD COLUMN globalApiKey TEXT DEFAULT NULL")
                 db.execSQL("ALTER TABLE accounts ADD COLUMN authType TEXT NOT NULL DEFAULT 'TOKEN'")
+            }
+        }
+
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // 为 zones 表增加名称服务器与套餐字段
+                db.execSQL("ALTER TABLE zones ADD COLUMN nameServers TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE zones ADD COLUMN plan TEXT DEFAULT NULL")
             }
         }
     }

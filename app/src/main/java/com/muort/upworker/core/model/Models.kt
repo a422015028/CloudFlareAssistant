@@ -101,9 +101,17 @@ data class Zone(
     val type: String? = null, // full, partial
     val paused: Boolean = false,
     val isSelected: Boolean = false, // Whether this zone is currently selected for the account
+    // CF 分配的名称服务器（换行分隔，Room 无需 TypeConverter）
+    val nameServers: String? = null,
+    // 套餐名称（如 "Free Plan"）
+    val plan: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
-)
+) {
+    /** 将换行分隔的名称服务器字符串拆为列表。 */
+    fun nameServerList(): List<String> =
+        nameServers?.split("\n")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()
+}
 
 // API response model for zones
 data class ZoneInfo(
@@ -119,8 +127,23 @@ data class ZoneInfo(
     @SerializedName("original_dnshost") val originalDnshost: String? = null,
     @SerializedName("created_on") val createdOn: String? = null,
     @SerializedName("modified_on") val modifiedOn: String? = null,
-    @SerializedName("activated_on") val activatedOn: String? = null
+    @SerializedName("activated_on") val activatedOn: String? = null,
+    @SerializedName("plan") val plan: ZonePlan? = null,
 )
+
+/** Zone 套餐信息（来自 Cloudflare API）。 */
+data class ZonePlan(
+    @SerializedName("name") val name: String? = null
+)
+
+/** 新建 Zone 请求体（POST /zones）。type="full" 表示 Cloudflare 作权威 DNS。 */
+data class CreateZoneRequest(
+    @SerializedName("name") val name: String,
+    @SerializedName("type") val type: String = "full",
+    @SerializedName("account") val account: AccountRef
+) {
+    data class AccountRef(@SerializedName("id") val id: String)
+}
 
 // API response model for accounts
 data class AccountInfo(

@@ -165,33 +165,13 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp" />
 
-        <LinearLayout
+        <Button
+            android:id="@+id/manageZonesBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
-
-            <Button
-                android:id="@+id/fetchZonesBtn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="从API获取域名"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
-
-            <Space
-                android:layout_width="8dp"
-                android:layout_height="match_parent" />
-
-            <Button
-                android:id="@+id/manageZonesBtn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="管理域名"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
-
-        </LinearLayout>
+            android:layout_marginBottom="16dp"
+            android:text="切换活动域名"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <TextView
             android:layout_width="match_parent"

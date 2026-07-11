@@ -46,18 +46,20 @@ class DnsFragment : Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         setupAdapter()
         setupClickListeners()
         observeViewModel()
-        
-        val account = accountViewModel.defaultAccount.value
-        if (account != null) {
-            timber.log.Timber.d("DNS Fragment: Loading records for account: ${account.name}")
-            dnsViewModel.loadDnsRecords(account)
+
+        // 优先从导航参数获取 zoneId，回退到账号默认 zoneId
+        val zoneId = arguments?.getString("zoneId") ?: accountViewModel.defaultAccount.value?.zoneId
+        if (!zoneId.isNullOrBlank()) {
+            dnsViewModel.setZoneId(zoneId)
+            timber.log.Timber.d("DNS Fragment: Loading records for zoneId: $zoneId")
+            accountViewModel.defaultAccount.value?.let { dnsViewModel.loadDnsRecords(it) }
         } else {
-            timber.log.Timber.w("DNS Fragment: No default account available")
-            Snackbar.make(binding.root, "请先添加并设置默认账号", Snackbar.LENGTH_LONG).show()
+            timber.log.Timber.w("DNS Fragment: No zoneId available")
+            Snackbar.make(binding.root, "请先选择或添加域名", Snackbar.LENGTH_LONG).show()
         }
     }
     

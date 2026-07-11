@@ -17,6 +17,9 @@ interface ZoneDao {
     
     @Query("SELECT * FROM zones WHERE id = :zoneId")
     suspend fun getZoneById(zoneId: String): Zone?
+
+    @Query("SELECT * FROM zones WHERE id = :zoneId")
+    fun observeZoneById(zoneId: String): Flow<Zone?>
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertZone(zone: Zone)
@@ -32,6 +35,10 @@ interface ZoneDao {
     
     @Query("DELETE FROM zones WHERE accountId = :accountId")
     suspend fun deleteZonesByAccount(accountId: Long)
+
+    /** 删除指定账号下不在 remoteIds 列表中的 zone（用于同步删除云端已移除的域名）。 */
+    @Query("DELETE FROM zones WHERE accountId = :accountId AND id NOT IN (:remoteIds)")
+    suspend fun deleteZonesNotInList(accountId: Long, remoteIds: List<String>)
     
     @Transaction
     suspend fun setSelectedZone(accountId: Long, zoneId: String) {

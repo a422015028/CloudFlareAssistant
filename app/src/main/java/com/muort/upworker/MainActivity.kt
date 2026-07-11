@@ -271,6 +271,8 @@ class MainActivity : AppCompatActivity() {
                     accountViewModel.defaultAccount.collect { account ->
                         account?.let {
                             accountViewModel.loadZonesForAccount(it.id)
+                            // 启动/账号就绪时静默同步云端 zone 列表到数据库
+                            accountViewModel.fetchZonesFromApi(it, silent = true)
                         }
                     }
                 }

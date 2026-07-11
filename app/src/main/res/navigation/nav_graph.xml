@@ -22,7 +22,11 @@
         <action
             android:id="@+id/action_home_to_dns"
             app:destination="@id/dnsFragment" />
-        
+
+        <action
+            android:id="@+id/action_home_to_domainList"
+            app:destination="@id/domainListFragment" />
+
         <action
             android:id="@+id/action_home_to_route"
             app:destination="@id/routeFragment" />
@@ -104,6 +108,119 @@
         android:name="com.muort.upworker.feature.dns.DnsFragment"
         android:label="DNS 管理"
         tools:layout="@layout/fragment_dns" />
+
+    <!-- ============ 域名管理 ============ -->
+    <fragment
+        android:id="@+id/domainListFragment"
+        android:name="com.muort.upworker.feature.domain.DomainListFragment"
+        android:label="域名管理"
+        tools:layout="@layout/fragment_domain_list">
+
+        <action
+            android:id="@+id/action_domainList_to_domainDetail"
+            app:destination="@id/domainDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/domainDetailFragment"
+        android:name="com.muort.upworker.feature.domain.DomainDetailFragment"
+        android:label="域名详情"
+        tools:layout="@layout/fragment_domain_detail">
+
+        <action android:id="@+id/action_domainDetail_to_dns"           app:destination="@id/dnsFragment" />
+        <action android:id="@+id/action_domainDetail_to_analytics"     app:destination="@id/analyticsFragment" />
+        <action android:id="@+id/action_domainDetail_to_waf"           app:destination="@id/wafFragment" />
+        <action android:id="@+id/action_domainDetail_to_cache"          app:destination="@id/cacheRulesFragment" />
+        <action android:id="@+id/action_domainDetail_to_rateLimit"     app:destination="@id/rateLimitFragment" />
+        <action android:id="@+id/action_domainDetail_to_emailRouting"  app:destination="@id/emailRoutingFragment" />
+        <action android:id="@+id/action_domainDetail_to_loadBalancer"   app:destination="@id/loadBalancerFragment" />
+        <action android:id="@+id/action_domainDetail_to_ssl"           app:destination="@id/sslFragment" />
+        <action android:id="@+id/action_domainDetail_to_sslCerts"      app:destination="@id/sslCertsFragment" />
+        <action android:id="@+id/action_domainDetail_to_transform"     app:destination="@id/transformRulesFragment" />
+        <action android:id="@+id/action_domainDetail_to_accessRules"   app:destination="@id/accessRulesFragment" />
+        <action android:id="@+id/action_domainDetail_to_performance"   app:destination="@id/performanceFragment" />
+        <action android:id="@+id/action_domainDetail_to_snippets"      app:destination="@id/snippetsFragment" />
+        <action android:id="@+id/action_domainDetail_to_zoneSettings"  app:destination="@id/zoneSettingsFragment" />
+    </fragment>
+
+    <!-- ============ 域名级功能页 ============ -->
+    <fragment
+        android:id="@+id/analyticsFragment"
+        android:name="com.muort.upworker.feature.zone.AnalyticsFragment"
+        android:label="流量分析"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/wafFragment"
+        android:name="com.muort.upworker.feature.zone.WafFragment"
+        android:label="WAF 规则"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/cacheRulesFragment"
+        android:name="com.muort.upworker.feature.zone.CacheRulesFragment"
+        android:label="缓存规则"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/rateLimitFragment"
+        android:name="com.muort.upworker.feature.zone.RateLimitFragment"
+        android:label="速率限制"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/emailRoutingFragment"
+        android:name="com.muort.upworker.feature.zone.EmailRoutingFragment"
+        android:label="电子邮件路由"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/loadBalancerFragment"
+        android:name="com.muort.upworker.feature.zone.LoadBalancerFragment"
+        android:label="负载均衡"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/sslFragment"
+        android:name="com.muort.upworker.feature.zone.SslFragment"
+        android:label="SSL/TLS"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/sslCertsFragment"
+        android:name="com.muort.upworker.feature.zone.SslCertsFragment"
+        android:label="SSL 证书"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/transformRulesFragment"
+        android:name="com.muort.upworker.feature.zone.TransformRulesFragment"
+        android:label="Transform Rules"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/accessRulesFragment"
+        android:name="com.muort.upworker.feature.zone.AccessRulesFragment"
+        android:label="IP 访问规则"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/performanceFragment"
+        android:name="com.muort.upworker.feature.zone.PerformanceFragment"
+        android:label="性能已缓存"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/snippetsFragment"
+        android:name="com.muort.upworker.feature.zone.SnippetsFragment"
+        android:label="Snippets"
+        tools:layout="@layout/fragment_zone_feature" />
+
+    <fragment
+        android:id="@+id/zoneSettingsFragment"
+        android:name="com.muort.upworker.feature.zone.ZoneSettingsFragment"
+        android:label="设置"
+        tools:layout="@layout/fragment_zone_feature" />
 
     <fragment
         android:id="@+id/routeFragment"

@@ -699,7 +699,7 @@ class RouteFragment : Fragment() {
                     ttl = 1 // Auto TTL
                 )
                 
-                when (val result = dnsRepository.createDnsRecord(account, dnsRequest)) {
+                when (val result = dnsRepository.createDnsRecord(account, account.zoneId!!, dnsRequest)) {
                     is Resource.Success -> {
                         Snackbar.make(
                             binding.root,

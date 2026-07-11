@@ -48,6 +48,15 @@ interface CloudFlareApi {
         @Query("per_page") perPage: Int = 50,
         @Query("page") page: Int = 1
     ): Response<CloudFlareResponse<List<ZoneInfo>>>
+
+    /** 新建 Zone（添加域名，full setup）。响应含 CF 分配的 name_servers。 */
+    @POST("zones")
+    suspend fun createZone(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Body request: CreateZoneRequest
+    ): Response<CloudFlareResponse<ZoneInfo>>
     
     // ==================== Accounts ====================
     
@@ -1585,5 +1594,344 @@ interface CloudFlareApi {
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
         @Path("token_id") tokenId: String
+    ): Response<CloudFlareResponse<Unit>>
+
+    // ==================== Zone Rulesets（WAF / Cache / Rate Limit / Transform 共用 phase 入口） ====================
+
+    /** GET /zones/{zone_id}/rulesets/phases/{phase}/entrypoint —— 取某 phase 的 entrypoint ruleset。 */
+    @GET("zones/{zone_id}/rulesets/phases/{phase}/entrypoint")
+    suspend fun getRulesetEntrypoint(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("phase") phase: String
+    ): Response<CloudFlareResponse<WafRuleset>>
+
+    /** PUT /zones/{zone_id}/rulesets/phases/{phase}/entrypoint —— 创建 entrypoint（首条规则时）。 */
+    @PUT("zones/{zone_id}/rulesets/phases/{phase}/entrypoint")
+    suspend fun createRulesetEntrypoint(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("phase") phase: String,
+        @Body body: WafEntrypointUpdate
+    ): Response<CloudFlareResponse<WafRuleset>>
+
+    /** POST /zones/{zone_id}/rulesets/{ruleset_id}/rules —— 向已有规则集追加规则，返回完整 ruleset。 */
+    @POST("zones/{zone_id}/rulesets/{ruleset_id}/rules")
+    suspend fun addRulesetRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Body rule: WafRuleCreate
+    ): Response<CloudFlareResponse<WafRuleset>>
+
+    /** PATCH /zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id} —— 启停 / 整条更新规则，返回完整 ruleset。 */
+    @PATCH("zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}")
+    suspend fun updateRulesetRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Path("rule_id") ruleId: String,
+        @Body body: Any
+    ): Response<CloudFlareResponse<WafRuleset>>
+
+    /** DELETE /zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id} —— 删除单条规则。 */
+    @DELETE("zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}")
+    suspend fun deleteRulesetRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Path("rule_id") ruleId: String
+    ): Response<CloudFlareResponse<Unit>>
+
+    // ==================== IP 访问规则（firewall/access_rules/rules） ====================
+
+    @GET("zones/{zone_id}/firewall/access_rules/rules")
+    suspend fun listAccessRules(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Query("per_page") perPage: Int = 100
+    ): Response<CloudFlareResponse<List<FirewallAccessRule>>>
+
+    @POST("zones/{zone_id}/firewall/access_rules/rules")
+    suspend fun createAccessRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Body rule: AccessRuleCreate
+    ): Response<CloudFlareResponse<FirewallAccessRule>>
+
+    @PATCH("zones/{zone_id}/firewall/access_rules/rules/{rule_id}")
+    suspend fun updateAccessRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("rule_id") ruleId: String,
+        @Body update: AccessRuleUpdate
+    ): Response<CloudFlareResponse<FirewallAccessRule>>
+
+    @DELETE("zones/{zone_id}/firewall/access_rules/rules/{rule_id}")
+    suspend fun deleteAccessRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("rule_id") ruleId: String
+    ): Response<CloudFlareResponse<Unit>>
+
+    // ==================== Email Routing ====================
+
+    @GET("zones/{zone_id}/email/routing")
+    suspend fun getEmailRoutingSettings(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String
+    ): Response<CloudFlareResponse<EmailRoutingSettings>>
+
+    @POST("zones/{zone_id}/email/routing/{action}")
+    suspend fun setEmailRoutingEnabled(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("action") action: String,
+        @Body body: Map<String, String>
+    ): Response<CloudFlareResponse<Unit>>
+
+    @GET("zones/{zone_id}/email/routing/rules")
+    suspend fun listEmailRoutingRules(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String
+    ): Response<CloudFlareResponse<List<EmailRoutingRule>>>
+
+    @POST("zones/{zone_id}/email/routing/rules")
+    suspend fun createEmailRoutingRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Body rule: EmailRoutingRuleInput
+    ): Response<CloudFlareResponse<EmailRoutingRule>>
+
+    @PUT("zones/{zone_id}/email/routing/rules/{rule_id}")
+    suspend fun updateEmailRoutingRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("rule_id") ruleId: String,
+        @Body rule: EmailRoutingRuleInput
+    ): Response<CloudFlareResponse<EmailRoutingRule>>
+
+    @DELETE("zones/{zone_id}/email/routing/rules/{rule_id}")
+    suspend fun deleteEmailRoutingRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("rule_id") ruleId: String
+    ): Response<CloudFlareResponse<Unit>>
+
+    @GET("accounts/{account_id}/email/routing/addresses")
+    suspend fun listEmailDestinationAddresses(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<EmailDestinationAddress>>>
+
+    @POST("accounts/{account_id}/email/routing/addresses")
+    suspend fun createEmailDestinationAddress(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body body: EmailDestinationCreate
+    ): Response<CloudFlareResponse<EmailDestinationAddress>>
+
+    @DELETE("accounts/{account_id}/email/routing/addresses/{address_id}")
+    suspend fun deleteEmailDestinationAddress(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("address_id") addressId: String
+    ): Response<CloudFlareResponse<Unit>>
+
+    // ==================== SSL / 证书 ====================
+
+    @GET("zones/{zone_id}/ssl/certificate_packs")
+    suspend fun listCertificatePacks(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Query("status") status: String = "all"
+    ): Response<CloudFlareResponse<List<SslCertificatePack>>>
+
+    @GET("zones/{zone_id}/ssl/universal/settings")
+    suspend fun getUniversalSslSettings(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String
+    ): Response<CloudFlareResponse<UniversalSslSettings>>
+
+    @PATCH("zones/{zone_id}/ssl/universal/settings")
+    suspend fun setUniversalSslSettings(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Body settings: UniversalSslSettings
+    ): Response<CloudFlareResponse<UniversalSslSettings>>
+
+    @DELETE("zones/{zone_id}/ssl/certificate_packs/{pack_id}")
+    suspend fun deleteCertificatePack(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("pack_id") packId: String
+    ): Response<CloudFlareResponse<Unit>>
+
+    // ==================== Zone Settings（设置 / 性能 / SSL 模式） ====================
+
+    @GET("zones/{zone_id}/settings/{setting}")
+    suspend fun getZoneSetting(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("setting") setting: String
+    ): Response<CloudFlareResponse<ZoneSetting>>
+
+    @PATCH("zones/{zone_id}/settings/{setting}")
+    suspend fun setZoneSetting(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("setting") setting: String,
+        @Body update: ZoneSettingUpdate
+    ): Response<CloudFlareResponse<ZoneSetting>>
+
+    @POST("zones/{zone_id}/purge_cache")
+    suspend fun purgeAllCache(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Body request: PurgeRequest
+    ): Response<CloudFlareResponse<PurgeResult>>
+
+    @POST("zones/{zone_id}/purge_cache")
+    suspend fun purgeFilesCache(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Body request: PurgeFilesRequest
+    ): Response<CloudFlareResponse<PurgeResult>>
+
+    // ==================== Load Balancer ====================
+
+    @GET("zones/{zone_id}/load_balancers")
+    suspend fun listLoadBalancers(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String
+    ): Response<CloudFlareResponse<List<LoadBalancer>>>
+
+    @PATCH("zones/{zone_id}/load_balancers/{lb_id}")
+    suspend fun toggleLoadBalancer(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("lb_id") lbId: String,
+        @Body body: LoadBalancerToggle
+    ): Response<CloudFlareResponse<LoadBalancer>>
+
+    @DELETE("zones/{zone_id}/load_balancers/{lb_id}")
+    suspend fun deleteLoadBalancer(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("lb_id") lbId: String
+    ): Response<CloudFlareResponse<Unit>>
+
+    @GET("accounts/{account_id}/load_balancers/pools")
+    suspend fun listLoadBalancerPools(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<Pool>>>
+
+    @GET("accounts/{account_id}/load_balancers/monitors")
+    suspend fun listLoadBalancerMonitors(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<Monitor>>>
+
+    // ==================== Snippets ====================
+
+    @GET("zones/{zone_id}/snippets")
+    suspend fun listSnippets(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String
+    ): Response<CloudFlareResponse<List<Snippet>>>
+
+    @GET("zones/{zone_id}/snippets/{snippet_name}/content")
+    suspend fun getSnippetContent(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("snippet_name") snippetName: String
+    ): Response<ResponseBody>
+
+    @Multipart
+    @PUT("zones/{zone_id}/snippets/{snippet_name}")
+    suspend fun putSnippet(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("snippet_name") snippetName: String,
+        @Part("metadata") metadata: RequestBody,
+        @Part script: MultipartBody.Part
+    ): Response<CloudFlareResponse<Snippet>>
+
+    @DELETE("zones/{zone_id}/snippets/{snippet_name}")
+    suspend fun deleteSnippet(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("snippet_name") snippetName: String
     ): Response<CloudFlareResponse<Unit>>
 }

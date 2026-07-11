@@ -17,21 +17,31 @@ import javax.inject.Inject
 class DnsViewModel @Inject constructor(
     private val dnsRepository: DnsRepository
 ) : ViewModel() {
-    
+
+    private var currentZoneId: String = ""
+
     private val _dnsRecords = MutableStateFlow<List<DnsRecord>>(emptyList())
     val dnsRecords: StateFlow<List<DnsRecord>> = _dnsRecords.asStateFlow()
-    
+
     private val _loadingState = MutableStateFlow(false)
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
-    
+
     private val _message = MutableSharedFlow<String>()
     val message: SharedFlow<String> = _message.asSharedFlow()
-    
+
+    fun setZoneId(zoneId: String) {
+        currentZoneId = zoneId
+    }
+
     fun loadDnsRecords(account: Account, type: String? = null, name: String? = null) {
+        if (currentZoneId.isBlank()) {
+            viewModelScope.launch { _message.emit("Zone ID 未设置") }
+            return
+        }
         viewModelScope.launch {
             _loadingState.value = true
-            
-            when (val result = dnsRepository.listDnsRecords(account, type, name)) {
+
+            when (val result = dnsRepository.listDnsRecords(account, currentZoneId, type, name)) {
                 is Resource.Success -> {
                     _dnsRecords.value = result.data
                     Timber.d("Loaded ${result.data.size} DNS records")
@@ -42,11 +52,11 @@ class DnsViewModel @Inject constructor(
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun createDnsRecord(
         account: Account,
         type: String,
@@ -64,12 +74,12 @@ class DnsViewModel @Inject constructor(
         )
         createDnsRecord(account, record)
     }
-    
+
     fun createDnsRecord(account: Account, record: DnsRecordRequest) {
         viewModelScope.launch {
             _loadingState.value = true
-            
-            when (val result = dnsRepository.createDnsRecord(account, record)) {
+
+            when (val result = dnsRepository.createDnsRecord(account, currentZoneId, record)) {
                 is Resource.Success -> {
                     _message.emit("DNS 记录创建成功")
                     loadDnsRecords(account)
@@ -79,11 +89,11 @@ class DnsViewModel @Inject constructor(
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun updateDnsRecord(
         account: Account,
         recordId: String,
@@ -102,12 +112,12 @@ class DnsViewModel @Inject constructor(
         )
         updateDnsRecord(account, recordId, record)
     }
-    
+
     fun updateDnsRecord(account: Account, recordId: String, record: DnsRecordRequest) {
         viewModelScope.launch {
             _loadingState.value = true
-            
-            when (val result = dnsRepository.updateDnsRecord(account, recordId, record)) {
+
+            when (val result = dnsRepository.updateDnsRecord(account, currentZoneId, recordId, record)) {
                 is Resource.Success -> {
                     _message.emit("DNS 记录更新成功")
                     loadDnsRecords(account)
@@ -117,16 +127,16 @@ class DnsViewModel @Inject constructor(
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun deleteDnsRecord(account: Account, recordId: String) {
         viewModelScope.launch {
             _loadingState.value = true
-            
-            when (val result = dnsRepository.deleteDnsRecord(account, recordId)) {
+
+            when (val result = dnsRepository.deleteDnsRecord(account, currentZoneId, recordId)) {
                 is Resource.Success -> {
                     _message.emit("DNS 记录删除成功")
                     loadDnsRecords(account)
@@ -136,7 +146,7 @@ class DnsViewModel @Inject constructor(
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }

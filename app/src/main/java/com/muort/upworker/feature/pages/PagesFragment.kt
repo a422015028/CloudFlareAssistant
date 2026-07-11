@@ -2070,7 +2070,7 @@ class PagesFragment : Fragment() {
                 proxied = true,
                 ttl = 1
             )
-            when (val result = dnsRepository.createDnsRecord(account, dnsRequest)) {
+            when (val result = dnsRepository.createDnsRecord(account, account.zoneId, dnsRequest)) {
                 is Resource.Success -> {
                     Snackbar.make(
                         binding.root,

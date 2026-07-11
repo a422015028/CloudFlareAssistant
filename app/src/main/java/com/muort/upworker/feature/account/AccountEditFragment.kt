@@ -173,44 +173,12 @@ class AccountEditFragment : Fragment() {
     }
     
     private fun setupZoneButtons() {
-        binding.fetchZonesBtn.setOnClickListener {
-            val name = binding.nameEditText.text.toString().trim()
-            val accountId = binding.accountIdEditText.text.toString().trim()
-            val token = binding.tokenEditText.text.toString().trim()
-            val email = binding.emailEditText.text.toString().trim()
-            val globalApiKey = binding.globalApiKeyEditText.text.toString().trim()
-            
-            // 根据认证类型验证凭据
-            val hasCredentials = when (selectedAuthType) {
-                AuthType.TOKEN -> token.isNotEmpty()
-                AuthType.GLOBAL_API_KEY -> email.isNotEmpty() && globalApiKey.isNotEmpty()
-            }
-            
-            if (accountId.isEmpty() || !hasCredentials) {
-                showToast("请先填写 Account ID 和当前选中的认证凭据")
-                return@setOnClickListener
-            }
-            
-            // Create temporary account for API call
-            val tempAccount = com.muort.upworker.core.model.Account(
-                id = if (args.accountId == -1L) 0 else args.accountId,
-                name = name.ifEmpty { "临时" },
-                accountId = accountId,
-                token = token.ifEmpty { "" },
-                email = email.ifEmpty { null },
-                globalApiKey = globalApiKey.ifEmpty { null },
-                authType = selectedAuthType.name
-            )
-            
-            viewModel.fetchZonesFromApi(tempAccount)
-        }
-        
         binding.manageZonesBtn.setOnClickListener {
             if (args.accountId == -1L) {
                 showToast("请先保存账号")
                 return@setOnClickListener
             }
-            
+
             showZoneManagementDialog()
         }
     }

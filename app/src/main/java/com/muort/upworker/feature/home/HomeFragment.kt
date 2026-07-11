@@ -117,7 +117,7 @@ class HomeFragment : Fragment() {
         binding.dnsCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                findNavController().navigate(R.id.action_home_to_dns)
+                findNavController().navigate(R.id.action_home_to_domainList)
             }, 150)
         }
         

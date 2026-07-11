@@ -14,26 +14,27 @@ import javax.inject.Singleton
 class DnsRepository @Inject constructor(
     private val api: CloudFlareApi
 ) {
-    
+
     suspend fun listDnsRecords(
         account: Account,
+        zoneId: String,
         type: String? = null,
         name: String? = null
     ): Resource<List<DnsRecord>> = withContext(Dispatchers.IO) {
-        Timber.d("listDnsRecords called for account: ${account.name}, zoneId: ${account.zoneId}")
-        
-        if (account.zoneId.isNullOrBlank()) {
+        Timber.d("listDnsRecords called for account: ${account.name}, zoneId: $zoneId")
+
+        if (zoneId.isBlank()) {
             Timber.e("Zone ID is missing for account: ${account.name}")
             return@withContext Resource.Error("Zone ID is required for DNS operations")
         }
-        
+
         safeApiCall {
-            Timber.d("Calling DNS API with zoneId: ${account.zoneId}, type: $type, name: $name")
+            Timber.d("Calling DNS API with zoneId: $zoneId, type: $type, name: $name")
             val response = api.listDnsRecords(
                 token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
-                zoneId = account.zoneId,
+                zoneId = zoneId,
                 type = type,
                 name = name
             )
@@ -72,85 +73,88 @@ class DnsRepository @Inject constructor(
     
     suspend fun createDnsRecord(
         account: Account,
+        zoneId: String,
         record: DnsRecordRequest
     ): Resource<DnsRecord> = withContext(Dispatchers.IO) {
-        if (account.zoneId.isNullOrBlank()) {
+        if (zoneId.isBlank()) {
             return@withContext Resource.Error("Zone ID is required for DNS operations")
         }
-        
+
         safeApiCall {
             val response = api.createDnsRecord(
                 token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
-                zoneId = account.zoneId,
+                zoneId = zoneId,
                 record = record
             )
-            
+
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
                 } ?: Resource.Error("DNS record created but no result returned")
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Resource.Error("Failed to create DNS record: $errorMsg")
             }
         }
     }
-    
+
     suspend fun updateDnsRecord(
         account: Account,
+        zoneId: String,
         recordId: String,
         record: DnsRecordRequest
     ): Resource<DnsRecord> = withContext(Dispatchers.IO) {
-        if (account.zoneId.isNullOrBlank()) {
+        if (zoneId.isBlank()) {
             return@withContext Resource.Error("Zone ID is required for DNS operations")
         }
-        
+
         safeApiCall {
             val response = api.updateDnsRecord(
                 token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
-                zoneId = account.zoneId,
+                zoneId = zoneId,
                 recordId = recordId,
                 record = record
             )
-            
+
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
                 } ?: Resource.Error("DNS record updated but no result returned")
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Resource.Error("Failed to update DNS record: $errorMsg")
             }
         }
     }
-    
+
     suspend fun deleteDnsRecord(
         account: Account,
+        zoneId: String,
         recordId: String
     ): Resource<Unit> = withContext(Dispatchers.IO) {
-        if (account.zoneId.isNullOrBlank()) {
+        if (zoneId.isBlank()) {
             return@withContext Resource.Error("Zone ID is required for DNS operations")
         }
-        
+
         safeApiCall {
             val response = api.deleteDnsRecord(
                 token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
-                zoneId = account.zoneId,
+                zoneId = zoneId,
                 recordId = recordId
             )
-            
+
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Resource.Error("Failed to delete DNS record: $errorMsg")
             }
