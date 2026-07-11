@@ -217,16 +217,21 @@ class GatewayRulesFragment : Fragment() {
         val dnsHostLayout = dialogView.findViewById<View>(R.id.dnsHostLayout)
         val dnsListSpinner = dialogView.findViewById<Spinner>(R.id.dnsListSpinner)
         val dnsListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.dnsListNotInCheckbox)
+        val dnsOperatorSpinner = dialogView.findViewById<Spinner>(R.id.dnsOperatorSpinner)
 
         val httpMatchTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.httpMatchTypeGroup)
+        val httpHostLayout = dialogView.findViewById<View>(R.id.httpHostLayout)
         val httpDomainListSpinner = dialogView.findViewById<Spinner>(R.id.httpDomainListSpinner)
         val httpUrlListSpinner = dialogView.findViewById<Spinner>(R.id.httpUrlListSpinner)
         val httpDomainListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.httpDomainListNotInCheckbox)
         val httpUrlListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.httpUrlListNotInCheckbox)
+        val httpOperatorSpinner = dialogView.findViewById<Spinner>(R.id.httpOperatorSpinner)
 
         val l4MatchTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.l4MatchTypeGroup)
+        val l4SourceIpLayout = dialogView.findViewById<View>(R.id.l4SourceIpLayout)
         val l4ListSpinner = dialogView.findViewById<Spinner>(R.id.l4ListSpinner)
         val l4ListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.l4ListNotInCheckbox)
+        val l4OperatorSpinner = dialogView.findViewById<Spinner>(R.id.l4OperatorSpinner)
 
         val overrideFields = dialogView.findViewById<View>(R.id.overrideFields)
         val overrideTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.overrideTypeGroup)
@@ -274,6 +279,19 @@ class GatewayRulesFragment : Fragment() {
             }
         }
 
+        fun updateValueHint(layout: View?, operator: String, baseName: String) {
+            val isIp = baseName.contains("IP", ignoreCase = true)
+            val singleExample = if (isIp) "192.168.1.0/24" else "example.com"
+            val multiExample = if (isIp) "192.168.1.1, 10.0.0.0/8" else "example.com, test.com"
+            val regexExample = if (isIp) "192\\\\.168\\\\..*" else ".*\\\\.example\\\\.com"
+            val hint = when (operator) {
+                "in", "not_in" -> "多个值，逗号分隔 (如: $multiExample)"
+                "matches", "not_matches" -> "正则表达式 (如: $regexExample)"
+                else -> "$baseName (如: $singleExample)"
+            }
+            (layout as? com.google.android.material.textfield.TextInputLayout)?.hint = hint
+        }
+
         val domainLists = viewModel.lists.value.filter { it.type == "DOMAIN" }
         val dnsListAdapter = ArrayAdapter(
             requireContext(),
@@ -310,12 +328,83 @@ class GatewayRulesFragment : Fragment() {
         l4ListAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         l4ListSpinner.adapter = l4ListAdapter
 
+        val dnsOperators = listOf(
+            "default" to "默认(域名+子域名)",
+            "is" to "is (等于)",
+            "is_not" to "is not (不等于)",
+            "in" to "in (在集合中)",
+            "not_in" to "not in (不在集合中)",
+            "matches" to "matches (匹配正则)",
+            "not_matches" to "does not match (不匹配正则)"
+        )
+        val dnsOperatorAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            dnsOperators.map { it.second }
+        )
+        dnsOperatorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        dnsOperatorSpinner.adapter = dnsOperatorAdapter
+        dnsOperatorSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateValueHint(dnsHostLayout, dnsOperators[position].first, "域名")
+                updateTrafficPreview()
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
+        val httpOperators = listOf(
+            "default" to "默认(主机+子域名)",
+            "is" to "is (等于)",
+            "is_not" to "is not (不等于)",
+            "in" to "in (在集合中)",
+            "not_in" to "not in (不在集合中)",
+            "matches" to "matches (匹配正则)",
+            "not_matches" to "does not match (不匹配正则)"
+        )
+        val httpOperatorAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            httpOperators.map { it.second }
+        )
+        httpOperatorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        httpOperatorSpinner.adapter = httpOperatorAdapter
+        httpOperatorSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateValueHint(httpHostLayout, httpOperators[position].first, "主机名")
+                updateTrafficPreview()
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
+        val l4Operators = listOf(
+            "is" to "is (等于)",
+            "is_not" to "is not (不等于)",
+            "in" to "in (在集合中)",
+            "not_in" to "not in (不在集合中)"
+        )
+        val l4OperatorAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            l4Operators.map { it.second }
+        )
+        l4OperatorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        l4OperatorSpinner.adapter = l4OperatorAdapter
+        l4OperatorSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateValueHint(l4SourceIpLayout, l4Operators[position].first, "IP/CIDR")
+                updateTrafficPreview()
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
         dnsMatchTypeGroup.setOnCheckedChangeListener { _, checkedId ->
             if (checkedId == R.id.dnsMatchSingle) {
+                dnsOperatorSpinner.visibility = View.VISIBLE
                 dnsHostLayout.visibility = View.VISIBLE
                 dnsListSpinner.visibility = View.GONE
                 dnsListNotInCheckbox.visibility = View.GONE
             } else {
+                dnsOperatorSpinner.visibility = View.GONE
                 dnsHostLayout.visibility = View.GONE
                 dnsListSpinner.visibility = View.VISIBLE
                 dnsListNotInCheckbox.visibility = View.VISIBLE
@@ -324,10 +413,10 @@ class GatewayRulesFragment : Fragment() {
         }
 
         httpMatchTypeGroup.setOnCheckedChangeListener { _, checkedId ->
-            val httpHostLayout = dialogView.findViewById<View>(R.id.httpHostLayout)
             val httpPathLayout = dialogView.findViewById<View>(R.id.httpPathLayout)
             when (checkedId) {
                 R.id.httpMatchSingle -> {
+                    httpOperatorSpinner.visibility = View.VISIBLE
                     httpHostLayout?.visibility = View.VISIBLE
                     httpPathLayout?.visibility = View.VISIBLE
                     httpDomainListSpinner?.visibility = View.GONE
@@ -336,6 +425,7 @@ class GatewayRulesFragment : Fragment() {
                     httpUrlListNotInCheckbox.visibility = View.GONE
                 }
                 R.id.httpMatchDomainList -> {
+                    httpOperatorSpinner.visibility = View.GONE
                     httpHostLayout?.visibility = View.GONE
                     httpPathLayout?.visibility = View.GONE
                     httpDomainListSpinner?.visibility = View.VISIBLE
@@ -344,6 +434,7 @@ class GatewayRulesFragment : Fragment() {
                     httpUrlListNotInCheckbox.visibility = View.GONE
                 }
                 R.id.httpMatchUrlList -> {
+                    httpOperatorSpinner.visibility = View.GONE
                     httpHostLayout?.visibility = View.GONE
                     httpPathLayout?.visibility = View.GONE
                     httpDomainListSpinner?.visibility = View.GONE
@@ -356,14 +447,15 @@ class GatewayRulesFragment : Fragment() {
         }
 
         l4MatchTypeGroup.setOnCheckedChangeListener { _, checkedId ->
-            val l4SourceIpLayout = dialogView.findViewById<View>(R.id.l4SourceIpLayout)
             val l4DestPortLayout = dialogView.findViewById<View>(R.id.l4DestPortLayout)
             if (checkedId == R.id.l4MatchSingle) {
+                l4OperatorSpinner.visibility = View.VISIBLE
                 l4SourceIpLayout?.visibility = View.VISIBLE
                 l4DestPortLayout?.visibility = View.VISIBLE
                 l4ListSpinner.visibility = View.GONE
                 l4ListNotInCheckbox.visibility = View.GONE
             } else {
+                l4OperatorSpinner.visibility = View.GONE
                 l4SourceIpLayout?.visibility = View.GONE
                 l4DestPortLayout?.visibility = View.GONE
                 l4ListSpinner.visibility = View.VISIBLE
@@ -448,6 +540,7 @@ class GatewayRulesFragment : Fragment() {
             nameInput.setText(rule.name)
             precedenceInput.setText(rule.precedence?.toString() ?: "0")
             enabledSwitch.isChecked = rule.enabled
+            typeSpinner.isEnabled = false
             
             val ruleType = rule.filters.firstOrNull() ?: "dns"
             val typeIndex = types.indexOfFirst { it.first == ruleType }
@@ -473,8 +566,16 @@ class GatewayRulesFragment : Fragment() {
                                 dialogView.findViewById<android.widget.RadioGroup>(R.id.dnsMatchTypeGroup)?.check(R.id.dnsMatchSingle)
                             }
                         } else {
-                            val domain = extractDomainFromTraffic(traffic)
-                            dialogView.findViewById<TextInputEditText>(R.id.dnsHostInput)?.setText(domain)
+                            dialogView.findViewById<android.widget.RadioGroup>(R.id.dnsMatchTypeGroup)?.check(R.id.dnsMatchSingle)
+                            val op = detectOperator(traffic)
+                            val dnsOps = listOf("default", "is", "is_not", "in", "not_in", "matches", "not_matches")
+                            val opIndex = dnsOps.indexOf(op).coerceAtLeast(0)
+                            dnsOperatorSpinner.setSelection(opIndex)
+                            val value = when (op) {
+                                "in", "not_in" -> extractInlineValues(traffic)
+                                else -> extractSingleValue(traffic, "dns.fqdn")
+                            }
+                            dialogView.findViewById<TextInputEditText>(R.id.dnsHostInput)?.setText(value)
                         }
                     }
                 }
@@ -503,9 +604,17 @@ class GatewayRulesFragment : Fragment() {
                                 }
                             }
                         } else {
-                            val host = extractHostFromTraffic(traffic)
+                            dialogView.findViewById<android.widget.RadioGroup>(R.id.httpMatchTypeGroup)?.check(R.id.httpMatchSingle)
+                            val op = detectOperator(traffic)
+                            val httpOps = listOf("default", "is", "is_not", "in", "not_in", "matches", "not_matches")
+                            val opIndex = httpOps.indexOf(op).coerceAtLeast(0)
+                            httpOperatorSpinner.setSelection(opIndex)
+                            val value = when (op) {
+                                "in", "not_in" -> extractInlineValues(traffic)
+                                else -> extractSingleValue(traffic, "http.request.host")
+                            }
+                            dialogView.findViewById<TextInputEditText>(R.id.httpHostInput)?.setText(value)
                             val path = extractPathFromTraffic(traffic)
-                            dialogView.findViewById<TextInputEditText>(R.id.httpHostInput)?.setText(host)
                             dialogView.findViewById<TextInputEditText>(R.id.httpPathInput)?.setText(path ?: "")
                         }
                     }
@@ -526,9 +635,17 @@ class GatewayRulesFragment : Fragment() {
                                 dialogView.findViewById<android.widget.RadioGroup>(R.id.l4MatchTypeGroup)?.check(R.id.l4MatchSingle)
                             }
                         } else {
-                            val ip = extractIpFromTraffic(traffic)
+                            dialogView.findViewById<android.widget.RadioGroup>(R.id.l4MatchTypeGroup)?.check(R.id.l4MatchSingle)
+                            val op = detectOperator(traffic)
+                            val l4Ops = listOf("is", "is_not", "in", "not_in")
+                            val opIndex = l4Ops.indexOf(op).coerceAtLeast(0)
+                            l4OperatorSpinner.setSelection(opIndex)
+                            val value = when (op) {
+                                "in", "not_in" -> extractInlineValues(traffic)
+                                else -> extractIpFromTraffic(traffic)
+                            }
+                            dialogView.findViewById<TextInputEditText>(R.id.l4SourceIpInput)?.setText(value)
                             val port = extractPortFromTraffic(traffic)
-                            dialogView.findViewById<TextInputEditText>(R.id.l4SourceIpInput)?.setText(ip)
                             dialogView.findViewById<TextInputEditText>(R.id.l4DestPortInput)?.setText(port ?: "")
                         }
                     }
@@ -602,6 +719,11 @@ class GatewayRulesFragment : Fragment() {
             .show()
     }
     
+    private fun formatInlineSet(input: String): String {
+        return input.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            .joinToString(" ") { "\"$it\"" }
+    }
+
     private fun buildTrafficExpression(ruleType: String, dialogView: View): String? {
         return when (ruleType) {
             "dns" -> {
@@ -617,10 +739,21 @@ class GatewayRulesFragment : Fragment() {
                         if (notIn) "not($expr)" else expr
                     } else null
                 } else {
-                    val host = dialogView.findViewById<TextInputEditText>(R.id.dnsHostInput)?.text?.toString()
-                    if (!host.isNullOrBlank()) {
-                        "dns.fqdn == \"$host\" or dns.fqdn matches \".*\\.$host\""
-                    } else null
+                    val operators = listOf("default", "is", "is_not", "in", "not_in", "matches", "not_matches")
+                    val operatorSpinner = dialogView.findViewById<Spinner>(R.id.dnsOperatorSpinner)
+                    val operator = operators.getOrNull(operatorSpinner?.selectedItemPosition ?: 0) ?: "default"
+                    val value = dialogView.findViewById<TextInputEditText>(R.id.dnsHostInput)?.text?.toString()
+                    if (value.isNullOrBlank()) null
+                    else when (operator) {
+                        "default" -> "dns.fqdn == \"$value\" or dns.fqdn matches \".*\\.$value\""
+                        "is" -> "dns.fqdn == \"$value\""
+                        "is_not" -> "not(dns.fqdn == \"$value\")"
+                        "in" -> "dns.fqdn in {${formatInlineSet(value)}}"
+                        "not_in" -> "not(dns.fqdn in {${formatInlineSet(value)}})"
+                        "matches" -> "dns.fqdn matches \"$value\""
+                        "not_matches" -> "not(dns.fqdn matches \"$value\")"
+                        else -> null
+                    }
                 }
             }
             "http" -> {
@@ -649,16 +782,29 @@ class GatewayRulesFragment : Fragment() {
                         } else null
                     }
                     else -> {
+                        val operators = listOf("default", "is", "is_not", "in", "not_in", "matches", "not_matches")
+                        val operatorSpinner = dialogView.findViewById<Spinner>(R.id.httpOperatorSpinner)
+                        val operator = operators.getOrNull(operatorSpinner?.selectedItemPosition ?: 0) ?: "default"
                         val host = dialogView.findViewById<TextInputEditText>(R.id.httpHostInput)?.text?.toString()
                         val path = dialogView.findViewById<TextInputEditText>(R.id.httpPathInput)?.text?.toString()
-                        if (!host.isNullOrBlank()) {
-                            val hostPart = "http.request.host == \"$host\" or http.request.host matches \".*\\.$host\""
-                            if (!path.isNullOrBlank()) {
+                        if (host.isNullOrBlank()) null
+                        else {
+                            val hostPart = when (operator) {
+                                "default" -> "http.request.host == \"$host\" or http.request.host matches \".*\\.$host\""
+                                "is" -> "http.request.host == \"$host\""
+                                "is_not" -> "not(http.request.host == \"$host\")"
+                                "in" -> "http.request.host in {${formatInlineSet(host)}}"
+                                "not_in" -> "not(http.request.host in {${formatInlineSet(host)}})"
+                                "matches" -> "http.request.host matches \"$host\""
+                                "not_matches" -> "not(http.request.host matches \"$host\")"
+                                else -> null
+                            }
+                            if (hostPart != null && !path.isNullOrBlank()) {
                                 "$hostPart and http.request.uri.path matches \"$path\""
                             } else {
                                 hostPart
                             }
-                        } else null
+                        }
                     }
                 }
             }
@@ -675,16 +821,26 @@ class GatewayRulesFragment : Fragment() {
                         if (notIn) "not($expr)" else expr
                     } else null
                 } else {
+                    val operators = listOf("is", "is_not", "in", "not_in")
+                    val operatorSpinner = dialogView.findViewById<Spinner>(R.id.l4OperatorSpinner)
+                    val operator = operators.getOrNull(operatorSpinner?.selectedItemPosition ?: 0) ?: "is"
                     val sourceIp = dialogView.findViewById<TextInputEditText>(R.id.l4SourceIpInput)?.text?.toString()
                     val port = dialogView.findViewById<TextInputEditText>(R.id.l4DestPortInput)?.text?.toString()
-                    if (!sourceIp.isNullOrBlank()) {
-                        val ipPart = "net.src.ip == $sourceIp"
-                        if (!port.isNullOrBlank()) {
+                    if (sourceIp.isNullOrBlank()) null
+                    else {
+                        val ipPart = when (operator) {
+                            "is" -> "net.src.ip == $sourceIp"
+                            "is_not" -> "not(net.src.ip == $sourceIp)"
+                            "in" -> "net.src.ip in {${formatInlineSet(sourceIp)}}"
+                            "not_in" -> "not(net.src.ip in {${formatInlineSet(sourceIp)}})"
+                            else -> null
+                        }
+                        if (ipPart != null && !port.isNullOrBlank()) {
                             "$ipPart and net.dst.port == $port"
                         } else {
                             ipPart
                         }
-                    } else null
+                    }
                 }
             }
             else -> null
@@ -761,18 +917,6 @@ fun TextInputEditText.setOnTextChangedListener(callback: () -> Unit) {
     })
 }
 
-private fun extractDomainFromTraffic(traffic: String): String {
-    val regex = Regex("dns\\.fqdn\\s*(==|matches)\\s*\"([^\"]+)\"")
-    val match = regex.find(traffic)
-    return match?.groupValues?.get(2) ?: ""
-}
-
-private fun extractHostFromTraffic(traffic: String): String {
-    val regex = Regex("http\\.request\\.host\\s*(==|matches)\\s*\"([^\"]+)\"")
-    val match = regex.find(traffic)
-    return match?.groupValues?.get(2) ?: ""
-}
-
 private fun extractPathFromTraffic(traffic: String): String? {
     val regex = Regex("http\\.request\\.uri\\.path\\s*(==|matches)\\s*\"([^\"]+)\"")
     val match = regex.find(traffic)
@@ -780,9 +924,9 @@ private fun extractPathFromTraffic(traffic: String): String? {
 }
 
 private fun extractIpFromTraffic(traffic: String): String {
-    val regex = Regex("net\\.src\\.ip\\s*==\\s*([\\d./]+)")
+    val regex = Regex("net\\.src\\.ip\\s*(==|!=)\\s*([\\d./a-fA-F:]+)")
     val match = regex.find(traffic)
-    return match?.groupValues?.get(1) ?: ""
+    return match?.groupValues?.get(2) ?: ""
 }
 
 private fun extractPortFromTraffic(traffic: String): String? {
@@ -792,11 +936,45 @@ private fun extractPortFromTraffic(traffic: String): String? {
 }
 
 private fun extractListIdFromTraffic(traffic: String): String? {
-    val regex = Regex("\\b(?:not )?in\\s+\\$(\\S+)")
+    val regex = Regex("\\b(?:not )?in\\s+\\$([a-fA-F0-9-]+)")
     val match = regex.find(traffic)
     return match?.groupValues?.get(1)
 }
 
 private fun isNotInList(traffic: String): Boolean {
-    return traffic.trimStart().startsWith("not(")
+    val trimmed = traffic.trimStart()
+    return trimmed.startsWith("not") && trimmed.contains(" in $")
+}
+
+private fun detectOperator(traffic: String): String {
+    val trimmed = traffic.trim()
+    return when {
+        trimmed.contains(" or ") && trimmed.contains("==") && trimmed.contains("matches") -> "default"
+        trimmed.startsWith("not") && trimmed.contains(" in {") -> "not_in"
+        trimmed.startsWith("not") && trimmed.contains("matches") -> "not_matches"
+        trimmed.startsWith("not") && trimmed.contains("==") -> "is_not"
+        trimmed.contains("!=") -> "is_not"
+        trimmed.contains(" in {") -> "in"
+        trimmed.contains("matches") -> "matches"
+        trimmed.contains("==") -> "is"
+        else -> "default"
+    }
+}
+
+private fun extractSingleValue(traffic: String, field: String): String {
+    val eqRegex = Regex("${Regex.escape(field)}\\s*(==|!=)\\s*\"([^\"]+)\"")
+    val eqMatch = eqRegex.find(traffic)
+    if (eqMatch != null) return eqMatch.groupValues[2]
+    val matchRegex = Regex("${Regex.escape(field)}\\s*matches\\s*\"([^\"]+)\"")
+    val matchMatch = matchRegex.find(traffic)
+    return matchMatch?.groupValues?.get(1) ?: ""
+}
+
+private fun extractInlineValues(traffic: String): String {
+    val regex = Regex("\\{([^}]+)\\}")
+    val match = regex.find(traffic) ?: return ""
+    return match.groupValues[1].split(Regex("\\s+"))
+        .map { it.trim().trim('"') }
+        .filter { it.isNotEmpty() }
+        .joinToString(", ")
 }

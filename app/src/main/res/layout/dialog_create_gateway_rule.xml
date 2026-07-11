@@ -167,6 +167,12 @@
 
             </RadioGroup>
 
+            <Spinner
+                android:id="@+id/dnsOperatorSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/dnsHostLayout"
                 android:layout_width="match_parent"
@@ -223,6 +229,12 @@
                 android:text="匹配网站访问，支持主机名和 URL 路径"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
+
+            <Spinner
+                android:id="@+id/httpOperatorSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/httpHostLayout"
@@ -342,6 +354,12 @@
                 android:text="匹配网络层流量，支持 IP 地址和端口"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
+
+            <Spinner
+                android:id="@+id/l4OperatorSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/l4SourceIpLayout"
