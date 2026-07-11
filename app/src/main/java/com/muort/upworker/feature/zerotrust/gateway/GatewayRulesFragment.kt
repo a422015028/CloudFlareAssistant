@@ -719,9 +719,9 @@ class GatewayRulesFragment : Fragment() {
             .show()
     }
     
-    private fun formatInlineSet(input: String): String {
+    private fun formatInlineSet(input: String, quote: Boolean = true): String {
         return input.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-            .joinToString(" ") { "\"$it\"" }
+            .joinToString(" ") { if (quote) "\"$it\"" else it }
     }
 
     private fun buildTrafficExpression(ruleType: String, dialogView: View): String? {
@@ -831,8 +831,8 @@ class GatewayRulesFragment : Fragment() {
                         val ipPart = when (operator) {
                             "is" -> "net.src.ip == $sourceIp"
                             "is_not" -> "not(net.src.ip == $sourceIp)"
-                            "in" -> "net.src.ip in {${formatInlineSet(sourceIp)}}"
-                            "not_in" -> "not(net.src.ip in {${formatInlineSet(sourceIp)}})"
+                            "in" -> "net.src.ip in {${formatInlineSet(sourceIp, false)}}"
+                            "not_in" -> "not(net.src.ip in {${formatInlineSet(sourceIp, false)}})"
                             else -> null
                         }
                         if (ipPart != null && !port.isNullOrBlank()) {
