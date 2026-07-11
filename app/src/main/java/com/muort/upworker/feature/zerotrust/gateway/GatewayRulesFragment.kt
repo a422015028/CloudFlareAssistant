@@ -24,6 +24,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.muort.upworker.R
 import com.muort.upworker.core.model.GatewayRule
 import com.muort.upworker.core.model.GatewayRuleRequest
+import com.muort.upworker.core.model.GatewayRuleSettings
 import com.muort.upworker.databinding.FragmentGatewayRulesBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -215,13 +216,24 @@ class GatewayRulesFragment : Fragment() {
         val dnsMatchTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.dnsMatchTypeGroup)
         val dnsHostLayout = dialogView.findViewById<View>(R.id.dnsHostLayout)
         val dnsListSpinner = dialogView.findViewById<Spinner>(R.id.dnsListSpinner)
+        val dnsListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.dnsListNotInCheckbox)
 
         val httpMatchTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.httpMatchTypeGroup)
         val httpDomainListSpinner = dialogView.findViewById<Spinner>(R.id.httpDomainListSpinner)
         val httpUrlListSpinner = dialogView.findViewById<Spinner>(R.id.httpUrlListSpinner)
+        val httpDomainListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.httpDomainListNotInCheckbox)
+        val httpUrlListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.httpUrlListNotInCheckbox)
 
         val l4MatchTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.l4MatchTypeGroup)
         val l4ListSpinner = dialogView.findViewById<Spinner>(R.id.l4ListSpinner)
+        val l4ListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.l4ListNotInCheckbox)
+
+        val overrideFields = dialogView.findViewById<View>(R.id.overrideFields)
+        val overrideTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.overrideTypeGroup)
+        val overrideIpsLayout = dialogView.findViewById<View>(R.id.overrideIpsLayout)
+        val overrideHostLayout = dialogView.findViewById<View>(R.id.overrideHostLayout)
+        val overrideIpsInput = dialogView.findViewById<TextInputEditText>(R.id.overrideIpsInput)
+        val overrideHostInput = dialogView.findViewById<TextInputEditText>(R.id.overrideHostInput)
 
         val templateBlockBtn = dialogView.findViewById<Button>(R.id.templateBlockBtn)
         val templateAllowBtn = dialogView.findViewById<Button>(R.id.templateAllowBtn)
@@ -241,8 +253,7 @@ class GatewayRulesFragment : Fragment() {
             "block" to "阻止",
             "safesearch" to "安全搜索",
             "ytrestricted" to "YouTube限制",
-            "isolate" to "隔离",
-            "noscan" to "不扫描"
+            "override" to "覆盖"
         )
         val actionAdapter = ArrayAdapter(
             requireContext(),
@@ -303,9 +314,11 @@ class GatewayRulesFragment : Fragment() {
             if (checkedId == R.id.dnsMatchSingle) {
                 dnsHostLayout.visibility = View.VISIBLE
                 dnsListSpinner.visibility = View.GONE
+                dnsListNotInCheckbox.visibility = View.GONE
             } else {
                 dnsHostLayout.visibility = View.GONE
                 dnsListSpinner.visibility = View.VISIBLE
+                dnsListNotInCheckbox.visibility = View.VISIBLE
             }
             updateTrafficPreview()
         }
@@ -319,18 +332,24 @@ class GatewayRulesFragment : Fragment() {
                     httpPathLayout?.visibility = View.VISIBLE
                     httpDomainListSpinner?.visibility = View.GONE
                     httpUrlListSpinner?.visibility = View.GONE
+                    httpDomainListNotInCheckbox.visibility = View.GONE
+                    httpUrlListNotInCheckbox.visibility = View.GONE
                 }
                 R.id.httpMatchDomainList -> {
                     httpHostLayout?.visibility = View.GONE
                     httpPathLayout?.visibility = View.GONE
                     httpDomainListSpinner?.visibility = View.VISIBLE
                     httpUrlListSpinner?.visibility = View.GONE
+                    httpDomainListNotInCheckbox.visibility = View.VISIBLE
+                    httpUrlListNotInCheckbox.visibility = View.GONE
                 }
                 R.id.httpMatchUrlList -> {
                     httpHostLayout?.visibility = View.GONE
                     httpPathLayout?.visibility = View.GONE
                     httpDomainListSpinner?.visibility = View.GONE
                     httpUrlListSpinner?.visibility = View.VISIBLE
+                    httpDomainListNotInCheckbox.visibility = View.GONE
+                    httpUrlListNotInCheckbox.visibility = View.VISIBLE
                 }
             }
             updateTrafficPreview()
@@ -343,10 +362,12 @@ class GatewayRulesFragment : Fragment() {
                 l4SourceIpLayout?.visibility = View.VISIBLE
                 l4DestPortLayout?.visibility = View.VISIBLE
                 l4ListSpinner.visibility = View.GONE
+                l4ListNotInCheckbox.visibility = View.GONE
             } else {
                 l4SourceIpLayout?.visibility = View.GONE
                 l4DestPortLayout?.visibility = View.GONE
                 l4ListSpinner.visibility = View.VISIBLE
+                l4ListNotInCheckbox.visibility = View.VISIBLE
             }
             updateTrafficPreview()
         }
@@ -356,10 +377,34 @@ class GatewayRulesFragment : Fragment() {
                 dnsFields.visibility = if (position == 0) View.VISIBLE else View.GONE
                 httpFields.visibility = if (position == 1) View.VISIBLE else View.GONE
                 l4Fields.visibility = if (position == 2) View.VISIBLE else View.GONE
+                updateOverrideVisibility(typeSpinner, actionSpinner, overrideFields)
                 updateTrafficPreview()
             }
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         }
+
+        actionSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateOverrideVisibility(typeSpinner, actionSpinner, overrideFields)
+                updateTrafficPreview()
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
+        overrideTypeGroup.setOnCheckedChangeListener { _, checkedId ->
+            if (checkedId == R.id.overrideIpList) {
+                overrideIpsLayout.visibility = View.VISIBLE
+                overrideHostLayout.visibility = View.GONE
+            } else {
+                overrideIpsLayout.visibility = View.GONE
+                overrideHostLayout.visibility = View.VISIBLE
+            }
+        }
+
+        dnsListNotInCheckbox.setOnCheckedChangeListener { _, _ -> updateTrafficPreview() }
+        httpDomainListNotInCheckbox.setOnCheckedChangeListener { _, _ -> updateTrafficPreview() }
+        httpUrlListNotInCheckbox.setOnCheckedChangeListener { _, _ -> updateTrafficPreview() }
+        l4ListNotInCheckbox.setOnCheckedChangeListener { _, _ -> updateTrafficPreview() }
 
         dialogView.findViewById<TextInputEditText>(R.id.dnsHostInput)?.setOnTextChangedListener {
             updateTrafficPreview()
@@ -422,6 +467,8 @@ class GatewayRulesFragment : Fragment() {
                             val listIndex = editDomainLists.indexOfFirst { it.id == listId }
                             if (listIndex >= 0) {
                                 dialogView.findViewById<Spinner>(R.id.dnsListSpinner)?.setSelection(listIndex)
+                                dialogView.findViewById<android.widget.CheckBox>(R.id.dnsListNotInCheckbox)?.isChecked = isNotInList(traffic)
+                                dnsListNotInCheckbox.visibility = View.VISIBLE
                             } else {
                                 dialogView.findViewById<android.widget.RadioGroup>(R.id.dnsMatchTypeGroup)?.check(R.id.dnsMatchSingle)
                             }
@@ -441,12 +488,16 @@ class GatewayRulesFragment : Fragment() {
                             if (domainListIndex >= 0) {
                                 dialogView.findViewById<android.widget.RadioGroup>(R.id.httpMatchTypeGroup)?.check(R.id.httpMatchDomainList)
                                 dialogView.findViewById<Spinner>(R.id.httpDomainListSpinner)?.setSelection(domainListIndex)
+                                dialogView.findViewById<android.widget.CheckBox>(R.id.httpDomainListNotInCheckbox)?.isChecked = isNotInList(traffic)
+                                httpDomainListNotInCheckbox.visibility = View.VISIBLE
                             } else {
                                 val editUrlLists = viewModel.lists.value.filter { it.type == "URL" }
                                 val urlListIndex = editUrlLists.indexOfFirst { it.id == listId }
                                 if (urlListIndex >= 0) {
                                     dialogView.findViewById<android.widget.RadioGroup>(R.id.httpMatchTypeGroup)?.check(R.id.httpMatchUrlList)
                                     dialogView.findViewById<Spinner>(R.id.httpUrlListSpinner)?.setSelection(urlListIndex)
+                                    dialogView.findViewById<android.widget.CheckBox>(R.id.httpUrlListNotInCheckbox)?.isChecked = isNotInList(traffic)
+                                    httpUrlListNotInCheckbox.visibility = View.VISIBLE
                                 } else {
                                     dialogView.findViewById<android.widget.RadioGroup>(R.id.httpMatchTypeGroup)?.check(R.id.httpMatchSingle)
                                 }
@@ -469,6 +520,8 @@ class GatewayRulesFragment : Fragment() {
                             val listIndex = editIpLists.indexOfFirst { it.id == listId }
                             if (listIndex >= 0) {
                                 dialogView.findViewById<Spinner>(R.id.l4ListSpinner)?.setSelection(listIndex)
+                                dialogView.findViewById<android.widget.CheckBox>(R.id.l4ListNotInCheckbox)?.isChecked = isNotInList(traffic)
+                                l4ListNotInCheckbox.visibility = View.VISIBLE
                             } else {
                                 dialogView.findViewById<android.widget.RadioGroup>(R.id.l4MatchTypeGroup)?.check(R.id.l4MatchSingle)
                             }
@@ -486,6 +539,20 @@ class GatewayRulesFragment : Fragment() {
             
             val actionIndex = actions.indexOfFirst { it.first == rule.action }
             if (actionIndex >= 0) actionSpinner.setSelection(actionIndex)
+
+            // Populate override fields if action is override
+            if (rule.action == "override" && ruleType == "dns") {
+                rule.ruleSettings?.let { settings ->
+                    overrideFields.visibility = View.VISIBLE
+                    if (!settings.overrideIps.isNullOrEmpty()) {
+                        overrideTypeGroup.check(R.id.overrideIpList)
+                        overrideIpsInput.setText(settings.overrideIps.joinToString("\n"))
+                    } else if (!settings.overrideHost.isNullOrBlank()) {
+                        overrideTypeGroup.check(R.id.overrideHostname)
+                        overrideHostInput.setText(settings.overrideHost)
+                    }
+                }
+            }
             
             updateTrafficPreview()
         }
@@ -508,14 +575,21 @@ class GatewayRulesFragment : Fragment() {
                 val enabled = enabledSwitch.isChecked
                 
                 val traffic = buildTrafficExpression(ruleType, dialogView)
-                
+
+                val ruleSettings = if (action == "override" && ruleType == "dns") {
+                    buildOverrideSettings(dialogView)
+                } else {
+                    existingRule?.ruleSettings
+                }
+
                 val request = GatewayRuleRequest(
                     name = name,
                     action = action,
                     enabled = enabled,
                     filters = listOf(ruleType),
                     traffic = traffic,
-                    precedence = precedence
+                    precedence = precedence,
+                    ruleSettings = ruleSettings
                 )
                 
                 if (existingRule == null) {
@@ -535,10 +609,12 @@ class GatewayRulesFragment : Fragment() {
                 if (dnsMatchTypeGroup?.checkedRadioButtonId == R.id.dnsMatchList) {
                     val domainLists = viewModel.lists.value.filter { it.type == "DOMAIN" }
                     val dnsListSpinner = dialogView.findViewById<Spinner>(R.id.dnsListSpinner)
+                    val notIn = dialogView.findViewById<android.widget.CheckBox>(R.id.dnsListNotInCheckbox)?.isChecked == true
                     val selectedIndex = dnsListSpinner?.selectedItemPosition ?: -1
                     if (selectedIndex >= 0 && selectedIndex < domainLists.size) {
                         val listId = domainLists[selectedIndex].id
-                        "dns.fqdn in $${listId.trim()}"
+                        val expr = "dns.fqdn in $${listId.trim()}"
+                        if (notIn) "not($expr)" else expr
                     } else null
                 } else {
                     val host = dialogView.findViewById<TextInputEditText>(R.id.dnsHostInput)?.text?.toString()
@@ -553,19 +629,23 @@ class GatewayRulesFragment : Fragment() {
                     R.id.httpMatchDomainList -> {
                         val domainLists = viewModel.lists.value.filter { it.type == "DOMAIN" }
                         val httpDomainListSpinner = dialogView.findViewById<Spinner>(R.id.httpDomainListSpinner)
+                        val notIn = dialogView.findViewById<android.widget.CheckBox>(R.id.httpDomainListNotInCheckbox)?.isChecked == true
                         val selectedIndex = httpDomainListSpinner?.selectedItemPosition ?: -1
                         if (selectedIndex >= 0 && selectedIndex < domainLists.size) {
                             val listId = domainLists[selectedIndex].id
-                            "http.request.host in $${listId.trim()}"
+                            val expr = "http.request.host in $${listId.trim()}"
+                            if (notIn) "not($expr)" else expr
                         } else null
                     }
                     R.id.httpMatchUrlList -> {
                         val urlLists = viewModel.lists.value.filter { it.type == "URL" }
                         val httpUrlListSpinner = dialogView.findViewById<Spinner>(R.id.httpUrlListSpinner)
+                        val notIn = dialogView.findViewById<android.widget.CheckBox>(R.id.httpUrlListNotInCheckbox)?.isChecked == true
                         val selectedIndex = httpUrlListSpinner?.selectedItemPosition ?: -1
                         if (selectedIndex >= 0 && selectedIndex < urlLists.size) {
                             val listId = urlLists[selectedIndex].id
-                            "http.request.uri in $${listId.trim()}"
+                            val expr = "http.request.uri in $${listId.trim()}"
+                            if (notIn) "not($expr)" else expr
                         } else null
                     }
                     else -> {
@@ -587,10 +667,12 @@ class GatewayRulesFragment : Fragment() {
                 if (l4MatchTypeGroup?.checkedRadioButtonId == R.id.l4MatchList) {
                     val ipLists = viewModel.lists.value.filter { it.type == "IP" }
                     val l4ListSpinner = dialogView.findViewById<Spinner>(R.id.l4ListSpinner)
+                    val notIn = dialogView.findViewById<android.widget.CheckBox>(R.id.l4ListNotInCheckbox)?.isChecked == true
                     val selectedIndex = l4ListSpinner?.selectedItemPosition ?: -1
                     if (selectedIndex >= 0 && selectedIndex < ipLists.size) {
                         val listId = ipLists[selectedIndex].id
-                        "net.dst.ip in $${listId.trim()}"
+                        val expr = "net.dst.ip in $${listId.trim()}"
+                        if (notIn) "not($expr)" else expr
                     } else null
                 } else {
                     val sourceIp = dialogView.findViewById<TextInputEditText>(R.id.l4SourceIpInput)?.text?.toString()
@@ -607,6 +689,30 @@ class GatewayRulesFragment : Fragment() {
             }
             else -> null
         }
+    }
+
+    private fun buildOverrideSettings(dialogView: View): GatewayRuleSettings {
+        val overrideTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.overrideTypeGroup)
+        return if (overrideTypeGroup?.checkedRadioButtonId == R.id.overrideIpList) {
+            val ipsText = dialogView.findViewById<TextInputEditText>(R.id.overrideIpsInput)?.text?.toString() ?: ""
+            val ips = ipsText.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
+            GatewayRuleSettings(overrideIps = ips)
+        } else {
+            val host = dialogView.findViewById<TextInputEditText>(R.id.overrideHostInput)?.text?.toString()?.trim()
+            GatewayRuleSettings(overrideHost = host?.takeIf { it.isNotEmpty() })
+        }
+    }
+
+    private fun updateOverrideVisibility(
+        typeSpinner: Spinner,
+        actionSpinner: Spinner,
+        overrideFields: View
+    ) {
+        val types = listOf("dns", "http", "l4")
+        val actions = listOf("allow", "block", "safesearch", "ytrestricted", "override")
+        val ruleType = types.getOrNull(typeSpinner.selectedItemPosition) ?: "dns"
+        val action = actions.getOrNull(actionSpinner.selectedItemPosition) ?: "allow"
+        overrideFields.visibility = if (action == "override" && ruleType == "dns") View.VISIBLE else View.GONE
     }
 
     private fun confirmDeleteRule(ruleId: String, ruleName: String) {
@@ -686,7 +792,11 @@ private fun extractPortFromTraffic(traffic: String): String? {
 }
 
 private fun extractListIdFromTraffic(traffic: String): String? {
-    val regex = Regex("\\b(in)\\s+\\$(\\S+)")
+    val regex = Regex("\\b(?:not )?in\\s+\\$(\\S+)")
     val match = regex.find(traffic)
-    return match?.groupValues?.get(2)
+    return match?.groupValues?.get(1)
+}
+
+private fun isNotInList(traffic: String): Boolean {
+    return traffic.trimStart().startsWith("not(")
 }

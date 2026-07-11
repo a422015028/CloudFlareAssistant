@@ -82,8 +82,7 @@ class GatewayRuleAdapter(
                 "block" -> "阻止"
                 "safesearch" -> "安全搜索"
                 "ytrestricted" -> "YouTube限制"
-                "isolate" -> "隔离"
-                "noscan" -> "不扫描"
+                "override" -> "覆盖"
                 else -> action ?: "未知"
             }
         }

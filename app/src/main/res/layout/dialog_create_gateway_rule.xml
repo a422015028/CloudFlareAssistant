@@ -189,6 +189,15 @@
                 android:layout_marginTop="8dp"
                 android:visibility="gone" />
 
+            <CheckBox
+                android:id="@+id/dnsListNotInCheckbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="反向匹配 (not in list)"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
         </LinearLayout>
 
         <!-- HTTP 规则字段 -->
@@ -283,11 +292,29 @@
                 android:layout_marginTop="8dp"
                 android:visibility="gone" />
 
+            <CheckBox
+                android:id="@+id/httpDomainListNotInCheckbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="反向匹配 (not in list)"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
             <Spinner
                 android:id="@+id/httpUrlListSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:visibility="gone" />
+
+            <CheckBox
+                android:id="@+id/httpUrlListNotInCheckbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="反向匹配 (not in list)"
+                android:textSize="12sp"
                 android:visibility="gone" />
 
         </LinearLayout>
@@ -376,6 +403,98 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:visibility="gone" />
+
+            <CheckBox
+                android:id="@+id/l4ListNotInCheckbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="反向匹配 (not in list)"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <!-- 覆盖设置 (仅 DNS 规则 + override 动作) -->
+        <LinearLayout
+            android:id="@+id/overrideFields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="覆盖设置"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="将匹配的 DNS 查询覆盖到指定目标"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <RadioGroup
+                android:id="@+id/overrideTypeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/overrideIpList"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="IP列表" />
+
+                <RadioButton
+                    android:id="@+id/overrideHostname"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="单个主机名" />
+
+            </RadioGroup>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/overrideIpsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="IP列表 (每行一个IP)">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/overrideIpsInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:minLines="2" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/overrideHostLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="主机名 (如: example.com)"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/overrideHostInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
 
