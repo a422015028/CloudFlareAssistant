@@ -2,9 +2,11 @@ package com.muort.upworker.feature.zerotrust.gateway
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.muort.upworker.R
 import com.muort.upworker.core.model.GatewayList
 import com.muort.upworker.databinding.ItemGatewayListBinding
 
@@ -40,11 +42,22 @@ class GatewayListAdapter(
                 "URL" -> "URL"
                 else -> list.type
             }
+            binding.listTypeChip.setTextColor(getListTypeColor(list.type))
             binding.listDescriptionText.text = list.description ?: "无描述"
             binding.itemCountText.text = "项目数: ${list.count ?: 0}"
 
             binding.editButton.setOnClickListener { onEditClick(list) }
             binding.deleteButton.setOnClickListener { onDeleteClick(list) }
+        }
+
+        private fun getListTypeColor(type: String?): Int {
+            val colorRes = when (type) {
+                "DOMAIN" -> R.color.blue
+                "IP" -> R.color.md_theme_tertiary
+                "URL" -> R.color.purple_700
+                else -> R.color.grey_500
+            }
+            return ContextCompat.getColor(binding.root.context, colorRes)
         }
     }
 

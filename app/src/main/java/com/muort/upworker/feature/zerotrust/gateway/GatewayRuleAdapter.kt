@@ -7,9 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.muort.upworker.R
 import com.muort.upworker.core.model.GatewayRule
 import com.muort.upworker.databinding.ItemGatewayRuleBinding
 
@@ -49,8 +51,10 @@ class GatewayRuleAdapter(
                 "l4" -> "网络"
                 else -> ruleType.uppercase()
             }
-            
+            binding.ruleTypeChip.setTextColor(getRuleTypeColor(ruleType))
+
             binding.ruleActionChip.text = getActionLabel(rule.action)
+            binding.ruleActionChip.setTextColor(getActionColor(rule.action))
             
             binding.ruleTrafficText.text = rule.traffic ?: "无匹配条件"
             binding.ruleTrafficText.visibility = if (rule.traffic.isNullOrBlank()) View.GONE else View.VISIBLE
@@ -85,6 +89,28 @@ class GatewayRuleAdapter(
                 "override" -> "覆盖"
                 else -> action ?: "未知"
             }
+        }
+
+        private fun getRuleTypeColor(ruleType: String): Int {
+            val colorRes = when (ruleType) {
+                "dns" -> R.color.blue
+                "http" -> R.color.purple_700
+                "l4" -> R.color.md_theme_tertiary
+                else -> R.color.grey_500
+            }
+            return ContextCompat.getColor(binding.root.context, colorRes)
+        }
+
+        private fun getActionColor(action: String?): Int {
+            val colorRes = when (action) {
+                "allow" -> R.color.md_theme_success
+                "block" -> R.color.md_theme_error
+                "safesearch" -> R.color.blue
+                "ytrestricted" -> R.color.md_theme_tertiary
+                "override" -> R.color.purple_700
+                else -> R.color.grey_500
+            }
+            return ContextCompat.getColor(binding.root.context, colorRes)
         }
     }
 
