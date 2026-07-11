@@ -1,5 +1,6 @@
 package com.muort.upworker
 
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -24,6 +25,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.util.DataMigrationHelper
+import com.muort.upworker.core.util.DisplaySizeHelper
 import com.muort.upworker.core.util.MigrationResult
 import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.ActivityMainBinding
@@ -43,7 +45,18 @@ class MainActivity : AppCompatActivity() {
     
     @Inject
     lateinit var migrationHelper: DataMigrationHelper
-    
+
+    override fun attachBaseContext(newBase: Context) {
+        val fontScale = DisplaySizeHelper.getFontScale(newBase)
+        if (fontScale != 1.0f) {
+            val config = Configuration(newBase.resources.configuration)
+            config.fontScale = fontScale
+            super.attachBaseContext(newBase.createConfigurationContext(config))
+        } else {
+            super.attachBaseContext(newBase)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)

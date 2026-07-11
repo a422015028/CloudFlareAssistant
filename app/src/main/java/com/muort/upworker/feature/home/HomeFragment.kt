@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.muort.upworker.R
 import com.muort.upworker.core.util.AnimationHelper
+import com.muort.upworker.core.util.DisplaySizeHelper
 import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.DialogAboutBinding
 import com.muort.upworker.databinding.FragmentHomeBinding
@@ -173,6 +174,27 @@ class HomeFragment : Fragment() {
             AnimationHelper.scaleDown(it)
             showAboutDialog()
         }
+
+        binding.displaySizeCard.setOnClickListener {
+            AnimationHelper.scaleDown(it)
+            showDisplaySizeDialog()
+        }
+    }
+
+    private fun showDisplaySizeDialog() {
+        val labels = DisplaySizeHelper.OPTIONS.map { it.first }.toTypedArray()
+        val selectedIndex = DisplaySizeHelper.getSelectedIndex(requireContext())
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("显示大小")
+            .setSingleChoiceItems(labels, selectedIndex) { dialog, which ->
+                val scale = DisplaySizeHelper.OPTIONS[which].second
+                DisplaySizeHelper.setFontScale(requireContext(), scale)
+                dialog.dismiss()
+                // 重启 Activity 以应用新的字体缩放
+                requireActivity().recreate()
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
     
     private fun showAboutDialog() {
