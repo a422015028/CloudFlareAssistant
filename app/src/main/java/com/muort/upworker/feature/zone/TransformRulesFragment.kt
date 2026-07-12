@@ -332,7 +332,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
             when (val item = items[position]) {
                 is ListItem.PhaseHeader -> (holder as HeaderVH).bind(item.phase)
                 is ListItem.RuleItem -> (holder as RuleVH).bind(item.phase, item.rule, togglingIds)
-                is ListItem.EmptyHint -> (holder as EmptyVH).bind(item.phase)
+                is ListItem.EmptyHint -> (holder as EmptyVH).bind()
             }
         }
 
@@ -415,7 +415,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
                 setPadding(56, 8, 16, 8)
             },
         ) {
-            fun bind(phase: TransformPhase) {}
+            fun bind() {}
         }
     }
 }
