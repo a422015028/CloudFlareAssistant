@@ -150,7 +150,7 @@ data class GatewayRule(
     @SerializedName("id") val id: String,
     @SerializedName("name") val name: String,
     @SerializedName("description") val description: String? = null,
-    @SerializedName("action") val action: String, // "allow", "block", "safesearch", "ytrestricted", "on", "off", "scan", "noscan", "isolate", "noisolate", "override", "l4_override", "egress", "audit_ssh"
+    @SerializedName("action") val action: String, // "allow", "block", "safesearch", "ytrestricted", "on", "off", "scan", "noscan", "isolate", "noisolate", "override", "l4_override", "egress", "audit_ssh", "redirect"
     @SerializedName("enabled") val enabled: Boolean,
     @SerializedName("filters") val filters: List<String>, // ["dns", "http", "l4"]
     @SerializedName("traffic") val traffic: String? = null, // Wirefilter expression
@@ -187,7 +187,14 @@ data class GatewayRuleSettings(
     @SerializedName("l4override") val l4Override: L4Override? = null,
     @SerializedName("biso_admin_controls") val bisoAdminControls: BisoAdminControls? = null,
     @SerializedName("check_session") val checkSession: CheckSession? = null,
-    @SerializedName("insecure_disable_dnssec_validation") val insecureDisableDnssecValidation: Boolean? = null
+    @SerializedName("insecure_disable_dnssec_validation") val insecureDisableDnssecValidation: Boolean? = null,
+    @SerializedName("redirect") val redirect: GatewayRedirect? = null
+)
+
+data class GatewayRedirect(
+    @SerializedName("target_uri") val targetUri: String? = null,
+    @SerializedName("include_context") val includeContext: Boolean? = null,
+    @SerializedName("preserve_path_and_query") val preservePathAndQuery: Boolean? = null
 )
 
 data class L4Override(

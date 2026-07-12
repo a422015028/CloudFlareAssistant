@@ -87,6 +87,9 @@ class GatewayRuleAdapter(
                 "safesearch" -> "安全搜索"
                 "ytrestricted" -> "YouTube限制"
                 "override" -> "覆盖"
+                "redirect" -> "重定向"
+                "off" -> "不检查"
+                "noscan" -> "不扫描"
                 else -> action ?: "未知"
             }
         }
@@ -108,6 +111,9 @@ class GatewayRuleAdapter(
                 "safesearch" -> R.color.blue
                 "ytrestricted" -> R.color.md_theme_tertiary
                 "override" -> R.color.purple_700
+                "redirect" -> R.color.blue
+                "off" -> R.color.grey_500
+                "noscan" -> R.color.md_theme_tertiary
                 else -> R.color.grey_500
             }
             return ContextCompat.getColor(binding.root.context, colorRes)

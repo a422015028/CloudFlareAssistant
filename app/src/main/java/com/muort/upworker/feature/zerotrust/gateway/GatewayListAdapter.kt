@@ -1,7 +1,11 @@
 package com.muort.upworker.feature.zerotrust.gateway
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -45,6 +49,14 @@ class GatewayListAdapter(
             binding.listTypeChip.setTextColor(getListTypeColor(list.type))
             binding.listDescriptionText.text = list.description ?: "无描述"
             binding.itemCountText.text = "项目数: ${list.count ?: 0}"
+            binding.listIdText.text = "ID: ${list.id}"
+
+            binding.listIdText.setOnClickListener {
+                val clipboard = binding.root.context
+                    .getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboard.setPrimaryClip(ClipData.newPlainText("List ID", list.id))
+                Toast.makeText(binding.root.context, "已复制ID: ${list.id}", Toast.LENGTH_SHORT).show()
+            }
 
             binding.editButton.setOnClickListener { onEditClick(list) }
             binding.deleteButton.setOnClickListener { onDeleteClick(list) }

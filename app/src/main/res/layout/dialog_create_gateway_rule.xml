@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -86,7 +87,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="DNS规则: 匹配域名查询 | URL规则: 匹配网站访问 | IP规则: 匹配 IP 和端口"
+            android:text="DNS: 匹配域名查询 | HTTP: 匹配网站访问 | 网络: 匹配 IP 和端口"
             android:textSize="11sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -155,36 +156,36 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="单个域名"
-                    android:checked="true" />
+                    android:text="域名"
+                    android:checked="true"
+                    android:visibility="gone" />
 
                 <RadioButton
                     android:id="@+id/dnsMatchList"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="域名列表" />
+                    android:text="域名列表"
+                    android:visibility="gone" />
 
             </RadioGroup>
 
-            <Spinner
-                android:id="@+id/dnsOperatorSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/dnsHostLayout"
+                android:id="@+id/dnsExpressionLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="域名 (如: example.com)">
+                android:hint="规则表达式"
+                app:helperText='如: dns.fqdn == "example.com" or dns.fqdn matches ".*\.example\.com"'>
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/dnsHostInput"
+                    android:id="@+id/dnsExpressionInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="textMultiLine"
+                    android:gravity="top|start"
+                    android:fontFamily="monospace"
+                    android:minLines="2" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -236,39 +237,22 @@
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
 
-            <Spinner
-                android:id="@+id/httpOperatorSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/httpHostLayout"
+                android:id="@+id/httpExpressionLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="主机名 (如: example.com)">
+                android:hint="规则表达式"
+                app:helperText='如: http.request.host == "example.com" and http.request.uri.path matches "/api/*"'>
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/httpHostInput"
+                    android:id="@+id/httpExpressionInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/httpPathLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="URL 路径 (可选，如: /api/*)">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/httpPathInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="textMultiLine"
+                    android:gravity="top|start"
+                    android:fontFamily="monospace"
+                    android:minLines="2" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -284,22 +268,25 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="单个主机"
-                    android:checked="true" />
+                    android:text="主机"
+                    android:checked="true"
+                    android:visibility="gone" />
 
                 <RadioButton
                     android:id="@+id/httpMatchDomainList"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="域名列表" />
+                    android:text="域名列表"
+                    android:visibility="gone" />
 
                 <RadioButton
                     android:id="@+id/httpMatchUrlList"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="URL列表" />
+                    android:text="URL列表"
+                    android:visibility="gone" />
 
             </RadioGroup>
 
@@ -347,6 +334,23 @@
                 android:textSize="12sp"
                 android:visibility="gone" />
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/redirectUrlLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="策略URL重定向"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/redirectUrlInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
         </LinearLayout>
 
         <!-- L4 (Network) 规则字段 -->
@@ -373,39 +377,22 @@
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
 
-            <Spinner
-                android:id="@+id/l4OperatorSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/l4SourceIpLayout"
+                android:id="@+id/l4ExpressionLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="目标 IP/CIDR (如: 192.168.1.0/24)">
+                android:hint="规则表达式"
+                app:helperText='如: net.src.ip == 192.168.1.1 and net.dst.port == 443'>
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/l4SourceIpInput"
+                    android:id="@+id/l4ExpressionInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/l4DestPortLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="目标端口 (可选，如: 443)">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/l4DestPortInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number" />
+                    android:inputType="textMultiLine"
+                    android:gravity="top|start"
+                    android:fontFamily="monospace"
+                    android:minLines="2" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -421,15 +408,17 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="单个IP"
-                    android:checked="true" />
+                    android:text="IP"
+                    android:checked="true"
+                    android:visibility="gone" />
 
                 <RadioButton
                     android:id="@+id/l4MatchList"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="IP列表" />
+                    android:text="IP列表"
+                    android:visibility="gone" />
 
             </RadioGroup>
 
@@ -455,6 +444,42 @@
                 android:textSize="12sp"
                 android:visibility="gone" />
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/l4OverrideIpLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="替代IP"
+                app:helperText="例如: 192.168.1.1。可以是公共IP或连接到ZeroTrust网络的私有IP"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/l4OverrideIpInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/l4OverridePortLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="替代端口"
+                app:helperText="例如: 8080"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/l4OverridePortInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:textSize="13sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
         </LinearLayout>
 
         <!-- 覆盖设置 (仅 DNS 规则 + override 动作) -->
@@ -477,7 +502,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="将匹配的 DNS 查询覆盖到指定目标"
+                android:text="将匹配的 DNS 查询覆盖到指定目标（IP列表或单个主机名）"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
 

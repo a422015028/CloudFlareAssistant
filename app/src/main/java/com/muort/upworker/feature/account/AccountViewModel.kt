@@ -42,6 +42,9 @@ class AccountViewModel @Inject constructor(
     
     private val _loadingZones = MutableStateFlow(false)
     val loadingZones: StateFlow<Boolean> = _loadingZones.asStateFlow()
+
+    // 标记应用冷启动时是否已自动获取过 zone 列表（ViewModel 随进程存活，进程重启后重置）
+    private var zonesAutoFetchedOnColdStart = false
     
     init {
         loadAccounts()
@@ -270,6 +273,17 @@ class AccountViewModel @Inject constructor(
             }
             _loadingZones.value = false
         }
+    }
+
+    /**
+     * 仅在应用冷启动时自动获取一次 zone 列表（静默）。
+     * 后续返回主界面或切换账号时不再触发网络请求，避免重复请求。
+     * 用户仍可通过域名选择对话框的「从API刷新」手动触发。
+     */
+    fun maybeFetchZonesOnColdStart(account: Account) {
+        if (zonesAutoFetchedOnColdStart) return
+        zonesAutoFetchedOnColdStart = true
+        fetchZonesFromApi(account, silent = true)
     }
     
     fun selectZone(accountId: Long, zoneId: String) {
