@@ -20,6 +20,7 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.GatewayList
 import com.muort.upworker.core.model.GatewayListItem
 import com.muort.upworker.core.model.GatewayListRequest
+import com.muort.upworker.core.model.Resource
 import com.muort.upworker.databinding.FragmentGatewayListsBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -85,20 +86,6 @@ class GatewayListsFragment : Fragment() {
                             if (lists.isEmpty()) View.VISIBLE else View.GONE
                     }
                 }
-
-                launch {
-                    viewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
-                    }
-                }
-
-                launch {
-                    viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                        viewModel.error.collect { error ->
-                            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
-                        }
-                    }
-                }
             }
         }
     }
@@ -110,7 +97,12 @@ class GatewayListsFragment : Fragment() {
             return
         }
 
-        viewModel.loadLists(account)
+        lifecycleScope.launch {
+            val result = viewModel.loadLists(account)
+            if (result is Resource.Error) {
+                Snackbar.make(binding.root, "加载列表失败: ${result.message}", Snackbar.LENGTH_LONG).show()
+            }
+        }
     }
     
     override fun onResume() {
@@ -224,9 +216,25 @@ class GatewayListsFragment : Fragment() {
                 )
 
                 if (existingList == null) {
-                    viewModel.createList(account, request)
+                    lifecycleScope.launch {
+                        val result = viewModel.createList(account, request)
+                        val msg = when (result) {
+                            is Resource.Success -> "列表创建成功: ${result.data.name}"
+                            is Resource.Error -> "创建列表失败: ${result.message}"
+                            else -> return@launch
+                        }
+                        Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+                    }
                 } else {
-                    viewModel.updateList(account, existingList.id, request)
+                    lifecycleScope.launch {
+                        val result = viewModel.updateList(account, existingList.id, request)
+                        val msg = when (result) {
+                            is Resource.Success -> "列表更新成功: ${result.data.name}"
+                            is Resource.Error -> "更新列表失败: ${result.message}"
+                            else -> return@launch
+                        }
+                        Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+                    }
                 }
             }
             .setNegativeButton("取消", null)
@@ -252,7 +260,15 @@ class GatewayListsFragment : Fragment() {
 
     private fun deleteList(listId: String) {
         val account = accountViewModel.defaultAccount.value ?: return
-        viewModel.deleteList(account, listId)
+        lifecycleScope.launch {
+            val result = viewModel.deleteList(account, listId)
+            val msg = when (result) {
+                is Resource.Success -> "列表删除成功"
+                is Resource.Error -> "删除列表失败: ${result.message}"
+                else -> return@launch
+            }
+            Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroyView() {

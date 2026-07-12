@@ -17,6 +17,7 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.GatewayLocation
 import com.muort.upworker.core.model.GatewayLocationRequest
 import com.muort.upworker.core.model.LocationNetwork
+import com.muort.upworker.core.model.Resource
 import com.muort.upworker.databinding.FragmentGatewayLocationsBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -82,20 +83,6 @@ class GatewayLocationsFragment : Fragment() {
                             if (locations.isEmpty()) View.VISIBLE else View.GONE
                     }
                 }
-
-                launch {
-                    viewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
-                    }
-                }
-
-                launch {
-                    viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                        viewModel.error.collect { error ->
-                            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
-                        }
-                    }
-                }
             }
         }
     }
@@ -107,7 +94,12 @@ class GatewayLocationsFragment : Fragment() {
             return
         }
 
-        viewModel.loadLocations(account)
+        lifecycleScope.launch {
+            val result = viewModel.loadLocations(account)
+            if (result is Resource.Error) {
+                Snackbar.make(binding.root, "加载位置失败: ${result.message}", Snackbar.LENGTH_LONG).show()
+            }
+        }
     }
     
     override fun onResume() {
@@ -162,9 +154,25 @@ class GatewayLocationsFragment : Fragment() {
                 )
 
                 if (existingLocation == null) {
-                    viewModel.createLocation(account, request)
+                    lifecycleScope.launch {
+                        val result = viewModel.createLocation(account, request)
+                        val msg = when (result) {
+                            is Resource.Success -> "位置创建成功: ${result.data.name}"
+                            is Resource.Error -> "创建位置失败: ${result.message}"
+                            else -> return@launch
+                        }
+                        Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+                    }
                 } else {
-                    viewModel.updateLocation(account, existingLocation.id, request)
+                    lifecycleScope.launch {
+                        val result = viewModel.updateLocation(account, existingLocation.id, request)
+                        val msg = when (result) {
+                            is Resource.Success -> "位置更新成功: ${result.data.name}"
+                            is Resource.Error -> "更新位置失败: ${result.message}"
+                            else -> return@launch
+                        }
+                        Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+                    }
                 }
             }
             .setNegativeButton("取消", null)
@@ -184,7 +192,15 @@ class GatewayLocationsFragment : Fragment() {
 
     private fun deleteLocation(locationId: String) {
         val account = accountViewModel.defaultAccount.value ?: return
-        viewModel.deleteLocation(account, locationId)
+        lifecycleScope.launch {
+            val result = viewModel.deleteLocation(account, locationId)
+            val msg = when (result) {
+                is Resource.Success -> "位置删除成功"
+                is Resource.Error -> "删除位置失败: ${result.message}"
+                else -> return@launch
+            }
+            Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     private fun validateNetwork(cidr: String): String {

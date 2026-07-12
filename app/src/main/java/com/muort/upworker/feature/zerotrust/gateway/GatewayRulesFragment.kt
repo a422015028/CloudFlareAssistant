@@ -27,6 +27,7 @@ import com.muort.upworker.core.model.GatewayRuleRequest
 import com.muort.upworker.core.model.GatewayRuleSettings
 import com.muort.upworker.core.model.GatewayRedirect
 import com.muort.upworker.core.model.L4Override
+import com.muort.upworker.core.model.Resource
 import com.muort.upworker.databinding.FragmentGatewayRulesBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -161,20 +162,6 @@ class GatewayRulesFragment : Fragment() {
                         applyFilter()
                     }
                 }
-
-                launch {
-                    viewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
-                    }
-                }
-
-                launch {
-                    viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                        viewModel.error.collect { error ->
-                            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
-                        }
-                    }
-                }
             }
         }
     }
@@ -191,8 +178,18 @@ class GatewayRulesFragment : Fragment() {
             Snackbar.make(binding.root, "未选择账户", Snackbar.LENGTH_SHORT).show()
             return
         }
-        viewModel.loadRules(account)
-        viewModel.loadLists(account)
+        lifecycleScope.launch {
+            val result = viewModel.loadRules(account)
+            if (result is Resource.Error) {
+                Snackbar.make(binding.root, "加载规则失败: ${result.message}", Snackbar.LENGTH_LONG).show()
+            }
+        }
+        lifecycleScope.launch {
+            val result = viewModel.loadLists(account)
+            if (result is Resource.Error) {
+                Snackbar.make(binding.root, "加载列表失败: ${result.message}", Snackbar.LENGTH_LONG).show()
+            }
+        }
     }
     
     override fun onResume() {
@@ -711,9 +708,25 @@ class GatewayRulesFragment : Fragment() {
                 )
                 
                 if (existingRule == null) {
-                    viewModel.createRule(account, request)
+                    lifecycleScope.launch {
+                        val result = viewModel.createRule(account, request)
+                        val msg = when (result) {
+                            is Resource.Success -> "规则创建成功: ${result.data.name}"
+                            is Resource.Error -> "创建规则失败: ${result.message}"
+                            else -> return@launch
+                        }
+                        Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+                    }
                 } else {
-                    viewModel.updateRule(account, existingRule.id, request)
+                    lifecycleScope.launch {
+                        val result = viewModel.updateRule(account, existingRule.id, request)
+                        val msg = when (result) {
+                            is Resource.Success -> "规则更新成功: ${result.data.name}"
+                            is Resource.Error -> "更新规则失败: ${result.message}"
+                            else -> return@launch
+                        }
+                        Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+                    }
                 }
             }
             .setNegativeButton("取消", null)
@@ -822,7 +835,15 @@ class GatewayRulesFragment : Fragment() {
 
     private fun deleteRule(ruleId: String) {
         val account = accountViewModel.defaultAccount.value ?: return
-        viewModel.deleteRule(account, ruleId)
+        lifecycleScope.launch {
+            val result = viewModel.deleteRule(account, ruleId)
+            val msg = when (result) {
+                is Resource.Success -> "规则删除成功"
+                is Resource.Error -> "删除规则失败: ${result.message}"
+                else -> return@launch
+            }
+            Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     private fun updateRuleEnabled(rule: GatewayRule, enabled: Boolean) {
@@ -836,7 +857,15 @@ class GatewayRulesFragment : Fragment() {
             precedence = rule.precedence,
             ruleSettings = rule.ruleSettings
         )
-        viewModel.updateRule(account, rule.id, request)
+        lifecycleScope.launch {
+            val result = viewModel.updateRule(account, rule.id, request)
+            val msg = when (result) {
+                is Resource.Success -> "规则已${if (enabled) "启用" else "禁用"}"
+                is Resource.Error -> "更新失败: ${result.message}"
+                else -> return@launch
+            }
+            Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroyView() {
