@@ -435,14 +435,21 @@ class ZoneRulesetRepository @Inject constructor(
     }
 
     suspend fun toggleTransformRule(
-        account: Account, zoneId: String, rulesetId: String, ruleId: String, enabled: Boolean,
+        account: Account, zoneId: String, rulesetId: String, rule: TransformRule, enabled: Boolean,
     ): Resource<TransformRuleset> = withContext(Dispatchers.IO) {
         safeApiCall {
-            val resp = api.toggleTransformRule(
+            val body = TransformRuleCreate(
+                action = rule.action ?: "rewrite",
+                expression = rule.expression ?: "",
+                description = rule.description,
+                enabled = enabled,
+                actionParameters = rule.actionParameters,
+            )
+            val resp = api.updateTransformRule(
                 AuthHelper.getBearerToken(account),
                 AuthHelper.getEmail(account),
                 AuthHelper.getGlobalApiKey(account),
-                zoneId, rulesetId, ruleId, TransformRuleToggle(enabled),
+                zoneId, rulesetId, rule.id, body,
             )
             resp.toResource("切换转换规则失败")
         }

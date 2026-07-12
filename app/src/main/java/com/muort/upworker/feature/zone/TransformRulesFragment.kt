@@ -99,7 +99,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
         togglingRuleIds.add(rule.id)
         binding.recyclerView.post { renderAll() }
         viewLifecycleOwner.lifecycleScope.launch {
-            when (val r = repo.toggleTransformRule(account, zoneId, ruleset.id, rule.id, on)) {
+            when (val r = repo.toggleTransformRule(account, zoneId, ruleset.id, rule, on)) {
                 is Resource.Success -> rulesets[phase.raw] = r.data
                 is Resource.Error -> toast("操作失败: ${r.message}")
                 is Resource.Loading -> {}

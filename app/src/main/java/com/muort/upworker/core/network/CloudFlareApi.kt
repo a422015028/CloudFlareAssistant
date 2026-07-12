@@ -1785,17 +1785,6 @@ interface CloudFlareApi {
         @Body body: TransformRuleCreate
     ): Response<CloudFlareResponse<TransformRuleset>>
 
-    @PATCH("zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}")
-    suspend fun toggleTransformRule(
-        @Header("Authorization") token: String?,
-        @Header("X-Auth-Email") email: String?,
-        @Header("X-Auth-Key") apiKey: String?,
-        @Path("zone_id") zoneId: String,
-        @Path("ruleset_id") rulesetId: String,
-        @Path("rule_id") ruleId: String,
-        @Body body: TransformRuleToggle
-    ): Response<CloudFlareResponse<TransformRuleset>>
-
     @DELETE("zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}")
     suspend fun deleteTransformRule(
         @Header("Authorization") token: String?,

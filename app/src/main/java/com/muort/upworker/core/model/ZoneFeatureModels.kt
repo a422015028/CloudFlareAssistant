@@ -177,7 +177,6 @@ data class TransformRuleCreate(
     @SerializedName("action_parameters") val actionParameters: TransformActionParameters? = null,
 )
 
-data class TransformRuleToggle(@SerializedName("enabled") val enabled: Boolean)
 data class TransformEntrypointUpdate(@SerializedName("rules") val rules: List<TransformRuleCreate>)
 
 // ==================== IP 访问规则（firewall/access_rules/rules） ====================
