@@ -207,7 +207,31 @@
         android:id="@+id/snippetsFragment"
         android:name="com.muort.upworker.feature.zone.SnippetsFragment"
         android:label="代码片段"
-        tools:layout="@layout/fragment_zone_feature" />
+        tools:layout="@layout/fragment_zone_feature">
+
+        <action
+            android:id="@+id/action_snippets_to_editor"
+            app:destination="@id/snippetEditorFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/snippetEditorFragment"
+        android:name="com.muort.upworker.feature.zone.SnippetEditorFragment"
+        android:label="编辑代码片段"
+        tools:layout="@layout/fragment_snippet_editor">
+
+        <argument
+            android:name="zoneId"
+            app:argType="string" />
+
+        <argument
+            android:name="snippetName"
+            app:argType="string" />
+
+        <argument
+            android:name="isNew"
+            app:argType="boolean" />
+    </fragment>
 
     <fragment
         android:id="@+id/zoneSettingsFragment"

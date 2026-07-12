@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
+import okhttp3.MultipartReader
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -48,12 +49,54 @@ class SnippetRepository @Inject constructor(
                     zoneId, name,
                 )
                 if (resp.isSuccessful && resp.body() != null) {
-                    Resource.Success(resp.body()!!.string())
+                    val body = resp.body()!!
+                    val contentType = body.contentType()
+                    if (contentType != null && contentType.type == "multipart") {
+                        val boundary = contentType.parameter("boundary")
+                        if (boundary != null) {
+                            val reader = MultipartReader(body.source(), boundary)
+                            var mainModuleContent: String? = null
+                            var firstJsContent: String? = null
+                            while (true) {
+                                val part = reader.nextPart() ?: break
+                                val disposition = part.headers["Content-Disposition"]
+                                val fileName = disposition?.let { extractFilename(it) }
+                                val partContent = part.body.readUtf8()
+                                if (fileName != null && fileName.endsWith(".js")) {
+                                    if (firstJsContent == null) firstJsContent = partContent
+                                    if (fileName == "snippet.js" || fileName == "index.js") {
+                                        mainModuleContent = partContent
+                                    }
+                                }
+                            }
+                            val content = mainModuleContent ?: firstJsContent ?: ""
+                            Resource.Success(content)
+                        } else {
+                            Resource.Success(body.string())
+                        }
+                    } else {
+                        Resource.Success(body.string())
+                    }
                 } else {
                     Resource.Error("HTTP ${resp.code()}: ${resp.message()}")
                 }
             }
         }
+
+    private fun extractFilename(contentDisposition: String): String? {
+        val patterns = listOf(
+            """filename="([^"]+)"""",
+            """filename=([^;]+)""",
+        )
+        for (pattern in patterns) {
+            val regex = Regex(pattern)
+            val match = regex.find(contentDisposition)
+            if (match != null) {
+                return match.groupValues[1].trim()
+            }
+        }
+        return null
+    }
 
     /** 创建或更新（multipart：metadata + JS 模块）。 */
     suspend fun putSnippet(
