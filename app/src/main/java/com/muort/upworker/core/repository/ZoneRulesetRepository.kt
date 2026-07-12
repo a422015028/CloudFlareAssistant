@@ -147,4 +147,224 @@ class ZoneRulesetRepository @Inject constructor(
                 ?: "HTTP ${code()}: ${message()}")
         }
     }
+
+    // ==================== Cache Rules 专用（保留 action_parameters） ====================
+
+    private val cachePhase = "http_request_cache_settings"
+
+    suspend fun getCacheRuleset(account: Account, zoneId: String): Resource<CacheRuleset?> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val resp = api.getCacheRulesetEntrypoint(
+                    AuthHelper.getBearerToken(account),
+                    AuthHelper.getEmail(account),
+                    AuthHelper.getGlobalApiKey(account),
+                    zoneId, cachePhase,
+                )
+                if (resp.isSuccessful && resp.body()?.success == true) {
+                    Resource.Success(resp.body()?.result)
+                } else if (resp.code() == 404 || isNoEntrypoint(resp.body())) {
+                    Resource.Success(null)
+                } else {
+                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
+                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                }
+            }
+        }
+
+    suspend fun createCacheEntrypoint(
+        account: Account, zoneId: String, rule: CacheRuleCreate,
+    ): Resource<CacheRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.createCacheRulesetEntrypoint(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, cachePhase, CacheEntrypointUpdate(listOf(rule)),
+            )
+            resp.toResource("创建缓存规则集失败")
+        }
+    }
+
+    suspend fun addCacheRule(
+        account: Account, zoneId: String, rulesetId: String, rule: CacheRuleCreate,
+    ): Resource<CacheRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.addCacheRulesetRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, rule,
+            )
+            resp.toResource("添加缓存规则失败")
+        }
+    }
+
+    suspend fun setCacheRuleEnabled(
+        account: Account, zoneId: String, rulesetId: String, rule: CacheRule, enabled: Boolean,
+    ): Resource<CacheRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val body = CacheRuleCreate(
+                action = rule.action ?: "set_cache_settings",
+                expression = rule.expression ?: "",
+                description = rule.description,
+                enabled = enabled,
+                actionParameters = rule.actionParameters,
+            )
+            val resp = api.updateCacheRulesetRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, rule.id, body,
+            )
+            resp.toResource("切换缓存规则失败")
+        }
+    }
+
+    suspend fun updateCacheRule(
+        account: Account, zoneId: String, rulesetId: String, ruleId: String, rule: CacheRuleCreate,
+    ): Resource<CacheRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.updateCacheRulesetRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, ruleId, rule,
+            )
+            resp.toResource("更新缓存规则失败")
+        }
+    }
+
+    suspend fun deleteCacheRule(
+        account: Account, zoneId: String, rulesetId: String, ruleId: String,
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.deleteRulesetRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, ruleId,
+            )
+            if (resp.isSuccessful && resp.body()?.success == true) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error(resp.body()?.errors?.firstOrNull()?.message
+                    ?: "HTTP ${resp.code()}: ${resp.message()}")
+            }
+        }
+    }
+
+    // ==================== Rate Limiting 专用（保留 ratelimit 配置） ====================
+
+    private val rlPhase = "http_ratelimit"
+
+    suspend fun getRateLimitRuleset(account: Account, zoneId: String): Resource<RateLimitRuleset?> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val resp = api.getRateLimitRulesetEntrypoint(
+                    AuthHelper.getBearerToken(account),
+                    AuthHelper.getEmail(account),
+                    AuthHelper.getGlobalApiKey(account),
+                    zoneId, rlPhase,
+                )
+                if (resp.isSuccessful && resp.body()?.success == true) {
+                    Resource.Success(resp.body()?.result)
+                } else if (resp.code() == 404 || isNoEntrypoint(resp.body())) {
+                    Resource.Success(null)
+                } else {
+                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
+                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                }
+            }
+        }
+
+    suspend fun createRateLimitEntrypoint(
+        account: Account, zoneId: String, rule: RateLimitRuleCreate,
+    ): Resource<RateLimitRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.createRateLimitEntrypoint(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rlPhase, RateLimitEntrypointUpdate(listOf(rule)),
+            )
+            resp.toResource("创建速率限制规则集失败")
+        }
+    }
+
+    suspend fun addRateLimitRule(
+        account: Account, zoneId: String, rulesetId: String, rule: RateLimitRuleCreate,
+    ): Resource<RateLimitRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.addRateLimitRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, rule,
+            )
+            resp.toResource("添加速率限制规则失败")
+        }
+    }
+
+    suspend fun setRateLimitRuleEnabled(
+        account: Account, zoneId: String, rulesetId: String, rule: RateLimitRule, enabled: Boolean,
+    ): Resource<RateLimitRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            // http_ratelimit phase 的 PATCH 要求 action/expression/ratelimit 必填，
+            // 只发 {"enabled":false} 会报 20015/20125/20132，必须发送完整规则体。
+            val rl = rule.ratelimit
+            val body = RateLimitRuleCreate(
+                action = rule.action ?: "block",
+                expression = rule.expression ?: "",
+                description = rule.description,
+                enabled = enabled,
+                ratelimit = RateLimitConfigInput(
+                    characteristics = rl?.characteristics ?: listOf("ip.src", "cf.colo.id"),
+                    period = rl?.period ?: 60,
+                    requestsPerPeriod = rl?.requestsPerPeriod ?: 100,
+                    mitigationTimeout = rl?.mitigationTimeout ?: 60,
+                ),
+            )
+            val resp = api.updateRateLimitRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, rule.id, body,
+            )
+            resp.toResource("切换速率限制规则失败")
+        }
+    }
+
+    suspend fun updateRateLimitRule(
+        account: Account, zoneId: String, rulesetId: String, ruleId: String, rule: RateLimitRuleCreate,
+    ): Resource<RateLimitRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.updateRateLimitRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, ruleId, rule,
+            )
+            resp.toResource("更新速率限制规则失败")
+        }
+    }
+
+    suspend fun deleteRateLimitRule(
+        account: Account, zoneId: String, rulesetId: String, ruleId: String,
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.deleteRulesetRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, ruleId,
+            )
+            if (resp.isSuccessful && resp.body()?.success == true) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error(resp.body()?.errors?.firstOrNull()?.message
+                    ?: "HTTP ${resp.code()}: ${resp.message()}")
+            }
+        }
+    }
 }

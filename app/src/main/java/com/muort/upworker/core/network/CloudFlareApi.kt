@@ -1653,6 +1653,94 @@ interface CloudFlareApi {
         @Path("rule_id") ruleId: String
     ): Response<CloudFlareResponse<Unit>>
 
+    // ---- Cache Rules 专用（返回 CacheRuleset 以保留 action_parameters） ----
+
+    /** GET /zones/{zone_id}/rulesets/phases/{phase}/entrypoint —— 取缓存规则 entrypoint。 */
+    @GET("zones/{zone_id}/rulesets/phases/{phase}/entrypoint")
+    suspend fun getCacheRulesetEntrypoint(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("phase") phase: String
+    ): Response<CloudFlareResponse<CacheRuleset>>
+
+    /** PUT /zones/{zone_id}/rulesets/phases/{phase}/entrypoint —— 创建缓存规则 entrypoint。 */
+    @PUT("zones/{zone_id}/rulesets/phases/{phase}/entrypoint")
+    suspend fun createCacheRulesetEntrypoint(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("phase") phase: String,
+        @Body body: CacheEntrypointUpdate
+    ): Response<CloudFlareResponse<CacheRuleset>>
+
+    /** POST /zones/{zone_id}/rulesets/{ruleset_id}/rules —— 向缓存规则集追加规则。 */
+    @POST("zones/{zone_id}/rulesets/{ruleset_id}/rules")
+    suspend fun addCacheRulesetRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Body rule: CacheRuleCreate
+    ): Response<CloudFlareResponse<CacheRuleset>>
+
+    /** PATCH /zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id} —— 启停/更新缓存规则。 */
+    @PATCH("zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}")
+    suspend fun updateCacheRulesetRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Path("rule_id") ruleId: String,
+        @Body body: Any
+    ): Response<CloudFlareResponse<CacheRuleset>>
+
+    // ---- Rate Limiting 专用（返回 RateLimitRuleset 以保留 ratelimit 配置） ----
+
+    @GET("zones/{zone_id}/rulesets/phases/{phase}/entrypoint")
+    suspend fun getRateLimitRulesetEntrypoint(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("phase") phase: String
+    ): Response<CloudFlareResponse<RateLimitRuleset>>
+
+    @PUT("zones/{zone_id}/rulesets/phases/{phase}/entrypoint")
+    suspend fun createRateLimitEntrypoint(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("phase") phase: String,
+        @Body body: RateLimitEntrypointUpdate
+    ): Response<CloudFlareResponse<RateLimitRuleset>>
+
+    @POST("zones/{zone_id}/rulesets/{ruleset_id}/rules")
+    suspend fun addRateLimitRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Body rule: RateLimitRuleCreate
+    ): Response<CloudFlareResponse<RateLimitRuleset>>
+
+    @PATCH("zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}")
+    suspend fun updateRateLimitRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Path("rule_id") ruleId: String,
+        @Body body: Any
+    ): Response<CloudFlareResponse<RateLimitRuleset>>
+
     // ==================== IP 访问规则（firewall/access_rules/rules） ====================
 
     @GET("zones/{zone_id}/firewall/access_rules/rules")

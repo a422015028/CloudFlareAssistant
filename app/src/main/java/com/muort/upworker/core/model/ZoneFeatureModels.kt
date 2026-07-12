@@ -53,7 +53,17 @@ data class CacheActionParameters(
     @SerializedName("cache") val cache: Boolean? = null,
     @SerializedName("edge_ttl") val edgeTtl: CacheEdgeTTL? = null,
     @SerializedName("browser_ttl") val browserTtl: CacheBrowserTTL? = null,
-)
+    // 仅解码用于「是否含高级设置」探测，含这些设置的规则编辑器只读
+    @SerializedName("cache_key") val cacheKey: com.google.gson.JsonElement? = null,
+    @SerializedName("cache_reserve") val cacheReserve: com.google.gson.JsonElement? = null,
+    @SerializedName("read_timeout") val readTimeout: Int? = null,
+    @SerializedName("origin_cache_control") val originCacheControl: Boolean? = null,
+    @SerializedName("additional_cacheable_ports") val additionalCacheablePorts: List<Int>? = null,
+) {
+    val hasAdvancedSettings: Boolean
+        get() = cacheKey != null || cacheReserve != null || readTimeout != null ||
+            originCacheControl != null || (additionalCacheablePorts?.isNotEmpty() == true)
+}
 
 data class CacheEdgeTTL(
     @SerializedName("mode") val mode: String,
