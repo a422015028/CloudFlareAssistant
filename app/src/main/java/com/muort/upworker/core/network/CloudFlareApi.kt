@@ -1795,42 +1795,42 @@ interface CloudFlareApi {
         @Path("rule_id") ruleId: String
     ): Response<CloudFlareResponse<Unit>>
 
-    // ==================== IP 访问规则（firewall/access_rules/rules） ====================
+    // ==================== IP 访问规则（account 级 firewall/access_rules/rules） ====================
 
-    @GET("zones/{zone_id}/firewall/access_rules/rules")
+    @GET("accounts/{account_id}/firewall/access_rules/rules")
     suspend fun listAccessRules(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("zone_id") zoneId: String,
+        @Path("account_id") accountId: String,
         @Query("per_page") perPage: Int = 100
     ): Response<CloudFlareResponse<List<FirewallAccessRule>>>
 
-    @POST("zones/{zone_id}/firewall/access_rules/rules")
+    @POST("accounts/{account_id}/firewall/access_rules/rules")
     suspend fun createAccessRule(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("zone_id") zoneId: String,
+        @Path("account_id") accountId: String,
         @Body rule: AccessRuleCreate
     ): Response<CloudFlareResponse<FirewallAccessRule>>
 
-    @PATCH("zones/{zone_id}/firewall/access_rules/rules/{rule_id}")
+    @PATCH("accounts/{account_id}/firewall/access_rules/rules/{rule_id}")
     suspend fun updateAccessRule(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("zone_id") zoneId: String,
+        @Path("account_id") accountId: String,
         @Path("rule_id") ruleId: String,
         @Body update: AccessRuleUpdate
     ): Response<CloudFlareResponse<FirewallAccessRule>>
 
-    @DELETE("zones/{zone_id}/firewall/access_rules/rules/{rule_id}")
+    @DELETE("accounts/{account_id}/firewall/access_rules/rules/{rule_id}")
     suspend fun deleteAccessRule(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("zone_id") zoneId: String,
+        @Path("account_id") accountId: String,
         @Path("rule_id") ruleId: String
     ): Response<CloudFlareResponse<Unit>>
 
