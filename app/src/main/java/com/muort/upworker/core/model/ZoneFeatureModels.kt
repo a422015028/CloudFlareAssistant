@@ -353,19 +353,3 @@ data class SnippetRule(
     @SerializedName("description") val description: String? = null,
     @SerializedName("enabled") val enabled: Boolean? = null,
 )
-
-// ==================== Zone Analytics ====================
-
-// 复用已有的 AnalyticsGraphQLRequest / AnalyticsGraphQLResponse / ZoneAnalytics / HttpRequestsGroup
-// （位于 Models.kt）。流量分析页通过 queryAnalytics GraphQL 接口拉取 httpRequests1dGroups。
-
-/** 归一化的流量数据点（UI 渲染用）。 */
-data class TrafficDataPoint(
-    val date: String,
-    val requests: Long,
-    val bytes: Long,
-    val threats: Long,
-    val pageViews: Long,
-    val uniques: Long,
-    val cachedRequests: Long,
-)

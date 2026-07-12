@@ -128,7 +128,6 @@
         tools:layout="@layout/fragment_domain_detail">
 
         <action android:id="@+id/action_domainDetail_to_dns"           app:destination="@id/dnsFragment" />
-        <action android:id="@+id/action_domainDetail_to_analytics"     app:destination="@id/analyticsFragment" />
         <action android:id="@+id/action_domainDetail_to_waf"           app:destination="@id/wafFragment" />
         <action android:id="@+id/action_domainDetail_to_cache"          app:destination="@id/cacheRulesFragment" />
         <action android:id="@+id/action_domainDetail_to_rateLimit"     app:destination="@id/rateLimitFragment" />
@@ -144,12 +143,6 @@
     </fragment>
 
     <!-- ============ 域名级功能页 ============ -->
-    <fragment
-        android:id="@+id/analyticsFragment"
-        android:name="com.muort.upworker.feature.zone.AnalyticsFragment"
-        android:label="流量分析"
-        tools:layout="@layout/fragment_zone_feature" />
-
     <fragment
         android:id="@+id/wafFragment"
         android:name="com.muort.upworker.feature.zone.WafFragment"

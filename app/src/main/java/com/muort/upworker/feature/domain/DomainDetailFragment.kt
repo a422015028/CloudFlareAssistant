@@ -65,7 +65,6 @@ class DomainDetailFragment : Fragment() {
     private fun setupTools() {
         val tools = listOf(
             ZoneToolItem("DNS记录", android.R.drawable.ic_menu_edit, R.id.action_domainDetail_to_dns),
-            ZoneToolItem("流量分析", android.R.drawable.ic_menu_sort_by_size, R.id.action_domainDetail_to_analytics),
             ZoneToolItem("WAF规则", android.R.drawable.ic_menu_search, R.id.action_domainDetail_to_waf),
             ZoneToolItem("缓存规则", android.R.drawable.ic_menu_save, R.id.action_domainDetail_to_cache),
             ZoneToolItem("速率限制", android.R.drawable.ic_menu_recent_history, R.id.action_domainDetail_to_rateLimit),
