@@ -38,6 +38,9 @@ jobs:
       run: |
         echo $KEYSTORE_BASE64 | base64 -d > $GITHUB_WORKSPACE/app/keystore.jks
     
+    - name: Clean Build Cache
+      run: ./gradlew clean
+
     - name: Build Release APK
       env:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
