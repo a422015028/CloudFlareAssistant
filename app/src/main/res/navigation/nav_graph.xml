@@ -200,7 +200,7 @@
     <fragment
         android:id="@+id/performanceFragment"
         android:name="com.muort.upworker.feature.zone.PerformanceFragment"
-        android:label="性能已缓存"
+        android:label="性能与缓存"
         tools:layout="@layout/fragment_zone_feature" />
 
     <fragment

@@ -74,7 +74,7 @@ class DomainDetailFragment : Fragment() {
             ZoneToolItem("SSL证书", android.R.drawable.ic_menu_manage, R.id.action_domainDetail_to_sslCerts),
             ZoneToolItem("转换规则", android.R.drawable.ic_menu_rotate, R.id.action_domainDetail_to_transform),
             ZoneToolItem("IP访问规则", android.R.drawable.ic_menu_view, R.id.action_domainDetail_to_accessRules),
-            ZoneToolItem("性能已缓存", android.R.drawable.ic_menu_compass, R.id.action_domainDetail_to_performance),
+            ZoneToolItem("性能与缓存", android.R.drawable.ic_menu_compass, R.id.action_domainDetail_to_performance),
             ZoneToolItem("代码片段", android.R.drawable.ic_menu_agenda, R.id.action_domainDetail_to_snippets),
             ZoneToolItem("设置", android.R.drawable.ic_menu_preferences, R.id.action_domainDetail_to_zoneSettings),
         )
