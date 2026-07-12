@@ -1743,6 +1743,71 @@ interface CloudFlareApi {
 
     // ==================== IP 访问规则（firewall/access_rules/rules） ====================
 
+    // ---- Transform Rules 专用（返回 TransformRuleset 以保留 action_parameters） ----
+
+    @GET("zones/{zone_id}/rulesets/phases/{phase}/entrypoint")
+    suspend fun getTransformRulesetEntrypoint(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("phase") phase: String
+    ): Response<CloudFlareResponse<TransformRuleset>>
+
+    @PUT("zones/{zone_id}/rulesets/phases/{phase}/entrypoint")
+    suspend fun createTransformEntrypoint(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("phase") phase: String,
+        @Body body: TransformEntrypointUpdate
+    ): Response<CloudFlareResponse<TransformRuleset>>
+
+    @POST("zones/{zone_id}/rulesets/{ruleset_id}/rules")
+    suspend fun addTransformRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Body body: TransformRuleCreate
+    ): Response<CloudFlareResponse<TransformRuleset>>
+
+    @PATCH("zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}")
+    suspend fun updateTransformRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Path("rule_id") ruleId: String,
+        @Body body: TransformRuleCreate
+    ): Response<CloudFlareResponse<TransformRuleset>>
+
+    @PATCH("zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}")
+    suspend fun toggleTransformRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Path("rule_id") ruleId: String,
+        @Body body: TransformRuleToggle
+    ): Response<CloudFlareResponse<TransformRuleset>>
+
+    @DELETE("zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}")
+    suspend fun deleteTransformRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("ruleset_id") rulesetId: String,
+        @Path("rule_id") ruleId: String
+    ): Response<CloudFlareResponse<Unit>>
+
+    // ==================== IP 访问规则（firewall/access_rules/rules） ====================
+
     @GET("zones/{zone_id}/firewall/access_rules/rules")
     suspend fun listAccessRules(
         @Header("Authorization") token: String?,

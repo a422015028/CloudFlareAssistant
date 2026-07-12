@@ -72,7 +72,7 @@ class DomainDetailFragment : Fragment() {
             ZoneToolItem("负载均衡", android.R.drawable.ic_menu_share, R.id.action_domainDetail_to_loadBalancer),
             ZoneToolItem("SSL/TLS", android.R.drawable.ic_lock_lock, R.id.action_domainDetail_to_ssl),
             ZoneToolItem("SSL证书", android.R.drawable.ic_menu_manage, R.id.action_domainDetail_to_sslCerts),
-            ZoneToolItem("TransformRules", android.R.drawable.ic_menu_rotate, R.id.action_domainDetail_to_transform),
+            ZoneToolItem("转换规则", android.R.drawable.ic_menu_rotate, R.id.action_domainDetail_to_transform),
             ZoneToolItem("IP访问规则", android.R.drawable.ic_menu_view, R.id.action_domainDetail_to_accessRules),
             ZoneToolItem("性能已缓存", android.R.drawable.ic_menu_compass, R.id.action_domainDetail_to_performance),
             ZoneToolItem("Snippets", android.R.drawable.ic_menu_agenda, R.id.action_domainDetail_to_snippets),

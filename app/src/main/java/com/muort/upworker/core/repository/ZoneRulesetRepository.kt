@@ -367,4 +367,103 @@ class ZoneRulesetRepository @Inject constructor(
             }
         }
     }
+
+    // ==================== Transform Rules ====================
+
+    suspend fun getTransformRuleset(
+        account: Account, zoneId: String, phase: String,
+    ): Resource<TransformRuleset?> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.getTransformRulesetEntrypoint(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, phase,
+            )
+            if (resp.isSuccessful && resp.body()?.success == true) {
+                Resource.Success(resp.body()!!.result)
+            } else if (resp.code() == 404 ||
+                resp.body()?.errors?.any { it.message.contains("could not find entrypoint", ignoreCase = true) } == true) {
+                Resource.Success(null)
+            } else {
+                Resource.Error(resp.body()?.errors?.firstOrNull()?.message
+                    ?: "HTTP ${resp.code()}: ${resp.message()}")
+            }
+        }
+    }
+
+    suspend fun createTransformEntrypoint(
+        account: Account, zoneId: String, phase: String, rule: TransformRuleCreate,
+    ): Resource<TransformRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.createTransformEntrypoint(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, phase, TransformEntrypointUpdate(listOf(rule)),
+            )
+            resp.toResource("创建转换规则失败")
+        }
+    }
+
+    suspend fun addTransformRule(
+        account: Account, zoneId: String, rulesetId: String, rule: TransformRuleCreate,
+    ): Resource<TransformRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.addTransformRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, rule,
+            )
+            resp.toResource("添加转换规则失败")
+        }
+    }
+
+    suspend fun updateTransformRule(
+        account: Account, zoneId: String, rulesetId: String, ruleId: String, rule: TransformRuleCreate,
+    ): Resource<TransformRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.updateTransformRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, ruleId, rule,
+            )
+            resp.toResource("更新转换规则失败")
+        }
+    }
+
+    suspend fun toggleTransformRule(
+        account: Account, zoneId: String, rulesetId: String, ruleId: String, enabled: Boolean,
+    ): Resource<TransformRuleset> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.toggleTransformRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, ruleId, TransformRuleToggle(enabled),
+            )
+            resp.toResource("切换转换规则失败")
+        }
+    }
+
+    suspend fun deleteTransformRule(
+        account: Account, zoneId: String, rulesetId: String, ruleId: String,
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val resp = api.deleteTransformRule(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                zoneId, rulesetId, ruleId,
+            )
+            if (resp.isSuccessful && resp.body()?.success == true) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error(resp.body()?.errors?.firstOrNull()?.message
+                    ?: "HTTP ${resp.code()}: ${resp.message()}")
+            }
+        }
+    }
 }
