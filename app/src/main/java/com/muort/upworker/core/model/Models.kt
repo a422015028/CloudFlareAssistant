@@ -341,10 +341,11 @@ data class DnsRecord(
     @SerializedName("id") val id: String,
     @SerializedName("type") val type: String,
     @SerializedName("name") val name: String,
-    @SerializedName("content") val content: String,
+    @SerializedName("content") val content: String? = null,
     @SerializedName("proxied") val proxied: Boolean = false,
     @SerializedName("ttl") val ttl: Int = 1,
     @SerializedName("priority") val priority: Int? = null,
+    @SerializedName("data") val data: Map<String, Any?>? = null,
     @SerializedName("created_on") val createdOn: String? = null,
     @SerializedName("modified_on") val modifiedOn: String? = null
 )
@@ -352,10 +353,11 @@ data class DnsRecord(
 data class DnsRecordRequest(
     @SerializedName("type") val type: String,
     @SerializedName("name") val name: String,
-    @SerializedName("content") val content: String,
+    @SerializedName("content") val content: String? = null,
     @SerializedName("proxied") val proxied: Boolean = false,
     @SerializedName("ttl") val ttl: Int = 1,
-    @SerializedName("priority") val priority: Int? = null
+    @SerializedName("priority") val priority: Int? = null,
+    @SerializedName("data") val data: Map<String, Any?>? = null
 )
 
 // ==================== KV ====================

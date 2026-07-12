@@ -61,16 +61,20 @@ class DnsViewModel @Inject constructor(
         account: Account,
         type: String,
         name: String,
-        content: String,
+        content: String? = null,
         ttl: Int = 1,
-        proxied: Boolean = true
+        proxied: Boolean = true,
+        priority: Int? = null,
+        data: Map<String, Any?>? = null
     ) {
         val record = DnsRecordRequest(
             type = type,
             name = name,
             content = content,
             ttl = ttl,
-            proxied = proxied
+            proxied = proxied,
+            priority = priority,
+            data = data
         )
         createDnsRecord(account, record)
     }
@@ -99,16 +103,20 @@ class DnsViewModel @Inject constructor(
         recordId: String,
         type: String,
         name: String,
-        content: String,
+        content: String? = null,
         ttl: Int = 1,
-        proxied: Boolean = true
+        proxied: Boolean = true,
+        priority: Int? = null,
+        data: Map<String, Any?>? = null
     ) {
         val record = DnsRecordRequest(
             type = type,
             name = name,
             content = content,
             ttl = ttl,
-            proxied = proxied
+            proxied = proxied,
+            priority = priority,
+            data = data
         )
         updateDnsRecord(account, recordId, record)
     }

@@ -62,9 +62,7 @@
         <item>NS</item>
         <item>SRV</item>
         <item>LOC</item>
-        <item>SPF</item>
         <item>CERT</item>
-        <item>DNSKEY</item>
         <item>DS</item>
         <item>NAPTR</item>
         <item>SMIMEA</item>
@@ -86,9 +84,7 @@
         <item>1</item> <!-- NS -->
         <item>1</item> <!-- SRV -->
         <item>1</item> <!-- LOC -->
-        <item>1</item> <!-- SPF -->
         <item>1</item> <!-- CERT -->
-        <item>1</item> <!-- DNSKEY -->
         <item>1</item> <!-- DS -->
         <item>1</item> <!-- NAPTR -->
         <item>1</item> <!-- SMIMEA -->
