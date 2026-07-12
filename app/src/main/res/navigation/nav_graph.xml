@@ -206,7 +206,7 @@
     <fragment
         android:id="@+id/snippetsFragment"
         android:name="com.muort.upworker.feature.zone.SnippetsFragment"
-        android:label="Snippets"
+        android:label="代码片段"
         tools:layout="@layout/fragment_zone_feature" />
 
     <fragment
