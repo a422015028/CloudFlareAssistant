@@ -665,6 +665,36 @@ data class PagesDomainRequest(
     @SerializedName("name") val name: String
 )
 
+// ==================== Pages Functions ====================
+
+/**
+ * Pages Functions 路由配置（functions-filepath-routing-config.json）
+ * 用于描述 /functions 目录下的文件对应的路由
+ */
+data class PagesFunctionsRoutingConfig(
+    @SerializedName("baseURL") val baseURL: String = "/",
+    @SerializedName("routes") val routes: List<PagesFunctionRoute>
+)
+
+data class PagesFunctionRoute(
+    @SerializedName("routePath") val routePath: String,
+    @SerializedName("mountPath") val mountPath: String = "/",
+    @SerializedName("method") val method: String = "",
+    @SerializedName("module") val module: List<String>? = null,
+    @SerializedName("middleware") val middleware: List<String>? = null
+)
+
+/**
+ * _routes.json 格式
+ * 决定哪些路由触发 Functions，哪些直接返回静态资源
+ */
+data class PagesRoutesConfig(
+    @SerializedName("version") val version: Int = 1,
+    @SerializedName("description") val description: String? = null,
+    @SerializedName("include") val include: List<String>,
+    @SerializedName("exclude") val exclude: List<String> = emptyList()
+)
+
 // ==================== R2 ====================
 
 data class R2Bucket(

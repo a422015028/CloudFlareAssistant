@@ -42,6 +42,22 @@
                     android:textSize="12sp"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
+                <!-- Functions 标识 -->
+                <TextView
+                    android:id="@+id/functionsBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Functions"
+                    android:textSize="10sp"
+                    android:textColor="?attr/colorPrimary"
+                    android:background="@drawable/bg_chip"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:paddingTop="1dp"
+                    android:paddingBottom="1dp"
+                    android:layout_marginStart="6dp"
+                    android:visibility="gone" />
+
                 <TextView
                     android:id="@+id/deploymentTimeText"
                     android:layout_width="wrap_content"

@@ -377,9 +377,16 @@ class PagesRepository @Inject constructor(
                 val allFiles = mutableListOf<File>()
                 val manifestMap = mutableMapOf<String, String>()
                 var workerJsFile: File? = null
+                var hasFunctionsDir = false
 
                 fun collectFiles(currentFile: File) {
                     if (currentFile.isDirectory) {
+                        // 检测 functions 目录
+                        if (currentFile.name == "functions" && currentFile.parentFile == baseDir) {
+                            hasFunctionsDir = true
+                            Timber.d("collectFiles: 检测到 functions 目录，跳过静态文件收集")
+                            return // 不收集 functions 目录下的文件作为静态资源
+                        }
                         currentFile.listFiles()?.forEach { collectFiles(it) }
                     } else {
                         val name = currentFile.name
@@ -399,7 +406,7 @@ class PagesRepository @Inject constructor(
                 }
                 baseDir.listFiles()?.forEach { collectFiles(it) }
 
-                if (allFiles.isEmpty() && workerJsFile == null) {
+                if (allFiles.isEmpty() && workerJsFile == null && !hasFunctionsDir) {
                     return@safeApiCall Resource.Error("压缩包内无有效文件")
                 }
 
@@ -481,7 +488,8 @@ class PagesRepository @Inject constructor(
                 }
                 val manifestBody = manifestJson.toRequestBody("application/json".toMediaType())
 
-                // 最终盖章：通知部署完成（根据是否有 _worker.js 选择不同接口）
+                // 最终盖章：通知部署完成（根据部署类型选择不同接口）
+                // 优先级: _worker.js (高级模式) > functions/ (标准模式) > 纯静态
                 val response = if (workerJsFile != null) {
                     val workerFileSize = workerJsFile!!.length()
                     Timber.d("workerJsFile 路径: ${workerJsFile!!.absolutePath}")
@@ -503,6 +511,15 @@ class PagesRepository @Inject constructor(
                         projectName = projectName,
                         manifest = manifestBody,
                         workerBundle = workerBundlePart
+                    )
+                } else if (hasFunctionsDir) {
+                    // Pages Functions 标准模式：检测到 functions/ 目录
+                    Timber.d("检测到 functions 目录，使用 Pages Functions 标准模式部署")
+                    return@safeApiCall deployWithFunctions(
+                        account = account,
+                        projectName = projectName,
+                        baseDir = baseDir,
+                        manifestMap = manifestMap
                     )
                 } else {
                     api.createPagesDeploymentManifestOnly(
@@ -698,6 +715,587 @@ class PagesRepository @Inject constructor(
         val bundleBytes = baos.toByteArray()
         Timber.d("buildWorkerBundle: bundle 总大小 ${bundleBytes.size} 字节")
         return bundleBytes.toRequestBody("multipart/form-data; boundary=$boundary".toMediaType())
+    }
+
+    // ==================== Pages Functions (标准模式) ====================
+
+    /**
+     * 从解压目录中收集 Functions 文件
+     * @return Pair<Functions 文件列表, 路由配置列表> 或 null（如果没有 functions 目录）
+     */
+    private data class FunctionFile(
+        val relativePath: String,  // 相对 functions 目录的路径，如 "hello.js", "api/time.js"
+        val routePath: String,     // 路由路径，如 "/hello", "/api/time"
+        val method: String,        // HTTP 方法，空字符串表示所有方法
+        val content: String,       // 文件内容
+        val moduleExport: String,  // 导出的函数名，如 "onRequest" 或 "onRequestGet"
+        val isMiddleware: Boolean = false,  // 是否是中间件
+        val mountPath: String = "/"         // 中间件的挂载路径
+    )
+
+    /**
+     * 扫描 functions 目录，收集所有 Function 文件并生成路由配置
+     */
+    private fun collectFunctions(baseDir: File): List<FunctionFile>? {
+        val functionsDir = File(baseDir, "functions")
+        if (!functionsDir.exists() || !functionsDir.isDirectory) {
+            return null
+        }
+
+        val functionFiles = mutableListOf<FunctionFile>()
+
+        fun scanDirectory(dir: File, relativePrefix: String = "") {
+            dir.listFiles()?.forEach { file ->
+                if (file.isDirectory) {
+                    scanDirectory(file, "$relativePrefix${file.name}/")
+                } else if (file.extension == "js" || file.extension == "ts") {
+                    val relativePath = relativePrefix + file.name
+                    val content = file.readText(Charsets.UTF_8)
+
+                    // 检测是否是中间件文件
+                    val isMiddleware = file.nameWithoutExtension == "_middleware"
+                    val mountPath = if (relativePrefix.isEmpty()) {
+                        "/"
+                    } else {
+                        "/" + relativePrefix.removeSuffix("/")
+                    }
+
+                    if (isMiddleware) {
+                        // 中间件：导出 onRequest，作为中间件处理
+                        functionFiles.add(
+                            FunctionFile(
+                                relativePath = relativePath,
+                                routePath = "/",
+                                method = "",
+                                content = content,
+                                moduleExport = "onRequest",
+                                isMiddleware = true,
+                                mountPath = mountPath
+                            )
+                        )
+                        Timber.d("collectFunctions: 找到中间件 $relativePath → 挂载: $mountPath")
+                    } else {
+                        // 普通路由：检测所有导出的处理函数
+                        val routePath = convertFunctionPathToRoute(relativePath)
+                        val exports = detectExportFunctions(content)
+                        for (exportName in exports) {
+                            val method = extractMethodFromExport(exportName)
+                            functionFiles.add(
+                                FunctionFile(
+                                    relativePath = relativePath,
+                                    routePath = routePath,
+                                    method = method,
+                                    content = content,
+                                    moduleExport = exportName,
+                                    isMiddleware = false,
+                                    mountPath = mountPath
+                                )
+                            )
+                            Timber.d("collectFunctions: 找到 Function $relativePath → 路由: $routePath, 方法: ${method.ifEmpty { "ALL" }}, 导出: $exportName")
+                        }
+                    }
+                }
+            }
+        }
+
+        scanDirectory(functionsDir)
+        return functionFiles.ifEmpty { null }
+    }
+
+    /**
+     * 将 Functions 文件路径转换为路由路径
+     * 例如:
+     *   hello.js → /hello
+     *   api/time.js → /api/time
+     *   api/user/[id].js → /api/user/:id
+     *   index.js → /
+     *   api/index.js → /api
+     */
+    private fun convertFunctionPathToRoute(relativePath: String): String {
+        var path = relativePath.removeSuffix(".js").removeSuffix(".ts")
+
+        // 处理 index 文件
+        if (path.endsWith("/index")) {
+            path = path.removeSuffix("/index")
+        } else if (path == "index") {
+            return "/"
+        }
+
+        // 处理动态路由参数: [param] → :param, [[param]] → :param*
+        path = path.replace("\\[\\[([^]]+)]\\]".toRegex(), ":$1*")
+        path = path.replace("\\[([^]]+)]".toRegex(), ":$1")
+
+        return "/$path"
+    }
+
+    /**
+     * 检测文件中所有导出的处理函数名
+     * 返回导出函数名列表，如 ["onRequestGet", "onRequestPost", "onRequestDelete"]
+     * 如果没有方法特定的导出，但有 onRequest，则返回 ["onRequest"]
+     * 如果什么都没找到，默认返回 ["onRequest"]
+     */
+    private fun detectExportFunctions(content: String): List<String> {
+        val methodSpecificExports = listOf(
+            "onRequestGet", "onRequestPost", "onRequestPut", "onRequestPatch",
+            "onRequestDelete", "onRequestOptions", "onRequestHead"
+        )
+
+        val found = methodSpecificExports.filter { export ->
+            content.contains("export.*\\b$export\\b".toRegex()) ||
+            content.contains("export.*=.*$export".toRegex())
+        }
+
+        if (found.isNotEmpty()) return found
+
+        if (content.contains("export.*\\bonRequest\\b".toRegex()) ||
+            content.contains("export.*=.*onRequest".toRegex())) {
+            return listOf("onRequest")
+        }
+
+        return listOf("onRequest") // 默认
+    }
+
+    /**
+     * 从导出函数名中提取 HTTP 方法
+     * onRequestGet → GET, onRequestPost → POST, onRequest → "" (所有方法)
+     */
+    private fun extractMethodFromExport(exportName: String): String {
+        return when {
+            exportName == "onRequest" -> ""
+            exportName.startsWith("onRequest") -> exportName.removePrefix("onRequest").uppercase()
+            else -> ""
+        }
+    }
+
+    /**
+     * 构建 Pages Functions 的 Worker Bundle
+     * 生成一个统一的入口文件，根据路由分发到对应的处理函数
+     * 
+     * 注意：同一个 relativePath 的多个导出只上传一次模块文件，
+     * 但入口脚本中通过不同的 exportName 引用同一个模块
+     */
+    private fun buildFunctionsBundle(functionFiles: List<FunctionFile>): RequestBody {
+        val boundary = "----CloudFlareFunctionsBundle${System.currentTimeMillis()}----"
+        val mainModuleName = "_worker.js"
+
+        // 按 relativePath 去重，建立模块映射
+        val moduleMap = mutableMapOf<String, Int>()
+        val uniqueModules = mutableListOf<FunctionFile>()
+        for (func in functionFiles) {
+            if (!moduleMap.containsKey(func.relativePath)) {
+                val index = uniqueModules.size
+                moduleMap[func.relativePath] = index
+                uniqueModules.add(func)
+            }
+        }
+
+        // 生成入口 Worker 代码（路由分发器）
+        val entryScript = buildFunctionsEntryScript(functionFiles, moduleMap)
+        Timber.d("buildFunctionsBundle: 入口脚本大小 ${entryScript.length} 字符, 共 ${functionFiles.size} 个路由, ${uniqueModules.size} 个模块")
+
+        val baos = ByteArrayOutputStream()
+
+        // metadata part
+        val metadataJson = """{"main_module":"$mainModuleName"}"""
+        baos.write("--$boundary\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("Content-Disposition: form-data; name=\"metadata\"\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("Content-Type: application/json\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("\r\n".toByteArray(Charsets.UTF_8))
+        baos.write(metadataJson.toByteArray(Charsets.UTF_8))
+        baos.write("\r\n".toByteArray(Charsets.UTF_8))
+
+        // 主模块 (入口分发器)
+        baos.write("--$boundary\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("Content-Disposition: form-data; name=\"$mainModuleName\"; filename=\"$mainModuleName\"\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("Content-Type: application/javascript+module\r\n".toByteArray(Charsets.UTF_8))
+        baos.write("\r\n".toByteArray(Charsets.UTF_8))
+        baos.write(entryScript.toByteArray(Charsets.UTF_8))
+        baos.write("\r\n".toByteArray(Charsets.UTF_8))
+
+        // 各个 Function 模块文件（去重后）
+        uniqueModules.forEachIndexed { index, func ->
+            val moduleName = "func_$index.js"
+            baos.write("--$boundary\r\n".toByteArray(Charsets.UTF_8))
+            baos.write("Content-Disposition: form-data; name=\"$moduleName\"; filename=\"$moduleName\"\r\n".toByteArray(Charsets.UTF_8))
+            baos.write("Content-Type: application/javascript+module\r\n".toByteArray(Charsets.UTF_8))
+            baos.write("\r\n".toByteArray(Charsets.UTF_8))
+            baos.write(func.content.toByteArray(Charsets.UTF_8))
+            baos.write("\r\n".toByteArray(Charsets.UTF_8))
+        }
+
+        // closing boundary
+        baos.write("--$boundary--\r\n".toByteArray(Charsets.UTF_8))
+
+        val bundleBytes = baos.toByteArray()
+        Timber.d("buildFunctionsBundle: bundle 总大小 ${bundleBytes.size} 字节")
+        return bundleBytes.toRequestBody("multipart/form-data; boundary=$boundary".toMediaType())
+    }
+
+    /**
+     * 构建 Functions 入口脚本（路由分发器）
+     * 
+     * 支持：
+     * 1. 文件路由（含动态参数）
+     * 2. 方法级别导出（onRequestGet/Post/etc）
+     * 3. 中间件（_middleware.js，通过 context.next() 链式调用）
+     * 4. 静态资源回退（未匹配路由时通过 env.ASSETS.fetch 获取静态文件）
+     */
+    private fun buildFunctionsEntryScript(functionFiles: List<FunctionFile>, moduleMap: Map<String, Int>): String {
+        val sb = StringBuilder()
+
+        // 分离中间件和普通路由
+        val middlewares = functionFiles.filter { it.isMiddleware }.sortedBy { it.mountPath.length }
+        val routes = functionFiles.filter { !it.isMiddleware }
+
+        sb.appendLine("// ========================================")
+        sb.appendLine("// Pages Functions 自动生成的入口分发器")
+        sb.appendLine("// 由 upworker 生成")
+        sb.appendLine("// 中间件: ${middlewares.size}, 路由: ${routes.size}")
+        sb.appendLine("// ========================================")
+        sb.appendLine()
+
+        // 导入所有唯一模块（按 moduleMap 的索引）
+        val maxModuleIndex = (moduleMap.values.maxOrNull() ?: -1)
+        for (i in 0..maxModuleIndex) {
+            sb.appendLine("import * as module_$i from './func_$i.js';")
+        }
+        sb.appendLine()
+
+        // 在 Kotlin 层面预构建每个路由的正则表达式和参数名
+        data class RouteInfo(
+            val regexStr: String,
+            val paramNames: List<String>,
+            val method: String,
+            val moduleIndex: Int,
+            val exportName: String
+        )
+
+        val routeInfos = routes.map { func ->
+            val (regexStr, paramNames) = buildRouteRegex(func.routePath)
+            val moduleIndex = moduleMap[func.relativePath] ?: 0
+            RouteInfo(regexStr, paramNames, func.method, moduleIndex, func.moduleExport)
+        }
+
+        // 中间件列表
+        if (middlewares.isNotEmpty()) {
+            sb.appendLine("// 中间件列表（按挂载路径深度排序）")
+            sb.appendLine("const middlewares = [")
+            middlewares.forEach { mw ->
+                val moduleIndex = moduleMap[mw.relativePath] ?: 0
+                sb.appendLine("  { module: module_$moduleIndex, exportName: \"${mw.moduleExport}\", mountPath: \"${mw.mountPath}\" },")
+            }
+            sb.appendLine("];")
+            sb.appendLine()
+        } else {
+            sb.appendLine("const middlewares = [];")
+            sb.appendLine()
+        }
+
+        // 路由表
+        sb.appendLine("// 路由表（正则表达式预构建）")
+        sb.appendLine("const routes = [")
+        routeInfos.forEach { info ->
+            val paramNamesJson = info.paramNames.joinToString(",", "[", "]") { "\"$it\"" }
+            sb.appendLine("  { regex: new RegExp(\"${info.regexStr}\"), paramNames: $paramNamesJson, method: \"${info.method}\", module: module_${info.moduleIndex}, exportName: \"${info.exportName}\" },")
+        }
+        sb.appendLine("];")
+        sb.appendLine()
+
+        // 路由匹配函数
+        sb.appendLine("// 路由匹配")
+        sb.appendLine("function matchRoute(path, method) {")
+        sb.appendLine("  for (const route of routes) {")
+        sb.appendLine("    if (route.method && route.method !== method) continue;")
+        sb.appendLine("    const m = path.match(route.regex);")
+        sb.appendLine("    if (!m) continue;")
+        sb.appendLine("    const params = {};")
+        sb.appendLine("    for (let i = 0; i < route.paramNames.length; i++) {")
+        sb.appendLine("      params[route.paramNames[i]] = m[i + 1];")
+        sb.appendLine("    }")
+        sb.appendLine("    return { handler: route.module[route.exportName], params: params };")
+        sb.appendLine("  }")
+        sb.appendLine("  return null;")
+        sb.appendLine("}")
+        sb.appendLine()
+
+        // 中间件链执行函数
+        sb.appendLine("// 执行中间件链")
+        sb.appendLine("async function runMiddlewareChain(context, mwList, mwIndex, finalHandler) {")
+        sb.appendLine("  if (mwIndex >= mwList.length) {")
+        sb.appendLine("    return finalHandler(context);")
+        sb.appendLine("  }")
+        sb.appendLine("  const mw = mwList[mwIndex];")
+        sb.appendLine("  const nextContext = {")
+        sb.appendLine("    ...context,")
+        sb.appendLine("    next: async () => {")
+        sb.appendLine("      return runMiddlewareChain(context, mwList, mwIndex + 1, finalHandler);")
+        sb.appendLine("    }")
+        sb.appendLine("  };")
+        sb.appendLine("  const handler = mw.module[mw.exportName];")
+        sb.appendLine("  if (typeof handler === 'function') {")
+        sb.appendLine("    return handler(nextContext);")
+        sb.appendLine("  }")
+        sb.appendLine("  // 中间件没有处理函数，跳到下一个")
+        sb.appendLine("  return runMiddlewareChain(context, mwList, mwIndex + 1, finalHandler);")
+        sb.appendLine("}")
+        sb.appendLine()
+
+        // 静态资源回退函数
+        sb.appendLine("// 静态资源回退")
+        sb.appendLine("async function fetchStaticAsset(request, env) {")
+        sb.appendLine("  if (env && env.ASSETS) {")
+        sb.appendLine("    try {")
+        sb.appendLine("      return await env.ASSETS.fetch(request);")
+        sb.appendLine("    } catch (e) {")
+        sb.appendLine("      // ASSETS.fetch 失败，返回 404")
+        sb.appendLine("    }")
+        sb.appendLine("  }")
+        sb.appendLine("  return new Response('Not Found', { status: 404 });")
+        sb.appendLine("}")
+        sb.appendLine()
+
+        // 主处理函数 - Pages Functions 风格 (onRequest)
+        sb.appendLine("// Pages Functions 入口")
+        sb.appendLine("export async function onRequest(context) {")
+        sb.appendLine("  const { request, env } = context;")
+        sb.appendLine("  const url = new URL(request.url);")
+        sb.appendLine("  const path = url.pathname;")
+        sb.appendLine("  const method = request.method;")
+        sb.appendLine()
+        sb.appendLine("  // 匹配路由")
+        sb.appendLine("  const matched = matchRoute(path, method);")
+        sb.appendLine()
+        sb.appendLine("  // 最终处理函数：有路由匹配则调用，否则回退到静态资源")
+        sb.appendLine("  const finalHandler = (ctx) => {")
+        sb.appendLine("    if (matched && typeof matched.handler === 'function') {")
+        sb.appendLine("      const newCtx = { ...ctx, params: matched.params };")
+        sb.appendLine("      return matched.handler(newCtx);")
+        sb.appendLine("    }")
+        sb.appendLine("    // 回退到静态资源")
+        sb.appendLine("    return fetchStaticAsset(ctx.request, ctx.env);")
+        sb.appendLine("  };")
+        sb.appendLine()
+        sb.appendLine("  // 查找适用的中间件（挂载路径匹配当前请求路径）")
+        sb.appendLine("  const applicableMW = middlewares.filter(mw => {")
+        sb.appendLine("    return path === mw.mountPath || path.startsWith(mw.mountPath + '/');")
+        sb.appendLine("  });")
+        sb.appendLine()
+        sb.appendLine("  if (applicableMW.length > 0) {")
+        sb.appendLine("    return runMiddlewareChain(context, applicableMW, 0, finalHandler);")
+        sb.appendLine("  }")
+        sb.appendLine()
+        sb.appendLine("  return finalHandler(context);")
+        sb.appendLine("}")
+        sb.appendLine()
+
+        // Worker 风格的默认导出
+        sb.appendLine("// Worker 风格默认导出")
+        sb.appendLine("export default {")
+        sb.appendLine("  async fetch(request, env, ctx) {")
+        sb.appendLine("    const context = { request, env, ...ctx, params: {}, next: null };")
+        sb.appendLine("    return onRequest(context);")
+        sb.appendLine("  }")
+        sb.appendLine("};")
+        sb.appendLine()
+
+        return sb.toString()
+    }
+
+    /**
+     * 在 Kotlin 层面构建路由的正则表达式字符串
+     * 返回 Pair<JS 正则字符串, 参数名列表>
+     */
+    private fun buildRouteRegex(pattern: String): Pair<String, List<String>> {
+        val paramNames = mutableListOf<String>()
+        val regexSb = StringBuilder()
+        regexSb.append("^")
+
+        var i = 0
+        while (i < pattern.length) {
+            when {
+                pattern[i] == ':' -> {
+                    // 解析参数名
+                    var j = i + 1
+                    val paramNameSb = StringBuilder()
+                    while (j < pattern.length && (pattern[j].isLetterOrDigit() || pattern[j] == '_')) {
+                        paramNameSb.append(pattern[j])
+                        j++
+                    }
+                    val paramName = paramNameSb.toString()
+                    paramNames.add(paramName)
+
+                    // 检查是否是 catch-all (*)
+                    val isWildcard = j < pattern.length && pattern[j] == '*'
+                    if (isWildcard) j++
+
+                    // 添加正则捕获组
+                    if (isWildcard) {
+                        regexSb.append("(.*)")
+                    } else {
+                        regexSb.append("([^/]+)")
+                    }
+
+                    i = j
+                }
+                pattern[i] == '/' -> {
+                    regexSb.append("\\/")
+                    i++
+                }
+                // 转义正则特殊字符
+                ".*+?^\$()|[]\\".contains(pattern[i]) -> {
+                    regexSb.append("\\").append(pattern[i])
+                    i++
+                }
+                else -> {
+                    regexSb.append(pattern[i])
+                    i++
+                }
+            }
+        }
+
+        regexSb.append("\$")
+        return Pair(regexSb.toString(), paramNames)
+    }
+
+    /**
+     * 生成 functions-filepath-routing-config.json 内容
+     * 中间件以 middleware 字段表示，普通路由以 module 字段表示
+     */
+    private fun buildFunctionsRoutingConfig(functionFiles: List<FunctionFile>): String {
+        val routes = functionFiles.map { func ->
+            if (func.isMiddleware) {
+                """
+                {
+                  "mountPath": "${func.mountPath}",
+                  "middleware": ["${func.relativePath.replace('\\', '/')}:${func.moduleExport}"]
+                }
+                """.trimIndent()
+            } else {
+                """
+                {
+                  "routePath": "${func.routePath}",
+                  "mountPath": "/",
+                  "method": "${func.method}",
+                  "module": ["${func.relativePath.replace('\\', '/')}:${func.moduleExport}"]
+                }
+                """.trimIndent()
+            }
+        }
+
+        return """
+        {
+          "baseURL": "/",
+          "routes": [${routes.joinToString(",")}]
+        }
+        """.trimIndent()
+    }
+
+    /**
+     * 生成 _routes.json 内容
+     * 将所有 Function 路由和中间件挂载路径转换为 include 模式
+     */
+    private fun buildRoutesConfig(functionFiles: List<FunctionFile>): String {
+        val includePatterns = functionFiles.map { func ->
+            if (func.isMiddleware) {
+                // 中间件的挂载路径
+                func.mountPath
+            } else {
+                var pattern = func.routePath
+                if (pattern.contains(":")) {
+                    pattern = pattern.replace(":[a-zA-Z_][a-zA-Z0-9_]*\\*".toRegex(), "*")
+                    pattern = pattern.replace(":[a-zA-Z_][a-zA-Z0-9_]*".toRegex(), "*")
+                }
+                pattern
+            }
+        }.distinct()
+
+        return """
+        {
+          "version": 1,
+          "description": "Generated by upworker",
+          "include": [${includePatterns.joinToString(",") { "\"$it\"" }}],
+          "exclude": []
+        }
+        """.trimIndent()
+    }
+
+    /**
+     * 部署包含 Pages Functions 的项目
+     * 与 zip 部署类似，但额外处理 functions 目录
+     */
+    private suspend fun deployWithFunctions(
+        account: Account,
+        projectName: String,
+        baseDir: File,
+        manifestMap: Map<String, String>
+    ): Resource<PagesDeployment> {
+        val functionFiles = collectFunctions(baseDir)
+            ?: return Resource.Error("未找到 functions 目录或目录为空")
+
+        Timber.d("deployWithFunctions: 找到 ${functionFiles.size} 个 Function 文件")
+
+        // 1. 构建 Functions bundle
+        val workerBundle = buildFunctionsBundle(functionFiles)
+        val workerBundlePart = MultipartBody.Part.createFormData(
+            "_worker.bundle", "_worker.bundle", workerBundle
+        )
+
+        // 2. 构建 functions-filepath-routing-config.json
+        val routingConfig = buildFunctionsRoutingConfig(functionFiles)
+        val routingConfigBody = routingConfig.toRequestBody("application/json".toMediaType())
+        val routingConfigPart = MultipartBody.Part.createFormData(
+            "functions-filepath-routing-config.json",
+            "functions-filepath-routing-config.json",
+            routingConfigBody
+        )
+
+        // 3. 检查用户是否提供了 _routes.json，如果没有则自动生成
+        val routesJsonFile = File(baseDir, "_routes.json")
+        val routesJsonContent = if (routesJsonFile.exists()) {
+            routesJsonFile.readText(Charsets.UTF_8)
+        } else {
+            buildRoutesConfig(functionFiles)
+        }
+        val routesJsonBody = routesJsonContent.toRequestBody("application/json".toMediaType())
+        val routesJsonPart = MultipartBody.Part.createFormData(
+            "_routes.json", "_routes.json", routesJsonBody
+        )
+
+        // 4. 构建 manifest（作为表单字段而非文件上传）
+        val manifestJson = manifestMap.entries.joinToString(",", "{", "}") { entry ->
+            "\"${entry.key}\":\"${entry.value}\""
+        }
+        val manifestBody = manifestJson.toRequestBody("application/json".toMediaType())
+        val manifestPart = MultipartBody.Part.createFormData("manifest", null, manifestBody)
+
+        // 5. 组装所有 multipart 部分
+        val parts = mutableListOf<MultipartBody.Part>()
+        parts.add(manifestPart)
+        parts.add(workerBundlePart)
+        parts.add(routingConfigPart)
+        parts.add(routesJsonPart)
+
+        // 6. 发送部署请求
+        val response = api.createPagesDeploymentWithFunctions(
+            token = AuthHelper.getBearerToken(account),
+            email = AuthHelper.getEmail(account),
+            apiKey = AuthHelper.getGlobalApiKey(account),
+            accountId = account.accountId,
+            projectName = projectName,
+            parts = parts
+        )
+
+        return if (response.isSuccessful && response.body()?.success == true) {
+            response.body()?.result?.let {
+                Resource.Success(it)
+            } ?: Resource.Error("部署创建成功，但没有返回结果")
+        } else {
+            val errorBody = response.errorBody()?.string() ?: "无错误响应体"
+            val apiErrors = response.body()?.errors?.joinToString("; ") { "${it.code}: ${it.message}" }
+            val errorMsg = "部署失败: HTTP ${response.code()}, ${response.message()}. API错误: $apiErrors. 响应体: $errorBody"
+            Timber.e(errorMsg)
+            Resource.Error(errorMsg)
+        }
     }
 
     // ==================== Project Configuration Management ====================  

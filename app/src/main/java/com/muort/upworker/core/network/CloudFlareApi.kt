@@ -659,6 +659,22 @@ interface CloudFlareApi {
         @Part("manifest") manifest: RequestBody,
         @Part workerBundle: MultipartBody.Part
     ): Response<CloudFlareResponse<PagesDeployment>>
+
+    /**
+     * 3.c 支持 Pages Functions (标准模式) 的部署
+     * 包含 manifest + _worker.bundle + functions-filepath-routing-config.json + _routes.json
+     * 使用 @PartMap 灵活支持可选字段
+     */
+    @Multipart
+    @POST("accounts/{account_id}/pages/projects/{project_name}/deployments")
+    suspend fun createPagesDeploymentWithFunctions(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Part parts: List<MultipartBody.Part>
+    ): Response<CloudFlareResponse<PagesDeployment>>
     
     // ==================== Pages Domains ====================
     

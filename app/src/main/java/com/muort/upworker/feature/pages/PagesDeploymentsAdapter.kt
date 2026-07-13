@@ -22,6 +22,7 @@ class PagesDeploymentsAdapter(
         private val deploymentInfoText = itemView.findViewById<TextView>(R.id.deploymentInfoText)
         private val deploymentSourceText = itemView.findViewById<TextView>(R.id.deploymentSourceText)
         private val deploymentTimeText = itemView.findViewById<TextView>(R.id.deploymentTimeText)
+        private val functionsBadge = itemView.findViewById<TextView>(R.id.functionsBadge)
         private val runningBadge = itemView.findViewById<LinearLayout>(R.id.runningBadge)
         private val rollbackBtn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.rollbackBtn)
         private val retryBtn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.retryBtn)
@@ -49,6 +50,13 @@ class PagesDeploymentsAdapter(
                 else -> "来源: $triggerType"
             }
             deploymentSourceText.text = sourceText
+
+            // Functions 标识
+            functionsBadge.visibility = if (deployment.usesFunctions == true) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
             
             val isRunning = deployment.id == runningDeploymentId
             runningBadge.visibility = if (isRunning) View.VISIBLE else View.GONE
