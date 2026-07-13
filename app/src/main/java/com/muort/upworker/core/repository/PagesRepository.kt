@@ -3,6 +3,8 @@ package com.muort.upworker.core.repository
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.SucraseInput
+import com.muort.upworker.core.util.SucraseTransformer
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,7 +24,8 @@ import javax.inject.Singleton
 
 @Singleton
 class PagesRepository @Inject constructor(
-    private val api: CloudFlareApi
+    private val api: CloudFlareApi,
+    private val sucraseTransformer: SucraseTransformer
 ) {
 
     suspend fun listProjects(account: Account): Resource<List<PagesProject>> =   
@@ -748,7 +751,7 @@ class PagesRepository @Inject constructor(
             dir.listFiles()?.forEach { file ->
                 if (file.isDirectory) {
                     scanDirectory(file, "$relativePrefix${file.name}/")
-                } else if (file.extension == "js" || file.extension == "ts") {
+                } else if (file.extension in listOf("js", "ts", "tsx", "jsx", "mjs")) {
                     val relativePath = relativePrefix + file.name
                     val content = file.readText(Charsets.UTF_8)
 
@@ -812,7 +815,12 @@ class PagesRepository @Inject constructor(
      *   api/index.js → /api
      */
     private fun convertFunctionPathToRoute(relativePath: String): String {
-        var path = relativePath.removeSuffix(".js").removeSuffix(".ts")
+        var path = relativePath
+            .removeSuffix(".js")
+            .removeSuffix(".ts")
+            .removeSuffix(".tsx")
+            .removeSuffix(".jsx")
+            .removeSuffix(".mjs")
 
         // 处理 index 文件
         if (path.endsWith("/index")) {
@@ -888,6 +896,7 @@ class PagesRepository @Inject constructor(
                 uniqueModules.add(func)
             }
         }
+        Timber.d("buildFunctionsBundle: moduleMap keys = ${moduleMap.keys}")
 
         // 生成入口 Worker 代码（路由分发器）
         val entryScript = buildFunctionsEntryScript(functionFiles, moduleMap)
@@ -912,14 +921,44 @@ class PagesRepository @Inject constructor(
         baos.write(entryScript.toByteArray(Charsets.UTF_8))
         baos.write("\r\n".toByteArray(Charsets.UTF_8))
 
-        // 各个 Function 模块文件（去重后）
+        // 各个 Function 模块文件（去重后，import 路径已重写）
+        val rewrittenModules = mutableListOf<Pair<String, String>>() // moduleName -> content
         uniqueModules.forEachIndexed { index, func ->
             val moduleName = "func_$index.js"
+            // 检查是否包含相对导入
+            val hasRelativeImports = Regex("""(from\s*|import\s+)["']\.\.?/""").containsMatchIn(func.content)
+            if (hasRelativeImports) {
+                Timber.d("buildFunctionsBundle: func_$index.js ($func.relativePath) 含相对导入, 重写前预览: ${func.content.take(200).replace("\n", "\\n")}")
+            }
+            val rewrittenContent = rewriteImports(func.content, func.relativePath, moduleMap)
+            if (hasRelativeImports) {
+                Timber.d("buildFunctionsBundle: func_$index.js ($func.relativePath) 重写后预览: ${rewrittenContent.take(200).replace("\n", "\\n")}")
+            }
+            rewrittenModules.add(moduleName to rewrittenContent)
+        }
+
+        // 部署前验证：扫描所有模块，确保没有未重写的相对导入
+        val validateRegex = Regex("""["'](\.\.?/[^"']+)["']""")
+        var unresolvedCount = 0
+        rewrittenModules.forEach { (moduleName, content) ->
+            val unresolved = validateRegex.findAll(content).map { it.groupValues[1] }.toList()
+                .filter { !it.startsWith("./func_") }
+            if (unresolved.isNotEmpty()) {
+                unresolvedCount += unresolved.size
+                Timber.e("buildFunctionsBundle: ⚠️ $moduleName 包含未解析的相对导入: $unresolved")
+            }
+        }
+        if (unresolvedCount > 0) {
+            Timber.e("buildFunctionsBundle: ⚠️ 共 $unresolvedCount 个未解析的导入，部署可能失败！moduleMap keys: ${moduleMap.keys}")
+        }
+
+        // 写入 bundle
+        rewrittenModules.forEach { (moduleName, content) ->
             baos.write("--$boundary\r\n".toByteArray(Charsets.UTF_8))
             baos.write("Content-Disposition: form-data; name=\"$moduleName\"; filename=\"$moduleName\"\r\n".toByteArray(Charsets.UTF_8))
             baos.write("Content-Type: application/javascript+module\r\n".toByteArray(Charsets.UTF_8))
             baos.write("\r\n".toByteArray(Charsets.UTF_8))
-            baos.write(func.content.toByteArray(Charsets.UTF_8))
+            baos.write(content.toByteArray(Charsets.UTF_8))
             baos.write("\r\n".toByteArray(Charsets.UTF_8))
         }
 
@@ -929,6 +968,329 @@ class PagesRepository @Inject constructor(
         val bundleBytes = baos.toByteArray()
         Timber.d("buildFunctionsBundle: bundle 总大小 ${bundleBytes.size} 字节")
         return bundleBytes.toRequestBody("multipart/form-data; boundary=$boundary".toMediaType())
+    }
+
+    /**
+     * 重写模块文件中的相对 import 路径为 ./func_N.js
+     *
+     * 处理三种 import 形式：
+     * 1. import/export ... from "./path"  — 静态导入/导出
+     * 2. import "./path"                  — 副作用导入
+     * 3. import("./path")                 — 动态导入
+     *
+     * 只重写以 . 或 .. 开头的相对路径，bare specifier（如 "react"）保持不变。
+     */
+    private fun rewriteImports(
+        content: String,
+        currentRelativePath: String,
+        moduleMap: Map<String, Int>
+    ): String {
+        // from "..." 或 from '...'（匹配 import/export ... from "相对路径"）
+        // 使用 \s* 而非 \s+ 以兼容 from"path" 无空格的情况
+        val fromRegex = Regex("""(from\s*)(["'])(\.\.?/[^"']+)(["'])""")
+
+        // import "..." 或 import '...'（副作用导入，不匹配 import xxx from）
+        val sideEffectRegex = Regex("""(^|[\s;])(import\s+)(["'])(\.\.?/[^"']+)(["'])""")
+
+        // import("...") 或 import('...')（动态导入）
+        val dynamicImportRegex = Regex("""(import\s*\(\s*)(["'])(\.\.?/[^"']+)(["'])""")
+
+        var result = content
+        var rewriteCount = 0
+        var failCount = 0
+
+        // 1. 重写 from 导入
+        result = fromRegex.replace(result) { match ->
+            val prefix = match.groupValues[1]
+            val importPath = match.groupValues[3]
+            val resolved = resolveImportPath(importPath, currentRelativePath, moduleMap)
+            if (resolved != null) {
+                rewriteCount++
+                "$prefix\"$resolved\""
+            } else {
+                failCount++
+                Timber.w("rewriteImports: 未解析 from \"$importPath\" (in $currentRelativePath)")
+                match.value
+            }
+        }
+
+        // 2. 重写副作用导入
+        result = sideEffectRegex.replace(result) { match ->
+            val leading = match.groupValues[1]
+            val importKw = match.groupValues[2]
+            val importPath = match.groupValues[4]
+            val resolved = resolveImportPath(importPath, currentRelativePath, moduleMap)
+            if (resolved != null) {
+                rewriteCount++
+                "$leading$importKw\"$resolved\""
+            } else {
+                failCount++
+                match.value
+            }
+        }
+
+        // 3. 重写动态导入
+        result = dynamicImportRegex.replace(result) { match ->
+            val prefix = match.groupValues[1]
+            val importPath = match.groupValues[3]
+            val resolved = resolveImportPath(importPath, currentRelativePath, moduleMap)
+            if (resolved != null) {
+                rewriteCount++
+                "$prefix\"$resolved\""
+            } else {
+                failCount++
+                match.value
+            }
+        }
+
+        Timber.d("rewriteImports: $currentRelativePath 重写 $rewriteCount 个导入, $failCount 个失败")
+
+        // 4. 终极兜底：统一扫描所有剩余的相对路径导入（不以 ./func_ 开头的）
+        // 覆盖 from、side-effect import、dynamic import 三种形式
+        val catchAllFromRegex = Regex("""(from\s*)(["'])(\.\.?/[^"']+)(["'])""")
+        val catchAllSideEffectRegex = Regex("""(^|[\s;])(import\s+)(["'])(\.\.?/[^"']+)(["'])""")
+        val catchAllDynamicRegex = Regex("""(import\s*\(\s*)(["'])(\.\.?/[^"']+)(["'])""")
+
+        fun isUnresolved(path: String): Boolean = !path.startsWith("./func_")
+
+        fun resolveOrFallback(importPath: String): String {
+            val resolved = resolveImportPath(importPath, currentRelativePath, moduleMap)
+            if (resolved != null) return resolved
+            val fuzzyResolved = resolveImportPathFuzzy(importPath, currentRelativePath, moduleMap)
+            if (fuzzyResolved != null) {
+                Timber.w("rewriteImports: 模糊匹配成功 \"$importPath\" -> \"$fuzzyResolved\" (in $currentRelativePath)")
+                return fuzzyResolved
+            }
+            Timber.e("rewriteImports: 无法解析 \"$importPath\" (in $currentRelativePath), 替换为 func_0")
+            return "./func_0.js"
+        }
+
+        // 4a. 兜底 from 导入
+        val remainingFrom = catchAllFromRegex.findAll(result).map { it.groupValues[3] }.toList().filter(::isUnresolved)
+        if (remainingFrom.isNotEmpty()) {
+            Timber.w("rewriteImports: $currentRelativePath 进入兜底(from), 剩余: $remainingFrom")
+            result = catchAllFromRegex.replace(result) { match ->
+                val prefix = match.groupValues[1]
+                val importPath = match.groupValues[3]
+                if (!isUnresolved(importPath)) return@replace match.value
+                "$prefix\"${resolveOrFallback(importPath)}\""
+            }
+        }
+
+        // 4b. 兜底副作用导入
+        val remainingSideEffect = catchAllSideEffectRegex.findAll(result).map { it.groupValues[4] }.toList().filter(::isUnresolved)
+        if (remainingSideEffect.isNotEmpty()) {
+            Timber.w("rewriteImports: $currentRelativePath 进入兜底(side-effect), 剩余: $remainingSideEffect")
+            result = catchAllSideEffectRegex.replace(result) { match ->
+                val leading = match.groupValues[1]
+                val importKw = match.groupValues[2]
+                val importPath = match.groupValues[4]
+                if (!isUnresolved(importPath)) return@replace match.value
+                "$leading$importKw\"${resolveOrFallback(importPath)}\""
+            }
+        }
+
+        // 4c. 兜底动态导入
+        val remainingDynamic = catchAllDynamicRegex.findAll(result).map { it.groupValues[3] }.toList().filter(::isUnresolved)
+        if (remainingDynamic.isNotEmpty()) {
+            Timber.w("rewriteImports: $currentRelativePath 进入兜底(dynamic), 剩余: $remainingDynamic")
+            result = catchAllDynamicRegex.replace(result) { match ->
+                val prefix = match.groupValues[1]
+                val importPath = match.groupValues[3]
+                if (!isUnresolved(importPath)) return@replace match.value
+                "$prefix\"${resolveOrFallback(importPath)}\""
+            }
+        }
+
+        // 最终检查
+        val allRegexes = listOf(catchAllFromRegex, catchAllSideEffectRegex, catchAllDynamicRegex)
+        val finalRemaining = allRegexes.flatMap { regex ->
+            val groupIdx = if (regex == catchAllFromRegex || regex == catchAllDynamicRegex) 3 else 4
+            regex.findAll(result).map { it.groupValues[groupIdx] }.toList()
+        }.filter(::isUnresolved)
+        if (finalRemaining.isNotEmpty()) {
+            Timber.e("rewriteImports: $currentRelativePath 最终仍有未重写的导入: $finalRemaining")
+        }
+
+        return result
+    }
+
+    /**
+     * 解析相对 import 路径，在 moduleMap 中查找对应模块索引。
+     *
+     * 尝试多种扩展名和 index 文件变体：
+     * ./utils → utils, utils.js, utils.ts, utils.tsx, utils.jsx, utils/index.js, ...
+     *
+     * @return "./func_N.js" 或 null（未找到）
+     */
+    private fun resolveImportPath(
+        importPath: String,
+        currentRelativePath: String,
+        moduleMap: Map<String, Int>
+    ): String? {
+        // 获取当前文件所在目录
+        val currentDir = currentRelativePath.substringBeforeLast("/", "")
+
+        // 拆分路径并解析 .. 和 .
+        val dirParts = if (currentDir.isEmpty()) emptyList() else currentDir.split("/")
+        val importParts = importPath.split("/").filter { it.isNotEmpty() }
+
+        val resolved = mutableListOf<String>()
+        resolved.addAll(dirParts)
+        for (part in importParts) {
+            when {
+                part == "." -> { /* 当前目录，跳过 */ }
+                part == ".." -> { if (resolved.isNotEmpty()) resolved.removeAt(resolved.lastIndex) }
+                else -> resolved.add(part)
+            }
+        }
+        val basePath = resolved.joinToString("/")
+
+        Timber.d("resolveImportPath: importPath=\"$importPath\", currentRelativePath=\"$currentRelativePath\", currentDir=\"$currentDir\", basePath=\"$basePath\"")
+
+        // 尝试各种扩展名
+        val extensions = listOf("", ".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs")
+        for (ext in extensions) {
+            val candidate = basePath + ext
+            moduleMap[candidate]?.let { return "./func_$it.js" }
+        }
+
+        // 尝试 index 文件
+        val indexVariants = listOf("/index.js", "/index.ts", "/index.tsx", "/index.jsx")
+        for (variant in indexVariants) {
+            val candidate = basePath + variant
+            moduleMap[candidate]?.let { return "./func_$it.js" }
+        }
+
+        Timber.w("rewriteImports: 无法解析 \"$importPath\" (from $currentRelativePath, basePath=$basePath)")
+        Timber.w("rewriteImports: 可用模块键: ${moduleMap.keys}")
+        return null
+    }
+
+    /**
+     * 模糊匹配兜底：当精确解析失败时，尝试通过路径后缀匹配模块。
+     *
+     * 例如 basePath="utils/types" 时，会查找 moduleMap 中以 "utils/types" 结尾的键
+     * （如 "some/prefix/utils/types.ts"）。
+     */
+    private fun resolveImportPathFuzzy(
+        importPath: String,
+        currentRelativePath: String,
+        moduleMap: Map<String, Int>
+    ): String? {
+        // 先计算 basePath（与 resolveImportPath 相同的逻辑）
+        val currentDir = currentRelativePath.substringBeforeLast("/", "")
+        val dirParts = if (currentDir.isEmpty()) emptyList() else currentDir.split("/")
+        val importParts = importPath.split("/").filter { it.isNotEmpty() }
+
+        val resolved = mutableListOf<String>()
+        resolved.addAll(dirParts)
+        for (part in importParts) {
+            when {
+                part == "." -> { }
+                part == ".." -> { if (resolved.isNotEmpty()) resolved.removeAt(resolved.lastIndex) }
+                else -> resolved.add(part)
+            }
+        }
+        val basePath = resolved.joinToString("/")
+
+        // 模糊匹配：查找 moduleMap 中以 basePath 结尾的键（带各种扩展名）
+        val extensions = listOf("", ".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs")
+        for (ext in extensions) {
+            val suffix = basePath + ext
+            // 精确匹配
+            moduleMap[suffix]?.let { return "./func_$it.js" }
+            // 后缀匹配（basePath 是 moduleMap 键的后缀）
+            for ((key, index) in moduleMap) {
+                if (key == suffix || key.endsWith("/$suffix")) {
+                    return "./func_$index.js"
+                }
+            }
+        }
+
+        // 尝试 index 文件的后缀匹配
+        val indexVariants = listOf("/index.js", "/index.ts", "/index.tsx", "/index.jsx")
+        for (variant in indexVariants) {
+            val suffix = basePath + variant
+            for ((key, index) in moduleMap) {
+                if (key == suffix || key.endsWith("/$suffix")) {
+                    return "./func_$index.js"
+                }
+            }
+        }
+
+        // 最后尝试：直接用 importPath 的最后几个部分进行匹配
+        val pathEnd = importParts.filterNot { it == "." || it == ".." }.joinToString("/")
+        if (pathEnd.isNotEmpty()) {
+            for (ext in extensions) {
+                val suffix = pathEnd + ext
+                for ((key, index) in moduleMap) {
+                    if (key == suffix || key.endsWith("/$suffix")) {
+                        Timber.d("resolveImportPathFuzzy: 通过路径尾部 \"$pathEnd\" 匹配到 \"$key\"")
+                        return "./func_$index.js"
+                    }
+                }
+            }
+        }
+
+        return null
+    }
+
+    /**
+     * 使用 Sucrase 批量转换 TypeScript/JSX 文件为纯 JavaScript。
+     *
+     * 对 .ts 文件启用 typescript transform（剥离类型注解）
+     * 对 .tsx 文件启用 typescript + jsx transform
+     * 对 .jsx 文件启用 jsx transform
+     * .js 文件跳过
+     *
+     * 转换失败时保留原始内容并记录警告（.ts 文件可能在运行时报错，但 .js 文件不受影响）。
+     */
+    private suspend fun transformFunctionFiles(files: List<FunctionFile>): List<FunctionFile> {
+        // 找出需要转换的唯一文件（按 relativePath 去重）
+        val needsTransform = files.filter { f ->
+            f.relativePath.endsWith(".ts") ||
+            f.relativePath.endsWith(".tsx") ||
+            f.relativePath.endsWith(".jsx")
+        }.distinctBy { it.relativePath }
+
+        if (needsTransform.isEmpty()) return files
+
+        Timber.d("transformFunctionFiles: ${needsTransform.size} 个文件需要 Sucrase 转换")
+
+        val inputs = needsTransform.map { f ->
+            SucraseInput(
+                id = f.relativePath,
+                content = f.content,
+                isTS = f.relativePath.endsWith(".ts") || f.relativePath.endsWith(".tsx"),
+                isJSX = f.relativePath.endsWith(".tsx") || f.relativePath.endsWith(".jsx")
+            )
+        }
+
+        val results = sucraseTransformer.transformBatch(inputs)
+        val resultMap = results.associateBy { it.id }
+
+        // 日志输出转换结果
+        results.forEach { r ->
+            if (r.success) {
+                Timber.d("transformFunctionFiles: ✓ ${r.id} 转换成功 (${r.code?.length} 字符)")
+            } else {
+                Timber.w("transformFunctionFiles: ✗ ${r.id} 转换失败: ${r.error}")
+            }
+        }
+
+        // 更新文件内容
+        return files.map { file ->
+            val result = resultMap[file.relativePath]
+            if (result != null && result.success && result.code != null) {
+                file.copy(content = result.code)
+            } else if (result != null && !result.success) {
+                Timber.w("Sucrase 转换失败 ${file.relativePath}: ${result.error}")
+                file // 保留原始内容
+            } else {
+                file
+            }
+        }
     }
 
     /**
@@ -1261,12 +1623,15 @@ class PagesRepository @Inject constructor(
         baseDir: File,
         manifestMap: Map<String, String>
     ): Resource<PagesDeployment> {
-        val functionFiles = collectFunctions(baseDir)
+        val rawFunctionFiles = collectFunctions(baseDir)
             ?: return Resource.Error("未找到 functions 目录或目录为空")
 
-        Timber.d("deployWithFunctions: 找到 ${functionFiles.size} 个 Function 文件")
+        Timber.d("deployWithFunctions: 找到 ${rawFunctionFiles.size} 个 Function 文件")
 
-        // 1. 构建 Functions bundle
+        // 0. Sucrase 转换 TypeScript/JSX → 纯 JavaScript
+        val functionFiles = transformFunctionFiles(rawFunctionFiles)
+
+        // 1. 构建 Functions bundle（内部会重写 import 路径）
         val workerBundle = buildFunctionsBundle(functionFiles)
         val workerBundlePart = MultipartBody.Part.createFormData(
             "_worker.bundle", "_worker.bundle", workerBundle
