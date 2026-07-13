@@ -274,12 +274,13 @@ class PagesViewModel @Inject constructor(
         projectName: String,
         branch: String,
         file: java.io.File,
-        customCompatibilityDate: String? = null
+        customCompatibilityDate: String? = null,
+        customCompatibilityFlags: List<String>? = null
     ) {
         viewModelScope.launch {
             _loadingState.value = true
             
-            when (val result = pagesRepository.createDeployment(account, projectName, branch, file, customCompatibilityDate)) {
+            when (val result = pagesRepository.createDeployment(account, projectName, branch, file, customCompatibilityDate, customCompatibilityFlags)) {
                 is Resource.Success -> {
                     _message.emit("部署创建成功")
                     loadProjects(account)

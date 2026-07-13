@@ -607,7 +607,9 @@ data class EnvVar(
 data class PagesProjectUpdateRequest(
     @SerializedName("deployment_configs") val deploymentConfigs: DeploymentConfigsUpdate? = null,
     @SerializedName("name") val name: String? = null,
-    @SerializedName("production_branch") val productionBranch: String? = null
+    @SerializedName("production_branch") val productionBranch: String? = null,
+    @SerializedName("not_found_page") val notFoundPage: String? = null,
+    @SerializedName("pretty_urls") val prettyUrls: Boolean? = null
 )
 
 data class DeploymentConfigsUpdate(
@@ -626,7 +628,8 @@ data class EnvironmentConfigUpdate(
     @SerializedName("d1_databases") val d1Databases: Map<String, D1BindingUpdate?>? = null,
     @SerializedName("durable_objects") val durableObjects: Map<String, DurableObjectBindingUpdate?>? = null,
     @SerializedName("services") val services: Map<String, ServiceBindingUpdate?>? = null,
-    @SerializedName("compatibility_date") val compatibilityDate: String? = null
+    @SerializedName("compatibility_date") val compatibilityDate: String? = null,
+    @SerializedName("compatibility_flags") val compatibilityFlags: List<String>? = null
 )
 
 data class EnvVarUpdate(

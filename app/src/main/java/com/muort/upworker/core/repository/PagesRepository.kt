@@ -77,7 +77,149 @@ class PagesRepository @Inject constructor(
         }
     }
 
-    suspend fun createProject(  
+    /**
+     * 更新项目的 compatibility_flags
+     */
+    private suspend fun updateProjectCompatibilityFlags(
+        account: Account,
+        projectName: String,
+        compatibilityFlags: List<String>
+    ) {
+        try {
+            val updateRequest = PagesProjectUpdateRequest(
+                deploymentConfigs = DeploymentConfigsUpdate(
+                    preview = EnvironmentConfigUpdate(compatibilityFlags = compatibilityFlags),
+                    production = EnvironmentConfigUpdate(compatibilityFlags = compatibilityFlags)
+                )
+            )
+            api.updatePagesProject(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                projectName = projectName,
+                updateRequest = updateRequest
+            )
+            Timber.d("项目 $projectName 的 compatibility_flags 更新为 $compatibilityFlags")
+        } catch (e: Exception) {
+            Timber.w("更新项目 compatibility_flags 失败: ${e.message}")
+        }
+    }
+
+    /**
+     * 更新项目的 asset 配置（not_found_page, pretty_urls）
+     * 注意：Cloudflare API 通过 PATCH 项目接口更新 deployment_configs 中的设置
+     */
+    suspend fun updateAssetConfig(
+        account: Account,
+        projectName: String,
+        notFoundPage: String? = null,
+        prettyUrls: Boolean? = null
+    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val updateRequest = PagesProjectUpdateRequest(
+                notFoundPage = notFoundPage,
+                prettyUrls = prettyUrls
+            )
+            val response = api.updatePagesProject(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                projectName = projectName,
+                updateRequest = updateRequest
+            )
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let { Resource.Success(it) }
+                    ?: Resource.Error("Asset config updated but no result returned")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                Resource.Error("Failed to update asset config: $errorMsg")
+            }
+        }
+    }
+
+    /**
+     * 更新 Durable Objects 绑定
+     */
+    suspend fun updateDurableObjectBindings(
+        account: Account,
+        projectName: String,
+        environment: String,
+        bindings: Map<String, Pair<String, String>?>
+    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val doMap = bindings.mapValues { (_, classInfo) ->
+                classInfo?.let { (className, _) ->
+                    DurableObjectBindingUpdate(className = className)
+                }
+            }
+            val envConfig = EnvironmentConfigUpdate(durableObjects = doMap)
+            val deploymentConfigs = if (environment == "production") {
+                DeploymentConfigsUpdate(production = envConfig)
+            } else {
+                DeploymentConfigsUpdate(preview = envConfig)
+            }
+            val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)
+            val response = api.updatePagesProject(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                projectName = projectName,
+                updateRequest = updateRequest
+            )
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let { Resource.Success(it) }
+                    ?: Resource.Error("Durable Objects bindings updated but no result returned")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                Resource.Error("Failed to update Durable Objects bindings: $errorMsg")
+            }
+        }
+    }
+
+    /**
+     * 更新 Service Bindings
+     */
+    suspend fun updateServiceBindings(
+        account: Account,
+        projectName: String,
+        environment: String,
+        bindings: Map<String, Pair<String, String>?>
+    ): Resource<PagesProjectDetail> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val svcMap = bindings.mapValues { (_, svcInfo) ->
+                svcInfo?.let { (service, env) ->
+                    ServiceBindingUpdate(service = service, environment = env)
+                }
+            }
+            val envConfig = EnvironmentConfigUpdate(services = svcMap)
+            val deploymentConfigs = if (environment == "production") {
+                DeploymentConfigsUpdate(production = envConfig)
+            } else {
+                DeploymentConfigsUpdate(preview = envConfig)
+            }
+            val updateRequest = PagesProjectUpdateRequest(deploymentConfigs = deploymentConfigs)
+            val response = api.updatePagesProject(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                projectName = projectName,
+                updateRequest = updateRequest
+            )
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let { Resource.Success(it) }
+                    ?: Resource.Error("Service bindings updated but no result returned")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                Resource.Error("Failed to update service bindings: $errorMsg")
+            }
+        }
+    }
+
+    suspend fun createProject(
         account: Account,  
         name: String,  
         productionBranch: String = "main",
@@ -318,7 +460,8 @@ class PagesRepository @Inject constructor(
         projectName: String,  
         branch: String,  
         file: java.io.File,
-        customCompatibilityDate: String? = null
+        customCompatibilityDate: String? = null,
+        customCompatibilityFlags: List<String>? = null
     ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {  
         safeApiCall {  
             if (!file.exists()) {  
@@ -334,7 +477,7 @@ class PagesRepository @Inject constructor(
             }
 
             val finalCompatibilityDate = customCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
-              
+  
             // 1. 校验并创建项目
             val projectExists = checkProjectExists(account, projectName)  
             if (!projectExists) {  
@@ -345,6 +488,11 @@ class PagesRepository @Inject constructor(
                 customCompatibilityDate?.let {
                     updateProjectCompatibilityDate(account, projectName, it)
                 }
+            }
+
+            // 更新 compatibility_flags（无论项目是否新建，都确保 flags 同步）
+            if (customCompatibilityFlags != null) {
+                updateProjectCompatibilityFlags(account, projectName, customCompatibilityFlags)
             }  
 
             // 单文件 .js 部署：直接作为 Worker 脚本上传（bundle 接口）
@@ -370,7 +518,9 @@ class PagesRepository @Inject constructor(
                     val validFiles = baseDir.listFiles()?.filter { 
                         it.name != ".DS_Store" && it.name != "__MACOSX" && !it.name.startsWith(".")
                     }
-                    if (validFiles != null && validFiles.size == 1 && validFiles[0].isDirectory) {
+                    if (validFiles != null && validFiles.size == 1 && validFiles[0].isDirectory
+                        && validFiles[0].name != "_worker.js"  // 不要穿透 _worker.js 目录
+                        && validFiles[0].name != "functions") {  // 不要穿透 functions 目录
                         baseDir = validFiles[0]
                     } else {
                         break
@@ -381,6 +531,31 @@ class PagesRepository @Inject constructor(
                 val manifestMap = mutableMapOf<String, String>()
                 var workerJsFile: File? = null
                 var hasFunctionsDir = false
+
+                // 读取 .assetsignore 文件
+                val assetsignoreFile = File(baseDir, ".assetsignore")
+                val ignorePatterns = if (assetsignoreFile.exists()) {
+                    assetsignoreFile.readLines()
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() && !it.startsWith("#") }
+                        .also { Timber.d("collectFiles: 读取到 .assetsignore, ${it.size} 条规则") }
+                } else {
+                    emptyList()
+                }
+
+                // 检查路径是否匹配 .assetsignore 规则
+                fun isIgnored(relativePath: String): Boolean {
+                    if (ignorePatterns.isEmpty()) return false
+                    // 去掉开头的 /
+                    val path = relativePath.removePrefix("/")
+                    for (pattern in ignorePatterns) {
+                        if (matchGlob(path, pattern)) {
+                            Timber.d("collectFiles: $path 被 .assetsignore 规则 '$pattern' 忽略")
+                            return true
+                        }
+                    }
+                    return false
+                }
 
                 fun collectFiles(currentFile: File) {
                     if (currentFile.isDirectory) {
@@ -396,12 +571,16 @@ class PagesRepository @Inject constructor(
                         if (name == ".DS_Store" || currentFile.absolutePath.contains("__MACOSX") || name.startsWith(".")) {
                             return
                         }
+                        // 跳过 .assetsignore 本身
+                        if (name == ".assetsignore") return
                         val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
                         if (name == "_worker.js" && relativePath == "/_worker.js") {
                             Timber.d("collectFiles: 找到根目录 _worker.js, 路径=${currentFile.absolutePath}, 大小=${currentFile.length()}字节")
                             workerJsFile = currentFile
                             return
                         }
+                        // 检查 .assetsignore
+                        if (isIgnored(relativePath)) return
                         allFiles.add(currentFile)
                         val cfHash = getCfHash(currentFile)
                         manifestMap[relativePath] = cfHash
@@ -409,7 +588,15 @@ class PagesRepository @Inject constructor(
                 }
                 baseDir.listFiles()?.forEach { collectFiles(it) }
 
-                if (allFiles.isEmpty() && workerJsFile == null && !hasFunctionsDir) {
+                // 如果是 _worker.js 单文件模式，构建 bundle
+                val effectiveWorkerBundle: RequestBody? = if (workerJsFile != null) {
+                    Timber.d("使用 _worker.js 单文件模式")
+                    buildWorkerBundle(workerJsFile!!)
+                } else {
+                    null
+                }
+
+                if (allFiles.isEmpty() && effectiveWorkerBundle == null && !hasFunctionsDir) {
                     return@safeApiCall Resource.Error("压缩包内无有效文件")
                 }
 
@@ -492,19 +679,11 @@ class PagesRepository @Inject constructor(
                 val manifestBody = manifestJson.toRequestBody("application/json".toMediaType())
 
                 // 最终盖章：通知部署完成（根据部署类型选择不同接口）
-                // 优先级: _worker.js (高级模式) > functions/ (标准模式) > 纯静态
-                val response = if (workerJsFile != null) {
-                    val workerFileSize = workerJsFile!!.length()
-                    Timber.d("workerJsFile 路径: ${workerJsFile!!.absolutePath}")
-                    Timber.d("workerJsFile 文件大小: $workerFileSize 字节")
-                    if (workerFileSize == 0L) {
-                        return@safeApiCall Resource.Error("_worker.js 文件内容为空（0字节），请检查 zip 包中的文件是否完整")
-                    }
-                    // 构建 _worker.bundle: 手动构建 multipart 字节流
-                    val workerBundle = buildWorkerBundle(workerJsFile!!)
-                    Timber.d("_worker.bundle 大小: ${workerBundle.contentLength()} 字节")
+                // 优先级: _worker.js (高级模式, 单文件) > functions/ (标准模式) > 纯静态
+                val response = if (effectiveWorkerBundle != null) {
+                    Timber.d("_worker.bundle 大小: ${effectiveWorkerBundle.contentLength()} 字节")
                     val workerBundlePart = MultipartBody.Part.createFormData(
-                        "_worker.bundle", "_worker.bundle", workerBundle
+                        "_worker.bundle", "_worker.bundle", effectiveWorkerBundle
                     )
                     api.createPagesDeploymentWithWorker(
                         token = AuthHelper.getBearerToken(account),
@@ -718,6 +897,53 @@ class PagesRepository @Inject constructor(
         val bundleBytes = baos.toByteArray()
         Timber.d("buildWorkerBundle: bundle 总大小 ${bundleBytes.size} 字节")
         return bundleBytes.toRequestBody("multipart/form-data; boundary=$boundary".toMediaType())
+    }
+
+    // 简单 glob 匹配，支持 * 和精确路径匹配
+    // 支持的格式：
+    // - "README.md"  匹配根目录的 README.md
+    // - "*.md"  匹配根目录所有 .md 文件
+    // - "**\u002F*.md"  递归匹配所有 .md 文件
+    // - "docs\u002F*"  匹配 docs/ 下的文件
+    // - "docs\u002F**\u002F*.md"  递归匹配 docs/ 下所有 .md 文件
+    private fun matchGlob(path: String, pattern: String): Boolean {
+        // 将 glob 转为 regex
+        val regex = buildString {
+            append("^")
+            var i = 0
+            while (i < pattern.length) {
+                when {
+                    pattern.startsWith("**/", i) -> {
+                        append("(.*/)?")
+                        i += 3
+                    }
+                    pattern[i] == '*' && i + 1 < pattern.length && pattern[i + 1] == '*' -> {
+                        append(".*")
+                        i += 2
+                    }
+                    pattern[i] == '*' -> {
+                        append("[^/]*")
+                        i += 1
+                    }
+                    pattern[i] == '?' -> {
+                        append("[^/]")
+                        i += 1
+                    }
+                    pattern[i] == '.' || pattern[i] == '+' || pattern[i] == '(' || pattern[i] == ')'
+                        || pattern[i] == '[' || pattern[i] == ']' || pattern[i] == '{' || pattern[i] == '}'
+                        || pattern[i] == '^' || pattern[i] == '$' || pattern[i] == '|' || pattern[i] == '\\' -> {
+                        append("\\").append(pattern[i])
+                        i += 1
+                    }
+                    else -> {
+                        append(pattern[i])
+                        i += 1
+                    }
+                }
+            }
+            append("$")
+        }
+        return Regex(regex).matches(path)
     }
 
     // ==================== Pages Functions (标准模式) ====================

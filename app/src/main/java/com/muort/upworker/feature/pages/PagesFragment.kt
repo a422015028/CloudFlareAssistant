@@ -1331,13 +1331,19 @@ class PagesFragment : Fragment() {
         val customCompatibilityDate = binding.compatibilityDateEdit.text.toString().trim()
             .takeIf { it.isNotEmpty() }
         
+        val customCompatibilityFlags = binding.compatibilityFlagsEdit.text.toString().trim()
+            .takeIf { it.isNotEmpty() }
+            ?.split(Regex("[,\\n]"))
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+        
         // Show progress
         binding.uploadProgress.visibility = View.VISIBLE
         binding.deployBtn.isEnabled = false
         
-        Timber.d("Deploying project: $projectName, branch: $branch, file: ${file?.name}, compatibilityDate: $customCompatibilityDate")
+        Timber.d("Deploying project: $projectName, branch: $branch, file: ${file?.name}, compatibilityDate: $customCompatibilityDate, compatibilityFlags: $customCompatibilityFlags")
         
-        pagesViewModel.createDeployment(account, projectName, branch, file!!, customCompatibilityDate)
+        pagesViewModel.createDeployment(account, projectName, branch, file!!, customCompatibilityDate, customCompatibilityFlags)
         
         // Hide progress after a delay (will be handled by loading state)
         viewLifecycleOwner.lifecycleScope.launch {
