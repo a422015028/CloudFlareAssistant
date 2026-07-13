@@ -965,16 +965,23 @@ class PagesRepository @Inject constructor(
         data class RouteInfo(
             val regexStr: String,
             val paramNames: List<String>,
+            val paramFlags: List<Boolean>,  // true = catch-all (返回数组)
             val method: String,
             val moduleIndex: Int,
-            val exportName: String
+            val exportName: String,
+            val specificity: Int  // 路由特异性分数，越高越优先
         )
 
         val routeInfos = routes.map { func ->
-            val (regexStr, paramNames) = buildRouteRegex(func.routePath)
+            val (regexStr, paramNames, paramFlags) = buildRouteRegex(func.routePath)
             val moduleIndex = moduleMap[func.relativePath] ?: 0
-            RouteInfo(regexStr, paramNames, func.method, moduleIndex, func.moduleExport)
-        }
+            // 特异性：静态段 > 动态段 > catch-all
+            val staticSegments = func.routePath.split("/").count { it.isNotEmpty() && !it.startsWith(":") }
+            val dynamicSegments = paramFlags.count { !it }
+            val catchAllSegments = paramFlags.count { it }
+            val specificity = staticSegments * 100 + dynamicSegments * 10 + catchAllSegments
+            RouteInfo(regexStr, paramNames, paramFlags, func.method, moduleIndex, func.moduleExport, specificity)
+        }.sortedByDescending { it.specificity }  // 按特异性降序排列，更具体的路由优先匹配
 
         // 中间件列表
         if (middlewares.isNotEmpty()) {
@@ -991,12 +998,13 @@ class PagesRepository @Inject constructor(
             sb.appendLine()
         }
 
-        // 路由表
-        sb.appendLine("// 路由表（正则表达式预构建）")
+        // 路由表（按特异性排序，更具体的路由优先匹配）
+        sb.appendLine("// 路由表（按特异性排序）")
         sb.appendLine("const routes = [")
         routeInfos.forEach { info ->
             val paramNamesJson = info.paramNames.joinToString(",", "[", "]") { "\"$it\"" }
-            sb.appendLine("  { regex: new RegExp(\"${info.regexStr}\"), paramNames: $paramNamesJson, method: \"${info.method}\", module: module_${info.moduleIndex}, exportName: \"${info.exportName}\" },")
+            val paramFlagsJson = info.paramFlags.joinToString(",", "[", "]") { if (it) "true" else "false" }
+            sb.appendLine("  { regex: new RegExp(\"${info.regexStr}\"), paramNames: $paramNamesJson, paramFlags: $paramFlagsJson, method: \"${info.method}\", module: module_${info.moduleIndex}, exportName: \"${info.exportName}\" },")
         }
         sb.appendLine("];")
         sb.appendLine()
@@ -1010,7 +1018,14 @@ class PagesRepository @Inject constructor(
         sb.appendLine("    if (!m) continue;")
         sb.appendLine("    const params = {};")
         sb.appendLine("    for (let i = 0; i < route.paramNames.length; i++) {")
-        sb.appendLine("      params[route.paramNames[i]] = m[i + 1];")
+        sb.appendLine("      const name = route.paramNames[i];")
+        sb.appendLine("      const isCatchAll = route.paramFlags && route.paramFlags[i];")
+        sb.appendLine("      if (isCatchAll) {")
+        sb.appendLine("        // catch-all 参数返回数组")
+        sb.appendLine("        params[name] = m[i + 1] ? m[i + 1].split('/').filter(Boolean) : [];")
+        sb.appendLine("      } else {")
+        sb.appendLine("        params[name] = m[i + 1];")
+        sb.appendLine("      }")
         sb.appendLine("    }")
         sb.appendLine("    return { handler: route.module[route.exportName], params: params };")
         sb.appendLine("  }")
@@ -1025,10 +1040,15 @@ class PagesRepository @Inject constructor(
         sb.appendLine("    return finalHandler(context);")
         sb.appendLine("  }")
         sb.appendLine("  const mw = mwList[mwIndex];")
+        sb.appendLine("  // context.data 用于中间件间传递数据")
+        sb.appendLine("  const data = context.data || {};")
         sb.appendLine("  const nextContext = {")
         sb.appendLine("    ...context,")
+        sb.appendLine("    data: data,")
         sb.appendLine("    next: async () => {")
-        sb.appendLine("      return runMiddlewareChain(context, mwList, mwIndex + 1, finalHandler);")
+        sb.appendLine("      // 将中间件可能修改的 data 传递到下一层")
+        sb.appendLine("      const nextCtx = { ...context, data: nextContext.data };")
+        sb.appendLine("      return runMiddlewareChain(nextCtx, mwList, mwIndex + 1, finalHandler);")
         sb.appendLine("    }")
         sb.appendLine("  };")
         sb.appendLine("  const handler = mw.module[mw.exportName];")
@@ -1076,7 +1096,9 @@ class PagesRepository @Inject constructor(
         sb.appendLine("  };")
         sb.appendLine()
         sb.appendLine("  // 查找适用的中间件（挂载路径匹配当前请求路径）")
+        sb.appendLine("  // 根中间件 mountPath=/ 匹配所有路径")
         sb.appendLine("  const applicableMW = middlewares.filter(mw => {")
+        sb.appendLine("    if (mw.mountPath === '/') return true; // 根中间件匹配所有")
         sb.appendLine("    return path === mw.mountPath || path.startsWith(mw.mountPath + '/');")
         sb.appendLine("  });")
         sb.appendLine()
@@ -1092,7 +1114,15 @@ class PagesRepository @Inject constructor(
         sb.appendLine("// Worker 风格默认导出")
         sb.appendLine("export default {")
         sb.appendLine("  async fetch(request, env, ctx) {")
-        sb.appendLine("    const context = { request, env, ...ctx, params: {}, next: null };")
+        sb.appendLine("    const context = {")
+        sb.appendLine("      request,")
+        sb.appendLine("      env,")
+        sb.appendLine("      params: {},")
+        sb.appendLine("      data: {},")
+        sb.appendLine("      next: async () => fetchStaticAsset(request, env),")
+        sb.appendLine("      waitUntil: ctx && typeof ctx.waitUntil === 'function' ? ctx.waitUntil.bind(ctx) : () => {},")
+        sb.appendLine("      passThroughOnException: ctx && typeof ctx.passThroughOnException === 'function' ? ctx.passThroughOnException.bind(ctx) : () => {},")
+        sb.appendLine("    };")
         sb.appendLine("    return onRequest(context);")
         sb.appendLine("  }")
         sb.appendLine("};")
@@ -1103,10 +1133,11 @@ class PagesRepository @Inject constructor(
 
     /**
      * 在 Kotlin 层面构建路由的正则表达式字符串
-     * 返回 Pair<JS 正则字符串, 参数名列表>
+     * 返回 Triple<JS 正则字符串, 参数名列表, catch-all标志列表>
      */
-    private fun buildRouteRegex(pattern: String): Pair<String, List<String>> {
+    private fun buildRouteRegex(pattern: String): Triple<String, List<String>, List<Boolean>> {
         val paramNames = mutableListOf<String>()
+        val paramFlags = mutableListOf<Boolean>()  // true = catch-all
         val regexSb = StringBuilder()
         regexSb.append("^")
 
@@ -1127,6 +1158,7 @@ class PagesRepository @Inject constructor(
                     // 检查是否是 catch-all (*)
                     val isWildcard = j < pattern.length && pattern[j] == '*'
                     if (isWildcard) j++
+                    paramFlags.add(isWildcard)
 
                     // 添加正则捕获组
                     if (isWildcard) {
@@ -1154,7 +1186,7 @@ class PagesRepository @Inject constructor(
         }
 
         regexSb.append("\$")
-        return Pair(regexSb.toString(), paramNames)
+        return Triple(regexSb.toString(), paramNames, paramFlags)
     }
 
     /**
