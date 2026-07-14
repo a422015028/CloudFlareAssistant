@@ -297,6 +297,51 @@ class PagesViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
+
+    /**
+     * 带实时日志回调的部署方法。
+     * @param onLog 每条日志回调（主线程派发由调用方负责）
+     * @param onComplete 部署完成回调，参数为成功/失败标志和错误消息
+     */
+    fun createDeploymentWithLogs(
+        account: Account,
+        projectName: String,
+        branch: String,
+        file: java.io.File,
+        customCompatibilityDate: String? = null,
+        customCompatibilityFlags: List<String>? = null,
+        onLog: (String) -> Unit,
+        onComplete: (success: Boolean, errorMessage: String?) -> Unit
+    ) {
+        viewModelScope.launch {
+            _loadingState.value = true
+
+            val result = pagesRepository.createDeployment(
+                account, projectName, branch, file,
+                customCompatibilityDate, customCompatibilityFlags,
+                onLog = onLog
+            )
+
+            when (result) {
+                is Resource.Success -> {
+                    onLog("◇ 刷新项目列表...")
+                    loadProjects(account)
+                    _message.emit("部署创建成功")
+                    onComplete(true, null)
+                }
+                is Resource.Error -> {
+                    _message.emit("部署失败: ${result.message}")
+                    onComplete(false, result.message)
+                }
+                is Resource.Loading -> {}
+            }
+
+            // 清理临时 zip 文件
+            file.delete()
+
+            _loadingState.value = false
+        }
+    }
     
     // ==================== Configuration Management ====================
     

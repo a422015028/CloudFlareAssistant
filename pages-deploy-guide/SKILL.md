@@ -78,6 +78,7 @@ If the zip contains a single top-level wrapper directory (e.g., `myproject/`), t
 | TSX `.tsx` | Yes | Sucrase + JSX transform |
 | JSX `.jsx` | Yes | Sucrase + JSX transform |
 | Module imports | Yes | Relative paths auto-rewritten to `./func_N.js` |
+| NPM packages | Yes | esbuild-wasm bundles bare imports via esm.sh CDN (on-demand download) |
 | Static asset fallback | Yes | `env.ASSETS.fetch(request)` |
 | `_routes.json` | Yes | Auto-generated or user-provided |
 
@@ -94,7 +95,9 @@ export function onRequestGet(context) {
 }
 ```
 
-The app detects `/** @jsx functionName */` comments and configures Sucrase accordingly.
+The app detects `/** @jsx functionName */` comments and configures both Sucrase and esbuild accordingly.
+
+**Critical**: esbuild scans ALL comments in the source file for `@jsx` directives. Source-file `@jsx` pragma takes **precedence** over the `jsxFactory` build option. Never put `@jsx` in any comment other than the actual pragma directive — a comment like `// 验证 @jsx pragma 生效` will be interpreted as a pragma, overriding the intended factory function and causing `ReferenceError` at runtime.
 
 ### Module Import Resolution
 
@@ -106,14 +109,72 @@ The app rewrites relative imports (`./`, `../`) to `./func_N.js` format. Resolut
 
 All three import forms are handled: `from "..."`, `import "..."`, `import("...")`.
 
+### NPM Package Support (esbuild-wasm)
+
+Files containing **bare imports** (e.g., `import React from 'react'`) are automatically routed to esbuild-wasm for bundling. The app detects bare imports — any import specifier that is NOT a relative path (`./`, `../`), absolute path (`/`), or URL (`http://`, `https://`).
+
+**How it works:**
+1. App detects bare imports in function files (any extension: `.js`, `.ts`, `.tsx`, `.jsx`)
+2. esbuild-wasm files are downloaded on-demand (not bundled in APK) from jsdelivr CDN
+3. esbuild bundles each file: inlines NPM dependencies from esm.sh CDN, transforms TS/JSX
+4. Relative imports (`./`, `../`) are marked as `external` — preserved for the import rewriter
+5. Output is self-contained JS with NPM code inlined + relative imports preserved
+
+**Example:**
+```typescript
+// functions/api/qr.ts — uses NPM package
+import QRCode from 'qrcode'
+
+export function onRequestGet() {
+  const data = QRCode.toDataURL('hello')
+  return new Response(`<img src="${data}">`)
+}
+```
+
+**Requirements:**
+- Network connection required (esbuild-wasm download + esm.sh CDN fetch)
+- First use triggers ~12MB download (esbuild-wasm.js + esbuild.wasm), cached afterward
+- Files without bare imports still use Sucrase (offline, 193KB, no download needed)
+
+**Dual-path architecture:**
+- Files WITH bare imports → esbuild-wasm (NPM bundling + TS/JSX transform)
+- Files WITHOUT bare imports → Sucrase (TS/JSX transform only, offline)
+
+**Version management:**
+- App queries npm registry (`registry.npmjs.org/esbuild-wasm/latest`) for latest version
+- Local cached version compared against latest; re-downloads if outdated
+- Version cached in app private storage (`esbuild/version.txt`)
+
+**Multi-CDN download:**
+- jsdelivr (`cdn.jsdelivr.net`) as primary CDN, unpkg (`unpkg.com`) as fallback
+- Downloads `esm/browser.min.js` (JS) and `esbuild.wasm` (WASM binary) separately
+- Files stored in app private storage (`filesDir/esbuild/`), never in public directories
+
+**esm.sh CDN integration:**
+- Bare imports resolved via `https://esm.sh/{package}?bundle`
+- `?bundle` parameter returns self-contained single file — inlines all submodule dependencies (e.g., crypto-js's internal `./core` imports)
+- CDN module relative imports resolved against final redirected URL
+- Relative imports from original source file marked as `external` (not sent to CDN)
+
+**WebView integration:**
+- esbuild-wasm runs inside Android WebView with `worker: false` for compatibility
+- `shouldInterceptRequest` intercepts local WASM/JS files from private storage
+- CDN fetches (esm.sh) pass through unintercepted
+- Dynamic `import()` loads esbuild ESM module (avoids `<script type="module">` scope issues)
+
+**JSX pragma detection:**
+- App detects `/** @jsx h */` comments and sets esbuild's `jsxFactory` option
+- Also detects `/** @jsxFrag Fragment */` for fragment pragma
+- **Warning**: esbuild also scans ALL source comments for `@jsx` — see Common Pitfalls #5
+
 ## Functions Standard Mode — Unsupported Features
 
 | Feature | Reason | Workaround |
 |---------|--------|------------|
-| NPM dependencies | No bundler in offline environment | Copy dependency code into project, or use Workers native APIs |
 | TS path aliases | `tsconfig.json` not read | Use relative paths (`../utils/types`) |
 | Dynamic import variables | Static analysis only | Use static import paths |
 | Node.js APIs | Workers runtime (not Node.js) | Use `nodejs_compat` compatibility flag for limited support |
+| esbuild RE2 regex lookahead | esbuild's onResolve/onLoad filters use Go RE2 engine (no negative lookahead) | Split into sequential callback handlers |
 
 ## Static Asset Features
 
@@ -209,7 +270,9 @@ The app follows the Wrangler direct upload flow:
 1. **`_worker.js` must use Module syntax**: `export default { async fetch(request, env) { ... } }`, not `addEventListener('fetch', ...)`.
 2. **Functions must export `onRequest`**: or method-specific variants like `onRequestGet`.
 3. **No `_worker.js/` directory**: Use single file or `functions/` mode instead.
-4. **JSX needs pragma**: Add `/** @jsx h */` and import `h` function.
-5. **Imports must be relative**: `import { x } from './utils.js'`, not `import { x } from 'utils'`.
-6. **`_headers` and `_redirects` don't apply to Functions**: Handle in code.
-7. **Static assets in `functions/` mode**: Place outside `functions/` directory at project root.
+4. **JSX needs pragma**: Add `/** @jsx h */` at file top and define/import `h` function.
+5. **Never put `@jsx` in comments**: esbuild scans ALL comments for `@jsx` directives. A comment like `// 验证 @jsx pragma` will be misinterpreted as a pragma, overriding `@jsx h` and causing `ReferenceError`. Only use `@jsx` in the actual pragma directive.
+6. **NPM packages need network**: Bare imports trigger esbuild-wasm (requires download + CDN access). Relative imports work offline via Sucrase.
+7. **`_headers` and `_redirects` don't apply to Functions**: Handle in code.
+8. **Static assets in `functions/` mode**: Place outside `functions/` directory at project root.
+9. **QR code async**: `QRCode.toDataURL()` returns a Promise — must `await` it, otherwise output shows `[object Promise]`.

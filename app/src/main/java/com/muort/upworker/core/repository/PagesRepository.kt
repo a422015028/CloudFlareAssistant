@@ -3,6 +3,8 @@ package com.muort.upworker.core.repository
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.EsbuildBundler
+import com.muort.upworker.core.util.EsbuildInput
 import com.muort.upworker.core.util.SucraseInput
 import com.muort.upworker.core.util.SucraseTransformer
 import com.muort.upworker.core.util.safeApiCall
@@ -25,7 +27,8 @@ import javax.inject.Singleton
 @Singleton
 class PagesRepository @Inject constructor(
     private val api: CloudFlareApi,
-    private val sucraseTransformer: SucraseTransformer
+    private val sucraseTransformer: SucraseTransformer,
+    private val esbuildBundler: EsbuildBundler
 ) {
 
     suspend fun listProjects(account: Account): Resource<List<PagesProject>> =   
@@ -455,17 +458,19 @@ class PagesRepository @Inject constructor(
         }  
     }  
       
-    suspend fun createDeployment(  
-        account: Account,  
-        projectName: String,  
-        branch: String,  
+    suspend fun createDeployment(
+        account: Account,
+        projectName: String,
+        branch: String,
         file: java.io.File,
         customCompatibilityDate: String? = null,
-        customCompatibilityFlags: List<String>? = null
-    ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {  
-        safeApiCall {  
-            if (!file.exists()) {  
-                return@safeApiCall Resource.Error("文件不存在")  
+        customCompatibilityFlags: List<String>? = null,
+        onLog: ((String) -> Unit)? = null
+    ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            if (!file.exists()) {
+                onLog?.invoke("✗ 文件不存在")
+                return@safeApiCall Resource.Error("文件不存在")
             }
 
             val isZip = file.name.endsWith(".zip", ignoreCase = true)
@@ -473,36 +478,48 @@ class PagesRepository @Inject constructor(
             val isHtml = file.name.endsWith(".htm", ignoreCase = true) ||
                          file.name.endsWith(".html", ignoreCase = true)
             if (!isZip && !isJs && !isHtml) {
+                onLog?.invoke("✗ 仅支持 .zip、.js 或 .html 文件部署")
                 return@safeApiCall Resource.Error("仅支持 .zip、.js 或 .html 文件部署。")
             }
 
             val finalCompatibilityDate = customCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
-  
+            onLog?.invoke("▶ 开始部署项目: $projectName")
+            onLog?.invoke("  ├─ 文件: ${file.name} (${formatFileSize(file.length())})")
+            onLog?.invoke("  ├─ 分支: $branch")
+            onLog?.invoke("  └─ 兼容性日期: $finalCompatibilityDate")
+
             // 1. 校验并创建项目
-            val projectExists = checkProjectExists(account, projectName)  
-            if (!projectExists) {  
+            val projectExists = checkProjectExists(account, projectName)
+            if (!projectExists) {
+                onLog?.invoke("◇ 项目不存在，正在创建新项目...")
                 // 新项目：用户自定义日期 > 默认兼容日期
                 createProject(account, projectName, branch, finalCompatibilityDate)
+                onLog?.invoke("  └─ 项目创建完成")
             } else {
+                onLog?.invoke("◇ 项目已存在")
                 // 已有项目：只有用户自定义日期时才更新，没有自定义则不修改
                 customCompatibilityDate?.let {
                     updateProjectCompatibilityDate(account, projectName, it)
+                    onLog?.invoke("  └─ 已更新兼容性日期")
                 }
             }
 
             // 更新 compatibility_flags（无论项目是否新建，都确保 flags 同步）
             if (customCompatibilityFlags != null) {
+                onLog?.invoke("◇ 同步兼容性标志: $customCompatibilityFlags")
                 updateProjectCompatibilityFlags(account, projectName, customCompatibilityFlags)
-            }  
+            }
 
             // 单文件 .js 部署：直接作为 Worker 脚本上传（bundle 接口）
             if (isJs) {
-                return@safeApiCall deployWorkerOnly(account, projectName, file)
+                onLog?.invoke("◇ 检测到 .js 文件，使用 Worker 脚本模式部署")
+                return@safeApiCall deployWorkerOnly(account, projectName, file, onLog)
             }
 
             // 单文件 .htm/.html 部署：走原有 manifest-only 流程
             if (isHtml) {
-                return@safeApiCall deployStaticAssetOnly(account, projectName, file)
+                onLog?.invoke("◇ 检测到 HTML 文件，使用静态资源模式部署")
+                return@safeApiCall deployStaticAssetOnly(account, projectName, file, onLog)
             }
 
             // zip 文件部署
@@ -510,7 +527,9 @@ class PagesRepository @Inject constructor(
             tempDir.mkdirs()
 
             try {
+                onLog?.invoke("◇ 解压 ZIP 文件...")
                 unzip(file, tempDir)
+                onLog?.invoke("  └─ 解压完成")
 
                 // 智能穿透嵌套目录
                 var baseDir = tempDir
@@ -588,20 +607,27 @@ class PagesRepository @Inject constructor(
                 }
                 baseDir.listFiles()?.forEach { collectFiles(it) }
 
+                onLog?.invoke("◇ 收集文件完成: ${allFiles.size} 个静态资产" +
+                    (if (workerJsFile != null) " + _worker.js" else "") +
+                    (if (hasFunctionsDir) " + functions 目录" else ""))
+
                 // 如果是 _worker.js 单文件模式，构建 bundle
                 val effectiveWorkerBundle: RequestBody? = if (workerJsFile != null) {
                     Timber.d("使用 _worker.js 单文件模式")
+                    onLog?.invoke("◇ 构建 _worker.js bundle...")
                     buildWorkerBundle(workerJsFile!!)
                 } else {
                     null
                 }
 
                 if (allFiles.isEmpty() && effectiveWorkerBundle == null && !hasFunctionsDir) {
+                    onLog?.invoke("✗ 压缩包内无有效文件")
                     return@safeApiCall Resource.Error("压缩包内无有效文件")
                 }
 
                 // 2. 【Wrangler 步骤一】向 Cloudflare 申请专属资源上传 JWT Token
                 // 如果只有 _worker.js 没有静态资产，也需要获取 token（资产库为空时也可创建部署）
+                onLog?.invoke("◇ 申请资产上传 Token...")
                 val tokenResponse = api.getPagesUploadToken(
                     token = AuthHelper.getBearerToken(account),  
                     email = AuthHelper.getEmail(account),  
@@ -609,10 +635,16 @@ class PagesRepository @Inject constructor(
                     accountId = account.accountId,  
                     projectName = projectName
                 )
-                val jwt = tokenResponse.body()?.result?.jwt ?: return@safeApiCall Resource.Error("无法获取资产上传 Token")
+                val jwt = tokenResponse.body()?.result?.jwt
+                if (jwt == null) {
+                    onLog?.invoke("✗ 无法获取资产上传 Token")
+                    return@safeApiCall Resource.Error("无法获取资产上传 Token")
+                }
+                onLog?.invoke("  └─ Token 获取成功")
 
                 // 3. 【Wrangler 步骤二】把本地解压出的文件转为 Base64 对象批量上传至资源库
                 if (allFiles.isNotEmpty()) {
+                    onLog?.invoke("◇ 上传 ${allFiles.size} 个静态资产...")
                     val assetPayloads = allFiles.map { currentFile ->
                         val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
                         val cfHash = manifestMap[relativePath] ?: ""
@@ -658,11 +690,14 @@ class PagesRepository @Inject constructor(
                     // 执行资产库推送
                     val uploadResponse = api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = assetPayloads)
                     if (!uploadResponse.isSuccessful) {
+                        onLog?.invoke("✗ 资产上传失败，HTTP ${uploadResponse.code()}")
                         return@safeApiCall Resource.Error("资产原子层同步失败，HTTP Code: ${uploadResponse.code()}")
                     }
+                    onLog?.invoke("  └─ 资产上传完成")
                 }
 
                 // 3.b 【Wrangler upsert-hashes】更新资产哈希列表，初始化部署会话（即使没有静态资产也需要）
+                onLog?.invoke("◇ 更新资产哈希列表...")
                 val allHashes = manifestMap.values.toList()
                 val upsertResponse = api.upsertPagesAssetHashes(
                     jwtToken = "Bearer $jwt",
@@ -670,6 +705,9 @@ class PagesRepository @Inject constructor(
                 )
                 if (!upsertResponse.isSuccessful) {
                     Timber.w("upsert-hashes 返回非成功状态: HTTP ${upsertResponse.code()}，继续尝试部署")
+                    onLog?.invoke("  └─ 哈希更新返回 HTTP ${upsertResponse.code()}（继续尝试部署）")
+                } else {
+                    onLog?.invoke("  └─ 哈希列表已更新")
                 }
 
                 // 4. 【Wrangler 步骤三】组装纯清单 Manifest JSON 触发 CDN 全球路由刷新
@@ -682,6 +720,7 @@ class PagesRepository @Inject constructor(
                 // 优先级: _worker.js (高级模式, 单文件) > functions/ (标准模式) > 纯静态
                 val response = if (effectiveWorkerBundle != null) {
                     Timber.d("_worker.bundle 大小: ${effectiveWorkerBundle.contentLength()} 字节")
+                    onLog?.invoke("◇ 创建部署（Worker Bundle 模式）...")
                     val workerBundlePart = MultipartBody.Part.createFormData(
                         "_worker.bundle", "_worker.bundle", effectiveWorkerBundle
                     )
@@ -697,13 +736,16 @@ class PagesRepository @Inject constructor(
                 } else if (hasFunctionsDir) {
                     // Pages Functions 标准模式：检测到 functions/ 目录
                     Timber.d("检测到 functions 目录，使用 Pages Functions 标准模式部署")
+                    onLog?.invoke("◇ 创建部署（Pages Functions 标准模式）...")
                     return@safeApiCall deployWithFunctions(
                         account = account,
                         projectName = projectName,
                         baseDir = baseDir,
-                        manifestMap = manifestMap
+                        manifestMap = manifestMap,
+                        onLog = onLog
                     )
                 } else {
+                    onLog?.invoke("◇ 创建部署（静态资源模式）...")
                     api.createPagesDeploymentManifestOnly(
                         token = AuthHelper.getBearerToken(account),
                         email = AuthHelper.getEmail(account),
@@ -714,16 +756,24 @@ class PagesRepository @Inject constructor(
                     )
                 }
                   
-                if (response.isSuccessful && response.body()?.success == true) {  
-                    response.body()?.result?.let {  
-                        Resource.Success(it)  
-                    } ?: Resource.Error("部署创建成功，但没有返回结果")  
-                } else {  
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val deployment = response.body()?.result
+                    if (deployment != null) {
+                        onLog?.invoke("✓ 部署成功")
+                        deployment.url?.let { onLog?.invoke("  └─ URL: $it") }
+                        Resource.Success(deployment)
+                    } else {
+                        onLog?.invoke("△ 部署成功，但没有返回结果")
+                        Resource.Error("部署创建成功，但没有返回结果")
+                    }
+                } else {
                     val errorBody = response.errorBody()?.string() ?: "无错误响应体"
                     val apiErrors = response.body()?.errors?.joinToString("; ") { "${it.code}: ${it.message}" }
                     val errorMsg = "部署失败: HTTP ${response.code()}, ${response.message()}. API错误: $apiErrors. 响应体: $errorBody"
                     Timber.e(errorMsg)
-                    Resource.Error(errorMsg)  
+                    onLog?.invoke("✗ 部署失败: HTTP ${response.code()}")
+                    apiErrors?.let { onLog?.invoke("  └─ $it") }
+                    Resource.Error(errorMsg)
                 }
             } finally { 
                 tempDir.deleteRecursively() // 彻底清理碎片
@@ -753,13 +803,16 @@ class PagesRepository @Inject constructor(
     private suspend fun deployStaticAssetOnly(
         account: Account,
         projectName: String,
-        htmlFile: File
+        htmlFile: File,
+        onLog: ((String) -> Unit)? = null
     ): Resource<PagesDeployment> {
         if (htmlFile.length() == 0L) {
+            onLog?.invoke("✗ 文件内容为空（0字节）")
             return Resource.Error("文件内容为空（0字节）")
         }
 
         // 1. 获取 upload token
+        onLog?.invoke("◇ 申请资产上传 Token...")
         val tokenResponse = api.getPagesUploadToken(
             token = AuthHelper.getBearerToken(account),
             email = AuthHelper.getEmail(account),
@@ -768,7 +821,11 @@ class PagesRepository @Inject constructor(
             projectName = projectName
         )
         val jwt = tokenResponse.body()?.result?.jwt
-            ?: return Resource.Error("无法获取资产上传 Token")
+        if (jwt == null) {
+            onLog?.invoke("✗ 无法获取资产上传 Token")
+            return Resource.Error("无法获取资产上传 Token")
+        }
+        onLog?.invoke("  └─ Token 获取成功")
 
         // 2. 计算文件 hash，构建 manifest
         val relativePath = "/index.html"
@@ -776,6 +833,7 @@ class PagesRepository @Inject constructor(
         val manifestMap = mapOf(relativePath to cfHash)
 
         // 3. 上传资产（Base64）
+        onLog?.invoke("◇ 上传 HTML 资产...")
         val base64Str = android.util.Base64.encodeToString(htmlFile.readBytes(), android.util.Base64.NO_WRAP)
         val assetPayload = PagesAssetPayload(
             key = cfHash,
@@ -784,16 +842,21 @@ class PagesRepository @Inject constructor(
         )
         val uploadResponse = api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = listOf(assetPayload))
         if (!uploadResponse.isSuccessful) {
+            onLog?.invoke("✗ 资产上传失败，HTTP ${uploadResponse.code()}")
             return Resource.Error("资产上传失败，HTTP Code: ${uploadResponse.code()}")
         }
+        onLog?.invoke("  └─ 资产上传完成")
 
         // 4. upsert-hashes
+        onLog?.invoke("◇ 更新资产哈希列表...")
         api.upsertPagesAssetHashes(
             jwtToken = "Bearer $jwt",
             body = PagesUpsertHashesPayload(hashes = manifestMap.values.toList())
         )
+        onLog?.invoke("  └─ 哈希列表已更新")
 
         // 5. 创建部署（manifest-only）
+        onLog?.invoke("◇ 创建部署（HTML 模式）...")
         val manifestJson = manifestMap.entries.joinToString(",", "{", "}") { entry ->
             "\"${entry.key}\":\"${entry.value}\""
         }
@@ -808,10 +871,18 @@ class PagesRepository @Inject constructor(
         )
 
         return if (response.isSuccessful && response.body()?.success == true) {
-            response.body()?.result?.let { Resource.Success(it) }
-                ?: Resource.Error("部署创建成功，但没有返回结果")
+            val deployment = response.body()?.result
+            if (deployment != null) {
+                onLog?.invoke("✓ 部署成功")
+                deployment.url?.let { onLog?.invoke("  └─ URL: $it") }
+                Resource.Success(deployment)
+            } else {
+                onLog?.invoke("△ 部署成功，但没有返回结果")
+                Resource.Error("部署创建成功，但没有返回结果")
+            }
         } else {
             val errorBody = response.errorBody()?.string() ?: "无错误响应体"
+            onLog?.invoke("✗ 部署失败: HTTP ${response.code()}")
             Resource.Error("部署失败: HTTP ${response.code()}, ${response.message()}. 响应体: $errorBody")
         }
     }
@@ -822,13 +893,16 @@ class PagesRepository @Inject constructor(
     private suspend fun deployWorkerOnly(
         account: Account,
         projectName: String,
-        workerFile: File
+        workerFile: File,
+        onLog: ((String) -> Unit)? = null
     ): Resource<PagesDeployment> {
         if (workerFile.length() == 0L) {
+            onLog?.invoke("✗ Worker 脚本文件内容为空（0字节）")
             return Resource.Error("Worker 脚本文件内容为空（0字节）")
         }
 
         // 获取 upload token（即使没有静态资产也需要）
+        onLog?.invoke("◇ 申请资产上传 Token...")
         val tokenResponse = api.getPagesUploadToken(
             token = AuthHelper.getBearerToken(account),
             email = AuthHelper.getEmail(account),
@@ -837,20 +911,28 @@ class PagesRepository @Inject constructor(
             projectName = projectName
         )
         val jwt = tokenResponse.body()?.result?.jwt
-            ?: return Resource.Error("无法获取资产上传 Token")
+        if (jwt == null) {
+            onLog?.invoke("✗ 无法获取资产上传 Token")
+            return Resource.Error("无法获取资产上传 Token")
+        }
+        onLog?.invoke("  └─ Token 获取成功")
 
         // upsert-hashes（空列表，初始化部署会话）
+        onLog?.invoke("◇ 初始化部署会话...")
         api.upsertPagesAssetHashes(
             jwtToken = "Bearer $jwt",
             body = PagesUpsertHashesPayload(hashes = emptyList())
         )
+        onLog?.invoke("  └─ 会话已初始化")
 
         // 空 manifest + _worker.bundle
+        onLog?.invoke("◇ 构建 _worker.js bundle...")
         val manifestBody = "{}".toRequestBody("application/json".toMediaType())
         val workerBundle = buildWorkerBundle(workerFile)
         val workerBundlePart = MultipartBody.Part.createFormData(
             "_worker.bundle", "_worker.bundle", workerBundle
         )
+        onLog?.invoke("◇ 创建部署（Worker 脚本模式）...")
         val response = api.createPagesDeploymentWithWorker(
             token = AuthHelper.getBearerToken(account),
             email = AuthHelper.getEmail(account),
@@ -862,10 +944,18 @@ class PagesRepository @Inject constructor(
         )
 
         return if (response.isSuccessful && response.body()?.success == true) {
-            response.body()?.result?.let { Resource.Success(it) }
-                ?: Resource.Error("部署创建成功，但没有返回结果")
+            val deployment = response.body()?.result
+            if (deployment != null) {
+                onLog?.invoke("✓ 部署成功")
+                deployment.url?.let { onLog?.invoke("  └─ URL: $it") }
+                Resource.Success(deployment)
+            } else {
+                onLog?.invoke("△ 部署成功，但没有返回结果")
+                Resource.Error("部署创建成功，但没有返回结果")
+            }
         } else {
             val errorBody = response.errorBody()?.string() ?: "无错误响应体"
+            onLog?.invoke("✗ 部署失败: HTTP ${response.code()}")
             Resource.Error("部署失败: HTTP ${response.code()}, ${response.message()}. 响应体: $errorBody")
         }
     }
@@ -1004,23 +1094,39 @@ class PagesRepository @Inject constructor(
                         )
                         Timber.d("collectFunctions: 找到中间件 $relativePath → 挂载: $mountPath")
                     } else {
-                        // 普通路由：检测所有导出的处理函数
+                        // 普通文件：检测所有导出的处理函数
                         val routePath = convertFunctionPathToRoute(relativePath)
                         val exports = detectExportFunctions(content)
-                        for (exportName in exports) {
-                            val method = extractMethodFromExport(exportName)
+                        if (exports.isEmpty()) {
+                            // 工具模块：无 onRequest* 导出，不是路由，但仍需加入列表以保证 import 可解析
                             functionFiles.add(
                                 FunctionFile(
                                     relativePath = relativePath,
                                     routePath = routePath,
-                                    method = method,
+                                    method = "",
                                     content = content,
-                                    moduleExport = exportName,
+                                    moduleExport = "",
                                     isMiddleware = false,
                                     mountPath = mountPath
                                 )
                             )
-                            Timber.d("collectFunctions: 找到 Function $relativePath → 路由: $routePath, 方法: ${method.ifEmpty { "ALL" }}, 导出: $exportName")
+                            Timber.d("collectFunctions: 找到工具模块 $relativePath（非路由）")
+                        } else {
+                            for (exportName in exports) {
+                                val method = extractMethodFromExport(exportName)
+                                functionFiles.add(
+                                    FunctionFile(
+                                        relativePath = relativePath,
+                                        routePath = routePath,
+                                        method = method,
+                                        content = content,
+                                        moduleExport = exportName,
+                                        isMiddleware = false,
+                                        mountPath = mountPath
+                                    )
+                                )
+                                Timber.d("collectFunctions: 找到 Function $relativePath → 路由: $routePath, 方法: ${method.ifEmpty { "ALL" }}, 导出: $exportName")
+                            }
                         }
                     }
                 }
@@ -1086,7 +1192,8 @@ class PagesRepository @Inject constructor(
             return listOf("onRequest")
         }
 
-        return listOf("onRequest") // 默认
+        // 无 onRequest* 导出 → 工具模块（非路由），返回空列表
+        return emptyList()
     }
 
     /**
@@ -1164,7 +1271,8 @@ class PagesRepository @Inject constructor(
         }
 
         // 部署前验证：扫描所有模块，确保没有未重写的相对导入
-        val validateRegex = Regex("""["'](\.\.?/[^"']+)["']""")
+        // 只匹配真正的 ES module import/export 语句，不匹配 UMD wrapper 中的字符串字面量（如 define(["./core"], x)）
+        val validateRegex = Regex("""(?:from\s*|import\s+|import\s*\(\s*)["'](\.\.?/[^"']+)["']""")
         var unresolvedCount = 0
         rewrittenModules.forEach { (moduleName, content) ->
             val unresolved = validateRegex.findAll(content).map { it.groupValues[1] }.toList()
@@ -1463,59 +1571,119 @@ class PagesRepository @Inject constructor(
     }
 
     /**
-     * 使用 Sucrase 批量转换 TypeScript/JSX 文件为纯 JavaScript。
+     * 转换 Functions 文件为纯 JavaScript。
      *
-     * 对 .ts 文件启用 typescript transform（剥离类型注解）
-     * 对 .tsx 文件启用 typescript + jsx transform
-     * 对 .jsx 文件启用 jsx transform
-     * .js 文件跳过
+     * 分两条路径：
+     * 1. 含 bare imports（NPM 包导入）的文件 → esbuild-wasm 打包（内联 NPM 依赖 + TS/JSX 转换）
+     * 2. 不含 bare imports 的 .ts/.tsx/.jsx 文件 → Sucrase 转换（离线，193KB）
      *
-     * 转换失败时保留原始内容并记录警告（.ts 文件可能在运行时报错，但 .js 文件不受影响）。
+     * esbuild-wasm 文件按需下载，仅在有 bare imports 时触发。
+     * 相对导入（./ ../）在 esbuild 中标记为 external，保留给 import 重写器处理。
+     *
+     * 转换失败时保留原始内容并记录警告。
      */
     private suspend fun transformFunctionFiles(files: List<FunctionFile>): List<FunctionFile> {
-        // 找出需要转换的唯一文件（按 relativePath 去重）
-        val needsTransform = files.filter { f ->
-            f.relativePath.endsWith(".ts") ||
-            f.relativePath.endsWith(".tsx") ||
-            f.relativePath.endsWith(".jsx")
+        // 检测含有 bare imports 的文件（任何扩展名都可能有 NPM 包导入）
+        val esbuildFiles = files.filter { hasBareImports(it.content) }
+            .distinctBy { it.relativePath }
+
+        // 不含 bare imports 的 TS/JSX 文件 → Sucrase（原逻辑不变）
+        val sucraseFiles = files.filter { f ->
+            !hasBareImports(f.content) && (
+                f.relativePath.endsWith(".ts") ||
+                f.relativePath.endsWith(".tsx") ||
+                f.relativePath.endsWith(".jsx")
+            )
         }.distinctBy { it.relativePath }
 
-        if (needsTransform.isEmpty()) return files
+        if (esbuildFiles.isEmpty() && sucraseFiles.isEmpty()) return files
 
-        Timber.d("transformFunctionFiles: ${needsTransform.size} 个文件需要 Sucrase 转换")
+        // relativePath → 转换后内容
+        val resultMap = mutableMapOf<String, String>()
 
-        val inputs = needsTransform.map { f ->
-            SucraseInput(
-                id = f.relativePath,
-                content = f.content,
-                isTS = f.relativePath.endsWith(".ts") || f.relativePath.endsWith(".tsx"),
-                isJSX = f.relativePath.endsWith(".tsx") || f.relativePath.endsWith(".jsx")
-            )
+        // 路径 1: esbuild 处理含 bare imports 的文件
+        if (esbuildFiles.isNotEmpty()) {
+            Timber.d("transformFunctionFiles: ${esbuildFiles.size} 个文件含 bare imports，使用 esbuild 打包")
+
+            val available = esbuildBundler.ensureAvailable()
+            if (!available) {
+                Timber.w("transformFunctionFiles: esbuild-wasm 不可用，跳过 NPM 包打包")
+                esbuildFiles.forEach { f ->
+                    Timber.w("transformFunctionFiles: ✗ ${f.relativePath} esbuild 不可用")
+                }
+            } else {
+                val esbuildInputs = esbuildFiles.map { f ->
+                    val loader = when {
+                        f.relativePath.endsWith(".tsx") -> "tsx"
+                        f.relativePath.endsWith(".ts") -> "ts"
+                        f.relativePath.endsWith(".jsx") -> "jsx"
+                        else -> "js"
+                    }
+                    EsbuildInput(
+                        id = f.relativePath,
+                        content = f.content,
+                        filePath = f.relativePath,
+                        loader = loader
+                    )
+                }
+
+                val esbuildResults = esbuildBundler.bundleBatch(esbuildInputs)
+                esbuildResults.forEach { r ->
+                    if (r.success && r.code != null) {
+                        resultMap[r.id] = r.code
+                        Timber.d("transformFunctionFiles: ✓ ${r.id} esbuild 打包成功 (${r.code.length} 字符)")
+                    } else {
+                        Timber.w("transformFunctionFiles: ✗ ${r.id} esbuild 打包失败: ${r.error}")
+                    }
+                }
+            }
         }
 
-        val results = sucraseTransformer.transformBatch(inputs)
-        val resultMap = results.associateBy { it.id }
+        // 路径 2: Sucrase 处理不含 bare imports 的 TS/JSX 文件（原逻辑不变）
+        if (sucraseFiles.isNotEmpty()) {
+            Timber.d("transformFunctionFiles: ${sucraseFiles.size} 个文件使用 Sucrase 转换")
 
-        // 日志输出转换结果
-        results.forEach { r ->
-            if (r.success) {
-                Timber.d("transformFunctionFiles: ✓ ${r.id} 转换成功 (${r.code?.length} 字符)")
-            } else {
-                Timber.w("transformFunctionFiles: ✗ ${r.id} 转换失败: ${r.error}")
+            val inputs = sucraseFiles.map { f ->
+                SucraseInput(
+                    id = f.relativePath,
+                    content = f.content,
+                    isTS = f.relativePath.endsWith(".ts") || f.relativePath.endsWith(".tsx"),
+                    isJSX = f.relativePath.endsWith(".tsx") || f.relativePath.endsWith(".jsx")
+                )
+            }
+
+            val sucraseResults = sucraseTransformer.transformBatch(inputs)
+            sucraseResults.forEach { r ->
+                if (r.success && r.code != null) {
+                    resultMap[r.id] = r.code
+                    Timber.d("transformFunctionFiles: ✓ ${r.id} Sucrase 转换成功 (${r.code.length} 字符)")
+                } else {
+                    Timber.w("transformFunctionFiles: ✗ ${r.id} Sucrase 转换失败: ${r.error}")
+                }
             }
         }
 
         // 更新文件内容
         return files.map { file ->
-            val result = resultMap[file.relativePath]
-            if (result != null && result.success && result.code != null) {
-                file.copy(content = result.code)
-            } else if (result != null && !result.success) {
-                Timber.w("Sucrase 转换失败 ${file.relativePath}: ${result.error}")
-                file // 保留原始内容
+            val transformed = resultMap[file.relativePath]
+            if (transformed != null) {
+                file.copy(content = transformed)
             } else {
-                file
+                file // 保留原始内容
             }
+        }
+    }
+
+    /**
+     * 检测文件内容是否含有 bare imports（NPM 包导入）。
+     * bare import = 不是相对路径（./ ../）、绝对路径（/）、或 URL（http:// https://）的导入。
+     */
+    private fun hasBareImports(content: String): Boolean {
+        val regex = Regex("""(?:from\s+|import\s+|import\s*\()\s*["']([^"']+)["']""")
+        return regex.findAll(content).any { match ->
+            val spec = match.groupValues[1]
+            !spec.startsWith("./") && !spec.startsWith("../") &&
+            !spec.startsWith("/") && !spec.startsWith("http://") && !spec.startsWith("https://")
         }
     }
 
@@ -1531,9 +1699,9 @@ class PagesRepository @Inject constructor(
     private fun buildFunctionsEntryScript(functionFiles: List<FunctionFile>, moduleMap: Map<String, Int>): String {
         val sb = StringBuilder()
 
-        // 分离中间件和普通路由
+        // 分离中间件和普通路由（moduleExport 为空的是工具模块，不参与路由分发）
         val middlewares = functionFiles.filter { it.isMiddleware }.sortedBy { it.mountPath.length }
-        val routes = functionFiles.filter { !it.isMiddleware }
+        val routes = functionFiles.filter { !it.isMiddleware && it.moduleExport.isNotEmpty() }
 
         sb.appendLine("// ========================================")
         sb.appendLine("// Pages Functions 自动生成的入口分发器")
@@ -1782,7 +1950,8 @@ class PagesRepository @Inject constructor(
      * 中间件以 middleware 字段表示，普通路由以 module 字段表示
      */
     private fun buildFunctionsRoutingConfig(functionFiles: List<FunctionFile>): String {
-        val routes = functionFiles.map { func ->
+        // 只处理路由和中间件，跳过工具模块（moduleExport 为空）
+        val routes = functionFiles.filter { it.isMiddleware || it.moduleExport.isNotEmpty() }.map { func ->
             if (func.isMiddleware) {
                 """
                 {
@@ -1815,7 +1984,7 @@ class PagesRepository @Inject constructor(
      * 将所有 Function 路由和中间件挂载路径转换为 include 模式
      */
     private fun buildRoutesConfig(functionFiles: List<FunctionFile>): String {
-        val includePatterns = functionFiles.map { func ->
+        val includePatterns = functionFiles.filter { it.isMiddleware || it.moduleExport.isNotEmpty() }.map { func ->
             if (func.isMiddleware) {
                 // 中间件的挂载路径
                 func.mountPath
@@ -1847,23 +2016,33 @@ class PagesRepository @Inject constructor(
         account: Account,
         projectName: String,
         baseDir: File,
-        manifestMap: Map<String, String>
+        manifestMap: Map<String, String>,
+        onLog: ((String) -> Unit)? = null
     ): Resource<PagesDeployment> {
         val rawFunctionFiles = collectFunctions(baseDir)
-            ?: return Resource.Error("未找到 functions 目录或目录为空")
+        if (rawFunctionFiles == null) {
+            onLog?.invoke("✗ 未找到 functions 目录或目录为空")
+            return Resource.Error("未找到 functions 目录或目录为空")
+        }
 
         Timber.d("deployWithFunctions: 找到 ${rawFunctionFiles.size} 个 Function 文件")
+        onLog?.invoke("◇ 收集到 ${rawFunctionFiles.size} 个 Function 文件")
 
         // 0. Sucrase 转换 TypeScript/JSX → 纯 JavaScript
+        onLog?.invoke("◇ 转换 TypeScript/JSX...")
         val functionFiles = transformFunctionFiles(rawFunctionFiles)
+        onLog?.invoke("  └─ 转换完成")
 
         // 1. 构建 Functions bundle（内部会重写 import 路径）
+        onLog?.invoke("◇ 构建 Functions bundle...")
         val workerBundle = buildFunctionsBundle(functionFiles)
         val workerBundlePart = MultipartBody.Part.createFormData(
             "_worker.bundle", "_worker.bundle", workerBundle
         )
+        onLog?.invoke("  └─ bundle 已构建")
 
         // 2. 构建 functions-filepath-routing-config.json
+        onLog?.invoke("◇ 构建路由配置...")
         val routingConfig = buildFunctionsRoutingConfig(functionFiles)
         val routingConfigBody = routingConfig.toRequestBody("application/json".toMediaType())
         val routingConfigPart = MultipartBody.Part.createFormData(
@@ -1883,6 +2062,7 @@ class PagesRepository @Inject constructor(
         val routesJsonPart = MultipartBody.Part.createFormData(
             "_routes.json", "_routes.json", routesJsonBody
         )
+        onLog?.invoke("  └─ 路由配置已就绪")
 
         // 4. 构建 manifest（作为表单字段而非文件上传）
         val manifestJson = manifestMap.entries.joinToString(",", "{", "}") { entry ->
@@ -1899,6 +2079,7 @@ class PagesRepository @Inject constructor(
         parts.add(routesJsonPart)
 
         // 6. 发送部署请求
+        onLog?.invoke("◇ 发送部署请求...")
         val response = api.createPagesDeploymentWithFunctions(
             token = AuthHelper.getBearerToken(account),
             email = AuthHelper.getEmail(account),
@@ -1909,14 +2090,22 @@ class PagesRepository @Inject constructor(
         )
 
         return if (response.isSuccessful && response.body()?.success == true) {
-            response.body()?.result?.let {
-                Resource.Success(it)
-            } ?: Resource.Error("部署创建成功，但没有返回结果")
+            val deployment = response.body()?.result
+            if (deployment != null) {
+                onLog?.invoke("✓ 部署成功")
+                deployment.url?.let { onLog?.invoke("  └─ URL: $it") }
+                Resource.Success(deployment)
+            } else {
+                onLog?.invoke("△ 部署成功，但没有返回结果")
+                Resource.Error("部署创建成功，但没有返回结果")
+            }
         } else {
             val errorBody = response.errorBody()?.string() ?: "无错误响应体"
             val apiErrors = response.body()?.errors?.joinToString("; ") { "${it.code}: ${it.message}" }
             val errorMsg = "部署失败: HTTP ${response.code()}, ${response.message()}. API错误: $apiErrors. 响应体: $errorBody"
             Timber.e(errorMsg)
+            onLog?.invoke("✗ 部署失败: HTTP ${response.code()}")
+            apiErrors?.let { onLog?.invoke("  └─ $it") }
             Resource.Error(errorMsg)
         }
     }
@@ -2175,15 +2364,17 @@ class PagesRepository @Inject constructor(
         ZipInputStream(FileInputStream(zipFile)).use { zis ->
             var entry = zis.nextEntry
             while (entry != null) {
-                val newFile = File(targetDir, entry.name)
-                Timber.d("unzip: entry=${entry.name}, size=${entry.size}, compressedSize=${entry.compressedSize}, isDirectory=${entry.isDirectory}")
+                // 归一化路径分隔符：Windows 创建的 zip 可能使用反斜杠，Android 上需要正斜杠
+                val entryName = entry.name.replace("\\", "/")
+                val newFile = File(targetDir, entryName)
+                Timber.d("unzip: entry=${entryName}, size=${entry.size}, compressedSize=${entry.compressedSize}, isDirectory=${entry.isDirectory}")
                 if (entry.isDirectory) {
                     newFile.mkdirs()
                 } else {
                     newFile.parentFile?.mkdirs()
                     newFile.outputStream().use { fos ->
                         val copied = zis.copyTo(fos)
-                        Timber.d("unzip: 解压 ${entry.name} 完成, 复制了 $copied 字节, 文件大小=${newFile.length()}")
+                        Timber.d("unzip: 解压 ${entryName} 完成, 复制了 $copied 字节, 文件大小=${newFile.length()}")
                     }
                 }
                 zis.closeEntry()
@@ -2201,5 +2392,15 @@ class PagesRepository @Inject constructor(
         digest.update(ext.toByteArray(Charsets.UTF_8))
         val hashBytes = digest.digest()
         return hashBytes.joinToString("") { "%02x".format(it) }.substring(0, 32)
+    }
+
+    private fun formatFileSize(bytes: Long): String {
+        val kb = 1024.0
+        val mb = kb * 1024
+        return when {
+            bytes < kb -> "${bytes}B"
+            bytes < mb -> String.format("%.1fKB", bytes / kb)
+            else -> String.format("%.1fMB", bytes / mb)
+        }
     }
 }

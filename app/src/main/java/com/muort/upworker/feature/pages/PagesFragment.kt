@@ -45,6 +45,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
@@ -1291,7 +1292,7 @@ class PagesFragment : Fragment() {
         val projectName = binding.projectNameEdit.text.toString().trim()
         val branch = binding.branchEdit.text.toString().trim()
         val file = selectedFile
-        
+
         when {
             projectName.isEmpty() -> {
                 showToast("请输入项目名称")
@@ -1321,7 +1322,7 @@ class PagesFragment : Fragment() {
                 return
             }
         }
-        
+
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
             showToast("请先选择账号")
@@ -1330,27 +1331,137 @@ class PagesFragment : Fragment() {
 
         val customCompatibilityDate = binding.compatibilityDateEdit.text.toString().trim()
             .takeIf { it.isNotEmpty() }
-        
+
         val customCompatibilityFlags = binding.compatibilityFlagsEdit.text.toString().trim()
             .takeIf { it.isNotEmpty() }
             ?.split(Regex("[,\\n]"))
             ?.map { it.trim() }
             ?.filter { it.isNotEmpty() }
-        
-        // Show progress
+
+        Timber.d("Deploying project: $projectName, branch: $branch, file: ${file?.name}, compatibilityDate: $customCompatibilityDate, compatibilityFlags: $customCompatibilityFlags")
+
+        // 弹出部署日志对话框
+        showDeployLogsDialog(
+            account = account,
+            projectName = projectName,
+            branch = branch,
+            file = file!!,
+            customCompatibilityDate = customCompatibilityDate,
+            customCompatibilityFlags = customCompatibilityFlags
+        )
+    }
+
+    /**
+     * 显示部署日志对话框，实时显示部署过程的详细日志。
+     * 部署完成前禁用关闭按钮；完成后状态徽章变色。
+     */
+    private fun showDeployLogsDialog(
+        account: Account,
+        projectName: String,
+        branch: String,
+        file: java.io.File,
+        customCompatibilityDate: String?,
+        customCompatibilityFlags: List<String>?
+    ) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_deploy_logs, null)
+        val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
+        val projectNameText = dialogView.findViewById<android.widget.TextView>(R.id.projectNameText)
+        val statusBadge = dialogView.findViewById<android.widget.LinearLayout>(R.id.statusBadge)
+        val statusProgress = dialogView.findViewById<android.widget.ProgressBar>(R.id.statusProgress)
+        val statusText = dialogView.findViewById<android.widget.TextView>(R.id.statusText)
+        val logScrollView = dialogView.findViewById<android.widget.ScrollView>(R.id.logScrollView)
+        val logContent = dialogView.findViewById<android.widget.TextView>(R.id.logContent)
+        val copyBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.copyBtn)
+        val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
+
+        titleText.text = "部署日志"
+        projectNameText.text = "项目: $projectName"
+        logContent.text = ""
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+        dialog.setCanceledOnTouchOutside(false)
+
+        // 实时日志收集（用于一键复制）
+        val logBuilder = StringBuilder()
+        fun appendLog(line: String) {
+            logBuilder.append(line).append('\n')
+            // 在主线程追加并自动滚动到底部
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                logContent.text = logBuilder.toString()
+                logScrollView.post { logScrollView.fullScroll(android.view.View.FOCUS_DOWN) }
+            }
+        }
+
+        // 复制日志按钮
+        copyBtn.setOnClickListener {
+            val logs = logBuilder.toString()
+            if (logs.isEmpty()) {
+                showToast("暂无日志可复制")
+                return@setOnClickListener
+            }
+            val clipboard = requireContext()
+                .getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val clip = android.content.ClipData.newPlainText("deploy_logs", logs)
+            clipboard.setPrimaryClip(clip)
+            showToast("日志已复制到剪贴板")
+        }
+
+        // 关闭按钮（部署完成前禁用，完成后启用）
+        closeBtn.setOnClickListener {
+            // 部署完成后清空输入框
+            binding.projectNameEdit.text?.clear()
+            binding.filePathEdit.text?.clear()
+            selectedFile = null
+            dialog.dismiss()
+        }
+
+        // 显示进度条
         binding.uploadProgress.visibility = View.VISIBLE
         binding.deployBtn.isEnabled = false
-        
-        Timber.d("Deploying project: $projectName, branch: $branch, file: ${file?.name}, compatibilityDate: $customCompatibilityDate, compatibilityFlags: $customCompatibilityFlags")
-        
-        pagesViewModel.createDeployment(account, projectName, branch, file!!, customCompatibilityDate, customCompatibilityFlags)
-        
-        // Hide progress after a delay (will be handled by loading state)
-        viewLifecycleOwner.lifecycleScope.launch {
-            kotlinx.coroutines.delay(1000)
-            binding.uploadProgress.visibility = View.GONE
-            binding.deployBtn.isEnabled = true
-        }
+
+        dialog.show()
+
+        // 启动部署
+        pagesViewModel.createDeploymentWithLogs(
+            account = account,
+            projectName = projectName,
+            branch = branch,
+            file = file,
+            customCompatibilityDate = customCompatibilityDate,
+            customCompatibilityFlags = customCompatibilityFlags,
+            onLog = { line -> appendLog(line) },
+            onComplete = { success, errorMessage ->
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                    // 隐藏进度条
+                    binding.uploadProgress.visibility = View.GONE
+                    binding.deployBtn.isEnabled = true
+
+                    // 隐藏旋转进度指示器
+                    statusProgress.visibility = View.GONE
+
+                    // 更新状态徽章
+                    val bgRes = if (success) R.drawable.bg_status_badge_success else R.drawable.bg_status_badge_error
+                    statusBadge.setBackgroundResource(bgRes)
+                    statusText.text = if (success) "部署成功" else "部署失败"
+                    val colorRes = if (success) R.color.green_500 else R.color.red_500
+                    statusText.setTextColor(resources.getColor(colorRes, requireContext().theme))
+                    statusProgress.indeterminateTintList = android.content.res.ColorStateList.valueOf(
+                        resources.getColor(colorRes, requireContext().theme)
+                    )
+
+                    // 失败时追加错误信息
+                    if (!success && errorMessage != null) {
+                        appendLog("✗ 错详情: $errorMessage")
+                    }
+
+                    // 启用关闭按钮
+                    closeBtn.isEnabled = true
+                }
+            }
+        )
     }
     
     private fun showCreateProjectDialog() {
