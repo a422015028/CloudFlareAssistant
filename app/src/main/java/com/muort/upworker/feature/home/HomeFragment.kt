@@ -218,7 +218,7 @@ class HomeFragment : Fragment() {
         
         // Telegram 链接点击
         dialogBinding.layoutTelegram.setOnClickListener {
-            openUrl("https://t.me/CFmuort")
+            openUrl("https://telegram.me/CFmuort")
         }
         
         // GitHub 链接点击
@@ -233,12 +233,12 @@ class HomeFragment : Fragment() {
 
         // Cloudflare 官网链接点击
         dialogBinding.layoutCloudflareWebsite.setOnClickListener {
-            openUrl("https://www.cloudflare.com/")
+            openUrl("https://www.cloudflare.com")
         }
 
         // 本应用官网链接点击
         dialogBinding.layoutAppWebsite.setOnClickListener {
-            openUrl("https://cf.390202.xyz/")
+            openUrl("https://cf.390202.xyz")
         }
 
         // API 令牌获取说明展开/收起
@@ -284,7 +284,7 @@ class HomeFragment : Fragment() {
                 if (updateInfo != null) {
                     val latestVersionCode = updateInfo.versionCode
                     if (latestVersionCode > currentVersionCode) {
-                        showUpdateDialog(updateInfo.versionName, updateInfo.updateContent)
+                        showUpdateDialog(updateInfo.versionName, latestVersionCode, updateInfo.updateContent)
                     } else {
                         requireContext().showToast("当前已是最新版本")
                     }
@@ -332,17 +332,17 @@ class HomeFragment : Fragment() {
         }
     }
     
-    private fun showUpdateDialog(versionName: String, updateContent: String) {
+    private fun showUpdateDialog(versionName: String, versionCode: Long, updateContent: String) {
         val message = if (updateContent.isNotBlank()) {
-            "版本 $versionName\n\n$updateContent"
+            "版本 $versionName (Build $versionCode)\n\n$updateContent"
         } else {
-            "版本 $versionName 可用，是否立即更新？"
+            "版本 $versionName (Build $versionCode) 可用，是否立即更新？"
         }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("发现新版本")
             .setMessage(message)
             .setPositiveButton("更新") { _, _ ->
-                openUrl("https://cfd.390202.xyz/CloudFlareAssistant.apk")
+                openUrl("https://cf.390202.xyz/download/latest")
             }
             .setNegativeButton("取消", null)
             .show()
