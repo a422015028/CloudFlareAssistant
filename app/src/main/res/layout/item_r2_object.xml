@@ -54,7 +54,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="下载"
                 android:src="@android:drawable/stat_sys_download"
-                android:tint="?android:textColorSecondary" />
+                app:tint="?android:textColorSecondary" />
 
             <Space
                 android:layout_width="16dp"
@@ -68,7 +68,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="删除"
                 android:src="@android:drawable/ic_menu_delete"
-                android:tint="?android:textColorSecondary" />
+                app:tint="?android:textColorSecondary" />
 
         </LinearLayout>
 

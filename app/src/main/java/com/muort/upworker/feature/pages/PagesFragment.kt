@@ -2594,7 +2594,7 @@ class PagesFragment : Fragment() {
                     view.setBackgroundColor(color)
                 } else {
                     view.setAlpha(1.0f)
-                    view.setBackgroundColor(android.R.color.transparent)
+                    view.setBackgroundColor(view.context.getColor(android.R.color.transparent))
                 }
             }
             

@@ -262,10 +262,17 @@ class HomeFragment : Fragment() {
     }
     
     private fun checkForUpdates(progressBar: android.widget.ProgressBar, textView: android.widget.TextView) {
-        val currentVersionCode = try {
-            requireContext().packageManager.getPackageInfo(requireContext().packageName, 0).longVersionCode
+        val (currentVersionName, currentVersionCode) = try {
+            val packageInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+            val code = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                packageInfo.longVersionCode
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.versionCode.toLong()
+            }
+            packageInfo.versionName.orEmpty() to code
         } catch (e: Exception) {
-            Timber.e(e, "Failed to get version code")
+            Timber.e(e, "Failed to get version info")
             return
         }
         
@@ -283,7 +290,7 @@ class HomeFragment : Fragment() {
                 
                 if (updateInfo != null) {
                     val latestVersionCode = updateInfo.versionCode
-                    if (latestVersionCode > currentVersionCode) {
+                    if (latestVersionCode > currentVersionCode || isNewerVersion(updateInfo.versionName, currentVersionName)) {
                         showUpdateDialog(updateInfo.versionName, latestVersionCode, updateInfo.updateContent)
                     } else {
                         requireContext().showToast("当前已是最新版本")
@@ -346,6 +353,20 @@ class HomeFragment : Fragment() {
             }
             .setNegativeButton("取消", null)
             .show()
+    }
+
+    private fun isNewerVersion(remote: String, current: String): Boolean {
+        if (remote.isBlank() || current.isBlank()) return false
+        val remoteParts = remote.split(".").mapNotNull { it.toIntOrNull() }
+        val currentParts = current.split(".").mapNotNull { it.toIntOrNull() }
+        val maxLen = maxOf(remoteParts.size, currentParts.size)
+        for (i in 0 until maxLen) {
+            val r = remoteParts.getOrNull(i) ?: 0
+            val c = currentParts.getOrNull(i) ?: 0
+            if (r > c) return true
+            if (r < c) return false
+        }
+        return false
     }
 
     private data class VersionInfo(val versionName: String, val versionCode: Long, val updateContent: String)
