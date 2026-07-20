@@ -2092,4 +2092,78 @@ interface CloudFlareApi {
         @Path("zone_id") zoneId: String,
         @Path("snippet_name") snippetName: String
     ): Response<CloudFlareResponse<Unit>>
+
+    // ==================== API Tokens (权限管理) ====================
+    // 文档: https://developers.cloudflare.com/fundamentals/api/how-to/create-via-api/
+
+    /**
+     * 列出所有可用的权限组
+     * GET /user/tokens/permission_groups
+     * 需要 Token 具有 "API Tokens Read" 或 "API Tokens Write" 权限
+     */
+    @GET("user/tokens/permission_groups")
+    suspend fun listPermissionGroups(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?
+    ): Response<CloudFlareResponse<List<PermissionGroup>>>
+
+    /**
+     * 校验当前 Token，返回其 id 与状态
+     * GET /user/tokens/verify
+     */
+    @GET("user/tokens/verify")
+    suspend fun verifyToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?
+    ): Response<CloudFlareResponse<ApiToken>>
+
+    /**
+     * 获取指定 Token 的详情（含策略/权限）
+     * GET /user/tokens/{token_id}
+     */
+    @GET("user/tokens/{token_id}")
+    suspend fun getTokenDetail(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("token_id") tokenId: String
+    ): Response<CloudFlareResponse<ApiToken>>
+
+    /**
+     * 列出当前用户的所有 Token
+     * GET /user/tokens
+     */
+    @GET("user/tokens")
+    suspend fun listTokens(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?
+    ): Response<CloudFlareResponse<List<ApiToken>>>
+
+    /**
+     * 创建 API Token（自定义权限）
+     * POST /user/tokens
+     * 响应中的 value 为 Token 密钥，仅返回一次
+     * 需要 Token 具有 "API Tokens Write" 权限
+     */
+    @POST("user/tokens")
+    suspend fun createApiToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Body request: CreateTokenRequest
+    ): Response<CloudFlareResponse<ApiToken>>
+
+    /**
+     * 获取当前用户信息（用于 user 作用域策略的 USER_TAG）
+     * GET /user
+     */
+    @GET("user")
+    suspend fun getCurrentUser(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?
+    ): Response<CloudFlareResponse<CloudflareUser>>
 }

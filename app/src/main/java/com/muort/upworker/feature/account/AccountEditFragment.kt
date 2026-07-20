@@ -19,7 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class AccountEditFragment : Fragment() {
+class AccountEditFragment : Fragment(), ApiTokenPermissionSheet.Listener {
     
     private var _binding: FragmentAccountEditBinding? = null
     private val binding get() = _binding!!
@@ -44,6 +44,7 @@ class AccountEditFragment : Fragment() {
         
         setupAuthTypeDropdown()
         setupFetchAccountIdButton()
+        setupPermissionButton()
         loadAccountIfEditing()
         setupSaveButton()
         setupZoneButtons()
@@ -123,6 +124,56 @@ class AccountEditFragment : Fragment() {
             }
             .setNegativeButton("取消", null)
             .show()
+    }
+
+    /**
+     * 设置 “权限” 按钮：打开 API Token 权限管理弹窗
+     * 可查看当前 Token 权限，或创建一个权限受控的新 Token 并回填
+     */
+    private fun setupPermissionButton() {
+        binding.tokenPermissionBtn.setOnClickListener {
+            val token = binding.tokenEditText.text.toString().trim()
+            val email = binding.emailEditText.text.toString().trim()
+            val globalApiKey = binding.globalApiKeyEditText.text.toString().trim()
+            val accountId = binding.accountIdEditText.text.toString().trim()
+            val name = binding.nameEditText.text.toString().trim().ifBlank { "临时" }
+
+            // 决定可用认证方式（优先当前选中，否则用已填写的凭据）
+            val hasToken = token.isNotEmpty()
+            val hasGlobal = email.isNotEmpty() && globalApiKey.isNotEmpty()
+            val authTypeToUse = when {
+                selectedAuthType == AuthType.TOKEN && hasToken -> AuthType.TOKEN
+                selectedAuthType == AuthType.GLOBAL_API_KEY && hasGlobal -> AuthType.GLOBAL_API_KEY
+                hasToken -> AuthType.TOKEN
+                hasGlobal -> AuthType.GLOBAL_API_KEY
+                else -> {
+                    showToast("请先填写 API Token 或 Global API Key 凭据")
+                    return@setOnClickListener
+                }
+            }
+
+            val tempAccount = com.muort.upworker.core.model.Account(
+                id = 0,
+                name = name,
+                accountId = accountId,
+                token = if (authTypeToUse == AuthType.TOKEN) token else "",
+                email = if (authTypeToUse == AuthType.GLOBAL_API_KEY) email else null,
+                globalApiKey = if (authTypeToUse == AuthType.GLOBAL_API_KEY) globalApiKey else null,
+                authType = authTypeToUse.name
+            )
+
+            ApiTokenPermissionSheet.newInstance(tempAccount)
+                .show(childFragmentManager, "ApiTokenPermissionSheet")
+        }
+    }
+
+    /** ApiTokenPermissionSheet.Listener：回填创建的新 Token */
+    override fun onFillApiToken(value: String) {
+        binding.tokenEditText.setText(value)
+        // 切换为 API Token 认证方式
+        selectedAuthType = AuthType.TOKEN
+        binding.authTypeRadioGroup.check(com.muort.upworker.R.id.radioToken)
+        showToast("已填入新创建的 API Token")
     }
     
     /**

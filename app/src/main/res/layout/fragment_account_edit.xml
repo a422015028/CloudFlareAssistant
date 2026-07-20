@@ -94,24 +94,47 @@
 
         </RadioGroup>
 
-        <!-- API Token 输入 -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tokenInputLayout"
+        <!-- API Token 输入 + 权限按钮 -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="API Token"
-            app:boxBackgroundMode="outline"
+            android:orientation="horizontal"
             android:layout_marginBottom="16dp"
-            app:endIconMode="password_toggle">
+            android:gravity="bottom">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/tokenEditText"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tokenInputLayout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:fontFamily="monospace" />
+                android:layout_weight="1"
+                android:hint="API Token"
+                app:boxBackgroundMode="outline"
+                app:endIconMode="password_toggle">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/tokenEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:fontFamily="monospace" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/tokenPermissionBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="权限"
+                android:textSize="12sp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="14dp"
+                style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                app:icon="@android:drawable/ic_menu_manage"
+                app:iconSize="16dp"
+                app:iconPadding="4dp" />
+
+        </LinearLayout>
 
         <!-- Global API Key 认证区域 -->
         <LinearLayout
