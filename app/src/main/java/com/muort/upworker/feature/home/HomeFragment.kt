@@ -238,7 +238,7 @@ class HomeFragment : Fragment() {
 
         // 本应用官网链接点击
         dialogBinding.layoutAppWebsite.setOnClickListener {
-            openUrl("https://cf.390202.xyz")
+            openUrl("https://cf.muort.com")
         }
 
         // API 令牌获取说明展开/收起
@@ -318,7 +318,7 @@ class HomeFragment : Fragment() {
                     .build()
                 
                 val request = Request.Builder()
-                    .url("https://cfd.390202.xyz/version")
+                    .url("https://cfd.muort.com/version")
                     .get()
                     .build()
                 
@@ -349,7 +349,7 @@ class HomeFragment : Fragment() {
             .setTitle("发现新版本")
             .setMessage(message)
             .setPositiveButton("更新") { _, _ ->
-                openUrl("https://cf.390202.xyz/download/latest")
+                openUrl("https://cf.muort.com/download/latest")
             }
             .setNegativeButton("取消", null)
             .show()

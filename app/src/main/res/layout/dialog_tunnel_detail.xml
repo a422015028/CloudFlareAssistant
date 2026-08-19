@@ -102,12 +102,12 @@
             android:layout_marginTop="8dp"
             android:textSize="16sp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/connectionsRecyclerView"
+        <LinearLayout
+            android:id="@+id/connectionsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:nestedScrollingEnabled="false" />
+            android:orientation="vertical" />
 
         <TextView
             android:id="@+id/noConnectionsText"

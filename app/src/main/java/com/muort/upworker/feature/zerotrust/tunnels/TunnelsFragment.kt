@@ -23,6 +23,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.databinding.FragmentTunnelsBinding
+import com.muort.upworker.databinding.ItemTunnelConnectionBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -198,22 +199,22 @@ class TunnelsFragment : Fragment() {
         dialogView.findViewById<TextView>(R.id.connectionCountText).text = 
             "活跃连接: $connectionCount"
         
-        // Connections RecyclerView
-        val connectionsRecyclerView = dialogView.findViewById<RecyclerView>(R.id.connectionsRecyclerView)
+        // Connections
+        val connectionsContainer = dialogView.findViewById<LinearLayout>(R.id.connectionsContainer)
         val noConnectionsText = dialogView.findViewById<TextView>(R.id.noConnectionsText)
-        
+
         val connections = tunnel.connections ?: emptyList()
         if (connections.isNotEmpty()) {
-            val connectionAdapter = TunnelConnectionAdapter()
-            connectionsRecyclerView.apply {
-                layoutManager = LinearLayoutManager(requireContext())
-                adapter = connectionAdapter
+            connectionsContainer.removeAllViews()
+            for (connection in connections) {
+                val itemBinding = ItemTunnelConnectionBinding.inflate(layoutInflater, connectionsContainer, false)
+                bindConnectionItem(itemBinding, connection)
+                connectionsContainer.addView(itemBinding.root)
             }
-            connectionAdapter.submitList(connections)
-            connectionsRecyclerView.visibility = View.VISIBLE
+            connectionsContainer.visibility = View.VISIBLE
             noConnectionsText.visibility = View.GONE
         } else {
-            connectionsRecyclerView.visibility = View.GONE
+            connectionsContainer.visibility = View.GONE
             noConnectionsText.visibility = View.VISIBLE
         }
         
@@ -434,20 +435,20 @@ class TunnelsFragment : Fragment() {
             val copyCommandButton = dialogView.findViewById<android.widget.Button>(R.id.copyCommandButton)
             val hideTokenButton = dialogView.findViewById<android.widget.Button>(R.id.hideTokenButton)
             
-            val fullCommand = "cloudflared service install $token"
+            val fullCommand = "cloudflared tunnel run --token $token"
             var isTokenHidden = true
-            tokenTextView.text = "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
+            tokenTextView.text = "cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
             hideTokenButton.setText("显示令牌")
             
             hideTokenButton.setOnClickListener {
                 isTokenHidden = !isTokenHidden
-                tokenTextView.text = if (isTokenHidden) "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else fullCommand
+                tokenTextView.text = if (isTokenHidden) "cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else fullCommand
                 hideTokenButton.setText(if (isTokenHidden) "显示令牌" else "隐藏令牌")
             }
             
             copyCommandButton.setOnClickListener {
                 val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                val clip = android.content.ClipData.newPlainText("Cloudflared Service Command", fullCommand)
+                val clip = android.content.ClipData.newPlainText("Cloudflared Tunnel Command", fullCommand)
                 clipboard.setPrimaryClip(clip)
                 Snackbar.make(binding.root, "命令已复制", Snackbar.LENGTH_SHORT).show()
             }
@@ -493,6 +494,40 @@ class TunnelsFragment : Fragment() {
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
             val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            val date = inputFormat.parse(dateString.substringBefore(".").substringBefore("Z"))
+            outputFormat.format(date!!)
+        } catch (e: Exception) {
+            dateString.substringBefore("T")
+        }
+    }
+
+    private fun bindConnectionItem(binding: ItemTunnelConnectionBinding, connection: TunnelConnection) {
+        binding.coloNameText.text = connection.coloName ?: "Unknown Colo"
+
+        val isPendingReconnect = connection.isPendingReconnect == true
+        binding.connectionStatusChip.text = if (isPendingReconnect) "重连中" else "已连接"
+        binding.connectionStatusChip.setChipBackgroundColorResource(
+            if (isPendingReconnect) android.R.color.holo_orange_light else android.R.color.holo_green_light
+        )
+
+        val clientVersion = connection.clientVersion ?: "Unknown"
+        binding.clientInfoText.text = "cloudflared $clientVersion"
+
+        val originIp = connection.originIp
+        if (!originIp.isNullOrBlank()) {
+            binding.originIpText.text = "源 IP: $originIp"
+        } else {
+            binding.originIpText.text = "源 IP: N/A"
+        }
+
+        binding.openedAtText.text = "连接时间: ${formatConnectionDateTime(connection.openedAt)}"
+    }
+
+    private fun formatConnectionDateTime(dateString: String?): String {
+        if (dateString == null) return "N/A"
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
             val date = inputFormat.parse(dateString.substringBefore(".").substringBefore("Z"))
             outputFormat.format(date!!)
         } catch (e: Exception) {
