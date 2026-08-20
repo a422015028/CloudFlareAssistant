@@ -14,7 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
+import android.widget.Toast
 import com.google.android.material.textfield.TextInputEditText
 import com.muort.upworker.R
 import com.muort.upworker.core.model.AccessGroupRequest
@@ -91,14 +91,14 @@ class GroupFragment : Fragment() {
                 // Messages
                 launch {
                     viewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
 
                 // Errors
                 launch {
                     viewModel.error.collect { error ->
-                        Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -107,8 +107,8 @@ class GroupFragment : Fragment() {
 
     private fun loadGroups() {
         val account = accountViewModel.defaultAccount.value
-        if (account == null) {
-            Snackbar.make(binding.root, "未选择账户", Snackbar.LENGTH_SHORT).show()
+                if (account == null) {
+            android.widget.Toast.makeText(requireContext(), "未选择账户", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -188,12 +188,12 @@ class GroupFragment : Fragment() {
             .setPositiveButton("创建") { _, _ ->
                 val name = nameInput?.text?.toString()
                 if (name.isNullOrBlank()) {
-                    Snackbar.make(binding.root, "请输入组名称", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "请输入组名称", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
                 if (includeRules.isEmpty()) {
-                    Snackbar.make(binding.root, "至少需要一条包含规则", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "至少需要一条包含规则", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -295,12 +295,12 @@ class GroupFragment : Fragment() {
             .setPositiveButton("保存") { _, _ ->
                 val name = nameInput?.text?.toString()
                 if (name.isNullOrBlank()) {
-                    Snackbar.make(binding.root, "请输入组名称", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "请输入组名称", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
                 if (includeRules.isEmpty()) {
-                    Snackbar.make(binding.root, "至少需要一条包含规则", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "至少需要一条包含规则", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 

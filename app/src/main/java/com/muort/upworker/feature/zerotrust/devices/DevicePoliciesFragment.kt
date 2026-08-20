@@ -119,13 +119,13 @@ ff05::/16"""
 
                 launch {
                     viewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()      
                     }
                 }
 
                 launch {
                     viewModel.error.collect { error ->
-                        Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -345,11 +345,11 @@ ff05::/16"""
                         splitTunnelIncludeLayout.visibility = View.GONE
                         if (splitTunnelExcludeInput.text.isNullOrBlank()) {
                             splitTunnelExcludeInput.setText(DEFAULT_SPLIT_TUNNEL_EXCLUDE)
-                            com.google.android.material.snackbar.Snackbar.make(
-                                dialogView,
-                                "已自动填入默认排除列表，请检查后点击保存",
-                                com.google.android.material.snackbar.Snackbar.LENGTH_LONG
-                            ).show()
+                                android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "已自动填入默认排除列表，请检查后点击保存",
+                                    android.widget.Toast.LENGTH_LONG
+                                ).show()
                         }
                     }
                     1 -> {
@@ -491,7 +491,7 @@ ff05::/16"""
                 if (existingPolicy == null) {
                     val name = nameInput.text?.toString()
                     if (name.isNullOrBlank()) {
-                        Snackbar.make(binding.root, "配置文件名称不能为空", Snackbar.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), "配置文件名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
                         return@setPositiveButton
                     }
                     
@@ -543,10 +543,10 @@ ff05::/16"""
                         )
                         viewModel.updateDefaultPolicy(account, update)
                         viewModel.setSplitTunnel(account, null, splitTunnelExclude, splitTunnelInclude)
-                    } else {
+                        } else {
                         val name = nameInput.text?.toString()
                         if (name.isNullOrBlank()) {
-                            Snackbar.make(binding.root, "配置文件名称不能为空", Snackbar.LENGTH_SHORT).show()
+                            android.widget.Toast.makeText(requireContext(), "配置文件名称不能为空", android.widget.Toast.LENGTH_SHORT).show()   
                             return@setPositiveButton
                         }
                         

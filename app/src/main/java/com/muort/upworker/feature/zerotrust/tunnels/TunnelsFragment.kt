@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
+import android.widget.Toast
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.muort.upworker.R
@@ -98,16 +98,15 @@ class TunnelsFragment : Fragment() {
                             if (tunnels.isEmpty()) View.VISIBLE else View.GONE
                     }
                 }
-
                 launch {
                     viewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
 
                 launch {
                     viewModel.error.collect { error ->
-                        Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -151,7 +150,7 @@ class TunnelsFragment : Fragment() {
                 val name = nameInput.text?.toString()
                 
                 if (name.isNullOrBlank()) {
-                    Snackbar.make(binding.root, "隧道名称不能为空", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "隧道名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -267,7 +266,7 @@ class TunnelsFragment : Fragment() {
                             val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                             val clip = android.content.ClipData.newPlainText("Cloudflared Service Command", fullCommand)
                             clipboard.setPrimaryClip(clip)
-                            Snackbar.make(binding.root, "命令已复制", Snackbar.LENGTH_SHORT).show()
+                            android.widget.Toast.makeText(requireContext(), "命令已复制", android.widget.Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         tokenText.text = "获取令牌失败"
@@ -450,7 +449,7 @@ class TunnelsFragment : Fragment() {
                 val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                 val clip = android.content.ClipData.newPlainText("Cloudflared Tunnel Command", fullCommand)
                 clipboard.setPrimaryClip(clip)
-                Snackbar.make(binding.root, "命令已复制", Snackbar.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(requireContext(), "命令已复制", android.widget.Toast.LENGTH_SHORT).show()
             }
             
             MaterialAlertDialogBuilder(requireContext())

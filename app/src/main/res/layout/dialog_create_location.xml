@@ -104,6 +104,63 @@
             android:textSize="11sp"
             android:textColor="?android:attr/textColorSecondary" />
 
+        <!-- DNS 端点开关 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="DNS 端点开关"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ipv4Switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:checked="true"
+            android:text="启用 IPv4 DNS 端点" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="使用共享 IPv4 地址，启用时必须在上方填写来源 IP 白名单（路由器公网 IP），否则无法保存。"
+            android:textSize="11sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/ipv6Switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:checked="true"
+            android:text="启用 IPv6 DNS 端点" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/dotSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:checked="true"
+            android:text="启用 DNS over TLS (DoT)" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/dohSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:checked="true"
+            android:text="启用 DNS over HTTPS (DoH)" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="至少启用一个端点；默认位置必须启用 DoH。"
+            android:textSize="11sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
         <!-- DNS 端点信息 -->
         <TextView
             android:layout_width="wrap_content"
@@ -125,7 +182,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="• IPv4 DNS 地址（如 162.159.36.1）"
+            android:text="• IPv4 DNS 地址（主/备用，如 172.64.36.1 / 172.64.36.2）"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -134,6 +191,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="• IPv6 DNS 地址"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="• DNS over TLS (DoT) 地址（端口 853）"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 

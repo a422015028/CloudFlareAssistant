@@ -1230,7 +1230,7 @@ interface CloudFlareApi {
     ): Response<CloudFlareResponse<Unit>>
     
     // ==================== Zero Trust - Gateway Locations ====================
-    
+
     /**
      * List Gateway Locations
      */

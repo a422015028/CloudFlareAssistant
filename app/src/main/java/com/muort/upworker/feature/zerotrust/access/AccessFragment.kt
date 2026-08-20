@@ -16,7 +16,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
+import android.widget.Toast
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.muort.upworker.R
@@ -72,7 +72,7 @@ class AccessFragment : Fragment() {
                 accessViewModel.selectApplication(app)
                 val action = AccessFragmentDirections.actionAccessToDetail(app.id)
                 findNavController().navigate(action)
-                Snackbar.make(binding.root, "应用: ${app.name}", Snackbar.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(requireContext(), "应用: ${app.name}", android.widget.Toast.LENGTH_SHORT).show()
             },
             onDeleteClick = { app ->
                 confirmDelete(app)
@@ -107,14 +107,14 @@ class AccessFragment : Fragment() {
                 // Messages
                 launch {
                     accessViewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
                 
                 // Errors
                 launch {
                     accessViewModel.error.collect { error ->
-                        Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -170,9 +170,8 @@ class AccessFragment : Fragment() {
                 val domain = domainInput.text.toString()
                 val selectedType = appTypes[typeSpinner.selectedItemPosition].first
                 val sessionDuration = sessionDurationInput.text.toString()
-                
                 if (name.isBlank()) {
-                    Snackbar.make(binding.root, "应用名称不能为空", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "应用名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 

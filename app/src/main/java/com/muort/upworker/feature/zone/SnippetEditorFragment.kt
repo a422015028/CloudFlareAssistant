@@ -238,8 +238,8 @@ class SnippetEditorFragment : Fragment() {
     private fun loadSnippetContent() {
         binding.progressBar.visibility = View.VISIBLE
 
-        if (account == null) {
-            Snackbar.make(binding.root, "账号未就绪", Snackbar.LENGTH_LONG).show()
+                if (account == null) {
+            android.widget.Toast.makeText(requireContext(), "账号未就绪", android.widget.Toast.LENGTH_LONG).show()
             binding.progressBar.visibility = View.GONE
             return
         }
@@ -258,7 +258,7 @@ class SnippetEditorFragment : Fragment() {
                     }
                 }
                 is Resource.Error -> {
-                    Snackbar.make(binding.root, "读取失败: ${r.message}", Snackbar.LENGTH_LONG).show()
+                    android.widget.Toast.makeText(requireContext(), "读取失败: ${r.message}", android.widget.Toast.LENGTH_LONG).show()
                 }
                 is Resource.Loading -> {}
             }
@@ -270,20 +270,20 @@ class SnippetEditorFragment : Fragment() {
         binding.progressBar.visibility = View.VISIBLE
 
         if (account == null) {
-            Snackbar.make(binding.root, "账号未就绪", Snackbar.LENGTH_LONG).show()
+            android.widget.Toast.makeText(requireContext(), "账号未就绪", android.widget.Toast.LENGTH_LONG).show()
             binding.progressBar.visibility = View.GONE
             return
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            when (val r = snippetRepo.putSnippet(account!!, args.zoneId, args.snippetName, content)) {
+                    when (val r = snippetRepo.putSnippet(account!!, args.zoneId, args.snippetName, content)) {
                 is Resource.Success -> {
-                    Snackbar.make(binding.root, "保存成功", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "保存成功", android.widget.Toast.LENGTH_SHORT).show()
                     hasUnsavedChanges = false
                     originalContent = content
                 }
                 is Resource.Error -> {
-                    Snackbar.make(binding.root, "保存失败: ${r.message}", Snackbar.LENGTH_LONG).show()
+                    android.widget.Toast.makeText(requireContext(), "保存失败: ${r.message}", android.widget.Toast.LENGTH_LONG).show()
                 }
                 is Resource.Loading -> {}
             }
@@ -311,7 +311,7 @@ class SnippetEditorFragment : Fragment() {
         binding.progressBar.visibility = View.VISIBLE
 
         if (account == null) {
-            Snackbar.make(binding.root, "账号未就绪", Snackbar.LENGTH_LONG).show()
+            android.widget.Toast.makeText(requireContext(), "账号未就绪", android.widget.Toast.LENGTH_LONG).show()
             binding.progressBar.visibility = View.GONE
             return
         }
@@ -319,11 +319,11 @@ class SnippetEditorFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = snippetRepo.deleteSnippet(account!!, args.zoneId, args.snippetName)) {
                 is Resource.Success -> {
-                    Snackbar.make(binding.root, "已删除", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "已删除", android.widget.Toast.LENGTH_SHORT).show()
                     findNavController().navigateUp()
                 }
                 is Resource.Error -> {
-                    Snackbar.make(binding.root, "删除失败: ${r.message}", Snackbar.LENGTH_LONG).show()
+                    android.widget.Toast.makeText(requireContext(), "删除失败: ${r.message}", android.widget.Toast.LENGTH_LONG).show()
                 }
                 is Resource.Loading -> {}
             }

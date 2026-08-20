@@ -132,14 +132,14 @@ class AccessDetailFragment : Fragment() {
                 // Observe messages
                 launch {
                     viewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
 
                 // Observe errors
                 launch {
                     viewModel.error.collect { error ->
-                        Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -148,8 +148,8 @@ class AccessDetailFragment : Fragment() {
 
     private fun loadAppDetail() {
         val account = accountViewModel.defaultAccount.value
-        if (account == null) {
-            Snackbar.make(binding.root, "未选择账户", Snackbar.LENGTH_SHORT).show()
+                if (account == null) {
+            android.widget.Toast.makeText(requireContext(), "未选择账户", android.widget.Toast.LENGTH_SHORT).show()
             findNavController().navigateUp()
             return
         }
@@ -348,12 +348,12 @@ class AccessDetailFragment : Fragment() {
                 val sessionDuration = sessionDurationInput?.text?.toString()
 
                 if (name.isNullOrBlank()) {
-                    Snackbar.make(binding.root, "应用名称不能为空", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "应用名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
                 if (type != "app_launcher" && type != "bookmark" && domain.isNullOrBlank()) {
-                    Snackbar.make(binding.root, "域名不能为空", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "域名不能为空", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 

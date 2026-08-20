@@ -292,8 +292,12 @@ data class GatewayLocation(
     @SerializedName("doh_subdomain") val dohSubdomain: String? = null,
     @SerializedName("anonymized_logs_enabled") val anonymizedLogsEnabled: Boolean? = null,
     @SerializedName("ipv4_destination") val ipv4Destination: String? = null,
+    @SerializedName("ipv4_destination_backup") val ipv4DestinationBackup: String? = null,
+    @SerializedName("dns_destination_ips_id") val dnsDestinationIpsId: String? = null,
     @SerializedName("client_default") val clientDefault: Boolean? = null,
     @SerializedName("ecs_support") val ecsSupport: Boolean? = null,
+    @SerializedName("endpoints") val endpoints: LocationEndpoints? = null,
+    @SerializedName("max_ttl") val maxTtl: LocationMaxTtl? = null,
     @SerializedName("created_at") val createdAt: String? = null,
     @SerializedName("updated_at") val updatedAt: String? = null,
     @SerializedName("client_count") val clientCount: Int? = null
@@ -329,7 +333,8 @@ data class DOHEndpoint(
 
 data class DOTEndpoint(
     @SerializedName("enabled") val enabled: Boolean? = null,
-    @SerializedName("networks") val networks: List<LocationNetwork>? = null
+    @SerializedName("networks") val networks: List<LocationNetwork>? = null,
+    @SerializedName("require_token") val requireToken: Boolean? = null
 )
 
 data class IPV4Endpoint(

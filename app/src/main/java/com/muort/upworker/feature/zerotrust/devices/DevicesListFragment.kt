@@ -13,7 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
+import android.widget.Toast
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Device
 import com.muort.upworker.databinding.FragmentDevicesListBinding
@@ -77,13 +77,21 @@ class DevicesListFragment : Fragment() {
 
                 launch {
                     viewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(
+                            requireContext(),
+                            message,
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
 
                 launch {
                     viewModel.error.collect { error ->
-                        Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(
+                            requireContext(),
+                            error,
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             }

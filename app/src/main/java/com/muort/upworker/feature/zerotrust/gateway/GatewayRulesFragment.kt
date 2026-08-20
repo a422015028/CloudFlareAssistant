@@ -19,7 +19,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.muort.upworker.R
 import com.muort.upworker.core.model.GatewayRule
@@ -175,19 +174,19 @@ class GatewayRulesFragment : Fragment() {
     private fun loadRules() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            Snackbar.make(binding.root, "未选择账户", Snackbar.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), "未选择账户", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
         lifecycleScope.launch {
             val result = viewModel.loadRules(account)
             if (result is Resource.Error) {
-                Snackbar.make(binding.root, "加载规则失败: ${result.message}", Snackbar.LENGTH_LONG).show()
+                android.widget.Toast.makeText(requireContext(), "加载规则失败: ${result.message}", android.widget.Toast.LENGTH_LONG).show()
             }
         }
         lifecycleScope.launch {
             val result = viewModel.loadLists(account)
             if (result is Resource.Error) {
-                Snackbar.make(binding.root, "加载列表失败: ${result.message}", Snackbar.LENGTH_LONG).show()
+                android.widget.Toast.makeText(requireContext(), "加载列表失败: ${result.message}", android.widget.Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -662,9 +661,9 @@ class GatewayRulesFragment : Fragment() {
             .setPositiveButton(if (existingRule == null) "创建" else "保存") { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
                 val name = nameInput.text?.toString()
-                
+
                 if (name.isNullOrBlank()) {
-                    Snackbar.make(binding.root, "规则名称不能为空", Snackbar.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), "规则名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -715,7 +714,7 @@ class GatewayRulesFragment : Fragment() {
                             is Resource.Error -> "创建规则失败: ${result.message}"
                             else -> return@launch
                         }
-                        Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     lifecycleScope.launch {
@@ -725,7 +724,7 @@ class GatewayRulesFragment : Fragment() {
                             is Resource.Error -> "更新规则失败: ${result.message}"
                             else -> return@launch
                         }
-                        Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -842,7 +841,7 @@ class GatewayRulesFragment : Fragment() {
                 is Resource.Error -> "删除规则失败: ${result.message}"
                 else -> return@launch
             }
-            Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -864,7 +863,7 @@ class GatewayRulesFragment : Fragment() {
                 is Resource.Error -> "更新失败: ${result.message}"
                 else -> return@launch
             }
-            Snackbar.make(binding.root, msg, if (result is Resource.Error) Snackbar.LENGTH_LONG else Snackbar.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
