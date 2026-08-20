@@ -66,6 +66,9 @@ class AccountListFragment : Fragment() {
         binding.addAccountFab.setOnClickListener {
             findNavController().navigate(R.id.action_accounts_to_add)
         }
+        binding.tokenManagerFab.setOnClickListener {
+            TokenManagerActivity.start(requireContext())
+        }
     }
     
     private fun observeViewModel() {

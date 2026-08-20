@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardElevation="2dp"
+    app:cardCornerRadius="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tokenNameText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="令牌名称"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/tokenStatusChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="active"
+                android:textSize="10sp"
+                android:checkable="false"
+                style="@style/Widget.Material3.Chip.Assist" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tokenIdText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID"
+            android:textSize="11sp"
+            android:textColor="?android:textColorSecondary"
+            android:layout_marginTop="4dp"
+            android:fontFamily="monospace"
+            android:maxLines="1"
+            android:ellipsize="middle" />
+
+        <TextView
+            android:id="@+id/tokenPermissionsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="权限组"
+            android:textSize="12sp"
+            android:textColor="?android:textColorSecondary"
+            android:layout_marginTop="6dp"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tokenTimeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="时间信息"
+            android:textSize="11sp"
+            android:textColor="?android:textColorSecondary"
+            android:layout_marginTop="4dp"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="4dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/detailBtn"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="详情"
+                android:textSize="13sp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/editBtn"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="编辑"
+                android:textSize="13sp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/rollBtn"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="更换"
+                android:textSize="13sp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/deleteBtn"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="删除"
+                android:textSize="13sp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

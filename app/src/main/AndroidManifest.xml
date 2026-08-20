@@ -38,6 +38,9 @@
         
         <!-- 注册 Worker 实时日志页面 -->
         <activity android:name="com.muort.upworker.feature.worker.WorkerLogsActivity" android:exported="false" />
+
+        <!-- 注册账户 API 令牌管理页面 -->
+        <activity android:name="com.muort.upworker.feature.account.TokenManagerActivity" android:exported="false" />
         
         <!-- FileProvider for sharing script files -->
         <provider

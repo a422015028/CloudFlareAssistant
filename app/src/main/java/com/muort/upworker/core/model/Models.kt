@@ -10,7 +10,8 @@ data class CloudFlareResponse<T>(
     @SerializedName("result") val result: T?,
     @SerializedName("success") val success: Boolean,
     @SerializedName("errors") val errors: List<CloudFlareError>?,
-    @SerializedName("messages") val messages: List<String>?
+    // 实际返回为对象数组 {code, message, type}，非字符串数组；项目未消费此字段，声明为 Any 兼容解析
+    @SerializedName("messages") val messages: List<Any>?
 )
 
 data class CloudFlareError(
@@ -1041,6 +1042,136 @@ data class KvStorageGroup(
 data class KvStorageMax(
     @SerializedName("byteCount") val byteCount: Long? = null, // 存储字节数
     @SerializedName("keyCount") val keyCount: Long? = null // 键数量
+)
+
+// ==================== User API Tokens ====================
+
+/**
+ * 用户 API 令牌
+ */
+data class ApiToken(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("status") val status: String? = null, // active / disabled / expired
+    @SerializedName("expires_on") val expiresOn: String? = null,
+    @SerializedName("not_before") val notBefore: String? = null,
+    @SerializedName("issued_on") val issuedOn: String? = null,
+    @SerializedName("modified_on") val modifiedOn: String? = null,
+    @SerializedName("last_used_on") val lastUsedOn: String? = null,
+    @SerializedName("policies") val policies: List<TokenPolicy>? = null,
+    @SerializedName("condition") val condition: TokenCondition? = null,
+    @SerializedName("value") val value: String? = null // 令牌值，仅创建时返回一次
+)
+
+/**
+ * 令牌访问策略
+ * resources 可为 map[string]（简单字符串）或 map[map[string]]（嵌套对象，账户级令牌），
+ * 故声明为 Map<String, Any> 由 Gson 自行处理两种形态
+ */
+data class TokenPolicy(
+    @SerializedName("id") val id: String? = null,
+    @SerializedName("effect") val effect: String = "allow", // allow / deny
+    @SerializedName("permission_groups") val permissionGroups: List<TokenPermissionGroupRef> = emptyList(),
+    @SerializedName("resources") val resources: Map<String, Any>? = null // 空 map = 所有资源
+)
+
+data class TokenPermissionGroupRef(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("meta") val meta: TokenPgMeta? = null
+)
+
+data class TokenPgMeta(
+    @SerializedName("key") val key: String? = null,
+    @SerializedName("value") val value: String? = null
+)
+
+/**
+ * 令牌条件（IP 限制）
+ */
+data class TokenCondition(
+    @SerializedName("request_ip") val requestIp: TokenIpCondition? = null
+)
+
+data class TokenIpCondition(
+    @SerializedName("in") val inList: List<String>? = null,
+    @SerializedName("not_in") val notInList: List<String>? = null
+)
+
+/**
+ * 权限组（user/tokens/permission_groups）
+ * scopes 决定策略 resources 必须包含的资源类型:
+ * - com.cloudflare.api.account → "com.cloudflare.api.account.<account_id>"
+ * - com.cloudflare.api.account.zone → "com.cloudflare.api.account.zone.<zone_id|*|.*>"
+ * - com.cloudflare.api.user → "com.cloudflare.api.user.<user_id>"
+ * - com.cloudflare.edge.r2.bucket → "com.cloudflare.edge.r2.bucket.<bucket_id>"
+ */
+data class PermissionGroup(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String? = null, // 如 "Workers Scripts Write"，后缀标明操作类型
+    @SerializedName("category") val category: String? = null, // 产品分类
+    @SerializedName("scopes") val scopes: List<String>? = null
+) {
+    /** 操作类型: 读 / 写 / 执行 */
+    fun opTypes(): Set<String> {
+        val n = name ?: return emptySet()
+        val t = mutableSetOf<String>()
+        if (n.endsWith("Edit")) { t.add("读"); t.add("写") } // Edit = Read + Write
+        if (n.endsWith("Write")) t.add("写")
+        if (n.endsWith("Read")) t.add("读")
+        if (n.endsWith("Evaluate")) t.add("执行")
+        return t
+    }
+
+    /** 资源范围中文标签 */
+    fun scopeLabels(): List<String> {
+        val s = scopes ?: return emptyList()
+        val labels = mutableListOf<String>()
+        if (s.contains("com.cloudflare.api.account.zone")) labels.add("域名")
+        if (s.contains("com.cloudflare.api.account.flagship.app")) labels.add("Flagship")
+        if (s.contains("com.cloudflare.api.account")) labels.add("账户")
+        if (s.contains("com.cloudflare.api.user")) labels.add("用户")
+        if (s.contains("com.cloudflare.edge.r2.bucket")) labels.add("R2")
+        return labels.distinct()
+    }
+}
+
+/**
+ * 用户信息（GET /user），用于构造 user 级资源
+ */
+data class UserInfo(
+    @SerializedName("id") val id: String? = null,
+    @SerializedName("email") val email: String? = null
+)
+
+/**
+ * 令牌验证结果
+ */
+data class TokenVerifyResult(
+    @SerializedName("id") val id: String? = null,
+    @SerializedName("status") val status: String? = null,
+    @SerializedName("expires_on") val expiresOn: String? = null,
+    @SerializedName("not_before") val notBefore: String? = null
+)
+
+/**
+ * 令牌删除结果
+ */
+data class TokenDeleteResult(
+    @SerializedName("id") val id: String? = null
+)
+
+/**
+ * 令牌创建/更新请求体
+ * Gson 序列化时自动跳过 null 字段，符合 API 不接受 null 的约束
+ */
+data class TokenUpsertRequest(
+    val name: String,
+    val policies: List<TokenPolicy>,
+    val expires_on: String? = null,
+    val not_before: String? = null,
+    val condition: TokenCondition? = null,
+    val status: String? = null
 )
 
 /**

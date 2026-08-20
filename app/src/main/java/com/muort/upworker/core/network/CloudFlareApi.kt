@@ -442,9 +442,154 @@ interface CloudFlareApi {
         @Path("zone_id") zoneId: String,
         @Path("record_id") recordId: String
     ): Response<CloudFlareResponse<Unit>>
-    
+
+    // ==================== User API Tokens ====================
+
+    @GET("user/tokens")
+    suspend fun listUserTokens(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?
+    ): Response<CloudFlareResponse<List<ApiToken>>>
+
+    @GET("user/tokens/{token_id}")
+    suspend fun getUserToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("token_id") tokenId: String
+    ): Response<CloudFlareResponse<ApiToken>>
+
+    @GET("user/tokens/verify")
+    suspend fun verifyUserToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?
+    ): Response<CloudFlareResponse<TokenVerifyResult>>
+
+    @GET("accounts/{account_id}/tokens/verify")
+    suspend fun verifyAccountToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<TokenVerifyResult>>
+
+    @PUT("accounts/{account_id}/tokens/{token_id}/value")
+    suspend fun rollAccountToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("token_id") tokenId: String,
+        @Body body: Map<String, String>
+    ): Response<CloudFlareResponse<String>>
+
+    @PUT("user/tokens/{token_id}/value")
+    suspend fun rollUserToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("token_id") tokenId: String,
+        @Body body: Map<String, String>
+    ): Response<CloudFlareResponse<String>>
+
+    @GET("user/tokens/permission_groups")
+    suspend fun listPermissionGroups(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?
+    ): Response<CloudFlareResponse<List<PermissionGroup>>>
+
+    @GET("accounts/{account_id}/tokens/permission_groups")
+    suspend fun listAccountPermissionGroups(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<PermissionGroup>>>
+
+    @GET("user")
+    suspend fun getUser(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?
+    ): Response<CloudFlareResponse<UserInfo>>
+
+    @POST("user/tokens")
+    suspend fun createUserToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Body request: TokenUpsertRequest
+    ): Response<CloudFlareResponse<ApiToken>>
+
+    @PUT("user/tokens/{token_id}")
+    suspend fun updateUserToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("token_id") tokenId: String,
+        @Body request: TokenUpsertRequest
+    ): Response<CloudFlareResponse<ApiToken>>
+
+    @DELETE("user/tokens/{token_id}")
+    suspend fun deleteUserToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("token_id") tokenId: String
+    ): Response<CloudFlareResponse<TokenDeleteResult>>
+
+    // ==================== Account API Tokens ====================
+
+    @GET("accounts/{account_id}/tokens")
+    suspend fun listAccountTokens(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<ApiToken>>>
+
+    @GET("accounts/{account_id}/tokens/{token_id}")
+    suspend fun getAccountToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("token_id") tokenId: String
+    ): Response<CloudFlareResponse<ApiToken>>
+
+    @POST("accounts/{account_id}/tokens")
+    suspend fun createAccountToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body request: TokenUpsertRequest
+    ): Response<CloudFlareResponse<ApiToken>>
+
+    @PUT("accounts/{account_id}/tokens/{token_id}")
+    suspend fun updateAccountToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("token_id") tokenId: String,
+        @Body request: TokenUpsertRequest
+    ): Response<CloudFlareResponse<ApiToken>>
+
+    @DELETE("accounts/{account_id}/tokens/{token_id}")
+    suspend fun deleteAccountToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("token_id") tokenId: String
+    ): Response<CloudFlareResponse<TokenDeleteResult>>
+
     // ==================== KV ====================
-    
+
     @GET("accounts/{account_id}/storage/kv/namespaces")
     suspend fun listKvNamespaces(
         @Header("Authorization") token: String?,
