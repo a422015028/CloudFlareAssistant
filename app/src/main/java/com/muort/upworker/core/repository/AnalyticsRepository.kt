@@ -78,8 +78,11 @@ class AnalyticsRepository @Inject constructor(
                     
                     // 获取 R2 存储桶列表（REST API）
                     val r2Stats = fetchR2BucketStats(account)
-                    
-                    val metrics = parseAnalyticsData(analyticsResponse?.data, d1Stats, r2Stats)
+
+                    // 获取 KV 命名空间列表（REST API）
+                    val kvStats = fetchKvNamespaceStats(account)
+
+                    val metrics = parseAnalyticsData(analyticsResponse?.data, d1Stats, r2Stats, kvStats)
                     Timber.d("Parsed metrics: $metrics")
                     Resource.Success(metrics)
                 } else {
@@ -173,6 +176,25 @@ class AnalyticsRepository @Inject constructor(
                       payloadSize
                     }
                   }
+                  kvOperationsAdaptiveGroups(
+                    limit: 100,
+                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
+                  ) {
+                    sum {
+                      requests
+                    }
+                    dimensions {
+                      actionType
+                    }
+                  }
+                  kvStorageAdaptiveGroups(
+                    limit: 1,
+                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
+                  ) {
+                    max {
+                      byteCount
+                    }
+                  }
                 }
               }
             }
@@ -225,6 +247,25 @@ class AnalyticsRepository @Inject constructor(
                       payloadSize
                     }
                   }
+                  kvOperationsAdaptiveGroups(
+                    limit: 100,
+                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
+                  ) {
+                    sum {
+                      requests
+                    }
+                    dimensions {
+                      actionType
+                    }
+                  }
+                  kvStorageAdaptiveGroups(
+                    limit: 1,
+                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
+                  ) {
+                    max {
+                      byteCount
+                    }
+                  }
                 }
               }
             }
@@ -268,6 +309,13 @@ class AnalyticsRepository @Inject constructor(
      */
     private data class R2Stats(
         val bucketCount: Int = 0
+    )
+
+    /**
+     * KV 命名空间统计信息（来自 REST API）
+     */
+    private data class KvStats(
+        val namespaceCount: Int = 0
     )
     
     /**
@@ -328,9 +376,37 @@ class AnalyticsRepository @Inject constructor(
     }
     
     /**
+     * 获取 KV 命名空间统计信息（通过 REST API）
+     */
+    private suspend fun fetchKvNamespaceStats(account: Account): KvStats {
+        return try {
+            val response = api.listKvNamespaces(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId
+            )
+
+            if (response.isSuccessful) {
+                val namespaces = response.body()?.result ?: emptyList()
+                val count = namespaces.size
+
+                Timber.d("KV Stats: namespaceCount=$count")
+                KvStats(namespaceCount = count)
+            } else {
+                Timber.w("Failed to fetch KV namespaces: ${response.message()}")
+                KvStats()
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching KV namespace stats")
+            KvStats()
+        }
+    }
+
+    /**
      * 解析 Analytics 数据
      */
-    private fun parseAnalyticsData(data: AnalyticsData?, d1Stats: D1Stats = D1Stats(), r2Stats: R2Stats = R2Stats()): DashboardMetrics {
+    private fun parseAnalyticsData(data: AnalyticsData?, d1Stats: D1Stats = D1Stats(), r2Stats: R2Stats = R2Stats(), kvStats: KvStats = KvStats()): DashboardMetrics {
         if (data == null) {
             return DashboardMetrics()
         }
@@ -417,6 +493,9 @@ class AnalyticsRepository @Inject constructor(
         var r2ClassAOperations = 0L // A类操作（写操作：PutObject, DeleteObject 等）
         var r2ClassBOperations = 0L // B类操作（读操作：GetObject, ListObjects 等）
         var r2StorageBytes = 0L // R2 总存储字节数
+        var kvReads = 0L // KV 读取次数
+        var kvWrites = 0L // KV 写入次数
+        var kvStorageBytes = 0L // KV 总存储字节数
         
         data.viewer?.accounts?.firstOrNull()?.let { account ->
             // Workers 数据
@@ -457,6 +536,23 @@ class AnalyticsRepository @Inject constructor(
             // R2 存储数据
             account.r2Storage?.firstOrNull()?.max?.payloadSize?.let { storageBytes ->
                 r2StorageBytes = storageBytes
+            }
+
+            // KV 操作数据 - read 归读取，其余（write/list/delete）归写入
+            account.kvOperations?.forEach { group ->
+                val actionType = group.dimensions?.actionType ?: ""
+                val count = group.sum.requests ?: 0
+
+                if (actionType.equals("read", ignoreCase = true)) {
+                    kvReads += count
+                } else {
+                    kvWrites += count
+                }
+            }
+
+            // KV 存储数据
+            account.kvStorage?.firstOrNull()?.max?.byteCount?.let { storageBytes ->
+                kvStorageBytes = storageBytes
             }
         }
         
@@ -533,6 +629,10 @@ class AnalyticsRepository @Inject constructor(
             r2ClassBOperations = r2ClassBOperations, // B类操作（读）- GraphQL
             r2StorageBytes = r2StorageBytes, // R2 总存储 - GraphQL
             r2BucketCount = r2Stats.bucketCount, // 来自 REST API
+            kvReads = kvReads, // KV 读取 - GraphQL
+            kvWrites = kvWrites, // KV 写入 - GraphQL
+            kvStorageBytes = kvStorageBytes, // KV 总存储 - GraphQL
+            kvNamespaceCount = kvStats.namespaceCount, // 来自 REST API
             requestsTimeSeries = requestsTimeSeries.sortedBy { it.timestamp },
             bandwidthTimeSeries = bandwidthTimeSeries.sortedBy { it.timestamp },
             threatsTimeSeries = threatsTimeSeries.sortedBy { it.timestamp },

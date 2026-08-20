@@ -599,6 +599,12 @@ class DashboardCardView @JvmOverloads constructor(
         binding.r2ClassBOperationsText.text = formatNumber(metrics.r2ClassBOperations)
         binding.r2StorageText.text = formatBytes(metrics.r2StorageBytes)
         binding.r2BucketCountText.text = metrics.r2BucketCount.toString()
+
+        // === KV 存储监控 ===
+        binding.kvReadsText.text = formatNumber(metrics.kvReads)
+        binding.kvWritesText.text = formatNumber(metrics.kvWrites)
+        binding.kvStorageText.text = formatBytes(metrics.kvStorageBytes)
+        binding.kvNamespaceCountText.text = metrics.kvNamespaceCount.toString()
     }
 
     /**

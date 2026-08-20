@@ -882,7 +882,9 @@ data class AccountAnalytics(
     @SerializedName("d1AnalyticsAdaptiveGroups") val d1Analytics: List<D1AnalyticsGroup>?,
     @SerializedName("d1StorageAdaptiveGroups") val d1Storage: List<D1StorageGroup>?,
     @SerializedName("r2OperationsAdaptiveGroups") val r2Operations: List<R2OperationsGroup>?,
-    @SerializedName("r2StorageAdaptiveGroups") val r2Storage: List<R2StorageGroup>?
+    @SerializedName("r2StorageAdaptiveGroups") val r2Storage: List<R2StorageGroup>?,
+    @SerializedName("kvOperationsAdaptiveGroups") val kvOperations: List<KvOperationsGroup>?,
+    @SerializedName("kvStorageAdaptiveGroups") val kvStorage: List<KvStorageGroup>?
 )
 
 /**
@@ -1014,6 +1016,34 @@ data class R2StorageMax(
 )
 
 /**
+ * KV 操作统计组 - 读/写操作
+ */
+data class KvOperationsGroup(
+    @SerializedName("sum") val sum: KvOperationsSum,
+    @SerializedName("dimensions") val dimensions: KvOperationsDimensions? = null
+)
+
+data class KvOperationsSum(
+    @SerializedName("requests") val requests: Long? = null
+)
+
+data class KvOperationsDimensions(
+    @SerializedName("actionType") val actionType: String? = null // read, write, list, delete 等
+)
+
+/**
+ * KV 存储统计组 - 存储数据
+ */
+data class KvStorageGroup(
+    @SerializedName("max") val max: KvStorageMax? = null
+)
+
+data class KvStorageMax(
+    @SerializedName("byteCount") val byteCount: Long? = null, // 存储字节数
+    @SerializedName("keyCount") val keyCount: Long? = null // 键数量
+)
+
+/**
  * 仪表盘数据汇总
  * 用于 UI 展示
  */
@@ -1044,6 +1074,11 @@ data class DashboardMetrics(
     val r2ClassBOperations: Long = 0, // R2 B类操作（读操作）- GraphQL
     val r2StorageBytes: Long = 0, // R2 总存储（字节）- GraphQL
     val r2BucketCount: Int = 0, // R2 存储桶数量 - REST API
+    // === KV 存储监控 ===
+    val kvReads: Long = 0, // KV 读取次数 - GraphQL
+    val kvWrites: Long = 0, // KV 写入次数（写/删/列表）- GraphQL
+    val kvStorageBytes: Long = 0, // KV 总存储（字节）- GraphQL
+    val kvNamespaceCount: Int = 0, // KV 命名空间数量 - REST API
     val requestsTimeSeries: List<TimeSeriesPoint> = emptyList(),
     val bandwidthTimeSeries: List<TimeSeriesPoint> = emptyList(),
     val threatsTimeSeries: List<TimeSeriesPoint> = emptyList(),
