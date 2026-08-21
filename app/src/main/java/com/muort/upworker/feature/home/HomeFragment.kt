@@ -291,7 +291,7 @@ class HomeFragment : Fragment() {
                 if (updateInfo != null) {
                     val latestVersionCode = updateInfo.versionCode
                     if (latestVersionCode > currentVersionCode || isNewerVersion(updateInfo.versionName, currentVersionName)) {
-                        showUpdateDialog(updateInfo.versionName, latestVersionCode, updateInfo.updateContent)
+                        showUpdateDialog(updateInfo.versionName, latestVersionCode, updateInfo.updateContent, updateInfo.apkUrl)
                     } else {
                         requireContext().showToast("当前已是最新版本")
                     }
@@ -318,7 +318,7 @@ class HomeFragment : Fragment() {
                     .build()
                 
                 val request = Request.Builder()
-                    .url("https://cfd.muort.com/version")
+                    .url("https://cf.muort.com/version")
                     .get()
                     .build()
                 
@@ -328,8 +328,9 @@ class HomeFragment : Fragment() {
                     val versionName = json.optString("versionName", "")
                     val versionCode = json.optLong("versionCode", 0)
                     val updateContent = json.optString("updateContent", "")
+                    val apkUrl = json.optString("apk", "")
                     if (versionCode > 0) {
-                        return@withContext VersionInfo(versionName, versionCode, updateContent)
+                        return@withContext VersionInfo(versionName, versionCode, updateContent, apkUrl)
                     }
                 }
             } catch (e: Exception) {
@@ -339,7 +340,7 @@ class HomeFragment : Fragment() {
         }
     }
     
-    private fun showUpdateDialog(versionName: String, versionCode: Long, updateContent: String) {
+    private fun showUpdateDialog(versionName: String, versionCode: Long, updateContent: String, apkUrl: String) {
         val message = if (updateContent.isNotBlank()) {
             "版本 $versionName (Build $versionCode)\n\n$updateContent"
         } else {
@@ -349,7 +350,11 @@ class HomeFragment : Fragment() {
             .setTitle("发现新版本")
             .setMessage(message)
             .setPositiveButton("更新") { _, _ ->
-                openUrl("https://cf.muort.com/download/latest")
+                if (apkUrl.isNotBlank()) {
+                    openUrl(apkUrl)
+                } else {
+                    requireContext().showToast("下载地址无效")
+                }
             }
             .setNegativeButton("取消", null)
             .show()
@@ -369,7 +374,7 @@ class HomeFragment : Fragment() {
         return false
     }
 
-    private data class VersionInfo(val versionName: String, val versionCode: Long, val updateContent: String)
+    private data class VersionInfo(val versionName: String, val versionCode: Long, val updateContent: String, val apkUrl: String)
     
     private fun openUrl(url: String) {
         try {
