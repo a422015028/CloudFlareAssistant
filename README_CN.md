@@ -44,7 +44,7 @@ Kotlin · Hilt · MVVM · Coroutines/Flow · Room · Retrofit/OkHttp · Navigati
 
 ## 下载
 
-从 [Releases](../../releases) 下载最新 APK，或访问 [cf.390202.xyz](https://cf.muort.com)。
+从 [Releases](../../releases) 下载最新 APK，或访问 [cf.muort.com](https://cf.muort.com)。
 
 ## 环境要求
 
