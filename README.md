@@ -44,7 +44,7 @@ Kotlin · Hilt · MVVM · Coroutines/Flow · Room · Retrofit/OkHttp · Navigati
 
 ## Download
 
-Download the latest APK from [Releases](../../releases) or visit [cf.390202.xyz](https://cf.muort.com).
+Download the latest APK from [Releases](../../releases) or visit [cf.muort.com](https://cf.muort.com).
 
 ## Requirements
 
