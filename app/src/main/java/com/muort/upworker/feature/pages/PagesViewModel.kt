@@ -9,6 +9,7 @@ import com.muort.upworker.core.model.PagesDeploymentLogs
 import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.PagesProjectDetail
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.TailResult
 import com.muort.upworker.core.repository.PagesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -253,7 +254,24 @@ class PagesViewModel @Inject constructor(
     ): Resource<PagesDeploymentLogs> {
         return pagesRepository.getDeploymentLogs(account, projectName, deploymentId)
     }
-    
+
+    suspend fun createDeploymentTail(
+        account: Account,
+        projectName: String,
+        deploymentId: String
+    ): Resource<TailResult> {
+        return pagesRepository.createDeploymentTail(account, projectName, deploymentId)
+    }
+
+    suspend fun deleteDeploymentTail(
+        account: Account,
+        projectName: String,
+        deploymentId: String,
+        tailId: String
+    ): Resource<Unit> {
+        return pagesRepository.deleteDeploymentTail(account, projectName, deploymentId, tailId)
+    }
+
     suspend fun listDomainsSuspend(
         account: Account,
         projectName: String

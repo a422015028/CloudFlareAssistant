@@ -33,6 +33,7 @@ import com.muort.upworker.core.model.PagesDomain
 import com.muort.upworker.core.model.DEFAULT_COMPATIBILITY_DATE
 import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.TailResult
 import com.muort.upworker.feature.pages.CleanupResult
 import com.muort.upworker.core.repository.KvRepository
 import com.muort.upworker.core.repository.R2Repository
@@ -216,7 +217,7 @@ class PagesFragment : Fragment() {
             },
             onLogsClick = { project ->
                 accountViewModel.defaultAccount.value?.let { account ->
-                    showProjectLogsDialog(account, project)
+                    showProjectLiveLogs(account, project)
                 }
             },
             onSelectionModeClick = { project, isSelected ->
@@ -1805,6 +1806,7 @@ class PagesFragment : Fragment() {
         val repoInfoText = dialogView.findViewById<android.widget.TextView>(R.id.repoInfoText)
         val deleteBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
         val accessBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.accessBtn)
+        val liveLogsBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.liveLogsBtn)
         val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
 
         titleText.text = "${project.name} - 部署详情"
@@ -2031,18 +2033,29 @@ class PagesFragment : Fragment() {
             dialog.dismiss()
         }
 
+        liveLogsBtn.setOnClickListener {
+            accountViewModel.defaultAccount.value?.let { acc ->
+                showProjectLogsDialog(acc, project, deployment)
+            }
+        }
+
         dialog.show()
     }
-    
-    private fun showProjectLogsDialog(account: com.muort.upworker.core.model.Account, project: PagesProject) {
+
+    private fun showProjectLogsDialog(
+        account: com.muort.upworker.core.model.Account,
+        project: PagesProject,
+        deployment: PagesDeployment
+    ) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_pages_logs, null)
         val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
-        val deploymentSelector = dialogView.findViewById<android.widget.AutoCompleteTextView>(R.id.deploymentSelector)
+        val deploymentSelectorLayout = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.deploymentSelectorLayout)
         val logContent = dialogView.findViewById<android.widget.TextView>(R.id.logContent)
         val logInfoText = dialogView.findViewById<android.widget.TextView>(R.id.logInfoText)
         val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
 
-        titleText.text = "${project.name} - 部署日志"
+        titleText.text = "${project.name} - 构建日志"
+        deploymentSelectorLayout.visibility = android.view.View.GONE
         logContent.text = "加载中..."
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
@@ -2053,37 +2066,53 @@ class PagesFragment : Fragment() {
             dialog.dismiss()
         }
 
-        lifecycleScope.launch {
-            val result = pagesViewModel.getDeploymentListSuspend(account, project.name)
-            if (result is Resource.Success<*>) {
-                @Suppress("UNCHECKED_CAST")
-                val deploymentList = result.data as List<PagesDeployment>
-                val displayItems = deploymentList.map { dep ->
-                    val shortId = dep.shortId ?: dep.id.take(8)
-                    val env = if (dep.environment == "production") "生产" else "预览"
-                    val date = dep.createdOn?.substringBefore('T') ?: "未知时间"
-                    "$shortId • $env • $date"
-                }
-                val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, displayItems)
-                deploymentSelector.setAdapter(adapter)
+        dialog.show()
+        loadDeploymentLogs(account, project.name, deployment.id, logContent, logInfoText)
+    }
 
-                if (deploymentList.isNotEmpty()) {
-                    deploymentSelector.setText(displayItems[0], false)
-                    loadDeploymentLogs(account, project.name, deploymentList[0].id, logContent, logInfoText)
-                }
+    /**
+     * 项目卡片"日志"入口：打开当前生产/预览部署的实时日志（与官网 Logs 一致）
+     */
+    private fun showProjectLiveLogs(account: com.muort.upworker.core.model.Account, project: PagesProject) {
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("实时日志")
+            .setMessage("正在创建日志通道...")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
 
-                deploymentSelector.setOnItemClickListener { _, _, position, _ ->
-                    if (position < deploymentList.size) {
-                        logContent.text = "加载中..."
-                        loadDeploymentLogs(account, project.name, deploymentList[position].id, logContent, logInfoText)
+        viewLifecycleOwner.lifecycleScope.launch {
+            // 获取项目详情以定位当前生产/预览部署
+            var deploymentId: String? = null
+            val detailResult = pagesViewModel.getProjectDetailSuspend(account, project.name)
+            if (detailResult is Resource.Success) {
+                deploymentId = detailResult.data.canonicalDeployment?.id
+                    ?: detailResult.data.previewDeployment?.id
+            }
+            if (deploymentId == null) {
+                loadingDialog.dismiss()
+                showToast("未找到可用的部署")
+                return@launch
+            }
+
+            val result = pagesViewModel.createDeploymentTail(account, project.name, deploymentId)
+            when (result) {
+                is Resource.Success<*> -> {
+                    val tail = result.data as? TailResult
+                    loadingDialog.dismiss()
+                    if (tail?.url.isNullOrEmpty()) {
+                        showToast("创建日志通道失败: 无 WSS 地址")
+                    } else {
+                        PagesLogsActivity.start(requireContext(), project.name, tail!!.url)
                     }
                 }
-            } else {
-                logContent.text = "加载部署列表失败"
+                is Resource.Error -> {
+                    loadingDialog.dismiss()
+                    showToast("创建日志通道失败: ${result.message}")
+                }
+                is Resource.Loading -> {}
             }
         }
-
-        dialog.show()
     }
 
     private fun loadDeploymentLogs(

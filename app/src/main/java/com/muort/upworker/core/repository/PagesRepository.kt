@@ -450,14 +450,70 @@ class PagesRepository @Inject constructor(
                 response.body()?.result?.let {  
                     Resource.Success(it)  
                 } ?: Resource.Error("Logs fetched but no result returned")  
-            } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
-                    ?: response.message()  
-                Resource.Error("Failed to get deployment logs: $errorMsg")  
-            }  
-        }  
-    }  
-      
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    ?: response.message()
+                Resource.Error("Failed to get deployment logs: $errorMsg")
+            }
+        }
+    }
+
+    // ==================== Pages Tails (Real-time Logs) ====================
+
+    suspend fun createDeploymentTail(
+        account: Account,
+        projectName: String,
+        deploymentId: String
+    ): Resource<TailResult> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val response = api.createPagesDeploymentTail(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                projectName = projectName,
+                deploymentId = deploymentId
+            )
+
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("创建日志通道失败: 无返回结果")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.message()
+                Resource.Error("创建日志通道失败: $errorMsg")
+            }
+        }
+    }
+
+    suspend fun deleteDeploymentTail(
+        account: Account,
+        projectName: String,
+        deploymentId: String,
+        tailId: String
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val response = api.deletePagesDeploymentTail(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                projectName = projectName,
+                deploymentId = deploymentId,
+                tailId = tailId
+            )
+
+            if (response.isSuccessful && response.body()?.success == true) {
+                Resource.Success(Unit)
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.message()
+                Resource.Error("删除日志通道失败: $errorMsg")
+            }
+        }
+    }
+
     suspend fun createDeployment(
         account: Account,
         projectName: String,

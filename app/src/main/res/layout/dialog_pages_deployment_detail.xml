@@ -883,13 +883,21 @@
         android:layout_marginTop="16dp">
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/liveLogsBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="日志"/>
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/deleteBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="删除"
             app:backgroundTint="@color/red_500"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white"
+            android:layout_marginStart="8dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/accessBtn"

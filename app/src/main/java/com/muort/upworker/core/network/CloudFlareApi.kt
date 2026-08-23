@@ -864,6 +864,38 @@ interface CloudFlareApi {
         @Path("domain_name") domainName: String
     ): Response<CloudFlareResponse<Unit>>
     
+    // ==================== Pages Tails (Real-time Logs) ====================
+    
+    /**
+     * Create deployment tail
+     * https://developers.cloudflare.com/api/resources/pages/subresources/projects/subresources/deployments/subresources/tails/methods/create
+     */
+    @POST("accounts/{account_id}/pages/projects/{project_name}/deployments/{deployment_id}/tails")
+    suspend fun createPagesDeploymentTail(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Path("deployment_id") deploymentId: String,
+        @Body body: CreateTailRequest = CreateTailRequest()
+    ): Response<CloudFlareResponse<TailResult>>
+    
+    /**
+     * Delete deployment tail
+     * https://developers.cloudflare.com/api/resources/pages/subresources/projects/subresources/deployments/subresources/tails/methods/delete
+     */
+    @DELETE("accounts/{account_id}/pages/projects/{project_name}/deployments/{deployment_id}/tails/{tail_id}")
+    suspend fun deletePagesDeploymentTail(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Path("deployment_id") deploymentId: String,
+        @Path("tail_id") tailId: String
+    ): Response<CloudFlareResponse<Unit>>
+    
     // ==================== R2 ====================
     
     @GET("accounts/{account_id}/r2/buckets")
