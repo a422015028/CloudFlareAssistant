@@ -17,7 +17,6 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import com.google.android.material.appbar.MaterialToolbar
@@ -55,9 +54,6 @@ class PagesLogsActivity : AppCompatActivity() {
     private lateinit var pauseBtn: MaterialButton
     private lateinit var clearBtn: MaterialButton
     private lateinit var refreshBtn: MaterialButton
-    private lateinit var selectAllBtn: MaterialButton
-    private lateinit var copyBtn: MaterialButton
-    private lateinit var closeBtn: MaterialButton
     private lateinit var waitingText: TextView
     private lateinit var logsContainer: LinearLayout
     private lateinit var logsScrollView: ScrollView
@@ -99,9 +95,6 @@ class PagesLogsActivity : AppCompatActivity() {
         pauseBtn = findViewById<MaterialButton>(R.id.pauseBtn)
         clearBtn = findViewById<MaterialButton>(R.id.clearBtn)
         refreshBtn = findViewById<MaterialButton>(R.id.refreshBtn)
-        selectAllBtn = findViewById<MaterialButton>(R.id.selectAllBtn)
-        copyBtn = findViewById<MaterialButton>(R.id.copyBtn)
-        closeBtn = findViewById<MaterialButton>(R.id.closeBtn)
         waitingText = findViewById<TextView>(R.id.waitingText)
         logsContainer = findViewById<LinearLayout>(R.id.logsContainer)
         logsScrollView = findViewById<ScrollView>(R.id.logsScrollView)
@@ -115,9 +108,6 @@ class PagesLogsActivity : AppCompatActivity() {
         pauseBtn.setOnClickListener { togglePause() }
         clearBtn.setOnClickListener { clearLogs() }
         refreshBtn.setOnClickListener { refreshConnection() }
-        selectAllBtn.setOnClickListener { selectAllLogs() }
-        copyBtn.setOnClickListener { copyLogs() }
-        closeBtn.setOnClickListener { finish() }
 
         val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
         if (wssUrl.isNullOrEmpty()) {
@@ -270,7 +260,7 @@ class PagesLogsActivity : AppCompatActivity() {
             ).apply { bottomMargin = dp(8) }
         }
 
-        // 第一行：状态圆点 + Ok + 方法
+        // 第一行：状态圆点 + Ok + 方法 + （右侧复制按钮，仅展开时显示）
         val headerRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -305,15 +295,31 @@ class PagesLogsActivity : AppCompatActivity() {
             }
             headerRow.addView(methodTv)
         }
+
+        // 弹性占位：把复制按钮推到卡片最右侧
+        headerRow.addView(View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(0, 1, 1f)
+        })
+
+        // 复制按钮：ImageButton 渲染 colorControlNormal 深色图标，与顶部工具栏一致；复制本卡片全部内容
+        val copyCardBtn = android.widget.ImageButton(this).apply {
+            setImageResource(R.drawable.ic_content_copy)
+            background = null
+            val pad = dp(6)
+            setPadding(pad, pad, pad, pad)
+            layoutParams = LinearLayout.LayoutParams(dp(28), dp(28))
+            visibility = View.GONE
+        }
+        headerRow.addView(copyCardBtn)
+
         card.addView(headerRow)
 
-        // 第二行：URL（可选中复制）
+        // 第二行：URL（不可选中，避免拦截点击）
         if (url.isNotEmpty()) {
             val urlTv = TextView(this).apply {
                 text = url
                 textSize = 13f
                 setTextColor(Color.parseColor("#2563eb"))
-                setTextIsSelectable(true)
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
@@ -352,10 +358,39 @@ class PagesLogsActivity : AppCompatActivity() {
             card.addView(contentTv)
         }
 
-        // 点击卡片弹出详情对话框（与官网一致）
+        // 点击卡片展开/收起详情（内联显示格式化 JSON），复制按钮仅在展开时显示
         card.isClickable = true
         card.isFocusable = true
-        card.setOnClickListener { showEventDetailDialog(outcome, method, url, timeStr, rawJson) }
+        card.setOnClickListener {
+            val detail = card.getTag(R.id.logsContainer) as? TextView
+            if (detail == null) return@setOnClickListener
+            val expanding = detail.visibility != View.VISIBLE
+            detail.visibility = if (expanding) View.VISIBLE else View.GONE
+            copyCardBtn.visibility = if (expanding) View.VISIBLE else View.GONE
+            if (expanding && detail.text.isNullOrEmpty()) {
+                fillDetailText(detail, rawJson)
+            }
+        }
+        copyCardBtn.setOnClickListener {
+            val detail = card.getTag(R.id.logsContainer) as? TextView
+            val json = detail?.text?.toString()?.takeIf { it.isNotEmpty() } ?: rawJson
+            copyCardContent(outcome, method, url, timeStr, json)
+        }
+
+        // 内联详情区：格式化 JSON，默认隐藏
+        val detailTv = TextView(this).apply {
+            textSize = 11f
+            setTypeface(Typeface.MONOSPACE)
+            setTextColor(Color.parseColor("#374151"))
+            visibility = View.GONE
+            setPadding(0, dp(8), 0, 0)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        card.setTag(R.id.logsContainer, detailTv)
+        card.addView(detailTv)
 
         return Pair(card, rawJson)
     }
@@ -376,46 +411,32 @@ class PagesLogsActivity : AppCompatActivity() {
     }
 
     /**
-     * 详情弹窗：标题为摘要信息，正文为格式化 JSON（与官网点击事件后的展示一致）
+     * 首次展开时填充格式化 JSON 到内联详情区
      */
-    private fun showEventDetailDialog(
-        outcome: String,
-        method: String,
-        url: String,
-        timeStr: String,
-        rawJson: String
-    ) {
+    private fun fillDetailText(detailTv: TextView, rawJson: String) {
         val prettyJson = try {
             GsonBuilder().setPrettyPrinting().create()
                 .toJson(JsonParser.parseString(rawJson))
         } catch (e: Exception) {
             rawJson
         }
+        detailTv.text = prettyJson
+    }
 
-        val summary = buildString {
-            append("$outcome  $method\n$url\n$timeStr")
+    /**
+     * 复制单张卡片全部内容：摘要（状态/方法/URL/时间）+ 格式化 JSON
+     */
+    private fun copyCardContent(outcome: String, method: String, url: String, timeStr: String, json: String) {
+        val text = buildString {
+            append(outcome)
+            if (method.isNotEmpty()) append("  $method")
+            if (url.isNotEmpty()) append("\n$url")
+            append("\n$timeStr\n\n")
+            append(json)
         }
-
-        val scrollView = ScrollView(this)
-        val textView = TextView(this).apply {
-            text = prettyJson
-            textSize = 11f
-            setTypeface(Typeface.MONOSPACE)
-            setTextIsSelectable(true)
-            setPadding(48, 24, 48, 24)
-        }
-        scrollView.addView(textView)
-
-        AlertDialog.Builder(this)
-            .setTitle(summary.trim())
-            .setView(scrollView)
-            .setPositiveButton("关闭", null)
-            .setNeutralButton("复制 JSON") { _, _ ->
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Pages log detail", prettyJson))
-                showToast("JSON 已复制")
-            }
-            .show()
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Pages log event", text))
+        showToast("已复制该卡片内容")
     }
 
     // ==================== 连接管理 ====================
@@ -450,38 +471,6 @@ class PagesLogsActivity : AppCompatActivity() {
         logsContainer.removeAllViews()
         waitingText.visibility = View.VISIBLE
         logsContainer.addView(waitingText)
-    }
-
-    private fun selectAllLogs() {
-        // 卡片模式下全选无实际操作对象，保留按钮占位
-        showToast("点击卡片可查看和复制详情")
-    }
-
-    private fun copyLogs() {
-        if (eventCards.isEmpty()) {
-            showToast("没有日志可复制")
-            return
-        }
-        val sb = StringBuilder()
-        for ((card, _) in eventCards) {
-            val texts = collectTexts(card)
-            sb.append(texts.joinToString("\n")).append("\n\n")
-        }
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Pages logs", sb.toString()))
-        showToast("日志已复制")
-    }
-
-    private fun collectTexts(view: View): List<String> {
-        if (view is TextView) return listOf(view.text.toString())
-        if (view is ViewGroup) {
-            val out = mutableListOf<String>()
-            for (i in 0 until view.childCount) {
-                out.addAll(collectTexts(view.getChildAt(i)))
-            }
-            return out
-        }
-        return emptyList()
     }
 
     private fun showToast(message: String) {
