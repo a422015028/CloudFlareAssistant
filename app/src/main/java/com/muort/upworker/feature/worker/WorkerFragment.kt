@@ -62,6 +62,13 @@ data class D1BindingItem(
     val databaseName: String
 )
 
+// Data class for service binding display
+data class ServiceBindingItem(
+    val bindingName: String,
+    val serviceName: String,
+    val serviceEnvironment: String
+)
+
 @AndroidEntryPoint
 class WorkerFragment : Fragment() {
     
@@ -79,6 +86,9 @@ class WorkerFragment : Fragment() {
     
     @Inject
     lateinit var d1Repository: D1Repository
+
+    @Inject
+    lateinit var workerRepository: com.muort.upworker.core.repository.WorkerRepository
     
     @Inject
     lateinit var accountRepository: AccountRepository
@@ -184,6 +194,9 @@ class WorkerFragment : Fragment() {
             },
             onConfigD1Click = { script ->
                 showConfigD1BindingsDialog(script)
+            },
+            onConfigServiceClick = { script ->
+                showConfigServiceBindingsDialog(script)
             },
             onConfigVariablesClick = { script ->
                 showConfigVariablesDialog(script)
@@ -877,6 +890,177 @@ class WorkerFragment : Fragment() {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
             showToast("D1 绑定配置已更新")
+        }
+    }
+    
+    // ==================== Service Bindings Configuration ====================
+    
+    private fun showConfigServiceBindingsDialog(script: WorkerScript) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在加载...")
+            .setMessage("正在获取当前服务绑定配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        viewModel.getWorkerSettings(account, script.id) { settingsResult ->
+            loadingDialog.dismiss()
+            
+            val dialogBinding = com.muort.upworker.databinding.DialogScriptServiceBindingsBinding.inflate(layoutInflater)
+            
+            // Setup title
+            dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+            
+            // Temporary list for this dialog - initialize with existing bindings
+            val tempServiceBindings = mutableListOf<ServiceBindingItem>()
+            
+            // Load existing service bindings from settings
+            if (settingsResult is com.muort.upworker.core.model.Resource.Success) {
+                settingsResult.data.bindings?.forEach { binding ->
+                    if (binding.type == "service" && binding.service != null) {
+                        tempServiceBindings.add(ServiceBindingItem(binding.name, binding.service, binding.environment ?: "production"))
+                        Timber.d("Loaded existing service binding: ${binding.name} -> ${binding.service} (${binding.environment})")
+                    }
+                }
+            }
+            
+            // Setup adapter with lateinit reference
+            lateinit var tempAdapter: ServiceBindingsAdapter
+            tempAdapter = ServiceBindingsAdapter(
+                onDeleteClick = { position ->
+                    tempServiceBindings.removeAt(position)
+                    updateDialogServiceBindingsUI(dialogBinding, tempAdapter, tempServiceBindings)
+                }
+            )
+            dialogBinding.bindingsRecyclerView.apply {
+                layoutManager = LinearLayoutManager(requireContext())
+                adapter = tempAdapter
+            }
+            
+            // Add binding button
+            dialogBinding.addBindingBtn.setOnClickListener {
+                showAddServiceBindingDialogForScript(script, tempServiceBindings) {
+                    updateDialogServiceBindingsUI(dialogBinding, tempAdapter, tempServiceBindings)
+                }
+            }
+            
+            updateDialogServiceBindingsUI(dialogBinding, tempAdapter, tempServiceBindings)
+            
+            // Show dialog
+            MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogBinding.root)
+                .setPositiveButton("应用配置") { _, _ ->
+                    // Allow empty bindings (remove all bindings)
+                    applyServiceBindingsToScript(script, tempServiceBindings)
+                }
+                .setNegativeButton("取消", null)
+                .show()
+        }
+    }
+    
+    private fun updateDialogServiceBindingsUI(
+        dialogBinding: com.muort.upworker.databinding.DialogScriptServiceBindingsBinding,
+        adapter: ServiceBindingsAdapter,
+        bindings: List<ServiceBindingItem>
+    ) {
+        if (bindings.isEmpty()) {
+            dialogBinding.noBindingsText.visibility = View.VISIBLE
+            dialogBinding.bindingsRecyclerView.visibility = View.GONE
+        } else {
+            dialogBinding.noBindingsText.visibility = View.GONE
+            dialogBinding.bindingsRecyclerView.visibility = View.VISIBLE
+            adapter.submitList(bindings)
+        }
+    }
+    
+    private fun showAddServiceBindingDialogForScript(
+        currentScript: WorkerScript,
+        tempBindings: MutableList<ServiceBindingItem>,
+        onAdded: () -> Unit
+    ) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = workerRepository.listWorkerScripts(account)
+            
+            if (result is com.muort.upworker.core.model.Resource.Success<List<com.muort.upworker.core.model.WorkerScript>>) {
+                val workers = result.data.filter { it.id != currentScript.id }
+                
+                if (workers.isEmpty()) {
+                    showToast("暂无其他 Worker 脚本可绑定")
+                    return@launch
+                }
+                
+                val dialogBinding = com.muort.upworker.databinding.DialogServiceBindingBinding.inflate(layoutInflater)
+                
+                // Setup worker spinner
+                val workerNames = workers.map { it.id }
+                val workerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, workerNames)
+                workerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                dialogBinding.workerSpinner.adapter = workerAdapter
+
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("添加") { _, _ ->
+                        val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
+                        val selectedIndex = dialogBinding.workerSpinner.selectedItemPosition
+
+                        if (bindingName.isEmpty()) {
+                            showToast("请输入绑定名称")
+                            return@setPositiveButton
+                        }
+
+                        if (selectedIndex >= 0 && selectedIndex < workers.size) {
+                            val worker = workers[selectedIndex]
+                            tempBindings.add(ServiceBindingItem(bindingName, worker.id, "production"))
+                            onAdded()
+                            showToast("服务绑定已添加")
+                        }
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            } else if (result is com.muort.upworker.core.model.Resource.Error) {
+                showToast("加载 Worker 列表失败: ${result.message}")
+            }
+        }
+    }
+    
+    private fun applyServiceBindingsToScript(script: WorkerScript, bindings: List<ServiceBindingItem>) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        Timber.d("Applying ${bindings.size} service bindings to script '${script.id}'")
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在更新...")
+            .setMessage("正在更新服务绑定配置（不重新上传脚本代码）")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        val bindingTriples = bindings.map { Triple(it.bindingName, it.serviceName, it.serviceEnvironment) }
+        viewModel.updateWorkerServiceBindings(account, script.id, bindingTriples)
+        
+        // Dismiss loading dialog after a short delay to show the message
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(500)
+            loadingDialog.dismiss()
+            showToast("服务绑定配置已更新")
         }
     }
     
@@ -2173,6 +2357,7 @@ class WorkerScriptsAdapter(
     private val onConfigKvClick: (WorkerScript) -> Unit,
     private val onConfigR2Click: (WorkerScript) -> Unit,
     private val onConfigD1Click: (WorkerScript) -> Unit,
+    private val onConfigServiceClick: (WorkerScript) -> Unit,
     private val onConfigVariablesClick: (WorkerScript) -> Unit,
     private val onConfigSecretsClick: (WorkerScript) -> Unit,
     private val onSelectionModeClick: (WorkerScript, Boolean) -> Unit = { _, _ -> }
@@ -2270,6 +2455,10 @@ class WorkerScriptsAdapter(
             
             binding.configD1Btn.setOnClickListener {
                 onConfigD1Click(script)
+            }
+
+            binding.configServiceBtn.setOnClickListener {
+                onConfigServiceClick(script)
             }
             
             binding.configVariablesBtn.setOnClickListener {
@@ -2555,6 +2744,47 @@ class D1BindingsAdapter(
             binding.bindingNameText.text = d1Binding.bindingName
             binding.databaseNameText.text = d1Binding.databaseName
             
+            binding.deleteBindingBtn.setOnClickListener {
+                onDeleteClick(position)
+            }
+        }
+    }
+}
+
+class ServiceBindingsAdapter(
+    private val onDeleteClick: (Int) -> Unit
+) : RecyclerView.Adapter<ServiceBindingsAdapter.BindingViewHolder>() {
+
+    private var bindings = listOf<ServiceBindingItem>()
+
+    fun submitList(newBindings: List<ServiceBindingItem>) {
+        bindings = newBindings
+        notifyDataSetChanged()
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
+        val binding = com.muort.upworker.databinding.ItemPagesServiceBindingBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return BindingViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: BindingViewHolder, position: Int) {
+        holder.bind(bindings[position], position)
+    }
+
+    override fun getItemCount() = bindings.size
+
+    inner class BindingViewHolder(
+        private val binding: com.muort.upworker.databinding.ItemPagesServiceBindingBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(serviceBinding: ServiceBindingItem, position: Int) {
+            binding.bindingNameText.text = serviceBinding.bindingName
+            binding.serviceNameText.text = "Service: ${serviceBinding.serviceName}"
+
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(position)
             }

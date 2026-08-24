@@ -548,6 +548,88 @@ class WorkerRepository @Inject constructor(
     }
     
     /**
+     * Update service bindings for an existing Worker Script (without re-uploading script code)
+     * @param account The Cloudflare account
+     * @param scriptName Name of the existing script
+     * @param serviceBindings List of (variable name, target worker name, target environment or null) triples
+     * @return Resource indicating success or error
+     */
+    suspend fun updateWorkerServiceBindings(
+        account: Account,
+        scriptName: String,
+        serviceBindings: List<Triple<String, String, String?>>
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            Timber.d("Updating service bindings for script '$scriptName' with ${serviceBindings.size} bindings")
+
+            // First, get existing settings to preserve other bindings and compatibilityDate
+            val existingBindings = mutableListOf<WorkerBinding>()
+            var existingCompatibilityDate: String? = null
+            val settingsResult = getWorkerSettings(account, scriptName)
+            if (settingsResult is Resource.Success) {
+                settingsResult.data.bindings?.forEach { binding ->
+                    // Keep all non-service bindings
+                    if (binding.type != "service") {
+                        existingBindings.add(binding)
+                    }
+                }
+                existingCompatibilityDate = settingsResult.data.compatibilityDate
+            }
+
+            // Convert triples to WorkerBinding objects
+            val svcBindingsList = serviceBindings.map { (name, serviceName, environment) ->
+                Timber.d("Adding service binding: $name -> $serviceName ($environment)")
+                WorkerBinding(
+                    type = "service",
+                    name = name,
+                    service = serviceName,
+                    environment = environment ?: "production"
+                )
+            }
+
+            // Combine existing bindings with new service bindings
+            val allBindings = existingBindings + svcBindingsList
+            Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${svcBindingsList.size} service)")
+
+            // Create settings request with preserved compatibilityDate
+            val settingsRequest = WorkerSettingsRequest(
+                bindings = allBindings,
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
+            )
+
+            Timber.d("Service Settings request: $settingsRequest")
+
+            val settingsJson = gson.toJson(settingsRequest)
+
+            // Convert to RequestBody for multipart
+            val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
+
+            // Call API to update settings
+            val response = api.updateWorkerSettings(
+                token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName,
+                settings = settingsBody
+            )
+
+            if (response.isSuccessful && response.body()?.success == true) {
+                Timber.d("Successfully updated service bindings for '$scriptName'")
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("Update successful but no result returned")
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.message()
+                Timber.e("Failed to update service bindings: Response code: ${response.code()}, Error body: $errorBody")
+                Resource.Error("Failed to update service bindings: $errorMsg")
+            }
+        }
+    }
+    
+    /**
      * Update environment variables for an existing Worker Script
      * @param account The Cloudflare account
      * @param scriptName Name of the existing script

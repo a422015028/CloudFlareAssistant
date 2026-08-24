@@ -270,6 +270,41 @@ class WorkerViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Update service bindings for an existing Worker Script
+     * Only updates the bindings configuration, does NOT re-upload script code
+     * @param scriptName Name of the existing script
+     * @param serviceBindings List of triples containing (binding_name, target_worker, target_environment or null)
+     */
+    fun updateWorkerServiceBindings(
+        account: Account,
+        scriptName: String,
+        serviceBindings: List<Triple<String, String, String?>>
+    ) {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Uploading
+
+            when (val result = workerRepository.updateWorkerServiceBindings(
+                account, scriptName, serviceBindings
+            )) {
+                is Resource.Success -> {
+                    _uploadState.value = UploadState.Success
+                    _message.emit("服务绑定已成功更新（'$scriptName'）")
+                    Timber.d("Service bindings updated for script: $scriptName")
+                    loadWorkerScripts(account)
+                }
+                is Resource.Error -> {
+                    _uploadState.value = UploadState.Error(result.message)
+                    _message.emit("更新服务绑定失败: ${result.message}")
+                    Timber.e("Failed to update service bindings: ${result.message}")
+                }
+                is Resource.Loading -> {
+                    _uploadState.value = UploadState.Uploading
+                }
+            }
+        }
+    }
     
     /**
      * Update environment variables for an existing Worker Script

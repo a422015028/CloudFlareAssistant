@@ -488,6 +488,37 @@ class PagesViewModel @Inject constructor(
     }
     
     /**
+     * Update service bindings for a Pages project
+     * @param environment "production" or "preview"
+     * @param bindings Map of binding name to (service name, environment) pair, null to delete
+     */
+    fun updateServiceBindings(
+        account: Account,
+        projectName: String,
+        environment: String,
+        bindings: Map<String, Pair<String, String>?>
+    ) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = pagesRepository.updateServiceBindings(
+                account, projectName, environment, bindings
+            )) {
+                is Resource.Success -> {
+                    _message.emit("服务绑定更新成功")
+                    _projectDetail.value = result.data
+                    Timber.d("Service bindings updated for $projectName")
+                }
+                is Resource.Error -> {
+                    _message.emit("服务绑定更新失败: ${result.message}")
+                    Timber.e("Failed to update service bindings: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+
+    /**
      * Get current project detail with callback for synchronous access
      */
     fun getProjectDetail(

@@ -68,6 +68,9 @@ class PagesFragment : Fragment() {
     
     @Inject
     lateinit var d1Repository: D1Repository
+
+    @Inject
+    lateinit var workerRepository: com.muort.upworker.core.repository.WorkerRepository
     
     @Inject
     lateinit var dnsRepository: com.muort.upworker.core.repository.DnsRepository
@@ -195,6 +198,11 @@ class PagesFragment : Fragment() {
                     showConfigDialog(account, project, "production", "d1")
                 }
             },
+            onConfigServiceClick = { project ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showConfigDialog(account, project, "production", "services")
+                }
+            },
             onConfigR2Click = { project ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     showConfigDialog(account, project, "production", "r2")
@@ -285,7 +293,8 @@ class PagesFragment : Fragment() {
             "机密 (预览)",
             "KV 绑定",
             "R2 绑定",
-            "D1 绑定"
+            "D1 绑定",
+            "服务绑定"
         )
 
         MaterialAlertDialogBuilder(requireContext())
@@ -300,6 +309,7 @@ class PagesFragment : Fragment() {
                     5 -> showConfigDialog(account, project, "production", "kv")
                     6 -> showConfigDialog(account, project, "production", "r2")
                     7 -> showConfigDialog(account, project, "production", "d1")
+                    8 -> showConfigDialog(account, project, "production", "services")
                 }
             }
             .setNegativeButton("关闭", null)
@@ -313,6 +323,7 @@ class PagesFragment : Fragment() {
             "kv" -> showKvBindingsDialog(account, project, environment)
             "r2" -> showR2BindingsDialog(account, project, environment)
             "d1" -> showD1BindingsDialog(account, project, environment)
+            "services" -> showServiceBindingsDialog(account, project, environment)
         }
     }
     
@@ -1214,12 +1225,189 @@ class PagesFragment : Fragment() {
         }
         
         pagesViewModel.updateD1Bindings(account, project.name, environment, bindingsMap)
-        
+
         // Dismiss loading dialog after a short delay
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
             showToast("D1 绑定配置已更新")
+        }
+    }
+
+    private fun showServiceBindingsDialog(account: Account, project: PagesProject, environment: String) {
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("加载中...")
+            .setMessage("正在获取当前服务绑定配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+
+        // Fetch current project detail to get existing bindings
+        viewLifecycleOwner.lifecycleScope.launch {
+            pagesViewModel.getProjectDetail(account, project.name) { projectResult ->
+                loadingDialog.dismiss()
+
+                val dialogBinding = com.muort.upworker.databinding.DialogPagesServicesBinding.inflate(layoutInflater)
+
+                // Setup title
+                dialogBinding.projectNameText.text = "项目名称: ${project.name} (${if (environment == "production") "生产" else "预览"}环境)"
+
+                // Temporary list for this dialog - Triple: (bindingName, serviceName, serviceEnv)
+                val tempServiceBindings = mutableListOf<Triple<String, String, String>>()
+                val originalBindingNames = mutableListOf<String>()
+
+                // Load existing service bindings from project settings
+                if (projectResult is Resource.Success) {
+                    val envConfig = if (environment == "production") {
+                        projectResult.data.deploymentConfigs?.production
+                    } else {
+                        projectResult.data.deploymentConfigs?.preview
+                    }
+                    envConfig?.services?.forEach { (bindingName, svc) ->
+                        tempServiceBindings.add(Triple(bindingName, svc.service, svc.environment))
+                        originalBindingNames.add(bindingName)
+                        Timber.d("Loaded existing service binding: $bindingName -> ${svc.service}")
+                    }
+                }
+
+                // Setup adapter
+                lateinit var tempAdapter: PagesServiceBindingsAdapter
+                tempAdapter = PagesServiceBindingsAdapter(
+                    onDeleteClick = { binding ->
+                        tempServiceBindings.remove(binding)
+                        tempAdapter.submitList(tempServiceBindings.toList())
+                        updateServicesDialogBindingsUI(dialogBinding, tempAdapter, tempServiceBindings)
+                    }
+                )
+                dialogBinding.bindingsRecyclerView.apply {
+                    layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+                    adapter = tempAdapter
+                }
+
+                // Add binding button
+                dialogBinding.addBindingBtn.setOnClickListener {
+                    showAddServiceBindingDialogForPages(account, project, tempServiceBindings) {
+                        updateServicesDialogBindingsUI(dialogBinding, tempAdapter, tempServiceBindings)
+                    }
+                }
+
+                updateServicesDialogBindingsUI(dialogBinding, tempAdapter, tempServiceBindings)
+
+                // Show dialog
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("应用配置") { _, _ ->
+                        applyServiceBindingsToPages(account, project, environment, originalBindingNames, tempServiceBindings)
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            }
+        }
+    }
+
+    private fun updateServicesDialogBindingsUI(
+        dialogBinding: com.muort.upworker.databinding.DialogPagesServicesBinding,
+        adapter: PagesServiceBindingsAdapter,
+        bindings: List<Triple<String, String, String>>
+    ) {
+        if (bindings.isEmpty()) {
+            dialogBinding.noBindingsText.visibility = View.VISIBLE
+            dialogBinding.bindingsRecyclerView.visibility = View.GONE
+        } else {
+            dialogBinding.noBindingsText.visibility = View.GONE
+            dialogBinding.bindingsRecyclerView.visibility = View.VISIBLE
+            adapter.submitList(bindings)
+        }
+    }
+
+    private fun showAddServiceBindingDialogForPages(
+        account: Account,
+        project: PagesProject,
+        tempBindings: MutableList<Triple<String, String, String>>,
+        onAdded: () -> Unit
+    ) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = workerRepository.listWorkerScripts(account)
+
+            if (result is Resource.Success) {
+                val workers = result.data.filter { it.id != project.name }
+
+                if (workers.isEmpty()) {
+                    showToast("暂无其他 Worker 脚本可绑定")
+                    return@launch
+                }
+
+                val dialogBinding = com.muort.upworker.databinding.DialogPagesServiceBindingBinding.inflate(layoutInflater)
+
+                // Setup worker spinner
+                val workerNames = workers.map { it.id }
+                val workerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, workerNames)
+                workerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                dialogBinding.workerSpinner.adapter = workerAdapter
+
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton("添加") { _, _ ->
+                        val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
+                        val selectedIndex = dialogBinding.workerSpinner.selectedItemPosition
+
+                        if (bindingName.isEmpty()) {
+                            showToast("请输入绑定名称")
+                            return@setPositiveButton
+                        }
+
+                        if (selectedIndex >= 0 && selectedIndex < workers.size) {
+                            val worker = workers[selectedIndex]
+                            tempBindings.add(Triple(bindingName, worker.id, "production"))
+                            onAdded()
+                            showToast("服务绑定已添加")
+                        }
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            } else if (result is Resource.Error) {
+                showToast("加载 Worker 列表失败: ${result.message}")
+            }
+        }
+    }
+
+    private fun applyServiceBindingsToPages(
+        account: Account,
+        project: PagesProject,
+        environment: String,
+        originalBindingNames: List<String>,
+        newBindings: List<Triple<String, String, String>>
+    ) {
+        Timber.d("Applying ${newBindings.size} service bindings to Pages project '${project.name}' ($environment)")
+
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在更新...")
+            .setMessage("正在更新服务绑定配置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+
+        // Convert to Map format for API: binding name -> (service, serviceEnv), null to delete
+        val bindingsMap = newBindings.associate { it.first to Pair(it.second, it.third) as Pair<String, String>? }.toMutableMap()
+
+        // Add deleted bindings with null values
+        val newBindingNames = newBindings.map { it.first }.toSet()
+        originalBindingNames.forEach { name ->
+            if (name !in newBindingNames) {
+                bindingsMap[name] = null
+                Timber.d("Marking service binding for deletion: $name")
+            }
+        }
+
+        pagesViewModel.updateServiceBindings(account, project.name, environment, bindingsMap)
+
+        // Dismiss loading dialog after a short delay
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(500)
+            loadingDialog.dismiss()
+            showToast("服务绑定配置已更新")
         }
     }
     
@@ -2490,6 +2678,7 @@ class PagesFragment : Fragment() {
         private val onConfigSecretClick: (PagesProject) -> Unit,
         private val onConfigKvClick: (PagesProject) -> Unit,
         private val onConfigD1Click: (PagesProject) -> Unit,
+        private val onConfigServiceClick: (PagesProject) -> Unit,
         private val onConfigR2Click: (PagesProject) -> Unit,
         private val onViewDeploymentsClick: (PagesProject) -> Unit,
         private val onViewDomainsClick: (PagesProject) -> Unit,
@@ -2590,7 +2779,11 @@ class PagesFragment : Fragment() {
                 binding.configD1Btn.setOnClickListener {
                     onConfigD1Click(project)
                 }
-                
+
+                binding.configServiceBtn.setOnClickListener {
+                    onConfigServiceClick(project)
+                }
+
                 binding.configR2Btn.setOnClickListener {
                     onConfigR2Click(project)
                 }
@@ -2882,6 +3075,47 @@ class PagesD1BindingsAdapter(
             
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(d1Binding)
+            }
+        }
+    }
+}
+
+class PagesServiceBindingsAdapter(
+    private val onDeleteClick: (Triple<String, String, String>) -> Unit
+) : RecyclerView.Adapter<PagesServiceBindingsAdapter.BindingViewHolder>() {
+
+    private var bindings = listOf<Triple<String, String, String>>()
+
+    fun submitList(newBindings: List<Triple<String, String, String>>) {
+        bindings = newBindings
+        notifyDataSetChanged()
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
+        val binding = com.muort.upworker.databinding.ItemPagesServiceBindingBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return BindingViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: BindingViewHolder, position: Int) {
+        holder.bind(bindings[position])
+    }
+
+    override fun getItemCount() = bindings.size
+
+    inner class BindingViewHolder(
+        private val binding: com.muort.upworker.databinding.ItemPagesServiceBindingBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(serviceBinding: Triple<String, String, String>) {
+            binding.bindingNameText.text = serviceBinding.first
+            binding.serviceNameText.text = "Service: ${serviceBinding.second}"
+
+            binding.deleteBindingBtn.setOnClickListener {
+                onDeleteClick(serviceBinding)
             }
         }
     }
