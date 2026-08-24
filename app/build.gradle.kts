@@ -2,7 +2,6 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
     id("androidx.navigation.safeargs.kotlin")
@@ -109,7 +108,7 @@ android {
 
 dependencies {
     // Kotlin
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.24")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     
     // AndroidX Core
@@ -142,7 +141,7 @@ dependencies {
     
     // Hilt Dependency Injection
     implementation("com.google.dagger:hilt-android:2.54")
-    kapt("com.google.dagger:hilt-compiler:2.54")
+    ksp("com.google.dagger:hilt-compiler:2.54")
     
     // Retrofit & Network
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
