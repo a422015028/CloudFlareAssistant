@@ -5,14 +5,16 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingTop="5dp"
-    android:paddingBottom="5dp">
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
 
     <TextView
         android:id="@+id/networkStatName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="0.35"
+        android:singleLine="true"
+        android:ellipsize="end"
         android:textSize="13sp"
         android:textStyle="bold"
         android:textColor="?attr/colorOnSurfaceVariant"
@@ -22,30 +24,25 @@
         android:id="@+id/networkStatValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="8dp"
+        android:minWidth="52dp"
+        android:gravity="end"
         android:textSize="13sp"
         android:textStyle="bold"
         android:textColor="?attr/colorOnSurface"
         tools:text="4.99k" />
 
-    <LinearLayout
-        android:layout_width="100dp"
-        android:layout_height="12dp"
-        android:orientation="horizontal">
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        android:layout_weight="0.4"
+        android:background="@drawable/bg_network_stat_track">
 
         <View
             android:id="@+id/networkStatBarFilled"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/colorPrimary" />
-
-        <View
-            android:id="@+id/networkStatBarRest"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:background="@android:color/transparent" />
-    </LinearLayout>
+            android:background="@drawable/bg_network_stat_fill" />
+    </FrameLayout>
 
 </LinearLayout>

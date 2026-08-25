@@ -437,24 +437,28 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         renderNetworkList(
             binding.analyticsHttpVersionSubtitle,
             binding.analyticsHttpVersionContainer,
-            overview.httpVersionStats
+            overview.httpVersionStats,
+            context.getColor(android.R.color.holo_blue_dark)
         )
         renderNetworkList(
             binding.analyticsSslSubtitle,
             binding.analyticsSslProtocolContainer,
-            overview.sslProtocolStats
+            overview.sslProtocolStats,
+            context.getColor(R.color.purple_700)
         )
         renderNetworkList(
             binding.analyticsContentTypeSubtitle,
             binding.analyticsContentTypeContainer,
-            overview.contentTypeStats
+            overview.contentTypeStats,
+            context.getColor(android.R.color.holo_green_dark)
         )
     }
 
     private fun renderNetworkList(
         subtitle: android.widget.TextView,
         container: android.widget.LinearLayout,
-        stats: List<com.muort.upworker.core.model.NetworkStatItem>
+        stats: List<com.muort.upworker.core.model.NetworkStatItem>,
+        barColor: Int
     ) {
         val visible = stats.isNotEmpty()
         subtitle.visibility = if (visible) View.VISIBLE else View.GONE
@@ -470,13 +474,15 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
             row.networkStatName.text = item.name
             row.networkStatValue.text = formatNumber(item.requests)
 
-            val filledWeight = (item.requests / maxRequests * 1000f).coerceIn(1f, 1000f)
-            row.networkStatBarFilled.layoutParams = android.widget.LinearLayout.LayoutParams(
-                0, android.view.ViewGroup.LayoutParams.MATCH_PARENT, filledWeight
-            )
-            row.networkStatBarRest.layoutParams = android.widget.LinearLayout.LayoutParams(
-                0, android.view.ViewGroup.LayoutParams.MATCH_PARENT, 1000f - filledWeight
-            )
+            val track = row.networkStatBarFilled.parent as android.view.ViewGroup
+            track.post {
+                val ratio = (item.requests / maxRequests).coerceIn(0.02f, 1f)
+                row.networkStatBarFilled.layoutParams = android.widget.FrameLayout.LayoutParams(
+                    (track.width * ratio).toInt().coerceAtLeast(6),
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            }
+            row.networkStatBarFilled.backgroundTintList = ColorStateList.valueOf(barColor)
             container.addView(row.root)
         }
     }
