@@ -297,7 +297,7 @@ class PagesFragment : Fragment() {
             .create()
         loadingDialog.show()
 
-        viewModel.getProjectDetail(account, project.name) { result ->
+        pagesViewModel.getProjectDetail(account, project.name) { result ->
             requireActivity().runOnUiThread {
                 loadingDialog.dismiss()
                 if (result !is Resource.Success) {
@@ -358,7 +358,7 @@ class PagesFragment : Fragment() {
                 // 保存时：环境选择仅用于回显提示，Cloudflare Pages API 会同时更新生产+预览
                 showToast("正在更新 ${if (selectedEnv == "production") "生产" else "预览"}环境运行时设置...")
 
-                viewModel.updateRuntimeSettings(
+                pagesViewModel.updateRuntimeSettings(
                     account = account,
                     projectName = project.name,
                     compatibilityDate = compatibilityDate,

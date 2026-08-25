@@ -135,7 +135,7 @@ class PagesRepository @Inject constructor(
                 )
             )
             val response = api.updatePagesProject(
-                token=[REDACTED],
+                token = AuthHelper.getBearerToken(account),
                 email = AuthHelper.getEmail(account),
                 apiKey = AuthHelper.getGlobalApiKey(account),
                 accountId = account.accountId,
