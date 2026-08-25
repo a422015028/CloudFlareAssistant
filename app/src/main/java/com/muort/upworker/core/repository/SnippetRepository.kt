@@ -142,3 +142,80 @@ class SnippetRepository @Inject constructor(
             }
         }
 }
+
+
+    // ==================== Snippet Rules ====================
+
+    suspend fun listSnippetRules(account: Account, zoneId: String): Resource<List<SnippetRule>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val resp = api.listSnippetRules(
+                    AuthHelper.getBearerToken(account),
+                    AuthHelper.getEmail(account),
+                    AuthHelper.getGlobalApiKey(account),
+                    zoneId,
+                )
+                if (resp.isSuccessful && resp.body()?.success == true) {
+                    Resource.Success(resp.body()?.result ?: emptyList())
+                } else {
+                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
+                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                }
+            }
+        }
+
+    suspend fun createSnippetRule(account: Account, zoneId: String, rule: SnippetRuleCreate): Resource<SnippetRule> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val resp = api.createSnippetRule(
+                    AuthHelper.getBearerToken(account),
+                    AuthHelper.getEmail(account),
+                    AuthHelper.getGlobalApiKey(account),
+                    zoneId, rule,
+                )
+                if (resp.isSuccessful && resp.body()?.success == true) {
+                    resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error("创建失败：无返回数据")
+                } else {
+                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
+                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                }
+            }
+        }
+
+    suspend fun updateSnippetRule(account: Account, zoneId: String, ruleId: String, rule: SnippetRuleCreate): Resource<SnippetRule> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val resp = api.updateSnippetRule(
+                    AuthHelper.getBearerToken(account),
+                    AuthHelper.getEmail(account),
+                    AuthHelper.getGlobalApiKey(account),
+                    zoneId, ruleId, rule,
+                )
+                if (resp.isSuccessful && resp.body()?.success == true) {
+                    resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error("更新失败：无返回数据")
+                } else {
+                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
+                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                }
+            }
+        }
+
+    suspend fun deleteSnippetRule(account: Account, zoneId: String, ruleId: String): Resource<Unit> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val resp = api.deleteSnippetRule(
+                    AuthHelper.getBearerToken(account),
+                    AuthHelper.getEmail(account),
+                    AuthHelper.getGlobalApiKey(account),
+                    zoneId, ruleId,
+                )
+                if (resp.isSuccessful && resp.body()?.success == true) {
+                    Resource.Success(Unit)
+                } else {
+                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
+                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                }
+            }
+        }
+
+}

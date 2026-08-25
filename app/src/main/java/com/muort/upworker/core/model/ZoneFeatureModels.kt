@@ -362,3 +362,10 @@ data class SnippetRule(
     @SerializedName("description") val description: String? = null,
     @SerializedName("enabled") val enabled: Boolean? = null,
 )
+
+data class SnippetRuleCreate(
+    @SerializedName("snippet_name") val snippetName: String,
+    @SerializedName("expression") val expression: String,
+    @SerializedName("description") val description: String? = null,
+    @SerializedName("enabled") val enabled: Boolean = true,
+)

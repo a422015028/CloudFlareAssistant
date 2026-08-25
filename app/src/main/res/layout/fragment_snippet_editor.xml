@@ -21,6 +21,16 @@
             app:titleTextColor="?attr/colorOnSurface">
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRules"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="0dp"
+                android:contentDescription="规则设置"
+                app:icon="@drawable/ic_rule" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSelectAll"
                 style="@style/Widget.Material3.Button.IconButton"
                 android:layout_width="wrap_content"

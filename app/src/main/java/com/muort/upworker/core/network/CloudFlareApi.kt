@@ -2282,3 +2282,52 @@ interface CloudFlareApi {
         @Path("snippet_name") snippetName: String
     ): Response<CloudFlareResponse<Unit>>
 }
+
+    // ==================== Snippet Rules ====================
+
+    @GET("zones/{zone_id}/snippets/rules")
+    suspend fun listSnippetRules(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+    ): Response<CloudFlareResponse<List<SnippetRule>>>
+
+    @GET("zones/{zone_id}/snippets/rules/{rule_id}")
+    suspend fun getSnippetRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("rule_id") ruleId: String,
+    ): Response<CloudFlareResponse<SnippetRule>>
+
+    @POST("zones/{zone_id}/snippets/rules")
+    suspend fun createSnippetRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Body rule: SnippetRuleCreate,
+    ): Response<CloudFlareResponse<SnippetRule>>
+
+    @PUT("zones/{zone_id}/snippets/rules/{rule_id}")
+    suspend fun updateSnippetRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("rule_id") ruleId: String,
+        @Body rule: SnippetRuleCreate,
+    ): Response<CloudFlareResponse<SnippetRule>>
+
+    @DELETE("zones/{zone_id}/snippets/rules/{rule_id}")
+    suspend fun deleteSnippetRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Path("rule_id") ruleId: String,
+    ): Response<CloudFlareResponse<Unit>>
+
+}
