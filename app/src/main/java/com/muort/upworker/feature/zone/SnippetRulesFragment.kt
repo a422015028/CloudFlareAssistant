@@ -42,13 +42,25 @@ class SnippetRulesFragment : BaseZoneFeatureFragment() {
 
         adapter = ZoneRuleAdapter(
             onToggle = { _, item, enabled ->
-                account?.let { toggleRule(it, item, enabled) }
+                account?.let { acct ->
+                    loaded.firstOrNull { it.id == item.id }?.let { rule ->
+                        toggleRule(acct, rule, enabled)
+                    }
+                }
             },
             onDelete = { _, item ->
-                account?.let { deleteRule(it, item) }
+                account?.let { acct ->
+                    loaded.firstOrNull { it.id == item.id }?.let { rule ->
+                        deleteRule(acct, rule)
+                    }
+                }
             },
             onItemClick = { _, item ->
-                account?.let { showEditRuleDialog(it, item) }
+                account?.let { acct ->
+                    loaded.firstOrNull { it.id == item.id }?.let { rule ->
+                        showEditRuleDialog(acct, rule)
+                    }
+                }
             },
         )
         binding.recyclerView.adapter = adapter
