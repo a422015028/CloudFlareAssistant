@@ -1081,11 +1081,29 @@ data class ZoneAnalyticsSum(
     @SerializedName("encryptedBytes") val encryptedBytes: Long? = null,
     @SerializedName("pageViews") val pageViews: Long? = null,
     @SerializedName("threats") val threats: Long? = null,
-    @SerializedName("responseStatusMap") val responseStatusMap: List<ResponseStatusEntry>? = null
+    @SerializedName("responseStatusMap") val responseStatusMap: List<ResponseStatusEntry>? = null,
+    @SerializedName("clientHTTPVersionMap") val clientHTTPVersionMap: List<ClientHTTPVersionEntry>? = null,
+    @SerializedName("clientSSLMap") val clientSSLMap: List<ClientSSLEntry>? = null,
+    @SerializedName("contentTypeMap") val contentTypeMap: List<ContentTypeEntry>? = null
 )
 
 data class ResponseStatusEntry(
     @SerializedName("edgeResponseStatus") val edgeResponseStatus: Int? = null,
+    @SerializedName("requests") val requests: Long? = null
+)
+
+data class ClientHTTPVersionEntry(
+    @SerializedName("clientHTTPProtocol") val clientHTTPProtocol: String? = null,
+    @SerializedName("requests") val requests: Long? = null
+)
+
+data class ClientSSLEntry(
+    @SerializedName("clientSSLProtocol") val clientSSLProtocol: String? = null,
+    @SerializedName("requests") val requests: Long? = null
+)
+
+data class ContentTypeEntry(
+    @SerializedName("edgeResponseContentTypeName") val edgeResponseContentTypeName: String? = null,
     @SerializedName("requests") val requests: Long? = null
 )
 
@@ -1154,7 +1172,19 @@ data class AccountAnalyticsOverview(
     val error4xxDelta: Double? = null,
     val error4xxRateDelta: Double? = null,
     val error5xxDelta: Double? = null,
-    val error5xxRateDelta: Double? = null
+    val error5xxRateDelta: Double? = null,
+    // 网络区块（客户端 HTTP 版本 / SSL 协议 / 热门内容类型，按请求数降序）
+    val httpVersionStats: List<NetworkStatItem> = emptyList(),
+    val sslProtocolStats: List<NetworkStatItem> = emptyList(),
+    val contentTypeStats: List<NetworkStatItem> = emptyList()
+)
+
+/**
+ * 网络分布统计项（名称 + 请求数）
+ */
+data class NetworkStatItem(
+    val name: String,
+    val requests: Long
 )
 
 // ==================== User API Tokens ====================

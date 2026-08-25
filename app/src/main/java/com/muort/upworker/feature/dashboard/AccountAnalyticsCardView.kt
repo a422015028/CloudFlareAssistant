@@ -16,6 +16,7 @@ import com.muort.upworker.core.model.AccountAnalyticsOverview
 import com.muort.upworker.core.model.TimeSeriesPoint
 import com.muort.upworker.core.model.TimeRange
 import com.muort.upworker.databinding.CardAccountAnalyticsBinding
+import com.muort.upworker.databinding.ItemNetworkStatBinding
 import timber.log.Timber
 
 /**
@@ -164,6 +165,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         updateMetrics(overview)
         updateCharts(overview)
         updateStatus(overview)
+        updateNetworkStats(overview)
     }
 
     private fun updateMetrics(overview: AccountAnalyticsOverview) {
@@ -378,6 +380,63 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
                     android.graphics.Color.GRAY
                 )
             )
+        }
+    }
+
+    /**
+     * 渲染网络区块（HTTP 版本 / SSL 协议 / 内容类型），官网风格：
+     * 名称左对齐 + 请求数右对齐 + 下方按最大值等比的细条形图
+     */
+    private fun updateNetworkStats(overview: AccountAnalyticsOverview) {
+        val hasNetworkData = overview.httpVersionStats.isNotEmpty() ||
+            overview.sslProtocolStats.isNotEmpty() ||
+            overview.contentTypeStats.isNotEmpty()
+        binding.analyticsNetworkSectionTitle.visibility = if (hasNetworkData) View.VISIBLE else View.GONE
+
+        renderNetworkList(
+            binding.analyticsHttpVersionSubtitle,
+            binding.analyticsHttpVersionContainer,
+            overview.httpVersionStats
+        )
+        renderNetworkList(
+            binding.analyticsSslSubtitle,
+            binding.analyticsSslProtocolContainer,
+            overview.sslProtocolStats
+        )
+        renderNetworkList(
+            binding.analyticsContentTypeSubtitle,
+            binding.analyticsContentTypeContainer,
+            overview.contentTypeStats
+        )
+    }
+
+    private fun renderNetworkList(
+        subtitle: android.widget.TextView,
+        container: android.widget.LinearLayout,
+        stats: List<com.muort.upworker.core.model.NetworkStatItem>
+    ) {
+        val visible = stats.isNotEmpty()
+        subtitle.visibility = if (visible) View.VISIBLE else View.GONE
+        container.visibility = if (visible) View.VISIBLE else View.GONE
+        container.removeAllViews()
+        if (!visible) return
+
+        val inflater = LayoutInflater.from(context)
+        val maxRequests = stats.maxOf { it.requests }.toFloat()
+
+        stats.forEach { item ->
+            val row = ItemNetworkStatBinding.inflate(inflater, container, false)
+            row.networkStatName.text = item.name
+            row.networkStatValue.text = formatNumber(item.requests)
+
+            val filledWeight = (item.requests / maxRequests * 1000f).coerceIn(1f, 1000f)
+            row.networkStatBarFilled.layoutParams = android.widget.LinearLayout.LayoutParams(
+                0, android.view.ViewGroup.LayoutParams.MATCH_PARENT, filledWeight
+            )
+            row.networkStatBarRest.layoutParams = android.widget.LinearLayout.LayoutParams(
+                0, android.view.ViewGroup.LayoutParams.MATCH_PARENT, 1000f - filledWeight
+            )
+            container.addView(row.root)
         }
     }
 

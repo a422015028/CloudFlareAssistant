@@ -741,7 +741,7 @@ class AnalyticsRepository @Inject constructor(
         }
         val dimension = if (hourly) "datetime" else "date"
 
-        fun zoneBlock(alias: String, zoneId: String, timeFilter: String) = """
+        fun zoneBlock(alias: String, zoneId: String, timeFilter: String, withNetworkMaps: Boolean) = """
         $alias: zones(filter: {zoneTag: "$zoneId"}) {
           groups: $dataset(
             limit: ${if (hourly) 25 else 32},
@@ -760,6 +760,20 @@ class AnalyticsRepository @Inject constructor(
                 edgeResponseStatus
                 requests
               }
+              ${if (withNetworkMaps) """
+              clientHTTPVersionMap {
+                clientHTTPProtocol
+                requests
+              }
+              clientSSLMap {
+                clientSSLProtocol
+                requests
+              }
+              contentTypeMap {
+                edgeResponseContentTypeName
+                requests
+              }
+              """ else ""}
             }
             uniq {
               uniques
@@ -772,7 +786,8 @@ class AnalyticsRepository @Inject constructor(
         """.trimIndent()
 
         val zoneFields = zoneIds.mapIndexed { index, zoneId ->
-            zoneBlock("z$index", zoneId, currentFilter) + "\n" + zoneBlock("p$index", zoneId, prevFilter)
+            zoneBlock("z$index", zoneId, currentFilter, true) + "\n" +
+                zoneBlock("p$index", zoneId, prevFilter, false)
         }.joinToString("\n")
 
         val variableDefs = if (hourly) {
@@ -917,8 +932,21 @@ class AnalyticsRepository @Inject constructor(
             error4xxDelta = delta(current.error4xx, prev.error4xx),
             error4xxRateDelta = rateDelta(curError4xxRate, prevError4xxRate),
             error5xxDelta = delta(current.error5xx, prev.error5xx),
-            error5xxRateDelta = rateDelta(curError5xxRate, prevError5xxRate)
+            error5xxRateDelta = rateDelta(curError5xxRate, prevError5xxRate),
+            httpVersionStats = current.httpVersionMap.toNetworkStats(),
+            sslProtocolStats = current.sslMap.toNetworkStats(),
+            contentTypeStats = current.contentTypeMap.toNetworkStats()
         )
+    }
+
+    /**
+     * 将 map 转换为按请求数降序的网络统计列表
+     */
+    private fun Map<String, Long>.toNetworkStats(): List<NetworkStatItem> {
+        return entries
+            .filter { it.value > 0 }
+            .sortedByDescending { it.value }
+            .map { NetworkStatItem(it.key, it.value) }
     }
 
     /**
@@ -936,7 +964,10 @@ class AnalyticsRepository @Inject constructor(
         val error4xx: Long,
         val error5xx: Long,
         val threats: Long,
-        val seriesMap: SortedMap<Long, LongArray>
+        val seriesMap: SortedMap<Long, LongArray>,
+        val httpVersionMap: Map<String, Long>,
+        val sslMap: Map<String, Long>,
+        val contentTypeMap: Map<String, Long>
     )
 
     /**
@@ -957,6 +988,9 @@ class AnalyticsRepository @Inject constructor(
         var error5xx = 0L
         var threats = 0L
         val seriesMap = sortedMapOf<Long, LongArray>()
+        val httpVersionMap = mutableMapOf<String, Long>()
+        val sslMap = mutableMapOf<String, Long>()
+        val contentTypeMap = mutableMapOf<String, Long>()
 
         data.viewer?.filterKeys { it.startsWith(prefix) }?.values?.forEach zonesLoop@{ zoneList ->
             zoneList.forEach zoneLoop@{ zoneNode ->
@@ -992,6 +1026,19 @@ class AnalyticsRepository @Inject constructor(
                         }
                     }
 
+                    sum.clientHTTPVersionMap?.forEach { entry ->
+                        val name = entry.clientHTTPProtocol ?: return@forEach
+                        httpVersionMap[name] = (httpVersionMap[name] ?: 0) + (entry.requests ?: 0)
+                    }
+                    sum.clientSSLMap?.forEach { entry ->
+                        val name = entry.clientSSLProtocol ?: return@forEach
+                        sslMap[name] = (sslMap[name] ?: 0) + (entry.requests ?: 0)
+                    }
+                    sum.contentTypeMap?.forEach { entry ->
+                        val name = entry.edgeResponseContentTypeName ?: return@forEach
+                        contentTypeMap[name] = (contentTypeMap[name] ?: 0) + (entry.requests ?: 0)
+                    }
+
                     // 时间序列聚合
                     val timestamp = when {
                         hourly -> group.dimensions?.datetime?.let { parseISODateTime(it) }
@@ -1024,7 +1071,10 @@ class AnalyticsRepository @Inject constructor(
             error4xx = error4xx,
             error5xx = error5xx,
             threats = threats,
-            seriesMap = seriesMap
+            seriesMap = seriesMap,
+            httpVersionMap = httpVersionMap,
+            sslMap = sslMap,
+            contentTypeMap = contentTypeMap
         )
     }
     
