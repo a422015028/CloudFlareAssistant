@@ -1137,7 +1137,24 @@ data class AccountAnalyticsOverview(
     val error4xxTimeSeries: List<TimeSeriesPoint> = emptyList(),
     val error4xxRateTimeSeries: List<TimeSeriesPoint> = emptyList(),
     val error5xxTimeSeries: List<TimeSeriesPoint> = emptyList(),
-    val error5xxRateTimeSeries: List<TimeSeriesPoint> = emptyList()
+    val error5xxRateTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    // 与上一期对比的变化百分比（null 表示上期无数据，不显示）
+    val requestsDelta: Double? = null,
+    val bandwidthDelta: Double? = null,
+    val visitorsDelta: Double? = null,
+    val pageViewsDelta: Double? = null,
+    val encryptedRequestsDelta: Double? = null,
+    val encryptedRequestRateDelta: Double? = null,
+    val encryptedBytesDelta: Double? = null,
+    val encryptedBytesRateDelta: Double? = null,
+    val cachedRequestsDelta: Double? = null,
+    val cachedRequestRateDelta: Double? = null,
+    val cachedBytesDelta: Double? = null,
+    val cachedBytesRateDelta: Double? = null,
+    val error4xxDelta: Double? = null,
+    val error4xxRateDelta: Double? = null,
+    val error5xxDelta: Double? = null,
+    val error5xxRateDelta: Double? = null
 )
 
 // ==================== User API Tokens ====================
@@ -1347,7 +1364,29 @@ enum class TimeRange(val days: Int, val displayName: String) {
     fun getEndDateTime(): String {
         val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US)
         dateFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
-        return dateFormat.format(java.util.Date())
+        return dateFormat.format(java.util.Calendar.getInstance().time)
+    }
+
+    /**
+     * 获取上一期（紧邻当前期之前）的查询开始时间，用于环比对比
+     */
+    fun getPrevStartDateTime(): String {
+        val calendar = java.util.Calendar.getInstance()
+        calendar.add(java.util.Calendar.DAY_OF_MONTH, -days * 2)
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US)
+        dateFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+        return dateFormat.format(calendar.time)
+    }
+
+    /**
+     * 获取上一期的查询结束时间（即当前期开始时刻）
+     */
+    fun getPrevEndDateTime(): String {
+        val calendar = java.util.Calendar.getInstance()
+        calendar.add(java.util.Calendar.DAY_OF_MONTH, -days)
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US)
+        dateFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+        return dateFormat.format(calendar.time)
     }
 }
 

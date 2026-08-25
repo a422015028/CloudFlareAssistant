@@ -690,9 +690,13 @@ class AnalyticsRepository @Inject constructor(
                 if (hourly) {
                     variables["since"] = timeRange.getStartDateTime()
                     variables["until"] = timeRange.getEndDateTime()
+                    variables["prevSince"] = timeRange.getPrevStartDateTime()
+                    variables["prevUntil"] = timeRange.getPrevEndDateTime()
                 } else {
                     variables["sinceDate"] = timeRange.getStartDateTime().substring(0, 10)
                     variables["untilDate"] = timeRange.getEndDateTime().substring(0, 10)
+                    variables["prevSinceDate"] = timeRange.getPrevStartDateTime().substring(0, 10)
+                    variables["prevUntilDate"] = timeRange.getPrevEndDateTime().substring(0, 10)
                 }
 
                 val response = api.queryAccountAnalytics(
@@ -721,53 +725,60 @@ class AnalyticsRepository @Inject constructor(
         }
 
     /**
-     * 构建账户分析 GraphQL 查询（每个 Zone 一个别名查询）
+     * 构建账户分析 GraphQL 查询（每个 Zone 两个别名查询：z{n} 当前期、p{n} 上一期）
      */
     private fun buildAccountAnalyticsQuery(zoneIds: List<String>, hourly: Boolean): String {
         val dataset = if (hourly) "httpRequests1hGroups" else "httpRequests1dGroups"
-        val timeFilter = if (hourly) {
+        val currentFilter = if (hourly) {
             "datetime_geq: \$since, datetime_lt: \$until"
         } else {
             "date_geq: \$sinceDate, date_leq: \$untilDate"
         }
+        val prevFilter = if (hourly) {
+            "datetime_geq: \$prevSince, datetime_lt: \$prevUntil"
+        } else {
+            "date_geq: \$prevSinceDate, date_leq: \$prevUntilDate"
+        }
         val dimension = if (hourly) "datetime" else "date"
 
-        val zoneFields = zoneIds.mapIndexed { index, zoneId ->
-            """
-            z$index: zones(filter: {zoneTag: "$zoneId"}) {
-              groups: $dataset(
-                limit: ${if (hourly) 25 else 32},
-                filter: {$timeFilter}
-              ) {
-                sum {
-                  requests
-                  bytes
-                  cachedRequests
-                  cachedBytes
-                  encryptedRequests
-                  encryptedBytes
-                  pageViews
-                  threats
-                  responseStatusMap {
-                    edgeResponseStatus
-                    requests
-                  }
-                }
-                uniq {
-                  uniques
-                }
-                dimensions {
-                  $dimension
-                }
+        fun zoneBlock(alias: String, zoneId: String, timeFilter: String) = """
+        $alias: zones(filter: {zoneTag: "$zoneId"}) {
+          groups: $dataset(
+            limit: ${if (hourly) 25 else 32},
+            filter: {$timeFilter}
+          ) {
+            sum {
+              requests
+              bytes
+              cachedRequests
+              cachedBytes
+              encryptedRequests
+              encryptedBytes
+              pageViews
+              threats
+              responseStatusMap {
+                edgeResponseStatus
+                requests
               }
             }
-            """.trimIndent()
+            uniq {
+              uniques
+            }
+            dimensions {
+              $dimension
+            }
+          }
+        }
+        """.trimIndent()
+
+        val zoneFields = zoneIds.mapIndexed { index, zoneId ->
+            zoneBlock("z$index", zoneId, currentFilter) + "\n" + zoneBlock("p$index", zoneId, prevFilter)
         }.joinToString("\n")
 
         val variableDefs = if (hourly) {
-            "(\$since: Time!, \$until: Time!)"
+            "(\$since: Time!, \$until: Time!, \$prevSince: Time!, \$prevUntil: Time!)"
         } else {
-            "(\$sinceDate: string!, \$untilDate: string!)"
+            "(\$sinceDate: string!, \$untilDate: string!, \$prevSinceDate: string!, \$prevUntilDate: string!)"
         }
 
         return """
@@ -780,12 +791,160 @@ class AnalyticsRepository @Inject constructor(
     }
 
     /**
-     * 解析账户分析数据（聚合所有 Zone）
+     * 解析账户分析数据（聚合所有 Zone，当前期 z{n} 与上一期 p{n} 对比计算环比）
      */
     private fun parseAccountAnalytics(data: AccountAnalyticsData?, hourly: Boolean): AccountAnalyticsOverview {
         val empty = AccountAnalyticsOverview()
         if (data?.viewer == null) return empty
 
+        val current = aggregatePeriod(data, "z", hourly)
+        val prev = aggregatePeriod(data, "p", hourly)
+
+        val requestsSeries = mutableListOf<TimeSeriesPoint>()
+        val bandwidthSeries = mutableListOf<TimeSeriesPoint>()
+        val visitorsSeries = mutableListOf<TimeSeriesPoint>()
+        val pageViewsSeries = mutableListOf<TimeSeriesPoint>()
+        val encryptedRequestsSeries = mutableListOf<TimeSeriesPoint>()
+        val encryptedRequestRateSeries = mutableListOf<TimeSeriesPoint>()
+        val encryptedBytesSeries = mutableListOf<TimeSeriesPoint>()
+        val encryptedBytesRateSeries = mutableListOf<TimeSeriesPoint>()
+        val cachedRequestsSeries = mutableListOf<TimeSeriesPoint>()
+        val cachedRequestRateSeries = mutableListOf<TimeSeriesPoint>()
+        val cachedBytesSeries = mutableListOf<TimeSeriesPoint>()
+        val cachedBytesRateSeries = mutableListOf<TimeSeriesPoint>()
+        val error4xxSeries = mutableListOf<TimeSeriesPoint>()
+        val error4xxRateSeries = mutableListOf<TimeSeriesPoint>()
+        val error5xxSeries = mutableListOf<TimeSeriesPoint>()
+        val error5xxRateSeries = mutableListOf<TimeSeriesPoint>()
+
+        current.seriesMap.forEach { (timestamp, b) ->
+            requestsSeries.add(TimeSeriesPoint(timestamp, b[0].toDouble()))
+            bandwidthSeries.add(TimeSeriesPoint(timestamp, b[1].toDouble()))
+            visitorsSeries.add(TimeSeriesPoint(timestamp, b[2].toDouble()))
+            pageViewsSeries.add(TimeSeriesPoint(timestamp, b[3].toDouble()))
+            encryptedRequestsSeries.add(TimeSeriesPoint(timestamp, b[4].toDouble()))
+            encryptedBytesSeries.add(TimeSeriesPoint(timestamp, b[5].toDouble()))
+            cachedRequestsSeries.add(TimeSeriesPoint(timestamp, b[6].toDouble()))
+            cachedBytesSeries.add(TimeSeriesPoint(timestamp, b[7].toDouble()))
+            error4xxSeries.add(TimeSeriesPoint(timestamp, b[8].toDouble()))
+            error5xxSeries.add(TimeSeriesPoint(timestamp, b[9].toDouble()))
+
+            fun pct(numerator: Long, denominator: Long): Double =
+                if (denominator > 0) numerator.toDouble() / denominator.toDouble() * 100 else 0.0
+            encryptedRequestRateSeries.add(TimeSeriesPoint(timestamp, pct(b[4], b[0])))
+            encryptedBytesRateSeries.add(TimeSeriesPoint(timestamp, pct(b[5], b[1])))
+            cachedRequestRateSeries.add(TimeSeriesPoint(timestamp, pct(b[6], b[0])))
+            cachedBytesRateSeries.add(TimeSeriesPoint(timestamp, pct(b[7], b[1])))
+            error4xxRateSeries.add(TimeSeriesPoint(timestamp, pct(b[8], b[0])))
+            error5xxRateSeries.add(TimeSeriesPoint(timestamp, pct(b[9], b[0])))
+        }
+
+        fun rate(numerator: Long, denominator: Long): Double =
+            if (denominator > 0) numerator.toDouble() / denominator.toDouble() * 100 else 0.0
+
+        // 环比：上期无数据返回 null（UI 不显示），上期为 0 且本期有数据视为 +100%
+        fun delta(cur: Long, prevV: Long): Double? = when {
+            prevV == 0L && cur == 0L -> null
+            prevV == 0L -> 100.0
+            else -> (cur - prevV).toDouble() / prevV.toDouble() * 100.0
+        }
+
+        fun rateDelta(curRate: Double, prevRate: Double): Double? = when {
+            prevRate == 0.0 && curRate == 0.0 -> null
+            prevRate == 0.0 -> 100.0
+            else -> (curRate - prevRate) / prevRate * 100.0
+        }
+
+        val curEncryptedReqRate = rate(current.encryptedRequests, current.requests)
+        val curEncryptedBytesRate = rate(current.encryptedBytes, current.bytes)
+        val curCachedReqRate = rate(current.cachedRequests, current.requests)
+        val curCachedBytesRate = rate(current.cachedBytes, current.bytes)
+        val curError4xxRate = rate(current.error4xx, current.requests)
+        val curError5xxRate = rate(current.error5xx, current.requests)
+        val prevEncryptedReqRate = rate(prev.encryptedRequests, prev.requests)
+        val prevEncryptedBytesRate = rate(prev.encryptedBytes, prev.bytes)
+        val prevCachedReqRate = rate(prev.cachedRequests, prev.requests)
+        val prevCachedBytesRate = rate(prev.cachedBytes, prev.bytes)
+        val prevError4xxRate = rate(prev.error4xx, prev.requests)
+        val prevError5xxRate = rate(prev.error5xx, prev.requests)
+
+        return AccountAnalyticsOverview(
+            requests = current.requests,
+            bandwidthBytes = current.bytes,
+            uniqueVisitors = current.uniques,
+            pageViews = current.pageViews,
+            encryptedRequests = current.encryptedRequests,
+            encryptedBytes = current.encryptedBytes,
+            cachedRequests = current.cachedRequests,
+            cachedBytes = current.cachedBytes,
+            error4xxRequests = current.error4xx,
+            error5xxRequests = current.error5xx,
+            threats = current.threats,
+            encryptedRequestRate = curEncryptedReqRate,
+            encryptedBytesRate = curEncryptedBytesRate,
+            cachedRequestRate = curCachedReqRate,
+            cachedBytesRate = curCachedBytesRate,
+            error4xxRate = curError4xxRate,
+            error5xxRate = curError5xxRate,
+            requestsTimeSeries = requestsSeries,
+            bandwidthTimeSeries = bandwidthSeries,
+            visitorsTimeSeries = visitorsSeries,
+            pageViewsTimeSeries = pageViewsSeries,
+            encryptedRequestsTimeSeries = encryptedRequestsSeries,
+            encryptedRequestRateTimeSeries = encryptedRequestRateSeries,
+            encryptedBytesTimeSeries = encryptedBytesSeries,
+            encryptedBytesRateTimeSeries = encryptedBytesRateSeries,
+            cachedRequestsTimeSeries = cachedRequestsSeries,
+            cachedRequestRateTimeSeries = cachedRequestRateSeries,
+            cachedBytesTimeSeries = cachedBytesSeries,
+            cachedBytesRateTimeSeries = cachedBytesRateSeries,
+            error4xxTimeSeries = error4xxSeries,
+            error4xxRateTimeSeries = error4xxRateSeries,
+            error5xxTimeSeries = error5xxSeries,
+            error5xxRateTimeSeries = error5xxRateSeries,
+            requestsDelta = delta(current.requests, prev.requests),
+            bandwidthDelta = delta(current.bytes, prev.bytes),
+            visitorsDelta = delta(current.uniques, prev.uniques),
+            pageViewsDelta = delta(current.pageViews, prev.pageViews),
+            encryptedRequestsDelta = delta(current.encryptedRequests, prev.encryptedRequests),
+            encryptedRequestRateDelta = rateDelta(curEncryptedReqRate, prevEncryptedReqRate),
+            encryptedBytesDelta = delta(current.encryptedBytes, prev.encryptedBytes),
+            encryptedBytesRateDelta = rateDelta(curEncryptedBytesRate, prevEncryptedBytesRate),
+            cachedRequestsDelta = delta(current.cachedRequests, prev.cachedRequests),
+            cachedRequestRateDelta = rateDelta(curCachedReqRate, prevCachedReqRate),
+            cachedBytesDelta = delta(current.cachedBytes, prev.cachedBytes),
+            cachedBytesRateDelta = rateDelta(curCachedBytesRate, prevCachedBytesRate),
+            error4xxDelta = delta(current.error4xx, prev.error4xx),
+            error4xxRateDelta = rateDelta(curError4xxRate, prevError4xxRate),
+            error5xxDelta = delta(current.error5xx, prev.error5xx),
+            error5xxRateDelta = rateDelta(curError5xxRate, prevError5xxRate)
+        )
+    }
+
+    /**
+     * 单期聚合结果
+     */
+    private data class PeriodTotals(
+        val requests: Long,
+        val bytes: Long,
+        val uniques: Long,
+        val pageViews: Long,
+        val encryptedRequests: Long,
+        val encryptedBytes: Long,
+        val cachedRequests: Long,
+        val cachedBytes: Long,
+        val error4xx: Long,
+        val error5xx: Long,
+        val threats: Long,
+        val seriesMap: SortedMap<Long, LongArray>
+    )
+
+    /**
+     * 聚合单个时间段的多个 Zone 数据（按别名前缀过滤：z=当前期，p=上一期）
+     * seriesMap 时间桶索引: 0:requests 1:bytes 2:uniques 3:pageViews 4:encryptedRequests
+     * 5:encryptedBytes 6:cachedRequests 7:cachedBytes 8:error4xx 9:error5xx
+     */
+    private fun aggregatePeriod(data: AccountAnalyticsData, prefix: String, hourly: Boolean): PeriodTotals {
         var requests = 0L
         var bytes = 0L
         var uniques = 0L
@@ -797,13 +956,9 @@ class AnalyticsRepository @Inject constructor(
         var error4xx = 0L
         var error5xx = 0L
         var threats = 0L
-
-        // 按时间桶聚合多 Zone 数据 (timestamp -> 各指标累计)
-        // 0:requests 1:bytes 2:uniques 3:pageViews 4:encryptedRequests 5:encryptedBytes
-        // 6:cachedRequests 7:cachedBytes 8:error4xx 9:error5xx
         val seriesMap = sortedMapOf<Long, LongArray>()
 
-        data.viewer.values.forEach zonesLoop@{ zoneList ->
+        data.viewer?.filterKeys { it.startsWith(prefix) }?.values?.forEach zonesLoop@{ zoneList ->
             zoneList.forEach zoneLoop@{ zoneNode ->
                 zoneNode.groups?.forEach groupLoop@{ group ->
                     val sum = group.sum ?: return@groupLoop
@@ -857,82 +1012,19 @@ class AnalyticsRepository @Inject constructor(
             }
         }
 
-        val requestsSeries = mutableListOf<TimeSeriesPoint>()
-        val bandwidthSeries = mutableListOf<TimeSeriesPoint>()
-        val visitorsSeries = mutableListOf<TimeSeriesPoint>()
-        val pageViewsSeries = mutableListOf<TimeSeriesPoint>()
-        val encryptedRequestsSeries = mutableListOf<TimeSeriesPoint>()
-        val encryptedRequestRateSeries = mutableListOf<TimeSeriesPoint>()
-        val encryptedBytesSeries = mutableListOf<TimeSeriesPoint>()
-        val encryptedBytesRateSeries = mutableListOf<TimeSeriesPoint>()
-        val cachedRequestsSeries = mutableListOf<TimeSeriesPoint>()
-        val cachedRequestRateSeries = mutableListOf<TimeSeriesPoint>()
-        val cachedBytesSeries = mutableListOf<TimeSeriesPoint>()
-        val cachedBytesRateSeries = mutableListOf<TimeSeriesPoint>()
-        val error4xxSeries = mutableListOf<TimeSeriesPoint>()
-        val error4xxRateSeries = mutableListOf<TimeSeriesPoint>()
-        val error5xxSeries = mutableListOf<TimeSeriesPoint>()
-        val error5xxRateSeries = mutableListOf<TimeSeriesPoint>()
-
-        seriesMap.forEach { (timestamp, b) ->
-            requestsSeries.add(TimeSeriesPoint(timestamp, b[0].toDouble()))
-            bandwidthSeries.add(TimeSeriesPoint(timestamp, b[1].toDouble()))
-            visitorsSeries.add(TimeSeriesPoint(timestamp, b[2].toDouble()))
-            pageViewsSeries.add(TimeSeriesPoint(timestamp, b[3].toDouble()))
-            encryptedRequestsSeries.add(TimeSeriesPoint(timestamp, b[4].toDouble()))
-            encryptedBytesSeries.add(TimeSeriesPoint(timestamp, b[5].toDouble()))
-            cachedRequestsSeries.add(TimeSeriesPoint(timestamp, b[6].toDouble()))
-            cachedBytesSeries.add(TimeSeriesPoint(timestamp, b[7].toDouble()))
-            error4xxSeries.add(TimeSeriesPoint(timestamp, b[8].toDouble()))
-            error5xxSeries.add(TimeSeriesPoint(timestamp, b[9].toDouble()))
-
-            fun pct(numerator: Long, denominator: Long): Double =
-                if (denominator > 0) numerator.toDouble() / denominator.toDouble() * 100 else 0.0
-            encryptedRequestRateSeries.add(TimeSeriesPoint(timestamp, pct(b[4], b[0])))
-            encryptedBytesRateSeries.add(TimeSeriesPoint(timestamp, pct(b[5], b[1])))
-            cachedRequestRateSeries.add(TimeSeriesPoint(timestamp, pct(b[6], b[0])))
-            cachedBytesRateSeries.add(TimeSeriesPoint(timestamp, pct(b[7], b[1])))
-            error4xxRateSeries.add(TimeSeriesPoint(timestamp, pct(b[8], b[0])))
-            error5xxRateSeries.add(TimeSeriesPoint(timestamp, pct(b[9], b[0])))
-        }
-
-        fun rate(numerator: Long, denominator: Long): Double =
-            if (denominator > 0) numerator.toDouble() / denominator.toDouble() * 100 else 0.0
-
-        return AccountAnalyticsOverview(
+        return PeriodTotals(
             requests = requests,
-            bandwidthBytes = bytes,
-            uniqueVisitors = uniques,
+            bytes = bytes,
+            uniques = uniques,
             pageViews = pageViews,
             encryptedRequests = encryptedRequests,
             encryptedBytes = encryptedBytes,
             cachedRequests = cachedRequests,
             cachedBytes = cachedBytes,
-            error4xxRequests = error4xx,
-            error5xxRequests = error5xx,
+            error4xx = error4xx,
+            error5xx = error5xx,
             threats = threats,
-            encryptedRequestRate = rate(encryptedRequests, requests),
-            encryptedBytesRate = rate(encryptedBytes, bytes),
-            cachedRequestRate = rate(cachedRequests, requests),
-            cachedBytesRate = rate(cachedBytes, bytes),
-            error4xxRate = rate(error4xx, requests),
-            error5xxRate = rate(error5xx, requests),
-            requestsTimeSeries = requestsSeries,
-            bandwidthTimeSeries = bandwidthSeries,
-            visitorsTimeSeries = visitorsSeries,
-            pageViewsTimeSeries = pageViewsSeries,
-            encryptedRequestsTimeSeries = encryptedRequestsSeries,
-            encryptedRequestRateTimeSeries = encryptedRequestRateSeries,
-            encryptedBytesTimeSeries = encryptedBytesSeries,
-            encryptedBytesRateTimeSeries = encryptedBytesRateSeries,
-            cachedRequestsTimeSeries = cachedRequestsSeries,
-            cachedRequestRateTimeSeries = cachedRequestRateSeries,
-            cachedBytesTimeSeries = cachedBytesSeries,
-            cachedBytesRateTimeSeries = cachedBytesRateSeries,
-            error4xxTimeSeries = error4xxSeries,
-            error4xxRateTimeSeries = error4xxRateSeries,
-            error5xxTimeSeries = error5xxSeries,
-            error5xxRateTimeSeries = error5xxRateSeries
+            seriesMap = seriesMap
         )
     }
     

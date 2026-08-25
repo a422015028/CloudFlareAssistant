@@ -183,15 +183,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsRequestsText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsRequestsText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsRequestsDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsRequestsChart"
@@ -216,15 +234,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsBandwidthText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0 B"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsBandwidthText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 B"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsBandwidthDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsBandwidthChart"
@@ -249,15 +285,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsVisitorsText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsVisitorsText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsVisitorsDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsVisitorsChart"
@@ -282,15 +336,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsPageViewsText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsPageViewsText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsPageViewsDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsPageViewsChart"
@@ -334,15 +406,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsEncryptedRequestsText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsEncryptedRequestsText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsEncryptedRequestsDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsEncryptedRequestsChart"
@@ -366,15 +456,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsEncryptedRequestRateText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.00%"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsEncryptedRequestRateText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.00%"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsEncryptedRequestRateDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsEncryptedRequestRateChart"
@@ -398,15 +506,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsEncryptedBytesText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0 B"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsEncryptedBytesText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 B"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsEncryptedBytesDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsEncryptedBytesChart"
@@ -430,15 +556,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsEncryptedBytesRateText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.00%"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsEncryptedBytesRateText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.00%"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsEncryptedBytesRateDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsEncryptedBytesRateChart"
@@ -482,15 +626,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsCachedRequestsText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsCachedRequestsText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsCachedRequestsDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsCachedRequestsChart"
@@ -514,15 +676,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsCachedRequestRateText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.00%"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsCachedRequestRateText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.00%"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsCachedRequestRateDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsCachedRequestRateChart"
@@ -546,15 +726,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsCachedBytesText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0 B"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsCachedBytesText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 B"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsCachedBytesDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsCachedBytesChart"
@@ -578,15 +776,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsCachedBytesRateText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.00%"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsCachedBytesRateText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.00%"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsCachedBytesRateDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsCachedBytesRateChart"
@@ -630,15 +846,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsError4xxText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsError4xxText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsError4xxDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsError4xxChart"
@@ -662,15 +896,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsError4xxRateText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.00%"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsError4xxRateText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.00%"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsError4xxRateDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsError4xxRateChart"
@@ -694,15 +946,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsError5xxText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsError5xxText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsError5xxDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsError5xxChart"
@@ -726,15 +996,33 @@
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
-                        <TextView
-                            android:id="@+id/analyticsError5xxRateText"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.00%"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface"
-                            android:layout_marginTop="2dp" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="2dp">
+
+                            <TextView
+                                android:id="@+id/analyticsError5xxRateText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.00%"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface" />
+
+                            <TextView
+                                android:id="@+id/analyticsError5xxRateDelta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:visibility="gone"
+                                tools:text="↗ 12%" />
+
+                        </LinearLayout>
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/analyticsError5xxRateChart"

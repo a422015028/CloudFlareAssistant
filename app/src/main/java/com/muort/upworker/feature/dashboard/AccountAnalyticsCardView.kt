@@ -17,7 +17,6 @@ import com.muort.upworker.core.model.TimeSeriesPoint
 import com.muort.upworker.core.model.TimeRange
 import com.muort.upworker.databinding.CardAccountAnalyticsBinding
 import timber.log.Timber
-import kotlin.math.roundToInt
 
 /**
  * 账户分析概览卡片（对应官网 /analytics 页面）
@@ -170,27 +169,68 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
     private fun updateMetrics(overview: AccountAnalyticsOverview) {
         // 核心指标
         binding.analyticsRequestsText.text = formatNumber(overview.requests)
+        applyDelta(binding.analyticsRequestsDelta, overview.requestsDelta)
         binding.analyticsBandwidthText.text = formatBytes(overview.bandwidthBytes)
+        applyDelta(binding.analyticsBandwidthDelta, overview.bandwidthDelta)
         binding.analyticsVisitorsText.text = formatNumber(overview.uniqueVisitors)
+        applyDelta(binding.analyticsVisitorsDelta, overview.visitorsDelta)
         binding.analyticsPageViewsText.text = formatNumber(overview.pageViews)
+        applyDelta(binding.analyticsPageViewsDelta, overview.pageViewsDelta)
 
         // 安全性
         binding.analyticsEncryptedRequestsText.text = formatNumber(overview.encryptedRequests)
+        applyDelta(binding.analyticsEncryptedRequestsDelta, overview.encryptedRequestsDelta)
         binding.analyticsEncryptedRequestRateText.text = "${formatPercentage(overview.encryptedRequestRate)}%"
+        applyDelta(binding.analyticsEncryptedRequestRateDelta, overview.encryptedRequestRateDelta)
         binding.analyticsEncryptedBytesText.text = formatBytes(overview.encryptedBytes)
+        applyDelta(binding.analyticsEncryptedBytesDelta, overview.encryptedBytesDelta)
         binding.analyticsEncryptedBytesRateText.text = "${formatPercentage(overview.encryptedBytesRate)}%"
+        applyDelta(binding.analyticsEncryptedBytesRateDelta, overview.encryptedBytesRateDelta)
 
         // 缓存
         binding.analyticsCachedRequestsText.text = formatNumber(overview.cachedRequests)
+        applyDelta(binding.analyticsCachedRequestsDelta, overview.cachedRequestsDelta)
         binding.analyticsCachedRequestRateText.text = "${formatPercentage(overview.cachedRequestRate)}%"
+        applyDelta(binding.analyticsCachedRequestRateDelta, overview.cachedRequestRateDelta)
         binding.analyticsCachedBytesText.text = formatBytes(overview.cachedBytes)
+        applyDelta(binding.analyticsCachedBytesDelta, overview.cachedBytesDelta)
         binding.analyticsCachedBytesRateText.text = "${formatPercentage(overview.cachedBytesRate)}%"
+        applyDelta(binding.analyticsCachedBytesRateDelta, overview.cachedBytesRateDelta)
 
         // 错误
         binding.analyticsError4xxText.text = formatNumber(overview.error4xxRequests)
+        applyDelta(binding.analyticsError4xxDelta, overview.error4xxDelta)
         binding.analyticsError4xxRateText.text = "${formatPercentage(overview.error4xxRate)}%"
+        applyDelta(binding.analyticsError4xxRateDelta, overview.error4xxRateDelta)
         binding.analyticsError5xxText.text = formatNumber(overview.error5xxRequests)
+        applyDelta(binding.analyticsError5xxDelta, overview.error5xxDelta)
         binding.analyticsError5xxRateText.text = "${formatPercentage(overview.error5xxRate)}%"
+        applyDelta(binding.analyticsError5xxRateDelta, overview.error5xxRateDelta)
+    }
+
+    /**
+     * 设置环比标签（官网风格：↗ +12% 绿色 / ↘ -8% 红色 / → 0% 中性）
+     */
+    private fun applyDelta(deltaView: android.widget.TextView, delta: Double?) {
+        if (delta == null) {
+            deltaView.visibility = View.GONE
+            return
+        }
+
+        val (arrow, color) = when {
+            delta > 0 -> "↗" to context.getColor(android.R.color.holo_green_dark)
+            delta < 0 -> "↘" to context.getColor(R.color.md_theme_error)
+            else -> "→" to com.google.android.material.color.MaterialColors.getColor(
+                context, com.google.android.material.R.attr.colorOnSurfaceVariant, android.graphics.Color.GRAY
+            )
+        }
+
+        val absValue = kotlin.math.abs(delta)
+        val valueText = String.format("%.2f", absValue)
+
+        deltaView.visibility = View.VISIBLE
+        deltaView.text = "$arrow ${if (delta < 0) "-" else "+"}$valueText%"
+        deltaView.setTextColor(color)
     }
 
     private fun updateCharts(overview: AccountAnalyticsOverview) {
@@ -362,9 +402,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
 
     private fun formatPercentage(value: Double): String {
         return when {
-            value >= 100.0 -> "100"
-            value >= 10.0 -> value.roundToInt().toString()
-            value >= 1.0 -> String.format("%.1f", value)
+            value >= 99.995 -> "100"
             else -> String.format("%.2f", value)
         }
     }
