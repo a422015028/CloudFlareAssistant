@@ -204,6 +204,9 @@ class WorkerFragment : Fragment() {
             onConfigSecretsClick = { script ->
                 showConfigSecretsDialog(script)
             },
+            onRuntimeSettingsClick = { script ->
+                showWorkerRuntimeSettingsDialog(script)
+            },
             onSelectionModeClick = { script, isSelected ->
                 if (isSelected) {
                     selectedScripts.add(script.id)
@@ -1467,6 +1470,125 @@ class WorkerFragment : Fragment() {
         }
     }
     
+    // ==================== Worker Runtime Settings ====================
+    
+    private fun showWorkerRuntimeSettingsDialog(script: WorkerScript) {
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast("请先选择账号")
+            return
+        }
+        
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在加载...")
+            .setMessage("正在获取当前运行时设置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        viewModel.getWorkerSettings(account, script.id) { settingsResult ->
+            requireActivity().runOnUiThread {
+            loadingDialog.dismiss()
+            
+            if (settingsResult !is com.muort.upworker.core.model.Resource.Success) {
+                val msg = (settingsResult as? com.muort.upworker.core.model.Resource.Error)?.message ?: "未知错误"
+                showToast("获取设置失败: $msg")
+                return@runOnUiThread
+            }
+            
+            val dialogBinding = com.muort.upworker.databinding.DialogWorkerRuntimeSettingsBinding.inflate(layoutInflater)
+            
+            // Setup title
+            dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+            
+            // Load current settings
+            var currentCompatibilityDate = DEFAULT_COMPATIBILITY_DATE
+            var currentCompatibilityFlags = emptyList<String>()
+            var currentPlacementMode = "off"
+            
+            val settings = settingsResult.data
+            currentCompatibilityDate = settings.compatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
+            currentCompatibilityFlags = settings.compatibilityFlags ?: emptyList()
+            currentPlacementMode = settings.placement?.mode ?: "off"
+            
+            // Set current values
+            dialogBinding.compatibilityDateInput.setText(currentCompatibilityDate)
+            if (currentCompatibilityFlags.isNotEmpty()) {
+                dialogBinding.compatibilityFlagsInput.setText(currentCompatibilityFlags.joinToString("\n"))
+            }
+            dialogBinding.smartPlacementSwitch.isChecked = currentPlacementMode == "smart"
+            
+            // Show dialog
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("运行时设置")
+                .setView(dialogBinding.root)
+                .setPositiveButton("保存") { _, _ ->
+                    val compatibilityDate = dialogBinding.compatibilityDateInput.text.toString().trim()
+                        .takeIf { it.isNotEmpty() } ?: DEFAULT_COMPATIBILITY_DATE
+                    val compatibilityFlags = dialogBinding.compatibilityFlagsInput.text.toString().trim()
+                        .split(Regex("[,\n]"))
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                    val placementMode = if (dialogBinding.smartPlacementSwitch.isChecked) "smart" else "off"
+                    
+                    applyWorkerRuntimeSettings(
+                        account = account,
+                        scriptName = script.id,
+                        compatibilityDate = compatibilityDate,
+                        compatibilityFlags = compatibilityFlags,
+                        placementMode = placementMode
+                    )
+                }
+                .setNegativeButton("取消", null)
+                .show()
+            }
+        }
+    }
+    
+    private fun applyWorkerRuntimeSettings(
+        account: Account,
+        scriptName: String,
+        compatibilityDate: String,
+        compatibilityFlags: List<String>,
+        placementMode: String
+    ) {
+        // Show loading dialog
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("正在保存...")
+            .setMessage("正在更新运行时设置")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+        
+        // Create placement object
+        val placement = if (placementMode == "smart") {
+            com.muort.upworker.core.model.Placement(mode = "smart")
+        } else {
+            null
+        }
+        
+        // Update settings using ViewModel
+        viewModel.updateWorkerRuntimeSettings(
+            account = account,
+            scriptName = scriptName,
+            compatibilityDate = compatibilityDate,
+            compatibilityFlags = compatibilityFlags,
+            placement = placement
+        ) { result ->
+            requireActivity().runOnUiThread {
+                loadingDialog.dismiss()
+                when (result) {
+                    is com.muort.upworker.core.model.Resource.Success ->
+                        showToast("运行时设置已更新")
+                    is com.muort.upworker.core.model.Resource.Error ->
+                        showToast("更新失败: ${result.message}")
+                    else -> {}
+                }
+            }
+        }
+    }
+    
     private fun loadScripts() {
         val account = accountViewModel.defaultAccount.value
         if (account != null) {
@@ -2360,6 +2482,7 @@ class WorkerScriptsAdapter(
     private val onConfigServiceClick: (WorkerScript) -> Unit,
     private val onConfigVariablesClick: (WorkerScript) -> Unit,
     private val onConfigSecretsClick: (WorkerScript) -> Unit,
+    private val onRuntimeSettingsClick: (WorkerScript) -> Unit = {},
     private val onSelectionModeClick: (WorkerScript, Boolean) -> Unit = { _, _ -> }
 ) : RecyclerView.Adapter<WorkerScriptsAdapter.ScriptViewHolder>() {
     
@@ -2467,6 +2590,10 @@ class WorkerScriptsAdapter(
             
             binding.configSecretsBtn.setOnClickListener {
                 onConfigSecretsClick(script)
+            }
+            
+            binding.runtimeSettingsBtn.setOnClickListener {
+                onRuntimeSettingsClick(script)
             }
             
             binding.logsBtn.setOnClickListener {

@@ -32,6 +32,7 @@ import com.muort.upworker.core.model.PagesDeploymentLogs
 import com.muort.upworker.core.model.PagesDomain
 import com.muort.upworker.core.model.DEFAULT_COMPATIBILITY_DATE
 import com.muort.upworker.core.model.PagesProject
+import com.muort.upworker.core.model.PagesProjectDetail
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.TailResult
 import com.muort.upworker.feature.pages.CleanupResult
@@ -39,6 +40,8 @@ import com.muort.upworker.core.repository.KvRepository
 import com.muort.upworker.core.repository.R2Repository
 import com.muort.upworker.core.repository.D1Repository
 import com.muort.upworker.databinding.DialogPagesInputBinding
+import com.muort.upworker.databinding.DialogPagesRuntimeSettingsBinding
+import com.muort.upworker.core.model.Placement
 import com.muort.upworker.databinding.FragmentPagesBinding
 import com.muort.upworker.databinding.ItemPagesProjectBinding
 import com.muort.upworker.feature.account.AccountViewModel
@@ -284,6 +287,108 @@ class PagesFragment : Fragment() {
         }
     }
     
+    // ==================== Pages 运行时设置 ====================
+
+    private fun showPagesRuntimeSettingsDialog(account: Account, project: PagesProject) {
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("加载中")
+            .setMessage("正在获取当前运行时设置...")
+            .setCancelable(false)
+            .create()
+        loadingDialog.show()
+
+        viewModel.getProjectDetail(account, project.name) { result ->
+            requireActivity().runOnUiThread {
+                loadingDialog.dismiss()
+                if (result !is Resource.Success) {
+                    val msg = (result as? Resource.Error)?.message ?: "未知错误"
+                    showToast("获取设置失败: $msg")
+                    return@runOnUiThread
+                }
+                showPagesRuntimeSettingsForm(account, project, result.data)
+            }
+        }
+    }
+
+    private fun showPagesRuntimeSettingsForm(
+        account: Account,
+        project: PagesProject,
+        detail: PagesProjectDetail
+    ) {
+        val dialogBinding = DialogPagesRuntimeSettingsBinding.inflate(layoutInflater)
+
+        dialogBinding.projectNameText.text = "项目名称: ${project.name}"
+
+        // 读取当前生产环境配置（回显）
+        val envConfig = detail.deploymentConfigs?.production
+        dialogBinding.compatibilityDateInput.setText(envConfig?.compatibilityDate ?: "2025-01-01")
+        if (!envConfig?.compatibilityFlags.isNullOrEmpty()) {
+            dialogBinding.compatibilityFlagsInput.setText(envConfig?.compatibilityFlags?.joinToString("\n"))
+        }
+        dialogBinding.smartPlacementSwitch.isChecked = envConfig?.placement?.mode == "smart"
+
+        // 环境选择
+        dialogBinding.chipProduction.isChecked = true
+        var selectedEnv = "production"
+        dialogBinding.chipProduction.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                selectedEnv = "production"
+                applyEnvConfig(dialogBinding, detail, "production")
+            }
+        }
+        dialogBinding.chipPreview.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                selectedEnv = "preview"
+                applyEnvConfig(dialogBinding, detail, "preview")
+            }
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("运行时设置")
+            .setView(dialogBinding.root)
+            .setPositiveButton("保存") { _, _ ->
+                val compatibilityDate = dialogBinding.compatibilityDateInput.text.toString().trim()
+                    .takeIf { it.isNotEmpty() } ?: "2025-01-01"
+                val compatibilityFlags = dialogBinding.compatibilityFlagsInput.text.toString().trim()
+                    .split(Regex("[,\\n]"))
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                val placement = if (dialogBinding.smartPlacementSwitch.isChecked) Placement(mode = "smart") else null
+
+                // 保存时：环境选择仅用于回显提示，Cloudflare Pages API 会同时更新生产+预览
+                showToast("正在更新 ${if (selectedEnv == "production") "生产" else "预览"}环境运行时设置...")
+
+                viewModel.updateRuntimeSettings(
+                    account = account,
+                    projectName = project.name,
+                    compatibilityDate = compatibilityDate,
+                    compatibilityFlags = compatibilityFlags,
+                    placement = placement
+                ) { saveResult ->
+                    requireActivity().runOnUiThread {
+                        when (saveResult) {
+                            is Resource.Success -> showToast("运行时设置已更新")
+                            is Resource.Error -> showToast("更新失败: ${saveResult.message}")
+                            else -> {}
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun applyEnvConfig(
+        dialogBinding: DialogPagesRuntimeSettingsBinding,
+        detail: PagesProjectDetail,
+        env: String
+    ) {
+        val envConfig = if (env == "production") detail.deploymentConfigs?.production else detail.deploymentConfigs?.preview
+        dialogBinding.compatibilityDateInput.setText(envConfig?.compatibilityDate ?: "")
+        dialogBinding.compatibilityFlagsInput.setText(envConfig?.compatibilityFlags?.joinToString("\n") ?: "")
+        dialogBinding.smartPlacementSwitch.isChecked = envConfig?.placement?.mode == "smart"
+    }
+
     private fun showProjectManagementDialog(account: Account, project: PagesProject) {
         val options = arrayOf(
             "查看部署",
@@ -294,7 +399,8 @@ class PagesFragment : Fragment() {
             "KV 绑定",
             "R2 绑定",
             "D1 绑定",
-            "服务绑定"
+            "服务绑定",
+            "运行时设置"
         )
 
         MaterialAlertDialogBuilder(requireContext())
@@ -310,6 +416,7 @@ class PagesFragment : Fragment() {
                     6 -> showConfigDialog(account, project, "production", "r2")
                     7 -> showConfigDialog(account, project, "production", "d1")
                     8 -> showConfigDialog(account, project, "production", "services")
+                    9 -> showPagesRuntimeSettingsDialog(account, project)
                 }
             }
             .setNegativeButton("关闭", null)
