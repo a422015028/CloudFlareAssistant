@@ -773,6 +773,11 @@ class AnalyticsRepository @Inject constructor(
                 edgeResponseContentTypeName
                 requests
               }
+              countryMap {
+                clientCountryName
+                requests
+                bytes
+              }
               """ else ""}
             }
             uniq {
@@ -935,7 +940,16 @@ class AnalyticsRepository @Inject constructor(
             error5xxRateDelta = rateDelta(curError5xxRate, prevError5xxRate),
             httpVersionStats = current.httpVersionMap.toNetworkStats(),
             sslProtocolStats = current.sslMap.toNetworkStats(),
-            contentTypeStats = current.contentTypeMap.toNetworkStats()
+            contentTypeStats = current.contentTypeMap.toNetworkStats(),
+            regionStats = current.countryAgg.map { (code, agg) ->
+                RegionStatItem(
+                    name = code,
+                    requests = agg.requests,
+                    bytes = agg.bytes,
+                    requestsTimeSeries = agg.series.map { (ts, b) -> TimeSeriesPoint(ts, b[0].toDouble()) },
+                    bytesTimeSeries = agg.series.map { (ts, b) -> TimeSeriesPoint(ts, b[1].toDouble()) }
+                )
+            }.filter { it.requests > 0 }.sortedByDescending { it.requests }
         )
     }
 
@@ -967,8 +981,18 @@ class AnalyticsRepository @Inject constructor(
         val seriesMap: SortedMap<Long, LongArray>,
         val httpVersionMap: Map<String, Long>,
         val sslMap: Map<String, Long>,
-        val contentTypeMap: Map<String, Long>
+        val contentTypeMap: Map<String, Long>,
+        val countryAgg: Map<String, CountryAgg>
     )
+
+    /**
+     * 单个国家在单期内的聚合（总量 + 逐时间桶序列，桶数组 0:requests 1:bytes）
+     */
+    private class CountryAgg {
+        var requests = 0L
+        var bytes = 0L
+        val series = sortedMapOf<Long, LongArray>()
+    }
 
     /**
      * 聚合单个时间段的多个 Zone 数据（按别名前缀过滤：z=当前期，p=上一期）
@@ -991,6 +1015,7 @@ class AnalyticsRepository @Inject constructor(
         val httpVersionMap = mutableMapOf<String, Long>()
         val sslMap = mutableMapOf<String, Long>()
         val contentTypeMap = mutableMapOf<String, Long>()
+        val countryAgg = mutableMapOf<String, CountryAgg>()
 
         data.viewer?.filterKeys { it.startsWith(prefix) }?.values?.forEach zonesLoop@{ zoneList ->
             zoneList.forEach zoneLoop@{ zoneNode ->
@@ -1055,7 +1080,27 @@ class AnalyticsRepository @Inject constructor(
                     bucket[7] += gCachedBytes
                     bucket[8] += g4xx
                     bucket[9] += g5xx
+
+                    sum.countryMap?.forEach { entry ->
+                        val code = entry.clientCountryName ?: return@forEach
+                        val cReq = entry.requests ?: 0
+                        val cBytes = entry.bytes ?: 0
+                        val agg = countryAgg.getOrPut(code) { CountryAgg() }
+                        agg.requests += cReq
+                        agg.bytes += cBytes
+                        val cBucket = agg.series.getOrPut(timestamp) { longArrayOf(0L, 0L) }
+                        cBucket[0] += cReq
+                        cBucket[1] += cBytes
+                    }
                 }
+            }
+        }
+
+        // 按整期时间轴为每个国家补零：低流量国家的流量若集中在单个时间桶，
+        // 序列只有 1 个点无法画折线；补零后与官网一致（零线 + 单桶尖峰）
+        if (seriesMap.isNotEmpty()) {
+            countryAgg.values.forEach { agg ->
+                seriesMap.keys.forEach { ts -> agg.series.getOrPut(ts) { longArrayOf(0L, 0L) } }
             }
         }
 
@@ -1074,7 +1119,8 @@ class AnalyticsRepository @Inject constructor(
             seriesMap = seriesMap,
             httpVersionMap = httpVersionMap,
             sslMap = sslMap,
-            contentTypeMap = contentTypeMap
+            contentTypeMap = contentTypeMap,
+            countryAgg = countryAgg
         )
     }
     

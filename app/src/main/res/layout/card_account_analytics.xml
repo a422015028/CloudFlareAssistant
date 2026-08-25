@@ -374,6 +374,97 @@
 
                 </GridLayout>
 
+                <!-- 地区分布区块 -->
+                <TextView
+                    android:id="@+id/analyticsRegionSectionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🌍 地区分布"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="4dp" />
+
+                <LinearLayout
+                    android:id="@+id/analyticsRegionHeaderRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.42"
+                        android:gravity="center"
+                        android:text="请求"
+                        android:textSize="12sp"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.52"
+                        android:layout_marginStart="8dp"
+                        android:gravity="center"
+                        android:text="带宽"
+                        android:textSize="12sp"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/analyticsRegionContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <LinearLayout
+                    android:id="@+id/analyticsRegionPagination"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="4dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/analyticsRegionPrevButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:padding="0dp"
+                        android:text="&lt;"
+                        android:textSize="16sp"
+                        style="@style/Widget.Material3.Button.TonalButton" />
+
+                    <TextView
+                        android:id="@+id/analyticsRegionPageInfo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:textSize="12sp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        tools:text="1 到 10，共 21 个" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/analyticsRegionNextButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:padding="0dp"
+                        android:text="&gt;"
+                        android:textSize="16sp"
+                        style="@style/Widget.Material3.Button.TonalButton" />
+                </LinearLayout>
+
                 <!-- 安全性区块 -->
                 <TextView
                     android:layout_width="wrap_content"

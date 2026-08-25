@@ -1084,7 +1084,8 @@ data class ZoneAnalyticsSum(
     @SerializedName("responseStatusMap") val responseStatusMap: List<ResponseStatusEntry>? = null,
     @SerializedName("clientHTTPVersionMap") val clientHTTPVersionMap: List<ClientHTTPVersionEntry>? = null,
     @SerializedName("clientSSLMap") val clientSSLMap: List<ClientSSLEntry>? = null,
-    @SerializedName("contentTypeMap") val contentTypeMap: List<ContentTypeEntry>? = null
+    @SerializedName("contentTypeMap") val contentTypeMap: List<ContentTypeEntry>? = null,
+    @SerializedName("countryMap") val countryMap: List<CountryMapEntry>? = null
 )
 
 data class ResponseStatusEntry(
@@ -1105,6 +1106,12 @@ data class ClientSSLEntry(
 data class ContentTypeEntry(
     @SerializedName("edgeResponseContentTypeName") val edgeResponseContentTypeName: String? = null,
     @SerializedName("requests") val requests: Long? = null
+)
+
+data class CountryMapEntry(
+    @SerializedName("clientCountryName") val clientCountryName: String? = null,
+    @SerializedName("requests") val requests: Long? = null,
+    @SerializedName("bytes") val bytes: Long? = null
 )
 
 data class ZoneAnalyticsUniq(
@@ -1176,7 +1183,9 @@ data class AccountAnalyticsOverview(
     // 网络区块（客户端 HTTP 版本 / SSL 协议 / 热门内容类型，按请求数降序）
     val httpVersionStats: List<NetworkStatItem> = emptyList(),
     val sslProtocolStats: List<NetworkStatItem> = emptyList(),
-    val contentTypeStats: List<NetworkStatItem> = emptyList()
+    val contentTypeStats: List<NetworkStatItem> = emptyList(),
+    // 地区分布（按请求数降序，name 为 ISO 3166-1 alpha-2 国家码）
+    val regionStats: List<RegionStatItem> = emptyList()
 )
 
 /**
@@ -1185,6 +1194,17 @@ data class AccountAnalyticsOverview(
 data class NetworkStatItem(
     val name: String,
     val requests: Long
+)
+
+/**
+ * 地区分布统计项（国家码 + 请求数/带宽及其时间序列）
+ */
+data class RegionStatItem(
+    val name: String,
+    val requests: Long,
+    val bytes: Long,
+    val requestsTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val bytesTimeSeries: List<TimeSeriesPoint> = emptyList()
 )
 
 // ==================== User API Tokens ====================

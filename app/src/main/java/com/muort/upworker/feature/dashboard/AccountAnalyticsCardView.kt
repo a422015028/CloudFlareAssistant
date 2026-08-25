@@ -13,10 +13,12 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.muort.upworker.R
 import com.muort.upworker.core.model.AccountAnalyticsOverview
+import com.muort.upworker.core.model.RegionStatItem
 import com.muort.upworker.core.model.TimeSeriesPoint
 import com.muort.upworker.core.model.TimeRange
 import com.muort.upworker.databinding.CardAccountAnalyticsBinding
 import com.muort.upworker.databinding.ItemNetworkStatBinding
+import com.muort.upworker.databinding.ItemRegionStatBinding
 import timber.log.Timber
 
 /**
@@ -41,7 +43,17 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
 
     companion object {
         private const val KEY_ANALYTICS_ENABLED = "account_analytics_enabled"
+        private const val REGION_PAGE_SIZE = 10
+
+        // Cloudflare 分析中的非 ISO 国家码
+        private val specialRegionNames = mapOf(
+            "T1" to "Tor 网络流量",
+            "XX" to "未知地区"
+        )
     }
+
+    private var regionStats: List<RegionStatItem> = emptyList()
+    private var regionPage = 0
 
     init {
         binding = CardAccountAnalyticsBinding.inflate(LayoutInflater.from(context), this, true)
@@ -73,27 +85,49 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
             binding.analyticsError5xxChart,
             binding.analyticsError5xxRateChart
         ).forEach { chart ->
-            chart.apply {
-                description.isEnabled = false
-                setTouchEnabled(false)
-                isDragEnabled = false
-                setScaleEnabled(false)
-                setPinchZoom(false)
-                setDrawGridBackground(false)
-                xAxis.isEnabled = false
-                axisLeft.isEnabled = false
-                axisRight.isEnabled = false
-                legend.isEnabled = false
-                setHighlightPerDragEnabled(false)
-                setHighlightPerTapEnabled(false)
-                setDrawMarkers(false)
-            }
+            applySparkChartStyle(chart)
+        }
+    }
+
+    /**
+     * 迷你趋势图基础样式：无坐标轴、无图例、不可交互
+     */
+    private fun applySparkChartStyle(chart: LineChart) {
+        chart.apply {
+            description.isEnabled = false
+            setTouchEnabled(false)
+            isDragEnabled = false
+            setScaleEnabled(false)
+            setPinchZoom(false)
+            setDrawGridBackground(false)
+            xAxis.isEnabled = false
+            axisLeft.isEnabled = false
+            axisRight.isEnabled = false
+            legend.isEnabled = false
+            setHighlightPerDragEnabled(false)
+            setHighlightPerTapEnabled(false)
+            setDrawMarkers(false)
         }
     }
 
     private fun setupListeners() {
         binding.analyticsRefreshButton.setOnClickListener {
             onRefreshClick?.invoke()
+        }
+
+        binding.analyticsRegionPrevButton.setOnClickListener {
+            if (regionPage > 0) {
+                regionPage--
+                renderRegionPage()
+            }
+        }
+
+        binding.analyticsRegionNextButton.setOnClickListener {
+            val totalPages = (regionStats.size + REGION_PAGE_SIZE - 1) / REGION_PAGE_SIZE
+            if (regionPage < totalPages - 1) {
+                regionPage++
+                renderRegionPage()
+            }
         }
     }
 
@@ -166,6 +200,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         updateCharts(overview)
         updateStatus(overview)
         updateNetworkStats(overview)
+        updateRegionStats(overview)
     }
 
     private fun updateMetrics(overview: AccountAnalyticsOverview) {
@@ -340,12 +375,13 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
                 this.color = color
                 setCircleColor(color)
                 lineWidth = 1.5f
-                circleRadius = 1.5f
+                // 单点无法画折线，放大圆点保证可见
+                circleRadius = if (entries.size == 1) 3f else 1.5f
                 setDrawCircleHole(false)
                 setDrawValues(false)
                 mode = LineDataSet.Mode.CUBIC_BEZIER
                 cubicIntensity = 0.2f
-                setDrawFilled(true)
+                setDrawFilled(entries.size > 1)
                 fillColor = color
                 fillAlpha = 60
             }
@@ -437,6 +473,72 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
                 0, android.view.ViewGroup.LayoutParams.MATCH_PARENT, 1000f - filledWeight
             )
             container.addView(row.root)
+        }
+    }
+
+    /**
+     * 渲染地区分布区块：国家 | 请求数+迷你图 | 带宽+迷你图，按请求数降序分页展示
+     */
+    private fun updateRegionStats(overview: AccountAnalyticsOverview) {
+        regionStats = overview.regionStats
+        regionPage = 0
+
+        val visible = regionStats.isNotEmpty()
+        binding.analyticsRegionSectionTitle.visibility = if (visible) View.VISIBLE else View.GONE
+        binding.analyticsRegionHeaderRow.visibility = if (visible) View.VISIBLE else View.GONE
+        binding.analyticsRegionContainer.visibility = if (visible) View.VISIBLE else View.GONE
+        binding.analyticsRegionPagination.visibility =
+            if (visible && regionStats.size > REGION_PAGE_SIZE) View.VISIBLE else View.GONE
+
+        if (visible) renderRegionPage()
+    }
+
+    private fun renderRegionPage() {
+        val totalPages = (regionStats.size + REGION_PAGE_SIZE - 1) / REGION_PAGE_SIZE
+        if (regionPage >= totalPages) regionPage = totalPages - 1
+        if (regionPage < 0) regionPage = 0
+
+        val container = binding.analyticsRegionContainer
+        container.removeAllViews()
+        val inflater = LayoutInflater.from(context)
+        val sparkColor = context.getColor(android.R.color.holo_blue_dark)
+
+        val start = regionPage * REGION_PAGE_SIZE
+        val end = minOf(start + REGION_PAGE_SIZE, regionStats.size)
+        for (index in start until end) {
+            val item = regionStats[index]
+            val row = ItemRegionStatBinding.inflate(inflater, container, false)
+            row.regionStatName.text = countryDisplayName(item.name)
+            row.regionRequestsValue.text = formatNumber(item.requests)
+            row.regionBandwidthValue.text = formatBytes(item.bytes)
+
+            applySparkChartStyle(row.regionRequestsChart)
+            applySparkChartStyle(row.regionBandwidthChart)
+            updateSparkChart(row.regionRequestsChart, item.requestsTimeSeries, sparkColor)
+            updateSparkChart(row.regionBandwidthChart, item.bytesTimeSeries, sparkColor)
+
+            container.addView(row.root)
+        }
+
+        binding.analyticsRegionPageInfo.text = "${start + 1} 到 $end，共 ${regionStats.size} 个"
+        binding.analyticsRegionPrevButton.isEnabled = regionPage > 0
+        binding.analyticsRegionNextButton.isEnabled = regionPage < totalPages - 1
+    }
+
+    /**
+     * ISO 3166-1 alpha-2 国家码转本地化显示名；Cloudflare 特殊码单独映射
+     */
+    private fun countryDisplayName(code: String): String {
+        if (code.isBlank()) return code
+        specialRegionNames[code]?.let { return it }
+        return try {
+            val name = java.util.Locale.Builder()
+                .setRegion(code)
+                .build()
+                .getDisplayCountry(java.util.Locale.getDefault())
+            if (name.isBlank() || name == code) code else name
+        } catch (e: Exception) {
+            code
         }
     }
 
