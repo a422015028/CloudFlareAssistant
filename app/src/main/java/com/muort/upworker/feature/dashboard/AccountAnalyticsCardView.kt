@@ -91,6 +91,8 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
 
     /**
      * 迷你趋势图基础样式：无坐标轴、无图例、不可交互
+     * minOffset=0：默认 15dp 边距会把低高度图表的内容区压成负数，导致曲线渲染出界
+     * axisMinimum=0：强制零线贴底，波动整体挂在基线上方（与官网一致）
      */
     private fun applySparkChartStyle(chart: LineChart) {
         chart.apply {
@@ -100,6 +102,9 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
             setScaleEnabled(false)
             setPinchZoom(false)
             setDrawGridBackground(false)
+            minOffset = 0f
+            axisLeft.axisMinimum = 0f
+            axisRight.axisMinimum = 0f
             xAxis.isEnabled = false
             axisLeft.isEnabled = false
             axisRight.isEnabled = false

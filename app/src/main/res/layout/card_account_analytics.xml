@@ -396,12 +396,12 @@
                     <Space
                         android:layout_width="0dp"
                         android:layout_height="1dp"
-                        android:layout_weight="1" />
+                        android:layout_weight="0.32" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.42"
+                        android:layout_weight="0.32"
                         android:gravity="center"
                         android:text="请求"
                         android:textSize="12sp"
@@ -410,8 +410,8 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.52"
-                        android:layout_marginStart="8dp"
+                        android:layout_weight="0.36"
+                        android:layout_marginStart="6dp"
                         android:gravity="center"
                         android:text="带宽"
                         android:textSize="12sp"
