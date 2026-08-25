@@ -656,6 +656,285 @@ class AnalyticsRepository @Inject constructor(
             0L
         }
     }
+
+    /**
+     * 获取账户分析概览数据（聚合账户下所有 Zone，对应官网 /analytics 页面）
+     * 24小时使用小时级分组（httpRequests1hGroups），7天/30天使用天级分组（httpRequests1dGroups）
+     */
+    suspend fun getAccountAnalyticsOverview(
+        account: Account,
+        timeRange: TimeRange = TimeRange.ONE_DAY
+    ): Resource<AccountAnalyticsOverview> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                Timber.d("Fetching account analytics overview for account: ${account.accountId}, timeRange: ${timeRange.displayName}")
+
+                // 获取账户下所有 Zone
+                val zonesResponse = api.listZones(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account)
+                )
+                if (!zonesResponse.isSuccessful) {
+                    return@safeApiCall Resource.Error("获取域名列表失败: ${zonesResponse.message()}")
+                }
+                val zoneIds = zonesResponse.body()?.result?.map { it.id } ?: emptyList()
+                if (zoneIds.isEmpty()) {
+                    Timber.d("No zones in account, returning empty overview")
+                    return@safeApiCall Resource.Success(AccountAnalyticsOverview())
+                }
+
+                val hourly = timeRange == TimeRange.ONE_DAY
+                val query = buildAccountAnalyticsQuery(zoneIds, hourly)
+                val variables = mutableMapOf<String, Any>()
+                if (hourly) {
+                    variables["since"] = timeRange.getStartDateTime()
+                    variables["until"] = timeRange.getEndDateTime()
+                } else {
+                    variables["sinceDate"] = timeRange.getStartDateTime().substring(0, 10)
+                    variables["untilDate"] = timeRange.getEndDateTime().substring(0, 10)
+                }
+
+                val response = api.queryAccountAnalytics(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    request = AnalyticsGraphQLRequest(query = query, variables = variables)
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body?.errors?.isNotEmpty() == true) {
+                        val errorMsg = body.errors.joinToString(", ") { it.message }
+                        Timber.e("GraphQL errors: $errorMsg")
+                        return@safeApiCall Resource.Error("分析查询失败: $errorMsg")
+                    }
+                    val overview = parseAccountAnalytics(body?.data, hourly)
+                    Timber.d("Parsed account analytics overview: requests=${overview.requests}")
+                    Resource.Success(overview)
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Timber.e("Failed to fetch account analytics: ${response.code()}, $errorBody")
+                    Resource.Error("获取分析数据失败: ${response.message()}")
+                }
+            }
+        }
+
+    /**
+     * 构建账户分析 GraphQL 查询（每个 Zone 一个别名查询）
+     */
+    private fun buildAccountAnalyticsQuery(zoneIds: List<String>, hourly: Boolean): String {
+        val dataset = if (hourly) "httpRequests1hGroups" else "httpRequests1dGroups"
+        val timeFilter = if (hourly) {
+            "datetime_geq: \$since, datetime_lt: \$until"
+        } else {
+            "date_geq: \$sinceDate, date_leq: \$untilDate"
+        }
+        val dimension = if (hourly) "datetime" else "date"
+
+        val zoneFields = zoneIds.mapIndexed { index, zoneId ->
+            """
+            z$index: zones(filter: {zoneTag: "$zoneId"}) {
+              groups: $dataset(
+                limit: ${if (hourly) 25 else 32},
+                filter: {$timeFilter}
+              ) {
+                sum {
+                  requests
+                  bytes
+                  cachedRequests
+                  cachedBytes
+                  encryptedRequests
+                  encryptedBytes
+                  pageViews
+                  threats
+                  responseStatusMap {
+                    edgeResponseStatus
+                    requests
+                  }
+                }
+                uniq {
+                  uniques
+                }
+                dimensions {
+                  $dimension
+                }
+              }
+            }
+            """.trimIndent()
+        }.joinToString("\n")
+
+        val variableDefs = if (hourly) {
+            "(\$since: Time!, \$until: Time!)"
+        } else {
+            "(\$sinceDate: string!, \$untilDate: string!)"
+        }
+
+        return """
+        query AccountAnalyticsOverview$variableDefs {
+          viewer {
+            $zoneFields
+          }
+        }
+        """.trimIndent()
+    }
+
+    /**
+     * 解析账户分析数据（聚合所有 Zone）
+     */
+    private fun parseAccountAnalytics(data: AccountAnalyticsData?, hourly: Boolean): AccountAnalyticsOverview {
+        val empty = AccountAnalyticsOverview()
+        if (data?.viewer == null) return empty
+
+        var requests = 0L
+        var bytes = 0L
+        var uniques = 0L
+        var pageViews = 0L
+        var encryptedRequests = 0L
+        var encryptedBytes = 0L
+        var cachedRequests = 0L
+        var cachedBytes = 0L
+        var error4xx = 0L
+        var error5xx = 0L
+        var threats = 0L
+
+        // 按时间桶聚合多 Zone 数据 (timestamp -> 各指标累计)
+        // 0:requests 1:bytes 2:uniques 3:pageViews 4:encryptedRequests 5:encryptedBytes
+        // 6:cachedRequests 7:cachedBytes 8:error4xx 9:error5xx
+        val seriesMap = sortedMapOf<Long, LongArray>()
+
+        data.viewer.values.forEach zonesLoop@{ zoneList ->
+            zoneList.forEach zoneLoop@{ zoneNode ->
+                zoneNode.groups?.forEach groupLoop@{ group ->
+                    val sum = group.sum ?: return@groupLoop
+                    val gRequests = sum.requests ?: 0
+                    val gBytes = sum.bytes ?: 0
+                    val gPageViews = sum.pageViews ?: 0
+                    val gEncryptedRequests = sum.encryptedRequests ?: 0
+                    val gEncryptedBytes = sum.encryptedBytes ?: 0
+                    val gCachedRequests = sum.cachedRequests ?: 0
+                    val gCachedBytes = sum.cachedBytes ?: 0
+                    val gUniques = group.uniq?.uniques ?: 0
+
+                    requests += gRequests
+                    bytes += gBytes
+                    pageViews += gPageViews
+                    encryptedRequests += gEncryptedRequests
+                    encryptedBytes += gEncryptedBytes
+                    cachedRequests += gCachedRequests
+                    cachedBytes += gCachedBytes
+                    threats += sum.threats ?: 0
+                    uniques += gUniques
+
+                    var g4xx = 0L
+                    var g5xx = 0L
+                    sum.responseStatusMap?.forEach statusLoop@{ entry ->
+                        val status = entry.edgeResponseStatus ?: return@statusLoop
+                        val req = entry.requests ?: 0
+                        when {
+                            status in 400..499 -> { error4xx += req; g4xx += req }
+                            status >= 500 -> { error5xx += req; g5xx += req }
+                        }
+                    }
+
+                    // 时间序列聚合
+                    val timestamp = when {
+                        hourly -> group.dimensions?.datetime?.let { parseISODateTime(it) }
+                        else -> group.dimensions?.date?.let { parseDate(it) }
+                    } ?: return@groupLoop
+                    val bucket = seriesMap.getOrPut(timestamp) { LongArray(10) }
+                    bucket[0] += gRequests
+                    bucket[1] += gBytes
+                    bucket[2] += gUniques
+                    bucket[3] += gPageViews
+                    bucket[4] += gEncryptedRequests
+                    bucket[5] += gEncryptedBytes
+                    bucket[6] += gCachedRequests
+                    bucket[7] += gCachedBytes
+                    bucket[8] += g4xx
+                    bucket[9] += g5xx
+                }
+            }
+        }
+
+        val requestsSeries = mutableListOf<TimeSeriesPoint>()
+        val bandwidthSeries = mutableListOf<TimeSeriesPoint>()
+        val visitorsSeries = mutableListOf<TimeSeriesPoint>()
+        val pageViewsSeries = mutableListOf<TimeSeriesPoint>()
+        val encryptedRequestsSeries = mutableListOf<TimeSeriesPoint>()
+        val encryptedRequestRateSeries = mutableListOf<TimeSeriesPoint>()
+        val encryptedBytesSeries = mutableListOf<TimeSeriesPoint>()
+        val encryptedBytesRateSeries = mutableListOf<TimeSeriesPoint>()
+        val cachedRequestsSeries = mutableListOf<TimeSeriesPoint>()
+        val cachedRequestRateSeries = mutableListOf<TimeSeriesPoint>()
+        val cachedBytesSeries = mutableListOf<TimeSeriesPoint>()
+        val cachedBytesRateSeries = mutableListOf<TimeSeriesPoint>()
+        val error4xxSeries = mutableListOf<TimeSeriesPoint>()
+        val error4xxRateSeries = mutableListOf<TimeSeriesPoint>()
+        val error5xxSeries = mutableListOf<TimeSeriesPoint>()
+        val error5xxRateSeries = mutableListOf<TimeSeriesPoint>()
+
+        seriesMap.forEach { (timestamp, b) ->
+            requestsSeries.add(TimeSeriesPoint(timestamp, b[0].toDouble()))
+            bandwidthSeries.add(TimeSeriesPoint(timestamp, b[1].toDouble()))
+            visitorsSeries.add(TimeSeriesPoint(timestamp, b[2].toDouble()))
+            pageViewsSeries.add(TimeSeriesPoint(timestamp, b[3].toDouble()))
+            encryptedRequestsSeries.add(TimeSeriesPoint(timestamp, b[4].toDouble()))
+            encryptedBytesSeries.add(TimeSeriesPoint(timestamp, b[5].toDouble()))
+            cachedRequestsSeries.add(TimeSeriesPoint(timestamp, b[6].toDouble()))
+            cachedBytesSeries.add(TimeSeriesPoint(timestamp, b[7].toDouble()))
+            error4xxSeries.add(TimeSeriesPoint(timestamp, b[8].toDouble()))
+            error5xxSeries.add(TimeSeriesPoint(timestamp, b[9].toDouble()))
+
+            fun pct(numerator: Long, denominator: Long): Double =
+                if (denominator > 0) numerator.toDouble() / denominator.toDouble() * 100 else 0.0
+            encryptedRequestRateSeries.add(TimeSeriesPoint(timestamp, pct(b[4], b[0])))
+            encryptedBytesRateSeries.add(TimeSeriesPoint(timestamp, pct(b[5], b[1])))
+            cachedRequestRateSeries.add(TimeSeriesPoint(timestamp, pct(b[6], b[0])))
+            cachedBytesRateSeries.add(TimeSeriesPoint(timestamp, pct(b[7], b[1])))
+            error4xxRateSeries.add(TimeSeriesPoint(timestamp, pct(b[8], b[0])))
+            error5xxRateSeries.add(TimeSeriesPoint(timestamp, pct(b[9], b[0])))
+        }
+
+        fun rate(numerator: Long, denominator: Long): Double =
+            if (denominator > 0) numerator.toDouble() / denominator.toDouble() * 100 else 0.0
+
+        return AccountAnalyticsOverview(
+            requests = requests,
+            bandwidthBytes = bytes,
+            uniqueVisitors = uniques,
+            pageViews = pageViews,
+            encryptedRequests = encryptedRequests,
+            encryptedBytes = encryptedBytes,
+            cachedRequests = cachedRequests,
+            cachedBytes = cachedBytes,
+            error4xxRequests = error4xx,
+            error5xxRequests = error5xx,
+            threats = threats,
+            encryptedRequestRate = rate(encryptedRequests, requests),
+            encryptedBytesRate = rate(encryptedBytes, bytes),
+            cachedRequestRate = rate(cachedRequests, requests),
+            cachedBytesRate = rate(cachedBytes, bytes),
+            error4xxRate = rate(error4xx, requests),
+            error5xxRate = rate(error5xx, requests),
+            requestsTimeSeries = requestsSeries,
+            bandwidthTimeSeries = bandwidthSeries,
+            visitorsTimeSeries = visitorsSeries,
+            pageViewsTimeSeries = pageViewsSeries,
+            encryptedRequestsTimeSeries = encryptedRequestsSeries,
+            encryptedRequestRateTimeSeries = encryptedRequestRateSeries,
+            encryptedBytesTimeSeries = encryptedBytesSeries,
+            encryptedBytesRateTimeSeries = encryptedBytesRateSeries,
+            cachedRequestsTimeSeries = cachedRequestsSeries,
+            cachedRequestRateTimeSeries = cachedRequestRateSeries,
+            cachedBytesTimeSeries = cachedBytesSeries,
+            cachedBytesRateTimeSeries = cachedBytesRateSeries,
+            error4xxTimeSeries = error4xxSeries,
+            error4xxRateTimeSeries = error4xxRateSeries,
+            error5xxTimeSeries = error5xxSeries,
+            error5xxRateTimeSeries = error5xxRateSeries
+        )
+    }
     
     /**
      * 解析 ISO 8601 日期时间字符串为 Unix 时间戳

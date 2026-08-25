@@ -11,11 +11,17 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <com.muort.upworker.feature.dashboard.AccountAnalyticsCardView
+            android:id="@+id/accountAnalyticsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="12dp" />
+
         <com.muort.upworker.feature.dashboard.DashboardCardView
             android:id="@+id/dashboardCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:layout_marginBottom="12dp" />
 
         <GridLayout

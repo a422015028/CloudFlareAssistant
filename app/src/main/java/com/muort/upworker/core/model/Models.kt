@@ -1044,6 +1044,102 @@ data class KvStorageMax(
     @SerializedName("keyCount") val keyCount: Long? = null // 键数量
 )
 
+// ==================== Account Analytics Overview ====================
+
+/**
+ * 账户分析概览 GraphQL 响应
+ * viewer 下为动态别名 key（z0/z1/... 每个 zone 一个），故声明为 Map
+ */
+data class AccountAnalyticsGraphQLResponse(
+    @SerializedName("data") val data: AccountAnalyticsData?,
+    @SerializedName("errors") val errors: List<GraphQLError>?
+)
+
+data class AccountAnalyticsData(
+    @SerializedName("viewer") val viewer: Map<String, List<AggregatedZoneAnalytics>>?
+)
+
+/**
+ * 单个 zone 的聚合分析节点（通过别名查询）
+ */
+data class AggregatedZoneAnalytics(
+    @SerializedName("groups") val groups: List<ZoneAnalyticsGroup>?
+)
+
+data class ZoneAnalyticsGroup(
+    @SerializedName("sum") val sum: ZoneAnalyticsSum? = null,
+    @SerializedName("uniq") val uniq: ZoneAnalyticsUniq? = null,
+    @SerializedName("dimensions") val dimensions: ZoneAnalyticsDimensions? = null
+)
+
+data class ZoneAnalyticsSum(
+    @SerializedName("requests") val requests: Long? = null,
+    @SerializedName("bytes") val bytes: Long? = null,
+    @SerializedName("cachedRequests") val cachedRequests: Long? = null,
+    @SerializedName("cachedBytes") val cachedBytes: Long? = null,
+    @SerializedName("encryptedRequests") val encryptedRequests: Long? = null,
+    @SerializedName("encryptedBytes") val encryptedBytes: Long? = null,
+    @SerializedName("pageViews") val pageViews: Long? = null,
+    @SerializedName("threats") val threats: Long? = null,
+    @SerializedName("responseStatusMap") val responseStatusMap: List<ResponseStatusEntry>? = null
+)
+
+data class ResponseStatusEntry(
+    @SerializedName("edgeResponseStatus") val edgeResponseStatus: Int? = null,
+    @SerializedName("requests") val requests: Long? = null
+)
+
+data class ZoneAnalyticsUniq(
+    @SerializedName("uniques") val uniques: Long? = null
+)
+
+data class ZoneAnalyticsDimensions(
+    @SerializedName("date") val date: String? = null,
+    @SerializedName("datetime") val datetime: String? = null
+)
+
+/**
+ * 账户分析概览业务模型（聚合账户下所有 zone，对应官网 /analytics 页面）
+ */
+data class AccountAnalyticsOverview(
+    val requests: Long = 0,
+    val bandwidthBytes: Long = 0,
+    val uniqueVisitors: Long = 0,
+    val pageViews: Long = 0,
+    val encryptedRequests: Long = 0,
+    val encryptedBytes: Long = 0,
+    val cachedRequests: Long = 0,
+    val cachedBytes: Long = 0,
+    val error4xxRequests: Long = 0,
+    val error5xxRequests: Long = 0,
+    val threats: Long = 0,
+    val encryptedRequestRate: Double = 0.0,
+    val encryptedBytesRate: Double = 0.0,
+    val cachedRequestRate: Double = 0.0,
+    val cachedBytesRate: Double = 0.0,
+    val error4xxRate: Double = 0.0,
+    val error5xxRate: Double = 0.0,
+    val requestsTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val bandwidthTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val visitorsTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val pageViewsTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    // 安全性
+    val encryptedRequestsTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val encryptedRequestRateTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val encryptedBytesTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val encryptedBytesRateTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    // 缓存
+    val cachedRequestsTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val cachedRequestRateTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val cachedBytesTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val cachedBytesRateTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    // 错误
+    val error4xxTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val error4xxRateTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val error5xxTimeSeries: List<TimeSeriesPoint> = emptyList(),
+    val error5xxRateTimeSeries: List<TimeSeriesPoint> = emptyList()
+)
+
 // ==================== User API Tokens ====================
 
 /**

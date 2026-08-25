@@ -24,6 +24,8 @@ import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.DialogAboutBinding
 import com.muort.upworker.databinding.FragmentHomeBinding
 import com.muort.upworker.feature.account.AccountViewModel
+import com.muort.upworker.feature.dashboard.AccountAnalyticsState
+import com.muort.upworker.feature.dashboard.AccountAnalyticsViewModel
 import com.muort.upworker.feature.dashboard.DashboardState
 import com.muort.upworker.feature.dashboard.DashboardViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,6 +51,7 @@ class HomeFragment : Fragment() {
     
     private val accountViewModel: AccountViewModel by activityViewModels()
     private val dashboardViewModel: DashboardViewModel by viewModels()
+    private val accountAnalyticsViewModel: AccountAnalyticsViewModel by viewModels()
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,6 +68,7 @@ class HomeFragment : Fragment() {
         setupUI()
         observeViewModel()
         setupDashboard()
+        setupAccountAnalytics()
 
         // 日志卡片点击跳转新页面
         binding.logCard.setOnClickListener {
@@ -94,6 +98,31 @@ class HomeFragment : Fragment() {
                 // 开启时自动刷新数据
                 accountViewModel.defaultAccount.value?.let { account ->
                     dashboardViewModel.refresh(account)
+                }
+            }
+        }
+    }
+
+    private fun setupAccountAnalytics() {
+        // 刷新按钮
+        binding.accountAnalyticsCard.onRefreshClick = {
+            accountViewModel.defaultAccount.value?.let { account ->
+                accountAnalyticsViewModel.refresh(account)
+            }
+        }
+
+        // 时间范围切换
+        binding.accountAnalyticsCard.onTimeRangeChanged = { timeRange ->
+            accountViewModel.defaultAccount.value?.let { account ->
+                accountAnalyticsViewModel.changeTimeRange(account, timeRange)
+            }
+        }
+
+        // 开关监听：开启时自动加载数据
+        binding.accountAnalyticsCard.onAnalyticsEnabledChanged = { isEnabled ->
+            if (isEnabled) {
+                accountViewModel.defaultAccount.value?.let { account ->
+                    accountAnalyticsViewModel.refresh(account)
                 }
             }
         }
@@ -394,6 +423,30 @@ class HomeFragment : Fragment() {
                         // 仅在仪表盘开关开启时加载数据
                         if (account != null && binding.dashboardCard.isDashboardEnabled()) {
                             dashboardViewModel.loadDashboard(account)
+                        }
+                        // 仅在账户分析开关开启时加载数据
+                        if (account != null && binding.accountAnalyticsCard.isAnalyticsEnabled()) {
+                            accountAnalyticsViewModel.load(account)
+                        }
+                    }
+                }
+
+                launch {
+                    accountAnalyticsViewModel.state.collect { state ->
+                        when (state) {
+                            is AccountAnalyticsState.Idle -> {
+                                // 初始状态，不显示任何内容
+                            }
+                            is AccountAnalyticsState.Loading -> {
+                                binding.accountAnalyticsCard.showLoading()
+                            }
+                            is AccountAnalyticsState.Success -> {
+                                binding.accountAnalyticsCard.showData(state.overview)
+                            }
+                            is AccountAnalyticsState.Error -> {
+                                binding.accountAnalyticsCard.showError(state.message)
+                                Timber.e("Account analytics error: ${state.message}")
+                            }
                         }
                     }
                 }

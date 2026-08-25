@@ -1063,6 +1063,18 @@ interface CloudFlareApi {
         @Header("X-Auth-Key") apiKey: String?,
         @Body request: AnalyticsGraphQLRequest
     ): Response<AnalyticsGraphQLResponse>
+
+    /**
+     * GraphQL Analytics API - 账户分析概览
+     * https://developers.cloudflare.com/analytics/graphql-api/
+     */
+    @POST("graphql")
+    suspend fun queryAccountAnalytics(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Body request: AnalyticsGraphQLRequest
+    ): Response<AccountAnalyticsGraphQLResponse>
     
     // ==================== Zero Trust - Access Applications ====================
     
