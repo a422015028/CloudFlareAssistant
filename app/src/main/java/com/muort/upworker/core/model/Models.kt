@@ -169,7 +169,9 @@ const val DEFAULT_COMPATIBILITY_DATE = "2026-06-16"
  * https://developers.cloudflare.com/workers/configuration/smart-placement/
  */
 data class Placement(
-    @SerializedName("mode") val mode: String? = null,  // "smart" or "off"
+    @SerializedName("mode") val mode: String? = null,  // "standard" / "smart" / "region" / "service"
+    @SerializedName("region") val region: String? = null,  // mode=region 时的区域代码，如 eu
+    @SerializedName("host") val host: String? = null,  // mode=service 时的主机名或主机:端口
 )
 
 data class WorkerScript(

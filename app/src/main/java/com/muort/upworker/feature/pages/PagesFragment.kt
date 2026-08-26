@@ -43,6 +43,9 @@ import com.muort.upworker.databinding.DialogPagesInputBinding
 import com.muort.upworker.databinding.DialogPagesRuntimeSettingsBinding
 import com.muort.upworker.core.model.Placement
 import com.muort.upworker.databinding.FragmentPagesBinding
+import com.muort.upworker.feature.attachDatePicker
+import com.muort.upworker.feature.attachFlagSuggestions
+import com.muort.upworker.feature.bindPlacement
 import com.muort.upworker.databinding.ItemPagesProjectBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -325,7 +328,9 @@ class PagesFragment : Fragment() {
         if (!envConfig?.compatibilityFlags.isNullOrEmpty()) {
             dialogBinding.compatibilityFlagsInput.setText(envConfig?.compatibilityFlags?.joinToString("\n"))
         }
-        dialogBinding.smartPlacementSwitch.isChecked = envConfig?.placement?.mode == "smart"
+        dialogBinding.placementModeGroup.bindPlacement(null, null, envConfig?.placement?.mode)
+        dialogBinding.dateInputLayout.attachDatePicker(this, dialogBinding.compatibilityDateInput)
+        dialogBinding.flagSuggestionsInput.attachFlagSuggestions(dialogBinding.compatibilityFlagsInput)
 
         // 环境选择
         dialogBinding.chipProduction.isChecked = true
@@ -353,7 +358,7 @@ class PagesFragment : Fragment() {
                     .split(Regex("[,\\n]"))
                     .map { it.trim() }
                     .filter { it.isNotEmpty() }
-                val placement = if (dialogBinding.smartPlacementSwitch.isChecked) Placement(mode = "smart") else null
+                val placement = if (dialogBinding.placementModeGroup.checkedRadioButtonId == R.id.placementSmart) Placement(mode = "smart") else null
 
                 // 保存时：环境选择仅用于回显提示，Cloudflare Pages API 会同时更新生产+预览
                 showToast("正在更新 ${if (selectedEnv == "production") "生产" else "预览"}环境运行时设置...")
@@ -386,7 +391,7 @@ class PagesFragment : Fragment() {
         val envConfig = if (env == "production") detail.deploymentConfigs?.production else detail.deploymentConfigs?.preview
         dialogBinding.compatibilityDateInput.setText(envConfig?.compatibilityDate ?: "")
         dialogBinding.compatibilityFlagsInput.setText(envConfig?.compatibilityFlags?.joinToString("\n") ?: "")
-        dialogBinding.smartPlacementSwitch.isChecked = envConfig?.placement?.mode == "smart"
+        dialogBinding.placementModeGroup.bindPlacement(null, null, envConfig?.placement?.mode)
     }
 
     private fun showProjectManagementDialog(account: Account, project: PagesProject) {

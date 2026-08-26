@@ -26,6 +26,10 @@ import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.WorkerScript
 import com.muort.upworker.core.model.DEFAULT_COMPATIBILITY_DATE
+import com.muort.upworker.feature.attachDatePicker
+import com.muort.upworker.feature.attachFlagSuggestions
+import com.muort.upworker.feature.bindPlacement
+import com.muort.upworker.feature.readPlacement
 import com.muort.upworker.core.repository.KvRepository
 import com.muort.upworker.core.repository.R2Repository
 import com.muort.upworker.core.repository.D1Repository
@@ -1517,7 +1521,15 @@ class WorkerFragment : Fragment() {
             if (currentCompatibilityFlags.isNotEmpty()) {
                 dialogBinding.compatibilityFlagsInput.setText(currentCompatibilityFlags.joinToString("\n"))
             }
-            dialogBinding.smartPlacementSwitch.isChecked = currentPlacementMode == "smart"
+            dialogBinding.placementModeGroup.bindPlacement(
+                dialogBinding.placementRegionLayout,
+                dialogBinding.placementHostLayout,
+                currentPlacementMode,
+            )
+            settings.placement?.region?.let { dialogBinding.placementRegionInput.setText(it) }
+            settings.placement?.host?.let { dialogBinding.placementHostInput.setText(it) }
+            dialogBinding.dateInputLayout.attachDatePicker(this, dialogBinding.compatibilityDateInput)
+            dialogBinding.flagSuggestionsInput.attachFlagSuggestions(dialogBinding.compatibilityFlagsInput)
             
             // Show dialog
             MaterialAlertDialogBuilder(requireContext())
@@ -1530,14 +1542,23 @@ class WorkerFragment : Fragment() {
                         .split(Regex("[,\n]"))
                         .map { it.trim() }
                         .filter { it.isNotEmpty() }
-                    val placementMode = if (dialogBinding.smartPlacementSwitch.isChecked) "smart" else "off"
-                    
+                    val (placementMode, placementRegion, placementHost) = dialogBinding.placementModeGroup.readPlacement(
+                        dialogBinding.placementRegionInput,
+                        dialogBinding.placementHostInput,
+                    )
+                    val placement = when (placementMode) {
+                        "smart" -> com.muort.upworker.core.model.Placement(mode = "smart")
+                        "region" -> com.muort.upworker.core.model.Placement(mode = "region", region = placementRegion)
+                        "service" -> com.muort.upworker.core.model.Placement(mode = "service", host = placementHost)
+                        else -> null  // 默认模式不发送 placement 字段
+                    }
+
                     applyWorkerRuntimeSettings(
                         account = account,
                         scriptName = script.id,
                         compatibilityDate = compatibilityDate,
                         compatibilityFlags = compatibilityFlags,
-                        placementMode = placementMode
+                        placement = placement
                     )
                 }
                 .setNegativeButton("取消", null)
@@ -1551,7 +1572,7 @@ class WorkerFragment : Fragment() {
         scriptName: String,
         compatibilityDate: String,
         compatibilityFlags: List<String>,
-        placementMode: String
+        placement: com.muort.upworker.core.model.Placement?
     ) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
@@ -1560,13 +1581,6 @@ class WorkerFragment : Fragment() {
             .setCancelable(false)
             .create()
         loadingDialog.show()
-        
-        // Create placement object
-        val placement = if (placementMode == "smart") {
-            com.muort.upworker.core.model.Placement(mode = "smart")
-        } else {
-            null
-        }
         
         // Update settings using ViewModel
         viewModel.updateWorkerRuntimeSettings(

@@ -59,13 +59,15 @@
 
         <!-- 兼容性日期 -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/dateInputLayout"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="兼容性日期"
-            app:helperText="格式: YYYY-MM-DD (例: 2024-01-01)"
+            app:helperText="格式: YYYY-MM-DD (例: 2024-01-01)，点日历图标选择"
             app:helperTextEnabled="true"
-            app:startIconDrawable="@drawable/ic_calendar">
+            app:endIconMode="custom"
+            app:endIconDrawable="@drawable/ic_calendar">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/compatibilityDateInput"
@@ -85,11 +87,27 @@
             android:layout_marginBottom="8dp" />
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/flagSuggestionsLayout"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="快速添加常用标志"
+            app:helperText="选择后自动追加到下方输入框">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/flagSuggestionsInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="兼容性标志"
-            app:helperText="每行一个标志 (例: nodejs_compat)"
+            android:layout_marginTop="8dp"
+            android:hint="兼容性标志（可手动输入）"
+            app:helperText="每行一个标志，也可从上方快速添加"
             app:helperTextEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -101,30 +119,36 @@
                 android:gravity="top" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- 智能放置 -->
+        <!-- 放置模式 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="智能放置 (Smart Placement)"
+            android:text="放置模式 (Placement)"
             android:textSize="14sp"
             android:textStyle="bold"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="启用后，Pages Functions 将自动部署到离您的后端服务最近的位置"
-            android:textSize="12sp"
-            android:textColor="?android:textColorSecondary"
-            android:layout_marginBottom="8dp" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/smartPlacementSwitch"
+        <RadioGroup
+            android:id="@+id/placementModeGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="启用智能放置"
-            android:checked="false" />
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/placementOff"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="默认（始终在靠近最终用户的位置处理请求）" />
+
+            <RadioButton
+                android:id="@+id/placementSmart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="智能（自动选择最佳位置，Pages 仅支持此模式）" />
+
+        </RadioGroup>
 
     </LinearLayout>
 </ScrollView>
