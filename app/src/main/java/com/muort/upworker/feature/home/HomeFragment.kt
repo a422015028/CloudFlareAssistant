@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.GridLayout
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -92,10 +94,63 @@ class HomeFragment : Fragment() {
 
         // 开关监听：开启时自动加载数据
         binding.accountAnalyticsCard.onAnalyticsEnabledChanged = { isEnabled ->
+            updateFeatureGridLayout(isEnabled)
             if (isEnabled) {
                 accountViewModel.defaultAccount.value?.let { account ->
                     accountAnalyticsViewModel.refresh(account)
                 }
+            }
+        }
+
+        // 初始化时根据开关状态设置布局模式
+        updateFeatureGridLayout(binding.accountAnalyticsCard.isAnalyticsEnabled())
+    }
+
+    /**
+     * 根据分析开关状态切换功能网格布局模式：
+     * - 分析开启：GridLayout wrap_content，卡片固定高度，内容可滚动
+     * - 分析关闭：GridLayout 占满剩余空间，卡片均匀分布，不留白
+     */
+    private fun updateFeatureGridLayout(analyticsEnabled: Boolean) {
+        val grid = binding.featureGrid
+        val container = binding.homeContainer
+        val childCount = grid.childCount
+
+        if (analyticsEnabled) {
+            // 分析开启：wrap_content 模式，内容可滚动
+            val containerParams = container.layoutParams
+            containerParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+            container.layoutParams = containerParams
+
+            val gridParams = grid.layoutParams as LinearLayout.LayoutParams
+            gridParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
+            gridParams.weight = 0f
+            grid.layoutParams = gridParams
+
+            for (i in 0 until childCount) {
+                val child = grid.getChildAt(i)
+                val params = child.layoutParams as GridLayout.LayoutParams
+                params.height = GridLayout.LayoutParams.WRAP_CONTENT
+                params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED)
+                child.layoutParams = params
+            }
+        } else {
+            // 分析关闭：填满剩余空间，卡片平分高度，不留白
+            val containerParams = container.layoutParams
+            containerParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+            container.layoutParams = containerParams
+
+            val gridParams = grid.layoutParams as LinearLayout.LayoutParams
+            gridParams.height = 0
+            gridParams.weight = 1f
+            grid.layoutParams = gridParams
+
+            for (i in 0 until childCount) {
+                val child = grid.getChildAt(i)
+                val params = child.layoutParams as GridLayout.LayoutParams
+                params.height = 0
+                params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                child.layoutParams = params
             }
         }
     }
