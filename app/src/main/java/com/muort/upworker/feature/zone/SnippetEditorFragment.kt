@@ -270,7 +270,7 @@ class SnippetEditorFragment : Fragment() {
         }
     }
 
-    private fun saveSnippet(content: String) {
+    private fun saveSnippet(content: String, onSaved: (() -> Unit)? = null) {
         binding.progressBar.visibility = View.VISIBLE
 
         if (account == null) {
@@ -285,6 +285,7 @@ class SnippetEditorFragment : Fragment() {
                     android.widget.Toast.makeText(requireContext(), "保存成功", android.widget.Toast.LENGTH_SHORT).show()
                     hasUnsavedChanges = false
                     originalContent = content
+                    onSaved?.invoke()
                 }
                 is Resource.Error -> {
                     android.widget.Toast.makeText(requireContext(), "保存失败: ${r.message}", android.widget.Toast.LENGTH_LONG).show()
@@ -454,10 +455,21 @@ class SnippetEditorFragment : Fragment() {
     }
 
     private fun navigateToRules() {
-        if (args.isNew) {
-            Toast.makeText(requireContext(), "请先保存代码片段后再设置规则", Toast.LENGTH_SHORT).show()
-            return
+        // 对齐官方流程：粘贴完代码即可直接设置规则，无需手动先保存
+        getEditorContent { content ->
+            if (args.isNew && content.isBlank()) {
+                Toast.makeText(requireContext(), "请先粘贴代码片段内容", Toast.LENGTH_SHORT).show()
+                return@getEditorContent
+            }
+            if (args.isNew) {
+                saveSnippet(content) { doNavigateToRules() }
+            } else {
+                doNavigateToRules()
+            }
         }
+    }
+
+    private fun doNavigateToRules() {
         val action = SnippetEditorFragmentDirections.actionSnippetEditorToRules(
             zoneId = args.zoneId,
             snippetName = args.snippetName,

@@ -22,7 +22,7 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
     private lateinit var adapter: ZoneRuleAdapter
     private var loaded: List<Snippet> = emptyList()
 
-    override val emptyText: String = "暂无代码片段"
+    override val emptyText: String = "暂无代码片段\n长按右下角 + 号可清空全部片段"
     override val showAddFab: Boolean = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -36,6 +36,10 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
             },
         )
         binding.recyclerView.adapter = adapter
+        binding.addFab.setOnLongClickListener {
+            showDeleteAllDialog()
+            true
+        }
     }
 
     override suspend fun onAccountReady(account: Account) = load(account)
@@ -98,6 +102,33 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
                 is Resource.Error -> toast("删除失败: ${r.message}")
                 is Resource.Loading -> {}
             }
+        }
+    }
+
+    private fun showDeleteAllDialog() {
+        if (loaded.isEmpty()) {
+            toast("当前没有代码片段")
+            return
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("清空全部代码片段")
+            .setMessage("确定要删除全部 ${loaded.size} 个代码片段及其触发规则吗？此操作不可撤销。")
+            .setPositiveButton("全部删除") { _, _ -> deleteAllSnippets() }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun deleteAllSnippets() {
+        val acct = account ?: return
+        viewLifecycleOwner.lifecycleScope.launch {
+            showLoading()
+            var ok = 0
+            loaded.forEach { snippet ->
+                val r = snippetRepo.deleteSnippet(acct, zoneId, snippet.snippetName)
+                if (r is Resource.Success) ok++
+            }
+            toast("已删除 $ok/${loaded.size} 个代码片段")
+            load(acct)
         }
     }
 
