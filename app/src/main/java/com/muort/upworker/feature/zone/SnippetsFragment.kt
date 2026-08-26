@@ -78,6 +78,7 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
     private fun navigateToEditor(snippetName: String, isNew: Boolean) {
         val action = SnippetsFragmentDirections.actionSnippetsToEditor(
             zoneId = zoneId,
+            zoneName = zoneName,
             snippetName = snippetName,
             isNew = isNew,
         )
@@ -108,11 +109,9 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
 
     private fun deleteSnippet(account: Account, name: String) {
         viewLifecycleOwner.lifecycleScope.launch {
-            when (val r = snippetRepo.deleteSnippet(account, zoneId, name)) {
+            when (val r = snippetRepo.teardownSnippet(account, zoneId, name)) {
                 is Resource.Success -> {
-                    // 尽力清理该片段的规则，避免遗留孤儿规则
-                    snippetRepo.deleteSnippetRule(account, zoneId, name)
-                    toast("已删除"); load(account)
+                    toast("已删除（含规则与 DNS）"); load(account)
                 }
                 is Resource.Error -> toast("删除失败: ${r.message}")
                 is Resource.Loading -> {}
@@ -139,7 +138,7 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
             showLoading()
             var ok = 0
             loaded.forEach { snippet ->
-                val r = snippetRepo.deleteSnippet(acct, zoneId, snippet.snippetName)
+                val r = snippetRepo.teardownSnippet(acct, zoneId, snippet.snippetName)
                 if (r is Resource.Success) ok++
             }
             toast("已删除 $ok/${loaded.size} 个代码片段")

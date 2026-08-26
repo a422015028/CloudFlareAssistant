@@ -9,9 +9,20 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import android.app.AlertDialog
+import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import com.muort.upworker.R
+import com.muort.upworker.core.model.Account
+import com.muort.upworker.core.model.DnsRecord
+import com.muort.upworker.core.model.DnsRecordRequest
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.SnippetRule
+import com.muort.upworker.core.repository.DnsRepository
 import com.muort.upworker.core.repository.SnippetRepository
+import com.muort.upworker.databinding.DialogSnippetDnsBinding
 import com.muort.upworker.databinding.DialogSnippetRuleBinding
 import com.muort.upworker.databinding.ItemSnippetConditionBinding
 import com.muort.upworker.feature.account.AccountViewModel
@@ -29,12 +40,15 @@ class SnippetRuleDialog : DialogFragment() {
 
     @Inject lateinit var snippetRepo: SnippetRepository
 
+    @Inject lateinit var dnsRepo: DnsRepository
+
     private val accountViewModel: AccountViewModel by activityViewModels()
 
     private var _binding: DialogSnippetRuleBinding? = null
     private val binding get() = _binding!!
 
     private val zoneId: String by lazy { requireArguments().getString(ARG_ZONE_ID)!! }
+    private val zoneName: String by lazy { requireArguments().getString(ARG_ZONE_NAME) ?: "" }
     private val snippetName: String by lazy { requireArguments().getString(ARG_SNIPPET_NAME)!! }
     private val existingRule: SnippetRule? by lazy {
         requireArguments().getString(ARG_EXPRESSION)?.let { expr ->
@@ -371,7 +385,7 @@ class SnippetRuleDialog : DialogFragment() {
             when (result) {
                 is Resource.Success -> {
                     Toast.makeText(requireContext(), "规则已保存", Toast.LENGTH_SHORT).show()
-                    dismiss()
+                    checkDnsCoverageAndFinish(account, expr)
                 }
                 is Resource.Error ->
                     Toast.makeText(requireContext(), "保存失败：${result.message}", Toast.LENGTH_LONG).show()
@@ -410,6 +424,7 @@ class SnippetRuleDialog : DialogFragment() {
 
     companion object {
         private const val ARG_ZONE_ID = "zone_id"
+        private const val ARG_ZONE_NAME = "zone_name"
         private const val ARG_SNIPPET_NAME = "snippet_name"
         private const val ARG_EXPRESSION = "expression"
         private const val ARG_DESCRIPTION = "description"
@@ -420,10 +435,12 @@ class SnippetRuleDialog : DialogFragment() {
             zoneId: String,
             snippetName: String,
             currentRule: SnippetRule?,
+            zoneName: String = "",
         ) {
             SnippetRuleDialog().apply {
                 arguments = Bundle().apply {
                     putString(ARG_ZONE_ID, zoneId)
+                    putString(ARG_ZONE_NAME, zoneName)
                     putString(ARG_SNIPPET_NAME, snippetName)
                     if (currentRule != null) {
                         putString(ARG_EXPRESSION, currentRule.expression)
@@ -434,4 +451,160 @@ class SnippetRuleDialog : DialogFragment() {
             }.show(fragmentManager, "SnippetRuleDialog")
         }
     }
+    // ==================== DNS 覆盖检查与绑定引导 ====================
+
+    /** 从表达式中提取 http.host 条件引用的主机名（支持 eq/ne/contains/in） */
+    private fun extractHostnamesFromExpression(expression: String): List<String> {
+        val out = LinkedHashSet<String>()
+        Regex("""http\.host\s+(?:eq|ne|==|!=|contains)\s+"([^"]+)"""").findAll(expression)
+            .forEach { out += it.groupValues[1].lowercase().trimEnd('.') }
+        Regex("""http\.host\s+in\s*\{([^}]*)\}""").findAll(expression).forEach { m ->
+            Regex("\"([^\"]+)\"").findAll(m.groupValues[1])
+                .forEach { out += it.groupValues[1].lowercase().trimEnd('.') }
+        }
+        return out.toList()
+    }
+
+    /**
+     * 判断主机名是否已被开启代理的 DNS 记录覆盖：
+     * 精确匹配或通配符逐级回退（a.b.example.com → *.b.example.com → *.example.com）
+     */
+    private fun isCoveredByProxiedRecord(hostname: String, records: List<DnsRecord>): Boolean {
+        val proxied = records.filter { it.proxied }
+            .map { it.name.lowercase().trimEnd('.') }
+            .toSet()
+        val parts = hostname.lowercase().trimEnd('.').split('.')
+        for (i in parts.indices) {
+            val candidate = (if (i == 0) "" else "*.") + parts.drop(i).joinToString(".")
+            if (candidate in proxied) return true
+        }
+        return false
+    }
+
+    /** 规则保存成功后检查 DNS 覆盖；有未代理的主机名时弹三选项引导，否则直接结束 */
+    private fun checkDnsCoverageAndFinish(account: Account, expression: String) {
+        val hostnames = extractHostnamesFromExpression(expression)
+        if (hostnames.isEmpty()) { dismiss(); return }
+        lifecycleScope.launch {
+            // ponytail: DNS 读取失败（Token 无 DNS 读权限等）时静默跳过检查，不打扰用户
+            val records = when (val r = dnsRepo.listDnsRecords(account, zoneId)) {
+                is Resource.Success -> r.data
+                else -> null
+            } ?: run { dismiss(); return@launch }
+            val uncovered = hostnames.filter { !isCoveredByProxiedRecord(it, records) }
+            if (uncovered.isEmpty()) { dismiss(); return@launch }
+            showDnsBindingWarning(uncovered)
+        }
+    }
+
+    /**
+     * 对齐 Cloudflare 网页版样式：标题"此规则可能不适用于您的流量"，
+     * 单对话框内含 [忽略并继续] / [创建新代理 DNS 记录]（默认）单选 + 记录表单。
+     */
+    private fun showDnsBindingWarning(uncovered: List<String>) {
+        // ponytail: 规则面板随后立即退场，后续回调一律挂 Activity——DialogFragment 销毁后其 scope 与 requireContext 均失效
+        val account = accountViewModel.defaultAccount.value ?: run { dismiss(); return }
+        val act = requireActivity()
+        val ctx = act.applicationContext
+        val host = uncovered.first()
+        val fqdn = if (zoneName.isNotEmpty() && !host.endsWith(zoneName)) "$host.$zoneName" else host
+        val dBinding = DialogSnippetDnsBinding.inflate(layoutInflater)
+
+        dBinding.dnsExplainText.text = "您的 DNS 配置可能不是 $host 的代理流量，这意味着请求可能不符合此规则。"
+
+        fun updateTargetText(b: DialogSnippetDnsBinding, f: String) {
+            val content = b.recordContentInput.text?.toString()?.trim().orEmpty()
+            b.dnsTargetText.text = "$f 指向 ${if (content.isEmpty()) "-" else content} 并通过 Cloudflare 代理其流量。"
+        }
+
+        val types = listOf("A", "AAAA", "CNAME")
+        // 各类型默认值与提示，对齐网页版：A→192.0.2.1、AAAA→100::（黑洞地址，用于放弃请求）
+        fun applyType(type: String) {
+            when (type) {
+                "A" -> {
+                    dBinding.recordContentLayout.hint = "IPv4 地址（必填）"
+                    dBinding.recordContentLayout.helperText = "使用 192.0.2.1 放弃请求"
+                    dBinding.recordContentInput.setText("192.0.2.1")
+                }
+                "AAAA" -> {
+                    dBinding.recordContentLayout.hint = "IPv6 地址（必填）"
+                    dBinding.recordContentLayout.helperText = "使用 100:: 放弃请求"
+                    dBinding.recordContentInput.setText("100::")
+                }
+                else -> {
+                    dBinding.recordContentLayout.hint = "[content]"
+                    dBinding.recordContentLayout.helperText = null
+                    dBinding.recordContentInput.setText("")
+                }
+            }
+            updateTargetText(dBinding, fqdn)
+        }
+        dBinding.recordTypeInput.setText(types.first(), false)
+        dBinding.recordTypeInput.setAdapter(
+            ArrayAdapter(act, android.R.layout.simple_list_item_1, types)
+        )
+        dBinding.recordTypeInput.setOnItemClickListener { _, _, pos, _ -> applyType(types[pos]) }
+        dBinding.recordNameInput.setText(host)
+
+        dBinding.recordContentInput.addTextChangedListener(
+            object : android.text.TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+                override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+                override fun afterTextChanged(s: android.text.Editable?) = updateTargetText(dBinding, fqdn)
+            }
+        )
+        applyType(types.first())
+
+        dBinding.dnsActionGroup.setOnCheckedChangeListener { _, checkedId ->
+            val creating = checkedId == R.id.radioCreate
+            dBinding.recordFormCard.visibility = if (creating) View.VISIBLE else View.GONE
+            dBinding.dnsTargetText.visibility = if (creating) View.VISIBLE else View.GONE
+        }
+
+        // 先把引导对话框弹出，再让规则面板退场，避免两层 Dialog 叠加互相遮挡
+        val dialog = MaterialAlertDialogBuilder(act)
+            .setTitle("此规则可能不适用于您的流量")
+            .setView(dBinding.root)
+            .setPositiveButton(if (dBinding.radioCreate.isChecked) "创建记录和部署规则" else "部署规则", null)
+            // “取消”走 AlertDialog 默认行为只关引导框；规则面板已在下方 dismiss 退场
+            .setNegativeButton("取消", null)
+            .show()
+        dismiss()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener { btn ->
+            if (!dBinding.radioCreate.isChecked) { dialog.dismiss(); return@setOnClickListener }
+            val type = dBinding.recordTypeInput.text.toString().trim().uppercase()
+            val name = dBinding.recordNameInput.text?.toString()?.trim() ?: ""
+            val content = dBinding.recordContentInput.text?.toString()?.trim() ?: ""
+            if (name.isEmpty() || content.isEmpty()) {
+                Toast.makeText(ctx, "请填写名称和内容", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            btn.isEnabled = false
+            act.lifecycleScope.launch {
+                val result = dnsRepo.createDnsRecord(
+                    account,
+                    zoneId,
+                    DnsRecordRequest(
+                        type = type,
+                        name = name,
+                        content = content,
+                        proxied = true,
+                        ttl = 300,
+                    ),
+                )
+                when (result) {
+                    is Resource.Success -> {
+                        Toast.makeText(ctx, "DNS 记录已创建并开启代理", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    }
+                    is Resource.Error -> {
+                        Toast.makeText(ctx, "创建失败：${result.message}", Toast.LENGTH_LONG).show()
+                        btn.isEnabled = true
+                    }
+                    is Resource.Loading -> {}
+                }
+            }
+        }
+    }
+
 }

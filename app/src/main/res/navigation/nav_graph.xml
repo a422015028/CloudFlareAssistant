@@ -225,6 +225,11 @@
             app:argType="string" />
 
         <argument
+            android:name="zoneName"
+            app:argType="string"
+            android:defaultValue="" />
+
+        <argument
             android:name="snippetName"
             app:argType="string" />
 
