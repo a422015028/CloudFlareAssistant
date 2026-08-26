@@ -141,7 +141,6 @@ class SnippetRepository @Inject constructor(
                 }
             }
         }
-}
 
 
     // ==================== Snippet Rules ====================

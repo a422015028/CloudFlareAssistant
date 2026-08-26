@@ -2281,7 +2281,6 @@ interface CloudFlareApi {
         @Path("zone_id") zoneId: String,
         @Path("snippet_name") snippetName: String
     ): Response<CloudFlareResponse<Unit>>
-}
 
     // ==================== Snippet Rules ====================
 
@@ -2329,5 +2328,4 @@ interface CloudFlareApi {
         @Path("zone_id") zoneId: String,
         @Path("rule_id") ruleId: String,
     ): Response<CloudFlareResponse<Unit>>
-
 }
