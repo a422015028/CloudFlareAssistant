@@ -206,6 +206,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         updateStatus(overview)
         updateNetworkStats(overview)
         updateRegionStats(overview)
+        updateStorageStats(overview)
     }
 
     private fun updateMetrics(overview: AccountAnalyticsOverview) {
@@ -551,6 +552,29 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         } catch (e: Exception) {
             code
         }
+    }
+
+    /**
+     * 更新 D1 / R2 / KV 存储监控指标
+     */
+    private fun updateStorageStats(overview: AccountAnalyticsOverview) {
+        // D1 数据库
+        binding.analyticsD1ReadsText.text = formatNumber(overview.d1ReadRows)
+        binding.analyticsD1WritesText.text = formatNumber(overview.d1WriteRows)
+        binding.analyticsD1StorageText.text = formatBytes(overview.d1StorageBytes)
+        binding.analyticsD1CountText.text = formatNumber(overview.d1DatabaseCount.toLong())
+
+        // R2 对象存储
+        binding.analyticsR2ClassAText.text = formatNumber(overview.r2ClassAOperations)
+        binding.analyticsR2ClassBText.text = formatNumber(overview.r2ClassBOperations)
+        binding.analyticsR2StorageText.text = formatBytes(overview.r2StorageBytes)
+        binding.analyticsR2CountText.text = formatNumber(overview.r2BucketCount.toLong())
+
+        // KV 命名空间
+        binding.analyticsKvReadsText.text = formatNumber(overview.kvReads)
+        binding.analyticsKvWritesText.text = formatNumber(overview.kvWrites)
+        binding.analyticsKvStorageText.text = formatBytes(overview.kvStorageBytes)
+        binding.analyticsKvCountText.text = formatNumber(overview.kvNamespaceCount.toLong())
     }
 
     private fun formatNumber(value: Long): String {

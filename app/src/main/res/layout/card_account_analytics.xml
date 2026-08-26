@@ -1185,6 +1185,360 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical" />
 
+                <!-- 数据库 &amp; 存储监控区块 -->
+                <LinearLayout
+                    android:id="@+id/analyticsStorageSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💾 数据库 &amp; 存储监控"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorOnSurface"
+                        android:layout_marginBottom="4dp" />
+
+                    <GridLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:columnCount="3"
+                        android:rowCount="4"
+                        android:alignmentMode="alignBounds">
+
+                        <!-- D1 数据库列 -->
+
+                        <!-- D1 已读行 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="D1已读行"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsD1ReadsText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- R2 A类操作 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="R2 A类操作"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsR2ClassAText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- KV 读取 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="KV读取"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsKvReadsText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- D1 已写行 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="D1已写行"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsD1WritesText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- R2 B类操作 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="R2 B类操作"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsR2ClassBText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- KV 写入 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="KV写入"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsKvWritesText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- D1 总存储 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="D1总存储"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsD1StorageText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 B"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- R2 总存储 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="R2总存储"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsR2StorageText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 B"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- KV 总存储 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="KV总存储"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsKvStorageText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 B"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- D1 数据库数 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="D1数据库"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsD1CountText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- R2 存储桶数 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="R2存储桶"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsR2CountText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                        <!-- KV 命名空间数 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="KV命名空间"
+                                android:textSize="12sp"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            <TextView
+                                android:id="@+id/analyticsKvCountText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
+
+                    </GridLayout>
+
+                </LinearLayout>
+
                 <!-- 时间范围提示 -->
                 <TextView
                     android:id="@+id/analyticsTimeRangeHintText"

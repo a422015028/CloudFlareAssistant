@@ -241,12 +241,10 @@ class R2Repository @Inject constructor(
     suspend fun createCustomDomain(
         account: Account,
         bucketName: String,
-        domain: String
+        domain: String,
+        zoneId: String,
     ): Resource<R2CustomDomain> = withContext(Dispatchers.IO) {
         safeApiCall {
-            val zoneId = account.zoneId 
-                ?: return@safeApiCall Resource.Error("账号未配置 Zone ID")
-            
             val request = R2CustomDomainRequest(
                 domain = domain,
                 zoneId = zoneId,

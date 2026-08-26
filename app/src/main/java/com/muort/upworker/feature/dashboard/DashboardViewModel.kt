@@ -30,11 +30,15 @@ class DashboardViewModel @Inject constructor(
     val currentTimeRange: StateFlow<TimeRange> = _currentTimeRange.asStateFlow()
     
     /**
-     * 加载仪表盘数据
+     * 加载域名分析数据
      */
-    fun loadDashboard(account: Account?, timeRange: TimeRange = TimeRange.ONE_DAY) {
+    fun loadDashboard(account: Account?, zoneId: String, timeRange: TimeRange = TimeRange.ONE_DAY) {
         if (account == null) {
             _dashboardState.value = DashboardState.Error("请先选择账号")
+            return
+        }
+        if (zoneId.isBlank()) {
+            _dashboardState.value = DashboardState.Error("域名 ID 不能为空")
             return
         }
         
@@ -43,11 +47,11 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             _dashboardState.value = DashboardState.Loading
             
-            when (val result = analyticsRepository.getDashboardMetrics(account, timeRange)) {
+            when (val result = analyticsRepository.getDashboardMetrics(account, zoneId, timeRange)) {
                 is Resource.Success -> {
                     _metrics.value = result.data
                     _dashboardState.value = DashboardState.Success(result.data)
-                    Timber.d("Dashboard loaded successfully for ${timeRange.displayName}: ${result.data}")
+                    Timber.d("Dashboard loaded successfully for zone $zoneId, ${timeRange.displayName}: ${result.data}")
                 }
                 is Resource.Error -> {
                     val errorMsg = result.message
@@ -64,15 +68,15 @@ class DashboardViewModel @Inject constructor(
     /**
      * 刷新数据
      */
-    fun refresh(account: Account?) {
-        loadDashboard(account, _currentTimeRange.value)
+    fun refresh(account: Account?, zoneId: String) {
+        loadDashboard(account, zoneId, _currentTimeRange.value)
     }
     
     /**
      * 切换时间范围
      */
-    fun changeTimeRange(account: Account?, timeRange: TimeRange) {
-        loadDashboard(account, timeRange)
+    fun changeTimeRange(account: Account?, zoneId: String, timeRange: TimeRange) {
+        loadDashboard(account, zoneId, timeRange)
     }
     
     /**

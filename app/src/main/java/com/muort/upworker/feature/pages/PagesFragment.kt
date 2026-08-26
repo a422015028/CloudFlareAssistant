@@ -74,6 +74,9 @@ class PagesFragment : Fragment() {
     
     @Inject
     lateinit var dnsRepository: com.muort.upworker.core.repository.DnsRepository
+
+    @Inject
+    lateinit var zoneRepository: com.muort.upworker.core.repository.ZoneRepository
     
     private lateinit var projectAdapter: ProjectAdapter
     
@@ -2378,15 +2381,6 @@ class PagesFragment : Fragment() {
     }
 
     private fun autoConfigureDnsForDomain(account: Account, domain: PagesDomain, subdomain: String) {
-        if (account.zoneId.isNullOrBlank()) {
-            Snackbar.make(
-                binding.root,
-                "域名已添加，但账号未配置 Zone ID，无法自动添加 DNS 记录，请手动配置",
-                Snackbar.LENGTH_LONG
-            ).show()
-            return
-        }
-
         val validation = domain.validationData
         val recordType = when (validation?.method) {
             "txt" -> "TXT"
@@ -2396,6 +2390,17 @@ class PagesFragment : Fragment() {
         val recordValue = validation?.txtValue?.takeIf { it.isNotEmpty() } ?: subdomain
 
         viewLifecycleOwner.lifecycleScope.launch {
+            // 根据 hostname 自动匹配 zone
+            val zone = zoneRepository.findZoneByHostname(account.id, domain.name)
+            if (zone == null) {
+                Snackbar.make(
+                    binding.root,
+                    "域名已添加，但未找到对应的 Cloudflare 域名（Zone），无法自动添加 DNS 记录，请手动配置",
+                    Snackbar.LENGTH_LONG
+                ).show()
+                return@launch
+            }
+
             Snackbar.make(binding.root, "正在自动配置 DNS 记录...", Snackbar.LENGTH_SHORT).show()
             val dnsRequest = DnsRecordRequest(
                 type = recordType,
@@ -2404,7 +2409,7 @@ class PagesFragment : Fragment() {
                 proxied = true,
                 ttl = 1
             )
-            when (val result = dnsRepository.createDnsRecord(account, account.zoneId, dnsRequest)) {
+            when (val result = dnsRepository.createDnsRecord(account, zone.id, dnsRequest)) {
                 is Resource.Success -> {
                     Snackbar.make(
                         binding.root,

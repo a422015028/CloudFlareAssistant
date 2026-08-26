@@ -46,7 +46,6 @@ class AccountEditFragment : Fragment() {
         setupFetchAccountIdButton()
         loadAccountIfEditing()
         setupSaveButton()
-        setupZoneButtons()
         observeViewModel()
     }
     
@@ -172,17 +171,6 @@ class AccountEditFragment : Fragment() {
         }
     }
     
-    private fun setupZoneButtons() {
-        binding.manageZonesBtn.setOnClickListener {
-            if (args.accountId == -1L) {
-                showToast("请先保存账号")
-                return@setOnClickListener
-            }
-
-            showZoneManagementDialog()
-        }
-    }
-    
     private fun setupSaveButton() {
         binding.saveBtn.setOnClickListener {
             val name = binding.nameEditText.text.toString().trim()
@@ -193,11 +181,6 @@ class AccountEditFragment : Fragment() {
             val r2AccessKeyId = binding.r2AccessKeyIdEditText.text.toString().trim()
             val r2SecretAccessKey = binding.r2SecretAccessKeyEditText.text.toString().trim()
             val isDefault = binding.defaultSwitch.isChecked
-            
-            // Get selected zone ID from ViewModel (backward compatibility with old zoneId field)
-            val selectedZoneId = if (args.accountId != -1L) {
-                viewModel.getSelectedZoneId(args.accountId)
-            } else null
             
             if (name.isEmpty()) {
                 showToast("请输入账号名称")
@@ -235,7 +218,7 @@ class AccountEditFragment : Fragment() {
                     name, 
                     accountId, 
                     token.ifEmpty { "" },
-                    selectedZoneId,
+                    null,
                     isDefault,
                     r2AccessKeyId.ifEmpty { null },
                     r2SecretAccessKey.ifEmpty { null },
@@ -254,7 +237,6 @@ class AccountEditFragment : Fragment() {
                                 name = name,
                                 accountId = accountId,
                                 token = token.ifEmpty { "" },
-                                zoneId = selectedZoneId,
                                 isDefault = isDefault,
                                 r2AccessKeyId = r2AccessKeyId.ifEmpty { null },
                                 r2SecretAccessKey = r2SecretAccessKey.ifEmpty { null },
@@ -279,32 +261,6 @@ class AccountEditFragment : Fragment() {
                 }
             }
         }
-    }
-    
-    private fun showZoneManagementDialog() {
-        val zones = viewModel.zones.value
-        val selectedZone = viewModel.selectedZone.value
-        
-        if (zones.isEmpty()) {
-            showToast("暂无域名，请先从API获取")
-            return
-        }
-        
-        val items = zones.map { zone ->
-            val status = if (zone.status == "active") "✓" else "○"
-            val selected = if (zone.id == selectedZone?.id) " [已选择]" else ""
-            "$status ${zone.name}$selected"
-        }.toTypedArray()
-        
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-            .setTitle("选择域名")
-            .setSingleChoiceItems(items, zones.indexOfFirst { it.id == selectedZone?.id }) { dialog, which ->
-                val zone = zones[which]
-                viewModel.selectZone(args.accountId, zone.id)
-                dialog.dismiss()
-            }
-            .setNegativeButton("取消", null)
-            .show()
     }
     
     override fun onDestroyView() {

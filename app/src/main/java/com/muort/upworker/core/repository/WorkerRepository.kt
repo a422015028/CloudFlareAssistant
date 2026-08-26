@@ -1058,9 +1058,9 @@ class WorkerRepository @Inject constructor(
     }
 
     // Routes
-    suspend fun listRoutes(account: Account): Resource<List<Route>> = 
+    suspend fun listRoutes(account: Account, zoneId: String): Resource<List<Route>> = 
         withContext(Dispatchers.IO) {
-            if (account.zoneId.isNullOrBlank()) {
+            if (zoneId.isBlank()) {
                 return@withContext Resource.Error("Zone ID is required for route operations")
             }
             
@@ -1069,7 +1069,7 @@ class WorkerRepository @Inject constructor(
                     token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
-                    zoneId = account.zoneId
+                    zoneId = zoneId
                 )
                 
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -1084,10 +1084,11 @@ class WorkerRepository @Inject constructor(
     
     suspend fun createRoute(
         account: Account,
+        zoneId: String,
         pattern: String,
         scriptName: String
     ): Resource<Route> = withContext(Dispatchers.IO) {
-        if (account.zoneId.isNullOrBlank()) {
+        if (zoneId.isBlank()) {
             return@withContext Resource.Error("Zone ID is required for route operations")
         }
         
@@ -1096,7 +1097,7 @@ class WorkerRepository @Inject constructor(
                 token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
-                zoneId = account.zoneId,
+                zoneId = zoneId,
                 route = RouteRequest(pattern = pattern, script = scriptName)
             )
             
@@ -1114,11 +1115,12 @@ class WorkerRepository @Inject constructor(
     
     suspend fun updateRoute(
         account: Account,
+        zoneId: String,
         routeId: String,
         pattern: String,
         scriptName: String
     ): Resource<Route> = withContext(Dispatchers.IO) {
-        if (account.zoneId.isNullOrBlank()) {
+        if (zoneId.isBlank()) {
             return@withContext Resource.Error("Zone ID is required for route operations")
         }
         
@@ -1127,7 +1129,7 @@ class WorkerRepository @Inject constructor(
                 token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
-                zoneId = account.zoneId,
+                zoneId = zoneId,
                 routeId = routeId,
                 route = RouteRequest(pattern = pattern, script = scriptName)
             )
@@ -1224,9 +1226,10 @@ class WorkerRepository @Inject constructor(
     
     suspend fun deleteRoute(
         account: Account,
+        zoneId: String,
         routeId: String
     ): Resource<Unit> = withContext(Dispatchers.IO) {
-        if (account.zoneId.isNullOrBlank()) {
+        if (zoneId.isBlank()) {
             return@withContext Resource.Error("Zone ID is required for route operations")
         }
         
@@ -1235,7 +1238,7 @@ class WorkerRepository @Inject constructor(
                 token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
-                zoneId = account.zoneId,
+                zoneId = zoneId,
                 routeId = routeId
             )
             

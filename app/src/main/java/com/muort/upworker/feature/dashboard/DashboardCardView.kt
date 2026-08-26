@@ -108,6 +108,14 @@ class DashboardCardView @JvmOverloads constructor(
     fun isDashboardEnabled(): Boolean {
         return binding.dashboardSwitch.isChecked
     }
+
+    /**
+     * 隐藏开关控件（独立页面使用时不需要显示开关）
+     */
+    fun hideToggle() {
+        binding.dashboardSwitch.visibility = View.GONE
+        binding.dashboardMainContainer.visibility = View.VISIBLE
+    }
     
     private fun setupTimeRangeChips() {
         binding.timeRangeChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
@@ -587,24 +595,6 @@ class DashboardCardView @JvmOverloads constructor(
             context.getColor(android.R.color.holo_green_dark)
         }
         binding.unencryptedRequestsText.setTextColor(unencryptedColor)
-        
-        // === D1 数据库监控 ===
-        binding.d1ReadsText.text = formatNumber(metrics.d1ReadRows)
-        binding.d1WritesText.text = formatNumber(metrics.d1WriteRows)
-        binding.d1StorageText.text = formatBytes(metrics.d1StorageBytes)
-        binding.d1DatabaseCountText.text = metrics.d1DatabaseCount.toString()
-        
-        // === R2 存储监控 ===
-        binding.r2ClassAOperationsText.text = formatNumber(metrics.r2ClassAOperations)
-        binding.r2ClassBOperationsText.text = formatNumber(metrics.r2ClassBOperations)
-        binding.r2StorageText.text = formatBytes(metrics.r2StorageBytes)
-        binding.r2BucketCountText.text = metrics.r2BucketCount.toString()
-
-        // === KV 存储监控 ===
-        binding.kvReadsText.text = formatNumber(metrics.kvReads)
-        binding.kvWritesText.text = formatNumber(metrics.kvWrites)
-        binding.kvStorageText.text = formatBytes(metrics.kvStorageBytes)
-        binding.kvNamespaceCountText.text = metrics.kvNamespaceCount.toString()
     }
 
     /**

@@ -50,7 +50,6 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     
     private val accountViewModel: AccountViewModel by activityViewModels()
-    private val dashboardViewModel: DashboardViewModel by viewModels()
     private val accountAnalyticsViewModel: AccountAnalyticsViewModel by viewModels()
     
     override fun onCreateView(
@@ -67,7 +66,6 @@ class HomeFragment : Fragment() {
         
         setupUI()
         observeViewModel()
-        setupDashboard()
         setupAccountAnalytics()
 
         // 日志卡片点击跳转新页面
@@ -75,32 +73,6 @@ class HomeFragment : Fragment() {
             startActivity(android.content.Intent(requireContext(), com.muort.upworker.feature.log.LogActivity::class.java))
         }
         // 日志开关已移至日志页面
-    }
-
-    private fun setupDashboard() {
-        // 设置刷新按钮点击监听
-        binding.dashboardCard.onRefreshClick = {
-            accountViewModel.defaultAccount.value?.let { account ->
-                dashboardViewModel.refresh(account)
-            }
-        }
-        
-        // 设置时间范围切换监听
-        binding.dashboardCard.onTimeRangeChanged = { timeRange ->
-            accountViewModel.defaultAccount.value?.let { account ->
-                dashboardViewModel.changeTimeRange(account, timeRange)
-            }
-        }
-        
-        // 设置仪表盘开关监听
-        binding.dashboardCard.onDashboardEnabledChanged = { isEnabled ->
-            if (isEnabled) {
-                // 开启时自动刷新数据
-                accountViewModel.defaultAccount.value?.let { account ->
-                    dashboardViewModel.refresh(account)
-                }
-            }
-        }
     }
 
     private fun setupAccountAnalytics() {
@@ -150,7 +122,7 @@ class HomeFragment : Fragment() {
             }, 150)
         }
         
-        binding.routeCard.setOnClickListener {
+        binding.customDomainCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
                 findNavController().navigate(R.id.action_home_to_route)
@@ -420,10 +392,6 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     accountViewModel.defaultAccount.collect { account ->
-                        // 仅在仪表盘开关开启时加载数据
-                        if (account != null && binding.dashboardCard.isDashboardEnabled()) {
-                            dashboardViewModel.loadDashboard(account)
-                        }
                         // 仅在账户分析开关开启时加载数据
                         if (account != null && binding.accountAnalyticsCard.isAnalyticsEnabled()) {
                             accountAnalyticsViewModel.load(account)
@@ -446,26 +414,6 @@ class HomeFragment : Fragment() {
                             is AccountAnalyticsState.Error -> {
                                 binding.accountAnalyticsCard.showError(state.message)
                                 Timber.e("Account analytics error: ${state.message}")
-                            }
-                        }
-                    }
-                }
-                
-                launch {
-                    dashboardViewModel.dashboardState.collect { state ->
-                        when (state) {
-                            is DashboardState.Idle -> {
-                                // 初始状态，不显示任何内容
-                            }
-                            is DashboardState.Loading -> {
-                                binding.dashboardCard.showLoading()
-                            }
-                            is DashboardState.Success -> {
-                                binding.dashboardCard.showData(state.metrics)
-                            }
-                            is DashboardState.Error -> {
-                                binding.dashboardCard.showError(state.message)
-                                Timber.e("Dashboard error: ${state.message}")
                             }
                         }
                     }

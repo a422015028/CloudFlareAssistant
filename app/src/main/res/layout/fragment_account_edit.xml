@@ -159,23 +159,6 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="域名管理（Zone）"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" />
-
-        <Button
-            android:id="@+id/manageZonesBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="切换活动域名"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="R2 S3 API凭证（可选，用于对象操作）"
             android:textStyle="bold"
             android:textSize="14sp"
