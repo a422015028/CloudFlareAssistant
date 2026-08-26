@@ -215,21 +215,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/snippetRulesFragment"
-        android:name="com.muort.upworker.feature.zone.SnippetRulesFragment"
-        android:label="规则设置"
-        tools:layout="@layout/fragment_zone_feature">
-
-        <argument
-            android:name="zoneId"
-            app:argType="string" />
-
-        <argument
-            android:name="snippetName"
-            app:argType="string" />
-    </fragment>
-
-    <fragment
         android:id="@+id/snippetEditorFragment"
         android:name="com.muort.upworker.feature.zone.SnippetEditorFragment"
         android:label="编辑代码片段"
@@ -246,10 +231,6 @@
         <argument
             android:name="isNew"
             app:argType="boolean" />
-
-        <action
-            android:id="@+id/action_snippetEditor_to_rules"
-            app:destination="@id/snippetRulesFragment" />
     </fragment>
 
     <fragment

@@ -143,8 +143,8 @@ class SnippetEditorFragment : Fragment() {
     }
 
     private fun setupButtons() {
-        binding.btnRules.setOnClickListener {
-            navigateToRules()
+        binding.btnRule.setOnClickListener {
+            showRuleDialog()
         }
 
         binding.btnCopy.setOnClickListener {
@@ -165,6 +165,10 @@ class SnippetEditorFragment : Fragment() {
 
         binding.btnSearch.setOnClickListener {
             toggleSearchBar()
+        }
+
+        binding.btnRule.setOnClickListener {
+            showRuleDialog()
         }
 
         binding.webViewContainer.setOnClickListener {
@@ -336,6 +340,39 @@ class SnippetEditorFragment : Fragment() {
         }
     }
 
+    private fun showRuleDialog() {
+        // 对齐官方流程：新片段先静默保存内容，再弹出规则配置
+        if (args.isNew) {
+            getEditorContent { content ->
+                if (content.isBlank()) {
+                    Toast.makeText(requireContext(), "请先粘贴代码片段内容", Toast.LENGTH_SHORT).show()
+                    return@getEditorContent
+                }
+                saveSnippet(content) { showRuleDialog() }
+            }
+            return
+        }
+        val currentAccount = account ?: run {
+            Toast.makeText(requireContext(), "账号未就绪", Toast.LENGTH_SHORT).show()
+            return
+        }
+        binding.progressBar.visibility = View.VISIBLE
+        viewLifecycleOwner.lifecycleScope.launch {
+            val rule = when (val r = snippetRepo.listSnippetRules(currentAccount, args.zoneId)) {
+                is Resource.Success -> r.data.firstOrNull { it.snippetName == args.snippetName }
+                is Resource.Error -> {
+                    Toast.makeText(requireContext(), "读取规则失败：${r.message}", Toast.LENGTH_LONG).show()
+                    null
+                }
+                is Resource.Loading -> null
+            }
+            binding.progressBar.visibility = View.GONE
+            if (_binding != null) {
+                SnippetRuleDialog.show(parentFragmentManager, args.zoneId, args.snippetName, rule)
+            }
+        }
+    }
+
     private fun setEditorContent(content: String) {
         val jsonContent = org.json.JSONObject().apply {
             put("c", content)
@@ -452,29 +489,6 @@ class SnippetEditorFragment : Fragment() {
         }
         _binding = null
         super.onDestroyView()
-    }
-
-    private fun navigateToRules() {
-        // 对齐官方流程：粘贴完代码即可直接设置规则，无需手动先保存
-        getEditorContent { content ->
-            if (args.isNew && content.isBlank()) {
-                Toast.makeText(requireContext(), "请先粘贴代码片段内容", Toast.LENGTH_SHORT).show()
-                return@getEditorContent
-            }
-            if (args.isNew) {
-                saveSnippet(content) { doNavigateToRules() }
-            } else {
-                doNavigateToRules()
-            }
-        }
-    }
-
-    private fun doNavigateToRules() {
-        val action = SnippetEditorFragmentDirections.actionSnippetEditorToRules(
-            zoneId = args.zoneId,
-            snippetName = args.snippetName,
-        )
-        findNavController().navigate(action)
     }
 
     inner class JavaScriptBridge {
