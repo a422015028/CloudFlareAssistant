@@ -362,3 +362,8 @@ data class SnippetRule(
     @SerializedName("description") val description: String? = null,
     @SerializedName("enabled") val enabled: Boolean? = null,
 )
+
+/** PUT /zones/{zone_id}/snippets/snippet_rules 请求体（全量替换语义）。 */
+data class SnippetRulesRequest(
+    @SerializedName("rules") val rules: List<SnippetRule>,
+)

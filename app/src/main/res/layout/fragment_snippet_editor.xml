@@ -170,6 +170,15 @@
                     android:layout_weight="1"
                     android:text="搜索"
                     app:icon="@drawable/ic_search" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRule"
+                    style="@style/Widget.Material3.Button.TextButton.Icon"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="规则"
+                    app:icon="@drawable/ic_rule" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>

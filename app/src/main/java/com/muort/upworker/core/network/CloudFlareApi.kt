@@ -2281,4 +2281,29 @@ interface CloudFlareApi {
         @Path("zone_id") zoneId: String,
         @Path("snippet_name") snippetName: String
     ): Response<CloudFlareResponse<Unit>>
+
+    @GET("zones/{zone_id}/snippets/snippet_rules")
+    suspend fun listSnippetRules(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String
+    ): Response<CloudFlareResponse<List<SnippetRule>>>
+
+    @PUT("zones/{zone_id}/snippets/snippet_rules")
+    suspend fun putSnippetRules(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String,
+        @Body request: SnippetRulesRequest
+    ): Response<CloudFlareResponse<List<SnippetRule>>>
+
+    @DELETE("zones/{zone_id}/snippets/snippet_rules")
+    suspend fun deleteSnippetRules(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("zone_id") zoneId: String
+    ): Response<CloudFlareResponse<Unit>>
 }

@@ -163,6 +163,10 @@ class SnippetEditorFragment : Fragment() {
             toggleSearchBar()
         }
 
+        binding.btnRule.setOnClickListener {
+            showRuleDialog()
+        }
+
         binding.webViewContainer.setOnClickListener {
             if (binding.searchBar.visibility == View.VISIBLE) {
                 hideSearchBar()
@@ -328,6 +332,32 @@ class SnippetEditorFragment : Fragment() {
                 is Resource.Loading -> {}
             }
             binding.progressBar.visibility = View.GONE
+        }
+    }
+
+    private fun showRuleDialog() {
+        if (args.isNew) {
+            Toast.makeText(requireContext(), "请先保存代码片段，再配置规则", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val currentAccount = account ?: run {
+            Toast.makeText(requireContext(), "账号未就绪", Toast.LENGTH_SHORT).show()
+            return
+        }
+        binding.progressBar.visibility = View.VISIBLE
+        viewLifecycleOwner.lifecycleScope.launch {
+            val rule = when (val r = snippetRepo.listSnippetRules(currentAccount, args.zoneId)) {
+                is Resource.Success -> r.data.firstOrNull { it.snippetName == args.snippetName }
+                is Resource.Error -> {
+                    Toast.makeText(requireContext(), "读取规则失败：${r.message}", Toast.LENGTH_LONG).show()
+                    null
+                }
+                is Resource.Loading -> null
+            }
+            binding.progressBar.visibility = View.GONE
+            if (_binding != null) {
+                SnippetRuleDialog.show(parentFragmentManager, args.zoneId, args.snippetName, rule)
+            }
         }
     }
 
