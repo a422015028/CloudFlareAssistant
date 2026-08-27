@@ -1507,14 +1507,10 @@ class WorkerFragment : Fragment() {
             dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
             
             // Load current settings
-            var currentCompatibilityDate = DEFAULT_COMPATIBILITY_DATE
-            var currentCompatibilityFlags = emptyList<String>()
-            var currentPlacementMode = "off"
-            
             val settings = settingsResult.data
-            currentCompatibilityDate = settings.compatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
-            currentCompatibilityFlags = settings.compatibilityFlags ?: emptyList()
-            currentPlacementMode = settings.placement?.mode ?: "off"
+            val currentCompatibilityDate = settings.compatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
+            val currentCompatibilityFlags = settings.compatibilityFlags ?: emptyList()
+            val currentPlacementMode = settings.placement?.mode ?: "off"
             
             // Set current values
             dialogBinding.compatibilityDateInput.setText(currentCompatibilityDate)

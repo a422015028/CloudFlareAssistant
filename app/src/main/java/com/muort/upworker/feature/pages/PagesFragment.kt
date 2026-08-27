@@ -232,6 +232,11 @@ class PagesFragment : Fragment() {
                     showAddDomainDialog(account, project)
                 }
             },
+            onRuntimeSettingsClick = { project ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showPagesRuntimeSettingsDialog(account, project)
+                }
+            },
             onLogsClick = { project ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     showProjectLiveLogs(account, project)
@@ -2800,6 +2805,7 @@ class PagesFragment : Fragment() {
         private val onViewDeploymentsClick: (PagesProject) -> Unit,
         private val onViewDomainsClick: (PagesProject) -> Unit,
         private val onAddDomainClick: (PagesProject) -> Unit,
+        private val onRuntimeSettingsClick: (PagesProject) -> Unit,
         private val onLogsClick: (PagesProject) -> Unit,
         private val onSelectionModeClick: (PagesProject, Boolean) -> Unit = { _, _ -> }
     ) : RecyclerView.Adapter<ProjectAdapter.ViewHolder>() {
@@ -2856,6 +2862,7 @@ class PagesFragment : Fragment() {
                     binding.viewDeploymentsBtn.visibility = android.view.View.GONE
                     binding.viewDomainsBtn.visibility = android.view.View.GONE
                     binding.addDomainBtn.visibility = android.view.View.GONE
+                    binding.runtimeSettingsBtn.visibility = android.view.View.GONE
                     binding.logsBtn.visibility = android.view.View.GONE
                     
                     val isSelected = selectedItems.contains(project.name)
@@ -2876,6 +2883,7 @@ class PagesFragment : Fragment() {
                     binding.viewDeploymentsBtn.visibility = android.view.View.VISIBLE
                     binding.viewDomainsBtn.visibility = android.view.View.VISIBLE
                     binding.addDomainBtn.visibility = android.view.View.VISIBLE
+                    binding.runtimeSettingsBtn.visibility = android.view.View.VISIBLE
                     binding.logsBtn.visibility = android.view.View.VISIBLE
                     updateSelectionUI(binding.root, false)
                     binding.root.setOnClickListener(null)
@@ -2915,6 +2923,10 @@ class PagesFragment : Fragment() {
                 
                 binding.addDomainBtn.setOnClickListener {
                     onAddDomainClick(project)
+                }
+
+                binding.runtimeSettingsBtn.setOnClickListener {
+                    onRuntimeSettingsClick(project)
                 }
                 
                 binding.logsBtn.setOnClickListener {

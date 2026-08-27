@@ -155,23 +155,8 @@
                 android:minWidth="48dp"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                android:layout_marginEnd="4dp"
                 style="@style/Widget.Material3.Button.TextButton.Icon"
                 app:icon="@android:drawable/ic_lock_lock"
-                app:iconSize="16dp"
-                app:iconPadding="2dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/runtimeSettingsBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="设置"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
-                app:icon="@android:drawable/ic_menu_preferences"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
@@ -184,6 +169,21 @@
             android:orientation="horizontal"
             android:gravity="end"
             android:layout_marginTop="4dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/runtimeSettingsBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="设置"
+                android:textSize="11sp"
+                android:minWidth="48dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                app:icon="@android:drawable/ic_menu_preferences"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/triggerBtn"
