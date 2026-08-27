@@ -1,0 +1,50 @@
+name: Build Debug APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & Upload Debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Identify and Rename Output APK
+        run: |
+          mkdir -p output
+          APK_PATH=$(find app/build/outputs/apk -name "*debug*.apk" | head -n 1)
+          if [ -f "$APK_PATH" ]; then
+            VERSION_NAME=$(grep "versionName" app/build.gradle.kts | awk -F'"' '{print $2}')
+            cp "$APK_PATH" "output/CloudFlareAssistant-v${VERSION_NAME}-debug.apk"
+            sha256sum "output/CloudFlareAssistant-v${VERSION_NAME}-debug.apk" > "output/CloudFlareAssistant-v${VERSION_NAME}-debug.apk.sha256"
+            echo "APK ready: output/CloudFlareAssistant-v${VERSION_NAME}-debug.apk"
+          else
+            echo "Error: No debug APK generated!" && exit 1
+          fi
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cfa-debug-apk
+          path: output/*
+          retention-days: 14

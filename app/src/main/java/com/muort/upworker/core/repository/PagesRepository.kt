@@ -110,6 +110,49 @@ class PagesRepository @Inject constructor(
     }
 
     /**
+     * 更新项目的运行时设置（兼容日期、兼容性标志、放置）
+     */
+    suspend fun updateRuntimeSettings(
+        account: Account,
+        projectName: String,
+        compatibilityDate: String,
+        compatibilityFlags: List<String>,
+        placement: Placement? = null
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val updateRequest = PagesProjectUpdateRequest(
+                deploymentConfigs = DeploymentConfigsUpdate(
+                    preview = EnvironmentConfigUpdate(
+                        compatibilityDate = compatibilityDate,
+                        compatibilityFlags = compatibilityFlags,
+                        placement = placement
+                    ),
+                    production = EnvironmentConfigUpdate(
+                        compatibilityDate = compatibilityDate,
+                        compatibilityFlags = compatibilityFlags,
+                        placement = placement
+                    )
+                )
+            )
+            val response = api.updatePagesProject(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                projectName = projectName,
+                updateRequest = updateRequest
+            )
+            if (response.isSuccessful && response.body()?.success == true) {
+                Resource.Success(Unit)
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.message()
+                Resource.Error("更新失败: $errorMsg")
+            }
+        }
+    }
+
+    /**
      * 更新项目的 asset 配置（not_found_page, pretty_urls）
      * 注意：Cloudflare API 通过 PATCH 项目接口更新 deployment_configs 中的设置
      */

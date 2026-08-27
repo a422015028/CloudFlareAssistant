@@ -164,6 +164,16 @@ data class AccountSettings(
 
 const val DEFAULT_COMPATIBILITY_DATE = "2026-06-16"
 
+/**
+ * Worker/Pages 放置配置
+ * https://developers.cloudflare.com/workers/configuration/smart-placement/
+ */
+data class Placement(
+    @SerializedName("mode") val mode: String? = null,  // "standard" / "smart" / "region" / "service"
+    @SerializedName("region") val region: String? = null,  // mode=region 时的区域代码，如 eu
+    @SerializedName("host") val host: String? = null,  // mode=service 时的主机名或主机:端口
+)
+
 data class WorkerScript(
     @SerializedName("id") val id: String,
     @SerializedName("created_on") val createdOn: String?,
@@ -171,7 +181,9 @@ data class WorkerScript(
     @SerializedName("etag") val etag: String?,
     @SerializedName("size") val size: Long? = null,
     @SerializedName("bindings") val bindings: List<WorkerBinding>? = null,
-    @SerializedName("compatibility_date") val compatibilityDate: String? = null
+    @SerializedName("compatibility_date") val compatibilityDate: String? = null,
+    @SerializedName("compatibility_flags") val compatibilityFlags: List<String>? = null,
+    @SerializedName("placement") val placement: Placement? = null
 )
 
 data class WorkerVersion(
@@ -327,7 +339,8 @@ data class WorkerSettingsRequest(
     @SerializedName("compatibility_date") val compatibilityDate: String? = null,
     @SerializedName("compatibility_flags") val compatibilityFlags: List<String>? = null,
     @SerializedName("usage_model") val usageModel: String? = null,
-    @SerializedName("logpush") val logpush: Boolean? = null
+    @SerializedName("logpush") val logpush: Boolean? = null,
+    @SerializedName("placement") val placement: Placement? = null
 )
 
 data class CustomDomainRequest(
@@ -593,7 +606,10 @@ data class EnvironmentConfig(
     @SerializedName("r2_buckets") val r2Buckets: Map<String, R2Binding>? = null,
     @SerializedName("d1_databases") val d1Databases: Map<String, D1Binding>? = null,
     @SerializedName("durable_objects") val durableObjects: Map<String, DurableObjectBinding>? = null,
-    @SerializedName("services") val services: Map<String, ServiceBinding>? = null
+    @SerializedName("services") val services: Map<String, ServiceBinding>? = null,
+    @SerializedName("compatibility_date") val compatibilityDate: String? = null,
+    @SerializedName("compatibility_flags") val compatibilityFlags: List<String>? = null,
+    @SerializedName("placement") val placement: Placement? = null
 )
 
 data class EnvVar(
@@ -630,7 +646,8 @@ data class EnvironmentConfigUpdate(
     @SerializedName("durable_objects") val durableObjects: Map<String, DurableObjectBindingUpdate?>? = null,
     @SerializedName("services") val services: Map<String, ServiceBindingUpdate?>? = null,
     @SerializedName("compatibility_date") val compatibilityDate: String? = null,
-    @SerializedName("compatibility_flags") val compatibilityFlags: List<String>? = null
+    @SerializedName("compatibility_flags") val compatibilityFlags: List<String>? = null,
+    @SerializedName("placement") val placement: Placement? = null
 )
 
 data class EnvVarUpdate(

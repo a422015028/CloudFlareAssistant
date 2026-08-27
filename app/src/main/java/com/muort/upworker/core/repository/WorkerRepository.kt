@@ -855,6 +855,40 @@ class WorkerRepository @Inject constructor(
         }
     }
     
+    /**
+     * 更新 Worker 运行时设置（兼容日期、兼容性标志、放置），不重新上传脚本代码。
+     */
+    suspend fun updateWorkerSettings(
+        account: Account,
+        scriptName: String,
+        settingsRequest: WorkerSettingsRequest
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val settingsJson = gson.toJson(settingsRequest)
+            val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
+
+            val response = api.updateWorkerSettings(
+                AuthHelper.getBearerToken(account),
+                AuthHelper.getEmail(account),
+                AuthHelper.getGlobalApiKey(account),
+                account.accountId,
+                scriptName,
+                settingsBody
+            )
+
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error("更新成功但无返回数据")
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.message()
+                Timber.e("Failed to update runtime settings: $errorMsg")
+                Resource.Error("更新失败: $errorMsg")
+            }
+        }
+    }
+
     suspend fun deleteWorkerScript(
         account: Account,
         scriptName: String

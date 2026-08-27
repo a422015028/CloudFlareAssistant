@@ -52,6 +52,7 @@ class SnippetEditorFragment : Fragment() {
     private var isEditorReady = false
     private var hasUnsavedChanges = false
     private var originalContent: String = ""
+    private var contentSavedForRule = false
 
     private val openFileLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -151,6 +152,10 @@ class SnippetEditorFragment : Fragment() {
     }
 
     private fun setupButtons() {
+        binding.btnRule.setOnClickListener {
+            showRuleDialog()
+        }
+
         binding.btnCopy.setOnClickListener {
             getEditorContent { content ->
                 copyToClipboard(content)
@@ -282,7 +287,7 @@ class SnippetEditorFragment : Fragment() {
         }
     }
 
-    private fun saveSnippet(content: String) {
+    private fun saveSnippet(content: String, onSaved: (() -> Unit)? = null) {
         binding.progressBar.visibility = View.VISIBLE
 
         if (account == null) {
@@ -291,12 +296,32 @@ class SnippetEditorFragment : Fragment() {
             return
         }
 
+        // 上传前本地语法预校验，精确报出行列号；预校验不可用则放行
+        binding.webView.evaluateJavascript("checkSyntax()") { raw ->
+            var syntaxError: String? = null
+            try {
+                val obj = org.json.JSONObject(raw ?: "null")
+                if (!obj.optBoolean("ok", true)) syntaxError = obj.optString("message")
+            } catch (_: Exception) {
+            }
+            if (syntaxError != null) {
+                binding.progressBar.visibility = View.GONE
+                android.widget.Toast.makeText(requireContext(),
+                    "代码有语法错误，未保存。$syntaxError", android.widget.Toast.LENGTH_LONG).show()
+            } else {
+                uploadSnippet(content, onSaved)
+            }
+        }
+    }
+
+    private fun uploadSnippet(content: String, onSaved: (() -> Unit)? = null) {
         viewLifecycleOwner.lifecycleScope.launch {
                     when (val r = snippetRepo.putSnippet(account!!, args.zoneId, args.snippetName, content)) {
                 is Resource.Success -> {
                     android.widget.Toast.makeText(requireContext(), "保存成功", android.widget.Toast.LENGTH_SHORT).show()
                     hasUnsavedChanges = false
                     originalContent = content
+                    onSaved?.invoke()
                 }
                 is Resource.Error -> {
                     android.widget.Toast.makeText(requireContext(), "保存失败: ${r.message}", android.widget.Toast.LENGTH_LONG).show()
@@ -323,35 +348,58 @@ class SnippetEditorFragment : Fragment() {
             .show()
     }
 
-    private fun deleteSnippet() {
-        binding.progressBar.visibility = View.VISIBLE
+    // ponytail: 删除链约 5 个串行网络请求（弱网 10s+），挂 Activity scope 防中途退出把协程取消删一半；
+    // 回调碰视图前判 isAdded，Toast 用 ApplicationContext 防 fragment 销毁后泄漏
+    private var deleting = false
 
-        if (account == null) {
+    private fun deleteSnippet() {
+        if (deleting) return
+        val acct = account ?: run {
             android.widget.Toast.makeText(requireContext(), "账号未就绪", android.widget.Toast.LENGTH_LONG).show()
-            binding.progressBar.visibility = View.GONE
             return
         }
+        deleting = true
+        binding.progressBar.visibility = View.VISIBLE
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            when (val r = snippetRepo.deleteSnippet(account!!, args.zoneId, args.snippetName)) {
+        val ctx = requireContext().applicationContext
+        requireActivity().lifecycleScope.launch {
+            android.widget.Toast.makeText(ctx, "正在删除「${args.snippetName}」（含规则与 DNS）…", android.widget.Toast.LENGTH_LONG).show()
+            when (val r = snippetRepo.teardownSnippet(acct, args.zoneId, args.snippetName)) {
                 is Resource.Success -> {
-                    android.widget.Toast.makeText(requireContext(), "已删除", android.widget.Toast.LENGTH_SHORT).show()
-                    findNavController().navigateUp()
+                    android.widget.Toast.makeText(ctx, "已删除（含规则与 DNS）", android.widget.Toast.LENGTH_SHORT).show()
+                    if (isAdded) findNavController().navigateUp()
                 }
                 is Resource.Error -> {
-                    android.widget.Toast.makeText(requireContext(), "删除失败: ${r.message}", android.widget.Toast.LENGTH_LONG).show()
+                    android.widget.Toast.makeText(ctx, "删除失败: ${r.message}", android.widget.Toast.LENGTH_LONG).show()
+                    if (isAdded) {
+                        binding.progressBar.visibility = View.GONE
+                        deleting = false
+                    }
                 }
                 is Resource.Loading -> {}
             }
-            binding.progressBar.visibility = View.GONE
         }
     }
 
     private fun showRuleDialog() {
-        if (args.isNew) {
-            Toast.makeText(requireContext(), "请先保存代码片段，再配置规则", Toast.LENGTH_SHORT).show()
+        // 对齐官方流程：新片段先静默保存内容（仅一次），再弹出规则配置
+        if (args.isNew && !contentSavedForRule) {
+            getEditorContent { content ->
+                if (content.isBlank()) {
+                    Toast.makeText(requireContext(), "请先粘贴代码片段内容", Toast.LENGTH_SHORT).show()
+                    return@getEditorContent
+                }
+                saveSnippet(content) {
+                    contentSavedForRule = true
+                    openRuleDialog()
+                }
+            }
             return
         }
+        openRuleDialog()
+    }
+
+    private fun openRuleDialog() {
         val currentAccount = account ?: run {
             Toast.makeText(requireContext(), "账号未就绪", Toast.LENGTH_SHORT).show()
             return
@@ -368,7 +416,7 @@ class SnippetEditorFragment : Fragment() {
             }
             binding.progressBar.visibility = View.GONE
             if (_binding != null) {
-                SnippetRuleDialog.show(parentFragmentManager, args.zoneId, args.snippetName, rule)
+                SnippetRuleDialog.show(parentFragmentManager, args.zoneId, args.snippetName, rule, args.zoneName)
             }
         }
     }

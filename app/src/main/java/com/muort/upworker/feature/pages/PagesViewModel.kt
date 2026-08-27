@@ -8,6 +8,7 @@ import com.muort.upworker.core.model.PagesDeployment
 import com.muort.upworker.core.model.PagesDeploymentLogs
 import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.PagesProjectDetail
+import com.muort.upworker.core.model.Placement
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.TailResult
 import com.muort.upworker.core.repository.PagesRepository
@@ -534,6 +535,30 @@ class PagesViewModel @Inject constructor(
     
     suspend fun getProjectDetailSuspend(account: Account, projectName: String): Resource<PagesProjectDetail> {
         return pagesRepository.getProject(account, projectName)
+    }
+    
+    /**
+     * 更新项目的运行时设置（兼容日期、兼容性标志、放置）
+     */
+    fun updateRuntimeSettings(
+        account: Account,
+        projectName: String,
+        compatibilityDate: String,
+        compatibilityFlags: List<String>,
+        placement: Placement?,
+        callback: (Resource<Unit>) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            val result = pagesRepository.updateRuntimeSettings(
+                account, projectName, compatibilityDate, compatibilityFlags, placement
+            )
+            when (result) {
+                is Resource.Success -> _message.emit("运行时设置已更新")
+                is Resource.Error -> _message.emit("更新失败: ${result.message}")
+                else -> {}
+            }
+            callback(result)
+        }
     }
     
     // ==================== Pages Domains ====================

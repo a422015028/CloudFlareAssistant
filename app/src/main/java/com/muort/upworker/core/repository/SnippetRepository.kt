@@ -20,6 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class SnippetRepository @Inject constructor(
     private val api: CloudFlareApi,
+    private val dnsRepository: DnsRepository,
 ) {
     suspend fun listSnippets(account: Account, zoneId: String): Resource<List<Snippet>> =
         withContext(Dispatchers.IO) {
@@ -147,9 +148,36 @@ class SnippetRepository @Inject constructor(
 
     // ==================== Snippet Rules ====================
 
+    /**
+     * 彻底下线片段：先删触发规则（Cloudflare 会拒绝删除仍被规则引用的片段），连带清理
+     * 规则表达式指向的主机名 DNS 记录，最后删片段。
+     */
+    suspend fun teardownSnippet(account: Account, zoneId: String, name: String): Resource<Unit> =
+        withContext(Dispatchers.IO) {
+            // 先读一次规则：提取主机名供 DNS 清理；读到的列表复用给 deleteSnippetRule 省一次请求。
+            // 读取失败时不传 existing，由 deleteSnippetRule 内部重试——绝不能把空列表当“无规则”去全量清空
+            val existing = (listSnippetRules(account, zoneId) as? Resource.Success)?.data
+            val hosts = existing.orEmpty().filter { it.snippetName == name }
+                .flatMap { HOST_EQ_PATTERN.findAll(it.expression).map { m -> m.groupValues[1] } }
+            when (val r = deleteSnippetRule(account, zoneId, name, existing)) {
+                is Resource.Error -> return@withContext Resource.Error("删除触发规则失败（片段仍在使用中）：${r.message}")
+                else -> {}
+            }
+            // DNS 记录尽力清理：仅精确 eq 的主机名才安全可删，失败不阻塞片段删除
+            hosts.forEach { host ->
+                val records = (dnsRepository.listDnsRecords(account, zoneId, name = host) as? Resource.Success)?.data
+                    ?: return@forEach
+                records.forEach { dnsRepository.deleteDnsRecord(account, zoneId, it.id) }
+            }
+            deleteSnippet(account, zoneId, name)
+        }
+
     companion object {
         /** 官网 UI 口径的表达式长度上限（API 硬上限为 4096）。 */
         const val MAX_EXPRESSION_LENGTH = 4000
+
+        /** 从规则表达式中提取 http.host eq "xxx" 的主机名（contains 等模糊条件不做 DNS 清理）。 */
+        private val HOST_EQ_PATTERN = Regex("""http\.host\s+eq\s+"([^"]+)"""")
     }
 
     /**
@@ -224,14 +252,16 @@ class SnippetRepository @Inject constructor(
         account: Account,
         zoneId: String,
         snippetName: String,
+        existing: List<SnippetRule>? = null,
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
-            val existing = when (val r = listSnippetRules(account, zoneId)) {
+            // 调用方已读过规则列表时直接复用，省一次网络请求；为 null 才自行读取
+            val current = existing ?: when (val r = listSnippetRules(account, zoneId)) {
                 is Resource.Success -> r.data
                 is Resource.Error -> return@safeApiCall Resource.Error("读取现有规则失败：${r.message}")
                 is Resource.Loading -> return@safeApiCall Resource.Error("读取现有规则失败")
             }
-            val remaining = existing.filterNot { it.snippetName == snippetName }
+            val remaining = current.filterNot { it.snippetName == snippetName }
             val resp = if (remaining.isEmpty()) {
                 api.deleteSnippetRules(
                     AuthHelper.getBearerToken(account),

@@ -50,6 +50,7 @@
     <script src="file:///android_asset/codemirror/dialog.min.js"></script>
     <script src="file:///android_asset/codemirror/searchcursor.min.js"></script>
     <script src="file:///android_asset/codemirror/search.min.js"></script>
+    <script src="file:///android_asset/sucrase.min.js"></script>
 
     <script>
         window._editorTheme = window._editorTheme || 'dracula';
@@ -142,6 +143,24 @@
 
         function getContent() {
             return editor ? editor.getValue() : window._currentContent || '';
+        }
+
+        // 本地语法预校验：上传前在本机完整 parse，把精确行列号报给用户，
+        // 避免 Cloudflare 返回被截断的模糊 SyntaxError。校验器不可用时放行（返回 ok）。
+        function checkSyntax() {
+            var code = getContent();
+            if (!code || !code.trim()) return JSON.stringify({ok: true});
+            try {
+                if (window.Sucrase && window.Sucrase.transform) {
+                    window.Sucrase.transform(code, {transforms: []});
+                }
+                return JSON.stringify({ok: true});
+            } catch (e) {
+                var line = e.loc && e.loc.line;
+                var msg = String(e.message || e);
+                if (line) msg = '第 ' + line + ' 行' + (e.loc.column != null ? ('第 ' + e.loc.column + ' 列') : '') + ': ' + msg;
+                return JSON.stringify({ok: false, message: msg});
+            }
         }
 
         function setTheme(isDark) {

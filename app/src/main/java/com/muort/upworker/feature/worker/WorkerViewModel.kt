@@ -610,6 +610,43 @@ class WorkerViewModel @Inject constructor(
     fun resetUploadState() {
         _uploadState.value = UploadState.Idle
     }
+    
+    /**
+     * 更新 Worker 运行时设置（兼容日期、兼容性标志、放置）
+     */
+    fun updateWorkerRuntimeSettings(
+        account: Account,
+        scriptName: String,
+        compatibilityDate: String,
+        compatibilityFlags: List<String>,
+        placement: com.muort.upworker.core.model.Placement? = null,
+        onResult: (com.muort.upworker.core.model.Resource<Unit>) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            try {
+                // 先获取当前设置，保留已有 bindings
+                val currentSettings = workerRepository.getWorkerSettings(account, scriptName)
+
+                val settingsRequest = com.muort.upworker.core.model.WorkerSettingsRequest(
+                    bindings = (currentSettings as? Resource.Success)?.data?.bindings,
+                    compatibilityDate = compatibilityDate,
+                    compatibilityFlags = compatibilityFlags,
+                    placement = placement
+                )
+
+                val result = workerRepository.updateWorkerSettings(account, scriptName, settingsRequest)
+
+                when (result) {
+                    is Resource.Success -> onResult(Resource.Success(Unit))
+                    is Resource.Error -> onResult(Resource.Error(result.message))
+                    else -> {}
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to update runtime settings")
+                onResult(Resource.Error("更新失败: ${e.message}"))
+            }
+        }
+    }
 
     private val _versions = MutableStateFlow<List<WorkerVersion>>(emptyList())
     val versions: StateFlow<List<WorkerVersion>> = _versions
