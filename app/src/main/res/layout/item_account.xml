@@ -61,16 +61,6 @@
                     android:layout_marginTop="4dp"
                     android:fontFamily="monospace" />
 
-                <TextView
-                    android:id="@+id/zoneIdText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Zone ID"
-                    android:textSize="12sp"
-                    android:textColor="?android:textColorSecondary"
-                    android:layout_marginTop="2dp"
-                    android:fontFamily="monospace" />
-
             </LinearLayout>
 
             <ImageButton

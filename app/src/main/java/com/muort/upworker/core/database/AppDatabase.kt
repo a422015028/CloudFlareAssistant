@@ -7,18 +7,20 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.WebDavConfig
 import com.muort.upworker.core.model.R2BackupConfig
+import com.muort.upworker.core.model.LocalBackupConfig
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.model.ScriptVersion
 
 @Database(
-    entities = [Account::class, WebDavConfig::class, R2BackupConfig::class, Zone::class, ScriptVersion::class],
-    version = 8,
+    entities = [Account::class, WebDavConfig::class, R2BackupConfig::class, LocalBackupConfig::class, Zone::class, ScriptVersion::class],
+    version = 9,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     abstract fun webDavConfigDao(): WebDavConfigDao
     abstract fun r2BackupConfigDao(): R2BackupConfigDao
+    abstract fun localBackupConfigDao(): LocalBackupConfigDao
     abstract fun zoneDao(): ZoneDao
     abstract fun scriptVersionDao(): ScriptVersionDao
     
@@ -131,6 +133,26 @@ abstract class AppDatabase : RoomDatabase() {
                 // 为 zones 表增加名称服务器与套餐字段
                 db.execSQL("ALTER TABLE zones ADD COLUMN nameServers TEXT DEFAULT NULL")
                 db.execSQL("ALTER TABLE zones ADD COLUMN plan TEXT DEFAULT NULL")
+            }
+        }
+
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // 为 webdav_config 增加备份密码字段
+                db.execSQL("ALTER TABLE webdav_config ADD COLUMN backupPassword TEXT DEFAULT NULL")
+                // 为 r2_backup_config 增加备份密码字段
+                db.execSQL("ALTER TABLE r2_backup_config ADD COLUMN backupPassword TEXT DEFAULT NULL")
+                // 创建本地备份配置表
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS local_backup_config (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        directoryUri TEXT DEFAULT NULL,
+                        autoBackup INTEGER NOT NULL DEFAULT 0,
+                        backupPassword TEXT DEFAULT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )
+                """.trimIndent())
             }
         }
     }

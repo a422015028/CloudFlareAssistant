@@ -85,7 +85,6 @@ class AccountViewModel @Inject constructor(
                         _defaultAccount.value = resource.data
                         if (resource.data != null) {
                             Timber.d("Default account loaded: ${resource.data.name} (ID: ${resource.data.id})")
-                            Timber.d("Account fields - token: ${resource.data.token.take(10)}..., zoneId: ${resource.data.zoneId}")
                         } else {
                             Timber.w("Default account is null - no default account set")
                         }
@@ -103,7 +102,6 @@ class AccountViewModel @Inject constructor(
         name: String,
         accountId: String,
         token: String,
-        zoneId: String?,
         isDefault: Boolean = false,
         r2AccessKeyId: String? = null,
         r2SecretAccessKey: String? = null,
@@ -146,7 +144,6 @@ class AccountViewModel @Inject constructor(
                 name = name,
                 accountId = accountId,
                 token = token,
-                zoneId = zoneId?.takeIf { it.isNotBlank() },
                 isDefault = isDefault,
                 r2AccessKeyId = r2AccessKeyId?.takeIf { it.isNotBlank() },
                 r2SecretAccessKey = r2SecretAccessKey?.takeIf { it.isNotBlank() },

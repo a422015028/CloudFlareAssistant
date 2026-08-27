@@ -271,10 +271,10 @@ class WebDavClient @Inject constructor() {
                     val fileName = href.trimEnd('/').substringAfterLast('/')
                     Log.d(TAG, "parseFileNames extracted fileName: $fileName")
                     
-                    // 检查是否是备份文件
+                    // 检查是否是备份文件（支持 .json 和 .enc）
                     if (fileName.isNotEmpty() && 
                         fileName.startsWith("cloudflare_backup_") && 
-                        fileName.endsWith(".json")) {
+                        (fileName.endsWith(".json") || fileName.endsWith(".enc"))) {
                         Log.d(TAG, "parseFileNames matched backup file: $fileName")
                         fileNames.add(fileName)
                     }

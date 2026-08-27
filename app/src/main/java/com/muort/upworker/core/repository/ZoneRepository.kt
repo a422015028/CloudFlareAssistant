@@ -134,9 +134,6 @@ class ZoneRepository @Inject constructor(
     suspend fun setSelectedZone(accountId: Long, zoneId: String) {
         // Update zone selection in zones table
         zoneDao.setSelectedZone(accountId, zoneId)
-        
-        // Also update the account's zoneId field for backward compatibility
-        accountRepository.updateAccountZoneId(accountId, zoneId)
     }
     
     suspend fun deleteZonesByAccount(accountId: Long) {
