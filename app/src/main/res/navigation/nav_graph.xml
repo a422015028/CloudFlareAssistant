@@ -128,6 +128,8 @@
         tools:layout="@layout/fragment_domain_detail">
 
         <action android:id="@+id/action_domainDetail_to_dns"           app:destination="@id/dnsFragment" />
+        <action android:id="@+id/action_domainDetail_to_zoneAnalytics" app:destination="@id/zoneAnalyticsFragment" />
+        <action android:id="@+id/action_domainDetail_to_route"         app:destination="@id/routeFragment" />
         <action android:id="@+id/action_domainDetail_to_waf"           app:destination="@id/wafFragment" />
         <action android:id="@+id/action_domainDetail_to_cache"          app:destination="@id/cacheRulesFragment" />
         <action android:id="@+id/action_domainDetail_to_rateLimit"     app:destination="@id/rateLimitFragment" />
@@ -143,6 +145,12 @@
     </fragment>
 
     <!-- ============ 域名级功能页 ============ -->
+    <fragment
+        android:id="@+id/zoneAnalyticsFragment"
+        android:name="com.muort.upworker.feature.zone.ZoneAnalyticsFragment"
+        android:label="域名分析"
+        tools:layout="@layout/fragment_zone_analytics" />
+
     <fragment
         android:id="@+id/wafFragment"
         android:name="com.muort.upworker.feature.zone.WafFragment"
@@ -247,8 +255,17 @@
     <fragment
         android:id="@+id/routeFragment"
         android:name="com.muort.upworker.feature.route.RouteFragment"
-        android:label="路由和域管理"
-        tools:layout="@layout/fragment_route" />
+        android:label="路由"
+        tools:layout="@layout/fragment_route">
+        <argument
+            android:name="zoneId"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="zoneName"
+            android:defaultValue=""
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/kvFragment"

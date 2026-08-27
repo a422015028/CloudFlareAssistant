@@ -619,12 +619,6 @@ class R2Fragment : Fragment() {
     }
     
     private fun showAddCustomDomainDialog(account: Account, bucket: R2Bucket) {
-        if (account.zoneId.isNullOrEmpty()) {
-            showToast("该账号未配置 Zone ID，无法添加自定义域")
-            showCustomDomainsDialog(bucket)
-            return
-        }
-        
         val input = android.widget.EditText(requireContext()).apply {
             hint = "example.com"
             inputType = android.text.InputType.TYPE_TEXT_VARIATION_URI

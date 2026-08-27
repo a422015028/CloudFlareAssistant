@@ -9,6 +9,7 @@ import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,6 +22,20 @@ class ZoneRepository @Inject constructor(
     
     fun getZonesByAccount(accountId: Long): Flow<List<Zone>> {
         return zoneDao.getZonesByAccount(accountId)
+    }
+
+    /**
+     * 根据 hostname 匹配所属的 zone（最长后缀匹配）。
+     * 例如 hostname = "api.example.com" 会优先匹配 "api.example.com"，其次 "example.com"。
+     */
+    suspend fun findZoneByHostname(accountId: Long, hostname: String): Zone? {
+        val allZones = zoneDao.getZonesByAccount(accountId).firstOrNull() ?: emptyList()
+        if (allZones.isEmpty()) return null
+        val host = hostname.lowercase().trimEnd('.')
+        // 按 zone name 长度降序，优先匹配更精确的子域名 zone
+        return allZones
+            .sortedByDescending { it.name.length }
+            .firstOrNull { host == it.name.lowercase() || host.endsWith(".${it.name.lowercase()}") }
     }
 
     fun observeZone(zoneId: String): Flow<Zone?> {

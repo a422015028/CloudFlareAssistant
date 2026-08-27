@@ -9,6 +9,7 @@ import com.muort.upworker.core.model.R2Object
 import com.muort.upworker.core.model.Resource
 import java.io.File
 import com.muort.upworker.core.repository.R2Repository
+import com.muort.upworker.core.repository.ZoneRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class R2ViewModel @Inject constructor(
-    private val r2Repository: R2Repository
+    private val r2Repository: R2Repository,
+    private val zoneRepository: ZoneRepository,
 ) : ViewModel() {
     
     private val _buckets = MutableStateFlow<List<R2Bucket>>(emptyList())
@@ -252,8 +254,15 @@ class R2ViewModel @Inject constructor(
     fun createCustomDomain(account: Account, bucketName: String, domain: String) {
         viewModelScope.launch {
             _loadingState.value = true
-            
-            when (val result = r2Repository.createCustomDomain(account, bucketName, domain)) {
+
+            val zone = zoneRepository.findZoneByHostname(account.id, domain)
+            if (zone == null) {
+                _message.emit("添加失败：未找到对应的 Cloudflare 域名（Zone），请先在账号中添加该域名")
+                _loadingState.value = false
+                return@launch
+            }
+
+            when (val result = r2Repository.createCustomDomain(account, bucketName, domain, zone.id)) {
                 is Resource.Success -> {
                     _message.emit("自定义域添加成功")
                     loadCustomDomains(account, bucketName)

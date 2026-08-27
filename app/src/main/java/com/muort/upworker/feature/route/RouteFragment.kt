@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.fragment.app.Fragment
@@ -68,11 +69,17 @@ class RouteFragment : Fragment() {
     private val pagesViewModel: PagesViewModel by viewModels()
     private val r2ViewModel: com.muort.upworker.feature.r2.R2ViewModel by viewModels()
 
+    private val zoneId: String by lazy { arguments?.getString("zoneId") ?: "" }
+    private val zoneName: String by lazy { arguments?.getString("zoneName") ?: "" }
+
         // R2自定义域ViewModel，需你实现
         // private val r2ViewModel: R2ViewModel by viewModels()
     
     @Inject
     lateinit var dnsRepository: DnsRepository
+    
+    @Inject
+    lateinit var zoneRepository: com.muort.upworker.core.repository.ZoneRepository
     
     @Inject
     lateinit var pagesRepository: com.muort.upworker.core.repository.PagesRepository
@@ -93,6 +100,32 @@ class RouteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 模式切换：
+        // - zone 模式（有 zoneId）：只显示该域名的路由规则，单栏布局
+        // - account 模式（无 zoneId）：只显示自定义域管理，单栏布局（首页入口）
+        val isZoneMode = zoneId.isNotBlank()
+        if (isZoneMode) {
+            binding.domainPanel.visibility = View.GONE
+            binding.dividerView.visibility = View.GONE
+            // 左侧路由占满宽度
+            binding.routePanel.layoutParams =
+                (binding.routePanel.layoutParams as LinearLayout.LayoutParams).apply {
+                    weight = 1f
+                    width = 0
+                }
+            activity?.title = "路由"
+        } else {
+            binding.routePanel.visibility = View.GONE
+            binding.dividerView.visibility = View.GONE
+            // 右侧自定义域占满宽度
+            binding.domainPanel.layoutParams =
+                (binding.domainPanel.layoutParams as LinearLayout.LayoutParams).apply {
+                    weight = 1f
+                    width = 0
+                }
+            activity?.title = "自定义域"
+        }
+
         setupAdapter()
         setupTabs()
         setupClickListeners()
@@ -100,19 +133,24 @@ class RouteFragment : Fragment() {
 
         accountViewModel.defaultAccount.value?.let { account ->
             workerViewModel.loadWorkerScripts(account)
-            workerViewModel.loadRoutes(account)
-            workerViewModel.loadCustomDomains(account)
-            pagesViewModel.loadProjects(account)
-            // 加载R2存储桶列表
-            r2ViewModel.loadBuckets(account)
+            if (isZoneMode) {
+                workerViewModel.loadRoutes(account, zoneId)
+            } else {
+                workerViewModel.loadCustomDomains(account)
+                pagesViewModel.loadProjects(account)
+                // 加载R2存储桶列表
+                r2ViewModel.loadBuckets(account)
+            }
         }
 
-        // 监听R2存储桶变化，自动加载所有自定义域
-        lifecycleScope.launch {
-            r2ViewModel.buckets.collect { buckets ->
-                accountViewModel.defaultAccount.value?.let { account ->
-                    buckets.forEach { bucket ->
-                        r2ViewModel.loadCustomDomains(account, bucket.name)
+        // 监听R2存储桶变化，自动加载所有自定义域（仅 account 模式）
+        if (!isZoneMode) {
+            lifecycleScope.launch {
+                r2ViewModel.buckets.collect { buckets ->
+                    accountViewModel.defaultAccount.value?.let { account ->
+                        buckets.forEach { bucket ->
+                            r2ViewModel.loadCustomDomains(account, bucket.name)
+                        }
                     }
                 }
             }
@@ -293,9 +331,12 @@ class RouteFragment : Fragment() {
                     accountViewModel.defaultAccount.collect { account ->
                         if (account != null) {
                             workerViewModel.loadWorkerScripts(account)
-                            workerViewModel.loadRoutes(account)
-                            workerViewModel.loadCustomDomains(account)
-                            pagesViewModel.loadProjects(account)
+                            if (zoneId.isNotBlank()) {
+                                workerViewModel.loadRoutes(account, zoneId)
+                            } else {
+                                workerViewModel.loadCustomDomains(account)
+                                pagesViewModel.loadProjects(account)
+                            }
                         }
                     }
                 }
@@ -319,7 +360,7 @@ class RouteFragment : Fragment() {
                 val script = dialogBinding.routeScript.text.toString()
                 
                 accountViewModel.defaultAccount.value?.let { account ->
-                    workerViewModel.createRoute(account, pattern, script)
+                    workerViewModel.createRoute(account, zoneId, pattern, script)
                 }
             }
             .setNegativeButton("取消", null)
@@ -346,7 +387,7 @@ class RouteFragment : Fragment() {
                 val script = dialogBinding.routeScript.text.toString()
                 
                 accountViewModel.defaultAccount.value?.let { account ->
-                    workerViewModel.updateRoute(account, route.id, pattern, script)
+                    workerViewModel.updateRoute(account, zoneId, route.id, pattern, script)
                 }
             }
             .setNegativeButton("取消", null)
@@ -359,7 +400,7 @@ class RouteFragment : Fragment() {
             .setMessage("确定要删除路由 \"${route.pattern}\" 吗？")
             .setPositiveButton("删除") { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
-                    workerViewModel.deleteRoute(account, route.id)
+                    workerViewModel.deleteRoute(account, zoneId, route.id)
                 }
             }
             .setNegativeButton("取消", null)
@@ -669,11 +710,7 @@ class RouteFragment : Fragment() {
             .setMessage(message)
             .setPositiveButton("自动配置 DNS") { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
-                    if (account.zoneId.isNullOrBlank()) {
-                        Snackbar.make(binding.root, "账号未配置 Zone ID，无法自动添加 DNS 记录", Snackbar.LENGTH_LONG).show()
-                    } else {
-                        autoConfigureDns(account, recordType, recordName, recordValue)
-                    }
+                    autoConfigureDns(account, recordType, recordName, recordValue)
                 }
             }
             .setNegativeButton("关闭", null)
@@ -688,6 +725,17 @@ class RouteFragment : Fragment() {
     ) {
         lifecycleScope.launch {
             try {
+                // 根据 hostname 自动匹配 zone
+                val zone = zoneRepository.findZoneByHostname(account.id, recordName)
+                if (zone == null) {
+                    Snackbar.make(
+                        binding.root,
+                        "未找到对应的 Cloudflare 域名（Zone），无法自动添加 DNS 记录，请手动配置",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
+
                 // 显示加载状态
                 Snackbar.make(binding.root, "正在自动配置 DNS 记录...", Snackbar.LENGTH_SHORT).show()
                 
@@ -699,7 +747,7 @@ class RouteFragment : Fragment() {
                     ttl = 1 // Auto TTL
                 )
                 
-                when (val result = dnsRepository.createDnsRecord(account, account.zoneId!!, dnsRequest)) {
+                when (val result = dnsRepository.createDnsRecord(account, zone.id, dnsRequest)) {
                     is Resource.Success -> {
                         Snackbar.make(
                             binding.root,

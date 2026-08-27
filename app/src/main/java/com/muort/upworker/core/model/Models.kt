@@ -1202,7 +1202,22 @@ data class AccountAnalyticsOverview(
     val sslProtocolStats: List<NetworkStatItem> = emptyList(),
     val contentTypeStats: List<NetworkStatItem> = emptyList(),
     // 地区分布（按请求数降序，name 为 ISO 3166-1 alpha-2 国家码）
-    val regionStats: List<RegionStatItem> = emptyList()
+    val regionStats: List<RegionStatItem> = emptyList(),
+    // === D1 数据库监控 ===
+    val d1ReadRows: Long = 0,
+    val d1WriteRows: Long = 0,
+    val d1StorageBytes: Long = 0,
+    val d1DatabaseCount: Int = 0,
+    // === R2 存储监控 ===
+    val r2ClassAOperations: Long = 0,
+    val r2ClassBOperations: Long = 0,
+    val r2StorageBytes: Long = 0,
+    val r2BucketCount: Int = 0,
+    // === KV 存储监控 ===
+    val kvReads: Long = 0,
+    val kvWrites: Long = 0,
+    val kvStorageBytes: Long = 0,
+    val kvNamespaceCount: Int = 0,
 )
 
 /**
@@ -1375,21 +1390,6 @@ data class DashboardMetrics(
     val pagesPerVisit: Double = 0.0, // 人均页面浏览量 = pageViews / uniques
     val avgRequestSize: Double = 0.0, // 平均请求体积 (KB) = bytes / requests / 1024
     val unencryptedRequests: Long = 0, // 未加密请求数 = requests - encryptedRequests
-    // === D1 数据库监控 ===
-    val d1ReadRows: Long = 0, // D1 已读取行数 (主要计费指标) - GraphQL
-    val d1WriteRows: Long = 0, // D1 已写入行数 (主要计费指标) - GraphQL
-    val d1StorageBytes: Long = 0, // D1 总存储（字节）- REST API
-    val d1DatabaseCount: Int = 0, // D1 数据库数量 - REST API
-    // === R2 存储监控 ===
-    val r2ClassAOperations: Long = 0, // R2 A类操作（写操作）- GraphQL
-    val r2ClassBOperations: Long = 0, // R2 B类操作（读操作）- GraphQL
-    val r2StorageBytes: Long = 0, // R2 总存储（字节）- GraphQL
-    val r2BucketCount: Int = 0, // R2 存储桶数量 - REST API
-    // === KV 存储监控 ===
-    val kvReads: Long = 0, // KV 读取次数 - GraphQL
-    val kvWrites: Long = 0, // KV 写入次数（写/删/列表）- GraphQL
-    val kvStorageBytes: Long = 0, // KV 总存储（字节）- GraphQL
-    val kvNamespaceCount: Int = 0, // KV 命名空间数量 - REST API
     val requestsTimeSeries: List<TimeSeriesPoint> = emptyList(),
     val bandwidthTimeSeries: List<TimeSeriesPoint> = emptyList(),
     val threatsTimeSeries: List<TimeSeriesPoint> = emptyList(),

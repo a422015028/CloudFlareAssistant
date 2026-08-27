@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -51,6 +53,12 @@ class SnippetEditorFragment : Fragment() {
     private var hasUnsavedChanges = false
     private var originalContent: String = ""
     private var contentSavedForRule = false
+
+    private val openFileLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let { importFileContent(it) }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -152,6 +160,10 @@ class SnippetEditorFragment : Fragment() {
             getEditorContent { content ->
                 copyToClipboard(content)
             }
+        }
+
+        binding.btnImport.setOnClickListener {
+            openFileLauncher.launch(arrayOf("text/javascript", "text/plain", "application/javascript", "*/*"))
         }
 
         binding.btnSave.setOnClickListener {
@@ -438,6 +450,30 @@ class SnippetEditorFragment : Fragment() {
         val clip = ClipData.newPlainText("Snippet Code", content)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(requireContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun importFileContent(uri: Uri) {
+        try {
+            val content = requireContext().contentResolver.openInputStream(uri)?.use {
+                it.bufferedReader().readText()
+            }
+            if (content == null) {
+                Toast.makeText(requireContext(), "读取文件失败", Toast.LENGTH_SHORT).show()
+                return
+            }
+            // 将内容转义后设置到编辑器
+            val escaped = content
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+            executeJavaScript("setContent(\"$escaped\")")
+            hasUnsavedChanges = true
+            Toast.makeText(requireContext(), "已导入 ${content.length} 字符", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "导入失败: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
     private var lastTouchY = 0f

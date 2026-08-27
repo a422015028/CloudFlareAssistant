@@ -4,9 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:padding="16dp">
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp">
 
     <LinearLayout
+        android:id="@+id/homeContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -18,13 +21,8 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="12dp" />
 
-        <com.muort.upworker.feature.dashboard.DashboardCardView
-            android:id="@+id/dashboardCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp" />
-
         <GridLayout
+            android:id="@+id/featureGrid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:columnCount="2"
@@ -142,7 +140,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/routeCard"
+                android:id="@+id/customDomainCard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -169,7 +167,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="路由/自定义域"
+                        android:text="自定义域"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" />

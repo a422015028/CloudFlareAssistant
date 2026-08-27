@@ -467,11 +467,11 @@ class WorkerViewModel @Inject constructor(
     }
     
     // Routes
-    fun loadRoutes(account: Account) {
+    fun loadRoutes(account: Account, zoneId: String) {
         viewModelScope.launch {
             _loadingState.value = true
             
-            when (val result = workerRepository.listRoutes(account)) {
+            when (val result = workerRepository.listRoutes(account, zoneId)) {
                 is Resource.Success -> {
                     _routes.value = result.data
                     Timber.d("Loaded ${result.data.size} routes")
@@ -487,7 +487,7 @@ class WorkerViewModel @Inject constructor(
         }
     }
     
-    fun createRoute(account: Account, pattern: String, scriptName: String) {
+    fun createRoute(account: Account, zoneId: String, pattern: String, scriptName: String) {
         if (pattern.isBlank() || scriptName.isBlank()) {
             viewModelScope.launch {
                 _message.emit("请填写路由规则和脚本名称")
@@ -498,10 +498,10 @@ class WorkerViewModel @Inject constructor(
         viewModelScope.launch {
             _loadingState.value = true
             
-            when (val result = workerRepository.createRoute(account, pattern, scriptName)) {
+            when (val result = workerRepository.createRoute(account, zoneId, pattern, scriptName)) {
                 is Resource.Success -> {
                     _message.emit("路由创建成功")
-                    loadRoutes(account)
+                    loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
                     _message.emit("创建路由失败: ${result.message}")
@@ -513,14 +513,14 @@ class WorkerViewModel @Inject constructor(
         }
     }
     
-    fun updateRoute(account: Account, routeId: String, pattern: String, scriptName: String) {
+    fun updateRoute(account: Account, zoneId: String, routeId: String, pattern: String, scriptName: String) {
         viewModelScope.launch {
             _loadingState.value = true
             
-            when (val result = workerRepository.updateRoute(account, routeId, pattern, scriptName)) {
+            when (val result = workerRepository.updateRoute(account, zoneId, routeId, pattern, scriptName)) {
                 is Resource.Success -> {
                     _message.emit("路由更新成功")
-                    loadRoutes(account)
+                    loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
                     _message.emit("更新路由失败: ${result.message}")
@@ -532,14 +532,14 @@ class WorkerViewModel @Inject constructor(
         }
     }
     
-    fun deleteRoute(account: Account, routeId: String) {
+    fun deleteRoute(account: Account, zoneId: String, routeId: String) {
         viewModelScope.launch {
             _loadingState.value = true
             
-            when (val result = workerRepository.deleteRoute(account, routeId)) {
+            when (val result = workerRepository.deleteRoute(account, zoneId, routeId)) {
                 is Resource.Success -> {
                     _message.emit("路由删除成功")
-                    loadRoutes(account)
+                    loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
                     _message.emit("删除路由失败: ${result.message}")

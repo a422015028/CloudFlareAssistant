@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.GridLayout
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -50,7 +52,6 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     
     private val accountViewModel: AccountViewModel by activityViewModels()
-    private val dashboardViewModel: DashboardViewModel by viewModels()
     private val accountAnalyticsViewModel: AccountAnalyticsViewModel by viewModels()
     
     override fun onCreateView(
@@ -67,7 +68,6 @@ class HomeFragment : Fragment() {
         
         setupUI()
         observeViewModel()
-        setupDashboard()
         setupAccountAnalytics()
 
         // 日志卡片点击跳转新页面
@@ -75,32 +75,6 @@ class HomeFragment : Fragment() {
             startActivity(android.content.Intent(requireContext(), com.muort.upworker.feature.log.LogActivity::class.java))
         }
         // 日志开关已移至日志页面
-    }
-
-    private fun setupDashboard() {
-        // 设置刷新按钮点击监听
-        binding.dashboardCard.onRefreshClick = {
-            accountViewModel.defaultAccount.value?.let { account ->
-                dashboardViewModel.refresh(account)
-            }
-        }
-        
-        // 设置时间范围切换监听
-        binding.dashboardCard.onTimeRangeChanged = { timeRange ->
-            accountViewModel.defaultAccount.value?.let { account ->
-                dashboardViewModel.changeTimeRange(account, timeRange)
-            }
-        }
-        
-        // 设置仪表盘开关监听
-        binding.dashboardCard.onDashboardEnabledChanged = { isEnabled ->
-            if (isEnabled) {
-                // 开启时自动刷新数据
-                accountViewModel.defaultAccount.value?.let { account ->
-                    dashboardViewModel.refresh(account)
-                }
-            }
-        }
     }
 
     private fun setupAccountAnalytics() {
@@ -120,10 +94,63 @@ class HomeFragment : Fragment() {
 
         // 开关监听：开启时自动加载数据
         binding.accountAnalyticsCard.onAnalyticsEnabledChanged = { isEnabled ->
+            updateFeatureGridLayout(isEnabled)
             if (isEnabled) {
                 accountViewModel.defaultAccount.value?.let { account ->
                     accountAnalyticsViewModel.refresh(account)
                 }
+            }
+        }
+
+        // 初始化时根据开关状态设置布局模式
+        updateFeatureGridLayout(binding.accountAnalyticsCard.isAnalyticsEnabled())
+    }
+
+    /**
+     * 根据分析开关状态切换功能网格布局模式：
+     * - 分析开启：GridLayout wrap_content，卡片固定高度，内容可滚动
+     * - 分析关闭：GridLayout 占满剩余空间，卡片均匀分布，不留白
+     */
+    private fun updateFeatureGridLayout(analyticsEnabled: Boolean) {
+        val grid = binding.featureGrid
+        val container = binding.homeContainer
+        val childCount = grid.childCount
+
+        if (analyticsEnabled) {
+            // 分析开启：wrap_content 模式，内容可滚动
+            val containerParams = container.layoutParams
+            containerParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+            container.layoutParams = containerParams
+
+            val gridParams = grid.layoutParams as LinearLayout.LayoutParams
+            gridParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
+            gridParams.weight = 0f
+            grid.layoutParams = gridParams
+
+            for (i in 0 until childCount) {
+                val child = grid.getChildAt(i)
+                val params = child.layoutParams as GridLayout.LayoutParams
+                params.height = GridLayout.LayoutParams.WRAP_CONTENT
+                params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED)
+                child.layoutParams = params
+            }
+        } else {
+            // 分析关闭：填满剩余空间，卡片平分高度，不留白
+            val containerParams = container.layoutParams
+            containerParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+            container.layoutParams = containerParams
+
+            val gridParams = grid.layoutParams as LinearLayout.LayoutParams
+            gridParams.height = 0
+            gridParams.weight = 1f
+            grid.layoutParams = gridParams
+
+            for (i in 0 until childCount) {
+                val child = grid.getChildAt(i)
+                val params = child.layoutParams as GridLayout.LayoutParams
+                params.height = 0
+                params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                child.layoutParams = params
             }
         }
     }
@@ -150,7 +177,7 @@ class HomeFragment : Fragment() {
             }, 150)
         }
         
-        binding.routeCard.setOnClickListener {
+        binding.customDomainCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
                 findNavController().navigate(R.id.action_home_to_route)
@@ -420,10 +447,6 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     accountViewModel.defaultAccount.collect { account ->
-                        // 仅在仪表盘开关开启时加载数据
-                        if (account != null && binding.dashboardCard.isDashboardEnabled()) {
-                            dashboardViewModel.loadDashboard(account)
-                        }
                         // 仅在账户分析开关开启时加载数据
                         if (account != null && binding.accountAnalyticsCard.isAnalyticsEnabled()) {
                             accountAnalyticsViewModel.load(account)
@@ -446,26 +469,6 @@ class HomeFragment : Fragment() {
                             is AccountAnalyticsState.Error -> {
                                 binding.accountAnalyticsCard.showError(state.message)
                                 Timber.e("Account analytics error: ${state.message}")
-                            }
-                        }
-                    }
-                }
-                
-                launch {
-                    dashboardViewModel.dashboardState.collect { state ->
-                        when (state) {
-                            is DashboardState.Idle -> {
-                                // 初始状态，不显示任何内容
-                            }
-                            is DashboardState.Loading -> {
-                                binding.dashboardCard.showLoading()
-                            }
-                            is DashboardState.Success -> {
-                                binding.dashboardCard.showData(state.metrics)
-                            }
-                            is DashboardState.Error -> {
-                                binding.dashboardCard.showError(state.message)
-                                Timber.e("Dashboard error: ${state.message}")
                             }
                         }
                     }

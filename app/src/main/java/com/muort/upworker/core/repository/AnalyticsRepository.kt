@@ -23,12 +23,13 @@ class AnalyticsRepository @Inject constructor(
      * @param timeRange 时间范围（1天/7天/30天）
      */
     suspend fun getDashboardMetrics(
-        account: Account, 
+        account: Account,
+        zoneId: String,
         timeRange: TimeRange = TimeRange.ONE_DAY
-    ): Resource<DashboardMetrics> = 
+    ): Resource<DashboardMetrics> =
         withContext(Dispatchers.IO) {
             safeApiCall {
-                Timber.d("Fetching dashboard metrics for account: ${account.accountId}, timeRange: ${timeRange.displayName}")
+                Timber.d("Fetching dashboard metrics for zone: $zoneId, timeRange: ${timeRange.displayName}")
                 
                 // 使用时间范围枚举获取开始和结束时间
                 val startDateTime = timeRange.getStartDateTime()
@@ -37,10 +38,7 @@ class AnalyticsRepository @Inject constructor(
                 val startDate = startDateTime.substring(0, 10) // 提取日期部分
                 val endDate = endDateTime.substring(0, 10)
                 
-                // 如果有 zoneId，查询 Zone 级别的数据
-                val zoneId = account.zoneId
-                
-                val query = buildAnalyticsQuery(zoneId)
+                val query = buildAnalyticsQuery()
                 val variables = buildQueryVariables(
                     zoneId = zoneId,
                     accountId = account.accountId,
@@ -73,16 +71,7 @@ class AnalyticsRepository @Inject constructor(
                         return@safeApiCall Resource.Error("Analytics query failed: $errorMsg")
                     }
                     
-                    // 获取 D1 数据库列表（REST API）
-                    val d1Stats = fetchD1DatabaseStats(account)
-                    
-                    // 获取 R2 存储桶列表（REST API）
-                    val r2Stats = fetchR2BucketStats(account)
-
-                    // 获取 KV 命名空间列表（REST API）
-                    val kvStats = fetchKvNamespaceStats(account)
-
-                    val metrics = parseAnalyticsData(analyticsResponse?.data, d1Stats, r2Stats, kvStats)
+                    val metrics = parseAnalyticsData(analyticsResponse?.data)
                     Timber.d("Parsed metrics: $metrics")
                     Resource.Success(metrics)
                 } else {
@@ -96,10 +85,8 @@ class AnalyticsRepository @Inject constructor(
     /**
      * 构建 GraphQL 查询语句
      */
-    private fun buildAnalyticsQuery(zoneId: String?): String {
-        return if (zoneId != null) {
-            // Zone + Workers 查询
-            """
+    private fun buildAnalyticsQuery(): String {
+        return """
             query AnalyticsDashboard(${'$'}zoneTag: string, ${'$'}accountTag: string, ${'$'}sinceDate: string!, ${'$'}untilDate: string!, ${'$'}sinceTime: Time!, ${'$'}untilTime: Time!) {
               viewer {
                 zones(filter: {zoneTag: ${'$'}zoneTag}) {
@@ -199,85 +186,13 @@ class AnalyticsRepository @Inject constructor(
               }
             }
             """.trimIndent()
-        } else {
-            // 仅 Workers 查询
-            """
-            query WorkersDashboard(${'$'}accountTag: string, ${'$'}sinceDate: string!, ${'$'}untilDate: string!, ${'$'}sinceTime: Time!, ${'$'}untilTime: Time!) {
-              viewer {
-                accounts(filter: {accountTag: ${'$'}accountTag}) {
-                  workersInvocationsAdaptive(
-                    limit: 100,
-                    filter: {datetime_geq: ${'$'}sinceTime, datetime_leq: ${'$'}untilTime}
-                  ) {
-                    sum {
-                      requests
-                      errors
-                      subrequests
-                    }
-                    dimensions {
-                      scriptName
-                      datetime
-                    }
-                  }
-                  d1AnalyticsAdaptiveGroups(
-                    limit: 100,
-                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
-                  ) {
-                    sum {
-                      rowsRead
-                      rowsWritten
-                    }
-                  }
-                  r2OperationsAdaptiveGroups(
-                    limit: 100,
-                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
-                  ) {
-                    sum {
-                      requests
-                    }
-                    dimensions {
-                      actionType
-                    }
-                  }
-                  r2StorageAdaptiveGroups(
-                    limit: 1,
-                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
-                  ) {
-                    max {
-                      payloadSize
-                    }
-                  }
-                  kvOperationsAdaptiveGroups(
-                    limit: 100,
-                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
-                  ) {
-                    sum {
-                      requests
-                    }
-                    dimensions {
-                      actionType
-                    }
-                  }
-                  kvStorageAdaptiveGroups(
-                    limit: 1,
-                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
-                  ) {
-                    max {
-                      byteCount
-                    }
-                  }
-                }
-              }
-            }
-            """.trimIndent()
-        }
     }
     
     /**
      * 构建查询变量
      */
     private fun buildQueryVariables(
-        zoneId: String?,
+        zoneId: String,
         accountId: String,
         startDate: String,
         endDate: String,
@@ -285,11 +200,9 @@ class AnalyticsRepository @Inject constructor(
         endDateTime: String
     ): Map<String, Any> {
         return mutableMapOf<String, Any>().apply {
-            if (zoneId != null) {
-                put("zoneTag", zoneId)
-                put("sinceDate", startDate)
-                put("untilDate", endDate)
-            }
+            put("zoneTag", zoneId)
+            put("sinceDate", startDate)
+            put("untilDate", endDate)
             put("accountTag", accountId)
             put("sinceTime", startDateTime)
             put("untilTime", endDateTime)
@@ -317,6 +230,146 @@ class AnalyticsRepository @Inject constructor(
     private data class KvStats(
         val namespaceCount: Int = 0
     )
+
+    /**
+     * D1/R2/KV 用量数据（来自 GraphQL）
+     */
+    private data class StorageUsageData(
+        val d1ReadRows: Long = 0,
+        val d1WriteRows: Long = 0,
+        val r2ClassAOperations: Long = 0,
+        val r2ClassBOperations: Long = 0,
+        val r2StorageBytes: Long = 0,
+        val kvReads: Long = 0,
+        val kvWrites: Long = 0,
+        val kvStorageBytes: Long = 0,
+    )
+
+    /**
+     * 通过 GraphQL 查询账号级 D1/R2/KV 用量数据
+     */
+    private suspend fun fetchStorageUsageFromGraphQL(
+        account: Account,
+        timeRange: TimeRange
+    ): StorageUsageData {
+        return try {
+            val startDate = timeRange.getStartDateTime().substring(0, 10)
+            val endDate = timeRange.getEndDateTime().substring(0, 10)
+            val startTime = timeRange.getStartDateTime()
+            val endTime = timeRange.getEndDateTime()
+
+            val query = """
+            query StorageUsage(${'$'}accountTag: string, ${'$'}sinceDate: string!, ${'$'}untilDate: string!, ${'$'}sinceTime: Time!, ${'$'}untilTime: Time!) {
+              viewer {
+                accounts(filter: {accountTag: ${'$'}accountTag}) {
+                  d1AnalyticsAdaptiveGroups(
+                    limit: 100,
+                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
+                  ) {
+                    sum { rowsRead rowsWritten }
+                  }
+                  r2OperationsAdaptiveGroups(
+                    limit: 100,
+                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
+                  ) {
+                    sum { requests }
+                    dimensions { actionType }
+                  }
+                  r2StorageAdaptiveGroups(
+                    limit: 1,
+                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
+                  ) {
+                    max { payloadSize }
+                  }
+                  kvOperationsAdaptiveGroups(
+                    limit: 100,
+                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
+                  ) {
+                    sum { requests }
+                    dimensions { actionType }
+                  }
+                  kvStorageAdaptiveGroups(
+                    limit: 1,
+                    filter: {date_geq: ${'$'}sinceDate, date_leq: ${'$'}untilDate}
+                  ) {
+                    max { byteCount }
+                  }
+                }
+              }
+            }
+            """.trimIndent()
+
+            val variables = mapOf(
+                "accountTag" to account.accountId,
+                "sinceDate" to startDate,
+                "untilDate" to endDate,
+                "sinceTime" to startTime,
+                "untilTime" to endTime
+            )
+
+            val response = api.queryAnalytics(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                request = AnalyticsGraphQLRequest(query = query, variables = variables)
+            )
+
+            if (!response.isSuccessful) return StorageUsageData()
+            val data = response.body()?.data ?: return StorageUsageData()
+
+            var d1ReadRows = 0L
+            var d1WriteRows = 0L
+            var r2ClassA = 0L
+            var r2ClassB = 0L
+            var r2Storage = 0L
+            var kvReads = 0L
+            var kvWrites = 0L
+            var kvStorage = 0L
+
+            data.viewer?.accounts?.firstOrNull()?.let { acc ->
+                // D1
+                acc.d1Analytics?.forEach { g ->
+                    d1ReadRows += g.sum.rowsRead ?: 0
+                    d1WriteRows += g.sum.rowsWritten ?: 0
+                }
+                // R2 操作
+                acc.r2Operations?.forEach { g ->
+                    val action = g.dimensions?.actionType ?: ""
+                    val count = g.sum.requests ?: 0
+                    val isClassB = action.equals("GetObject", ignoreCase = true) ||
+                        action.equals("HeadObject", ignoreCase = true) ||
+                        action.equals("HeadBucket", ignoreCase = true) ||
+                        action.startsWith("Get", ignoreCase = true) ||
+                        action.equals("UsageSummary", ignoreCase = true)
+                    if (isClassB) r2ClassB += count else r2ClassA += count
+                }
+                // R2 存储
+                acc.r2Storage?.firstOrNull()?.max?.payloadSize?.let { r2Storage = it }
+                // KV 操作
+                acc.kvOperations?.forEach { g ->
+                    val action = g.dimensions?.actionType ?: ""
+                    val count = g.sum.requests ?: 0
+                    if (action.equals("read", ignoreCase = true)) kvReads += count else kvWrites += count
+                }
+                // KV 存储
+                acc.kvStorage?.firstOrNull()?.max?.byteCount?.let { kvStorage = it }
+            }
+
+            StorageUsageData(
+                d1ReadRows = d1ReadRows,
+                d1WriteRows = d1WriteRows,
+                r2ClassAOperations = r2ClassA,
+                r2ClassBOperations = r2ClassB,
+                r2StorageBytes = r2Storage,
+                kvReads = kvReads,
+                kvWrites = kvWrites,
+                kvStorageBytes = kvStorage,
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to fetch storage usage from GraphQL")
+            StorageUsageData()
+        }
+    }
     
     /**
      * 获取 D1 数据库统计信息（通过 REST API）
@@ -406,7 +459,7 @@ class AnalyticsRepository @Inject constructor(
     /**
      * 解析 Analytics 数据
      */
-    private fun parseAnalyticsData(data: AnalyticsData?, d1Stats: D1Stats = D1Stats(), r2Stats: R2Stats = R2Stats(), kvStats: KvStats = KvStats()): DashboardMetrics {
+    private fun parseAnalyticsData(data: AnalyticsData?): DashboardMetrics {
         if (data == null) {
             return DashboardMetrics()
         }
@@ -487,72 +540,12 @@ class AnalyticsRepository @Inject constructor(
             }
         }
         
-        // 解析 D1 和 R2 数据
-        var d1ReadRows = 0L
-        var d1WriteRows = 0L
-        var r2ClassAOperations = 0L // A类操作（写操作：PutObject, DeleteObject 等）
-        var r2ClassBOperations = 0L // B类操作（读操作：GetObject, ListObjects 等）
-        var r2StorageBytes = 0L // R2 总存储字节数
-        var kvReads = 0L // KV 读取次数
-        var kvWrites = 0L // KV 写入次数
-        var kvStorageBytes = 0L // KV 总存储字节数
-        
+        // 解析 Workers 数据
         data.viewer?.accounts?.firstOrNull()?.let { account ->
-            // Workers 数据
             account.workersInvocations?.forEach { group ->
                 workersInvocations += group.sum.requests
                 workersErrors += group.sum.errors
                 workersSubrequests += group.sum.subrequests ?: 0
-            }
-            
-            // D1 数据库数据 - 核心指标是行数，不是查询次数
-            account.d1Analytics?.forEach { group ->
-                d1ReadRows += group.sum.rowsRead ?: 0
-                d1WriteRows += group.sum.rowsWritten ?: 0
-            }
-            
-            // R2 操作数据 - 区分 A类/B类操作 (根据 Cloudflare R2 定价文档)
-            // A 类操作（写入/变更/列表）: ListBuckets, ListObjects, PutObject, DeleteObject, CopyObject 等
-            // B 类操作（读取）: GetObject, HeadObject, HeadBucket, GetBucket* 等
-            account.r2Operations?.forEach { group ->
-                val actionType = group.dimensions?.actionType ?: ""
-                val count = group.sum.requests ?: 0
-                
-                // B类操作（读操作）的关键字
-                val isClassB = actionType.equals("GetObject", ignoreCase = true) ||
-                    actionType.equals("HeadObject", ignoreCase = true) ||
-                    actionType.equals("HeadBucket", ignoreCase = true) ||
-                    actionType.startsWith("Get", ignoreCase = true) ||
-                    actionType.equals("UsageSummary", ignoreCase = true)
-                
-                if (isClassB) {
-                    r2ClassBOperations += count
-                } else {
-                    // 其他所有操作都是 A 类（写/变更/列表）
-                    r2ClassAOperations += count
-                }
-            }
-            
-            // R2 存储数据
-            account.r2Storage?.firstOrNull()?.max?.payloadSize?.let { storageBytes ->
-                r2StorageBytes = storageBytes
-            }
-
-            // KV 操作数据 - read 归读取，其余（write/list/delete）归写入
-            account.kvOperations?.forEach { group ->
-                val actionType = group.dimensions?.actionType ?: ""
-                val count = group.sum.requests ?: 0
-
-                if (actionType.equals("read", ignoreCase = true)) {
-                    kvReads += count
-                } else {
-                    kvWrites += count
-                }
-            }
-
-            // KV 存储数据
-            account.kvStorage?.firstOrNull()?.max?.byteCount?.let { storageBytes ->
-                kvStorageBytes = storageBytes
             }
         }
         
@@ -621,18 +614,6 @@ class AnalyticsRepository @Inject constructor(
             pagesPerVisit = pagesPerVisit,
             avgRequestSize = avgRequestSize,
             unencryptedRequests = unencryptedRequests,
-            d1ReadRows = d1ReadRows,
-            d1WriteRows = d1WriteRows,
-            d1StorageBytes = d1Stats.totalStorageBytes, // 来自 REST API
-            d1DatabaseCount = d1Stats.databaseCount, // 来自 REST API
-            r2ClassAOperations = r2ClassAOperations, // A类操作（写）- GraphQL
-            r2ClassBOperations = r2ClassBOperations, // B类操作（读）- GraphQL
-            r2StorageBytes = r2StorageBytes, // R2 总存储 - GraphQL
-            r2BucketCount = r2Stats.bucketCount, // 来自 REST API
-            kvReads = kvReads, // KV 读取 - GraphQL
-            kvWrites = kvWrites, // KV 写入 - GraphQL
-            kvStorageBytes = kvStorageBytes, // KV 总存储 - GraphQL
-            kvNamespaceCount = kvStats.namespaceCount, // 来自 REST API
             requestsTimeSeries = requestsTimeSeries.sortedBy { it.timestamp },
             bandwidthTimeSeries = bandwidthTimeSeries.sortedBy { it.timestamp },
             threatsTimeSeries = threatsTimeSeries.sortedBy { it.timestamp },
@@ -715,7 +696,31 @@ class AnalyticsRepository @Inject constructor(
                     }
                     val overview = parseAccountAnalytics(body?.data, hourly)
                     Timber.d("Parsed account analytics overview: requests=${overview.requests}")
-                    Resource.Success(overview)
+
+                    // 并行加载 D1/R2/KV 存储监控数据
+                    val d1Stats = runCatching { fetchD1DatabaseStats(account) }.getOrNull()
+                    val r2Stats = runCatching { fetchR2BucketStats(account) }.getOrNull()
+                    val kvStats = runCatching { fetchKvNamespaceStats(account) }.getOrNull()
+
+                    // 通过 GraphQL 查询 D1/R2/KV 的用量数据（复用已有的解析逻辑）
+                    val usageData = fetchStorageUsageFromGraphQL(account, timeRange)
+
+                    val overviewWithStorage = overview.copy(
+                        d1ReadRows = usageData.d1ReadRows,
+                        d1WriteRows = usageData.d1WriteRows,
+                        d1StorageBytes = d1Stats?.totalStorageBytes ?: 0L,
+                        d1DatabaseCount = d1Stats?.databaseCount ?: 0,
+                        r2ClassAOperations = usageData.r2ClassAOperations,
+                        r2ClassBOperations = usageData.r2ClassBOperations,
+                        r2StorageBytes = usageData.r2StorageBytes,
+                        r2BucketCount = r2Stats?.bucketCount ?: 0,
+                        kvReads = usageData.kvReads,
+                        kvWrites = usageData.kvWrites,
+                        kvStorageBytes = usageData.kvStorageBytes,
+                        kvNamespaceCount = kvStats?.namespaceCount ?: 0,
+                    )
+
+                    Resource.Success(overviewWithStorage)
                 } else {
                     val errorBody = response.errorBody()?.string()
                     Timber.e("Failed to fetch account analytics: ${response.code()}, $errorBody")

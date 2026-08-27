@@ -4,10 +4,6 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -23,7 +19,6 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.muort.upworker.core.model.Account
-import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.util.DataMigrationHelper
 import com.muort.upworker.core.util.DisplaySizeHelper
 import com.muort.upworker.core.util.MigrationResult
@@ -32,7 +27,6 @@ import com.muort.upworker.databinding.ActivityMainBinding
 import com.muort.upworker.databinding.DialogAccountSelectionBinding
 import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -184,14 +178,7 @@ class MainActivity : AppCompatActivity() {
                 onAccountSelected = { account ->
                     accountViewModel.setDefaultAccount(account.id)
                     dialog.dismiss()
-                    
-                    // Load zones and show zone selection dialog
-                    accountViewModel.loadZonesForAccount(account.id)
-                    lifecycleScope.launch {
-                        // Wait a bit for zones to load
-                        kotlinx.coroutines.delay(300)
-                        showZoneSelectionDialog(account)
-                    }
+                    showToast("已切换到 ${account.name}")
                 }
             )
             
@@ -257,18 +244,8 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    combine(
-                        accountViewModel.defaultAccount,
-                        accountViewModel.selectedZone
-                    ) { account, zone ->
-                        Pair(account, zone)
-                    }.collect { (account, zone) ->
-                        updateTitleBar(account, zone)
-                    }
-                }                
-
-                launch {
                     accountViewModel.defaultAccount.collect { account ->
+                        updateTitleBar(account)
                         account?.let {
                             accountViewModel.loadZonesForAccount(it.id)
                             // 仅应用冷启动时自动同步一次云端 zone 列表，避免每次返回主界面重复请求
@@ -286,79 +263,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    private fun updateTitleBar(account: Account?, zone: Zone?) {
+    private fun updateTitleBar(account: Account?) {
         if (account == null) {
             binding.currentAccountText.text = "未选择账号"
-            return
-        }
-
-        val accountName = account.name
-        val zoneName = zone?.name
-
-        if (zoneName.isNullOrEmpty()) {
-            binding.currentAccountText.text = accountName
         } else {
-            val text = "$accountName\n$zoneName"
-            val spannable = SpannableString(text)
-            
-            // 设置域名部分为正常字体（非粗体）和小字号 (75%)
-            val start = accountName.length + 1
-            val end = text.length
-            
-            spannable.setSpan(StyleSpan(android.graphics.Typeface.NORMAL), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            spannable.setSpan(RelativeSizeSpan(0.75f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            
-            binding.currentAccountText.text = spannable
+            binding.currentAccountText.text = account.name
         }
-    }
-    
-    private fun showZoneSelectionDialog(account: Account) {
-        val zones = accountViewModel.zones.value
-        val selectedZone = accountViewModel.selectedZone.value
-        
-        if (zones.isEmpty()) {
-            MaterialAlertDialogBuilder(this)
-                .setTitle("选择域名")
-                .setMessage("该账号暂无域名。\n\n您可以在账号管理页面通过API获取域名列表。")
-                .setPositiveButton("确定", null)
-                .show()
-            return
-        }
-        
-        // 如果只有一个域名，直接选择它
-        if (zones.size == 1) {
-            val zone = zones[0]
-            accountViewModel.selectZone(account.id, zone.id)
-            // 单域名自动选择，不需要额外提示
-            return
-        }
-        
-        val items = zones.map { zone ->
-            val status = if (zone.status == "active") "✓" else "○"
-            val selected = if (zone.id == selectedZone?.id) " [当前]" else ""
-            "$status ${zone.name}$selected"
-        }.toTypedArray()
-        
-        val selectedIndex = zones.indexOfFirst { it.id == selectedZone?.id }
-        
-        MaterialAlertDialogBuilder(this)
-            .setTitle("选择域名 - ${account.name}")
-            .setSingleChoiceItems(items, selectedIndex) { dialog, which ->
-                val zone = zones[which]
-                accountViewModel.selectZone(account.id, zone.id)
-                dialog.dismiss()
-            }
-            .setNeutralButton("从API刷新") { dialog, _ ->
-                dialog.dismiss()
-                accountViewModel.fetchZonesFromApi(account)
-                lifecycleScope.launch {
-                    // Wait for API call to complete
-                    kotlinx.coroutines.delay(1500)
-                    showZoneSelectionDialog(account)
-                }
-            }
-            .setNegativeButton("取消", null)
-            .show()
     }
     
     private fun performMigrationIfNeeded() {
