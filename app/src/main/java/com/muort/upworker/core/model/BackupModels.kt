@@ -8,7 +8,8 @@ import com.google.gson.annotations.SerializedName
 
 enum class StorageType {
     WEBDAV,
-    R2
+    R2,
+    LOCAL
 }
 
 // ==================== WebDAV Configuration ====================
@@ -22,6 +23,7 @@ data class WebDavConfig(
     val password: String,
     val backupPath: String = "/CloudFlareAssistant/",
     val autoBackup: Boolean = false,
+    val backupPassword: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )
@@ -36,6 +38,20 @@ data class R2BackupConfig(
     val bucketName: String,
     val backupPath: String = "backups/",
     val autoBackup: Boolean = false,
+    val backupPassword: String? = null,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
+)
+
+// ==================== Local Backup Configuration ====================
+
+@Entity(tableName = "local_backup_config")
+data class LocalBackupConfig(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val directoryUri: String? = null,
+    val autoBackup: Boolean = false,
+    val backupPassword: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )
@@ -63,7 +79,6 @@ data class AccountData(
     @SerializedName("email") val email: String? = null,
     @SerializedName("globalApiKey") val globalApiKey: String? = null,
     @SerializedName("authType") val authType: String = "TOKEN",
-    @SerializedName("zoneId") val zoneId: String? = null,
     @SerializedName("isDefault") val isDefault: Boolean = false,
     @SerializedName("r2AccessKeyId") val r2AccessKeyId: String? = null,
     @SerializedName("r2SecretAccessKey") val r2SecretAccessKey: String? = null,
@@ -80,7 +95,6 @@ fun Account.toAccountData() = AccountData(
     email = email,
     globalApiKey = globalApiKey,
     authType = authType,
-    zoneId = zoneId,
     isDefault = isDefault,
     r2AccessKeyId = r2AccessKeyId,
     r2SecretAccessKey = r2SecretAccessKey,
@@ -96,7 +110,6 @@ fun AccountData.toAccount() = Account(
     email = email,
     globalApiKey = globalApiKey,
     authType = authType,
-    zoneId = zoneId,
     isDefault = isDefault,
     r2AccessKeyId = r2AccessKeyId,
     r2SecretAccessKey = r2SecretAccessKey,

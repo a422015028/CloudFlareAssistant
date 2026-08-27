@@ -33,14 +33,43 @@ class AccountRepository @Inject constructor(
         coroutineScope.launch {
             try {
                 val backupRepository = backupRepositoryLazy.get()
-                val config = backupRepository.getWebDavConfigSync()
-                if (config?.autoBackup == true) {
-                    Timber.d("触发自动备份")
-                    val result = backupRepository.backupAccounts()
+
+                // WebDAV 自动备份
+                val webDavConfig = backupRepository.getWebDavConfigSync()
+                if (webDavConfig?.autoBackup == true) {
+                    Timber.d("触发 WebDAV 自动备份")
+                    val password = webDavConfig.backupPassword?.takeIf { it.isNotBlank() }
+                    val result = backupRepository.backupAccounts(password)
                     if (result.isSuccess) {
-                        Timber.d("自动备份成功: ${result.getOrNull()}")
+                        Timber.d("WebDAV 自动备份成功: ${result.getOrNull()}")
                     } else {
-                        Timber.e("自动备份失败: ${result.exceptionOrNull()?.message}")
+                        Timber.e("WebDAV 自动备份失败: ${result.exceptionOrNull()?.message}")
+                    }
+                }
+
+                // R2 自动备份
+                val r2Config = backupRepository.getR2BackupConfigSync()
+                if (r2Config?.autoBackup == true) {
+                    Timber.d("触发 R2 自动备份")
+                    val password = r2Config.backupPassword?.takeIf { it.isNotBlank() }
+                    val result = backupRepository.backupAccountsToR2(password)
+                    if (result.isSuccess) {
+                        Timber.d("R2 自动备份成功: ${result.getOrNull()}")
+                    } else {
+                        Timber.e("R2 自动备份失败: ${result.exceptionOrNull()?.message}")
+                    }
+                }
+
+                // 本地自动备份
+                val localConfig = backupRepository.getLocalBackupConfigSync()
+                if (localConfig?.autoBackup == true) {
+                    Timber.d("触发本地自动备份")
+                    val password = localConfig.backupPassword?.takeIf { it.isNotBlank() }
+                    val result = backupRepository.backupAccountsLocal(password)
+                    if (result.isSuccess) {
+                        Timber.d("本地自动备份成功: ${result.getOrNull()}")
+                    } else {
+                        Timber.e("本地自动备份失败: ${result.exceptionOrNull()?.message}")
                     }
                 }
             } catch (e: Exception) {
@@ -155,15 +184,6 @@ class AccountRepository @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e, "Error getting account count")
             0
-        }
-    }
-    
-    suspend fun updateAccountZoneId(accountId: Long, zoneId: String) {
-        try {
-            accountDao.updateAccountZoneId(accountId, zoneId)
-            Timber.d("Updated account $accountId zoneId to $zoneId")
-        } catch (e: Exception) {
-            Timber.e(e, "Error updating account zoneId")
         }
     }
     

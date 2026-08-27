@@ -187,13 +187,6 @@ class AccountAdapter : RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() 
             binding.accountNameText.text = account.name
             binding.accountIdText.text = "Account ID: ${account.accountId}"
             
-            if (account.zoneId.isNullOrBlank()) {
-                binding.zoneIdText.visibility = View.GONE
-            } else {
-                binding.zoneIdText.visibility = View.VISIBLE
-                binding.zoneIdText.text = "Zone ID: ${account.zoneId}"
-            }
-            
             binding.defaultChip.visibility = if (account.isDefault) View.VISIBLE else View.GONE
             
             binding.root.setOnClickListener {

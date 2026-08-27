@@ -218,7 +218,6 @@ class AccountEditFragment : Fragment() {
                     name, 
                     accountId, 
                     token.ifEmpty { "" },
-                    null,
                     isDefault,
                     r2AccessKeyId.ifEmpty { null },
                     r2SecretAccessKey.ifEmpty { null },

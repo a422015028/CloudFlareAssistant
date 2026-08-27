@@ -60,9 +60,9 @@ class BackupFilesAdapter(
         }
         
         private fun parseTimestamp(fileName: String): Long? {
-            // 文件名格式: cloudflare_backup_yyyyMMdd_HHmmss.json
+            // 文件名格式: cloudflare_backup_yyyyMMdd_HHmmss.json 或 .enc
             return try {
-                val pattern = "cloudflare_backup_(\\d{8})_(\\d{6})\\.json".toRegex()
+                val pattern = "cloudflare_backup_(\\d{8})_(\\d{6})\\.(json|enc)".toRegex()
                 val matchResult = pattern.find(fileName)
                 if (matchResult != null) {
                     val dateStr = matchResult.groupValues[1]

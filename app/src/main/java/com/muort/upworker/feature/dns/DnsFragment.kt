@@ -55,8 +55,8 @@ class DnsFragment : Fragment() {
         setupClickListeners()
         observeViewModel()
 
-        // 优先从导航参数获取 zoneId，回退到账号默认 zoneId
-        val zoneId = arguments?.getString("zoneId") ?: accountViewModel.defaultAccount.value?.zoneId
+        // 优先从导航参数获取 zoneId，回退到当前选中的 zone
+        val zoneId = arguments?.getString("zoneId") ?: accountViewModel.selectedZone.value?.id
         if (!zoneId.isNullOrBlank()) {
             dnsViewModel.setZoneId(zoneId)
             timber.log.Timber.d("DNS Fragment: Loading records for zoneId: $zoneId")
