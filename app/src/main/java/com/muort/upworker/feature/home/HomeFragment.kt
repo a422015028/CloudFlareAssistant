@@ -1,6 +1,7 @@
-package com.muort.upworker.feature.home
+﻿package com.muort.upworker.feature.home
 
 import com.muort.upworker.core.log.LogRepository
+import com.muort.upworker.core.util.safeNavigate
 import kotlinx.coroutines.flow.collectLatest
 
 import android.content.Intent
@@ -166,63 +167,63 @@ class HomeFragment : Fragment() {
         binding.workerCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                findNavController().navigate(R.id.action_home_to_worker)
+                findNavController().safeNavigate(R.id.action_home_to_worker)
             }, 150)
         }
         
         binding.dnsCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                findNavController().navigate(R.id.action_home_to_domainList)
+                findNavController().safeNavigate(R.id.action_home_to_domainList)
             }, 150)
         }
         
         binding.customDomainCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                findNavController().navigate(R.id.action_home_to_route)
+                findNavController().safeNavigate(R.id.action_home_to_route)
             }, 150)
         }
         
         binding.kvCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                findNavController().navigate(R.id.action_home_to_kv)
+                findNavController().safeNavigate(R.id.action_home_to_kv)
             }, 150)
         }
         
         binding.pagesCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                findNavController().navigate(R.id.action_home_to_pages)
+                findNavController().safeNavigate(R.id.action_home_to_pages)
             }, 150)
         }
         
         binding.r2Card.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                findNavController().navigate(R.id.action_home_to_r2)
+                findNavController().safeNavigate(R.id.action_home_to_r2)
             }, 150)
         }
         
         binding.d1Card.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                findNavController().navigate(R.id.action_home_to_d1)
+                findNavController().safeNavigate(R.id.action_home_to_d1)
             }, 150)
         }
         
         binding.backupCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                findNavController().navigate(R.id.action_home_to_backup)
+                findNavController().safeNavigate(R.id.action_home_to_backup)
             }, 150)
         }
         
         binding.zeroTrustCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
             it.postDelayed({
-                findNavController().navigate(R.id.action_home_to_zerotrust)
+                findNavController().safeNavigate(R.id.action_home_to_zerotrust)
             }, 150)
         }
         
