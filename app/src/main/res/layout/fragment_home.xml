@@ -56,7 +56,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Workers脚本"
+                        android:text="@string/card_workers"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -97,7 +97,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Pages项目"
+                        android:text="@string/card_pages"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -138,7 +138,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="域名管理"
+                        android:text="@string/card_domains"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -179,7 +179,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="自定义域"
+                        android:text="@string/card_custom_domain"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -220,7 +220,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="KV命名空间"
+                        android:text="@string/card_kv"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -261,7 +261,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="R2对象存储"
+                        android:text="@string/card_r2"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -302,7 +302,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="D1数据库"
+                        android:text="@string/card_d1"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -343,7 +343,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="ZeroTrust管理"
+                        android:text="@string/card_zero_trust"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -384,7 +384,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="备份恢复"
+                        android:text="@string/card_backup"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -425,7 +425,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="HTTP日志"
+                        android:text="@string/card_http_log"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -466,7 +466,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="设置"
+                        android:text="@string/card_settings"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"
@@ -507,7 +507,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="关于"
+                        android:text="@string/card_about"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp" android:gravity="center"

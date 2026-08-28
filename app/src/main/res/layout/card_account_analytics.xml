@@ -27,7 +27,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="📈 账户分析概览"
+                android:text="@string/account_analytics"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurface" />
@@ -55,7 +55,7 @@
                 android:id="@+id/analyticsStatusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="正常"
+                android:text="@string/analytics_status_normal"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1557,3 +1557,4 @@
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
+

@@ -14,7 +14,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="主题模式"
+            android:text="@string/theme_mode"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
@@ -33,7 +33,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="跟随系统"
+                android:text="@string/theme_follow_system"
                 android:textSize="13sp"
                 style="@style/Widget.Material3.Button.OutlinedButton" />
 
@@ -42,7 +42,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="浅色"
+                android:text="@string/theme_light"
                 android:textSize="13sp"
                 style="@style/Widget.Material3.Button.OutlinedButton" />
 
@@ -51,7 +51,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="深色"
+                android:text="@string/theme_dark"
                 android:textSize="13sp"
                 style="@style/Widget.Material3.Button.OutlinedButton" />
 
@@ -75,7 +75,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="动态配色"
+                    android:text="@string/dynamic_color"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -83,7 +83,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="跟随系统自动调整主题色（Android 12+）"
+                    android:text="@string/dynamic_color_desc"
                     android:textSize="12sp"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:layout_marginTop="2dp" />
@@ -108,7 +108,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="显示大小"
+            android:text="@string/display_size"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
@@ -126,15 +126,70 @@
             android:id="@+id/displaySizeButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="调整显示大小"
+            android:text="@string/adjust_display_size"
             style="@style/Widget.Material3.Button.OutlinedButton" />
 
-            <!-- 底部完成按钮 -->
+        <!-- 分割线 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorOutlineVariant"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="20dp" />
+
+        <!-- 语言 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/language"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/languageToggleGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/langFollowSystemBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/language_follow_system"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/langChineseBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/language_simplified_chinese"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/langEnglishBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/language_english"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <!-- 底部完成按钮 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/settingsDoneButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="完成"
+            android:text="@string/done"
             android:textSize="15sp"
             android:layout_marginTop="24dp"
             app:cornerRadius="12dp"

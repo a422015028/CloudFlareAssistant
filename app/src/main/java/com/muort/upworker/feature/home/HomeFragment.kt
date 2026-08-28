@@ -1,6 +1,7 @@
 ﻿package com.muort.upworker.feature.home
 
 import com.muort.upworker.core.log.LogRepository
+import com.muort.upworker.core.util.LocaleHelper
 import com.muort.upworker.core.util.ThemeHelper
 import com.muort.upworker.core.util.safeNavigate
 import kotlinx.coroutines.flow.collectLatest
@@ -406,15 +407,39 @@ class HomeFragment : Fragment() {
             dialogBinding.dynamicColorLayout.visibility = View.GONE
         }
 
+        // 语言设置
+        val language = LocaleHelper.getLanguage(requireContext())
+        val langButtonId = when (language) {
+            LocaleHelper.LANGUAGE_SIMPLIFIED_CHINESE -> R.id.langChineseBtn
+            LocaleHelper.LANGUAGE_ENGLISH -> R.id.langEnglishBtn
+            else -> R.id.langFollowSystemBtn
+        }
+        dialogBinding.languageToggleGroup.check(langButtonId)
+
+        dialogBinding.languageToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val lang = when (checkedId) {
+                    R.id.langChineseBtn -> LocaleHelper.LANGUAGE_SIMPLIFIED_CHINESE
+                    R.id.langEnglishBtn -> LocaleHelper.LANGUAGE_ENGLISH
+                    else -> LocaleHelper.LANGUAGE_FOLLOW_SYSTEM
+                }
+                LocaleHelper.setLanguage(requireContext(), lang)
+                // 延迟重启，让用户看到按钮切换效果
+                view?.postDelayed({
+                    if (isAdded) activity?.recreate()
+                }, 200)
+            }
+        }
+
         // 显示大小
         val currentSize = DisplaySizeHelper.OPTIONS[DisplaySizeHelper.getSelectedIndex(requireContext())].first
-        dialogBinding.displaySizeCurrentText.text = "当前：$currentSize"
+        dialogBinding.displaySizeCurrentText.text = getString(R.string.display_size_current, currentSize)
         dialogBinding.displaySizeButton.setOnClickListener {
             showDisplaySizeDialog()
         }
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("设置")
+            .setTitle(R.string.settings_title)
             .setView(dialogBinding.root)
             .show()
 
@@ -428,7 +453,7 @@ class HomeFragment : Fragment() {
         val labels = DisplaySizeHelper.OPTIONS.map { it.first }.toTypedArray()
         val selectedIndex = DisplaySizeHelper.getSelectedIndex(requireContext())
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("显示大小")
+            .setTitle(R.string.display_size)
             .setSingleChoiceItems(labels, selectedIndex) { dialog, which ->
                 val scale = DisplaySizeHelper.OPTIONS[which].second
                 DisplaySizeHelper.setFontScale(requireContext(), scale)
@@ -436,7 +461,7 @@ class HomeFragment : Fragment() {
                 // 重启 Activity 以应用新的字体缩放
                 requireActivity().recreate()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -447,13 +472,13 @@ class HomeFragment : Fragment() {
         try {
             val packageInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
             val versionName = packageInfo.versionName
-            dialogBinding.tvVersion.text = "版本 $versionName"
+            dialogBinding.tvVersion.text = getString(R.string.about_version, versionName)
         } catch (e: Exception) {
             Timber.e(e, "Failed to get version name")
         }
         
         // 动态设置版权年份
-        dialogBinding.tvCopyright.text = "© ${Year.now().value} CloudFlare Assistant\nMIT License"
+        dialogBinding.tvCopyright.text = getString(R.string.about_copyright, Year.now().value)
         
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
@@ -489,10 +514,10 @@ class HomeFragment : Fragment() {
             val content = dialogBinding.tvApiTokenGuideContent
             if (content.visibility == View.GONE) {
                 content.visibility = View.VISIBLE
-                dialogBinding.tvApiTokenGuideTitle.text = "🔑 如何获取 Cloudflare API 令牌（点击收起）"
+                dialogBinding.tvApiTokenGuideTitle.setText(R.string.about_api_token_guide_title_collapse)
             } else {
                 content.visibility = View.GONE
-                dialogBinding.tvApiTokenGuideTitle.text = "🔑 如何获取 Cloudflare API 令牌（点击展开）"
+                dialogBinding.tvApiTokenGuideTitle.setText(R.string.about_api_token_guide_title_expand)
             }
         }
         
@@ -521,7 +546,7 @@ class HomeFragment : Fragment() {
         
         // 显示加载动画
         progressBar.visibility = android.view.View.VISIBLE
-        textView.text = "检查中..."
+        textView.setText(R.string.checking)
         
         viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -529,25 +554,25 @@ class HomeFragment : Fragment() {
                 
                 // 恢复按钮状态
                 progressBar.visibility = android.view.View.GONE
-                textView.text = "检查更新"
+                textView.setText(R.string.check_update)
                 
                 if (updateInfo != null) {
                     val latestVersionCode = updateInfo.versionCode
                     if (latestVersionCode > currentVersionCode || isNewerVersion(updateInfo.versionName, currentVersionName)) {
                         showUpdateDialog(updateInfo.versionName, latestVersionCode, updateInfo.updateContent, updateInfo.apkUrl)
                     } else {
-                        requireContext().showToast("当前已是最新版本")
+                        requireContext().showToast(getString(R.string.already_latest_version))
                     }
                 } else {
-                    requireContext().showToast("检查更新失败")
+                    requireContext().showToast(getString(R.string.check_update_failed))
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Check update error")
-                requireContext().showToast("检查更新失败")
+                requireContext().showToast(getString(R.string.check_update_failed))
                 
                 // 恢复按钮状态
                 progressBar.visibility = android.view.View.GONE
-                textView.text = "检查更新"
+                textView.setText(R.string.check_update)
             }
         }
     }
@@ -585,21 +610,21 @@ class HomeFragment : Fragment() {
     
     private fun showUpdateDialog(versionName: String, versionCode: Long, updateContent: String, apkUrl: String) {
         val message = if (updateContent.isNotBlank()) {
-            "版本 $versionName (Build $versionCode)\n\n$updateContent"
+            getString(R.string.version_with_build_format, versionName, versionCode) + "\n\n$updateContent"
         } else {
-            "版本 $versionName (Build $versionCode) 可用，是否立即更新？"
+            getString(R.string.new_version_available, getString(R.string.version_format, versionName))
         }
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("发现新版本")
+            .setTitle(R.string.new_version_found)
             .setMessage(message)
-            .setPositiveButton("更新") { _, _ ->
+            .setPositiveButton(R.string.update) { _, _ ->
                 if (apkUrl.isNotBlank()) {
                     openUrl(apkUrl)
                 } else {
-                    requireContext().showToast("下载地址无效")
+                    requireContext().showToast(getString(R.string.invalid_download_url))
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -624,7 +649,7 @@ class HomeFragment : Fragment() {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             startActivity(intent)
         } catch (e: Exception) {
-            requireContext().showToast("无法打开链接")
+            requireContext().showToast(getString(R.string.cannot_open_url))
             Timber.e(e, "Failed to open URL: $url")
         }
     }

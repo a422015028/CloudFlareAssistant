@@ -13,6 +13,20 @@
     <string name="edit">编辑</string>
     <string name="save">保存</string>
     <string name="add">添加</string>
+    <string name="done">完成</string>
+    <string name="settings">设置</string>
+    <string name="about">关于</string>
+    <string name="checking">检查中…</string>
+    <string name="check_update">检查更新</string>
+    <string name="check_update_failed">检查更新失败</string>
+    <string name="already_latest_version">当前已是最新版本</string>
+    <string name="new_version_found">发现新版本</string>
+    <string name="update">更新</string>
+    <string name="invalid_download_url">下载地址无效</string>
+    <string name="cannot_open_url">无法打开链接</string>
+    <string name="version_format">版本 %1$s</string>
+    <string name="version_with_build_format">版本 %1$s (Build %2$d)</string>
+    <string name="new_version_available">%1$s 可用，是否立即更新？</string>
     
     <!-- 账户相关 -->
     <string name="account_empty">暂无账户\n点击 + 添加</string>
@@ -52,6 +66,71 @@
     <string name="r2_bucket">存储桶</string>
     <string name="r2_create_bucket">创建存储桶</string>
     <string name="r2_delete_bucket_confirm">确定要删除此存储桶吗？</string>
+    
+    <!-- 首页卡片 -->
+    <string name="card_workers">Workers脚本</string>
+    <string name="card_pages">Pages项目</string>
+    <string name="card_domains">域名管理</string>
+    <string name="card_custom_domain">自定义域</string>
+    <string name="card_kv">KV命名空间</string>
+    <string name="card_r2">R2对象存储</string>
+    <string name="card_d1">D1数据库</string>
+    <string name="card_zero_trust">ZeroTrust管理</string>
+    <string name="card_backup">备份恢复</string>
+    <string name="card_http_log">HTTP日志</string>
+    <string name="card_settings">设置</string>
+    <string name="card_about">关于</string>
+    
+    <!-- 设置对话框 -->
+    <string name="settings_title">设置</string>
+    <string name="theme_mode">主题模式</string>
+    <string name="theme_follow_system">跟随系统</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_dark">深色</string>
+    <string name="dynamic_color">动态配色</string>
+    <string name="dynamic_color_desc">跟随系统自动调整主题色（Android 12+）</string>
+    <string name="display_size">显示大小</string>
+    <string name="display_size_current">当前：%1$s</string>
+    <string name="adjust_display_size">调整显示大小</string>
+    <string name="language">语言</string>
+    <string name="language_follow_system">跟随系统</string>
+    <string name="language_simplified_chinese">简体中文</string>
+    <string name="language_english">English</string>
+    
+    <!-- 账户分析卡片 -->
+    <string name="account_analytics">账户分析概览</string>
+    <string name="analytics_enable">开启分析</string>
+    <string name="analytics_time_range_24h">24小时</string>
+    <string name="analytics_time_range_7d">7天</string>
+    <string name="analytics_time_range_30d">30天</string>
+    <string name="analytics_total_requests">总请求数</string>
+    <string name="analytics_bandwidth">带宽</string>
+    <string name="analytics_unique_visitors">独立访客</string>
+    <string name="analytics_threats">威胁数</string>
+    <string name="analytics_loading">加载中…</string>
+    <string name="analytics_error">加载失败</string>
+    <string name="analytics_retry">点击重试</string>
+    <string name="analytics_disabled_hint">开启后显示账户级分析数据</string>
+    <string name="analytics_status_normal">正常</string>
+    <string name="analytics_status_warning">警告</string>
+    <string name="analytics_status_critical">严重</string>
+    <string name="analytics_region_tor">Tor 网络流量</string>
+    <string name="analytics_region_unknown">未知地区</string>
+    
+    <!-- 关于对话框 -->
+    <string name="about_version">版本 %1$s</string>
+    <string name="about_copyright">© %1$d Cloudflare Assistant\nMIT License</string>
+    <string name="about_telegram_group">📱 Telegram 群组</string>
+    <string name="about_telegram_join">加入讨论 →</string>
+    <string name="about_github">🌟 GitHub</string>
+    <string name="about_github_view">查看源码 →</string>
+    <string name="about_cloudflare_api">🌐 Cloudflare API 文档</string>
+    <string name="about_cloudflare_website">🏠 Cloudflare 官网</string>
+    <string name="about_app_website">🚀 本应用官网</string>
+    <string name="about_visit">访问 →</string>
+    <string name="about_api_token_guide_title_expand">🔑 如何获取 Cloudflare API 令牌（点击展开）</string>
+    <string name="about_api_token_guide_title_collapse">🔑 如何获取 Cloudflare API 令牌（点击收起）</string>
+    <string name="about_api_token_guide_content">所需API权限: \n\n1. 登录 Cloudflare 仪表板\n2. 进入 我的个人资料 → API 令牌\n3. 点击 创建令牌\n4. 选择以下权限：\n\n【账户级别权限】\n   • Account Settings: 读取\n   • Workers Scripts: 编辑\n   • Workers Routes: 编辑\n   • Workers R2 Storage: 编辑\n   • Workers KV Storage: 编辑\n   • Cloudflare Pages: 编辑\n   • D1: 编辑\n   • Account Analytics: 读取\n\n【Zero Trust 权限】\n   • Zero Trust: 编辑\n   • Access: Apps and Policies: 编辑\n   • Access: Service Tokens: 编辑\n   • Gateway: 编辑\n   • Cloudflare Tunnel: 编辑\n\n【Zone 级别权限】\n   • Zone: 读取\n   • DNS: 编辑\n\n5. 账户资源选择：包含所有账户\n6. Zone资源选择：包含所有Zone\n7. 复制生成的 Token</string>
     
     <string-array name="dns_types">
         <item>A</item>

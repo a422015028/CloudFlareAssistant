@@ -1,0 +1,176 @@
+<resources>
+    <string name="app_name">Cloudflare Assistant</string>
+    
+    <!-- Common strings -->
+    <string name="loading">Loading…</string>
+    <string name="empty_list">No data</string>
+    <string name="error_network">Network error, please check your connection</string>
+    <string name="success">Success</string>
+    <string name="failed">Failed</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="save">Save</string>
+    <string name="add">Add</string>
+    <string name="done">Done</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+    <string name="checking">Checking…</string>
+    <string name="check_update">Check Update</string>
+    <string name="check_update_failed">Failed to check for updates</string>
+    <string name="already_latest_version">You are already on the latest version</string>
+    <string name="new_version_found">New Version Available</string>
+    <string name="update">Update</string>
+    <string name="invalid_download_url">Invalid download URL</string>
+    <string name="cannot_open_url">Unable to open link</string>
+    <string name="version_format">Version %1$s</string>
+    <string name="version_with_build_format">Version %1$s (Build %2$d)</string>
+    <string name="new_version_available">%1$s is available. Update now?</string>
+    
+    <!-- Account -->
+    <string name="account_empty">No account yet\nTap + to add</string>
+    <string name="account_add">Add Account</string>
+    <string name="account_edit">Edit Account</string>
+    <string name="account_delete_confirm">Delete this account?</string>
+    <string name="account_set_default">Set as Default</string>
+    
+    <!-- Worker -->
+    <string name="worker_upload">Upload Worker</string>
+    <string name="worker_select_file">Select File</string>
+    <string name="worker_uploading">Uploading…</string>
+    <string name="worker_upload_success">Upload successful</string>
+    <string name="worker_upload_failed">Upload failed</string>
+    
+    <!-- DNS -->
+    <string name="dns_record">DNS Records</string>
+    <string name="dns_add_record">Add Record</string>
+    <string name="dns_edit_record">Edit Record</string>
+    <string name="dns_delete_confirm">Delete this DNS record?</string>
+    
+    <!-- KV -->
+    <string name="kv_namespace">Namespaces</string>
+    <string name="kv_create_namespace">Create Namespace</string>
+    <string name="kv_delete_namespace_confirm">Delete this namespace?</string>
+    <string name="kv_key_value">Key-Value Pairs</string>
+    <string name="kv_add_key">Add Key-Value</string>
+    <string name="kv_edit_key">Edit Key-Value</string>
+    <string name="kv_delete_key_confirm">Delete this key-value pair?</string>
+    
+    <!-- Pages -->
+    <string name="pages_project">Pages Projects</string>
+    <string name="pages_create_project">Create Project</string>
+    <string name="pages_delete_project_confirm">Delete this project?</string>
+    
+    <!-- R2 -->
+    <string name="r2_bucket">Buckets</string>
+    <string name="r2_create_bucket">Create Bucket</string>
+    <string name="r2_delete_bucket_confirm">Delete this bucket?</string>
+    
+    <!-- Home cards -->
+    <string name="card_workers">Workers</string>
+    <string name="card_pages">Pages</string>
+    <string name="card_domains">Domains</string>
+    <string name="card_custom_domain">Custom Domains</string>
+    <string name="card_kv">KV Namespace</string>
+    <string name="card_r2">R2 Storage</string>
+    <string name="card_d1">D1 Database</string>
+    <string name="card_zero_trust">Zero Trust</string>
+    <string name="card_backup">Backup &amp; Restore</string>
+    <string name="card_http_log">HTTP Logs</string>
+    <string name="card_settings">Settings</string>
+    <string name="card_about">About</string>
+    
+    <!-- Settings dialog -->
+    <string name="settings_title">Settings</string>
+    <string name="theme_mode">Theme Mode</string>
+    <string name="theme_follow_system">System Default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="dynamic_color">Dynamic Color</string>
+    <string name="dynamic_color_desc">Auto-theme color from wallpaper (Android 12+)</string>
+    <string name="display_size">Display Size</string>
+    <string name="display_size_current">Current: %1$s</string>
+    <string name="adjust_display_size">Adjust Display Size</string>
+    <string name="language">Language</string>
+    <string name="language_follow_system">System Default</string>
+    <string name="language_simplified_chinese">简体中文</string>
+    <string name="language_english">English</string>
+    
+    <!-- Account Analytics card -->
+    <string name="account_analytics">Account Analytics Overview</string>
+    <string name="analytics_enable">Enable Analytics</string>
+    <string name="analytics_time_range_24h">24h</string>
+    <string name="analytics_time_range_7d">7d</string>
+    <string name="analytics_time_range_30d">30d</string>
+    <string name="analytics_total_requests">Total Requests</string>
+    <string name="analytics_bandwidth">Bandwidth</string>
+    <string name="analytics_unique_visitors">Unique Visitors</string>
+    <string name="analytics_threats">Threats</string>
+    <string name="analytics_loading">Loading…</string>
+    <string name="analytics_error">Failed to load</string>
+    <string name="analytics_retry">Tap to retry</string>
+    <string name="analytics_disabled_hint">Enable to view account-level analytics</string>
+    <string name="analytics_status_normal">Normal</string>
+    <string name="analytics_status_warning">Warning</string>
+    <string name="analytics_status_critical">Critical</string>
+    <string name="analytics_region_tor">Tor Traffic</string>
+    <string name="analytics_region_unknown">Unknown Region</string>
+    
+    <!-- About dialog -->
+    <string name="about_version">Version %1$s</string>
+    <string name="about_copyright">© %1$d Cloudflare Assistant\nMIT License</string>
+    <string name="about_telegram_group">📱 Telegram Group</string>
+    <string name="about_telegram_join">Join →</string>
+    <string name="about_github">🌟 GitHub</string>
+    <string name="about_github_view">View Source →</string>
+    <string name="about_cloudflare_api">🌐 Cloudflare API Docs</string>
+    <string name="about_cloudflare_website">🏠 Cloudflare Website</string>
+    <string name="about_app_website">🚀 Official Website</string>
+    <string name="about_visit">Visit →</string>
+    <string name="about_api_token_guide_title_expand">🔑 How to get a Cloudflare API Token (tap to expand)</string>
+    <string name="about_api_token_guide_title_collapse">🔑 How to get a Cloudflare API Token (tap to collapse)</string>
+    <string name="about_api_token_guide_content">Required API Permissions:\n\n1. Log in to the Cloudflare Dashboard\n2. Go to My Profile → API Tokens\n3. Tap Create Token\n4. Select the following permissions:\n\n[Account Level]\n   • Account Settings: Read\n   • Workers Scripts: Edit\n   • Workers Routes: Edit\n   • Workers R2 Storage: Edit\n   • Workers KV Storage: Edit\n   • Cloudflare Pages: Edit\n   • D1: Edit\n   • Account Analytics: Read\n\n[Zero Trust]\n   • Zero Trust: Edit\n   • Access: Apps and Policies: Edit\n   • Access: Service Tokens: Edit\n   • Gateway: Edit\n   • Cloudflare Tunnel: Edit\n\n[Zone Level]\n   • Zone: Read\n   • DNS: Edit\n\n5. Account Resources: Include all accounts\n6. Zone Resources: Include all zones\n7. Copy the generated token</string>
+    
+    <string-array name="dns_types">
+        <item>A</item>
+        <item>AAAA</item>
+        <item>CNAME</item>
+        <item>TXT</item>
+        <item>MX</item>
+        <item>NS</item>
+        <item>SRV</item>
+        <item>LOC</item>
+        <item>CERT</item>
+        <item>DS</item>
+        <item>NAPTR</item>
+        <item>SMIMEA</item>
+        <item>SSHFP</item>
+        <item>SVCB</item>
+        <item>TLSA</item>
+        <item>URI</item>
+        <item>PTR</item>
+        <item>HTTPS</item>
+    </string-array>
+
+    <string-array name="default_ttl">
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+    </string-array>
+</resources>

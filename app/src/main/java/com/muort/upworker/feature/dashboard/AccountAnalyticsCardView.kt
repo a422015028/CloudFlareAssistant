@@ -46,10 +46,15 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         private const val REGION_PAGE_SIZE = 10
 
         // Cloudflare 分析中的非 ISO 国家码
-        private val specialRegionNames = mapOf(
-            "T1" to "Tor 网络流量",
-            "XX" to "未知地区"
-        )
+        private val specialRegionCodes = setOf("T1", "XX")
+    }
+
+    private fun specialRegionName(code: String): String {
+        return when (code) {
+            "T1" -> context.getString(R.string.analytics_region_tor)
+            "XX" -> context.getString(R.string.analytics_region_unknown)
+            else -> code
+        }
     }
 
     private var regionStats: List<RegionStatItem> = emptyList()
@@ -185,7 +190,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         binding.analyticsLoadingContainer.visibility = View.VISIBLE
         binding.analyticsContentContainer.visibility = View.GONE
         binding.analyticsErrorContainer.visibility = View.GONE
-        setStatus("加载中")
+        setStatus(context.getString(R.string.analytics_loading))
     }
 
     fun showError(message: String) {
@@ -193,7 +198,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         binding.analyticsContentContainer.visibility = View.GONE
         binding.analyticsErrorContainer.visibility = View.VISIBLE
         binding.analyticsErrorText.text = message
-        setStatus("错误", R.color.md_theme_error)
+        setStatus(context.getString(R.string.analytics_error), R.color.md_theme_error)
     }
 
     fun showData(overview: AccountAnalyticsOverview) {
@@ -404,9 +409,9 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
      */
     private fun updateStatus(overview: AccountAnalyticsOverview) {
         when {
-            overview.error5xxRate > 5.0 -> setStatus("严重", R.color.md_theme_error)
-            overview.error5xxRate > 1.0 || overview.error4xxRate > 20.0 -> setStatus("警告", R.color.md_theme_tertiary)
-            else -> setStatus("正常", android.R.color.holo_green_dark)
+            overview.error5xxRate > 5.0 -> setStatus(context.getString(R.string.analytics_status_critical), R.color.md_theme_error)
+            overview.error5xxRate > 1.0 || overview.error4xxRate > 20.0 -> setStatus(context.getString(R.string.analytics_status_warning), R.color.md_theme_tertiary)
+            else -> setStatus(context.getString(R.string.analytics_status_normal), android.R.color.holo_green_dark)
         }
     }
 
@@ -542,7 +547,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
      */
     private fun countryDisplayName(code: String): String {
         if (code.isBlank()) return code
-        specialRegionNames[code]?.let { return it }
+        if (specialRegionCodes.contains(code)) return specialRegionName(code)
         return try {
             val name = java.util.Locale.Builder()
                 .setRegion(code)

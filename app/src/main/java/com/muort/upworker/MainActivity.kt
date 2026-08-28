@@ -21,6 +21,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.util.DataMigrationHelper
 import com.muort.upworker.core.util.DisplaySizeHelper
+import com.muort.upworker.core.util.LocaleHelper
 import com.muort.upworker.core.util.MigrationResult
 import com.muort.upworker.core.util.ThemeHelper
 import com.muort.upworker.core.util.showToast
@@ -42,7 +43,9 @@ class MainActivity : AppCompatActivity() {
     lateinit var migrationHelper: DataMigrationHelper
 
     override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(DisplaySizeHelper.wrap(newBase))
+        // 先应用语言设置，再应用显示大小设置
+        val localeContext = LocaleHelper.applyLocale(newBase)
+        super.attachBaseContext(DisplaySizeHelper.wrap(localeContext))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

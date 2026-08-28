@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"
-        android:text="版本 5.3"
+        android:text="@string/about_version"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp" />
 
@@ -65,7 +65,7 @@
             android:id="@+id/tvCheckUpdate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="检查更新"
+            android:text="@string/check_update"
             android:textColor="?attr/colorPrimary"
             android:textSize="14sp" />
     </LinearLayout>
@@ -94,7 +94,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="📱 Telegram 群组"
+            android:text="@string/about_telegram_group"
             android:textColor="?attr/colorPrimary"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -103,7 +103,7 @@
             android:id="@+id/tvTelegramLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="加入讨论 →"
+            android:text="@string/about_telegram_join"
             android:textColor="?attr/colorPrimary"
             android:textSize="14sp" />
     </LinearLayout>
@@ -125,7 +125,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🌟 GitHub"
+            android:text="@string/about_github"
             android:textColor="?attr/colorPrimary"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -134,7 +134,7 @@
             android:id="@+id/tvGithubLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="查看源码 →"
+            android:text="@string/about_github_view"
             android:textColor="?attr/colorPrimary"
             android:textSize="14sp" />
     </LinearLayout>
@@ -157,7 +157,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🌐 Cloudflare API 文档"
+            android:text="@string/about_cloudflare_api"
             android:textColor="?attr/colorPrimary"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -166,7 +166,7 @@
             android:id="@+id/tvCloudflareApiLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="访问 →"
+            android:text="@string/about_visit"
             android:textColor="?attr/colorPrimary"
             android:textSize="14sp" />
     </LinearLayout>
@@ -188,7 +188,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🏠 Cloudflare 官网"
+            android:text="@string/about_cloudflare_website"
             android:textColor="?attr/colorPrimary"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -197,7 +197,7 @@
             android:id="@+id/tvCloudflareWebsiteLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="访问 →"
+            android:text="@string/about_visit"
             android:textColor="?attr/colorPrimary"
             android:textSize="14sp" />
     </LinearLayout>
@@ -219,7 +219,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🚀 本应用官网"
+            android:text="@string/about_app_website"
             android:textColor="?attr/colorPrimary"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -228,7 +228,7 @@
             android:id="@+id/tvAppWebsiteLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="访问 →"
+            android:text="@string/about_visit"
             android:textColor="?attr/colorPrimary"
             android:textSize="14sp" />
     </LinearLayout>
@@ -245,7 +245,7 @@
             android:id="@+id/tvApiTokenGuideTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="🔑 如何获取 Cloudflare API 令牌（点击展开）"
+            android:text="@string/about_api_token_guide_title_expand"
             android:textColor="?attr/colorPrimary"
             android:textSize="15sp"
             android:textStyle="bold"
@@ -279,10 +279,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="© 2025 CloudFlare Assistant\nMIT License"
+        android:text="@string/about_copyright"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="12sp" />
 
 </LinearLayout>
 
 </ScrollView>
+
