@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="入站规则 (Ingress)"
+            android:text="@string/tunnel_ingress_rules"
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorPrimary" />
@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="配置流量转发规则"
+            android:text="@string/tunnel_traffic_rules_desc"
             android:textSize="14sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -40,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="添加规则"
+            android:text="@string/tunnel_add_rule"
             style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <!-- Divider -->
@@ -54,7 +54,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="WARP 路由"
+            android:text="@string/tunnel_warp_routing"
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorPrimary" />
@@ -64,14 +64,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="启用 WARP 路由"
+            android:text="@string/tunnel_enable_warp_routing"
             android:checked="false" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="允许 WARP 客户端通过此隧道路由流量"
+            android:text="@string/tunnel_warp_routing_desc"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 

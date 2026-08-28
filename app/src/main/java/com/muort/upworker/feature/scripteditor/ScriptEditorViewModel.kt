@@ -2,11 +2,13 @@ package com.muort.upworker.feature.scripteditor
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.database.AccountDao
 import com.muort.upworker.core.database.ScriptVersionDao
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.ScriptVersion
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.repository.WorkerRepository
 import kotlinx.coroutines.flow.first
 import com.muort.upworker.feature.worker.UploadState
@@ -35,8 +37,8 @@ class ScriptEditorViewModel @Inject constructor(
     private val _uploadState = MutableStateFlow<UploadState>(UploadState.Idle)
     val uploadState: StateFlow<UploadState> = _uploadState.asStateFlow()
     
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
+    private val _error = MutableStateFlow<UiMessage?>(UiMessage.Empty)
+    val error: StateFlow<UiMessage?> = _error.asStateFlow()
     
     private val _uploadSuccess = MutableStateFlow(false)
     val uploadSuccess: StateFlow<Boolean> = _uploadSuccess.asStateFlow()
@@ -50,7 +52,7 @@ class ScriptEditorViewModel @Inject constructor(
                 val account = accountDao.getAllAccountsSync().firstOrNull { it.accountId == accountEmail }
                 
                 if (account == null) {
-                    _error.value = "未找到账号"
+                    _error.value = UiMessage.of(R.string.vm_msg_se_account_not_found)
                     return@launch
                 }
                 
@@ -84,10 +86,10 @@ class ScriptEditorViewModel @Inject constructor(
                         val latestVersion = scriptVersionDao.getLatestVersion(accountEmail, scriptName)
                         if (latestVersion != null) {
                             _scriptContent.value = latestVersion.content
-                            _error.value = "无法从Cloudflare加载，已加载本地缓存版本"
+                            _error.value = UiMessage.of(R.string.vm_msg_se_cloudflare_loaded_local_cache)
                             Timber.d("Loaded script from local cache (API failed)")
                         } else {
-                            _error.value = "加载脚本失败: ${result.message}"
+                            _error.value = UiMessage.of(R.string.vm_msg_se_script_load_failed, result.message)
                             Timber.e("Failed to load script: ${result.message}")
                         }
                     }
@@ -97,7 +99,7 @@ class ScriptEditorViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Error loading script")
-                _error.value = "加载脚本失败: ${e.message}"
+                _error.value = UiMessage.of(R.string.vm_msg_se_script_load_failed, e.message ?: "")
             } finally {
                 _isLoading.value = false
             }
@@ -136,7 +138,7 @@ class ScriptEditorViewModel @Inject constructor(
             } catch (e: Exception) {
                 Timber.e(e, "Error saving version")
                 if (!isAutoSave) {
-                    _error.value = "保存失败: ${e.message}"
+                    _error.value = UiMessage.of(R.string.vm_msg_se_save_version_failed, e.message ?: "")
                 }
             }
         }
@@ -151,8 +153,8 @@ class ScriptEditorViewModel @Inject constructor(
                 val account = accountDao.getAllAccountsSync().firstOrNull { it.accountId == accountEmail }
                 
                 if (account == null) {
-                    _error.value = "未找到账号"
-                    _uploadState.value = UploadState.Error("未找到账号")
+                    _error.value = UiMessage.of(R.string.vm_msg_se_account_not_found)
+                    _uploadState.value = UploadState.Error(UiMessage.of(R.string.vm_msg_se_account_not_found))
                     return@launch
                 }
                 
@@ -197,8 +199,8 @@ class ScriptEditorViewModel @Inject constructor(
                             Timber.d("Script uploaded with preserved bindings: $scriptName")
                         }
                         is Resource.Error -> {
-                            _uploadState.value = UploadState.Error(result.message)
-                            _error.value = "上传失败: ${result.message}"
+                            _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
+                            _error.value = UiMessage.of(R.string.vm_msg_se_script_upload_failed, result.message)
                             Timber.e("Failed to upload script: ${result.message}")
                         }
                         is Resource.Loading -> {
@@ -213,8 +215,8 @@ class ScriptEditorViewModel @Inject constructor(
                 
             } catch (e: Exception) {
                 Timber.e(e, "Error uploading script")
-                _error.value = "上传失败: ${e.message}"
-                _uploadState.value = UploadState.Error(e.message ?: "未知错误")
+                _error.value = UiMessage.of(R.string.vm_msg_se_script_upload_failed, e.message ?: "")
+                _uploadState.value = UploadState.Error(UiMessage.RawString(e.message ?: "Unknown error"))
             } finally {
                 _isLoading.value = false
             }
@@ -231,7 +233,7 @@ class ScriptEditorViewModel @Inject constructor(
     }
     
     fun clearError() {
-        _error.value = null
+        _error.value = UiMessage.Empty
     }
     
     fun clearUploadSuccess() {
@@ -245,7 +247,7 @@ class ScriptEditorViewModel @Inject constructor(
                 Timber.d("Deleted $deletedCount non-Cloudflare versions")
             } catch (e: Exception) {
                 Timber.e(e, "Error clearing non-Cloudflare versions")
-                _error.value = "清除失败: ${e.message}"
+                _error.value = UiMessage.of(R.string.vm_msg_se_clear_versions_failed, e.message ?: "")
             }
         }
     }
@@ -257,7 +259,7 @@ class ScriptEditorViewModel @Inject constructor(
                 Timber.d("Deleted version: ${version.id}")
             } catch (e: Exception) {
                 Timber.e(e, "Error deleting version")
-                _error.value = "删除失败: ${e.message}"
+                _error.value = UiMessage.of(R.string.vm_msg_se_delete_version_failed, e.message ?: "")
             }
         }
     }
@@ -271,8 +273,8 @@ class ScriptEditorViewModel @Inject constructor(
                 val account = accountDao.getAllAccountsSync().firstOrNull { it.accountId == accountEmail }
                 
                 if (account == null) {
-                    _error.value = "未找到账号"
-                    _uploadState.value = UploadState.Error("未找到账号")
+                    _error.value = UiMessage.of(R.string.vm_msg_se_account_not_found)
+                    _uploadState.value = UploadState.Error(UiMessage.of(R.string.vm_msg_se_account_not_found))
                     return@launch
                 }
                 
@@ -321,8 +323,8 @@ class ScriptEditorViewModel @Inject constructor(
                             Timber.d("Script rolled back successfully")
                         }
                         is Resource.Error -> {
-                            _uploadState.value = UploadState.Error(result.message)
-                            _error.value = "回滚失败: ${result.message}"
+                            _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
+                            _error.value = UiMessage.of(R.string.vm_msg_se_rollback_failed, result.message)
                             Timber.e("Failed to rollback script: ${result.message}")
                         }
                         is Resource.Loading -> {
@@ -337,8 +339,8 @@ class ScriptEditorViewModel @Inject constructor(
                 
             } catch (e: Exception) {
                 Timber.e(e, "Error rolling back script")
-                _error.value = "回滚失败: ${e.message}"
-                _uploadState.value = UploadState.Error(e.message ?: "未知错误")
+                _error.value = UiMessage.of(R.string.vm_msg_se_rollback_failed, e.message ?: "")
+                _uploadState.value = UploadState.Error(UiMessage.RawString(e.message ?: "Unknown error"))
             } finally {
                 _isLoading.value = false
             }

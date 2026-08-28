@@ -37,7 +37,7 @@ fun TextInputLayout.attachDatePicker(fragment: Fragment, dateInput: TextInputEdi
             null
         }
         val picker = MaterialDatePicker.Builder.datePicker()
-            .setTitleText("选择兼容性日期")
+            .setTitleText(context.getString(R.string.runtime_compat_date_picker_title))
             .setSelection(initial ?: MaterialDatePicker.todayInUtcMilliseconds())
             .build()
         picker.addOnPositiveButtonClickListener { utcMillis ->

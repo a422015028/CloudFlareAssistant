@@ -63,7 +63,7 @@ class DnsFragment : Fragment() {
             accountViewModel.defaultAccount.value?.let { dnsViewModel.loadDnsRecords(it) }
         } else {
             timber.log.Timber.w("DNS Fragment: No zoneId available")
-            Snackbar.make(binding.root, "请先选择或添加域名", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(binding.root, getString(R.string.msg_please_select_zone_first), Snackbar.LENGTH_LONG).show()
         }
     }
     
@@ -105,7 +105,7 @@ class DnsFragment : Fragment() {
                 
                 launch {
                     dnsViewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root, message.asString(requireContext()), Snackbar.LENGTH_SHORT).show()
                     }
                 }
                 
@@ -204,7 +204,7 @@ class DnsFragment : Fragment() {
 
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val type = dialogBinding.dnsType.text.toString()
                 val name = dialogBinding.dnsName.text.toString()
                 val ttl = dialogBinding.dnsTtl.text.toString().toIntOrNull() ?: 1
@@ -242,7 +242,7 @@ class DnsFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -258,20 +258,110 @@ class DnsFragment : Fragment() {
     
     private fun showDeleteRecordDialog(record: DnsRecord) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除 DNS 记录")
-            .setMessage("确定要删除记录 \"${record.name}\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.delete)
+            .setMessage(getString(R.string.dns_delete_confirm))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     dnsViewModel.deleteDnsRecord(account, record.id)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private val dnsFieldConfigs: Map<String, List<DnsFieldConfig>> by lazy { buildDnsFieldConfigs() }
+
+    private fun buildDnsFieldConfigs(): Map<String, List<DnsFieldConfig>> {
+        val ctx = requireContext()
+        return mapOf(
+            "A" to listOf(DnsFieldConfig("content", ctx.getString(R.string.dns_field_ipv4), false, FieldLocation.CONTENT)),
+            "AAAA" to listOf(DnsFieldConfig("content", ctx.getString(R.string.dns_field_ipv6), false, FieldLocation.CONTENT)),
+            "CNAME" to listOf(DnsFieldConfig("content", ctx.getString(R.string.dns_field_target_domain), false, FieldLocation.CONTENT)),
+            "TXT" to listOf(DnsFieldConfig("content", ctx.getString(R.string.dns_field_text_content), false, FieldLocation.CONTENT)),
+            "NS" to listOf(DnsFieldConfig("content", ctx.getString(R.string.dns_field_ns_server), false, FieldLocation.CONTENT)),
+            "PTR" to listOf(DnsFieldConfig("content", ctx.getString(R.string.dns_field_target_domain), false, FieldLocation.CONTENT)),
+            "MX" to listOf(
+                DnsFieldConfig("priority", ctx.getString(R.string.dns_field_priority), true, FieldLocation.TOP_LEVEL),
+                DnsFieldConfig("content", ctx.getString(R.string.dns_field_mail_server), false, FieldLocation.CONTENT)
+            ),
+            "SRV" to listOf(
+                DnsFieldConfig("priority", ctx.getString(R.string.dns_field_priority), true, FieldLocation.DATA),
+                DnsFieldConfig("weight", ctx.getString(R.string.dns_field_weight), true, FieldLocation.DATA),
+                DnsFieldConfig("port", ctx.getString(R.string.dns_field_port), true, FieldLocation.DATA),
+                DnsFieldConfig("target", ctx.getString(R.string.dns_field_target_host), false, FieldLocation.DATA)
+            ),
+            "LOC" to listOf(
+                DnsFieldConfig("lat_degrees", ctx.getString(R.string.dns_field_lat_degrees), true, FieldLocation.DATA),
+                DnsFieldConfig("lat_minutes", ctx.getString(R.string.dns_field_lat_minutes), true, FieldLocation.DATA),
+                DnsFieldConfig("lat_seconds", ctx.getString(R.string.dns_field_lat_seconds), true, FieldLocation.DATA),
+                DnsFieldConfig("lat_direction", ctx.getString(R.string.dns_field_lat_direction), false, FieldLocation.DATA),
+                DnsFieldConfig("long_degrees", ctx.getString(R.string.dns_field_long_degrees), true, FieldLocation.DATA),
+                DnsFieldConfig("long_minutes", ctx.getString(R.string.dns_field_long_minutes), true, FieldLocation.DATA),
+                DnsFieldConfig("long_seconds", ctx.getString(R.string.dns_field_long_seconds), true, FieldLocation.DATA),
+                DnsFieldConfig("long_direction", ctx.getString(R.string.dns_field_long_direction), false, FieldLocation.DATA),
+                DnsFieldConfig("altitude", ctx.getString(R.string.dns_field_altitude), true, FieldLocation.DATA),
+                DnsFieldConfig("size", ctx.getString(R.string.dns_field_size_m), true, FieldLocation.DATA),
+                DnsFieldConfig("precision_horz", ctx.getString(R.string.dns_field_precision_horz), true, FieldLocation.DATA),
+                DnsFieldConfig("precision_vert", ctx.getString(R.string.dns_field_precision_vert), true, FieldLocation.DATA)
+            ),
+            "CERT" to listOf(
+                DnsFieldConfig("type", ctx.getString(R.string.dns_field_type), true, FieldLocation.DATA),
+                DnsFieldConfig("key_tag", "Key Tag", true, FieldLocation.DATA),
+                DnsFieldConfig("algorithm", ctx.getString(R.string.dns_field_algorithm), true, FieldLocation.DATA),
+                DnsFieldConfig("certificate", ctx.getString(R.string.dns_field_certificate_base64), false, FieldLocation.DATA)
+            ),
+            "DS" to listOf(
+                DnsFieldConfig("key_tag", "Key Tag", true, FieldLocation.DATA),
+                DnsFieldConfig("algorithm", ctx.getString(R.string.dns_field_algorithm), true, FieldLocation.DATA),
+                DnsFieldConfig("digest_type", ctx.getString(R.string.dns_field_digest_type), true, FieldLocation.DATA),
+                DnsFieldConfig("digest", ctx.getString(R.string.dns_field_digest), false, FieldLocation.DATA)
+            ),
+            "NAPTR" to listOf(
+                DnsFieldConfig("order", ctx.getString(R.string.dns_field_order), true, FieldLocation.DATA),
+                DnsFieldConfig("preference", ctx.getString(R.string.dns_field_preference), true, FieldLocation.DATA),
+                DnsFieldConfig("flags", ctx.getString(R.string.dns_field_flags), false, FieldLocation.DATA),
+                DnsFieldConfig("service", ctx.getString(R.string.dns_field_service), false, FieldLocation.DATA),
+                DnsFieldConfig("regex", ctx.getString(R.string.dns_field_regex), false, FieldLocation.DATA),
+                DnsFieldConfig("replacement", ctx.getString(R.string.dns_field_replacement), false, FieldLocation.DATA)
+            ),
+            "SMIMEA" to listOf(
+                DnsFieldConfig("usage", ctx.getString(R.string.dns_field_usage), true, FieldLocation.DATA),
+                DnsFieldConfig("selector", ctx.getString(R.string.dns_field_selector), true, FieldLocation.DATA),
+                DnsFieldConfig("matching_type", ctx.getString(R.string.dns_field_matching_type), true, FieldLocation.DATA),
+                DnsFieldConfig("certificate", ctx.getString(R.string.dns_field_certificate), false, FieldLocation.DATA)
+            ),
+            "SSHFP" to listOf(
+                DnsFieldConfig("algorithm", ctx.getString(R.string.dns_field_algorithm), true, FieldLocation.DATA),
+                DnsFieldConfig("type", ctx.getString(R.string.dns_field_type), true, FieldLocation.DATA),
+                DnsFieldConfig("fingerprint", ctx.getString(R.string.dns_field_fingerprint), false, FieldLocation.DATA)
+            ),
+            "SVCB" to listOf(
+                DnsFieldConfig("priority", ctx.getString(R.string.dns_field_priority), true, FieldLocation.DATA),
+                DnsFieldConfig("target", ctx.getString(R.string.dns_field_target), false, FieldLocation.DATA),
+                DnsFieldConfig("value", ctx.getString(R.string.dns_field_value), false, FieldLocation.DATA)
+            ),
+            "TLSA" to listOf(
+                DnsFieldConfig("usage", ctx.getString(R.string.dns_field_usage), true, FieldLocation.DATA),
+                DnsFieldConfig("selector", ctx.getString(R.string.dns_field_selector), true, FieldLocation.DATA),
+                DnsFieldConfig("matching_type", ctx.getString(R.string.dns_field_matching_type), true, FieldLocation.DATA),
+                DnsFieldConfig("certificate", ctx.getString(R.string.dns_field_certificate), false, FieldLocation.DATA)
+            ),
+            "URI" to listOf(
+                DnsFieldConfig("priority", ctx.getString(R.string.dns_field_priority), true, FieldLocation.TOP_LEVEL),
+                DnsFieldConfig("weight", ctx.getString(R.string.dns_field_weight), true, FieldLocation.DATA),
+                DnsFieldConfig("target", ctx.getString(R.string.dns_field_target_uri), false, FieldLocation.DATA)
+            ),
+            "HTTPS" to listOf(
+                DnsFieldConfig("priority", ctx.getString(R.string.dns_field_priority), true, FieldLocation.DATA),
+                DnsFieldConfig("target", ctx.getString(R.string.dns_field_target), false, FieldLocation.DATA),
+                DnsFieldConfig("value", ctx.getString(R.string.dns_field_value), false, FieldLocation.DATA)
+            )
+        )
     }
 
     companion object {
@@ -282,91 +372,6 @@ class DnsFragment : Fragment() {
             val label: String,
             val isNumber: Boolean,
             val location: FieldLocation
-        )
-
-        private val dnsFieldConfigs: Map<String, List<DnsFieldConfig>> = mapOf(
-            "A" to listOf(DnsFieldConfig("content", "IPv4 地址", false, FieldLocation.CONTENT)),
-            "AAAA" to listOf(DnsFieldConfig("content", "IPv6 地址", false, FieldLocation.CONTENT)),
-            "CNAME" to listOf(DnsFieldConfig("content", "目标域名", false, FieldLocation.CONTENT)),
-            "TXT" to listOf(DnsFieldConfig("content", "文本内容", false, FieldLocation.CONTENT)),
-            "NS" to listOf(DnsFieldConfig("content", "NS 服务器", false, FieldLocation.CONTENT)),
-            "PTR" to listOf(DnsFieldConfig("content", "目标域名", false, FieldLocation.CONTENT)),
-            "MX" to listOf(
-                DnsFieldConfig("priority", "优先级", true, FieldLocation.TOP_LEVEL),
-                DnsFieldConfig("content", "邮件服务器", false, FieldLocation.CONTENT)
-            ),
-            "SRV" to listOf(
-                DnsFieldConfig("priority", "优先级", true, FieldLocation.DATA),
-                DnsFieldConfig("weight", "权重", true, FieldLocation.DATA),
-                DnsFieldConfig("port", "端口", true, FieldLocation.DATA),
-                DnsFieldConfig("target", "目标主机", false, FieldLocation.DATA)
-            ),
-            "LOC" to listOf(
-                DnsFieldConfig("lat_degrees", "纬度(度)", true, FieldLocation.DATA),
-                DnsFieldConfig("lat_minutes", "纬度(分)", true, FieldLocation.DATA),
-                DnsFieldConfig("lat_seconds", "纬度(秒)", true, FieldLocation.DATA),
-                DnsFieldConfig("lat_direction", "纬度方向", false, FieldLocation.DATA),
-                DnsFieldConfig("long_degrees", "经度(度)", true, FieldLocation.DATA),
-                DnsFieldConfig("long_minutes", "经度(分)", true, FieldLocation.DATA),
-                DnsFieldConfig("long_seconds", "经度(秒)", true, FieldLocation.DATA),
-                DnsFieldConfig("long_direction", "经度方向", false, FieldLocation.DATA),
-                DnsFieldConfig("altitude", "海拔(m)", true, FieldLocation.DATA),
-                DnsFieldConfig("size", "大小(m)", true, FieldLocation.DATA),
-                DnsFieldConfig("precision_horz", "水平精度(m)", true, FieldLocation.DATA),
-                DnsFieldConfig("precision_vert", "垂直精度(m)", true, FieldLocation.DATA)
-            ),
-            "CERT" to listOf(
-                DnsFieldConfig("type", "类型", true, FieldLocation.DATA),
-                DnsFieldConfig("key_tag", "Key Tag", true, FieldLocation.DATA),
-                DnsFieldConfig("algorithm", "算法", true, FieldLocation.DATA),
-                DnsFieldConfig("certificate", "证书(Base64)", false, FieldLocation.DATA)
-            ),
-            "DS" to listOf(
-                DnsFieldConfig("key_tag", "Key Tag", true, FieldLocation.DATA),
-                DnsFieldConfig("algorithm", "算法", true, FieldLocation.DATA),
-                DnsFieldConfig("digest_type", "摘要类型", true, FieldLocation.DATA),
-                DnsFieldConfig("digest", "摘要", false, FieldLocation.DATA)
-            ),
-            "NAPTR" to listOf(
-                DnsFieldConfig("order", "顺序", true, FieldLocation.DATA),
-                DnsFieldConfig("preference", "偏好", true, FieldLocation.DATA),
-                DnsFieldConfig("flags", "标志", false, FieldLocation.DATA),
-                DnsFieldConfig("service", "服务", false, FieldLocation.DATA),
-                DnsFieldConfig("regex", "正则", false, FieldLocation.DATA),
-                DnsFieldConfig("replacement", "替换", false, FieldLocation.DATA)
-            ),
-            "SMIMEA" to listOf(
-                DnsFieldConfig("usage", "用法", true, FieldLocation.DATA),
-                DnsFieldConfig("selector", "选择器", true, FieldLocation.DATA),
-                DnsFieldConfig("matching_type", "匹配类型", true, FieldLocation.DATA),
-                DnsFieldConfig("certificate", "证书", false, FieldLocation.DATA)
-            ),
-            "SSHFP" to listOf(
-                DnsFieldConfig("algorithm", "算法", true, FieldLocation.DATA),
-                DnsFieldConfig("type", "类型", true, FieldLocation.DATA),
-                DnsFieldConfig("fingerprint", "指纹", false, FieldLocation.DATA)
-            ),
-            "SVCB" to listOf(
-                DnsFieldConfig("priority", "优先级", true, FieldLocation.DATA),
-                DnsFieldConfig("target", "目标", false, FieldLocation.DATA),
-                DnsFieldConfig("value", "值", false, FieldLocation.DATA)
-            ),
-            "TLSA" to listOf(
-                DnsFieldConfig("usage", "用法", true, FieldLocation.DATA),
-                DnsFieldConfig("selector", "选择器", true, FieldLocation.DATA),
-                DnsFieldConfig("matching_type", "匹配类型", true, FieldLocation.DATA),
-                DnsFieldConfig("certificate", "证书", false, FieldLocation.DATA)
-            ),
-            "URI" to listOf(
-                DnsFieldConfig("priority", "优先级", true, FieldLocation.TOP_LEVEL),
-                DnsFieldConfig("weight", "权重", true, FieldLocation.DATA),
-                DnsFieldConfig("target", "目标 URI", false, FieldLocation.DATA)
-            ),
-            "HTTPS" to listOf(
-                DnsFieldConfig("priority", "优先级", true, FieldLocation.DATA),
-                DnsFieldConfig("target", "目标", false, FieldLocation.DATA),
-                DnsFieldConfig("value", "值", false, FieldLocation.DATA)
-            )
         )
     }
 
@@ -408,7 +413,10 @@ class DnsFragment : Fragment() {
                     ?: ""
                 binding.dnsContentText.text = "→ $displayContent"
                 binding.dnsTtlText.text = "TTL: ${record.ttl}"
-                binding.dnsProxiedText.text = if (record.proxied) "🟠 已代理" else "⚪ 仅 DNS"
+                binding.dnsProxiedText.text = if (record.proxied)
+                    binding.root.context.getString(R.string.dns_proxied)
+                else
+                    binding.root.context.getString(R.string.dns_dns_only)
                 
                 // 点击列表项直接显示编辑窗口
                 binding.root.setOnClickListener {

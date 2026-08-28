@@ -35,6 +35,7 @@ import com.muort.upworker.core.model.TokenPermissionGroupRef
 import com.muort.upworker.core.model.TokenPolicy
 import com.muort.upworker.core.model.TokenUpsertRequest
 import com.muort.upworker.core.util.DisplaySizeHelper
+import com.muort.upworker.core.util.LocaleHelper
 import com.muort.upworker.core.util.ThemeHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -50,7 +51,7 @@ class TokenManagerActivity : AppCompatActivity() {
     private var accounts: List<Account> = emptyList()
 
     override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(DisplaySizeHelper.wrap(newBase))
+        super.attachBaseContext(DisplaySizeHelper.wrap(LocaleHelper.applyLocale(newBase)))
     }
 
     companion object {
@@ -171,13 +172,13 @@ class TokenManagerActivity : AppCompatActivity() {
                             }
                             is TokenUiState.Error -> {
                                 setViewVisibility(error = true)
-                                findViewById<TextView>(R.id.errorText).text = state.message
+                                findViewById<TextView>(R.id.errorText).text = state.message.asString(this@TokenManagerActivity)
                             }
                         }
                     }
                 }
                 launch {
-                    viewModel.message.collect { showToast(it) }
+                    viewModel.message.collect { showToast(it.asString(this@TokenManagerActivity)) }
                 }
                 launch {
                     viewModel.tokenDetail.collect { token -> showTokenDetailDialog(token) }
@@ -227,18 +228,18 @@ class TokenManagerActivity : AppCompatActivity() {
 
     private fun showAccountSelector() {
         if (accounts.isEmpty()) {
-            showToast("暂无可用账号")
+            showToast(getString(R.string.msg_no_account_available))
             return
         }
         val names = accounts.map { it.name }.toTypedArray()
         val selectedIndex = accounts.indexOfFirst { it.id == currentAccount?.id }
         MaterialAlertDialogBuilder(this)
-            .setTitle("选择账号")
+            .setTitle(getString(R.string.account_select))
             .setSingleChoiceItems(names, selectedIndex) { dialog, which ->
                 selectAccount(accounts[which])
                 dialog.dismiss()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
@@ -247,7 +248,7 @@ class TokenManagerActivity : AppCompatActivity() {
     private fun showEditDialog(existing: ApiToken?) {
         val account = currentAccount
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         if (viewModel.permissionGroups.value.isEmpty()) {
@@ -263,10 +264,10 @@ class TokenManagerActivity : AppCompatActivity() {
         val selectPgBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.selectPermissionGroupsBtn)
 
         titleText.text = when {
-            existing == null && viewModel.scope.value == TokenScope.USER -> "创建用户级令牌"
-            existing == null -> "创建账户级令牌"
-            viewModel.scope.value == TokenScope.USER -> "编辑用户级令牌"
-            else -> "编辑账户级令牌"
+            existing == null && viewModel.scope.value == TokenScope.USER -> getString(R.string.token_create_user_level)
+            existing == null -> getString(R.string.token_create_account_level)
+            viewModel.scope.value == TokenScope.USER -> getString(R.string.token_edit_user_level)
+            else -> getString(R.string.token_edit_account_level)
         }
         statusSwitch.visibility = if (existing == null) View.GONE else View.VISIBLE
 
@@ -278,9 +279,9 @@ class TokenManagerActivity : AppCompatActivity() {
 
         fun updatePgButtonText() {
             val suffix = if (selectedPgIds.size > MAX_PG_PER_POLICY) {
-                "，将拆为 ${policiesNeeded(selectedPgIds.size)} 个策略"
+                getString(R.string.token_split_suffix, policiesNeeded(selectedPgIds.size))
             } else ""
-            selectPgBtn.text = "选择权限组 (已选 ${selectedPgIds.size} 个，上限 $MAX_TOTAL_PG$suffix)"
+            selectPgBtn.text = getString(R.string.token_select_pg_btn, selectedPgIds.size, MAX_TOTAL_PG, suffix)
         }
 
         if (existing != null) {
@@ -297,24 +298,24 @@ class TokenManagerActivity : AppCompatActivity() {
 
         MaterialAlertDialogBuilder(this)
             .setView(dialogView)
-            .setPositiveButton(if (existing == null) "创建" else "保存") { dialog, _ ->
+            .setPositiveButton(if (existing == null) getString(R.string.dialog_create) else getString(R.string.save)) { dialog, _ ->
                 val name = nameInput.text?.toString()?.trim().orEmpty()
                 if (name.isEmpty()) {
-                    showToast("令牌名称不能为空")
+                    showToast(getString(R.string.token_name_cannot_be_empty))
                     return@setPositiveButton
                 }
                 if (selectedPgIds.isEmpty()) {
-                    showToast("请至少选择一个权限组")
+                    showToast(getString(R.string.token_please_select_pg))
                     return@setPositiveButton
                 }
                 if (selectedPgIds.size > MAX_TOTAL_PG) {
-                    showToast("权限组数量超出上限（最多 $MAX_TOTAL_PG 个 = $MAX_POLICIES 个策略 × $MAX_PG_PER_POLICY 个，当前 ${selectedPgIds.size} 个）")
+                    showToast(getString(R.string.token_pg_limit_exceeded, MAX_TOTAL_PG, MAX_POLICIES, MAX_PG_PER_POLICY, selectedPgIds.size))
                     return@setPositiveButton
                 }
 
                 val expiresDate = expiresInput.text?.toString()?.trim().orEmpty()
                 if (expiresDate.isNotEmpty() && !Regex("""^\d{4}-\d{2}-\d{2}$""").matches(expiresDate)) {
-                    showToast("过期日期格式应为 yyyy-MM-dd")
+                    showToast(getString(R.string.token_expiry_format_error))
                     return@setPositiveButton
                 }
 
@@ -327,7 +328,7 @@ class TokenManagerActivity : AppCompatActivity() {
                 val allGroups = viewModel.permissionGroups.value
                 val selectedGroups = selectedPgIds.mapNotNull { id -> allGroups.firstOrNull { it.id == id } }
                 if (selectedGroups.isEmpty()) {
-                    showToast("权限组数据加载中，请重新打开对话框")
+                    showToast(getString(R.string.token_pg_loading_retry))
                     return@setPositiveButton
                 }
 
@@ -335,7 +336,7 @@ class TokenManagerActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     val resources = buildResources(account, selectedGroups, existing)
                     if (resources.isEmpty()) {
-                        showToast("无法确定资源范围，请稍后重试")
+                        showToast(getString(R.string.token_scope_unknown))
                         return@launch
                     }
 
@@ -373,7 +374,7 @@ class TokenManagerActivity : AppCompatActivity() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
@@ -428,7 +429,7 @@ class TokenManagerActivity : AppCompatActivity() {
     private fun showPermissionGroupSelector(selectedIds: MutableSet<String>, onChanged: () -> Unit) {
         val allGroups = viewModel.permissionGroups.value
         if (allGroups.isEmpty()) {
-            showToast("权限组加载中，请稍后重试")
+            showToast(getString(R.string.token_pg_loading_retry2))
             viewModel.loadPermissionGroups(requireAccount(), force = true)
             return
         }
@@ -438,7 +439,7 @@ class TokenManagerActivity : AppCompatActivity() {
         val recyclerView = dialogView.findViewById<RecyclerView>(R.id.permissionGroupsRecyclerView)
 
         val limitToast = {
-            showToast("已达权限组总上限（$MAX_TOTAL_PG 个 = $MAX_POLICIES 策略 × $MAX_PG_PER_POLICY，超出部分将拆分为多策略）")
+            showToast(getString(R.string.token_pg_total_limit_reached, MAX_TOTAL_PG, MAX_POLICIES, MAX_PG_PER_POLICY))
         }
         val pgAdapter = PermissionGroupAdapter(allGroups, selectedIds, onLimitReached = limitToast)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -461,13 +462,13 @@ class TokenManagerActivity : AppCompatActivity() {
         })
 
         MaterialAlertDialogBuilder(this)
-            .setTitle("选择权限组")
+            .setTitle(getString(R.string.token_select_pg_title))
             .setView(dialogView)
-            .setPositiveButton("确定") { dialog, _ ->
+            .setPositiveButton(getString(R.string.confirm)) { dialog, _ ->
                 onChanged()
                 dialog.dismiss()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
@@ -476,57 +477,57 @@ class TokenManagerActivity : AppCompatActivity() {
     private fun showTokenDetailDialog(token: ApiToken) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_token_detail, null)
         val content = buildString {
-            appendLine("名称: ${token.name ?: "无"}")
-            appendLine("状态: ${statusDisplay(token.status)}")
+            appendLine(getString(R.string.token_detail_name, token.name ?: getString(R.string.status_none)))
+            appendLine(getString(R.string.token_detail_status, statusDisplay(token.status)))
             appendLine("ID: ${token.id}")
             appendLine()
-            appendLine("—— 时间信息 ——")
-            appendLine("创建时间: ${formatIsoTime(token.issuedOn)}")
-            appendLine("修改时间: ${formatIsoTime(token.modifiedOn)}")
-            appendLine("最后使用: ${formatIsoTime(token.lastUsedOn)}")
-            appendLine("生效时间: ${formatIsoTime(token.notBefore)}")
-            appendLine("过期时间: ${formatIsoTime(token.expiresOn)}")
+            appendLine(getString(R.string.token_detail_time_section))
+            appendLine(getString(R.string.token_detail_created_time, formatIsoTime(token.issuedOn)))
+            appendLine(getString(R.string.token_detail_modified_time, formatIsoTime(token.modifiedOn)))
+            appendLine(getString(R.string.token_detail_last_used, formatIsoTime(token.lastUsedOn)))
+            appendLine(getString(R.string.token_detail_not_before, formatIsoTime(token.notBefore)))
+            appendLine(getString(R.string.token_detail_expires_on, formatIsoTime(token.expiresOn)))
             token.condition?.requestIp?.let { ip ->
                 appendLine()
-                appendLine("—— IP 限制 ——")
-                ip.inList?.takeIf { it.isNotEmpty() }?.let { appendLine("允许: ${it.joinToString(", ")}") }
-                ip.notInList?.takeIf { it.isNotEmpty() }?.let { appendLine("拒绝: ${it.joinToString(", ")}") }
+                appendLine(getString(R.string.token_detail_ip_section))
+                ip.inList?.takeIf { it.isNotEmpty() }?.let { appendLine(getString(R.string.token_detail_ip_allow, it.joinToString(", "))) }
+                ip.notInList?.takeIf { it.isNotEmpty() }?.let { appendLine(getString(R.string.token_detail_ip_deny, it.joinToString(", "))) }
             }
             token.policies?.forEachIndexed { index, policy ->
                 appendLine()
-                appendLine("—— 策略 ${index + 1} (${policy.effect}) ——")
+                appendLine(getString(R.string.token_detail_policy_section, index + 1, policy.effect))
                 policy.permissionGroups.forEach { pg ->
                     appendLine("• ${pg.name ?: pg.id}")
                 }
                 val resources = policy.resources
                 if (resources != null && resources.isNotEmpty()) {
-                    appendLine("资源范围:")
+                    appendLine(getString(R.string.token_detail_resource_scope))
                     resources.forEach { (k, v) -> appendLine("  $k = $v") }
                 } else {
-                    appendLine("资源范围: 所有资源")
+                    appendLine(getString(R.string.token_detail_all_resources))
                 }
             }
         }
         dialogView.findViewById<TextView>(R.id.detailContentText).text = content
-        dialogView.findViewById<TextView>(R.id.detailTitleText).text = token.name ?: "令牌详情"
+        dialogView.findViewById<TextView>(R.id.detailTitleText).text = token.name ?: getString(R.string.token_detail_title)
 
         MaterialAlertDialogBuilder(this)
             .setView(dialogView)
-            .setPositiveButton("关闭", null)
+            .setPositiveButton(getString(R.string.dialog_close), null)
             .show()
     }
 
     private fun showVerifyResultDialog(result: com.muort.upworker.core.model.TokenVerifyResult) {
         val content = buildString {
-            appendLine("状态: ${statusDisplay(result.status)}")
-            appendLine("令牌 ID: ${result.id ?: "无"}")
-            appendLine("生效时间: ${formatIsoTime(result.notBefore)}")
-            appendLine("过期时间: ${formatIsoTime(result.expiresOn)}")
+            appendLine(getString(R.string.token_detail_status, statusDisplay(result.status)))
+            appendLine(getString(R.string.token_verify_id, result.id ?: getString(R.string.status_none)))
+            appendLine(getString(R.string.token_detail_not_before, formatIsoTime(result.notBefore)))
+            appendLine(getString(R.string.token_detail_expires_on, formatIsoTime(result.expiresOn)))
         }
         MaterialAlertDialogBuilder(this)
-            .setTitle("验证结果（当前账号凭据）")
+            .setTitle(getString(R.string.token_verify_result_title))
             .setMessage(content)
-            .setPositiveButton("关闭", null)
+            .setPositiveButton(getString(R.string.dialog_close), null)
             .show()
     }
 
@@ -537,11 +538,11 @@ class TokenManagerActivity : AppCompatActivity() {
         dialogView.findViewById<View>(R.id.copyValueBtn).setOnClickListener {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             clipboard.setPrimaryClip(ClipData.newPlainText("token", value))
-            showToast("已复制到剪贴板")
+            showToast(getString(R.string.msg_copied_to_clipboard))
         }
         MaterialAlertDialogBuilder(this)
             .setView(dialogView)
-            .setPositiveButton("关闭", null)
+            .setPositiveButton(getString(R.string.dialog_close), null)
             .setCancelable(false)
             .show()
     }
@@ -552,23 +553,23 @@ class TokenManagerActivity : AppCompatActivity() {
     private fun showRollConfirmation(token: ApiToken) {
         val account = currentAccount ?: return
         MaterialAlertDialogBuilder(this)
-            .setTitle("更换令牌")
-            .setMessage("确定更换 \"${token.name}\" 的令牌值吗？\n\n旧令牌值将立即失效，所有使用它的服务都会中断，请谨慎操作。")
-            .setPositiveButton("更换") { _, _ ->
+            .setTitle(getString(R.string.token_rollback_title))
+            .setMessage(getString(R.string.token_rollback_message, token.name))
+            .setPositiveButton(getString(R.string.dialog_replace)) { _, _ ->
                 viewModel.rollToken(account, token.id)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
     private fun showDeleteConfirmation(token: ApiToken) {
         MaterialAlertDialogBuilder(this)
-            .setTitle("删除令牌")
-            .setMessage("确定要删除令牌 \"${token.name}\" 吗？\n使用该令牌的应用将立即失效。")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(getString(R.string.token_delete_title))
+            .setMessage(getString(R.string.token_delete_message, token.name))
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
                 viewModel.deleteToken(requireAccount(), token.id)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
@@ -595,7 +596,7 @@ class TokenManagerActivity : AppCompatActivity() {
                 true
             }
             R.id.action_verify_token -> {
-                currentAccount?.let { viewModel.verifyToken(it) } ?: showToast("请先选择账号")
+                currentAccount?.let { viewModel.verifyToken(it) } ?: showToast(getString(R.string.msg_please_select_account_first))
                 true
             }
             R.id.action_refresh_tokens -> {
@@ -614,15 +615,15 @@ class TokenManagerActivity : AppCompatActivity() {
 
     private fun statusDisplay(status: String?): String {
         return when (status) {
-            "active" -> "启用"
-            "disabled" -> "已禁用"
-            "expired" -> "已过期"
-            else -> status ?: "未知"
+            "active" -> getString(R.string.status_active)
+            "disabled" -> getString(R.string.status_disabled)
+            "expired" -> getString(R.string.status_expired)
+            else -> status ?: getString(R.string.status_unknown)
         }
     }
 
     private fun formatIsoTime(iso: String?): String {
-        if (iso.isNullOrBlank()) return "无"
+        if (iso.isNullOrBlank()) return getString(R.string.status_none)
         return iso.take(16).replace("T", " ") + " UTC"
     }
 }
@@ -663,14 +664,14 @@ class TokenAdapter(
 
         fun bind(token: ApiToken) {
             val context = itemView.context
-            nameText.text = token.name ?: "未命名"
+            nameText.text = token.name ?: context.getString(R.string.status_unnamed)
             idText.text = token.id
 
             statusChip.text = when (token.status) {
-                "active" -> "启用"
-                "disabled" -> "已禁用"
-                "expired" -> "已过期"
-                else -> token.status ?: "未知"
+                "active" -> context.getString(R.string.status_active)
+                "disabled" -> context.getString(R.string.status_disabled)
+                "expired" -> context.getString(R.string.status_expired)
+                else -> token.status ?: context.getString(R.string.status_unknown)
             }
             val chipColor = when (token.status) {
                 "active" -> android.R.color.holo_green_dark
@@ -683,16 +684,16 @@ class TokenAdapter(
                 ?.mapNotNull { it.name }
                 .orEmpty()
             permissionsText.text = if (pgNames.isEmpty()) {
-                "权限组: 无"
+                context.getString(R.string.token_pg_none)
             } else if (pgNames.size <= 2) {
-                "权限组: ${pgNames.joinToString(", ")}"
+                context.getString(R.string.token_pg_list, pgNames.joinToString(", "))
             } else {
-                "权限组: ${pgNames.take(2).joinToString(", ")} 等 ${pgNames.size} 项"
+                context.getString(R.string.token_pg_more, pgNames.take(2).joinToString(", "), pgNames.size)
             }
 
             val times = mutableListOf<String>()
-            token.lastUsedOn?.let { times.add("最后使用 ${it.take(10)}") }
-            token.expiresOn?.let { times.add("过期 ${it.take(10)}") } ?: times.add("永不过期")
+            token.lastUsedOn?.let { times.add(context.getString(R.string.token_last_used_short, it.take(10))) }
+            token.expiresOn?.let { times.add(context.getString(R.string.token_expires_short, it.take(10))) } ?: times.add(context.getString(R.string.status_never_expires))
             timeText.text = times.joinToString(" · ")
 
             itemView.findViewById<View>(R.id.detailBtn).setOnClickListener { onDetail(token) }
@@ -769,15 +770,17 @@ class PermissionGroupAdapter(
         val context = holder.itemView.context
         val badgeRow = holder.badgeRow
         badgeRow.removeAllViews()
-        group.opTypes().forEach { op ->
+        val readLabel = context.getString(R.string.model_perm_read)
+        val writeLabel = context.getString(R.string.model_perm_write)
+        group.opTypes(context).forEach { op ->
             val color = when (op) {
-                "读" -> 0xFF1E88E5.toInt()
-                "写" -> 0xFFE53935.toInt()
+                readLabel -> 0xFF1E88E5.toInt()
+                writeLabel -> 0xFFE53935.toInt()
                 else -> 0xFF8E24AA.toInt()
             }
             badgeRow.addView(makeBadge(context, op, color))
         }
-        group.scopeLabels().forEach { label ->
+        group.scopeLabels(context).forEach { label ->
             badgeRow.addView(makeBadge(context, label, 0xFF757575.toInt()))
         }
     }

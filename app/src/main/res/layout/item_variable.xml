@@ -40,7 +40,7 @@
                     android:id="@+id/variableTypeText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="[文本]"
+                    android:text="@string/xml_item_variable"
                     android:textSize="11sp"
                     android:textColor="?attr/colorSecondary"
                     android:layout_marginStart="6dp"
@@ -76,7 +76,7 @@
                 android:layout_height="36dp"
                 android:src="@android:drawable/ic_menu_edit"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="编辑变量"
+                android:contentDescription="@string/xml_item_variable_desc"
                 android:layout_marginEnd="4dp" />
 
             <ImageButton
@@ -85,7 +85,7 @@
                 android:layout_height="36dp"
                 android:src="@android:drawable/ic_menu_delete"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="删除变量" />
+                android:contentDescription="@string/xml_item_variable_desc_2" />
 
         </LinearLayout>
 

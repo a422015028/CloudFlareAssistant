@@ -3,6 +3,8 @@ package com.muort.upworker.feature.backup
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.model.WebDavConfig
 import com.muort.upworker.core.model.R2BackupConfig
 import com.muort.upworker.core.model.LocalBackupConfig
@@ -35,8 +37,8 @@ class BackupViewModel @Inject constructor(
     private val _backupFiles = MutableStateFlow<List<String>>(emptyList())
     val backupFiles: StateFlow<List<String>> = _backupFiles.asStateFlow()
 
-    private val _message = MutableStateFlow<String?>(null)
-    val message: StateFlow<String?> = _message.asStateFlow()
+    private val _message = MutableStateFlow<UiMessage>(UiMessage.Empty)
+    val message: StateFlow<UiMessage> = _message.asStateFlow()
 
     private val _selectedStorageType = MutableStateFlow(StorageType.LOCAL)
     val selectedStorageType: StateFlow<StorageType> = _selectedStorageType.asStateFlow()
@@ -71,10 +73,10 @@ class BackupViewModel @Inject constructor(
                 )
 
                 backupRepository.saveWebDavConfig(config)
-                _message.value = "配置保存成功"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_config_saved_success)
 
             } catch (e: Exception) {
-                _message.value = "配置保存失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_config_save_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -96,13 +98,13 @@ class BackupViewModel @Inject constructor(
                 )
 
                 if (result.isSuccess) {
-                    _message.value = "连接成功"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_connection_success)
                 } else {
-                    _message.value = "连接失败: ${result.exceptionOrNull()?.message}"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_connection_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = "连接失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_connection_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -119,15 +121,15 @@ class BackupViewModel @Inject constructor(
                 val result = backupRepository.backupAccounts(password)
 
                 if (result.isSuccess) {
-                    val fileName = result.getOrNull()
-                    _message.value = "备份成功: $fileName"
+                    val fileName = result.getOrNull() ?: ""
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_success_filename, fileName)
                     loadBackupFiles()
                 } else {
-                    _message.value = "备份失败: ${result.exceptionOrNull()?.message}"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = "备份失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -143,13 +145,13 @@ class BackupViewModel @Inject constructor(
 
                 if (result.isSuccess) {
                     val count = result.getOrNull() ?: 0
-                    _message.value = "恢复成功，导入了 $count 个账号"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_restore_success_count, count)
                 } else {
-                    _message.value = "恢复失败: ${result.exceptionOrNull()?.message}"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_restore_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = "恢复失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_restore_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -167,22 +169,22 @@ class BackupViewModel @Inject constructor(
                     val files = result.getOrNull() ?: emptyList()
                     _backupFiles.value = files
                     if (files.isEmpty()) {
-                        _message.value = "未找到备份文件"
+                        _message.value = UiMessage.of(R.string.vm_msg_backup_files_not_found)
                     } else {
-                        _message.value = "找到 ${files.size} 个备份文件"
+                        _message.value = UiMessage.of(R.string.vm_msg_backup_files_found_count, files.size)
                     }
                 } else {
                     val error = result.exceptionOrNull()
                     val errorMsg = error?.message ?: "未知错误"
                     val stackTrace = error?.stackTraceToString()?.take(200) ?: ""
-                    _message.value = "加载文件列表失败: $errorMsg\n$stackTrace"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_load_files_failed, errorMsg + "\n" + stackTrace)
                     _backupFiles.value = emptyList()
                 }
 
             } catch (e: Exception) {
                 val errorMsg = e.message ?: "未知错误"
                 val stackTrace = e.stackTraceToString().take(200)
-                _message.value = "加载文件列表失败: $errorMsg\n$stackTrace"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_load_files_failed, errorMsg + "\n" + stackTrace)
                 _backupFiles.value = emptyList()
             } finally {
                 _loadingState.value = false
@@ -198,14 +200,14 @@ class BackupViewModel @Inject constructor(
                 val result = backupRepository.deleteBackupFile(fileName)
 
                 if (result.isSuccess) {
-                    _message.value = "删除成功"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_delete_success)
                     loadBackupFiles()
                 } else {
-                    _message.value = "删除失败: ${result.exceptionOrNull()?.message}"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = "删除失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -222,18 +224,18 @@ class BackupViewModel @Inject constructor(
                 val result = backupRepository.backupAccountsToR2(password)
 
                 if (result.isSuccess) {
-                    val fileName = result.getOrNull()
-                    _message.value = "备份成功: $fileName"
+                    val fileName = result.getOrNull() ?: ""
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_success_filename, fileName)
                     loadR2BackupFiles()
                 } else {
                     val exception = result.exceptionOrNull()
                     val errorMsg = exception?.message ?: exception?.toString() ?: "未知错误"
-                    _message.value = "备份失败: $errorMsg"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_failed, errorMsg)
                 }
 
             } catch (e: Exception) {
                 val errorMsg = e.message ?: e.toString()
-                _message.value = "备份失败: $errorMsg"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_failed, errorMsg)
             } finally {
                 _loadingState.value = false
             }
@@ -249,16 +251,16 @@ class BackupViewModel @Inject constructor(
 
                 if (result.isSuccess) {
                     val count = result.getOrNull() ?: 0
-                    _message.value = "恢复成功，导入了 $count 个账号"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_restore_success_count, count)
                 } else {
                     val exception = result.exceptionOrNull()
                     val errorMsg = exception?.message ?: exception?.toString() ?: "未知错误"
-                    _message.value = "恢复失败: $errorMsg"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_restore_failed, errorMsg)
                 }
 
             } catch (e: Exception) {
                 val errorMsg = e.message ?: e.toString()
-                _message.value = "恢复失败: $errorMsg"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_restore_failed, errorMsg)
             } finally {
                 _loadingState.value = false
             }
@@ -276,20 +278,20 @@ class BackupViewModel @Inject constructor(
                     val files = result.getOrNull() ?: emptyList()
                     _backupFiles.value = files
                     if (files.isEmpty()) {
-                        _message.value = "未找到备份文件"
+                        _message.value = UiMessage.of(R.string.vm_msg_backup_files_not_found)
                     } else {
-                        _message.value = "找到 ${files.size} 个备份文件"
+                        _message.value = UiMessage.of(R.string.vm_msg_backup_files_found_count, files.size)
                     }
                 } else {
                     val exception = result.exceptionOrNull()
                     val errorMsg = exception?.message ?: exception?.toString() ?: "未知错误"
-                    _message.value = "加载文件列表失败: $errorMsg"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_filelist_load_failed, errorMsg)
                     _backupFiles.value = emptyList()
                 }
 
             } catch (e: Exception) {
                 val errorMsg = e.message ?: e.toString()
-                _message.value = "加载文件列表失败: $errorMsg"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_filelist_load_failed, errorMsg)
                 _backupFiles.value = emptyList()
             } finally {
                 _loadingState.value = false
@@ -305,14 +307,14 @@ class BackupViewModel @Inject constructor(
                 val result = backupRepository.deleteR2BackupFile(fileName)
 
                 if (result.isSuccess) {
-                    _message.value = "删除成功"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_delete_success)
                     loadR2BackupFiles()
                 } else {
-                    _message.value = "删除失败: ${result.exceptionOrNull()?.message}"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = "删除失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -329,15 +331,15 @@ class BackupViewModel @Inject constructor(
                 val result = backupRepository.backupAccountsLocal(password)
 
                 if (result.isSuccess) {
-                    val fileName = result.getOrNull()
-                    _message.value = "备份成功: $fileName"
+                    val fileName = result.getOrNull() ?: ""
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_success_filename, fileName)
                     loadLocalBackupFiles()
                 } else {
-                    _message.value = "备份失败: ${result.exceptionOrNull()?.message}"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = "备份失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -353,13 +355,13 @@ class BackupViewModel @Inject constructor(
 
                 if (result.isSuccess) {
                     val count = result.getOrNull() ?: 0
-                    _message.value = "恢复成功，导入了 $count 个账号"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_restore_success_count, count)
                 } else {
-                    _message.value = "恢复失败: ${result.exceptionOrNull()?.message}"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_restore_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = "恢复失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_restore_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -377,12 +379,12 @@ class BackupViewModel @Inject constructor(
                     val files = result.getOrNull() ?: emptyList()
                     _backupFiles.value = files
                 } else {
-                    _message.value = "加载失败: ${result.exceptionOrNull()?.message}"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_filelist_load_failed, result.exceptionOrNull()?.message ?: "")
                     _backupFiles.value = emptyList()
                 }
 
             } catch (e: Exception) {
-                _message.value = "加载失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_filelist_load_failed, e.message ?: "")
                 _backupFiles.value = emptyList()
             } finally {
                 _loadingState.value = false
@@ -398,14 +400,14 @@ class BackupViewModel @Inject constructor(
                 val result = backupRepository.deleteLocalBackupFile(fileName)
 
                 if (result.isSuccess) {
-                    _message.value = "删除成功"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_delete_success)
                     loadLocalBackupFiles()
                 } else {
-                    _message.value = "删除失败: ${result.exceptionOrNull()?.message}"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = "删除失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -425,16 +427,16 @@ class BackupViewModel @Inject constructor(
                     // 恢复成功后，把文件保存到本地备份目录
                     val saveResult = backupRepository.saveLocalBackupFile(content, originalFileName)
                     if (saveResult.isSuccess) {
-                        _message.value = "导入成功，导入了 $count 个账号"
+                        _message.value = UiMessage.of(R.string.vm_msg_backup_import_success_count, count)
                     } else {
-                        _message.value = "导入成功（已导入 $count 个账号），但保存到本地目录失败: ${saveResult.exceptionOrNull()?.message}"
+                        _message.value = UiMessage.of(R.string.vm_msg_backup_imported_save_failed, count, saveResult.exceptionOrNull()?.message ?: "")
                     }
                     loadLocalBackupFiles()
                 } else {
-                    _message.value = "导入失败: ${result.exceptionOrNull()?.message}"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_import_failed, result.exceptionOrNull()?.message ?: "")
                 }
             } catch (e: Exception) {
-                _message.value = "导入失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_import_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -459,9 +461,9 @@ class BackupViewModel @Inject constructor(
                     updatedAt = System.currentTimeMillis()
                 )
                 backupRepository.saveLocalBackupConfig(config)
-                _message.value = "备份目录已设置"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_directory_set_success)
             } catch (e: Exception) {
-                _message.value = "设置目录失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_directory_set_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -485,9 +487,9 @@ class BackupViewModel @Inject constructor(
                     updatedAt = System.currentTimeMillis()
                 )
                 backupRepository.saveLocalBackupConfig(config)
-                _message.value = "配置保存成功"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_config_saved_success)
             } catch (e: Exception) {
-                _message.value = "配置保存失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_config_save_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -495,7 +497,7 @@ class BackupViewModel @Inject constructor(
     }
 
     fun clearMessage() {
-        _message.value = null
+        _message.value = UiMessage.Empty
     }
 
     fun selectStorageType(type: StorageType) {
@@ -511,7 +513,7 @@ class BackupViewModel @Inject constructor(
 
                 val account = accountRepository.getAccountById(accountId)
                 if (account == null) {
-                    _message.value = "账号不存在"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_account_not_found)
                     _availableBuckets.value = emptyList()
                     return@launch
                 }
@@ -522,9 +524,9 @@ class BackupViewModel @Inject constructor(
                     val buckets = result.data.map { it.name }
                     _availableBuckets.value = buckets
                     if (buckets.isEmpty()) {
-                        _message.value = "该账号没有可用的bucket"
+                        _message.value = UiMessage.of(R.string.vm_msg_backup_r2_buckets_empty)
                     } else {
-                        _message.value = "找到 ${buckets.size} 个bucket"
+                        _message.value = UiMessage.of(R.string.vm_msg_backup_r2_buckets_found_count, buckets.size)
                     }
                 } else {
                     val errorMsg = if (result is com.muort.upworker.core.model.Resource.Error) {
@@ -532,12 +534,12 @@ class BackupViewModel @Inject constructor(
                     } else {
                         "未知错误"
                     }
-                    _message.value = "加载bucket列表失败: $errorMsg"
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_r2_buckets_load_failed, errorMsg)
                     _availableBuckets.value = emptyList()
                 }
 
             } catch (e: Exception) {
-                _message.value = "加载bucket列表失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_r2_buckets_load_failed, e.message ?: "")
                 _availableBuckets.value = emptyList()
             } finally {
                 _loadingState.value = false
@@ -567,10 +569,10 @@ class BackupViewModel @Inject constructor(
                 )
 
                 backupRepository.saveR2BackupConfig(config)
-                _message.value = "配置保存成功"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_config_saved_success)
 
             } catch (e: Exception) {
-                _message.value = "配置保存失败: ${e.message}"
+                _message.value = UiMessage.of(R.string.vm_msg_backup_config_save_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }

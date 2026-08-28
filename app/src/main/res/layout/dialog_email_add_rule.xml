@@ -14,7 +14,7 @@
             android:id="@+id/matchInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="匹配地址（如 alice@example.com）"
+            android:hint="@string/email_routing_match_address"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="转发到（外部邮箱）"
+            android:hint="@string/email_routing_forward_to"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -53,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="规则名称（可选）"
+            android:hint="@string/email_routing_rule_name_optional"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText

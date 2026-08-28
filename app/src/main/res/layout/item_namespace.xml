@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_more"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="更多操作" />
+            android:contentDescription="@string/account_more_actions" />
 
     </LinearLayout>
 

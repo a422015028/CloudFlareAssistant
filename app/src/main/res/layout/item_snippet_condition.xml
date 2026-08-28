@@ -17,7 +17,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="字段"
+            android:hint="@string/snippet_field"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
             <AutoCompleteTextView
@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
-            android:text="删除"
+            android:text="@string/delete"
             android:textSize="13sp" />
     </LinearLayout>
 
@@ -41,7 +41,7 @@
         android:id="@+id/headerNameLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="请求头名称（如 x-custom-header）"
+        android:hint="@string/snippet_header_name_hint"
         android:layout_marginTop="8dp"
         android:visibility="gone"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
@@ -57,7 +57,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="运算符"
+        android:hint="@string/snippet_operator"
         android:layout_marginTop="8dp"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
@@ -72,7 +72,7 @@
         android:id="@+id/valueLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="值"
+        android:hint="@string/snippet_value"
         android:layout_marginTop="8dp"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 

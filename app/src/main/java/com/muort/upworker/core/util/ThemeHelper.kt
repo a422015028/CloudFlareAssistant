@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.color.DynamicColors
+import com.muort.upworker.R
 
 /**
  * 主题管理：浅色 / 深色 / 跟随系统 / 动态配色开关
@@ -73,5 +74,9 @@ object ThemeHelper {
         }
     }
 
-    val themeModeLabels = listOf("跟随系统", "浅色", "深色")
+    fun getThemeModeLabels(ctx: Context): List<String> = listOf(
+        ctx.getString(R.string.theme_follow_system),
+        ctx.getString(R.string.theme_light),
+        ctx.getString(R.string.theme_dark)
+    )
 }

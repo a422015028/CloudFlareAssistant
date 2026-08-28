@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.muort.upworker.R
 import com.muort.upworker.core.model.DeviceSettingsPolicy
 import com.muort.upworker.databinding.ItemDevicePolicyBinding
 
@@ -33,18 +34,19 @@ class DevicePolicyAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(policy: DeviceSettingsPolicy) {
+            val ctx = binding.root.context
             val isDefault = policy.isDefault == true
             
-            binding.policyNameText.text = if (isDefault) "默认配置文件" else (policy.name ?: "未命名配置文件")
-            binding.policyDescriptionText.text = policy.description ?: (if (isDefault) "应用于所有未匹配其他配置文件的设备" else "无描述")
+            binding.policyNameText.text = if (isDefault) ctx.getString(R.string.zt_policy_default_profile) else (policy.name ?: ctx.getString(R.string.zt_policy_unnamed_profile))
+            binding.policyDescriptionText.text = policy.description ?: (if (isDefault) ctx.getString(R.string.zt_policy_default_desc) else ctx.getString(R.string.zt_policy_no_desc))
             
             // Match rule - default policy doesn't have match
-            binding.matchRuleText.text = if (isDefault) "匹配规则: 所有设备" else "匹配规则: ${policy.match ?: "any"}"
+            binding.matchRuleText.text = if (isDefault) ctx.getString(R.string.zt_policy_match_all_devices) else ctx.getString(R.string.zt_policy_match_rule_format, policy.match ?: "any")
             
             // Settings
-            binding.autoConnectText.text = "自动连接: ${getAutoConnectLabel(policy.autoConnect)}"
-            binding.modeSwitchText.text = "模式切换: ${if (policy.allowModeSwitch == true) "允许" else "禁止"}"
-            binding.precedenceText.text = if (isDefault) "优先级: 默认" else "优先级: ${policy.precedence ?: 0}"
+            binding.autoConnectText.text = ctx.getString(R.string.zt_policy_auto_connect_label, getAutoConnectLabel(policy.autoConnect, ctx))
+            binding.modeSwitchText.text = if (policy.allowModeSwitch == true) ctx.getString(R.string.zt_policy_mode_switch_allow) else ctx.getString(R.string.zt_policy_mode_switch_deny)
+            binding.precedenceText.text = if (isDefault) ctx.getString(R.string.zt_policy_precedence_default) else ctx.getString(R.string.zt_policy_precedence_label, policy.precedence ?: 0)
             
             // Enabled switch
             binding.enabledSwitch.setOnCheckedChangeListener(null)
@@ -64,12 +66,12 @@ class DevicePolicyAdapter(
             }
         }
 
-        private fun getAutoConnectLabel(autoConnect: Int?): String {
+        private fun getAutoConnectLabel(autoConnect: Int?, ctx: android.content.Context): String {
             return when (autoConnect) {
-                0 -> "关闭"
-                1 -> "开启"
-                2 -> "强制"
-                else -> "默认"
+                0 -> ctx.getString(R.string.zt_policy_auto_connect_off)
+                1 -> ctx.getString(R.string.zt_policy_auto_connect_on)
+                2 -> ctx.getString(R.string.zt_policy_auto_connect_force)
+                else -> ctx.getString(R.string.zt_access_detail_default)
             }
         }
     }

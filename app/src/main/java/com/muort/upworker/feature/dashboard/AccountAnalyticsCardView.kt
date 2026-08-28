@@ -183,7 +183,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
     }
 
     private fun updateTimeRangeHint(timeRange: TimeRange) {
-        binding.analyticsTimeRangeHintText.text = "过去 ${timeRange.displayName} 数据"
+        binding.analyticsTimeRangeHintText.text = context.getString(R.string.dash_past_data, timeRange.displayName(context))
     }
 
     fun showLoading() {
@@ -537,7 +537,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
             container.addView(row.root)
         }
 
-        binding.analyticsRegionPageInfo.text = "${start + 1} 到 $end，共 ${regionStats.size} 个"
+        binding.analyticsRegionPageInfo.text = context.getString(R.string.dash_region_page_info, start + 1, end, regionStats.size)
         binding.analyticsRegionPrevButton.isEnabled = regionPage > 0
         binding.analyticsRegionNextButton.isEnabled = regionPage < totalPages - 1
     }

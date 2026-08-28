@@ -11,6 +11,7 @@ import androidx.core.view.WindowCompat
 import com.muort.upworker.R
 import com.muort.upworker.core.log.LogRepository
 import com.muort.upworker.core.util.DisplaySizeHelper
+import com.muort.upworker.core.util.LocaleHelper
 import com.muort.upworker.core.util.ThemeHelper
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -20,7 +21,7 @@ import kotlinx.coroutines.launch
 class LogActivity : AppCompatActivity() {
 
     override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(DisplaySizeHelper.wrap(newBase))
+        super.attachBaseContext(DisplaySizeHelper.wrap(LocaleHelper.applyLocale(newBase)))
     }
 
     private val scope = MainScope()
@@ -42,7 +43,7 @@ class LogActivity : AppCompatActivity() {
         // Handle system bar insets
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
             val systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            view.setPaddingRelative(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
         val isNightMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -52,7 +53,7 @@ class LogActivity : AppCompatActivity() {
         logTextView.setTextIsSelectable(true)
         // 彩色高亮日志（关键字、时间戳、JSON高亮）
         fun colorizeLog(raw: String): CharSequence {
-            if (raw.isBlank()) return "暂无日志"
+            if (raw.isBlank()) return getString(R.string.app_log_empty)
             val spannable = android.text.SpannableStringBuilder()
             val keywordColor = 0xFF1976D2.toInt() // 蓝色
             val timeColor = 0xFF388E3C.toInt()   // 绿色
@@ -144,22 +145,22 @@ class LogActivity : AppCompatActivity() {
             val text = logTextView.text.toString()
             val clip = android.content.ClipData.newPlainText("log", text)
             clipboard.setPrimaryClip(clip)
-            android.widget.Toast.makeText(this, "日志已复制", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(this, getString(R.string.msg_logs_copied), android.widget.Toast.LENGTH_SHORT).show()
         }
         val logSwitch = findViewById<com.google.android.material.button.MaterialButton>(R.id.logSwitch)
         var isLoggingEnabled = true
-        logSwitch.text = if (isLoggingEnabled) "开" else "关"
+        logSwitch.text = getString(if (isLoggingEnabled) R.string.app_log_switch_on else R.string.app_log_switch_off)
         // 同步开关状态
         scope.launch {
             LogRepository.getEnableFlow().collectLatest { enable ->
                 isLoggingEnabled = enable
-                logSwitch.text = if (enable) "开" else "关"
+                logSwitch.text = getString(if (enable) R.string.app_log_switch_on else R.string.app_log_switch_off)
             }
         }
         logSwitch.setOnClickListener {
             isLoggingEnabled = !isLoggingEnabled
             LogRepository.setEnable(isLoggingEnabled)
-            logSwitch.text = if (isLoggingEnabled) "开" else "关"
+            logSwitch.text = getString(if (isLoggingEnabled) R.string.app_log_switch_on else R.string.app_log_switch_off)
         }
     }
     override fun onDestroy() {

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayoutMediator
 import com.muort.upworker.databinding.FragmentDevicesBinding
+import com.muort.upworker.R
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -38,8 +39,8 @@ class DevicesFragment : Fragment() {
 
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
-                0 -> "设备"
-                1 -> "设备配置文件"
+                0 -> getString(R.string.zt_device_tab_devices)
+                1 -> getString(R.string.zt_device_tab_policies)
                 else -> ""
             }
         }.attach()

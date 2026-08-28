@@ -42,33 +42,34 @@ class GatewayRuleAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(rule: GatewayRule) {
+            val ctx = binding.root.context
             binding.ruleNameText.text = rule.name
             
             val ruleType = rule.filters.firstOrNull() ?: "unknown"
             binding.ruleTypeChip.text = when (ruleType) {
-                "dns" -> "DNS"
-                "http" -> "HTTP"
-                "l4" -> "网络"
+                "dns" -> ctx.getString(R.string.zt_gateway_rule_type_dns)
+                "http" -> ctx.getString(R.string.zt_gateway_rule_type_http)
+                "l4" -> ctx.getString(R.string.zt_gateway_rule_type_l4)
                 else -> ruleType.uppercase()
             }
             binding.ruleTypeChip.setTextColor(getRuleTypeColor(ruleType))
 
-            binding.ruleActionChip.text = getActionLabel(rule.action)
+            binding.ruleActionChip.text = getActionLabel(ctx, rule.action)
             binding.ruleActionChip.setTextColor(getActionColor(rule.action))
             
-            binding.ruleTrafficText.text = rule.traffic ?: "无匹配条件"
+            binding.ruleTrafficText.text = rule.traffic ?: ctx.getString(R.string.zt_gateway_rule_no_traffic)
             binding.ruleTrafficText.visibility = if (rule.traffic.isNullOrBlank()) View.GONE else View.VISIBLE
             
             binding.ruleTrafficText.setOnClickListener {
                 if (!rule.traffic.isNullOrBlank()) {
-                    val clipboard = binding.root.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("规则表达式", rule.traffic)
+                    val clipboard = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText(ctx.getString(R.string.zt_gateway_rule_expr_label), rule.traffic)
                     clipboard.setPrimaryClip(clip)
-                    Toast.makeText(binding.root.context, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, ctx.getString(R.string.msg_copied_to_clipboard), Toast.LENGTH_SHORT).show()
                 }
             }
             
-            binding.rulePrecedenceText.text = "优先级: ${rule.precedence ?: 0}"
+            binding.rulePrecedenceText.text = ctx.getString(R.string.zt_policy_precedence_label, rule.precedence ?: 0)
             
             binding.enabledSwitch.setOnCheckedChangeListener(null)
             binding.enabledSwitch.isChecked = rule.enabled
@@ -80,17 +81,17 @@ class GatewayRuleAdapter(
             binding.deleteButton.setOnClickListener { onDeleteClick(rule) }
         }
 
-        private fun getActionLabel(action: String?): String {
+        private fun getActionLabel(ctx: Context, action: String?): String {
             return when (action) {
-                "allow" -> "允许"
-                "block" -> "阻止"
-                "safesearch" -> "安全搜索"
-                "ytrestricted" -> "YouTube限制"
-                "override" -> "覆盖"
-                "redirect" -> "重定向"
-                "off" -> "不检查"
-                "noscan" -> "不扫描"
-                else -> action ?: "未知"
+                "allow" -> ctx.getString(R.string.zt_gateway_action_allow)
+                "block" -> ctx.getString(R.string.zt_gateway_action_block)
+                "safesearch" -> ctx.getString(R.string.zt_gateway_action_safesearch)
+                "ytrestricted" -> ctx.getString(R.string.zt_gateway_action_ytrestricted)
+                "override" -> ctx.getString(R.string.zt_gateway_action_override)
+                "redirect" -> ctx.getString(R.string.zt_gateway_action_redirect)
+                "off" -> ctx.getString(R.string.zt_gateway_action_off)
+                "noscan" -> ctx.getString(R.string.zt_gateway_action_noscan)
+                else -> action ?: ctx.getString(R.string.zt_gateway_rule_unknown_action)
             }
         }
 

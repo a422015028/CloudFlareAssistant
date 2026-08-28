@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.muort.upworker.R
 import com.muort.upworker.core.model.WafRule
 import com.muort.upworker.core.model.WafRuleCreate
 import com.muort.upworker.databinding.DialogWafExpressionBinding
@@ -28,39 +29,47 @@ import kotlinx.coroutines.launch
 class WafFragment : BaseZoneRulesetFragment() {
 
     override val phase: String = "http_request_firewall_custom"
-    override val addDialogTitle: String = "添加 WAF 规则"
+    override val addDialogTitleResId: Int = R.string.waf_add_rule_dialog_title
 
     /** 可创建/编辑的动作（skip 需额外参数，暂不提供）。 */
-    private val supportedActions = listOf(
-        "block" to "阻断 (Block)",
-        "challenge" to "质询 (Challenge)",
-        "managed_challenge" to "托管质询 (Managed Challenge)",
-        "js_challenge" to "JS 质询 (JS Challenge)",
-        "log" to "记录 (Log)",
+    private fun supportedActionLabels(ctx: android.content.Context) = listOf(
+        "block" to ctx.getString(R.string.waf_action_block),
+        "challenge" to ctx.getString(R.string.waf_action_challenge),
+        "managed_challenge" to ctx.getString(R.string.waf_action_managed_challenge),
+        "js_challenge" to ctx.getString(R.string.waf_action_js_challenge),
+        "log" to ctx.getString(R.string.waf_action_log),
     )
 
     /** 规则被点击 → 编辑（仅支持的动作可编辑）。 */
     override fun onRuleClicked(rule: WafRule) {
-        if (supportedActions.any { it.first == rule.action }) {
+        val ctx = requireContext()
+        val actions = supportedActionLabels(ctx)
+        if (actions.any { it.first == rule.action }) {
             showRuleDialog(editingRule = rule)
         } else {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("不支持编辑")
-                .setMessage("该规则的动作（${rule.action ?: "未知"}）包含额外参数，无法在此编辑。请到 Cloudflare 控制台修改。")
-                .setPositiveButton("确定", null)
+            MaterialAlertDialogBuilder(ctx)
+                .setTitle(R.string.waf_edit_not_supported_title)
+                .setMessage(
+                    getString(
+                        R.string.waf_edit_not_supported_message,
+                        rule.action ?: getString(R.string.status_unknown)
+                    )
+                )
+                .setPositiveButton(R.string.confirm, null)
                 .show()
         }
     }
 
     /** 删除前确认。 */
     override fun onRuleDeleteRequested(rule: WafRule) {
+        val ruleLabel = rule.description ?: rule.expression?.take(40) ?: rule.id
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除规则")
-            .setMessage("确定要删除规则「${rule.description ?: rule.expression?.take(40) ?: rule.id}」吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.waf_delete_rule_title)
+            .setMessage(getString(R.string.waf_delete_rule_confirm, ruleLabel))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 account?.let { rulesetViewModel.deleteRule(it, zoneId, rule) }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -71,19 +80,21 @@ class WafFragment : BaseZoneRulesetFragment() {
 
     /** 添加 / 编辑共用表单。 */
     private fun showRuleDialog(editingRule: WafRule?) {
+        val ctx = requireContext()
         val isEdit = editingRule != null
-        val binding = DialogWafRuleBinding.inflate(LayoutInflater.from(requireContext()))
+        val binding = DialogWafRuleBinding.inflate(LayoutInflater.from(ctx))
 
-        binding.formTitle.text = if (isEdit) "编辑 WAF 规则" else addDialogTitle
+        binding.formTitle.text = if (isEdit) getString(R.string.waf_edit_rule_title) else getString(addDialogTitleResId)
 
         // 名称
         binding.nameInput.setText(editingRule?.description ?: "")
 
         // 动作下拉
-        val actionLabels = supportedActions.map { it.second }
-        val actionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, actionLabels)
+        val actions = supportedActionLabels(ctx)
+        val actionLabels = actions.map { it.second }
+        val actionAdapter = ArrayAdapter(ctx, android.R.layout.simple_list_item_1, actionLabels)
         binding.actionInput.setAdapter(actionAdapter)
-        val currentActionIndex = supportedActions.indexOfFirst { it.first == editingRule?.action }
+        val currentActionIndex = actions.indexOfFirst { it.first == editingRule?.action }
         if (currentActionIndex >= 0) {
             binding.actionInput.setText(actionLabels[currentActionIndex], false)
         } else {
@@ -101,17 +112,17 @@ class WafFragment : BaseZoneRulesetFragment() {
             showExpressionBuilder(binding.expressionInput)
         }
 
-        val dialog = MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(ctx)
             .setView(binding.root)
-            .setPositiveButton(if (isEdit) "保存" else "添加") { _, _ ->
+            .setPositiveButton(if (isEdit) R.string.save else R.string.add) { _, _ ->
                 val name = binding.nameInput.text.toString().trim().ifBlank { null }
                 val actionIndex = actionLabels.indexOf(binding.actionInput.text.toString())
-                val action = if (actionIndex >= 0) supportedActions[actionIndex].first else "block"
+                val action = if (actionIndex >= 0) actions[actionIndex].first else "block"
                 val expression = binding.expressionInput.text.toString().trim()
                 val enabled = binding.enabledSwitch.isChecked
 
                 if (expression.isEmpty()) {
-                    toast("表达式不能为空")
+                    toast(getString(R.string.msg_expression_empty))
                     return@setPositiveButton
                 }
 
@@ -119,16 +130,16 @@ class WafFragment : BaseZoneRulesetFragment() {
                 account?.let { acct ->
                     if (isEdit && editingRule != null) {
                         rulesetViewModel.updateRule(acct, zoneId, editingRule.id, rule) { ok, err ->
-                            toast(if (ok) "保存成功" else "保存失败: $err")
+                            toast(if (ok) getString(R.string.msg_saved) else getString(R.string.msg_save_failed, err?.asString(requireContext()).orEmpty()))
                         }
                     } else {
                         rulesetViewModel.addRule(acct, zoneId, rule) { ok, err ->
-                            toast(if (ok) "添加成功" else "添加失败: $err")
+                            toast(if (ok) getString(R.string.msg_added) else getString(R.string.msg_add_failed, err?.asString(requireContext()).orEmpty()))
                         }
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .create()
 
         dialog.show()
@@ -138,7 +149,7 @@ class WafFragment : BaseZoneRulesetFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             rulesetViewModel.state.collect { state ->
                 saveButton.isEnabled = !state.isSaving
-                saveButton.text = if (state.isSaving) "保存中..." else if (isEdit) "保存" else "添加"
+                saveButton.text = if (state.isSaving) getString(R.string.msg_saving) else if (isEdit) getString(R.string.save) else getString(R.string.add)
             }
         }
     }
@@ -146,24 +157,24 @@ class WafFragment : BaseZoneRulesetFragment() {
     // ==================== 表达式构建器 ====================
 
     /** 可用字段。 */
-    private val wafFields = listOf(
-        WafField("ip.src", "客户端 IP", valueType = ValueType.IP),
-        WafField("ip.geoip.country", "国家代码", valueType = ValueType.STRING),
-        WafField("http.request.uri.path", "URI 路径", valueType = ValueType.STRING),
-        WafField("http.host", "主机名", valueType = ValueType.STRING),
-        WafField("http.request.method", "请求方法", valueType = ValueType.STRING),
+    private fun wafFields(ctx: android.content.Context) = listOf(
+        WafField("ip.src", ctx.getString(R.string.waf_field_client_ip), valueType = ValueType.IP),
+        WafField("ip.geoip.country", ctx.getString(R.string.waf_field_country_code), valueType = ValueType.STRING),
+        WafField("http.request.uri.path", ctx.getString(R.string.waf_field_uri_path), valueType = ValueType.STRING),
+        WafField("http.host", ctx.getString(R.string.waf_field_hostname), valueType = ValueType.STRING),
+        WafField("http.request.method", ctx.getString(R.string.waf_field_request_method), valueType = ValueType.STRING),
         WafField("http.user_agent", "User-Agent", valueType = ValueType.STRING),
-        WafField("http.request.full_uri", "完整 URI", valueType = ValueType.STRING),
-        WafField("cf.threat_score", "威胁评分", valueType = ValueType.NUMERIC),
+        WafField("http.request.full_uri", ctx.getString(R.string.waf_field_full_uri), valueType = ValueType.STRING),
+        WafField("cf.threat_score", ctx.getString(R.string.waf_field_threat_score), valueType = ValueType.NUMERIC),
     )
 
     /** 可用运算符。 */
-    private val wafOps = listOf(
-        WafOp("eq", "等于 (=)"),
-        WafOp("ne", "不等于 (≠)"),
-        WafOp("contains", "包含"),
-        WafOp("gt", "大于 (>)"),
-        WafOp("lt", "小于 (<)"),
+    private fun wafOps(ctx: android.content.Context) = listOf(
+        WafOp("eq", ctx.getString(R.string.waf_op_eq)),
+        WafOp("ne", ctx.getString(R.string.waf_op_ne)),
+        WafOp("contains", ctx.getString(R.string.waf_op_contains)),
+        WafOp("gt", ctx.getString(R.string.waf_op_gt)),
+        WafOp("lt", ctx.getString(R.string.waf_op_lt)),
     )
 
     private data class WafField(val expr: String, val label: String, val valueType: ValueType)
@@ -178,22 +189,25 @@ class WafFragment : BaseZoneRulesetFragment() {
     )
 
     private fun showExpressionBuilder(expressionInput: TextInputEditText) {
-        val exprBinding = DialogWafExpressionBinding.inflate(LayoutInflater.from(requireContext()))
+        val ctx = requireContext()
+        val exprBinding = DialogWafExpressionBinding.inflate(LayoutInflater.from(ctx))
+        val fields = wafFields(ctx)
+        val ops = wafOps(ctx)
         val conditions = mutableListOf(ConditionState())
         var useAnd = true
 
         fun updatePreview() {
-            val preview = buildExpression(conditions, useAnd)
-            exprBinding.previewText.text = preview.ifBlank { "（请添加条件）" }
+            val preview = buildExpression(conditions, useAnd, fields, ops)
+            exprBinding.previewText.text = preview.ifBlank { getString(R.string.waf_please_add_condition) }
         }
 
         // 初始条件
-        addConditionView(exprBinding.conditionsContainer, conditions, 0) { updatePreview() }
+        addConditionView(exprBinding.conditionsContainer, conditions, 0, fields, ops) { updatePreview() }
 
         exprBinding.addConditionBtn.setOnClickListener {
             val index = conditions.size
             conditions.add(ConditionState(fieldIndex = 0, opIndex = 0, value = ""))
-            addConditionView(exprBinding.conditionsContainer, conditions, index) { updatePreview() }
+            addConditionView(exprBinding.conditionsContainer, conditions, index, fields, ops) { updatePreview() }
             exprBinding.logicSwitchRow.visibility = if (conditions.size > 1) View.VISIBLE else View.GONE
             updatePreview()
         }
@@ -212,15 +226,15 @@ class WafFragment : BaseZoneRulesetFragment() {
         }
         exprBinding.andChip.isChecked = true
 
-        val dialog = MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(ctx)
             .setView(exprBinding.root)
-            .setPositiveButton("应用") { _, _ ->
-                val expr = buildExpression(conditions, useAnd)
+            .setPositiveButton(R.string.waf_apply_button) { _, _ ->
+                val expr = buildExpression(conditions, useAnd, fields, ops)
                 if (expr.isNotBlank()) {
                     expressionInput.setText(expr)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .create()
 
         dialog.show()
@@ -231,15 +245,18 @@ class WafFragment : BaseZoneRulesetFragment() {
         container: LinearLayout,
         conditions: MutableList<ConditionState>,
         index: Int,
+        fields: List<WafField>,
+        ops: List<WafOp>,
         onChange: () -> Unit,
     ) {
-        val condBinding = ItemWafConditionBinding.inflate(LayoutInflater.from(requireContext()))
+        val ctx = requireContext()
+        val condBinding = ItemWafConditionBinding.inflate(LayoutInflater.from(ctx))
         val cond = conditions[index]
 
         // 字段下拉
-        val fieldLabels = wafFields.map { it.label }
+        val fieldLabels = fields.map { it.label }
         condBinding.fieldSpinner.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, fieldLabels)
+            ArrayAdapter(ctx, android.R.layout.simple_list_item_1, fieldLabels)
         )
         condBinding.fieldSpinner.setText(fieldLabels[cond.fieldIndex], false)
         condBinding.fieldSpinner.setOnItemClickListener { _, _, position, _ ->
@@ -248,9 +265,9 @@ class WafFragment : BaseZoneRulesetFragment() {
         }
 
         // 运算符下拉
-        val opLabels = wafOps.map { it.label }
+        val opLabels = ops.map { it.label }
         condBinding.opSpinner.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, opLabels)
+            ArrayAdapter(ctx, android.R.layout.simple_list_item_1, opLabels)
         )
         condBinding.opSpinner.setText(opLabels[cond.opIndex], false)
         condBinding.opSpinner.setOnItemClickListener { _, _, position, _ ->
@@ -276,7 +293,7 @@ class WafFragment : BaseZoneRulesetFragment() {
                 // 重新构建所有条件视图
                 container.removeAllViews()
                 conditions.forEachIndexed { i, _ ->
-                    addConditionView(container, conditions, i, onChange)
+                    addConditionView(container, conditions, i, fields, ops, onChange)
                 }
                 onChange()
             }
@@ -291,12 +308,17 @@ class WafFragment : BaseZoneRulesetFragment() {
     }
 
     /** 将条件列表拼成 Wirefilter 表达式。 */
-    private fun buildExpression(conditions: List<ConditionState>, useAnd: Boolean): String {
+    private fun buildExpression(
+        conditions: List<ConditionState>,
+        useAnd: Boolean,
+        fields: List<WafField>,
+        ops: List<WafOp>,
+    ): String {
         val parts = conditions.mapNotNull { cond ->
             val v = cond.value.trim()
             if (v.isEmpty()) return@mapNotNull null
-            val field = wafFields[cond.fieldIndex]
-            val op = wafOps[cond.opIndex]
+            val field = fields[cond.fieldIndex]
+            val op = ops[cond.opIndex]
             val rhs = when (field.valueType) {
                 ValueType.IP -> {
                     // IP 地址：不支持 contains 等非 eq/ne 运算符时跳过

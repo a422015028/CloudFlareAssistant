@@ -10,7 +10,7 @@
         android:id="@+id/scriptNameTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="配置 Worker 的环境变量"
+        android:text="@string/xml_dialog_script_variables"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="8dp" />
@@ -19,7 +19,7 @@
         android:id="@+id/scriptNameText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="脚本名称: my-worker"
+        android:text="@string/binding_script_name_preview"
         android:textSize="14sp"
         android:textColor="?attr/colorPrimary"
         android:layout_marginBottom="16dp" />
@@ -35,7 +35,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="环境变量列表"
+            android:text="@string/pages_variables_list_title"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -43,7 +43,7 @@
             android:id="@+id/addVariableBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+ 添加变量"
+            android:text="@string/pages_add_variable"
             android:textSize="12sp"
             style="@style/Widget.Material3.Button.TextButton" />
 
@@ -61,7 +61,7 @@
         android:id="@+id/noVariablesText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="暂无环境变量"
+        android:text="@string/pages_no_variables"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
         android:padding="16dp"
@@ -71,7 +71,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="💡 环境变量：以明文形式存储的配置值，可在 Worker 中通过 env.VARIABLE_NAME 访问"
+        android:text="@string/xml_dialog_script_variables_2"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
         android:layout_marginTop="16dp"

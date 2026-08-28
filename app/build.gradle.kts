@@ -22,8 +22,8 @@ android {
         applicationId = "com.muort.upworker"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2608282
-        versionName = "7.7.4"
+        versionCode = 2608283
+        versionName = "7.7.5"
         
         vectorDrawables { 
             useSupportLibrary = true
@@ -93,7 +93,48 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    
+
+    lint {
+        // HardcodedText / MissingTranslation 等 i18n 拦截规则生效级别：
+        //  - lint.xml 中已把核心规则设为 error
+        //  - abortOnError=true：一旦有**未在基线中**的 error/warning-as-error 则构建立即失败（CI 级回归防护）
+        abortOnError = true
+        // 警告也作为失败（与 warningsAsErrors=true 配合，避免新引入的 HardcodedText 被作为 warning 溜过）
+        warningsAsErrors = true
+        // 跨模块依赖的库内 lint 检查（本项目单模块，true/false 影响不大但保留默认 true）
+        checkDependencies = true
+        // 基线白名单：所有"历史遗留"lint issue 登记在这里，不触发失败。
+        // 由 `./gradlew :app:updateLintBaseline` 生成与更新。
+        baseline = file("lint-baseline.xml")
+        // 生成 HTML + XML 报告（CI 存档用；按 variant 自动命名：lint-results-{debug,release}.html/xml，默认输出到 $buildDir/reports/）
+        htmlReport = true
+        xmlReport = true
+        // 发布构建也跑 lint（release 发布前拦截）
+        checkReleaseBuilds = true
+    }
+
+    // App Bundle 语言分拆配置：
+    // 本项目在运行时通过 LocaleHelper + DisplaySizeHelper（setLocale / createConfigurationContext）
+    // 实现应用内语言切换按钮（跟随系统 / 简体中文 / English），并没有接入 Play Core 的
+    // SplitInstallManager 动态语言下载功能。
+    //
+    // Lint 规则 AppBundleLocaleChanges 要求：
+    //   要么 1) 使用 Play Core 下载额外语言（SplitInstallManager），
+    //   要么 2) 在 App Bundle 中关闭按语言分拆，即所有语言资源打进主 APK。
+    // 我们选择方案 2：中文 + 英文合计仅 2 种，体积可忽略，兼容性最高。
+    // 参考：https://developer.android.com/guide/app-bundle/configure-base#handling_language_changes
+    bundle {
+        language {
+            enableSplit = false
+        }
+        density {
+            enableSplit = true
+        }
+        abi {
+            enableSplit = true
+        }
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"

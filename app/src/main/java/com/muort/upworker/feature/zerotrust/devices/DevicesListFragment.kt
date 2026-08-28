@@ -52,7 +52,7 @@ class DevicesListFragment : Fragment() {
     private fun setupRecyclerView() {
         deviceAdapter = DeviceAdapter(
             onRevokeClick = { device ->
-                confirmRevokeDevice(device.id, device.name ?: device.model ?: "设备")
+                confirmRevokeDevice(device.id, device.name ?: device.model ?: getString(R.string.zt_device_status_unknown))
             },
             onItemClick = { device ->
                 showDeviceDetailDialog(device)
@@ -79,7 +79,7 @@ class DevicesListFragment : Fragment() {
                     viewModel.message.collect { message ->
                         android.widget.Toast.makeText(
                             requireContext(),
-                            message,
+                            message.asString(requireContext()),
                             android.widget.Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -89,7 +89,7 @@ class DevicesListFragment : Fragment() {
                     viewModel.error.collect { error ->
                         android.widget.Toast.makeText(
                             requireContext(),
-                            error,
+                            error.asString(requireContext()),
                             android.widget.Toast.LENGTH_LONG
                         ).show()
                     }
@@ -115,7 +115,7 @@ class DevicesListFragment : Fragment() {
 
         // Device Name
         dialogView.findViewById<TextView>(R.id.deviceNameText).text =
-            device.name ?: device.model ?: "未知设备"
+            device.name ?: device.model ?: getString(R.string.zt_device_unknown_device)
 
         // Device Type Chip
         val deviceType = device.type ?: device.deviceType
@@ -125,21 +125,21 @@ class DevicesListFragment : Fragment() {
         // Status Chip
         val isRevoked = device.revokedAt != null
         val statusChip = dialogView.findViewById<Chip>(R.id.statusChip)
-        statusChip.text = if (isRevoked) "已撤销" else "活跃"
+        statusChip.text = if (isRevoked) getString(R.string.zt_device_status_revoked) else getString(R.string.zt_device_status_active)
         statusChip.setChipBackgroundColorResource(
             if (isRevoked) android.R.color.holo_red_light else android.R.color.holo_green_light
         )
 
         // Active Registrations Chip
         val activeRegChip = dialogView.findViewById<Chip>(R.id.activeRegChip)
-        activeRegChip.text = "活跃注册: ${device.activeRegistrations ?: 0}"
+        activeRegChip.text = getString(R.string.zt_device_active_registrations, device.activeRegistrations ?: 0)
 
         // User Info - last_seen_user preferred
         val user = device.lastSeenUser ?: device.user
         dialogView.findViewById<TextView>(R.id.userEmailText).text =
-            user?.email ?: user?.name ?: "未知用户"
+            user?.email ?: user?.name ?: getString(R.string.zt_device_unknown_user)
         dialogView.findViewById<TextView>(R.id.userIdText).text =
-            "ID: ${user?.id ?: "N/A"}"
+            getString(R.string.zt_device_id_label, user?.id ?: "N/A")
 
         // Device Info
         dialogView.findViewById<TextView>(R.id.modelText).text = device.model ?: "N/A"
@@ -156,16 +156,16 @@ class DevicesListFragment : Fragment() {
         // Network Info
         val ipAddr = device.publicIp ?: device.ip
         dialogView.findViewById<TextView>(R.id.ipAddressText).text =
-            "IP: ${ipAddr ?: "未知"}"
+            getString(R.string.zt_device_ip_label, ipAddr ?: getString(R.string.zt_device_status_unknown))
 
         // Policy Info - last_seen_registration.policy
         val policy = device.lastSeenRegistration?.policy
         dialogView.findViewById<TextView>(R.id.policyNameText).text =
-            policy?.name ?: device.policyName ?: "默认"
+            policy?.name ?: device.policyName ?: getString(R.string.zt_access_detail_default)
         dialogView.findViewById<TextView>(R.id.policyDefaultText).text =
-            if (policy?.default == true) "是" else "否"
+            if (policy?.default == true) getString(R.string.status_yes) else getString(R.string.status_no)
         dialogView.findViewById<TextView>(R.id.policyDeletedText).text =
-            if (policy?.deleted == true) "是" else "否"
+            if (policy?.deleted == true) getString(R.string.status_yes) else getString(R.string.status_no)
         dialogView.findViewById<TextView>(R.id.policyUpdatedAtText).text =
             formatDateTime(policy?.updatedAt)
 
@@ -173,17 +173,17 @@ class DevicesListFragment : Fragment() {
         val createdTime = device.createdAt ?: device.created
         val updatedTime = device.updatedAt ?: device.updated
         dialogView.findViewById<TextView>(R.id.createdAtText).text =
-            "创建时间: ${formatDateTime(createdTime)}"
+            getString(R.string.zt_device_created_label, formatDateTime(createdTime))
         dialogView.findViewById<TextView>(R.id.updatedAtText).text =
-            "更新时间: ${formatDateTime(updatedTime)}"
+            getString(R.string.zt_device_updated_label, formatDateTime(updatedTime))
         dialogView.findViewById<TextView>(R.id.lastSeenAtText).text =
-            "最后活跃: ${formatDateTime(device.lastSeenAt)}"
+            getString(R.string.zt_device_last_seen_label, formatDateTime(device.lastSeenAt))
 
         // Revoked Info
         val revokedText = dialogView.findViewById<TextView>(R.id.revokedAtText)
         if (isRevoked) {
             revokedText.visibility = View.VISIBLE
-            revokedText.text = "撤销时间: ${formatDateTime(device.revokedAt)}"
+            revokedText.text = getString(R.string.zt_device_revoked_label, formatDateTime(device.revokedAt))
         } else {
             revokedText.visibility = View.GONE
         }
@@ -192,19 +192,19 @@ class DevicesListFragment : Fragment() {
         val deletedText = dialogView.findViewById<TextView>(R.id.deletedAtText)
         if (device.deletedAt != null) {
             deletedText.visibility = View.VISIBLE
-            deletedText.text = "删除时间: ${formatDateTime(device.deletedAt)}"
+            deletedText.text = getString(R.string.zt_device_deleted_label, formatDateTime(device.deletedAt))
         } else {
             deletedText.visibility = View.GONE
         }
 
         val builder = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("设备详情")
+            .setTitle(R.string.zt_device_detail_title)
             .setView(dialogView)
-            .setNegativeButton("关闭", null)
+            .setNegativeButton(R.string.dialog_close, null)
 
         if (!isRevoked) {
-            builder.setPositiveButton("撤销设备") { _, _ ->
-                confirmRevokeDevice(device.id, device.name ?: device.model ?: "设备")
+            builder.setPositiveButton(R.string.zt_device_revoke_button) { _, _ ->
+                confirmRevokeDevice(device.id, device.name ?: device.model ?: getString(R.string.zt_device_status_unknown))
             }
         }
 
@@ -213,14 +213,14 @@ class DevicesListFragment : Fragment() {
 
     private fun confirmRevokeDevice(deviceId: String, deviceName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("撤销设备")
-            .setMessage("确定要撤销设备 \"$deviceName\" 吗？撤销后该设备将无法通过 WARP 连接。")
-            .setPositiveButton("撤销") { _, _ ->
+            .setTitle(R.string.zt_device_revoke_title)
+            .setMessage(getString(R.string.zt_device_revoke_confirm, deviceName))
+            .setPositiveButton(getString(R.string.zt_device_revoke_button)) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     viewModel.revokeDevice(account, deviceId)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -232,7 +232,7 @@ class DevicesListFragment : Fragment() {
             "android" -> "Android"
             "ios" -> "iOS"
             "chromeos" -> "ChromeOS"
-            else -> type?.uppercase() ?: "未知"
+            else -> type?.uppercase() ?: getString(R.string.zt_device_status_unknown)
         }
     }
 

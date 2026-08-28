@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.RateLimitRule
 import com.muort.upworker.databinding.DialogRateLimitBinding
@@ -28,28 +29,37 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class RateLimitFragment : BaseZoneFeatureFragment() {
 
-    override val emptyText: String = "暂无速率限制规则"
+    override val emptyTextResId: Int = R.string.rate_empty_rules
     override val showAddFab: Boolean = true
 
     private val viewModel: RateLimitViewModel by viewModels()
 
     private lateinit var adapter: RateLimitAdapter
 
-    // 周期选项（秒 → 中文标签）
+    // 周期选项（秒 → 显示标签）
     private val periods = listOf(
-        10 to "10 秒",
-        60 to "1 分钟",
-        600 to "10 分钟",
-        3600 to "1 小时",
+        10 to 10,  // we'll map with format below (static for unit consistency)
+        60 to 60,
+        600 to 600,
+        3600 to 3600,
     )
 
-    // 动作选项（英文值 → 中文标签）
-    private val actions = listOf(
-        "block" to "封锁",
-        "managed_challenge" to "托管质询",
-        "js_challenge" to "JS 质询",
-        "log" to "记录",
+    private fun periodLabels(ctx: android.content.Context): List<Pair<Int, String>> = listOf(
+        10 to "10 " + ctx.getString(R.string.lbl_seconds_short),
+        60 to "1 " + ctx.getString(R.string.lbl_minute_short),
+        600 to "10 " + ctx.getString(R.string.lbl_minutes_short),
+        3600 to "1 " + ctx.getString(R.string.lbl_hour_short),
     )
+
+    private fun actions(ctx: android.content.Context) = listOf(
+        "block" to ctx.getString(R.string.rate_action_block),
+        "managed_challenge" to ctx.getString(R.string.rate_action_managed_challenge),
+        "js_challenge" to ctx.getString(R.string.rate_action_js_challenge),
+        "log" to ctx.getString(R.string.rate_action_log),
+    )
+
+    private fun requestsLabel(ctx: android.content.Context, requests: Int, period: Int) =
+        ctx.getString(R.string.rate_requests_period_format, requests, period)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -82,7 +92,7 @@ class RateLimitFragment : BaseZoneFeatureFragment() {
                 viewModel.state.collect { state ->
                     if (state.isLoading) showLoading() else showList()
                     if (state.error != null) {
-                        showError(state.error)
+                        showError(state.error.asString(requireContext()))
                     } else if (state.rules.isEmpty() && !state.isLoading) {
                         showEmpty()
                     } else {
@@ -122,9 +132,10 @@ class RateLimitFragment : BaseZoneFeatureFragment() {
 
         inner class VH(private val b: ItemRateLimitBinding) : RecyclerView.ViewHolder(b.root) {
             fun bind(rule: RateLimitRule) {
+                val ctx = itemView.context
                 // 徽章：N 次 / N 秒
                 val r = rule.ratelimit
-                b.badgeText.text = "${r?.requestsPerPeriod ?: 0} 次 / ${r?.period ?: 0} 秒"
+                b.badgeText.text = requestsLabel(ctx, r?.requestsPerPeriod ?: 0, r?.period ?: 0)
 
                 // 描述
                 val desc = rule.description?.takeIf { it.isNotBlank() }
@@ -155,23 +166,26 @@ class RateLimitFragment : BaseZoneFeatureFragment() {
 
     private fun confirmDelete(rule: RateLimitRule) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除此速率限制规则？")
-            .setMessage("删除后将不再按此规则限速，操作不可撤销。")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.rate_delete_rule_title)
+            .setMessage(R.string.rate_delete_rule_message)
+            .setPositiveButton(R.string.delete) { _, _ ->
                 account?.let { viewModel.deleteRule(it, zoneId, rule) }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     // ==================== 添加 / 编辑表单 ====================
 
     private fun showRuleDialog(editingRule: RateLimitRule?) {
+        val ctx = requireContext()
         val isEdit = editingRule != null
-        val b = DialogRateLimitBinding.inflate(LayoutInflater.from(requireContext()))
+        val b = DialogRateLimitBinding.inflate(LayoutInflater.from(ctx))
 
-        val periodLabels = periods.map { it.second }
-        val actionLabels = actions.map { it.second }
+        val periodPairs = periodLabels(ctx)
+        val periodLabels = periodPairs.map { it.second }
+        val actionPairs = actions(ctx)
+        val actionLabels = actionPairs.map { it.second }
 
         // 描述
         b.descriptionInput.setText(editingRule?.description ?: "")
@@ -185,53 +199,53 @@ class RateLimitFragment : BaseZoneFeatureFragment() {
         )
 
         // 周期下拉
-        val periodAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, periodLabels)
+        val periodAdapter = ArrayAdapter(ctx, android.R.layout.simple_list_item_1, periodLabels)
         b.periodInput.setAdapter(periodAdapter)
         val periodSeconds = editingRule?.ratelimit?.period ?: 60
-        val periodIdx = periods.indexOfFirst { it.first == periodSeconds }.let { if (it >= 0) it else 1 }
+        val periodIdx = periodPairs.indexOfFirst { it.first == periodSeconds }.let { if (it >= 0) it else 1 }
         b.periodInput.setText(periodLabels[periodIdx], false)
 
         // 动作下拉
-        val actionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, actionLabels)
+        val actionAdapter = ArrayAdapter(ctx, android.R.layout.simple_list_item_1, actionLabels)
         b.actionInput.setAdapter(actionAdapter)
         val actionValue = editingRule?.action ?: "block"
-        val actionIdx = actions.indexOfFirst { it.first == actionValue }.let { if (it >= 0) it else 0 }
+        val actionIdx = actionPairs.indexOfFirst { it.first == actionValue }.let { if (it >= 0) it else 0 }
         b.actionInput.setText(actionLabels[actionIdx], false)
 
         // 缓解超时下拉
-        val mitigationAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, periodLabels)
+        val mitigationAdapter = ArrayAdapter(ctx, android.R.layout.simple_list_item_1, periodLabels)
         b.mitigationInput.setAdapter(mitigationAdapter)
         val mitigationSeconds = editingRule?.ratelimit?.mitigationTimeout ?: 60
-        val mitigationIdx = periods.indexOfFirst { it.first == mitigationSeconds }.let { if (it >= 0) it else 1 }
+        val mitigationIdx = periodPairs.indexOfFirst { it.first == mitigationSeconds }.let { if (it >= 0) it else 1 }
         b.mitigationInput.setText(periodLabels[mitigationIdx], false)
 
         // 启用开关
         b.enabledSwitch.isChecked = editingRule?.enabled ?: true
 
-        val dialog = MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(ctx)
             .setView(b.root)
-            .setPositiveButton(if (isEdit) "保存" else "添加") { _, _ ->
+            .setPositiveButton(if (isEdit) R.string.save else R.string.add) { _, _ ->
                 val expression = b.expressionInput.text.toString().trim()
                 if (expression.isEmpty()) {
-                    toast("表达式不能为空")
+                    toast(getString(R.string.msg_expression_empty))
                     return@setPositiveButton
                 }
                 val requests = b.requestsInput.text.toString().toIntOrNull() ?: 0
                 if (requests <= 0) {
-                    toast("请求数必须大于 0")
+                    toast(getString(R.string.msg_requests_must_be_positive))
                     return@setPositiveButton
                 }
                 val description = b.descriptionInput.text.toString().trim().ifBlank { null }
                 val enabled = b.enabledSwitch.isChecked
 
                 val pIdx = periodLabels.indexOf(b.periodInput.text.toString())
-                val period = if (pIdx >= 0) periods[pIdx].first else 60
+                val period = if (pIdx >= 0) periodPairs[pIdx].first else 60
 
                 val aIdx = actionLabels.indexOf(b.actionInput.text.toString())
-                val action = if (aIdx >= 0) actions[aIdx].first else "block"
+                val action = if (aIdx >= 0) actionPairs[aIdx].first else "block"
 
                 val mIdx = periodLabels.indexOf(b.mitigationInput.text.toString())
-                val mitigation = if (mIdx >= 0) periods[mIdx].first else 60
+                val mitigation = if (mIdx >= 0) periodPairs[mIdx].first else 60
 
                 account?.let { acct ->
                     viewModel.saveRule(
@@ -245,11 +259,11 @@ class RateLimitFragment : BaseZoneFeatureFragment() {
                         description = description,
                         enabled = enabled,
                     ) { ok, err ->
-                        toast(if (ok) "已保存" else "保存失败: $err")
+                        toast(if (ok) getString(R.string.msg_saved) else getString(R.string.msg_save_failed, err?.asString(requireContext()).orEmpty()))
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .create()
 
         dialog.show()
@@ -259,8 +273,12 @@ class RateLimitFragment : BaseZoneFeatureFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
                 saveButton.isEnabled = !state.isSaving
-                saveButton.text = if (state.isSaving) "保存中..." else if (isEdit) "保存" else "添加"
+                saveButton.text = if (state.isSaving) getString(R.string.msg_saving) else if (isEdit) getString(R.string.save) else getString(R.string.add)
             }
         }
+    }
+
+    companion object {
+        // static companion needed for R.string references; we use instance functions above instead
     }
 }

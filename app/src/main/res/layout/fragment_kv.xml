@@ -55,7 +55,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="暂无命名空间\n点击 + 创建"
+                android:text="@string/kv_no_namespaces"
                 android:gravity="center"
                 android:textColor="?android:textColorSecondary"
                 android:visibility="gone" />
@@ -67,7 +67,7 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:src="@android:drawable/ic_input_add"
-                android:contentDescription="创建命名空间" />
+                android:contentDescription="@string/kv_create_namespace" />
 
         </LinearLayout>
 
@@ -124,7 +124,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="请先选择命名空间"
+                android:text="@string/kv_please_select_namespace"
                 android:gravity="center"
                 android:textColor="?android:textColorSecondary"
                 android:visibility="gone" />
@@ -136,7 +136,7 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:src="@android:drawable/ic_input_add"
-                android:contentDescription="添加键值对"
+                android:contentDescription="@string/kv_add_key"
                 android:visibility="gone" />
 
         </LinearLayout>

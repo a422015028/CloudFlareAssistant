@@ -1,11 +1,13 @@
 package com.muort.upworker.feature.zone
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.Snippet
@@ -22,7 +24,7 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
     private lateinit var adapter: ZoneRuleAdapter
     private var loaded: List<Snippet> = emptyList()
 
-    override val emptyText: String = "暂无代码片段\n长按右下角 + 号可清空全部片段"
+    override val emptyTextResId: Int = R.string.snippet_empty_list
     override val showAddFab: Boolean = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,26 +54,26 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
 
     private fun showAddNameDialog() {
         val nameEdit = EditText(requireContext()).apply {
-            hint = "代码片段名称（如 redirect_old）"
+            setHint(R.string.snippet_name_hint)
             setSingleLine()
             setPadding(48, 32, 48, 32)
         }
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("新建代码片段")
+            .setTitle(R.string.snippet_new_title)
             .setView(nameEdit)
-            .setPositiveButton("确定") { _, _ ->
+            .setPositiveButton(R.string.confirm) { _, _ ->
                 val name = nameEdit.text.toString().trim()
                 if (name.isEmpty()) {
-                    toast("名称不能为空")
+                    toast(getString(R.string.msg_name_empty))
                     return@setPositiveButton
                 }
                 if (!name.matches(Regex("^[a-z0-9_]+$"))) {
-                    toast("名称仅支持小写字母、数字和下划线")
+                    toast(getString(R.string.msg_name_invalid))
                     return@setPositiveButton
                 }
                 navigateToEditor(name, isNew = true)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -100,8 +102,9 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
                 is Resource.Loading -> emptyList()
             }
             loaded = snippets
+            val ctx = requireContext()
             val items = snippets.map { s ->
-                s.toZoneRuleItem(rules.firstOrNull { it.snippetName == s.snippetName })
+                s.toZoneRuleItem(ctx, rules.firstOrNull { it.snippetName == s.snippetName })
             }
             if (items.isEmpty()) showEmpty() else { showList(); adapter.submitList(items) }
         }
@@ -111,9 +114,9 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = snippetRepo.teardownSnippet(account, zoneId, name)) {
                 is Resource.Success -> {
-                    toast("已删除（含规则与 DNS）"); load(account)
+                    toast(getString(R.string.msg_deleted_with_rules)); load(account)
                 }
-                is Resource.Error -> toast("删除失败: ${r.message}")
+                is Resource.Error -> toast(getString(R.string.msg_delete_failed, r.message))
                 is Resource.Loading -> {}
             }
         }
@@ -121,14 +124,14 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
 
     private fun showDeleteAllDialog() {
         if (loaded.isEmpty()) {
-            toast("当前没有代码片段")
+            toast(getString(R.string.snippet_no_snippets))
             return
         }
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("清空全部代码片段")
-            .setMessage("确定要删除全部 ${loaded.size} 个代码片段及其触发规则吗？此操作不可撤销。")
-            .setPositiveButton("全部删除") { _, _ -> deleteAllSnippets() }
-            .setNegativeButton("取消", null)
+            .setTitle(R.string.snippet_clear_all_title)
+            .setMessage(getString(R.string.snippet_clear_all_message, loaded.size))
+            .setPositiveButton(R.string.snippet_clear_all_button) { _, _ -> deleteAllSnippets() }
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -141,25 +144,32 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
                 val r = snippetRepo.teardownSnippet(acct, zoneId, snippet.snippetName)
                 if (r is Resource.Success) ok++
             }
-            toast("已删除 $ok/${loaded.size} 个代码片段")
+            toast(getString(R.string.snippet_bulk_delete_progress, ok, loaded.size))
             load(acct)
         }
     }
 
-    private fun Snippet.toZoneRuleItem(rule: com.muort.upworker.core.model.SnippetRule?): ZoneRuleItem = ZoneRuleItem(
+    private fun Snippet.toZoneRuleItem(
+        ctx: Context,
+        rule: com.muort.upworker.core.model.SnippetRule?,
+    ): ZoneRuleItem = ZoneRuleItem(
         id = snippetName,
         title = snippetName,
-        subtitle = "创建 ${createdOn?.take(10) ?: "-"} · 修改 ${modifiedOn?.take(10) ?: "-"}",
+        subtitle = getString(
+            R.string.snippet_subtitle_created_modified,
+            createdOn?.take(10) ?: "-",
+            modifiedOn?.take(10) ?: "-",
+        ),
         meta = when {
-            rule == null -> "未关联规则（不会执行）"
-            rule.enabled == false -> "规则已禁用：${ruleSummary(rule)}"
-            else -> "规则：${ruleSummary(rule)}"
+            rule == null -> getString(R.string.snippet_no_rule_attached)
+            rule.enabled == false -> getString(R.string.snippet_rule_disabled, ruleSummary(ctx, rule))
+            else -> getString(R.string.snippet_rule_label_format, ruleSummary(ctx, rule))
         },
         enabled = null,
         canDelete = true,
     )
 
-    private fun ruleSummary(rule: com.muort.upworker.core.model.SnippetRule): String =
-        if (rule.expression.trim() == "true") "所有格式化请求"
+    private fun ruleSummary(ctx: Context, rule: com.muort.upworker.core.model.SnippetRule): String =
+        if (rule.expression.trim() == "true") ctx.getString(R.string.snippet_all_requests_label)
         else rule.expression.let { if (it.length > 60) it.take(60) + "…" else it }
 }

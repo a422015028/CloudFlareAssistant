@@ -50,7 +50,7 @@
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:contentDescription="删除"
+            android:contentDescription="@string/delete"
             app:icon="@android:drawable/ic_menu_delete"
             app:iconSize="30dp"
             app:iconTint="?android:attr/textColorSecondary" />

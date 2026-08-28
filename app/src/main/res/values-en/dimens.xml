@@ -1,0 +1,13 @@
+<resources>
+  <!-- 英文环境下的 dimens：**与默认 values/dimens.xml 保持一致**。
+       说明：现在项目采用「中英文统一尺寸规范」，不再单独分档，
+       这样以后中文/英文界面用同一套规则，彻底避免两套标准各自出问题。
+       保留 values-en/dimens.xml 这个文件本身，是为了以后如果需要重新
+       对英文做更细粒度的本地化分档（比如某些语言更长再降字号），
+       可以直接在这里覆盖同名 dimen，无需重建资源文件。 -->
+  <dimen name="app_button_min_height">48dp</dimen>
+  <dimen name="app_button_min_width">112dp</dimen>
+  <dimen name="app_button_padding_h">10dp</dimen>
+  <dimen name="app_button_text_size">13sp</dimen>
+  <dimen name="app_button_icon_text_size">10sp</dimen>
+</resources>

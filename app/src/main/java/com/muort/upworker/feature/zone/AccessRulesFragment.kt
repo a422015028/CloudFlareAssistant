@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.AccessRuleConfigInput
 import com.muort.upworker.core.model.AccessRuleCreate
@@ -38,8 +39,47 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
     private lateinit var adapter: AccessRuleAdapter
     private var loaded: List<FirewallAccessRule> = emptyList()
 
-    override val emptyText: String = "暂无 IP 访问规则"
+    override val emptyTextResId: Int = R.string.ar_empty_rules
     override val showAddFab: Boolean = true
+
+    // MODES / TARGETS / PLACEHOLDERS —— 改为函数形式以避免静态 Context 泄漏
+    private fun modes(ctx: android.content.Context) = listOf(
+        "block" to ctx.getString(R.string.ar_action_block),
+        "managed_challenge" to ctx.getString(R.string.ar_action_managed_challenge),
+        "js_challenge" to "JS" + ctx.getString(R.string.ar_action_challenge),
+        "challenge" to ctx.getString(R.string.ar_action_challenge),
+        "whitelist" to ctx.getString(R.string.ar_action_whitelist),
+    )
+    private fun targets(ctx: android.content.Context) = listOf(
+        "ip" to ctx.getString(R.string.ar_target_ip),
+        "ip6" to "IPv6",
+        "ip_range" to ctx.getString(R.string.ar_target_ip_range),
+        "asn" to ctx.getString(R.string.ar_target_asn),
+        "country" to ctx.getString(R.string.ar_target_country),
+    )
+    private fun modeLabelCtx(ctx: android.content.Context, mode: String?): String = when (mode) {
+        "block" -> ctx.getString(R.string.ar_action_block)
+        "managed_challenge" -> ctx.getString(R.string.ar_action_managed_challenge)
+        "js_challenge" -> "JS" + ctx.getString(R.string.ar_action_challenge)
+        "challenge" -> ctx.getString(R.string.ar_action_challenge)
+        "whitelist" -> ctx.getString(R.string.ar_action_whitelist)
+        else -> mode ?: "—"
+    }
+    private fun targetLabelCtx(ctx: android.content.Context, target: String?): String = when (target) {
+        "ip" -> ctx.getString(R.string.ar_target_ip)
+        "ip6" -> "IPv6"
+        "ip_range" -> ctx.getString(R.string.ar_target_ip_range)
+        "asn" -> ctx.getString(R.string.ar_target_asn)
+        "country" -> ctx.getString(R.string.ar_target_country)
+        else -> target ?: "—"
+    }
+    private val TARGET_PLACEHOLDERS = mapOf(
+        "ip" to "192.0.2.1",
+        "ip6" to "2001:db8::1",
+        "ip_range" to "192.0.2.0/24",
+        "asn" to "AS13335",
+        "country" to "US",
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -78,11 +118,13 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
 
     private fun showEditor(existing: FirewallAccessRule?) {
         val ctx = requireContext()
+        val modes = modes(ctx)
+        val targets = targets(ctx)
         val b = DialogAccessRuleBinding.inflate(LayoutInflater.from(ctx))
         val isEdit = existing != null
 
         // 动作 Chip
-        for ((raw, label) in MODES) {
+        for ((raw, label) in modes) {
             val chip = Chip(ctx).apply {
                 text = label
                 isCheckable = true
@@ -98,7 +140,7 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
             b.valueLayout.visibility = View.GONE
             b.targetReadonly.visibility = View.VISIBLE
             b.editHint.visibility = View.VISIBLE
-            val targetLabel = targetLabel(existing?.configuration?.target)
+            val targetLabel = targetLabelCtx(ctx, existing?.configuration?.target)
             val value = existing?.configuration?.value ?: ""
             b.targetReadonly.text = "$targetLabel · $value"
             b.notesInput.setText(existing?.notes ?: "")
@@ -108,7 +150,7 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
             b.valueLayout.visibility = View.VISIBLE
             b.targetReadonly.visibility = View.GONE
             b.editHint.visibility = View.GONE
-            for ((raw, label) in TARGETS) {
+            for ((raw, label) in targets) {
                 val chip = Chip(ctx).apply {
                     text = label
                     isCheckable = true
@@ -117,18 +159,18 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
                 b.targetChips.addView(chip)
             }
             selectChip(b.targetChips, "ip")
-            b.valueLayout.hint = "目标"
+            b.valueLayout.hint = ctx.getString(R.string.ar_target_hint)
             b.targetChips.setOnCheckedStateChangeListener { group, _ ->
                 val raw = selectedRaw(group) ?: "ip"
-                b.valueLayout.hint = TARGET_PLACEHOLDERS[raw] ?: "目标"
+                b.valueLayout.hint = TARGET_PLACEHOLDERS[raw] ?: ctx.getString(R.string.ar_target_hint)
             }
         }
 
-        val title = if (isEdit) "编辑规则" else "新建规则"
+        val title = if (isEdit) R.string.ar_edit_rule_title else R.string.ar_new_rule_title
         MaterialAlertDialogBuilder(ctx)
             .setTitle(title)
             .setView(b.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val mode = selectedRaw(b.modeChips) ?: "block"
                 val notes = b.notesInput.text.toString().trim().ifBlank { null }
                 if (isEdit) {
@@ -137,11 +179,14 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
                 } else {
                     val target = selectedRaw(b.targetChips) ?: "ip"
                     val value = b.valueInput.text.toString().trim()
-                    if (value.isEmpty()) { toast("目标不能为空"); return@setPositiveButton }
+                    if (value.isEmpty()) {
+                        toast(getString(R.string.msg_target_empty))
+                        return@setPositiveButton
+                    }
                     account?.let { create(it, target, value, mode, notes) }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -149,8 +194,8 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val rule = AccessRuleCreate(mode, AccessRuleConfigInput(target, value), notes)
             when (val r = accessRepo.createRule(account, rule)) {
-                is Resource.Success -> { toast("添加成功"); load(account) }
-                is Resource.Error -> toast("添加失败: ${r.message}")
+                is Resource.Success -> { toast(getString(R.string.msg_added)); load(account) }
+                is Resource.Error -> toast(getString(R.string.msg_add_failed, r.message))
                 is Resource.Loading -> {}
             }
         }
@@ -160,8 +205,8 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val update = AccessRuleUpdate(mode, notes)
             when (val r = accessRepo.updateRule(account, ruleId, update)) {
-                is Resource.Success -> { toast("已保存"); load(account) }
-                is Resource.Error -> toast("保存失败: ${r.message}")
+                is Resource.Success -> { toast(getString(R.string.msg_saved)); load(account) }
+                is Resource.Error -> toast(getString(R.string.msg_save_failed, r.message))
                 is Resource.Loading -> {}
             }
         }
@@ -171,18 +216,18 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
 
     private fun confirmDelete(rule: FirewallAccessRule) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除规则")
+            .setTitle(R.string.ar_delete_rule_title)
             .setMessage(rule.configuration?.value ?: rule.id)
-            .setPositiveButton("删除") { _, _ -> account?.let { deleteRule(it, rule.id) } }
-            .setNegativeButton("取消", null)
+            .setPositiveButton(R.string.delete) { _, _ -> account?.let { deleteRule(it, rule.id) } }
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun deleteRule(account: Account, ruleId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = accessRepo.deleteRule(account, ruleId)) {
-                is Resource.Success -> { toast("已删除"); load(account) }
-                is Resource.Error -> toast("删除失败: ${r.message}")
+                is Resource.Success -> { toast(getString(R.string.msg_deleted)); load(account) }
+                is Resource.Error -> toast(getString(R.string.msg_delete_failed, r.message))
                 is Resource.Loading -> {}
             }
         }
@@ -203,58 +248,16 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
         return group.findViewById<Chip>(id).tag as String
     }
 
-    companion object {
-        private val MODES = listOf(
-            "block" to "封锁",
-            "managed_challenge" to "托管质询",
-            "js_challenge" to "JS质询",
-            "challenge" to "质询",
-            "whitelist" to "允许",
-        )
-        private val TARGETS = listOf(
-            "ip" to "IP",
-            "ip6" to "IPv6",
-            "ip_range" to "IP段",
-            "asn" to "ASN",
-            "country" to "国家",
-        )
-        private val TARGET_PLACEHOLDERS = mapOf(
-            "ip" to "192.0.2.1",
-            "ip6" to "2001:db8::1",
-            "ip_range" to "192.0.2.0/24",
-            "asn" to "AS13335",
-            "country" to "US",
-        )
-
-        private fun targetLabel(target: String?): String = when (target) {
-            "ip" -> "IP"
-            "ip6" -> "IPv6"
-            "ip_range" -> "IP段"
-            "asn" -> "ASN"
-            "country" -> "国家"
-            else -> target ?: "—"
-        }
-
-        private fun modeLabel(mode: String?): String = when (mode) {
-            "block" -> "封锁"
-            "managed_challenge" -> "托管质询"
-            "js_challenge" -> "JS质询"
-            "challenge" -> "质询"
-            "whitelist" -> "允许"
-            else -> mode ?: "—"
-        }
-
-        /** @return 文字颜色（全不透明） */
-        private fun modeColor(mode: String?): Int = when (mode) {
-            "block" -> Color.parseColor("#E5484D")
-            "whitelist" -> Color.parseColor("#18A058")
-            else -> Color.parseColor("#F57C00")
-        }
+    /** @return 文字颜色（全不透明） */
+    private fun modeColor(mode: String?): Int = when (mode) {
+        "block" -> Color.parseColor("#E5484D")
+        "whitelist" -> Color.parseColor("#18A058")
+        else -> Color.parseColor("#F57C00")
     }
 
     // ==================== 适配器 ====================
 
-    private class AccessRuleAdapter(
+    private inner class AccessRuleAdapter(
         private val onEdit: (FirewallAccessRule) -> Unit,
         private val onDelete: (FirewallAccessRule) -> Unit,
     ) : RecyclerView.Adapter<AccessRuleAdapter.VH>() {
@@ -278,15 +281,16 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
 
         override fun getItemCount(): Int = items.size
 
-        class VH(private val b: ItemAccessRuleBinding) : RecyclerView.ViewHolder(b.root) {
+        inner class VH(private val b: ItemAccessRuleBinding) : RecyclerView.ViewHolder(b.root) {
             fun bind(
                 rule: FirewallAccessRule,
                 onEdit: (FirewallAccessRule) -> Unit,
                 onDelete: (FirewallAccessRule) -> Unit,
             ) {
+                val ctx = itemView.context
                 val mode = rule.mode
                 val color = modeColor(mode)
-                b.modeBadge.text = modeLabel(mode)
+                b.modeBadge.text = modeLabelCtx(ctx, mode)
                 b.modeBadge.setTextColor(color)
                 b.modeBadge.background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
@@ -294,7 +298,7 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
                     setColor(Color.argb(38, Color.red(color), Color.green(color), Color.blue(color)))
                 }
 
-                b.targetLabel.text = targetLabel(rule.configuration?.target)
+                b.targetLabel.text = targetLabelCtx(ctx, rule.configuration?.target)
                 b.valueText.text = rule.configuration?.value ?: "—"
 
                 val notes = rule.notes

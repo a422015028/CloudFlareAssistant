@@ -1,8 +1,10 @@
 package com.muort.upworker.core.model
 
+import android.content.Context
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
+import com.muort.upworker.R
 
 // ==================== Common Response ====================
 
@@ -766,17 +768,37 @@ data class R2CustomDomain(
     @SerializedName("min_tls_version") val minTlsVersion: String? = null,
     @SerializedName("ciphers") val ciphers: Any? = null  // Can be array or other type
 ) {
-    // Helper to get status as string
-    val statusText: String
-        get() = when (status) {
-            is String -> status
-            is Map<*, *> -> {
-                val ssl = status["ssl"]?.toString() ?: "unknown"
-                val ownership = status["ownership"]?.toString() ?: "unknown"
-                "SSL:$ssl, 所有权:$ownership"
-            }
-            else -> "未知"
+    /** 将 API 返回的原始 status 字符串映射为本地化显示文本；未知值兜底显示原文 */
+    private fun mapStatusString(context: Context, raw: String): String {
+        val lower = raw.trim().lowercase()
+        val resId = when (lower) {
+            "pending", "pending-validation", "pending_validation", "inactive", "initializing" -> R.string.r2_status_pending
+            "active", "success", "ok", "valid", "healthy", "verified", "complete" -> R.string.r2_status_active
+            "pending-deletion", "pending_deletion", "deleting" -> R.string.r2_status_pending_deletion
+            "deleted" -> R.string.r2_status_deleted
+            "migrating", "migration" -> R.string.r2_status_migrating
+            "moved" -> R.string.r2_status_moved
+            "permitted", "allowed" -> R.string.r2_status_permitted
+            "unpermitted", "not_allowed", "disallowed" -> R.string.r2_status_unpermitted
+            "blocked", "blocked-new", "blocked_new", "revoked" -> R.string.r2_status_blocked
+            "quarantined", "quarantine" -> R.string.r2_status_quarantined
+            "disabled", "paused" -> R.string.r2_status_disabled
+            "expired", "expiring" -> R.string.r2_status_expired
+            "error", "failed", "failure", "invalid", "rejected" -> R.string.r2_status_error
+            else -> 0
         }
+        return if (resId != 0) context.getString(resId) else raw
+    }
+
+    fun getStatusText(context: Context): String = when (status) {
+        is String -> mapStatusString(context, status).ifBlank { context.getString(R.string.r2_status_unknown_status) }
+        is Map<*, *> -> {
+            val ssl = (status["ssl"]?.toString() ?: "unknown").let { mapStatusString(context, it) }
+            val ownership = (status["ownership"]?.toString() ?: "unknown").let { mapStatusString(context, it) }
+            context.getString(R.string.model_ssl_ownership_format, ssl, ownership)
+        }
+        else -> context.getString(R.string.r2_status_unknown_status)
+    }
 }
 
 data class R2CustomDomainsResponse(
@@ -1308,24 +1330,24 @@ data class PermissionGroup(
     @SerializedName("scopes") val scopes: List<String>? = null
 ) {
     /** 操作类型: 读 / 写 / 执行 */
-    fun opTypes(): Set<String> {
+    fun opTypes(context: Context): Set<String> {
         val n = name ?: return emptySet()
         val t = mutableSetOf<String>()
-        if (n.endsWith("Edit")) { t.add("读"); t.add("写") } // Edit = Read + Write
-        if (n.endsWith("Write")) t.add("写")
-        if (n.endsWith("Read")) t.add("读")
-        if (n.endsWith("Evaluate")) t.add("执行")
+        if (n.endsWith("Edit")) { t.add(context.getString(R.string.model_perm_read)); t.add(context.getString(R.string.model_perm_write)) } // Edit = Read + Write
+        if (n.endsWith("Write")) t.add(context.getString(R.string.model_perm_write))
+        if (n.endsWith("Read")) t.add(context.getString(R.string.model_perm_read))
+        if (n.endsWith("Evaluate")) t.add(context.getString(R.string.model_perm_execute))
         return t
     }
 
     /** 资源范围中文标签 */
-    fun scopeLabels(): List<String> {
+    fun scopeLabels(context: Context): List<String> {
         val s = scopes ?: return emptyList()
         val labels = mutableListOf<String>()
-        if (s.contains("com.cloudflare.api.account.zone")) labels.add("域名")
+        if (s.contains("com.cloudflare.api.account.zone")) labels.add(context.getString(R.string.model_scope_zone))
         if (s.contains("com.cloudflare.api.account.flagship.app")) labels.add("Flagship")
-        if (s.contains("com.cloudflare.api.account")) labels.add("账户")
-        if (s.contains("com.cloudflare.api.user")) labels.add("用户")
+        if (s.contains("com.cloudflare.api.account")) labels.add(context.getString(R.string.model_scope_account))
+        if (s.contains("com.cloudflare.api.user")) labels.add(context.getString(R.string.model_scope_user))
         if (s.contains("com.cloudflare.edge.r2.bucket")) labels.add("R2")
         return labels.distinct()
     }
@@ -1409,10 +1431,24 @@ data class TimeSeriesPoint(
 /**
  * 时间范围枚举
  */
-enum class TimeRange(val days: Int, val displayName: String) {
-    ONE_DAY(1, "24小时"),
-    SEVEN_DAYS(7, "7天"),
-    THIRTY_DAYS(30, "30天");
+enum class TimeRange(val days: Int) {
+    ONE_DAY(1),
+    SEVEN_DAYS(7),
+    THIRTY_DAYS(30);
+
+    fun displayName(context: Context): String = when (this) {
+        ONE_DAY -> context.getString(R.string.model_range_24h)
+        SEVEN_DAYS -> context.getString(R.string.model_range_7d)
+        THIRTY_DAYS -> context.getString(R.string.model_range_30d)
+    }
+
+    @Deprecated("Use displayName(Context) for UI strings; this property returns a static fallback value for logs.", ReplaceWith("displayName(context)"))
+    val displayName: String
+        get() = when (this) {
+            ONE_DAY -> "24 Hours"
+            SEVEN_DAYS -> "7 Days"
+            THIRTY_DAYS -> "30 Days"
+        }
     
     /**
      * 获取GraphQL查询的开始时间

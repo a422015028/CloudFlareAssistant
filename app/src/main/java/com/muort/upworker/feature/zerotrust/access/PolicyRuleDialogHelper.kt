@@ -18,13 +18,13 @@ import com.muort.upworker.core.model.AccessRule
 class PolicyRuleDialogHelper(private val context: Context) {
 
     private val ruleTypes = listOf(
-        "email" to "Email 地址",
-        "email_domain" to "Email 域名",
-        "ip" to "IP 地址",
-        "access_group" to "Access 组",
-        "geo" to "地理位置",
-        "everyone" to "所有人",
-        "common_name" to "证书通用名称"
+        "email" to context.getString(R.string.zt_rule_type_email),
+        "email_domain" to context.getString(R.string.zt_rule_type_email_domain),
+        "ip" to context.getString(R.string.zt_rule_type_ip),
+        "access_group" to context.getString(R.string.zt_rule_type_access_group),
+        "geo" to context.getString(R.string.zt_rule_type_geo),
+        "everyone" to context.getString(R.string.zt_rule_type_everyone),
+        "common_name" to context.getString(R.string.zt_rule_type_common_name)
     )
 
     /**
@@ -103,9 +103,9 @@ class PolicyRuleDialogHelper(private val context: Context) {
         }
 
         MaterialAlertDialogBuilder(context)
-            .setTitle("添加规则")
+            .setTitle(R.string.zt_rule_add_title)
             .setView(dialogView)
-            .setPositiveButton("添加") { _, _ ->
+            .setPositiveButton(R.string.add) { _, _ ->
                 val selectedType = ruleTypes[typeSpinner.selectedItemPosition].first
                 val rule = createRule(
                     selectedType,
@@ -119,7 +119,7 @@ class PolicyRuleDialogHelper(private val context: Context) {
                 
                 rule?.let { onRuleAdded(it) }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 

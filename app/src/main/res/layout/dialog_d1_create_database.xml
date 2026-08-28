@@ -8,7 +8,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="数据库名称">
+        android:hint="@string/d1_database_name_hint">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editDatabaseName"

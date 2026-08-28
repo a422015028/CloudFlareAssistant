@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="选择器类型"
+            android:text="@string/xml_dialog_add_policy_rule"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp"
             android:layout_marginBottom="4dp" />
@@ -39,10 +39,10 @@
                 android:id="@+id/emailLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email 地址"
+                android:hint="@string/zt_rule_type_email"
                 android:visibility="gone"
                 app:endIconMode="clear_text"
-                app:helperText="例如: user@example.com">
+                app:helperText="@string/xml_dialog_add_policy_rule_helper">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/emailInput"
@@ -58,10 +58,10 @@
                 android:id="@+id/emailDomainLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email 域名"
+                android:hint="@string/zt_rule_type_email_domain"
                 android:visibility="gone"
                 app:endIconMode="clear_text"
-                app:helperText="例如: example.com">
+                app:helperText="@string/xml_dialog_add_policy_rule_helper_2">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/emailDomainInput"
@@ -77,10 +77,10 @@
                 android:id="@+id/ipLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="IP 地址/范围"
+                android:hint="@string/xml_dialog_add_policy_rule_hint"
                 android:visibility="gone"
                 app:endIconMode="clear_text"
-                app:helperText="例如: 192.168.1.1 或 192.168.1.0/24">
+                app:helperText="@string/xml_dialog_add_policy_rule_helper_3">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/ipInput"
@@ -102,7 +102,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="选择 Access 组"
+                    android:text="@string/xml_dialog_add_policy_rule_2"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp"
                     android:layout_marginBottom="4dp" />
@@ -120,10 +120,10 @@
                 android:id="@+id/geoLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="国家代码"
+                android:hint="@string/snippet_field_country_code"
                 android:visibility="gone"
                 app:endIconMode="clear_text"
-                app:helperText="ISO 3166-1 alpha-2 代码，例如: CN, US, JP">
+                app:helperText="@string/xml_dialog_add_policy_rule_helper_4">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/geoInput"
@@ -140,7 +140,7 @@
                 android:id="@+id/everyoneText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="此规则将应用于所有人"
+                android:text="@string/xml_dialog_add_policy_rule_3"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp"
                 android:visibility="gone" />
@@ -150,10 +150,10 @@
                 android:id="@+id/commonNameLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="证书通用名称"
+                android:hint="@string/zt_rule_type_common_name"
                 android:visibility="gone"
                 app:endIconMode="clear_text"
-                app:helperText="客户端证书的 CN 字段">
+                app:helperText="@string/xml_dialog_add_policy_rule_helper_5">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/commonNameInput"

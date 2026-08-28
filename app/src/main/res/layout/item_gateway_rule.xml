@@ -31,7 +31,7 @@
                     android:id="@+id/ruleNameText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="规则名称"
+                    android:text="@string/gateway_rule_name"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -64,7 +64,7 @@
                         android:paddingTop="1dp"
                         android:paddingEnd="5dp"
                         android:paddingBottom="1dp"
-                        android:text="阻止"
+                        android:text="@string/gateway_block"
                         android:textColor="?attr/colorOnSecondary"
                         android:textSize="10sp" />
 
@@ -84,7 +84,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="匹配条件"
+            android:text="@string/gateway_match_conditions"
             android:textSize="10sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -106,7 +106,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="优先级: 0"
+            android:text="@string/common_priority_zero"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="10sp" />
 
@@ -123,7 +123,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
-                android:text="编辑"
+                android:text="@string/edit"
                 android:textSize="11sp" />
 
             <Button
@@ -131,7 +131,7 @@
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="删除"
+                android:text="@string/delete"
                 android:textSize="11sp"
                 android:textColor="?attr/colorError" />
 

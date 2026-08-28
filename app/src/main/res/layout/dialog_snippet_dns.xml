@@ -30,14 +30,14 @@
                 android:id="@+id/radioIgnore"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="忽略并继续部署规则" />
+                android:text="@string/dns_ignore_and_continue" />
 
             <com.google.android.material.radiobutton.MaterialRadioButton
                 android:id="@+id/radioCreate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="创建新代理 DNS 记录" />
+                android:text="@string/dns_create_proxy_record" />
         </RadioGroup>
 
         <TextView
@@ -65,7 +65,7 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="类型">
+                    android:hint="@string/dns_type">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/recordTypeInput"
@@ -79,7 +79,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="名称（必填）">
+                    android:hint="@string/dns_name_required">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/recordNameInput"
@@ -96,8 +96,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="IPv4 地址（必填）"
-                    app:helperText="使用 192.0.2.1 放弃请求">
+                    android:hint="@string/dns_ipv4_address_required"
+                    app:helperText="@string/dns_ipv4_helper">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/recordContentInput"

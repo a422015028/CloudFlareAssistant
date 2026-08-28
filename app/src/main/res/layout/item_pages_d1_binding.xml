@@ -47,7 +47,7 @@
             android:layout_height="36dp"
             android:src="@android:drawable/ic_menu_delete"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="删除绑定" />
+            android:contentDescription="@string/kv_delete_binding" />
 
     </LinearLayout>
 

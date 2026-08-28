@@ -23,10 +23,10 @@ import com.muort.upworker.core.model.AccessRule
 class PolicyEditDialogHelper(private val context: Context) {
 
     private val decisionTypes = listOf(
-        "allow" to "允许",
-        "deny" to "拒绝",
-        "bypass" to "绕过",
-        "non_identity" to "非身份"
+        "allow" to context.getString(R.string.zt_policy_decision_allow),
+        "deny" to context.getString(R.string.zt_policy_decision_deny),
+        "bypass" to context.getString(R.string.zt_policy_decision_bypass),
+        "non_identity" to context.getString(R.string.zt_policy_decision_non_identity)
     )
 
     /**
@@ -183,8 +183,8 @@ class PolicyEditDialogHelper(private val context: Context) {
             }
         }
 
-        val title = if (existingPolicy == null) "创建策略" else "编辑策略"
-        val positiveButton = if (existingPolicy == null) "创建" else "保存"
+        val title = if (existingPolicy == null) context.getString(R.string.zt_policy_create_title) else context.getString(R.string.zt_policy_edit_title)
+        val positiveButton = if (existingPolicy == null) context.getString(R.string.dialog_create) else context.getString(R.string.save)
 
         MaterialAlertDialogBuilder(context)
             .setTitle(title)
@@ -211,7 +211,7 @@ class PolicyEditDialogHelper(private val context: Context) {
 
                 onSave(policyRequest)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 

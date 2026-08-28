@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="菜单"
+                android:contentDescription="@string/domain_menu"
                 android:src="@android:drawable/ic_menu_more" />
 
         </LinearLayout>

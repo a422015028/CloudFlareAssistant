@@ -22,6 +22,7 @@ import com.muort.upworker.core.model.TailException
 import com.muort.upworker.core.model.TailLog
 import com.muort.upworker.core.model.TailTraceItem
 import com.muort.upworker.core.util.DisplaySizeHelper
+import com.muort.upworker.core.util.LocaleHelper
 import com.muort.upworker.core.util.ThemeHelper
 import okhttp3.*
 import java.text.SimpleDateFormat
@@ -31,7 +32,7 @@ import java.util.concurrent.TimeUnit
 class WorkerLogsActivity : AppCompatActivity() {
 
     override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(DisplaySizeHelper.wrap(newBase))
+        super.attachBaseContext(DisplaySizeHelper.wrap(LocaleHelper.applyLocale(newBase)))
     }
 
     private lateinit var toolbar: MaterialToolbar
@@ -130,7 +131,7 @@ class WorkerLogsActivity : AppCompatActivity() {
         val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
         if (wssUrl.isNullOrEmpty()) {
             Log.e("WorkerLogs", "WSS URL is empty")
-            showToast("WSS URL为空")
+            showToast(getString(R.string.status_wss_url_empty))
             return
         }
         currentWssUrl = wssUrl
@@ -142,7 +143,7 @@ class WorkerLogsActivity : AppCompatActivity() {
         runOnUiThread {
             isConnected = false
             connectionStatusDot.background = getDrawable(R.drawable.circle_yellow)
-            connectionStatusText.text = "连接中..."
+            connectionStatusText.text = getString(R.string.status_connecting)
         }
 
         val request = Request.Builder()
@@ -159,7 +160,7 @@ class WorkerLogsActivity : AppCompatActivity() {
                 runOnUiThread {
                     isConnected = true
                     connectionStatusDot.background = getDrawable(R.drawable.circle_green)
-                    connectionStatusText.text = "已连接"
+                    connectionStatusText.text = getString(R.string.status_connected)
                 }
             }
 
@@ -205,7 +206,7 @@ class WorkerLogsActivity : AppCompatActivity() {
                 runOnUiThread {
                     isConnected = false
                     connectionStatusDot.background = getDrawable(R.drawable.circle_red)
-                    connectionStatusText.text = "已断开"
+                    connectionStatusText.text = getString(R.string.status_disconnected)
                 }
                 webSocket.close(code, reason)
                 scheduleReconnect()
@@ -215,7 +216,7 @@ class WorkerLogsActivity : AppCompatActivity() {
                 runOnUiThread {
                     isConnected = false
                     connectionStatusDot.background = getDrawable(R.drawable.circle_red)
-                    connectionStatusText.text = "连接失败: ${t.message}"
+                    connectionStatusText.text = getString(R.string.status_connection_failed, t.message ?: "null")
                 }
                 Log.e("WorkerLogs", "WebSocket failure: ${t.message}", t)
                 Log.e("WorkerLogs", "WebSocket failure URL: $url")
@@ -248,10 +249,10 @@ class WorkerLogsActivity : AppCompatActivity() {
         isPaused = !isPaused
         if (isPaused) {
             pauseBtn.setIconResource(R.drawable.ic_play)
-            connectionStatusText.text = "已暂停"
+            connectionStatusText.text = getString(R.string.status_paused)
         } else {
             pauseBtn.setIconResource(R.drawable.ic_pause)
-            connectionStatusText.text = if (isConnected) "已连接" else "未连接"
+            connectionStatusText.text = if (isConnected) getString(R.string.status_connected) else getString(R.string.status_not_connected)
         }
     }
 
@@ -275,9 +276,9 @@ class WorkerLogsActivity : AppCompatActivity() {
         if (text.isNotEmpty()) {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
             clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Worker logs", text))
-            showToast("日志已复制")
+            showToast(getString(R.string.msg_logs_copied))
         } else {
-            showToast("没有日志可复制")
+            showToast(getString(R.string.msg_no_logs_to_copy))
         }
     }
 
@@ -299,7 +300,7 @@ class WorkerLogsActivity : AppCompatActivity() {
         webSocket = null
         isConnected = false
         connectionStatusDot.background = getDrawable(R.drawable.circle_yellow)
-        connectionStatusText.text = "连接中..."
+        connectionStatusText.text = getString(R.string.status_connecting)
         connectWebSocket(currentWssUrl)
     }
 

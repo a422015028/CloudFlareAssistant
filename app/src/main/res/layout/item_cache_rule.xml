@@ -71,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="含高级设置，仅可查看"
+                android:text="@string/xml_item_cache_rule"
                 android:textSize="11sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:visibility="gone" />
@@ -88,7 +88,7 @@
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:contentDescription="删除"
+            android:contentDescription="@string/delete"
             android:layout_marginStart="4dp"
             app:icon="@android:drawable/ic_menu_delete"
             app:iconSize="30dp"

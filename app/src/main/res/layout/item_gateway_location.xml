@@ -27,7 +27,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="位置名称"
+                android:text="@string/gateway_location_name"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -35,7 +35,7 @@
                 android:id="@+id/defaultChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="默认"
+                android:text="@string/account_default"
                 android:textSize="10sp"
                 android:visibility="gone" />
 
@@ -60,7 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
-                android:text="客户端: 5"
+                android:text="@string/gateway_clients_count"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="10sp" />
 
@@ -71,7 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="来源 IP 白名单: 无"
+            android:text="@string/gateway_source_ip_whitelist"
             android:textSize="11sp" />
 
         <TextView
@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="DNS 端点"
+            android:text="@string/gateway_dns_endpoints"
             android:textSize="11sp"
             android:textStyle="bold" />
 
@@ -144,7 +144,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
-                android:text="编辑"
+                android:text="@string/edit"
                 android:textSize="11sp" />
 
             <Button
@@ -152,7 +152,7 @@
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="删除"
+                android:text="@string/delete"
                 android:textSize="11sp"
                 android:textColor="?attr/colorError" />
 

@@ -49,14 +49,14 @@
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/appDomainTextView"
-            tools:text="自托管应用" />
+            tools:text="@string/access_self_hosted_app" />
 
         <ImageButton
             android:id="@+id/deleteButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="删除"
+            android:contentDescription="@string/delete"
             android:src="@android:drawable/ic_menu_delete"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

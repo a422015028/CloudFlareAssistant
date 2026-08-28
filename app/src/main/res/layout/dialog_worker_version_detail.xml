@@ -38,7 +38,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="版本号:"
+                        android:text="@string/xml_dialog_worker_version_detail"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -56,7 +56,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="版本ID:"
+                        android:text="@string/xml_dialog_worker_version_detail_2"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -74,7 +74,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="创建时间:"
+                        android:text="@string/xml_dialog_worker_version_detail_3"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -92,7 +92,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="来源:"
+                        android:text="@string/xml_dialog_worker_version_detail_4"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -128,7 +128,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="作者:"
+                        android:text="@string/xml_dialog_worker_version_detail_5"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -146,7 +146,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="状态:"
+                        android:text="@string/xml_dialog_worker_version_detail_6"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <LinearLayout
@@ -170,7 +170,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="作者ID:"
+                        android:text="@string/xml_dialog_worker_version_detail_7"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -188,7 +188,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="预览:"
+                        android:text="@string/xml_dialog_worker_version_detail_8"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -206,7 +206,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="部署消息:"
+                        android:text="@string/xml_dialog_worker_version_detail_9"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -224,7 +224,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="触发方式:"
+                        android:text="@string/xml_dialog_worker_version_detail_10"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -251,7 +251,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="部署信息"
+                        android:text="@string/xml_dialog_worker_version_detail_11"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp"/>
@@ -263,7 +263,7 @@
                         <TextView
                             android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:text="部署ID:"
+                            android:text="@string/xml_dialog_worker_version_detail_12"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurfaceVariant"/>
                         <TextView
@@ -281,7 +281,7 @@
                         <TextView
                             android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:text="部署时间:"
+                            android:text="@string/xml_dialog_worker_version_detail_13"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurfaceVariant"/>
                         <TextView
@@ -299,7 +299,7 @@
                         <TextView
                             android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:text="部署来源:"
+                            android:text="@string/xml_dialog_worker_version_detail_14"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurfaceVariant"/>
                         <TextView
@@ -317,7 +317,7 @@
                         <TextView
                             android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:text="部署策略:"
+                            android:text="@string/xml_dialog_worker_version_detail_15"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurfaceVariant"/>
                         <TextView
@@ -335,7 +335,7 @@
                         <TextView
                             android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:text="流量占比:"
+                            android:text="@string/xml_dialog_worker_version_detail_16"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurfaceVariant"/>
                         <TextView
@@ -353,7 +353,7 @@
                         <TextView
                             android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:text="部署作者:"
+                            android:text="@string/xml_dialog_worker_version_detail_17"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurfaceVariant"/>
                         <TextView
@@ -382,7 +382,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="删除"
+            android:text="@string/delete"
             app:backgroundTint="@color/red_500"
             android:textColor="@color/white"/>
 
@@ -391,7 +391,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="访问"
+            android:text="@string/xml_dialog_worker_version_detail_18"
             app:backgroundTint="?attr/colorPrimary"
             android:textColor="@color/white"
             android:layout_marginStart="8dp"/>
@@ -401,7 +401,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="关闭"
+            android:text="@string/ssl_mode_off"
             android:layout_marginStart="8dp"/>
 
     </LinearLayout>

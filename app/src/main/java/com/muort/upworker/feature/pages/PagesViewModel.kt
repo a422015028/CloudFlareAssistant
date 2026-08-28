@@ -2,6 +2,7 @@ package com.muort.upworker.feature.pages
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.PagesDomain
 import com.muort.upworker.core.model.PagesDeployment
@@ -11,6 +12,7 @@ import com.muort.upworker.core.model.PagesProjectDetail
 import com.muort.upworker.core.model.Placement
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.TailResult
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.repository.PagesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -46,8 +48,8 @@ class PagesViewModel @Inject constructor(
     private val _loadingState = MutableStateFlow(false)
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
     
-    private val _message = MutableSharedFlow<String>()
-    val message: SharedFlow<String> = _message.asSharedFlow()
+    private val _message = MutableSharedFlow<UiMessage>()
+    val message: SharedFlow<UiMessage> = _message.asSharedFlow()
     
     private val _cleanupResults = MutableStateFlow<List<CleanupResult>>(emptyList())
     val cleanupResults: StateFlow<List<CleanupResult>> = _cleanupResults.asStateFlow()
@@ -66,7 +68,7 @@ class PagesViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} projects")
                 }
                 is Resource.Error -> {
-                    _message.emit("加载项目失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_projects_load_failed, result.message))
                     Timber.e("Failed to load projects: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -88,7 +90,7 @@ class PagesViewModel @Inject constructor(
     ) {
         if (name.isBlank()) {
             viewModelScope.launch {
-                _message.emit("请输入项目名称")
+                _message.emit(UiMessage.of(R.string.vm_msg_pages_project_name_required))
             }
             return
         }
@@ -107,11 +109,11 @@ class PagesViewModel @Inject constructor(
                 compatibilityDate = compatibilityDate
             )) {
                 is Resource.Success -> {
-                    _message.emit("项目创建成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_project_create_success))
                     loadProjects(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("创建项目失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_project_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -126,7 +128,7 @@ class PagesViewModel @Inject constructor(
             
             when (val result = pagesRepository.deleteProject(account, projectName)) {
                 is Resource.Success -> {
-                    _message.emit("项目删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_project_delete_success))
                     if (_selectedProject.value?.name == projectName) {
                         _selectedProject.value = null
                         _deployments.value = emptyList()
@@ -134,7 +136,7 @@ class PagesViewModel @Inject constructor(
                     loadProjects(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除项目失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_project_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -156,7 +158,7 @@ class PagesViewModel @Inject constructor(
                     _projectDetail.value = result.data
                 }
                 is Resource.Error -> {
-                    _message.emit("加载项目详情失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_project_detail_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -175,7 +177,7 @@ class PagesViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} deployments")
                 }
                 is Resource.Error -> {
-                    _message.emit("加载部署列表失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployments_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -190,11 +192,11 @@ class PagesViewModel @Inject constructor(
             
             when (val result = pagesRepository.retryDeployment(account, projectName, deploymentId)) {
                 is Resource.Success -> {
-                    _message.emit("已重新发起部署")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_retry_success))
                     loadDeployments(account, projectName)
                 }
                 is Resource.Error -> {
-                    _message.emit("重新部署失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_retry_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -209,11 +211,11 @@ class PagesViewModel @Inject constructor(
             
             when (val result = pagesRepository.deleteDeployment(account, projectName, deploymentId)) {
                 is Resource.Success -> {
-                    _message.emit("部署删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_delete_success))
                     loadDeployments(account, projectName)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除部署失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -228,11 +230,11 @@ class PagesViewModel @Inject constructor(
             
             when (val result = pagesRepository.rollbackDeployment(account, projectName, deploymentId)) {
                 is Resource.Success -> {
-                    _message.emit("已回滚到此部署")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_rollback_success))
                     loadDeployments(account, projectName)
                 }
                 is Resource.Error -> {
-                    _message.emit("回滚失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_rollback_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -301,11 +303,11 @@ class PagesViewModel @Inject constructor(
             
             when (val result = pagesRepository.createDeployment(account, projectName, branch, file, customCompatibilityDate, customCompatibilityFlags)) {
                 is Resource.Success -> {
-                    _message.emit("部署创建成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_create_success))
                     loadProjects(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("部署失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -345,11 +347,11 @@ class PagesViewModel @Inject constructor(
                 is Resource.Success -> {
                     onLog("◇ 刷新项目列表...")
                     loadProjects(account)
-                    _message.emit("部署创建成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_create_success))
                     onComplete(true, null)
                 }
                 is Resource.Error -> {
-                    _message.emit("部署失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_create_failed, result.message))
                     onComplete(false, result.message)
                 }
                 is Resource.Loading -> {}
@@ -381,12 +383,12 @@ class PagesViewModel @Inject constructor(
                 account, projectName, environment, variables
             )) {
                 is Resource.Success -> {
-                    _message.emit("环境变量更新成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_env_vars_update_success))
                     _projectDetail.value = result.data
                     Timber.d("Environment variables updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit("环境变量更新失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_env_vars_update_failed, result.message))
                     Timber.e("Failed to update environment variables: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -412,12 +414,12 @@ class PagesViewModel @Inject constructor(
                 account, projectName, environment, bindings
             )) {
                 is Resource.Success -> {
-                    _message.emit("KV 绑定更新成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_kv_bindings_update_success))
                     _projectDetail.value = result.data
                     Timber.d("KV bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit("KV 绑定更新失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_kv_bindings_update_failed, result.message))
                     Timber.e("Failed to update KV bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -443,12 +445,12 @@ class PagesViewModel @Inject constructor(
                 account, projectName, environment, bindings
             )) {
                 is Resource.Success -> {
-                    _message.emit("R2 绑定更新成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_r2_bindings_update_success))
                     _projectDetail.value = result.data
                     Timber.d("R2 bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit("R2 绑定更新失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_r2_bindings_update_failed, result.message))
                     Timber.e("Failed to update R2 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -474,12 +476,12 @@ class PagesViewModel @Inject constructor(
                 account, projectName, environment, bindings
             )) {
                 is Resource.Success -> {
-                    _message.emit("D1 绑定更新成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_d1_bindings_update_success))
                     _projectDetail.value = result.data
                     Timber.d("D1 bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit("D1 绑定更新失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_d1_bindings_update_failed, result.message))
                     Timber.e("Failed to update D1 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -505,12 +507,12 @@ class PagesViewModel @Inject constructor(
                 account, projectName, environment, bindings
             )) {
                 is Resource.Success -> {
-                    _message.emit("服务绑定更新成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_service_bindings_update_success))
                     _projectDetail.value = result.data
                     Timber.d("Service bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit("服务绑定更新失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_service_bindings_update_failed, result.message))
                     Timber.e("Failed to update service bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -553,8 +555,8 @@ class PagesViewModel @Inject constructor(
                 account, projectName, compatibilityDate, compatibilityFlags, placement
             )
             when (result) {
-                is Resource.Success -> _message.emit("运行时设置已更新")
-                is Resource.Error -> _message.emit("更新失败: ${result.message}")
+                is Resource.Success -> _message.emit(UiMessage.of(R.string.vm_msg_pages_runtime_settings_updated))
+                is Resource.Error -> _message.emit(UiMessage.of(R.string.vm_msg_pages_runtime_settings_update_failed, result.message))
                 else -> {}
             }
             callback(result)
@@ -579,12 +581,12 @@ class PagesViewModel @Inject constructor(
                 account, projectName, domainName
             )) {
                 is Resource.Success -> {
-                    _message.emit("自定义域添加成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_custom_domain_add_success))
                     Timber.d("Domain $domainName added to $projectName")
                     callback(result)
                 }
                 is Resource.Error -> {
-                    _message.emit("自定义域添加失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_custom_domain_add_failed, result.message))
                     Timber.e("Failed to add domain: ${result.message}")
                     callback(result)
                 }
@@ -637,7 +639,8 @@ class PagesViewModel @Inject constructor(
             _cleanupResults.value = results.toList()
             
             val totalDeleted = results.sumOf { it.deletedCount }
-            _message.emit("清理完成！共清理了 $totalDeleted 个旧部署")
+            // plurals 场景用 RawString 透传；Collector 层可按需用 getQuantityString 自行格式化
+            _message.emit(UiMessage.of(R.string.vm_msg_pages_cleanup_finished_total, totalDeleted))
             
             _loadingState.value = false
         }
@@ -652,9 +655,9 @@ class PagesViewModel @Inject constructor(
             _cleanupResults.value = listOf(result)
             
             if (result.success) {
-                _message.emit("项目 ${result.projectName} 清理完成！成功清理了 ${result.deletedCount} 个旧部署")
+                _message.emit(UiMessage.of(R.string.vm_msg_pages_project_cleanup_finished, result.projectName, result.deletedCount))
             } else {
-                _message.emit("清理失败: ${result.errorMessage}")
+                _message.emit(UiMessage.of(R.string.vm_msg_pages_cleanup_failed, result.errorMessage ?: ""))
             }
             
             _loadingState.value = false

@@ -1,16 +1,20 @@
 package com.muort.upworker.feature.worker
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.CustomDomain
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.Route
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.model.WorkerVersion
 import com.muort.upworker.core.model.WorkerScript
 import com.muort.upworker.core.model.WorkerDeployment
 import com.muort.upworker.core.repository.WorkerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -19,6 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WorkerViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val workerRepository: WorkerRepository
 ) : ViewModel() {
 
@@ -73,13 +78,13 @@ class WorkerViewModel @Inject constructor(
                     when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
                         is Resource.Success -> {
                             _uploadState.value = UploadState.Success
-                            _message.emit("Worker 脚本上传成功（保留原有绑定）")
+                            _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_with_bindings_success))
                             Timber.d("Script uploaded with preserved bindings: $scriptName")
                             loadWorkerScripts(account)
                         }
                         is Resource.Error -> {
-                            _uploadState.value = UploadState.Error(result.message)
-                            _message.emit("上传失败: ${result.message}")
+                            _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
+                            _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_failed, result.message))
                             Timber.e("Failed to upload script: ${result.message}")
                         }
                         is Resource.Loading -> {
@@ -93,13 +98,13 @@ class WorkerViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                _uploadState.value = UploadState.Error(e.message ?: "Unknown error")
-                _message.emit("上传失败: ${e.message}")
+                _uploadState.value = UploadState.Error(UiMessage.RawString(e.message ?: "Unknown error"))
+                _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_failed, e.message ?: ""))
                 Timber.e(e, "Failed to upload script")
             }
         }
     }
-    
+
     private val _uploadState = MutableStateFlow<UploadState>(UploadState.Idle)
     val uploadState: StateFlow<UploadState> = _uploadState.asStateFlow()
     
@@ -115,8 +120,8 @@ class WorkerViewModel @Inject constructor(
     private val _loadingState = MutableStateFlow(false)
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
     
-    private val _message = MutableSharedFlow<String>()
-    val message: SharedFlow<String> = _message.asSharedFlow()
+    private val _message = MutableSharedFlow<UiMessage>()
+    val message: SharedFlow<UiMessage> = _message.asSharedFlow()
     
     private val _cleanupResults = MutableStateFlow<List<WorkerCleanupResult>>(emptyList())
     val cleanupResults: StateFlow<List<WorkerCleanupResult>> = _cleanupResults.asStateFlow()
@@ -143,13 +148,13 @@ class WorkerViewModel @Inject constructor(
                 when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
                     is Resource.Success -> {
                         _uploadState.value = UploadState.Success
-                        _message.emit("Worker 脚本上传成功")
+                        _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_plain_success))
                         Timber.d("Script uploaded: $scriptName")
                         loadWorkerScripts(account)
                     }
                     is Resource.Error -> {
-                        _uploadState.value = UploadState.Error(result.message)
-                        _message.emit("上传失败: ${result.message}")
+                        _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
+                        _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_failed, result.message))
                         Timber.e("Failed to upload script: ${result.message}")
                     }
                     is Resource.Loading -> {
@@ -183,14 +188,14 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("KV 绑定已成功更新（'$scriptName'）")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_kv_binding_updated_success, scriptName))
                     Timber.d("KV bindings updated for script: $scriptName")
                     // 重新加载脚本列表
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("更新绑定失败: ${result.message}")
+                    _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_binding_update_failed, result.message))
                     Timber.e("Failed to update KV bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -219,14 +224,14 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("R2 绑定已成功更新（'$scriptName'）")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_r2_binding_updated_success, scriptName))
                     Timber.d("R2 bindings updated for script: $scriptName")
                     // 重新加载脚本列表
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("更新绑定失败: ${result.message}")
+                    _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_binding_update_failed, result.message))
                     Timber.e("Failed to update R2 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -255,13 +260,13 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("D1 绑定已成功更新（'$scriptName'）")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_d1_binding_updated_success, scriptName))
                     Timber.d("D1 bindings updated for script: $scriptName")
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("更新 D1 绑定失败: ${result.message}")
+                    _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_d1_binding_update_failed, result.message))
                     Timber.e("Failed to update D1 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -290,13 +295,13 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("服务绑定已成功更新（'$scriptName'）")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_service_binding_updated_success, scriptName))
                     Timber.d("Service bindings updated for script: $scriptName")
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("更新服务绑定失败: ${result.message}")
+                    _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_binding_update_failed, result.message))
                     Timber.e("Failed to update service bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -324,13 +329,13 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("环境变量已成功更新（'$scriptName'）")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_variable_updated_success, scriptName))
                     Timber.d("Variables updated for script: $scriptName")
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("更新环境变量失败: ${result.message}")
+                    _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_variable_update_failed, result.message))
                     Timber.e("Failed to update variables: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -358,13 +363,13 @@ class WorkerViewModel @Inject constructor(
             )) {
                 is Resource.Success -> {
                     _uploadState.value = UploadState.Success
-                    _message.emit("密钥已成功更新（'$scriptName'）")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_secret_updated_success, scriptName))
                     Timber.d("Secrets updated for script: $scriptName")
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _uploadState.value = UploadState.Error(result.message)
-                    _message.emit("更新密钥失败: ${result.message}")
+                    _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_secret_update_failed, result.message))
                     Timber.e("Failed to update secrets: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -382,7 +387,7 @@ class WorkerViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} worker scripts")
                 }
                 is Resource.Error -> {
-                    _message.emit("加载 Worker 脚本列表失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_scripts_load_failed, result.message))
                     Timber.e("Failed to load scripts: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -401,19 +406,19 @@ class WorkerViewModel @Inject constructor(
                     }
                     is Resource.Error -> {
                         if (!silent) {
-                            _message.emit("加载脚本失败: ${result.message}")
+                            _message.emit(UiMessage.of(R.string.vm_msg_se_script_load_failed, result.message))
                         }
                     }
                     is Resource.Loading -> {}
                 }
             } catch (e: OutOfMemoryError) {
                 if (!silent) {
-                    _message.emit("内存不足，无法加载脚本")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_script_out_of_memory))
                 }
                 Timber.e(e, "内存不足")
             } catch (e: Exception) {
                 if (!silent) {
-                    _message.emit("加载脚本时出错: ${e.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_script_load_exception, e.message ?: ""))
                 }
                 Timber.e(e, "加载脚本异常")
             } finally {
@@ -440,7 +445,7 @@ class WorkerViewModel @Inject constructor(
                 is Resource.Error -> {
                     Timber.e("Failed to fetch settings: ${result.message}")
                     if (!silent) {
-                        _message.emit("加载脚本设置失败: ${result.message}")
+                        _message.emit(UiMessage.of(R.string.vm_msg_worker_script_settings_load_failed, result.message))
                     }
                     onResult(result)
                 }
@@ -455,11 +460,11 @@ class WorkerViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = workerRepository.deleteWorkerScript(account, scriptName)) {
                 is Resource.Success -> {
-                    _message.emit("脚本删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_script_delete_success))
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除脚本失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_script_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -477,7 +482,7 @@ class WorkerViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} routes")
                 }
                 is Resource.Error -> {
-                    _message.emit("加载路由列表失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_routes_load_failed, result.message))
                     Timber.e("Failed to load routes: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -490,7 +495,7 @@ class WorkerViewModel @Inject constructor(
     fun createRoute(account: Account, zoneId: String, pattern: String, scriptName: String) {
         if (pattern.isBlank() || scriptName.isBlank()) {
             viewModelScope.launch {
-                _message.emit("请填写路由规则和脚本名称")
+                _message.emit(UiMessage.of(R.string.vm_msg_worker_route_pattern_and_script_required))
             }
             return
         }
@@ -500,11 +505,11 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.createRoute(account, zoneId, pattern, scriptName)) {
                 is Resource.Success -> {
-                    _message.emit("路由创建成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_route_create_success))
                     loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
-                    _message.emit("创建路由失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_route_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -519,11 +524,11 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.updateRoute(account, zoneId, routeId, pattern, scriptName)) {
                 is Resource.Success -> {
-                    _message.emit("路由更新成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_route_update_success))
                     loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
-                    _message.emit("更新路由失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_route_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -538,11 +543,11 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.deleteRoute(account, zoneId, routeId)) {
                 is Resource.Success -> {
-                    _message.emit("路由删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_route_delete_success))
                     loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除路由失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_route_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -560,7 +565,7 @@ class WorkerViewModel @Inject constructor(
                     _customDomains.value = result.data
                 }
                 is Resource.Error -> {
-                    _message.emit("加载自定义域名失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domains_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -575,11 +580,11 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.addCustomDomain(account, hostname, scriptName)) {
                 is Resource.Success -> {
-                    _message.emit("自定义域名添加成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_add_success))
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("添加自定义域名失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_add_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -594,11 +599,11 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.deleteCustomDomain(account, domainId)) {
                 is Resource.Success -> {
-                    _message.emit("自定义域名删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_delete_success))
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除自定义域名失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -643,7 +648,7 @@ class WorkerViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to update runtime settings")
-                onResult(Resource.Error("更新失败: ${e.message}"))
+                onResult(Resource.Error(appContext.getString(R.string.vm_msg_worker_update_failed_template, e.message ?: "")))
             }
         }
     }
@@ -660,7 +665,7 @@ class WorkerViewModel @Inject constructor(
                     _versions.value = result.data
                 }
                 is Resource.Error -> {
-                    _message.emit("获取版本历史失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_versions_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -686,12 +691,12 @@ class WorkerViewModel @Inject constructor(
             val result = workerRepository.deployWorkerVersion(account, scriptName, versionId)
             when (result) {
                 is Resource.Success -> {
-                    _message.emit("回滚成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_rollback_success))
                     loadWorkerVersions(account, scriptName)
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("回滚失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_rollback_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -714,11 +719,11 @@ class WorkerViewModel @Inject constructor(
             val result = workerRepository.updateCustomDomain(account, domainId, request)
             when (result) {
                 is Resource.Success -> {
-                    _message.emit("自定义域名已更新")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_updated))
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("更新自定义域名失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -761,7 +766,8 @@ class WorkerViewModel @Inject constructor(
             _cleanupResults.value = results.toList()
 
             val totalDeleted = results.sumOf { it.deletedCount }
-            _message.emit("清理完成！共清理了 $totalDeleted 个旧版本")
+            // plurals 通过 RawString 透传；Fragment 层需用 context.resources.getQuantityString 自行格式化
+            _message.emit(UiMessage.of(R.string.vm_msg_worker_cleanup_finished_total, totalDeleted))
 
             _loadingState.value = false
         }
@@ -776,9 +782,9 @@ class WorkerViewModel @Inject constructor(
             _cleanupResults.value = listOf(result)
 
             if (result.success) {
-                _message.emit("脚本 ${result.scriptName} 清理完成！成功清理了 ${result.deletedCount} 个旧版本")
+                _message.emit(UiMessage.of(R.string.vm_msg_worker_cleanup_single_script_success, result.scriptName, result.deletedCount))
             } else {
-                _message.emit("清理失败: ${result.errorMessage}")
+                _message.emit(UiMessage.of(R.string.vm_msg_worker_cleanup_failed, result.errorMessage ?: ""))
             }
 
             _loadingState.value = false
@@ -818,11 +824,11 @@ class WorkerViewModel @Inject constructor(
                     WorkerCleanupResult(scriptName, 0, 0, false, result.message)
                 }
                 is Resource.Loading -> {
-                    WorkerCleanupResult(scriptName, 0, 0, false, "加载版本列表中")
+                    WorkerCleanupResult(scriptName, 0, 0, false, appContext.getString(R.string.vm_msg_worker_cleanup_loading_versions))
                 }
             }
         } catch (e: Exception) {
-            WorkerCleanupResult(scriptName, 0, 0, false, e.message ?: "未知错误")
+            WorkerCleanupResult(scriptName, 0, 0, false, e.message ?: appContext.getString(R.string.msg_unknown_error))
         }
     }
 }
@@ -839,5 +845,5 @@ sealed class UploadState {
     object Idle : UploadState()
     object Uploading : UploadState()
     object Success : UploadState()
-    data class Error(val message: String) : UploadState()
+    data class Error(val message: UiMessage) : UploadState()
 }

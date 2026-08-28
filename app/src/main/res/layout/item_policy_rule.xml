@@ -45,7 +45,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="删除规则"
+            android:contentDescription="@string/ar_delete_rule_title"
             android:src="@android:drawable/ic_menu_close_clear_cancel" />
 
     </LinearLayout>

@@ -17,7 +17,7 @@
             android:background="?attr/colorSurface"
             android:elevation="4dp"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:title="编辑代码片段"
+            app:title="@string/snippet_edit_title"
             app:titleTextColor="?attr/colorOnSurface">
 
             <com.google.android.material.button.MaterialButton
@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="0dp"
-                android:contentDescription="全选"
+                android:contentDescription="@string/snippet_select_all"
                 app:icon="@drawable/ic_select_all" />
 
             <com.google.android.material.button.MaterialButton
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="4dp"
-                android:contentDescription="删除"
+                android:contentDescription="@string/delete"
                 app:icon="@drawable/ic_delete"
                 app:iconTint="?attr/colorError" />
         </com.google.android.material.appbar.MaterialToolbar>
@@ -86,7 +86,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:hint="搜索"
+                        android:hint="@string/snippet_search"
                         app:boxCornerRadiusTopStart="4dp"
                         app:boxCornerRadiusTopEnd="4dp"
                         app:boxCornerRadiusBottomStart="4dp"
@@ -108,7 +108,7 @@
                         style="@style/Widget.Material3.Button.IconButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:contentDescription="上一个"
+                        android:contentDescription="@string/snippet_previous"
                         app:icon="@drawable/ic_arrow_up" />
 
                     <com.google.android.material.button.MaterialButton
@@ -116,7 +116,7 @@
                         style="@style/Widget.Material3.Button.IconButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:contentDescription="下一个"
+                        android:contentDescription="@string/snippet_next"
                         app:icon="@drawable/ic_arrow_down" />
 
                     <com.google.android.material.button.MaterialButton
@@ -124,7 +124,7 @@
                         style="@style/Widget.Material3.Button.IconButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:contentDescription="关闭"
+                        android:contentDescription="@string/domain_close"
                         app:icon="@drawable/ic_close" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -150,7 +150,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="复制"
+                    android:text="@string/snippet_copy"
                     app:icon="@drawable/ic_content_copy" />
 
                 <com.google.android.material.button.MaterialButton
@@ -159,7 +159,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="导入"
+                    android:text="@string/snippet_import"
                     app:icon="@drawable/ic_cloud_upload" />
 
                 <com.google.android.material.button.MaterialButton
@@ -168,7 +168,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="保存"
+                    android:text="@string/save"
                     app:icon="@drawable/ic_save" />
 
                 <com.google.android.material.button.MaterialButton
@@ -177,7 +177,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="搜索"
+                    android:text="@string/snippet_search"
                     app:icon="@drawable/ic_search" />
 
                 <com.google.android.material.button.MaterialButton
@@ -186,7 +186,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="规则"
+                    android:text="@string/snippet_rule_label"
                     app:icon="@drawable/ic_rule" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

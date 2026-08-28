@@ -2,12 +2,14 @@ package com.muort.upworker.feature.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.ApiToken
 import com.muort.upworker.core.model.PermissionGroup
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.TokenUpsertRequest
 import com.muort.upworker.core.model.TokenVerifyResult
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.repository.TokenRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -37,8 +39,8 @@ class TokenManagerViewModel @Inject constructor(
     private val _busy = MutableStateFlow(false)
     val busy: StateFlow<Boolean> = _busy.asStateFlow()
 
-    private val _message = MutableSharedFlow<String>()
-    val message: SharedFlow<String> = _message.asSharedFlow()
+    private val _message = MutableSharedFlow<UiMessage>()
+    val message: SharedFlow<UiMessage> = _message.asSharedFlow()
 
     // 一次性事件
     private val _tokenCreated = MutableSharedFlow<ApiToken>()
@@ -71,7 +73,7 @@ class TokenManagerViewModel @Inject constructor(
                     }
                 }
                 is Resource.Error -> {
-                    _uiState.value = TokenUiState.Error(result.message)
+                    _uiState.value = TokenUiState.Error(UiMessage.RawString(result.message))
                     Timber.e("Failed to load tokens: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -95,7 +97,7 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> _permissionGroups.value = result.data
-                is Resource.Error -> _message.emit(result.message)
+                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
                 is Resource.Loading -> {}
             }
         }
@@ -114,7 +116,7 @@ class TokenManagerViewModel @Inject constructor(
                 result.data
             }
             is Resource.Error -> {
-                _message.emit(result.message)
+                _message.emit(UiMessage.RawString(result.message))
                 null
             }
             is Resource.Loading -> null
@@ -133,7 +135,7 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> _tokenDetail.emit(result.data)
-                is Resource.Error -> _message.emit(result.message)
+                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -150,11 +152,11 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> {
-                    _message.emit(if (_scope.value == TokenScope.USER) "令牌创建成功" else "账户级令牌创建成功")
+                    _message.emit(if (_scope.value == TokenScope.USER) UiMessage.of(R.string.token_created_success) else UiMessage.of(R.string.vm_msg_token_account_scope_created_success))
                     _tokenCreated.emit(result.data)
                     loadTokens(account)
                 }
-                is Resource.Error -> _message.emit(result.message)
+                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -171,10 +173,10 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> {
-                    _message.emit("令牌更新成功")
+                    _message.emit(UiMessage.of(R.string.token_updated_success))
                     loadTokens(account)
                 }
-                is Resource.Error -> _message.emit(result.message)
+                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -191,10 +193,10 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> {
-                    _message.emit("令牌删除成功")
+                    _message.emit(UiMessage.of(R.string.token_deleted_success))
                     loadTokens(account)
                 }
-                is Resource.Error -> _message.emit(result.message)
+                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -214,10 +216,10 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> {
-                    _message.emit("令牌已更换，旧值立即失效")
+                    _message.emit(UiMessage.of(R.string.token_rolled_success))
                     _tokenRolled.emit(result.data)
                 }
-                is Resource.Error -> _message.emit(result.message)
+                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -232,7 +234,7 @@ class TokenManagerViewModel @Inject constructor(
             _busy.value = true
             when (val result = tokenRepository.verifyToken(account)) {
                 is Resource.Success -> _verifyResult.emit(result.data)
-                is Resource.Error -> _message.emit(result.message)
+                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -244,5 +246,5 @@ sealed class TokenUiState {
     object Loading : TokenUiState()
     object Empty : TokenUiState()
     data class Success(val tokens: List<ApiToken>) : TokenUiState()
-    data class Error(val message: String) : TokenUiState()
+    data class Error(val message: UiMessage) : TokenUiState()
 }

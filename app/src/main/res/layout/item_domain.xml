@@ -69,7 +69,7 @@
                     android:id="@+id/statusText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="待激活"
+                    android:text="@string/domain_pending"
                     android:textSize="12sp"
                     android:layout_marginStart="6dp" />
 
@@ -82,7 +82,7 @@
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_media_next"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="进入" />
+            android:contentDescription="@string/domain_enter" />
 
     </LinearLayout>
 

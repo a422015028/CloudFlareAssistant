@@ -4,12 +4,12 @@
 
     <item
         android:id="@+id/action_verify_token"
-        android:title="验证当前账号令牌"
+        android:title="@string/menu_token_verify_current"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_refresh_tokens"
-        android:title="刷新列表"
+        android:title="@string/menu_token_refresh_list"
         app:showAsAction="never" />
 
 </menu>

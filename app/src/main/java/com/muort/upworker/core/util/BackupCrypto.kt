@@ -1,6 +1,8 @@
 package com.muort.upworker.core.util
 
+import android.content.Context
 import android.util.Base64
+import com.muort.upworker.R
 import javax.crypto.Cipher
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.IvParameterSpec
@@ -52,14 +54,15 @@ object BackupCrypto {
      * 解密文本
      * @param encrypted Base64 编码的加密数据
      * @param password 密码
+     * @param context 用于获取本地化错误消息
      * @return 明文字符串
      * @throws IllegalArgumentException 密码错误或数据损坏
      */
-    fun decrypt(encrypted: String, password: String): String {
+    fun decrypt(encrypted: String, password: String, context: Context): String {
         val combined = Base64.decode(encrypted, Base64.NO_WRAP)
 
         if (combined.size < SALT_LENGTH + IV_LENGTH) {
-            throw IllegalArgumentException("加密数据格式不正确")
+            throw IllegalArgumentException(context.getString(R.string.repo_crypto_invalid_format))
         }
 
         val salt = combined.copyOfRange(0, SALT_LENGTH)

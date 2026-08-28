@@ -1,9 +1,12 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -15,6 +18,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class LoadBalancerRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
 ) {
     suspend fun listLoadBalancers(account: Account, zoneId: String): Resource<List<LoadBalancer>> =
@@ -46,7 +50,7 @@ class LoadBalancerRepository @Inject constructor(
                 zoneId, lbId, LoadBalancerToggle(enabled),
             )
             if (resp.isSuccessful && resp.body()?.success == true) {
-                resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error("切换失败：无返回数据")
+                resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error(appContext.getString(R.string.repo_generic_toggle_no_result))
             } else {
                 Resource.Error(resp.body()?.errors?.firstOrNull()?.message
                     ?: "HTTP ${resp.code()}: ${resp.message()}")

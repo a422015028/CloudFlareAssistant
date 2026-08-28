@@ -13,7 +13,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="应用名称"
+            android:hint="@string/access_app_name"
             app:endIconMode="clear_text">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="域名（可选）"
+            android:hint="@string/access_domain_optional"
             app:endIconMode="clear_text">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="12dp"
-            android:text="示例: app.example.com"
+            android:text="@string/access_domain_example"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -54,7 +54,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="应用类型"
+            android:text="@string/access_app_type"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp"
             android:layout_marginBottom="4dp" />
@@ -70,9 +70,9 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="会话时长（可选）"
+            android:hint="@string/access_session_duration_optional"
             app:endIconMode="clear_text"
-            app:helperText="例如: 30m, 2h, 24h">
+            app:helperText="@string/access_session_duration_example">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/sessionDurationInput"
@@ -102,7 +102,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SaaS 应用配置"
+                    android:text="@string/access_saas_config"
                     android:textStyle="bold"
                     android:textSize="14sp"
                     android:layout_marginBottom="12dp" />
@@ -144,7 +144,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Name ID Format"
                     app:endIconMode="clear_text"
-                    app:helperText="例如: email, id">
+                    app:helperText="@string/access_saas_example">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/saasNameIdFormatInput"
@@ -165,14 +165,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="App Launcher 可见" />
+            android:text="@string/access_app_launcher_visible" />
 
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/autoRedirectSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="自动重定向到身份验证" />
+            android:text="@string/access_auto_redirect_auth" />
 
     </LinearLayout>
 

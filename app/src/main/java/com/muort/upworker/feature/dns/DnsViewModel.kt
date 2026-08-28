@@ -2,10 +2,12 @@ package com.muort.upworker.feature.dns
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.DnsRecord
 import com.muort.upworker.core.model.DnsRecordRequest
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.repository.DnsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -26,8 +28,8 @@ class DnsViewModel @Inject constructor(
     private val _loadingState = MutableStateFlow(false)
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
 
-    private val _message = MutableSharedFlow<String>()
-    val message: SharedFlow<String> = _message.asSharedFlow()
+    private val _message = MutableSharedFlow<UiMessage>()
+    val message: SharedFlow<UiMessage> = _message.asSharedFlow()
 
     fun setZoneId(zoneId: String) {
         currentZoneId = zoneId
@@ -35,7 +37,7 @@ class DnsViewModel @Inject constructor(
 
     fun loadDnsRecords(account: Account, type: String? = null, name: String? = null) {
         if (currentZoneId.isBlank()) {
-            viewModelScope.launch { _message.emit("Zone ID 未设置") }
+            viewModelScope.launch { _message.emit(UiMessage.of(R.string.vm_msg_dns_zone_id_unset)) }
             return
         }
         viewModelScope.launch {
@@ -47,7 +49,7 @@ class DnsViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} DNS records")
                 }
                 is Resource.Error -> {
-                    _message.emit("加载 DNS 记录失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_dns_load_failed, result.message))
                     Timber.e("Failed to load DNS records: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -85,11 +87,11 @@ class DnsViewModel @Inject constructor(
 
             when (val result = dnsRepository.createDnsRecord(account, currentZoneId, record)) {
                 is Resource.Success -> {
-                    _message.emit("DNS 记录创建成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_dns_create_success))
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("创建 DNS 记录失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_dns_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -127,11 +129,11 @@ class DnsViewModel @Inject constructor(
 
             when (val result = dnsRepository.updateDnsRecord(account, currentZoneId, recordId, record)) {
                 is Resource.Success -> {
-                    _message.emit("DNS 记录更新成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_dns_update_success))
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("更新 DNS 记录失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_dns_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -146,11 +148,11 @@ class DnsViewModel @Inject constructor(
 
             when (val result = dnsRepository.deleteDnsRecord(account, currentZoneId, recordId)) {
                 is Resource.Success -> {
-                    _message.emit("DNS 记录删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_dns_delete_success))
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除 DNS 记录失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_dns_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.SslCertificatePack
@@ -34,7 +35,7 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
     private var packs: List<SslCertificatePack> = emptyList()
     private var isTogglingUniversal: Boolean = false
 
-    override val emptyText: String = "暂无 SSL 证书"
+    override val emptyTextResId: Int = R.string.ssl_certs_empty
     override val showAddFab: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,7 +75,13 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
             showEmpty(); return
         }
         showList()
-        adapter.update(universalEnabled, universalLoaded, isTogglingUniversal, packs)
+        adapter.update(
+            ctx = requireContext(),
+            universalEnabled = universalEnabled,
+            universalLoaded = universalLoaded,
+            isTogglingUniversal = isTogglingUniversal,
+            packs = packs,
+        )
     }
 
     // ==================== 通用证书 SSL 开关 ====================
@@ -86,10 +93,10 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
         binding.recyclerView.post { renderAll() }
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = sslRepo.setUniversalEnabled(account, zoneId, on)) {
-                is Resource.Success -> toast(if (on) "已启用" else "已关闭")
+                is Resource.Success -> toast(if (on) getString(R.string.msg_enabled) else getString(R.string.msg_disabled))
                 is Resource.Error -> {
                     universalEnabled = !on  // 回退
-                    toast("操作失败: ${r.message}")
+                    toast(getString(R.string.msg_operation_failed, r.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -101,21 +108,22 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
     // ==================== 删除证书包 ====================
 
     private fun confirmDeletePack(pack: SslCertificatePack) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除此证书？")
-            .setMessage("证书类型：${certTypeLabel(pack.type)}\n删除后不可恢复。")
-            .setPositiveButton("删除") { _, _ ->
+        val ctx = requireContext()
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.ssl_certs_delete_title)
+            .setMessage(ctx.getString(R.string.ssl_certs_delete_message, certTypeLabel(ctx, pack.type)))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 account?.let { deletePack(it, pack.id) }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun deletePack(account: Account, packId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = sslRepo.deletePack(account, zoneId, packId)) {
-                is Resource.Success -> { toast("已删除"); load(account) }
-                is Resource.Error -> toast("删除失败: ${r.message}")
+                is Resource.Success -> { toast(getString(R.string.msg_deleted)); load(account) }
+                is Resource.Error -> toast(getString(R.string.msg_delete_failed, r.message))
                 is Resource.Loading -> {}
             }
         }
@@ -123,19 +131,19 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
 
     // ==================== 标签 ====================
 
-    private fun certTypeLabel(type: String?): String = when (type) {
-        "universal" -> "通用证书"
-        "advanced" -> "高级证书"
-        "sni_custom", "legacy_custom", "mh_custom", "keyless" -> "自定义证书"
-        "total_tls" -> "Total SSL"
+    private fun certTypeLabel(ctx: android.content.Context, type: String?): String = when (type) {
+        "universal" -> ctx.getString(R.string.ssl_certs_type_universal)
+        "advanced" -> ctx.getString(R.string.ssl_certs_type_advanced)
+        "sni_custom", "legacy_custom", "mh_custom", "keyless" -> ctx.getString(R.string.ssl_certs_type_custom)
+        "total_tls" -> ctx.getString(R.string.ssl_certs_type_total_tls)
         else -> type ?: "—"
     }
 
-    private fun certStatusLabel(status: String?): String = when (status) {
-        "active" -> "已激活"
-        "pending_validation" -> "等待验证"
-        "initializing" -> "初始化中"
-        "expired" -> "已过期"
+    private fun certStatusLabel(ctx: android.content.Context, status: String?): String = when (status) {
+        "active" -> ctx.getString(R.string.ssl_certs_status_active)
+        "pending_validation" -> ctx.getString(R.string.ssl_certs_status_pending_validation)
+        "initializing" -> ctx.getString(R.string.ssl_certs_status_initializing)
+        "expired" -> ctx.getString(R.string.ssl_certs_status_expired)
         else -> status ?: "—"
     }
 
@@ -159,17 +167,43 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
         }
 
         fun update(
+            ctx: android.content.Context,
             universalEnabled: Boolean,
             universalLoaded: Boolean,
             isTogglingUniversal: Boolean,
             packs: List<SslCertificatePack>,
         ) {
+            this.cachedCtx = ctx
             items.clear()
             if (universalLoaded) {
                 items += CertItem.UniversalToggle(universalEnabled, isTogglingUniversal)
             }
             items += packs.map { CertItem.CertPack(it) }
             notifyDataSetChanged()
+        }
+
+        private var cachedCtx: android.content.Context? = null
+
+        private fun certTypeLabel(type: String?): String {
+            val ctx = cachedCtx ?: return type ?: "—"
+            return when (type) {
+                "universal" -> ctx.getString(R.string.ssl_certs_type_universal)
+                "advanced" -> ctx.getString(R.string.ssl_certs_type_advanced)
+                "sni_custom", "legacy_custom", "mh_custom", "keyless" -> ctx.getString(R.string.ssl_certs_type_custom)
+                "total_tls" -> ctx.getString(R.string.ssl_certs_type_total_tls)
+                else -> type ?: "—"
+            }
+        }
+
+        private fun certStatusLabel(status: String?): String {
+            val ctx = cachedCtx ?: return status ?: "—"
+            return when (status) {
+                "active" -> ctx.getString(R.string.ssl_certs_status_active)
+                "pending_validation" -> ctx.getString(R.string.ssl_certs_status_pending_validation)
+                "initializing" -> ctx.getString(R.string.ssl_certs_status_initializing)
+                "expired" -> ctx.getString(R.string.ssl_certs_status_expired)
+                else -> status ?: "—"
+            }
         }
 
         override fun getItemViewType(position: Int): Int = when (items[position]) {
@@ -191,14 +225,14 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             when (val item = items[position]) {
                 is CertItem.UniversalToggle -> (holder as UniversalVH).bind(item, onToggleUniversal)
-                is CertItem.CertPack -> (holder as CertVH).bind(item.pack, onDeletePack)
+                is CertItem.CertPack -> (holder as CertVH).bind(item.pack, onDeletePack, cachedCtx ?: holder.itemView.context)
             }
         }
 
         class UniversalVH(private val b: ItemSslToggleBinding) : RecyclerView.ViewHolder(b.root) {
             fun bind(item: CertItem.UniversalToggle, onToggle: (Boolean) -> Unit) {
-                b.titleText.text = "通用证书 SSL"
-                b.subtitleText.text = "Cloudflare 提供的免费通用 SSL 证书"
+                b.titleText.setText(R.string.ssl_certs_universal_title)
+                b.subtitleText.setText(R.string.ssl_certs_universal_subtitle)
                 b.subtitleText.visibility = View.VISIBLE
                 b.toggleSwitch.setOnCheckedChangeListener(null)
                 b.toggleSwitch.isChecked = item.enabled
@@ -209,11 +243,11 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
         }
 
         class CertVH(private val b: ItemSslCertBinding) : RecyclerView.ViewHolder(b.root) {
-            fun bind(pack: SslCertificatePack, onDelete: (SslCertificatePack) -> Unit) {
-                b.titleText.text = certTypeLabel(pack.type)
+            fun bind(pack: SslCertificatePack, onDelete: (SslCertificatePack) -> Unit, ctx: android.content.Context) {
+                b.titleText.text = certTypeLabel(ctx, pack.type)
                 val sub = buildString {
-                    append(certStatusLabel(pack.status))
-                    pack.expiresOnDay?.let { append(" · 到期 $it") }
+                    append(certStatusLabel(ctx, pack.status))
+                    pack.expiresOnDay?.let { append(ctx.getString(R.string.ssl_certs_expires_format, it)) }
                 }
                 b.subtitleText.text = sub
                 b.hostsText.text = pack.hosts?.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: ""
@@ -222,19 +256,19 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
                 b.deleteButton.setOnClickListener { onDelete(pack) }
             }
 
-            private fun certTypeLabel(type: String?): String = when (type) {
-                "universal" -> "通用证书"
-                "advanced" -> "高级证书"
-                "sni_custom", "legacy_custom", "mh_custom", "keyless" -> "自定义证书"
-                "total_tls" -> "Total SSL"
+            private fun certTypeLabel(ctx: android.content.Context, type: String?): String = when (type) {
+                "universal" -> ctx.getString(R.string.ssl_certs_type_universal)
+                "advanced" -> ctx.getString(R.string.ssl_certs_type_advanced)
+                "sni_custom", "legacy_custom", "mh_custom", "keyless" -> ctx.getString(R.string.ssl_certs_type_custom)
+                "total_tls" -> ctx.getString(R.string.ssl_certs_type_total_tls)
                 else -> type ?: "—"
             }
 
-            private fun certStatusLabel(status: String?): String = when (status) {
-                "active" -> "已激活"
-                "pending_validation" -> "等待验证"
-                "initializing" -> "初始化中"
-                "expired" -> "已过期"
+            private fun certStatusLabel(ctx: android.content.Context, status: String?): String = when (status) {
+                "active" -> ctx.getString(R.string.ssl_certs_status_active)
+                "pending_validation" -> ctx.getString(R.string.ssl_certs_status_pending_validation)
+                "initializing" -> ctx.getString(R.string.ssl_certs_status_initializing)
+                "expired" -> ctx.getString(R.string.ssl_certs_status_expired)
                 else -> status ?: "—"
             }
         }

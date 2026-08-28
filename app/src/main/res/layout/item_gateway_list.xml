@@ -31,7 +31,7 @@
                     android:id="@+id/listNameText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="列表名称"
+                    android:text="@string/gateway_list_name"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="列表描述"
+            android:text="@string/gateway_list_description_text"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="11sp" />
 
@@ -67,7 +67,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="项目数: 0"
+            android:text="@string/gateway_item_count"
             android:textSize="11sp" />
 
         <TextView
@@ -98,7 +98,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
-                android:text="编辑"
+                android:text="@string/edit"
                 android:textSize="11sp" />
 
             <Button
@@ -106,7 +106,7 @@
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="删除"
+                android:text="@string/delete"
                 android:textSize="11sp"
                 android:textColor="?attr/colorError" />
 

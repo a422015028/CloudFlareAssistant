@@ -15,7 +15,7 @@
         android:background="?attr/colorSurface"
         android:elevation="0dp"
         app:navigationIcon="@drawable/ic_arrow_back"
-        app:title="API 令牌管理"
+        app:title="@string/xml_activity_token_manager_title"
         app:titleTextColor="?attr/colorOnSurface" />
 
     <!-- 账号选择行 -->
@@ -34,7 +34,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="当前账号:"
+            android:text="@string/xml_activity_token_manager"
             android:textSize="13sp"
             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="未选择"
+            android:text="@string/xml_activity_token_manager_2"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?attr/colorPrimary"
@@ -56,7 +56,7 @@
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="切换"
+            android:text="@string/xml_activity_token_manager_3"
             android:textSize="13sp"
             android:minWidth="0dp"
             android:minHeight="0dp" />
@@ -74,12 +74,12 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="用户级令牌" />
+            android:text="@string/xml_activity_token_manager_4" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="账户级令牌" />
+            android:text="@string/xml_activity_token_manager_5" />
 
     </com.google.android.material.tabs.TabLayout>
 
@@ -93,7 +93,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="4dp"
-        android:text="新建令牌" />
+        android:text="@string/xml_activity_token_manager_6" />
 
     <!-- 内容区 -->
     <FrameLayout
@@ -128,7 +128,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="暂无 API 令牌"
+                android:text="@string/xml_activity_token_manager_7"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="12dp" />
@@ -136,7 +136,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="点击上方“新建令牌”按钮创建"
+                android:text="@string/xml_activity_token_manager_8"
                 android:textSize="13sp"
                 android:textColor="?android:textColorSecondary"
                 android:layout_marginTop="6dp" />
@@ -172,7 +172,7 @@
                 android:id="@+id/errorText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="加载失败"
+                android:text="@string/analytics_error"
                 android:textSize="14sp"
                 android:textColor="?android:textColorSecondary"
                 android:layout_marginTop="12dp" />
@@ -182,7 +182,7 @@
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="重试"
+                android:text="@string/dialog_retry"
                 android:layout_marginTop="8dp" />
 
         </LinearLayout>

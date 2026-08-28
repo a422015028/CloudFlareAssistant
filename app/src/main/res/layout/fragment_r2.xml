@@ -29,7 +29,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="存储桶"
+                    android:text="@string/r2_bucket_singular"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     android:textSize="18sp"
@@ -56,7 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="暂无存储桶\n点击 + 创建"
+                android:text="@string/r2_no_buckets"
                 android:gravity="center"
                 android:textColor="?android:textColorSecondary"
                 android:visibility="gone" />
@@ -68,7 +68,7 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:src="@android:drawable/ic_input_add"
-                android:contentDescription="创建存储桶" />
+                android:contentDescription="@string/r2_create_bucket" />
 
         </LinearLayout>
 
@@ -98,7 +98,7 @@
                     android:id="@+id/objectTitleText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="对象"
+                    android:text="@string/r2_object"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     android:textSize="18sp"
@@ -125,7 +125,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="请选择存储桶"
+                android:text="@string/r2_please_select_bucket"
                 android:gravity="center"
                 android:textColor="?android:textColorSecondary"
                 android:visibility="gone" />
@@ -137,7 +137,7 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:src="@android:drawable/ic_input_add"
-                android:contentDescription="上传对象"
+                android:contentDescription="@string/r2_upload_object"
                 android:visibility="gone" />
 
         </LinearLayout>

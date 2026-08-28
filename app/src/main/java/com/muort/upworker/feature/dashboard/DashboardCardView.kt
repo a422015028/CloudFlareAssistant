@@ -27,6 +27,7 @@ import com.muort.upworker.core.model.HealthStatus
 import com.muort.upworker.core.model.TimeRange
 import com.muort.upworker.databinding.CardDashboardBinding
 import timber.log.Timber
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -145,7 +146,7 @@ class DashboardCardView @JvmOverloads constructor(
      * 更新时间范围提示文本
      */
     private fun updateTimeRangeHint(timeRange: TimeRange) {
-        binding.timeRangeHintText.text = "过去 ${timeRange.displayName} 数据"
+        binding.timeRangeHintText.text = context.getString(R.string.dash_past_data, timeRange.displayName(context))
     }
 
     /**
@@ -169,10 +170,10 @@ class DashboardCardView @JvmOverloads constructor(
                 textColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.GRAY)
                 valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
-                        // 根据时间范围选择不同的日期格式
+                        // 根据时间范围选择不同的日期格式，尊重用户 Locale
                         val format = when (currentTimeRange) {
-                            TimeRange.ONE_DAY -> SimpleDateFormat("HH:mm", Locale.getDefault())
-                            TimeRange.SEVEN_DAYS, TimeRange.THIRTY_DAYS -> SimpleDateFormat("MM-dd", Locale.getDefault())
+                            TimeRange.ONE_DAY -> DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault())
+                            TimeRange.SEVEN_DAYS, TimeRange.THIRTY_DAYS -> DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
                         }
                         return format.format(Date(value.toLong()))
                     }
@@ -218,7 +219,7 @@ class DashboardCardView @JvmOverloads constructor(
                 val requestsEntries = metrics.requestsTimeSeries.map { point ->
                     Entry(point.timestamp.toFloat(), point.value.toFloat())
                 }
-                dataSets.add(LineDataSet(requestsEntries, "请求数").apply {
+                dataSets.add(LineDataSet(requestsEntries, context.getString(R.string.dash_legend_requests)).apply {
                     color = context.getColor(R.color.purple_700)
                     setCircleColor(context.getColor(R.color.purple_700))
                     lineWidth = 2.5f
@@ -236,7 +237,7 @@ class DashboardCardView @JvmOverloads constructor(
                 val bandwidthEntries = metrics.bandwidthTimeSeries.map { point ->
                     Entry(point.timestamp.toFloat(), point.value.toFloat())
                 }
-                dataSets.add(LineDataSet(bandwidthEntries, "带宽 (MB)").apply {
+                dataSets.add(LineDataSet(bandwidthEntries, context.getString(R.string.dash_legend_bandwidth_mb)).apply {
                     color = context.getColor(android.R.color.holo_blue_dark)
                     setCircleColor(context.getColor(android.R.color.holo_blue_dark))
                     lineWidth = 2f
@@ -253,7 +254,7 @@ class DashboardCardView @JvmOverloads constructor(
                 val threatsEntries = metrics.threatsTimeSeries.map { point ->
                     Entry(point.timestamp.toFloat(), point.value.toFloat())
                 }
-                dataSets.add(LineDataSet(threatsEntries, "威胁").apply {
+                dataSets.add(LineDataSet(threatsEntries, context.getString(R.string.dash_legend_threats)).apply {
                     color = context.getColor(R.color.md_theme_error)
                     setCircleColor(context.getColor(R.color.md_theme_error))
                     lineWidth = 2f
@@ -270,7 +271,7 @@ class DashboardCardView @JvmOverloads constructor(
                 val cachedEntries = metrics.cachedBytesTimeSeries.map { point ->
                     Entry(point.timestamp.toFloat(), point.value.toFloat())
                 }
-                dataSets.add(LineDataSet(cachedEntries, "缓存 (MB)").apply {
+                dataSets.add(LineDataSet(cachedEntries, context.getString(R.string.dash_legend_cache_mb)).apply {
                     color = context.getColor(android.R.color.holo_green_dark)
                     setCircleColor(context.getColor(android.R.color.holo_green_dark))
                     lineWidth = 2f
@@ -287,7 +288,7 @@ class DashboardCardView @JvmOverloads constructor(
                 val pageViewsEntries = metrics.pageViewsTimeSeries.map { point ->
                     Entry(point.timestamp.toFloat(), point.value.toFloat())
                 }
-                dataSets.add(LineDataSet(pageViewsEntries, "页面浏览").apply {
+                dataSets.add(LineDataSet(pageViewsEntries, context.getString(R.string.dash_legend_page_views)).apply {
                     color = context.getColor(R.color.md_theme_tertiary)
                     setCircleColor(context.getColor(R.color.md_theme_tertiary))
                     lineWidth = 2f
@@ -356,7 +357,15 @@ class DashboardCardView @JvmOverloads constructor(
                 textSize = 9f
                 textColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSurface, Color.BLACK)
                 valueFormatter = object : ValueFormatter() {
-                    private val labels = listOf("请求", "带宽", "缓存", "威胁", "访客")
+                    private val labels by lazy {
+                        listOf(
+                            context.getString(R.string.dash_bar_label_requests),
+                            context.getString(R.string.dash_bar_label_bandwidth),
+                            context.getString(R.string.dash_bar_label_cache),
+                            context.getString(R.string.dash_bar_label_threats),
+                            context.getString(R.string.dash_bar_label_visitors)
+                        )
+                    }
                     override fun getFormattedValue(value: Float): String {
                         return labels.getOrNull(value.toInt()) ?: ""
                     }
@@ -389,15 +398,15 @@ class DashboardCardView @JvmOverloads constructor(
         val cacheMissRate = 100f - cacheHitRate
         
         if (cacheHitRate > 0) {
-            entries.add(PieEntry(cacheHitRate, "缓存命中"))
+            entries.add(PieEntry(cacheHitRate, context.getString(R.string.dash_pie_cache_hit)))
         }
         if (cacheMissRate > 0) {
-            entries.add(PieEntry(cacheMissRate, "缓存未命中"))
+            entries.add(PieEntry(cacheMissRate, context.getString(R.string.dash_pie_cache_miss)))
         }
         
         if (entries.isEmpty()) {
             binding.pieChart.clear()
-            binding.pieChart.centerText = "暂无数据"
+            binding.pieChart.centerText = context.getString(R.string.empty_list)
             return
         }
         
@@ -419,7 +428,7 @@ class DashboardCardView @JvmOverloads constructor(
         
         val data = PieData(dataSet)
         binding.pieChart.data = data
-        binding.pieChart.centerText = "缓存分布"
+        binding.pieChart.centerText = context.getString(R.string.dash_pie_center_distribution)
         binding.pieChart.invalidate()
     }
 
@@ -457,7 +466,7 @@ class DashboardCardView @JvmOverloads constructor(
         entries.add(BarEntry(3f, threatsLog))
         entries.add(BarEntry(4f, visitorsLog))
         
-        val dataSet = BarDataSet(entries, "关键指标对比(对数尺度)").apply {
+        val dataSet = BarDataSet(entries, context.getString(R.string.dash_bar_dataset_title)).apply {
             colors = listOf(
                 Color.parseColor("#9C27B0"), // 紫色 - 请求
                 Color.parseColor("#2196F3"), // 蓝色 - 带宽
@@ -602,9 +611,9 @@ class DashboardCardView @JvmOverloads constructor(
      */
     private fun updateHealthStatus(status: HealthStatus) {
         val (statusText, statusColor) = when (status) {
-            HealthStatus.HEALTHY -> "正常" to context.getColor(android.R.color.holo_green_dark)
-            HealthStatus.WARNING -> "警告" to context.getColor(R.color.md_theme_tertiary)
-            HealthStatus.CRITICAL -> "严重" to context.getColor(R.color.md_theme_error)
+            HealthStatus.HEALTHY -> context.getString(R.string.analytics_status_normal) to context.getColor(android.R.color.holo_green_dark)
+            HealthStatus.WARNING -> context.getString(R.string.analytics_status_warning) to context.getColor(R.color.md_theme_tertiary)
+            HealthStatus.CRITICAL -> context.getString(R.string.analytics_status_critical) to context.getColor(R.color.md_theme_error)
         }
         
         binding.statusText.text = statusText

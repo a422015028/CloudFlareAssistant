@@ -18,7 +18,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="头名称"
+            android:hint="@string/xml_item_transform_header_row_hint"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -35,7 +35,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="4dp"
-            android:contentDescription="移除"
+            android:contentDescription="@string/snippet_remove_rule_button"
             app:icon="@android:drawable/ic_menu_delete"
             app:iconSize="30dp"
             app:iconTint="?android:attr/textColorSecondary"
@@ -53,21 +53,21 @@
             android:id="@+id/radioSet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="设置"
+            android:text="@string/zone_tool_settings"
             android:checked="true" />
 
         <RadioButton
             android:id="@+id/radioAdd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="添加"
+            android:text="@string/add"
             android:layout_marginStart="8dp" />
 
         <RadioButton
             android:id="@+id/radioRemove"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="移除"
+            android:text="@string/snippet_remove_rule_button"
             android:layout_marginStart="8dp" />
     </RadioGroup>
 
@@ -76,7 +76,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="值"
+        android:hint="@string/snippet_value_default"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText

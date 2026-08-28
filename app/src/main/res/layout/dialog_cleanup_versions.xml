@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="清理版本记录"
+        android:text="@string/xml_dialog_cleanup_versions"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
@@ -25,7 +25,7 @@
             android:id="@+id/cleanupAllProjectsRadio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="清理所有脚本的旧版本"
+            android:text="@string/xml_dialog_cleanup_versions_2"
             android:textSize="16sp"
             android:checked="true"
             android:layout_marginBottom="8dp" />
@@ -34,7 +34,7 @@
             android:id="@+id/cleanupSingleProjectRadio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="清理指定脚本的旧版本"
+            android:text="@string/xml_dialog_cleanup_versions_3"
             android:textSize="16sp" />
 
     </RadioGroup>
@@ -50,7 +50,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="选择脚本"
+            android:text="@string/xml_dialog_cleanup_versions_4"
             android:textSize="14sp"
             android:textColor="?android:textColorSecondary"
             android:layout_marginBottom="8dp" />
@@ -71,7 +71,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="保留最新版本数量"
+            android:text="@string/xml_dialog_cleanup_versions_5"
             android:textSize="14sp"
             android:textColor="?android:textColorSecondary"
             android:layout_marginBottom="8dp" />
@@ -79,7 +79,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="保留数量"
+            android:hint="@string/xml_dialog_cleanup_versions_hint"
             app:boxBackgroundMode="outline"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 

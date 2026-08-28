@@ -33,16 +33,17 @@ class DeviceAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(device: Device) {
-            binding.deviceNameText.text = device.name ?: device.model ?: "未知设备"
+            val ctx = binding.root.context
+            binding.deviceNameText.text = device.name ?: device.model ?: ctx.getString(R.string.zt_device_unknown_device)
 
             // Device type chip
             val deviceType = device.type ?: device.deviceType
-            binding.deviceTypeChip.text = getDeviceTypeLabel(deviceType)
+            binding.deviceTypeChip.text = getDeviceTypeLabel(deviceType, ctx)
             binding.deviceTypeChip.setChipIconResource(getDeviceTypeIcon(deviceType))
 
             // Status chip
             val isRevoked = device.revokedAt != null
-            binding.statusChip.text = if (isRevoked) "已撤销" else "活跃"
+            binding.statusChip.text = if (isRevoked) ctx.getString(R.string.zt_device_status_revoked) else ctx.getString(R.string.zt_device_status_active)
             binding.statusChip.setChipBackgroundColorResource(
                 if (isRevoked) android.R.color.holo_red_light else android.R.color.holo_green_light
             )
@@ -50,24 +51,25 @@ class DeviceAdapter(
             // User info
             val userEmail = device.lastSeenUser?.email ?: device.user?.email
                 ?: device.lastSeenUser?.name ?: device.user?.name
-            binding.userInfoText.text = "用户: ${userEmail ?: "未知"}"
+            val userUnknown = ctx.getString(R.string.zt_device_status_unknown)
+            binding.userInfoText.text = ctx.getString(R.string.zt_device_user_label, userEmail ?: userUnknown)
             binding.userInfoText.visibility = if (userEmail != null) View.VISIBLE else View.GONE
 
             // Policy info - 最后活跃的设备配置文件
             val policyName = device.lastSeenRegistration?.policy?.name
                 ?: device.policyName
-                ?: "默认"
-            binding.policyNameText.text = "最后活跃的设备配置文件: $policyName"
+                ?: ctx.getString(R.string.zt_access_detail_default)
+            binding.policyNameText.text = ctx.getString(R.string.zt_device_policy_label, policyName)
             binding.policyNameText.visibility = View.VISIBLE
 
             // IP address
             val ipAddr = device.publicIp ?: device.ip
-            binding.ipAddressText.text = "IP: ${ipAddr ?: "未知"}"
+            binding.ipAddressText.text = ctx.getString(R.string.zt_device_ip_label, ipAddr ?: userUnknown)
             binding.ipAddressText.visibility = if (ipAddr != null) View.VISIBLE else View.GONE
 
             // Last seen
             val lastSeen = device.lastSeenAt ?: device.updatedAt ?: device.updated
-            binding.lastUpdatedText.text = "最后活跃: ${formatDate(lastSeen)}"
+            binding.lastUpdatedText.text = ctx.getString(R.string.zt_device_last_seen_label, formatDate(lastSeen, ctx))
 
             // Revoke button - hide if already revoked
             binding.revokeButton.visibility = if (isRevoked) View.GONE else View.VISIBLE
@@ -77,7 +79,7 @@ class DeviceAdapter(
             binding.root.setOnClickListener { onItemClick(device) }
         }
 
-        private fun getDeviceTypeLabel(type: String?): String {
+        private fun getDeviceTypeLabel(type: String?, ctx: android.content.Context): String {
             return when (type?.lowercase()) {
                 "windows" -> "Windows"
                 "mac", "macos" -> "macOS"
@@ -85,7 +87,7 @@ class DeviceAdapter(
                 "android" -> "Android"
                 "ios" -> "iOS"
                 "chromeos" -> "ChromeOS"
-                else -> type?.uppercase() ?: "未知"
+                else -> type?.uppercase() ?: ctx.getString(R.string.zt_device_status_unknown)
             }
         }
 
@@ -97,8 +99,8 @@ class DeviceAdapter(
             }
         }
 
-        private fun formatDate(dateString: String?): String {
-            if (dateString == null) return "未知"
+        private fun formatDate(dateString: String?, ctx: android.content.Context): String {
+            if (dateString == null) return ctx.getString(R.string.zt_device_status_unknown)
             return try {
                 dateString.substring(0, 10)
             } catch (e: Exception) {

@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="在目标机器上安装cloudflared，并以管理员身份运行下面的命令，隧道即可连接。"
+        android:text="@string/tunnel_connect_instructions"
         android:textSize="14sp"
         android:textColor="?attr/colorOnSurface"
         android:layout_marginBottom="16dp"/>
@@ -37,21 +37,21 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="隐藏令牌"/>
+            android:text="@string/tunnel_hide_token"/>
 
         <Button
             android:id="@+id/copyCommandButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="复制命令"/>
+            android:text="@string/tunnel_copy_command"/>
 
     </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="令牌等同于隧道凭据，请妥善保管，不要公开分享。"
+        android:text="@string/tunnel_token_warning"
         android:textSize="12sp"
         android:textColor="?attr/colorError"/>
 

@@ -2,10 +2,12 @@ package com.muort.upworker.feature.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.AccountAnalyticsOverview
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.TimeRange
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.repository.AnalyticsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +33,7 @@ class AccountAnalyticsViewModel @Inject constructor(
 
     fun load(account: Account?, timeRange: TimeRange = TimeRange.ONE_DAY) {
         if (account == null) {
-            _state.value = AccountAnalyticsState.Error("请先选择账号")
+            _state.value = AccountAnalyticsState.Error(UiMessage.of(R.string.msg_please_select_account_first))
             return
         }
 
@@ -44,10 +46,11 @@ class AccountAnalyticsViewModel @Inject constructor(
                 is Resource.Success -> {
                     _overview.value = result.data
                     _state.value = AccountAnalyticsState.Success(result.data)
+                    @Suppress("DEPRECATION") // deprecated displayName is the static fallback intended for logs
                     Timber.d("Account analytics loaded for ${timeRange.displayName}: requests=${result.data.requests}")
                 }
                 is Resource.Error -> {
-                    _state.value = AccountAnalyticsState.Error(result.message)
+                    _state.value = AccountAnalyticsState.Error(UiMessage.RawString(result.message))
                     Timber.e("Failed to load account analytics: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -70,5 +73,5 @@ sealed class AccountAnalyticsState {
     object Idle : AccountAnalyticsState()
     object Loading : AccountAnalyticsState()
     data class Success(val overview: AccountAnalyticsOverview) : AccountAnalyticsState()
-    data class Error(val message: String) : AccountAnalyticsState()
+    data class Error(val message: UiMessage) : AccountAnalyticsState()
 }

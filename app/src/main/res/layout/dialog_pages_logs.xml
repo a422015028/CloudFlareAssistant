@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="选择部署"
+        android:hint="@string/xml_dialog_pages_logs_hint"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
         <AutoCompleteTextView
@@ -67,7 +67,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="关闭"
+        android:text="@string/ssl_mode_off"
         style="@style/Widget.Material3.Button.OutlinedButton" />
 
 </LinearLayout>

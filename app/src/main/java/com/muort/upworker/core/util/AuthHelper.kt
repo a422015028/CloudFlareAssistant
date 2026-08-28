@@ -1,5 +1,7 @@
 package com.muort.upworker.core.util
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.AuthType
 
@@ -75,11 +77,11 @@ object AuthHelper {
     /**
      * 检查账号认证配置是否完整
      */
-    fun validateAuthConfig(account: Account): ValidationResult {
+    fun validateAuthConfig(context: Context, account: Account): ValidationResult {
         return when (account.getAuthTypeEnum()) {
             AuthType.TOKEN -> {
                 if (account.token.isBlank()) {
-                    ValidationResult.Error("API Token 不能为空")
+                    ValidationResult.Error(context.getString(R.string.helper_auth_token_empty))
                 } else {
                     ValidationResult.Success
                 }
@@ -87,10 +89,10 @@ object AuthHelper {
             AuthType.GLOBAL_API_KEY -> {
                 val errors = mutableListOf<String>()
                 if (account.email?.isBlank() != false) {
-                    errors.add("邮箱不能为空")
+                    errors.add(context.getString(R.string.helper_auth_email_empty))
                 }
                 if (account.globalApiKey?.isBlank() != false) {
-                    errors.add("Global API Key 不能为空")
+                    errors.add(context.getString(R.string.helper_auth_global_key_empty))
                 }
                 if (errors.isEmpty()) {
                     ValidationResult.Success

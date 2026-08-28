@@ -1,9 +1,12 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -12,6 +15,7 @@ import javax.inject.Singleton
 /** IP 访问规则仓库（account 级 legacy firewall access rules）。对应 orange-cloud FirewallRepository。 */
 @Singleton
 class AccessRuleRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
 ) {
     suspend fun listRules(account: Account): Resource<List<FirewallAccessRule>> =
@@ -43,7 +47,7 @@ class AccessRuleRepository @Inject constructor(
                 account.accountId, rule,
             )
             if (resp.isSuccessful && resp.body()?.success == true) {
-                resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error("创建失败：无返回数据")
+                resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error(appContext.getString(R.string.repo_generic_create_no_result))
             } else {
                 Resource.Error(resp.body()?.errors?.firstOrNull()?.message
                     ?: "HTTP ${resp.code()}: ${resp.message()}")
@@ -62,7 +66,7 @@ class AccessRuleRepository @Inject constructor(
                 account.accountId, ruleId, update,
             )
             if (resp.isSuccessful && resp.body()?.success == true) {
-                resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error("更新失败：无返回数据")
+                resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error(appContext.getString(R.string.repo_generic_update_no_result))
             } else {
                 Resource.Error(resp.body()?.errors?.firstOrNull()?.message
                     ?: "HTTP ${resp.code()}: ${resp.message()}")

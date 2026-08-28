@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="匹配对象"
+            android:text="@string/access_rule_match_target"
             android:textSize="13sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnSurfaceVariant" />
@@ -31,7 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="目标">
+            android:hint="@string/access_rule_target_hint">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/valueInput"
@@ -54,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="动作"
+            android:text="@string/access_rule_action"
             android:textSize="13sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnSurfaceVariant" />
@@ -72,7 +72,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="备注（可选）">
+            android:hint="@string/access_rule_notes_optional">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/notesInput"
@@ -89,7 +89,7 @@
             android:layout_marginTop="12dp"
             android:textSize="12sp"
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:text="匹配对象创建后不可修改，如需更改请删除后重建。"
+            android:text="@string/access_rule_immutable_hint"
             android:visibility="gone" />
     </LinearLayout>
 </ScrollView>

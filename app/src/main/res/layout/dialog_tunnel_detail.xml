@@ -65,7 +65,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="隧道 ID"
+            android:text="@string/tunnel_id"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />
@@ -90,7 +90,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="连接信息"
+            android:text="@string/tunnel_connection_info"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />
@@ -114,7 +114,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="暂无活跃连接"
+            android:text="@string/tunnel_no_active_connections"
             android:textAlignment="center"
             android:textColor="?android:attr/textColorSecondary"
             android:visibility="gone" />
@@ -130,7 +130,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="时间信息"
+            android:text="@string/common_time_info"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />
@@ -177,7 +177,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="运行命令"
+            android:text="@string/tunnel_run_command"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />
@@ -186,7 +186,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="在目标机器上安装cloudflared,并以管理员身份运行下面的命令，隧道即可连接。"
+            android:text="@string/tunnel_connect_instructions_old"
             android:textSize="13sp" />
 
         <TextView
@@ -213,14 +213,14 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="隐藏令牌" />
+                android:text="@string/tunnel_hide_token" />
 
             <Button
                 android:id="@+id/copyCommandButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="复制命令" />
+                android:text="@string/tunnel_copy_command" />
 
         </LinearLayout>
 
@@ -228,7 +228,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="令牌等同于隧道凭据，请妥善保管，不要公开分享。"
+            android:text="@string/tunnel_token_warning"
             android:textSize="12sp"
             android:textColor="?attr/colorError" />
 

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Lint 配置文件（CloudFlareAssistant）
+  - 作为 CI 级 HardcodedText 拦截的主入口
+  - 所有与 i18n/国际化相关的 Issue 设为 error 级别
+  - 项目历史遗留问题全部通过 lint-baseline.xml 白名单，不阻止当前构建
+  - 新引入的 HardcodedText 会在 lintDebug/CI 中立即 FAILED，阻止提交
+-->
+<lint>
+    <!-- ========= 核心：硬编码文本拦截（国际化回归）========= -->
+    <issue id="HardcodedText" severity="error" />
+
+    <!-- ========= 其他国际化相关问题 ========= -->
+    <!-- 只在一种语言中定义、缺少 values 默认值或 values-en 翻译的 string name -->
+    <issue id="MissingTranslation" severity="error" />
+    <!-- 重复的 <string name="..."> 定义（容易一边漏改）-->
+    <issue id="DuplicateStrings" severity="warning" />
+    <!-- <string name> 中的参数化占位符顺序不一致 -->
+    <issue id="StringFormatInvalid" severity="error" />
+    <issue id="StringFormatMatches" severity="error" />
+    <!-- 复数 one/other 占位符不匹配 -->
+    <issue id="PluralsCandidate" severity="ignore" />
+
+    <!-- ========= 降低噪声但仍保留在基线的常见低风险规则 ========= -->
+    <!-- RTL：按项目决策暂不强制（XML 级 RTL 不做），保留 warning 级 -->
+    <issue id="RtlHardcoded" severity="warning" />
+    <issue id="RtlCompat" severity="warning" />
+    <issue id="RtlEnabled" severity="warning" />
+    <issue id="RtlSymmetry" severity="warning" />
+
+    <!-- 拼写检查（依赖外部字典，误报多，先忽略） -->
+    <issue id="Typos" severity="ignore" />
+
+    <!-- 新版本 Gradle/依赖提示（CI 环境不稳定，忽略） -->
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="NewerVersionAvailable" severity="ignore" />
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+    <issue id="MinSdkTooLow" severity="ignore" />
+    <issue id="TargetApi" severity="warning" />
+
+    <!-- 第三方库内部 lint 问题一般不修复（只抓当前模块源码）-->
+    <issue id="all">
+        <ignore path="**/build/**" />
+        <ignore path="**/.gradle/**" />
+        <ignore path="**/schemas/**" />
+    </issue>
+
+    <!-- ========= 排除生成代码 / 自动生成文件 ========= -->
+    <issue id="HardcodedText">
+        <ignore path="**/build/**" />
+        <ignore path="**/schemas/**" />
+        <!-- 纯调试日志标签 / Timber 中的中文（不作为用户可见 UI 文本）不在此规则拦截范围；
+             若 lint 误报在 Timber.* / 注释中，可在此按 path/line 追加 ignore，
+             或优先采用本项目建议：Timber 中文 tag 直接通过 baseline 白名单。 -->
+    </issue>
+</lint>

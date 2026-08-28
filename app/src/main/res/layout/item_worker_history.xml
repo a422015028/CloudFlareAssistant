@@ -84,7 +84,7 @@
                     android:id="@+id/runningText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="运行中"
+                    android:text="@string/xml_item_worker_history"
                     android:textSize="11sp"
                     android:textColor="@color/red_500"
                     android:layout_marginStart="4dp" />
@@ -95,7 +95,7 @@
                 android:id="@+id/deleteBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="删除"
+                android:text="@string/delete"
                 android:textSize="11sp"
                 android:minWidth="48dp"
                 android:paddingStart="8dp"

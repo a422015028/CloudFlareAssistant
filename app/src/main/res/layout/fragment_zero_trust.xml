@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="管理 Zero Trust 访问控制、安全网关、设备和隧道"
+            android:text="@string/zt_description"
             android:textSize="14sp"
             android:layout_marginBottom="24dp" />
 
@@ -45,7 +45,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="🔐 Access 访问控制"
+                    android:text="@string/zt_access_card_title"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -53,7 +53,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="管理应用访问策略、用户组和权限规则"
+                    android:text="@string/zt_access_card_desc"
                     android:textSize="14sp" />
 
             </LinearLayout>
@@ -80,7 +80,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="🛡️ Gateway 安全网关"
+                    android:text="@string/zt_gateway_card_title"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -88,7 +88,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="配置 DNS/HTTP 过滤规则、自定义列表和网络位置"
+                    android:text="@string/zt_gateway_card_desc"
                     android:textSize="14sp" />
 
             </LinearLayout>
@@ -115,7 +115,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="📱 Devices 设备管理"
+                    android:text="@string/zt_devices_card_title"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -123,7 +123,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="查看和管理 WARP 客户端设备及设备配置文件"
+                    android:text="@string/zt_devices_card_desc"
                     android:textSize="14sp" />
 
             </LinearLayout>
@@ -158,7 +158,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="管理 Cloudflare Tunnel 连接和配置"
+                    android:text="@string/zt_tunnel_card_desc"
                     android:textSize="14sp" />
 
             </LinearLayout>
@@ -185,7 +185,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="👥 Access 组管理"
+                    android:text="@string/zt_groups_card_title"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -193,7 +193,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="创建和管理 Access 用户组及组规则"
+                    android:text="@string/zt_groups_card_desc"
                     android:textSize="14sp" />
 
             </LinearLayout>

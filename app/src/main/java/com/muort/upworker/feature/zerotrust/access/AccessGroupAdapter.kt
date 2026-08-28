@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.muort.upworker.R
 import com.muort.upworker.core.model.AccessGroup
 import com.muort.upworker.databinding.ItemAccessGroupBinding
 
@@ -39,13 +40,14 @@ class AccessGroupAdapter(
         fun bind(group: AccessGroup) {
             binding.groupNameText.text = group.name
 
+            val ctx = binding.root.context
             val rulesInfo = buildString {
-                append("包含规则: ${group.include.size}")
+                append(ctx.resources.getQuantityString(R.plurals.zt_group_include_rules, group.include.size, group.include.size))
                 if (!group.exclude.isNullOrEmpty()) {
-                    append(" • 排除规则: ${group.exclude.size}")
+                    append(ctx.resources.getQuantityString(R.plurals.zt_group_exclude_rules, group.exclude.size, group.exclude.size))
                 }
                 if (!group.require.isNullOrEmpty()) {
-                    append(" • 必须规则: ${group.require.size}")
+                    append(ctx.resources.getQuantityString(R.plurals.zt_group_require_rules, group.require.size, group.require.size))
                 }
             }
             binding.groupRulesText.text = rulesInfo

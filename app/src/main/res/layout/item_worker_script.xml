@@ -40,7 +40,7 @@
                     android:id="@+id/logsBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="日志"
+                    android:text="@string/xml_item_worker_script"
                     android:textSize="11sp"
                     android:minWidth="48dp"
                     android:paddingStart="8dp"
@@ -63,183 +63,164 @@
 
         </LinearLayout>
 
-        <!-- Buttons Row 1 - Bindings -->
+        <!-- Buttons Row 1 - Bindings：空间均分，最右按钮绝对不会被挤出屏幕。
+             中文下按钮文字短均分看起来依然紧凑；英文下每个按钮独立 slice，
+             配合 AppButton.Text.Icon 的 maxLines=2+ellipsize+hyphenation，
+             长文本在自身区域内自动两行/断字/省略号，不会把下一个顶出屏幕。
+             【对齐关键】：baselineAligned=false + gravity=center_vertical
+             → 彻底告别"按文字基线对齐"导致的参差不齐：
+             LinearLayout 默认 baselineAligned=true 会把所有子元素 TextView 文字的基线
+             （最末行底部基线）对齐到同一水平线，文字 2 行的按钮底部基线偏下，
+             导致整个按钮（及图标）和旁边 1 行的按钮不在同一中心线。
+             baselineAligned=false 改由 gravity=center_vertical 统一按**父容器垂直中心**
+             对齐所有子按钮，再配合 iconGravity=start（图标对齐按钮自身中心），
+             无论文字是 1 行 / 2 行、系统字体放多大，所有图标都在同一水平线上。 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="end"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
             android:layout_marginTop="8dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/configKvBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="KV"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
+                style="@style/AppButton.Text.Icon"
                 app:icon="@android:drawable/ic_menu_add"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/configR2Btn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="R2"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
+                style="@style/AppButton.Text.Icon"
                 app:icon="@android:drawable/ic_menu_add"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/configD1Btn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="D1"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
+                style="@style/AppButton.Text.Icon"
                 app:icon="@android:drawable/ic_menu_add"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/configServiceBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="服务"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/dns_field_service"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
+                style="@style/AppButton.Text.Icon"
                 app:icon="@android:drawable/ic_menu_add"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/configVariablesBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="变量"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/pages_label_variable"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
+                style="@style/AppButton.Text.Icon"
                 app:icon="@android:drawable/ic_menu_add"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/configSecretsBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="机密"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
-                app:icon="@android:drawable/ic_lock_lock"
+                android:layout_weight="1"
+                android:text="@string/pages_label_secret"
+                style="@style/AppButton.Text.Icon"
+                app:icon="@android:drawable/ic_menu_add"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
         </LinearLayout>
 
-        <!-- Buttons Row 2 - Actions -->
+        <!-- Buttons Row 2 - Actions：同上均分，最右 Delete/Edit 绝对可见；
+             baselineAligned=false + gravity=center_vertical → 图标视觉齐平。 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="end"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
             android:layout_marginTop="4dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/runtimeSettingsBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="设置"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/zone_tool_settings"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
+                style="@style/AppButton.Text.Icon"
                 app:icon="@android:drawable/ic_menu_preferences"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/triggerBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="触发器"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/xml_item_worker_script_2"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
+                style="@style/AppButton.Text.Icon"
                 app:icon="@android:drawable/ic_menu_today"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/historyBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="部署记录"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/xml_item_worker_script_3"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
+                style="@style/AppButton.Text.Icon"
                 app:icon="@android:drawable/ic_menu_recent_history"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/editBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="编辑脚本"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/xml_item_worker_script_4"
                 android:layout_marginEnd="4dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
+                style="@style/AppButton.Text.Icon"
                 app:icon="@android:drawable/ic_menu_edit"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/deleteBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="删除"
-                android:textSize="11sp"
-                android:minWidth="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                style="@style/Widget.Material3.Button.TextButton.Icon"
+                android:layout_weight="1"
+                android:text="@string/delete"
+                style="@style/AppButton.Text.Icon"
                 app:icon="@android:drawable/ic_menu_delete"
                 app:iconSize="16dp"
                 app:iconPadding="2dp" />

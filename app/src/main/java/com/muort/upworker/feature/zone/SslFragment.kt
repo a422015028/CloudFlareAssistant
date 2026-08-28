@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.repository.ZoneSettingsRepository
@@ -41,7 +42,7 @@ class SslFragment : BaseZoneFeatureFragment() {
     // 正在写入的 key（临时禁用对应行）
     private val updating = mutableSetOf<String>()
 
-    override val emptyText: String = "加载中…"
+    override val emptyTextResId: Int = R.string.ssl_empty_loading
     override val showAddFab: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -85,6 +86,7 @@ class SslFragment : BaseZoneFeatureFragment() {
 
     private fun renderAll() {
         adapter.update(
+            ctx = requireContext(),
             sslMode = sslMode,
             alwaysUseHttps = alwaysUseHttps,
             autoHttpsRewrites = autoHttpsRewrites,
@@ -103,32 +105,34 @@ class SslFragment : BaseZoneFeatureFragment() {
     }
 
     private fun showSslModePicker() {
+        val ctx = requireContext()
         val modes = listOf("off", "flexible", "full", "strict")
-        val labels = modes.map { "$it — ${modeLabel(it)}" }.toTypedArray()
+        val labels = modes.map { ctx.getString(R.string.ssl_mode_label_format, it, modeLabel(ctx, it)) }.toTypedArray()
         val checked = modes.indexOf(sslMode)
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("SSL/TLS 加密模式")
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.ssl_encryption_mode_title)
             .setSingleChoiceItems(labels, checked) { dialog, which ->
                 val newMode = modes[which]
                 dialog.dismiss()
                 updateSetting("ssl", newMode) { sslMode = newMode }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun showMinTlsPicker() {
+        val ctx = requireContext()
         val versions = listOf("1.0", "1.1", "1.2", "1.3")
-        val labels = versions.map { "TLS $it" }.toTypedArray()
+        val labels = versions.map { ctx.getString(R.string.ssl_min_tls_label_format, it) }.toTypedArray()
         val checked = versions.indexOf(minTls)
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("最低 TLS 版本")
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.ssl_min_tls_version_title)
             .setSingleChoiceItems(labels, checked) { dialog, which ->
                 val v = versions[which]
                 dialog.dismiss()
                 updateSetting("min_tls_version", v) { minTls = v }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -151,8 +155,8 @@ class SslFragment : BaseZoneFeatureFragment() {
         binding.recyclerView.post { renderAll() }
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = settingsRepo.setSetting(account, zoneId, key, value)) {
-                is Resource.Success -> toast("已更新")
-                is Resource.Error -> toast("更新失败: ${r.message}")
+                is Resource.Success -> toast(getString(R.string.msg_updated))
+                is Resource.Error -> toast(getString(R.string.msg_update_failed, r.message))
                 is Resource.Loading -> {}
             }
             updating.remove(key)
@@ -160,11 +164,11 @@ class SslFragment : BaseZoneFeatureFragment() {
         }
     }
 
-    private fun modeLabel(mode: String): String = when (mode) {
-        "off" -> "关闭"
-        "flexible" -> "灵活"
-        "full" -> "完全"
-        "strict" -> "完全(严格)"
+    private fun modeLabel(ctx: android.content.Context, mode: String): String = when (mode) {
+        "off" -> ctx.getString(R.string.ssl_mode_off)
+        "flexible" -> ctx.getString(R.string.ssl_mode_flexible)
+        "full" -> ctx.getString(R.string.ssl_mode_full)
+        "strict" -> ctx.getString(R.string.ssl_mode_strict)
         else -> mode
     }
 
@@ -199,7 +203,16 @@ class SslFragment : BaseZoneFeatureFragment() {
             private const val TYPE_TOGGLE = 2
         }
 
+        private fun modeLabel(ctx: android.content.Context, mode: String): String = when (mode) {
+            "off" -> ctx.getString(R.string.ssl_mode_off)
+            "flexible" -> ctx.getString(R.string.ssl_mode_flexible)
+            "full" -> ctx.getString(R.string.ssl_mode_full)
+            "strict" -> ctx.getString(R.string.ssl_mode_strict)
+            else -> mode
+        }
+
         fun update(
+            ctx: android.content.Context,
             sslMode: String,
             alwaysUseHttps: Boolean,
             autoHttpsRewrites: Boolean,
@@ -209,32 +222,32 @@ class SslFragment : BaseZoneFeatureFragment() {
             items.clear()
             items += SslItem.Selector(
                 key = "ssl",
-                title = "SSL/TLS 加密模式",
-                subtitle = "off: 不加密 · flexible: 浏览器→CF · full: 端到端自签 · strict: 端到端可信",
-                value = modeLabel(sslMode),
+                title = ctx.getString(R.string.ssl_encryption_mode_title),
+                subtitle = ctx.getString(R.string.ssl_encryption_mode_subtitle),
+                value = modeLabel(ctx, sslMode),
             )
             items += SslItem.Toggle(
                 key = "always_use_https",
-                title = "始终使用 HTTPS",
-                subtitle = "将所有 HTTP 请求重定向到 HTTPS",
+                title = ctx.getString(R.string.ssl_always_https_title),
+                subtitle = ctx.getString(R.string.ssl_always_https_subtitle),
                 checked = alwaysUseHttps,
             )
             items += SslItem.Toggle(
                 key = "automatic_https_rewrites",
-                title = "自动 HTTPS 重写",
-                subtitle = "将页面上的 HTTP 链接自动改为 HTTPS",
+                title = ctx.getString(R.string.ssl_automatic_https_rewrites_title),
+                subtitle = ctx.getString(R.string.ssl_automatic_https_rewrites_subtitle),
                 checked = autoHttpsRewrites,
             )
             items += SslItem.Selector(
                 key = "min_tls_version",
-                title = "最低 TLS 版本",
+                title = ctx.getString(R.string.ssl_min_tls_version_title),
                 subtitle = null,
-                value = "TLS $minTls",
+                value = ctx.getString(R.string.ssl_min_tls_label_format, minTls),
             )
             items += SslItem.Toggle(
                 key = "tls_1_3",
-                title = "TLS 1.3",
-                subtitle = "启用 TLS 1.3 协议支持",
+                title = ctx.getString(R.string.ssl_tls_1_3_title),
+                subtitle = ctx.getString(R.string.ssl_tls_1_3_subtitle),
                 checked = tls13,
             )
             notifyDataSetChanged()
@@ -267,14 +280,6 @@ class SslFragment : BaseZoneFeatureFragment() {
         private fun getKey(position: Int): String = when (val item = items[position]) {
             is SslItem.Selector -> item.key
             is SslItem.Toggle -> item.key
-        }
-
-        private fun modeLabel(mode: String): String = when (mode) {
-            "off" -> "关闭"
-            "flexible" -> "灵活"
-            "full" -> "完全"
-            "strict" -> "完全(严格)"
-            else -> mode
         }
 
         class SelectorVH(private val b: ItemSslSelectorBinding) : RecyclerView.ViewHolder(b.root) {

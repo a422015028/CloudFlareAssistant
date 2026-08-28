@@ -151,7 +151,7 @@ class BackupFragment : Fragment() {
         saveLocalConfigButton = view.findViewById(R.id.saveLocalConfigButton)
 
         // 默认显示应用私有目录
-        localDirText.text = "当前目录: 应用私有目录（默认）"
+        localDirText.text = getString(R.string.backup_current_dir)
 
         backupButton = view.findViewById(R.id.backupButton)
         loadFilesButton = view.findViewById(R.id.loadFilesButton)
@@ -219,7 +219,7 @@ class BackupFragment : Fragment() {
             val password = passwordInput.text?.toString() ?: ""
 
             if (url.isEmpty() || username.isEmpty() || password.isEmpty()) {
-                Toast.makeText(requireContext(), "请填写完整的WebDAV配置", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.backup_webdav_config_required), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -235,7 +235,7 @@ class BackupFragment : Fragment() {
             val backupPassword = webDavBackupPasswordInput.text?.toString()
 
             if (url.isEmpty() || username.isEmpty() || password.isEmpty() || backupPath.isEmpty()) {
-                Toast.makeText(requireContext(), "请填写完整的WebDAV配置", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.backup_webdav_config_required), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -263,7 +263,7 @@ class BackupFragment : Fragment() {
 
         loadBucketsButton.setOnClickListener {
             if (selectedAccountId == 0L) {
-                Toast.makeText(requireContext(), "请先选择账号", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.msg_please_select_account_first), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             viewModel.loadBucketsForAccount(selectedAccountId)
@@ -276,7 +276,7 @@ class BackupFragment : Fragment() {
             val backupPassword = r2BackupPasswordInput.text?.toString()
 
             if (selectedAccountId == 0L || bucketName.isEmpty() || backupPath.isEmpty()) {
-                Toast.makeText(requireContext(), "请填写完整的R2配置", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.backup_r2_config_required), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -329,7 +329,7 @@ class BackupFragment : Fragment() {
         try {
             directoryPickerLauncher.launch(intent)
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "无法打开目录选择器", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.backup_cannot_open_dir_picker), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -343,7 +343,7 @@ class BackupFragment : Fragment() {
                 input.bufferedReader().use { it.readText() }
             } ?: return
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "读取文件失败: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.msg_file_read_failed, e.message), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -357,9 +357,9 @@ class BackupFragment : Fragment() {
             pendingImportFileName = fileName
             pendingImportContent = content
             showPasswordDialog(
-                title = "导入备份",
-                message = "该备份文件已加密，请输入解密密码。",
-                hintText = "备份密码",
+                title = getString(R.string.backup_import_title),
+                message = getString(R.string.backup_file_encrypted_hint),
+                hintText = getString(R.string.backup_password),
                 allowEmpty = false
             ) { password ->
                 showRestoreConfirmDialogWithContent(fileName, password, content)
@@ -378,26 +378,26 @@ class BackupFragment : Fragment() {
         content: String
     ) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("确认导入")
-            .setMessage("确定要从备份文件 $fileName 恢复账号吗？这将导入备份中的所有账号。")
-            .setPositiveButton("导入") { _, _ ->
+            .setTitle(R.string.backup_confirm_import_title)
+            .setMessage(getString(R.string.backup_confirm_import_message, fileName))
+            .setPositiveButton(R.string.backup_action_import) { _, _ ->
                 viewModel.importBackupFromContent(content, password, fileName)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun updateLocalDirDisplay(uri: Uri?) {
         if (uri == null) {
-            localDirText.text = "当前目录: 应用私有目录（默认）"
+            localDirText.text = getString(R.string.backup_current_dir)
             return
         }
         try {
             val docFile = DocumentFile.fromTreeUri(requireContext(), uri)
-            val displayName = docFile?.name ?: uri.lastPathSegment ?: "已选择"
-            localDirText.text = "当前目录: $displayName"
+            val displayName = docFile?.name ?: uri.lastPathSegment ?: getString(R.string.backup_selected)
+            localDirText.text = getString(R.string.backup_current_dir_format, displayName)
         } catch (e: Exception) {
-            localDirText.text = "已选择目录"
+            localDirText.text = getString(R.string.backup_selected_directory)
         }
     }
 
@@ -507,8 +507,8 @@ class BackupFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.message.collectLatest { message ->
-                message?.let {
-                    Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+                if (message != com.muort.upworker.core.model.UiMessage.Empty) {
+                    Toast.makeText(requireContext(), message.asString(requireContext()), Toast.LENGTH_LONG).show()
                     viewModel.clearMessage()
                 }
             }
@@ -528,7 +528,7 @@ class BackupFragment : Fragment() {
         val passwordInput = TextInputLayout(requireContext()).apply {
             boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_OUTLINE
             endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
-            setPadding(32, 8, 32, 8)
+            setPaddingRelative(32, 8, 32, 8)
         }
 
         val editText = TextInputEditText(requireContext()).apply {
@@ -543,8 +543,8 @@ class BackupFragment : Fragment() {
             .setTitle(title)
             .setMessage(message)
             .setView(passwordInput)
-            .setPositiveButton("确定", null)
-            .setNegativeButton("取消", null)
+            .setPositiveButton(R.string.confirm, null)
+            .setNegativeButton(R.string.cancel, null)
             .create()
 
         dialog.show()
@@ -552,7 +552,7 @@ class BackupFragment : Fragment() {
         dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
             val password = editText.text?.toString() ?: ""
             if (password.isEmpty() && !allowEmpty) {
-                editText.error = "请输入密码"
+                editText.error = getString(R.string.backup_password_required_hint)
                 return@setOnClickListener
             }
             val pwd = password.ifBlank { null }
@@ -588,9 +588,9 @@ class BackupFragment : Fragment() {
         if (isEncrypted) {
             pendingRestoreFileName = fileName
             showPasswordDialog(
-                title = "恢复备份",
-                message = "该备份文件已加密，请输入解密密码。",
-                hintText = "备份密码",
+                title = getString(R.string.backup_restore),
+                message = getString(R.string.backup_file_encrypted_hint),
+                hintText = getString(R.string.backup_password),
                 allowEmpty = false
             ) { password ->
                 pendingRestoreFileName = null
@@ -605,31 +605,31 @@ class BackupFragment : Fragment() {
 
     private fun showRestoreConfirmDialog(fileName: String, password: String?) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("确认恢复")
-            .setMessage("确定要从备份文件 $fileName 恢复账号吗？这将导入备份中的所有账号。")
-            .setPositiveButton("恢复") { _, _ ->
+            .setTitle(R.string.backup_confirm_restore_title)
+            .setMessage(getString(R.string.backup_confirm_restore_message, fileName))
+            .setPositiveButton(R.string.backup_restore) { _, _ ->
                 when (viewModel.selectedStorageType.value) {
                     StorageType.WEBDAV -> viewModel.restoreAccounts(fileName, password)
                     StorageType.R2 -> viewModel.restoreAccountsFromR2(fileName, password)
                     StorageType.LOCAL -> viewModel.restoreAccountsLocal(fileName, password)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun showDeleteConfirmDialog(fileName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("确认删除")
-            .setMessage("确定要删除备份文件 $fileName 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.backup_confirm_delete_title)
+            .setMessage(getString(R.string.backup_confirm_delete_message, fileName))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 when (viewModel.selectedStorageType.value) {
                     StorageType.WEBDAV -> viewModel.deleteBackupFile(fileName)
                     StorageType.R2 -> viewModel.deleteR2BackupFile(fileName)
                     StorageType.LOCAL -> viewModel.deleteLocalBackupFile(fileName)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 }

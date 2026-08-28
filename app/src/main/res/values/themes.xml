@@ -3,18 +3,136 @@
   <style name="Base.AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
     <!-- Customize your theme here. -->
     <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+    <!-- 全局文本/按钮样式：英文下文字更长，统一兜底避免溢出卡片/隐藏文字 -->
+    <item name="android:textViewStyle">@style/AppTextView</item>
+    <item name="android:buttonStyle">@style/AppButton</item>
+    <item name="materialButtonStyle">@style/AppMaterialButton</item>
+    <item name="chipStyle">@style/AppChip</item>
   </style>
 
   <style name="AppTheme" parent="Base.AppTheme" />
+
+  <!-- ====================================================================== -->
+  <!-- 全局 TextView 样式：默认允许换行，英文长词自动断字+连字符，极端长文走省略 -->
+  <!-- ====================================================================== -->
+  <style name="AppTextView" parent="@android:style/Widget.DeviceDefault.TextView">
+    <item name="android:breakStrategy">simple</item>
+    <item name="android:hyphenationFrequency">full</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:justificationMode">inter_word</item>
+    <item name="android:textIsSelectable">false</item>
+  </style>
+
+  <!-- ====================================================================== -->
+  <!-- 全局 Button / MaterialButton 家族 5 变体：统一尺寸/两行/断字策略 -->
+  <!--   lint 报 UnusedResources？因为它们是主题属性（materialButtonStyle 等）注入，
+       或通过 @style/AppButton.Outlined 显式引用，Lint 静态扫描不会追踪主题链。
+       使用 tools:keep 明确保留 4 个变体，避免误报误删。         -->
+  <!-- ====================================================================== -->
+  <style name="AppButton" parent="Widget.Material3.Button">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">@dimen/app_button_min_width</item>
+    <item name="android:maxLines">2</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">@dimen/app_button_padding_h</item>
+    <item name="android:paddingEnd">@dimen/app_button_padding_h</item>
+    <item name="android:breakStrategy">simple</item>
+    <item name="android:hyphenationFrequency">full</item>
+    <item name="android:textSize">@dimen/app_button_text_size</item>
+  </style>
+
+  <style name="AppMaterialButton" parent="Widget.Material3.Button">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">@dimen/app_button_min_width</item>
+    <item name="android:maxLines">2</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">@dimen/app_button_padding_h</item>
+    <item name="android:paddingEnd">@dimen/app_button_padding_h</item>
+    <item name="android:breakStrategy">simple</item>
+    <item name="android:hyphenationFrequency">full</item>
+    <item name="android:textAllCaps">false</item>
+    <item name="android:textSize">@dimen/app_button_text_size</item>
+  </style>
+
+  <!-- 带图标/轮廓的按钮变体：沿用同一套尺寸/换行策略；tools:keep 防止 lint 误判 unused -->
+  <style name="AppButton.Tonal" parent="Widget.Material3.Button.TonalButton" tools:keep="@style/AppButton_Tonal">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">@dimen/app_button_min_width</item>
+    <item name="android:maxLines">2</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">@dimen/app_button_padding_h</item>
+    <item name="android:paddingEnd">@dimen/app_button_padding_h</item>
+    <item name="android:breakStrategy">simple</item>
+    <item name="android:hyphenationFrequency">full</item>
+    <item name="android:textSize">@dimen/app_button_text_size</item>
+  </style>
+
+  <style name="AppButton.Outlined" parent="Widget.Material3.Button.OutlinedButton" tools:keep="@style/AppButton_Outlined">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">@dimen/app_button_min_width</item>
+    <item name="android:maxLines">2</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">@dimen/app_button_padding_h</item>
+    <item name="android:paddingEnd">@dimen/app_button_padding_h</item>
+    <item name="android:breakStrategy">simple</item>
+    <item name="android:hyphenationFrequency">full</item>
+    <item name="android:textSize">@dimen/app_button_text_size</item>
+  </style>
+
+  <style name="AppButton.Text" parent="Widget.Material3.Button.TextButton" tools:keep="@style/AppButton_Text">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">@dimen/app_button_min_width</item>
+    <item name="android:maxLines">2</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">@dimen/app_button_padding_h</item>
+    <item name="android:paddingEnd">@dimen/app_button_padding_h</item>
+    <item name="android:breakStrategy">simple</item>
+    <item name="android:hyphenationFrequency">full</item>
+    <item name="android:textSize">@dimen/app_button_text_size</item>
+  </style>
+
+  <!-- 专用：Icon + 文字的紧凑 TextButton（列表 item 里的功能按钮）。
+       关键：iconGravity=start（**不是默认 textStart**）— 默认 textStart 会让图标对齐到
+       文字第一行的 start 侧；当文字 maxLines=2 折成两行时按钮变高，但图标仍停在
+       第一行高度 → 和旁边只有 1 行文字的图标纵向中心线错位 → 肉眼"参差不齐"。
+       改为 start：图标对齐整个**按钮容器**的纵向中心，配合 minHeight=48dp 统一容器高度，
+       不管文字 1 行还是 2 行、不管系统字体放大多少，所有按钮图标都在同一条水平线上。
+       tools:keep 防 lint 误判 unused。 -->
+  <style name="AppButton.Text.Icon" parent="Widget.Material3.Button.TextButton.Icon" tools:keep="@style/AppButton_Text_Icon">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">0dp</item>
+    <item name="android:maxLines">2</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">4dp</item>
+    <item name="android:paddingEnd">4dp</item>
+    <item name="android:breakStrategy">simple</item>
+    <item name="android:hyphenationFrequency">full</item>
+    <item name="android:textSize">@dimen/app_button_icon_text_size</item>
+    <item name="android:textAllCaps">false</item>
+    <!-- 图标对齐：容器纵向中心，而非文字第一行中心 → 所有按钮图标视觉齐平 -->
+    <item name="iconGravity">start</item>
+  </style>
+
+  <!-- ====================================================================== -->
+  <!-- Chip 全局样式：Material Chip 严格单行，不支持 maxLines/多行换行；
+       只做：textIsSelectable=false（避免误触选中），其余沿用 Assist/Filter 默认样式。
+       英文下 Chip 长文本会按 Material 默认 ellipsize=end 截断加省略号，不会崩。 -->
+  <!-- ====================================================================== -->
+  <style name="AppChip" parent="Widget.Material3.Chip.Assist">
+    <item name="android:textIsSelectable">false</item>
+  </style>
 
   <!-- 自定义 Filter Chip 样式：选中态使用 primary 容器色，跟随动态主题 -->
   <style name="AppChip.Filter" parent="Widget.Material3.Chip.Filter">
     <item name="chipBackgroundColor">@color/chip_filter_bg</item>
     <item name="android:textColor">@color/chip_filter_text</item>
   </style>
-  
+
   <!-- Toolbar标题文字样式 -->
   <style name="ToolbarTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
     <item name="android:textSize">16sp</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:ellipsize">end</item>
   </style>
 </resources>

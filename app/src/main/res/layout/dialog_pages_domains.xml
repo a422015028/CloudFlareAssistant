@@ -32,7 +32,7 @@
         android:gravity="center"
         android:textSize="13sp"
         android:textColor="?attr/colorOnSurfaceVariant"
-        android:text="该项目尚未绑定自定义域名"
+        android:text="@string/domain_pages_no_custom"
         android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="关闭"
+        android:text="@string/ssl_mode_off"
         style="@style/Widget.Material3.Button.OutlinedButton" />
 
 </LinearLayout>

@@ -93,7 +93,7 @@ class GatewayListsFragment : Fragment() {
     private fun loadLists() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            android.widget.Toast.makeText(requireContext(), "未选择账户", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), getString(R.string.msg_no_account_selected), android.widget.Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -102,7 +102,7 @@ class GatewayListsFragment : Fragment() {
             if (result is Resource.Error) {
                 android.widget.Toast.makeText(
                     requireContext(),
-                    "加载列表失败: ${result.message}",
+                    getString(R.string.msg_load_lists_failed, result.message),
                     android.widget.Toast.LENGTH_LONG
                 ).show()
             }
@@ -127,9 +127,9 @@ class GatewayListsFragment : Fragment() {
         val templateUrlBtn = dialogView.findViewById<Button>(R.id.templateUrlBtn)
 
         val types = listOf(
-            "DOMAIN" to "域名",
-            "IP" to "IP 地址",
-            "URL" to "URL"
+            "DOMAIN" to getString(R.string.zt_list_type_domain),
+            "IP" to getString(R.string.zt_list_type_ip),
+            "URL" to getString(R.string.zt_list_type_url)
         )
         val typeAdapter = ArrayAdapter(
             requireContext(),
@@ -141,17 +141,17 @@ class GatewayListsFragment : Fragment() {
 
         templateDomainBtn.setOnClickListener {
             typeSpinner.setSelection(0)
-            nameInput.setText("域名列表")
+            nameInput.setText(getString(R.string.zt_list_template_domain_name))
         }
 
         templateIpBtn.setOnClickListener {
             typeSpinner.setSelection(1)
-            nameInput.setText("IP列表")
+            nameInput.setText(getString(R.string.zt_list_template_ip_name))
         }
 
         templateUrlBtn.setOnClickListener {
             typeSpinner.setSelection(2)
-            nameInput.setText("URL列表")
+            nameInput.setText(getString(R.string.zt_list_template_url_name))
         }
 
         existingList?.let { list ->
@@ -167,13 +167,13 @@ class GatewayListsFragment : Fragment() {
                 itemsInput.setText(text)
                 adjustItemsInputHeight(itemsInput, text)
             } else {
-                itemsInput.hint = "加载中..."
+                itemsInput.hint = getString(R.string.zt_list_loading_hint)
                 val account = accountViewModel.defaultAccount.value
                 if (account != null) {
                     viewModel.loadListItems(account, list.id) { loadedItems ->
                         val text = loadedItems.joinToString("\n") { it.value }
                         itemsInput.setText(text)
-                        itemsInput.hint = "列表项内容"
+                        itemsInput.hint = getString(R.string.zt_list_items_hint)
                         adjustItemsInputHeight(itemsInput, text)
                     }
                 }
@@ -181,20 +181,20 @@ class GatewayListsFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(if (existingList == null) "创建列表" else "编辑列表")
+            .setTitle(if (existingList == null) R.string.zt_list_create_title else R.string.zt_list_edit_title)
             .setView(dialogView)
-            .setPositiveButton(if (existingList == null) "创建" else "保存") { _, _ ->
+            .setPositiveButton(if (existingList == null) R.string.dialog_create else R.string.save) { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
                 val name = nameInput.text?.toString()
                 val itemsText = itemsInput.text?.toString()
 
                 if (name.isNullOrBlank()) {
-                    android.widget.Toast.makeText(requireContext(), "列表名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.msg_list_name_empty), android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
                 if (itemsText.isNullOrBlank()) {
-                    android.widget.Toast.makeText(requireContext(), "列表项不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.msg_list_items_empty), android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -207,7 +207,7 @@ class GatewayListsFragment : Fragment() {
                     }.filter { it.isNotBlank() }
 
                     if (items.isEmpty()) {
-                        android.widget.Toast.makeText(requireContext(), "列表项不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), getString(R.string.msg_list_items_empty), android.widget.Toast.LENGTH_SHORT).show()
                         return@setPositiveButton
                     }
                 }
@@ -223,8 +223,8 @@ class GatewayListsFragment : Fragment() {
                     lifecycleScope.launch {
                         val result = viewModel.createList(account, request)
                         val msg = when (result) {
-                            is Resource.Success -> "列表创建成功: ${result.data.name}"
-                            is Resource.Error -> "创建列表失败: ${result.message}"
+                            is Resource.Success -> getString(R.string.msg_list_create_success, result.data.name)
+                            is Resource.Error -> getString(R.string.msg_list_create_failed, result.message)
                             else -> return@launch
                         }
                         android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
@@ -233,8 +233,8 @@ class GatewayListsFragment : Fragment() {
                     lifecycleScope.launch {
                         val result = viewModel.updateList(account, existingList.id, request)
                         val msg = when (result) {
-                            is Resource.Success -> "列表更新成功: ${result.data.name}"
-                            is Resource.Error -> "更新列表失败: ${result.message}"
+                            is Resource.Success -> getString(R.string.msg_list_update_success, result.data.name)
+                            is Resource.Error -> getString(R.string.msg_list_update_failed, result.message)
                             else -> return@launch
                         }
                         android.widget.Toast.makeText(
@@ -245,7 +245,7 @@ class GatewayListsFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -257,12 +257,12 @@ class GatewayListsFragment : Fragment() {
 
     private fun confirmDeleteList(listId: String, listName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除列表")
-            .setMessage("确定要删除列表 \"$listName\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.zt_list_delete_title)
+            .setMessage(getString(R.string.zt_list_delete_confirm, listName))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 deleteList(listId)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -271,8 +271,8 @@ class GatewayListsFragment : Fragment() {
         lifecycleScope.launch {
             val result = viewModel.deleteList(account, listId)
             val msg = when (result) {
-                is Resource.Success -> "列表删除成功"
-                is Resource.Error -> "删除列表失败: ${result.message}"
+                is Resource.Success -> getString(R.string.msg_list_delete_success)
+                is Resource.Error -> getString(R.string.msg_list_delete_failed, result.message)
                 else -> return@launch
                 }
             android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()

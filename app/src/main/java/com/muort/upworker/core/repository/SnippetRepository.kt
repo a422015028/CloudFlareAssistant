@@ -1,9 +1,12 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -19,6 +22,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class SnippetRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
     private val dnsRepository: DnsRepository,
 ) {
@@ -118,7 +122,7 @@ class SnippetRepository @Inject constructor(
                 zoneId, name, metadataJson, scriptPart,
             )
             if (resp.isSuccessful && resp.body()?.success == true) {
-                resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error("保存失败：无返回数据")
+                resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error(appContext.getString(R.string.repo_snippet_save_no_result))
             } else {
                 val errors = resp.body()?.errors ?: parseErrors(resp)
                 Resource.Error(friendlyError(errors.firstOrNull()?.message)
@@ -160,7 +164,7 @@ class SnippetRepository @Inject constructor(
             val hosts = existing.orEmpty().filter { it.snippetName == name }
                 .flatMap { HOST_EQ_PATTERN.findAll(it.expression).map { m -> m.groupValues[1] } }
             when (val r = deleteSnippetRule(account, zoneId, name, existing)) {
-                is Resource.Error -> return@withContext Resource.Error("删除触发规则失败（片段仍在使用中）：${r.message}")
+                is Resource.Error -> return@withContext Resource.Error(appContext.getString(R.string.repo_snippet_delete_rule_in_use_failed_format, r.message))
                 else -> {}
             }
             // DNS 记录尽力清理：仅精确 eq 的主机名才安全可删，失败不阻塞片段删除
@@ -219,14 +223,14 @@ class SnippetRepository @Inject constructor(
         safeApiCall {
             val expr = rule.expression.trim()
             when {
-                expr.isEmpty() -> return@safeApiCall Resource.Error("表达式不能为空")
+                expr.isEmpty() -> return@safeApiCall Resource.Error(appContext.getString(R.string.repo_snippet_expression_empty))
                 expr.length > MAX_EXPRESSION_LENGTH ->
-                    return@safeApiCall Resource.Error("表达式长度 ${expr.length} 超过上限 $MAX_EXPRESSION_LENGTH 字符")
+                    return@safeApiCall Resource.Error(appContext.getString(R.string.repo_snippet_expression_too_long_format, expr.length, MAX_EXPRESSION_LENGTH))
             }
             val existing = when (val r = listSnippetRules(account, zoneId)) {
                 is Resource.Success -> r.data
-                is Resource.Error -> return@safeApiCall Resource.Error("读取现有规则失败：${r.message}")
-                is Resource.Loading -> return@safeApiCall Resource.Error("读取现有规则失败")
+                is Resource.Error -> return@safeApiCall Resource.Error(appContext.getString(R.string.repo_snippet_read_existing_rule_failed_format, r.message))
+                is Resource.Loading -> return@safeApiCall Resource.Error(appContext.getString(R.string.repo_snippet_read_existing_rule_failed))
             }
             val merged = existing.filterNot { it.snippetName == rule.snippetName } + rule
             val resp = api.putSnippetRules(
@@ -258,8 +262,8 @@ class SnippetRepository @Inject constructor(
             // 调用方已读过规则列表时直接复用，省一次网络请求；为 null 才自行读取
             val current = existing ?: when (val r = listSnippetRules(account, zoneId)) {
                 is Resource.Success -> r.data
-                is Resource.Error -> return@safeApiCall Resource.Error("读取现有规则失败：${r.message}")
-                is Resource.Loading -> return@safeApiCall Resource.Error("读取现有规则失败")
+                is Resource.Error -> return@safeApiCall Resource.Error(appContext.getString(R.string.repo_snippet_read_existing_rule_failed_format, r.message))
+                is Resource.Loading -> return@safeApiCall Resource.Error(appContext.getString(R.string.repo_snippet_read_existing_rule_failed))
             }
             val remaining = current.filterNot { it.snippetName == snippetName }
             val resp = if (remaining.isEmpty()) {
@@ -292,9 +296,9 @@ class SnippetRepository @Inject constructor(
     private fun friendlyError(message: String?): String? = when {
         message == null -> null
         message.contains("snippets are not allowed", ignoreCase = true) ->
-            "该域名未开通 Snippets 权限（免费计划仅部分域名可用，需 Pro 及以上计划）"
+            appContext.getString(R.string.repo_snippet_no_permission)
         message.contains("can only contain the characters", ignoreCase = true) ->
-            "片段名称仅支持小写字母、数字和下划线"
+            appContext.getString(R.string.repo_snippet_name_invalid)
         else -> message
     }
 

@@ -113,7 +113,7 @@ class RouteFragment : Fragment() {
                     weight = 1f
                     width = 0
                 }
-            activity?.title = "路由"
+            activity?.setTitle(R.string.route_title_routes)
         } else {
             binding.routePanel.visibility = View.GONE
             binding.dividerView.visibility = View.GONE
@@ -123,7 +123,7 @@ class RouteFragment : Fragment() {
                     weight = 1f
                     width = 0
                 }
-            activity?.title = "自定义域"
+            activity?.setTitle(R.string.route_title_custom_domains)
         }
 
         setupAdapter()
@@ -177,10 +177,10 @@ class RouteFragment : Fragment() {
                         }
                     }
                     DomainType.PAGES -> {
-                        Snackbar.make(binding.root, "Pages自定义域官方不支持编辑。", Snackbar.LENGTH_LONG).show()
+                        Snackbar.make(binding.root, getString(R.string.route_pages_domain_not_editable), Snackbar.LENGTH_LONG).show()
                     }
                     DomainType.R2 -> {
-                        Snackbar.make(binding.root, "R2自定义域官方不支持编辑。", Snackbar.LENGTH_LONG).show()
+                        Snackbar.make(binding.root, getString(R.string.route_r2_domain_not_editable), Snackbar.LENGTH_LONG).show()
                     }
                 }
             },
@@ -209,9 +209,9 @@ class RouteFragment : Fragment() {
         val scriptAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, scriptNames)
         dialogBinding.domainScript.setAdapter(scriptAdapter)
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("编辑自定义域")
+            .setTitle(R.string.route_edit_custom_domain)
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val hostname = dialogBinding.domainHostname.text.toString()
                 val script = dialogBinding.domainScript.text.toString()
                 accountViewModel.defaultAccount.value?.let { account ->
@@ -220,19 +220,19 @@ class RouteFragment : Fragment() {
                             if (hostname.isNotEmpty() && script.isNotEmpty()) {
                                 workerViewModel.updateCustomDomain(account, domain.id, hostname, script)
                             } else {
-                                Snackbar.make(binding.root, "域名和脚本不能为空", Snackbar.LENGTH_SHORT).show()
+                                Snackbar.make(binding.root, getString(R.string.route_domain_and_script_required), Snackbar.LENGTH_SHORT).show()
                             }
                         }
                         DomainType.PAGES -> {
-                            Snackbar.make(binding.root, "Pages 项目的自定义域官方不支持修改。", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(binding.root, getString(R.string.route_pages_domain_not_modifiable), Snackbar.LENGTH_LONG).show()
                         }
                         DomainType.R2 -> {
-                            Snackbar.make(binding.root, "R2自定义域暂不支持编辑。", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(binding.root, getString(R.string.route_r2_domain_edit_not_supported), Snackbar.LENGTH_LONG).show()
                         }
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -319,12 +319,12 @@ class RouteFragment : Fragment() {
                 }
                 launch {
                     workerViewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root, message.asString(requireContext()), Snackbar.LENGTH_SHORT).show()
                     }
                 }
                 launch {
                     pagesViewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root, message.asString(requireContext()), Snackbar.LENGTH_SHORT).show()
                     }
                 }
                 launch {
@@ -353,9 +353,9 @@ class RouteFragment : Fragment() {
         dialogBinding.routeScript.setAdapter(adapter)
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("添加路由")
+            .setTitle(R.string.route_add_route)
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val pattern = dialogBinding.routePattern.text.toString()
                 val script = dialogBinding.routeScript.text.toString()
                 
@@ -363,7 +363,7 @@ class RouteFragment : Fragment() {
                     workerViewModel.createRoute(account, zoneId, pattern, script)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -380,9 +380,9 @@ class RouteFragment : Fragment() {
         dialogBinding.routeScript.setText(route.script, false)
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("编辑路由")
+            .setTitle(R.string.route_edit_route)
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val pattern = dialogBinding.routePattern.text.toString()
                 val script = dialogBinding.routeScript.text.toString()
                 
@@ -390,20 +390,20 @@ class RouteFragment : Fragment() {
                     workerViewModel.updateRoute(account, zoneId, route.id, pattern, script)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun showDeleteRouteDialog(route: Route) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除路由")
-            .setMessage("确定要删除路由 \"${route.pattern}\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.route_delete_route)
+            .setMessage(getString(R.string.route_delete_route_confirm, route.pattern))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     workerViewModel.deleteRoute(account, zoneId, route.id)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -447,9 +447,9 @@ class RouteFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("添加自定义域")
+            .setTitle(R.string.route_add_custom_domain)
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val hostname = dialogBinding.domainHostname.text.toString()
 
                 accountViewModel.defaultAccount.value?.let { account ->
@@ -460,7 +460,7 @@ class RouteFragment : Fragment() {
                             if (script.isNotEmpty()) {
                                 workerViewModel.addCustomDomain(account, hostname, script)
                             } else {
-                                Snackbar.make(binding.root, "请选择 Worker 脚本", Snackbar.LENGTH_SHORT).show()
+                                Snackbar.make(binding.root, getString(R.string.route_please_select_worker_script), Snackbar.LENGTH_SHORT).show()
                             }
                         }
                         dialogBinding.typePagesRadio.isChecked -> {
@@ -478,7 +478,7 @@ class RouteFragment : Fragment() {
                                     }
                                 }
                             } else {
-                                Snackbar.make(binding.root, "请选择 Pages 项目", Snackbar.LENGTH_SHORT).show()
+                                Snackbar.make(binding.root, getString(R.string.route_please_select_pages_project), Snackbar.LENGTH_SHORT).show()
                             }
                         }
                         dialogBinding.typeR2Radio.isChecked == true -> {
@@ -486,23 +486,23 @@ class RouteFragment : Fragment() {
                             val bucket = dialogBinding.domainR2Bucket.text.toString()
                             if (bucket.isNotEmpty()) {
                                 r2ViewModel.createCustomDomain(account, bucket, hostname)
-                                Snackbar.make(binding.root, "R2自定义域添加请求已发出", Snackbar.LENGTH_SHORT).show()
+                                Snackbar.make(binding.root, getString(R.string.route_r2_domain_request_sent), Snackbar.LENGTH_SHORT).show()
                             } else {
-                                Snackbar.make(binding.root, "请选择 R2 存储桶", Snackbar.LENGTH_SHORT).show()
+                                Snackbar.make(binding.root, getString(R.string.route_please_select_r2_bucket), Snackbar.LENGTH_SHORT).show()
                             }
                         }
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun showDeleteDomainDialog(domain: UnifiedDomain) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除自定义域")
-            .setMessage("确定要删除域名 \"${domain.hostname}\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.route_delete_custom_domain)
+            .setMessage(getString(R.string.route_delete_custom_domain_confirm, domain.hostname))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     when (domain.type) {
                         DomainType.WORKER -> {
@@ -523,7 +523,7 @@ class RouteFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -531,7 +531,7 @@ class RouteFragment : Fragment() {
         lifecycleScope.launch {
             when (val result = pagesRepository.deleteDomain(account, projectName, domainName)) {
                 is Resource.Success -> {
-                    Snackbar.make(binding.root, "域名删除成功", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, getString(R.string.route_pages_domain_deleted_success), Snackbar.LENGTH_SHORT).show()
                     // 重新加载项目列表
                     pagesViewModel.loadProjects(account)
                 }
@@ -643,13 +643,13 @@ class RouteFragment : Fragment() {
             fun bind(domain: UnifiedDomain) {
                 // 所有类型都显示域名
                 binding.domainHostnameText.text = domain.hostname
-                val targetPrefix = when (domain.type) {
-                    DomainType.WORKER -> "→ Worker: "
-                    DomainType.PAGES -> "→ Pages: "
-                    DomainType.R2 -> "→ R2: "
+                val prefix = when (domain.type) {
+                    DomainType.WORKER -> itemView.context.getString(R.string.route_label_worker_prefix)
+                    DomainType.PAGES -> itemView.context.getString(R.string.route_label_pages_prefix)
+                    DomainType.R2 -> itemView.context.getString(R.string.route_label_r2_prefix)
                 }
                 // 显示目标（Worker脚本名/Pages项目名/R2桶名）
-                binding.domainScriptText.text = "$targetPrefix${domain.target}"
+                binding.domainScriptText.text = "$prefix${domain.target}"
                 binding.domainMenuButton.setOnClickListener { view ->
                     PopupMenu(view.context, view).apply {
                         inflate(R.menu.menu_account)
@@ -685,35 +685,36 @@ class RouteFragment : Fragment() {
             ?: subdomain
 
         val message = buildString {
-            appendLine("域名添加成功！")
+            appendLine(getString(R.string.route_dns_add_success_title))
             appendLine()
-            appendLine("域名: ${domain.name}")
+            appendLine(getString(R.string.route_dns_record_name, domain.name))
             appendLine()
-            appendLine("需要添加以下 DNS 记录：")
+            appendLine(getString(R.string.route_dns_need_add_records))
             appendLine()
-            appendLine("类型: $recordType")
-            appendLine("名称: $recordName")
-            appendLine("目标: $recordValue")
+            appendLine(getString(R.string.route_dns_record_type, recordType))
+            appendLine(getString(R.string.route_dns_record_name, recordName))
+            appendLine(getString(R.string.route_dns_record_target, recordValue))
             appendLine()
             if (!validation?.txtValue.isNullOrEmpty()) {
-                appendLine("点击【自动配置 DNS】按钮，系统将自动在 CloudFlare DNS 中添加此记录。")
+                appendLine(getString(R.string.route_dns_auto_hint_with_txt))
             } else {
-                appendLine("点击【自动配置 DNS】按钮，系统将使用默认配置自动添加 DNS 记录。")
+                appendLine(getString(R.string.route_dns_auto_hint_default))
             }
             appendLine()
-            appendLine("状态: ${domain.status ?: "待验证"}")
+            appendLine(getString(R.string.route_dns_status_format, domain.status
+                ?: getString(R.string.route_dns_status_pending).substringAfter(": ").trim()))
         }
         
         // 总是显示自动配置按钮
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("完成 DNS 设置")
+            .setTitle(R.string.route_dns_complete_setup_title)
             .setMessage(message)
-            .setPositiveButton("自动配置 DNS") { _, _ ->
+            .setPositiveButton(R.string.route_dns_auto_configure) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     autoConfigureDns(account, recordType, recordName, recordValue)
                 }
             }
-            .setNegativeButton("关闭", null)
+            .setNegativeButton(R.string.dialog_close, null)
             .show()
     }
     
@@ -730,14 +731,14 @@ class RouteFragment : Fragment() {
                 if (zone == null) {
                     Snackbar.make(
                         binding.root,
-                        "未找到对应的 Cloudflare 域名（Zone），无法自动添加 DNS 记录，请手动配置",
+                        getString(R.string.route_dns_zone_not_found),
                         Snackbar.LENGTH_LONG
                     ).show()
                     return@launch
                 }
 
                 // 显示加载状态
-                Snackbar.make(binding.root, "正在自动配置 DNS 记录...", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, getString(R.string.route_dns_configuring), Snackbar.LENGTH_SHORT).show()
                 
                 val dnsRequest = DnsRecordRequest(
                     type = recordType,
@@ -751,24 +752,24 @@ class RouteFragment : Fragment() {
                     is Resource.Success -> {
                         Snackbar.make(
                             binding.root,
-                            "DNS 记录添加成功！域名验证可能需要几分钟时间。",
+                            getString(R.string.route_dns_record_added_success),
                             Snackbar.LENGTH_LONG
                         ).show()
                     }
                     is Resource.Error -> {
                         MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("DNS 配置失败")
-                            .setMessage("无法自动添加 DNS 记录：${result.message}\n\n请手动在 DNS 管理中添加记录。")
-                            .setPositiveButton("确定", null)
+                            .setTitle(R.string.route_dns_config_failed_title)
+                            .setMessage(getString(R.string.route_dns_config_failed_message, result.message))
+                            .setPositiveButton(R.string.confirm, null)
                             .show()
                     }
                     is Resource.Loading -> {}
                 }
             } catch (e: Exception) {
                 MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("DNS 配置失败")
-                    .setMessage("发生错误：${e.message}\n\n请手动在 DNS 管理中添加记录。")
-                    .setPositiveButton("确定", null)
+                    .setTitle(R.string.route_dns_config_failed_title)
+                    .setMessage(getString(R.string.route_dns_config_error_message, e.message ?: ""))
+                    .setPositiveButton(R.string.confirm, null)
                     .show()
             }
         }

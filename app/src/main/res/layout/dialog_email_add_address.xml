@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="添加后 Cloudflare 会向该邮箱发送验证邮件，验证通过后才能作为转发目标。"
+        android:text="@string/email_routing_verify_hint"
         android:textSize="13sp"
         android:textColor="?android:attr/textColorSecondary" />
 
@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="目的邮箱地址"
+        android:hint="@string/email_routing_destination_email"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText

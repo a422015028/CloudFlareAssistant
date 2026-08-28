@@ -58,7 +58,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="最后活跃用户"
+            android:text="@string/device_last_active_user"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />
@@ -89,7 +89,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="设备信息"
+            android:text="@string/device_info"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />
@@ -104,7 +104,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="型号"
+                    android:text="@string/device_model"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/modelText"
@@ -118,7 +118,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="厂商"
+                    android:text="@string/device_manufacturer"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/manufacturerText"
@@ -132,7 +132,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="系统版本"
+                    android:text="@string/device_os_version"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/osVersionText"
@@ -146,7 +146,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="系统版本附加"
+                    android:text="@string/device_os_version_extra"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/osVersionExtraText"
@@ -160,7 +160,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="序列号"
+                    android:text="@string/device_serial_number"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/serialText"
@@ -174,7 +174,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="MAC 地址"
+                    android:text="@string/device_mac_address"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/macAddressText"
@@ -188,7 +188,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="硬件 ID"
+                    android:text="@string/device_hardware_id"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/hardwareIdText"
@@ -202,7 +202,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="客户端版本"
+                    android:text="@string/device_client_version"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/clientVersionText"
@@ -216,7 +216,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="设备 ID"
+                    android:text="@string/device_id"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/deviceIdText"
@@ -240,7 +240,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="网络信息"
+            android:text="@string/device_network_info"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />
@@ -265,7 +265,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="最后活跃的设备配置文件"
+            android:text="@string/device_last_active_profile"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />
@@ -280,7 +280,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="配置文件名称"
+                    android:text="@string/device_profile_name"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/policyNameText"
@@ -296,7 +296,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="是否默认"
+                    android:text="@string/device_is_default"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/policyDefaultText"
@@ -310,7 +310,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="是否已删除"
+                    android:text="@string/device_is_deleted"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/policyDeletedText"
@@ -324,7 +324,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="配置文件更新时间"
+                    android:text="@string/device_profile_updated"
                     android:textColor="?android:attr/textColorSecondary" />
                 <TextView
                     android:id="@+id/policyUpdatedAtText"
@@ -347,7 +347,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="时间信息"
+            android:text="@string/common_time_info"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary" />

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.util.showToast
+import com.muort.upworker.R
 import com.muort.upworker.databinding.FragmentZoneFeatureBinding
 import com.muort.upworker.databinding.ItemZoneRuleBinding
 import com.muort.upworker.feature.account.AccountViewModel
@@ -39,7 +40,7 @@ abstract class BaseZoneFeatureFragment : Fragment() {
         get() = accountViewModel.defaultAccount.value
 
     /** 空列表时显示的文案。 */
-    protected open val emptyText: String = "暂无数据"
+    protected open val emptyTextResId: Int = R.string.empty_list
 
     /** 是否显示右下角添加按钮。 */
     protected open val showAddFab: Boolean = false
@@ -55,7 +56,7 @@ abstract class BaseZoneFeatureFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.emptyStateText.text = emptyText
+        binding.emptyStateText.setText(emptyTextResId)
         binding.addFab.visibility = if (showAddFab) View.VISIBLE else View.GONE
         binding.retryButton.setOnClickListener { onRetry() }
         binding.addFab.setOnClickListener { onAddClicked() }

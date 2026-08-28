@@ -36,7 +36,7 @@
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:layout_marginTop="4dp"
-                tools:text="包含规则: 3 • 排除规则: 1 • 必须规则: 6" />
+                tools:text="@string/access_group_rules_preview" />
 
             <TextView
                 android:id="@+id/groupDefaultChip"
@@ -47,7 +47,7 @@
                 android:paddingTop="2dp"
                 android:paddingEnd="8dp"
                 android:paddingBottom="2dp"
-                android:text="默认组"
+                android:text="@string/access_default_group"
                 android:textSize="10sp"
                 android:layout_marginTop="4dp"
                 android:visibility="gone"
@@ -70,7 +70,7 @@
                 android:paddingTop="8dp"
                 android:paddingEnd="12dp"
                 android:paddingBottom="8dp"
-                android:text="编辑"
+                android:text="@string/edit"
                 android:textColor="?attr/colorPrimary"
                 android:textSize="14sp" />
 
@@ -83,7 +83,7 @@
                 android:paddingTop="8dp"
                 android:paddingEnd="12dp"
                 android:paddingBottom="8dp"
-                android:text="删除"
+                android:text="@string/delete"
                 android:textColor="?attr/colorError"
                 android:textSize="14sp" />
 

@@ -1,0 +1,77 @@
+name: HardcodedText & i18n Lint (Push / PR)
+
+# 作用：在 push / pull_request 阶段就拦截新增的硬编码 UI 文本、缺失翻译、参数化占位符不匹配等国际化回归，
+# 不再等到 release 发布流程才报错。与 app/lint.xml + app/lint-baseline.xml + android.lint {} 配合生效：
+#   - lint.xml: HardcodedText / MissingTranslation severity=error
+#   - build.gradle.kts: abortOnError=true + warningsAsErrors=true
+#   - lint-baseline.xml: 历史 Issue 白名单（只有"未登记"的新增 Issue 才会 FAIL）
+on:
+  push:
+    branches:
+      - main
+      - master
+      - dev
+    tags-ignore:
+      - 'v*'              # v* tag 发布走 release.yml，不要重复触发
+  pull_request:
+    branches:
+      - main
+      - master
+      - dev
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  workflow_dispatch:        # 也允许手动触发（例如：PR 被标记 draft→ready 后手动补跑）
+
+permissions:
+  contents: read
+
+# 同一个分支 / PR 上的重复推送，取消旧的 lint 任务，只保留最新一次跑
+concurrency:
+  group: lint-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint Debug + Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 注：lintDebug + lintRelease 都单独跑一次：
+      #  - release variant 可能包含 debug source set 不会进入的代码路径
+      #    （例如 release-only buildConfigField / `if (!BuildConfig.DEBUG)` 的 else 分支）
+      #    一旦这些路径上有新增 HardcodedText，必须在 PR 阶段就拦住
+      - name: Run Lint (Debug)
+        run: ./gradlew :app:lintDebug --console=plain --no-daemon --stacktrace
+
+      - name: Run Lint (Release)
+        run: ./gradlew :app:lintRelease --console=plain --no-daemon --stacktrace
+
+      - name: Upload Lint Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-reports-${{ github.event.pull_request.number || github.sha }}
+          path: |
+            app/build/reports/lint-results-debug.html
+            app/build/reports/lint-results-debug.xml
+            app/build/reports/lint-results-release.html
+            app/build/reports/lint-results-release.xml
+          if-no-files-found: warn
+          retention-days: 30

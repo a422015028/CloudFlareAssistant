@@ -29,7 +29,7 @@
             android:id="@+id/emptyStateText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="暂无数据"
+            android:text="@string/empty_list"
             android:textSize="16sp"
             android:textColor="?android:textColorSecondary"
             android:layout_marginTop="12dp" />
@@ -52,7 +52,7 @@
             android:id="@+id/errorStateText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="加载失败"
+            android:text="@string/analytics_error"
             android:textColor="@color/status_error"
             android:textSize="14sp" />
 
@@ -61,7 +61,7 @@
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="重试"
+            android:text="@string/domain_retry"
             android:layout_marginTop="8dp" />
     </LinearLayout>
 
@@ -88,7 +88,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:contentDescription="添加"
+        android:contentDescription="@string/add"
         android:visibility="gone"
         app:srcCompat="@android:drawable/ic_input_add"
         app:layout_constraintBottom_toBottomOf="parent"

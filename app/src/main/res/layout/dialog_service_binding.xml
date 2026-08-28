@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="添加服务绑定"
+        android:text="@string/xml_dialog_service_binding"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
@@ -17,7 +17,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="绑定名称 (如: MY_SERVICE)"
+        android:hint="@string/xml_dialog_service_binding_hint"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_marginBottom="12dp">
 
@@ -26,14 +26,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:singleLine="true" />
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:imeOptions="actionNext" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="选择目标 Worker"
+        android:text="@string/xml_dialog_service_binding_2"
         android:textSize="14sp"
         android:layout_marginBottom="8dp" />
 
@@ -46,7 +48,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="💡 提示：绑定名称将作为环境变量在 Worker 脚本中使用，通过它可直接调用目标 Worker"
+        android:text="@string/xml_dialog_service_binding_3"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
         android:layout_marginTop="12dp" />

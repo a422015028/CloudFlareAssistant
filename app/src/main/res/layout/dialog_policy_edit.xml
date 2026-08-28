@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:hint="策略名称"
+            android:hint="@string/xml_dialog_policy_edit_hint"
             app:endIconMode="clear_text">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -33,7 +33,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="决策类型"
+            android:text="@string/xml_dialog_policy_edit"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp"
             android:layout_marginBottom="4dp" />
@@ -51,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:hint="优先级 (数字越小优先级越高)"
+            android:hint="@string/xml_dialog_policy_edit_hint_2"
             app:endIconMode="clear_text">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -89,7 +89,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="包含规则 (Include)"
+                        android:text="@string/xml_dialog_policy_edit_2"
                         android:textStyle="bold"
                         android:textSize="14sp" />
 
@@ -98,7 +98,7 @@
                         style="@style/Widget.Material3.Button.TextButton.Icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="添加"
+                        android:text="@string/add"
                         app:icon="@android:drawable/ic_input_add" />
 
                 </LinearLayout>
@@ -115,7 +115,7 @@
                     android:id="@+id/noIncludeRulesText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="至少需要一条包含规则"
+                    android:text="@string/msg_group_need_include_rule"
                     android:textColor="?attr/colorError"
                     android:textSize="12sp"
                     android:visibility="visible" />
@@ -149,7 +149,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="排除规则 (Exclude)"
+                        android:text="@string/xml_dialog_policy_edit_3"
                         android:textStyle="bold"
                         android:textSize="14sp" />
 
@@ -158,7 +158,7 @@
                         style="@style/Widget.Material3.Button.TextButton.Icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="添加"
+                        android:text="@string/add"
                         app:icon="@android:drawable/ic_input_add" />
 
                 </LinearLayout>
@@ -175,7 +175,7 @@
                     android:id="@+id/noExcludeRulesText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="无排除规则（可选）"
+                    android:text="@string/xml_dialog_policy_edit_4"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp"
                     android:visibility="visible" />
@@ -209,7 +209,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="必需规则 (Require)"
+                        android:text="@string/xml_dialog_policy_edit_5"
                         android:textStyle="bold"
                         android:textSize="14sp" />
 
@@ -218,7 +218,7 @@
                         style="@style/Widget.Material3.Button.TextButton.Icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="添加"
+                        android:text="@string/add"
                         app:icon="@android:drawable/ic_input_add" />
 
                 </LinearLayout>
@@ -235,7 +235,7 @@
                     android:id="@+id/noRequireRulesText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="无必需规则（可选）"
+                    android:text="@string/xml_dialog_policy_edit_6"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp"
                     android:visibility="visible" />
@@ -250,9 +250,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:hint="会话时长 (可选，如: 24h)"
+            android:hint="@string/xml_dialog_policy_edit_hint_3"
             app:endIconMode="clear_text"
-            app:helperText="例如: 30m, 2h, 24h">
+            app:helperText="@string/access_session_duration_example">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/sessionDurationInput"

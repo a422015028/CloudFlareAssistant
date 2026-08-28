@@ -19,7 +19,7 @@
             android:background="?attr/colorSurface"
             android:elevation="4dp"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:title="编辑脚本"
+            app:title="@string/xml_fragment_script_editor_title"
             app:titleTextColor="?attr/colorOnSurface">
 
             <!-- Undo Button -->
@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="0dp"
-                android:contentDescription="撤销"
+                android:contentDescription="@string/xml_fragment_script_editor_desc"
                 app:icon="@drawable/ic_undo" />
 
             <!-- Select All Button -->
@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="0dp"
-                android:contentDescription="全选"
+                android:contentDescription="@string/snippet_select_all"
                 app:icon="@drawable/ic_select_all" />
 
             <!-- Version History Button -->
@@ -52,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="4dp"
-                android:contentDescription="版本历史"
+                android:contentDescription="@string/xml_fragment_script_editor_desc_2"
                 app:icon="@drawable/ic_history" />
         </com.google.android.material.appbar.MaterialToolbar>
 
@@ -103,7 +103,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:hint="搜索"
+                        android:hint="@string/snippet_search"
                         app:boxCornerRadiusTopStart="4dp"
                         app:boxCornerRadiusTopEnd="4dp"
                         app:boxCornerRadiusBottomStart="4dp"
@@ -126,7 +126,7 @@
                         style="@style/Widget.Material3.Button.IconButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:contentDescription="上一个"
+                        android:contentDescription="@string/snippet_previous"
                         app:icon="@drawable/ic_arrow_up" />
 
                     <com.google.android.material.button.MaterialButton
@@ -134,7 +134,7 @@
                         style="@style/Widget.Material3.Button.IconButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:contentDescription="下一个"
+                        android:contentDescription="@string/snippet_next"
                         app:icon="@drawable/ic_arrow_down" />
 
                     <com.google.android.material.button.MaterialButton
@@ -142,7 +142,7 @@
                         style="@style/Widget.Material3.Button.IconButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:contentDescription="关闭"
+                        android:contentDescription="@string/ssl_mode_off"
                         app:icon="@drawable/ic_close" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -170,7 +170,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="复制"
+                    android:text="@string/snippet_copy"
                     app:icon="@drawable/ic_content_copy" />
 
                 <!-- Manual Save Button -->
@@ -180,7 +180,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="保存"
+                    android:text="@string/save"
                     app:icon="@drawable/ic_save" />
 
                 <!-- Upload Button -->
@@ -190,7 +190,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="上传"
+                    android:text="@string/xml_fragment_script_editor"
                     app:icon="@drawable/ic_cloud_upload" />
 
                 <!-- Search Button -->
@@ -200,7 +200,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="搜索"
+                    android:text="@string/snippet_search"
                     app:icon="@drawable/ic_search" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

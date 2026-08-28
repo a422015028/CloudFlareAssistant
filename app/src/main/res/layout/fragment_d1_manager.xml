@@ -28,7 +28,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="数据库"
+                    android:text="@string/d1_database"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     android:textSize="18sp"
@@ -55,7 +55,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="暂无数据库\n点击 + 创建"
+                android:text="@string/d1_no_databases"
                 android:gravity="center"
                 android:textColor="?android:textColorSecondary"
                 android:visibility="gone" />
@@ -67,7 +67,7 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:src="@android:drawable/ic_input_add"
-                android:contentDescription="创建数据库" />
+                android:contentDescription="@string/d1_create_database" />
 
         </LinearLayout>
 
@@ -97,7 +97,7 @@
                     android:id="@+id/tableTitleText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="数据表"
+                    android:text="@string/d1_table"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     android:textSize="18sp"
@@ -124,7 +124,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="请先选择数据库"
+                android:text="@string/d1_please_select_database"
                 android:gravity="center"
                 android:textColor="?android:textColorSecondary"
                 android:visibility="gone" />
@@ -136,7 +136,7 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:src="@android:drawable/ic_input_add"
-                android:contentDescription="新建表"
+                android:contentDescription="@string/d1_create_table"
                 android:visibility="gone" />
 
             <!-- 数据表格 -->
@@ -157,7 +157,7 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:src="@android:drawable/ic_media_play"
-                android:contentDescription="执行 SQL" />
+                android:contentDescription="@string/d1_execute_sql" />
 
         </LinearLayout>
 

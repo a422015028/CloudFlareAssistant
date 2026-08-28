@@ -89,7 +89,7 @@
                 android:id="@+id/analyticsChip1Day"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="24小时"
+                android:text="@string/analytics_time_range_24h"
                 android:checked="true"
                 style="@style/AppChip.Filter" />
 
@@ -97,14 +97,14 @@
                 android:id="@+id/analyticsChip7Days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="7天"
+                android:text="@string/analytics_time_range_7d"
                 style="@style/AppChip.Filter" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/analyticsChip30Days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="30天"
+                android:text="@string/analytics_time_range_30d"
                 style="@style/AppChip.Filter" />
 
         </com.google.android.material.chip.ChipGroup>
@@ -145,7 +145,7 @@
                     android:id="@+id/analyticsErrorText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="加载失败"
+                    android:text="@string/analytics_error"
                     android:textSize="14sp"
                     android:textColor="?attr/colorError"
                     android:gravity="center" />
@@ -179,7 +179,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="请求"
+                            android:text="@string/xml_card_account_analytics"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -230,7 +230,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="带宽"
+                            android:text="@string/analytics_bandwidth"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -281,7 +281,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="访问量"
+                            android:text="@string/xml_card_account_analytics_2"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -332,7 +332,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="页面浏览量"
+                            android:text="@string/xml_card_account_analytics_3"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -379,7 +379,7 @@
                     android:id="@+id/analyticsRegionSectionTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🌍 地区分布"
+                    android:text="@string/xml_card_account_analytics_4"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -403,7 +403,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.32"
                         android:gravity="center"
-                        android:text="请求"
+                        android:text="@string/xml_card_account_analytics_5"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -413,7 +413,7 @@
                         android:layout_weight="0.36"
                         android:layout_marginStart="6dp"
                         android:gravity="center"
-                        android:text="带宽"
+                        android:text="@string/analytics_bandwidth"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
@@ -469,7 +469,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🔒 安全性"
+                    android:text="@string/xml_card_account_analytics_6"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -493,7 +493,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="加密请求数"
+                            android:text="@string/xml_card_account_analytics_7"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -543,7 +543,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="加密请求率"
+                            android:text="@string/xml_card_account_analytics_8"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -593,7 +593,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="加密带宽"
+                            android:text="@string/xml_card_account_analytics_9"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -643,7 +643,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="加密带宽率"
+                            android:text="@string/xml_card_account_analytics_10"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -689,7 +689,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⚡ 缓存"
+                    android:text="@string/xml_card_account_analytics_11"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -713,7 +713,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="已缓存的请求数"
+                            android:text="@string/xml_card_account_analytics_12"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -763,7 +763,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="缓存请求率"
+                            android:text="@string/xml_card_account_analytics_13"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -813,7 +813,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="已缓存的带宽"
+                            android:text="@string/xml_card_account_analytics_14"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -863,7 +863,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="缓存带宽率"
+                            android:text="@string/xml_card_account_analytics_15"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -909,7 +909,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⚠️ 错误"
+                    android:text="@string/xml_card_account_analytics_16"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -933,7 +933,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="4xx 错误数量"
+                            android:text="@string/xml_card_account_analytics_17"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -983,7 +983,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="4xx 错误率"
+                            android:text="@string/xml_card_account_analytics_18"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1033,7 +1033,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="5xx 错误数量"
+                            android:text="@string/xml_card_account_analytics_19"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1083,7 +1083,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="5xx 错误率"
+                            android:text="@string/xml_card_account_analytics_20"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1130,7 +1130,7 @@
                     android:id="@+id/analyticsNetworkSectionTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🌐 网络"
+                    android:text="@string/xml_card_account_analytics_21"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -1141,7 +1141,7 @@
                     android:id="@+id/analyticsHttpVersionSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="使用的客户端 HTTP 版本"
+                    android:text="@string/xml_card_account_analytics_22"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurfaceVariant"
@@ -1157,7 +1157,7 @@
                     android:id="@+id/analyticsSslSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="通过 SSL 提供的流量"
+                    android:text="@string/xml_card_account_analytics_23"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurfaceVariant"
@@ -1173,7 +1173,7 @@
                     android:id="@+id/analyticsContentTypeSubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="热门内容类型"
+                    android:text="@string/xml_card_account_analytics_24"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurfaceVariant"
@@ -1196,7 +1196,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="💾 数据库 &amp; 存储监控"
+                        android:text="@string/xml_card_account_analytics_25"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:textColor="?attr/colorOnSurface"
@@ -1222,7 +1222,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="D1已读行"
+                                android:text="@string/xml_card_account_analytics_26"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1249,7 +1249,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="R2 A类操作"
+                                android:text="@string/xml_card_account_analytics_27"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1276,7 +1276,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="KV读取"
+                                android:text="@string/xml_card_account_analytics_28"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1303,7 +1303,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="D1已写行"
+                                android:text="@string/xml_card_account_analytics_29"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1330,7 +1330,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="R2 B类操作"
+                                android:text="@string/xml_card_account_analytics_30"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1357,7 +1357,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="KV写入"
+                                android:text="@string/xml_card_account_analytics_31"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1384,7 +1384,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="D1总存储"
+                                android:text="@string/xml_card_account_analytics_32"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1411,7 +1411,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="R2总存储"
+                                android:text="@string/xml_card_account_analytics_33"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1438,7 +1438,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="KV总存储"
+                                android:text="@string/xml_card_account_analytics_34"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1465,7 +1465,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="D1数据库"
+                                android:text="@string/card_d1"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1492,7 +1492,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="R2存储桶"
+                                android:text="@string/xml_card_account_analytics_35"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1519,7 +1519,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="KV命名空间"
+                                android:text="@string/card_kv"
                                 android:textSize="12sp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -1544,7 +1544,7 @@
                     android:id="@+id/analyticsTimeRangeHintText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="过去 24 小时数据"
+                    android:text="@string/xml_card_account_analytics_36"
                     android:textSize="11sp"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:layout_gravity="center"

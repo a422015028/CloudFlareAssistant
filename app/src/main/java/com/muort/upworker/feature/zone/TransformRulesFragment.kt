@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.HeaderTransform
 import com.muort.upworker.core.model.Resource
@@ -17,7 +18,6 @@ import com.muort.upworker.core.model.TransformRuleCreate
 import com.muort.upworker.core.model.TransformRuleset
 import com.muort.upworker.core.model.UriRewrite
 import com.muort.upworker.core.repository.ZoneRulesetRepository
-import com.muort.upworker.R
 import com.muort.upworker.databinding.DialogTransformRuleBinding
 import com.muort.upworker.databinding.ItemTransformHeaderRowBinding
 import com.muort.upworker.databinding.ItemTransformRuleBinding
@@ -44,7 +44,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
     private val togglingRuleIds = mutableSetOf<String>()
     private var loaded = false
 
-    override val emptyText: String = "暂无转换规则"
+    override val emptyTextResId: Int = R.string.transform_empty_rules
     override val showAddFab: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -101,7 +101,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = repo.toggleTransformRule(account, zoneId, ruleset.id, rule, on)) {
                 is Resource.Success -> rulesets[phase.raw] = r.data
-                is Resource.Error -> toast("操作失败: ${r.message}")
+                is Resource.Error -> toast(getString(R.string.msg_operation_failed, r.message))
                 is Resource.Loading -> {}
             }
             togglingRuleIds.remove(rule.id)
@@ -114,6 +114,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
     private fun showEditor(phase: TransformPhase, existing: TransformRule?) {
         val ctx = requireContext()
         val b = DialogTransformRuleBinding.inflate(LayoutInflater.from(ctx))
+        val phaseTitle = phase.title(ctx)
 
         // 预填
         b.expressionInput.setText(existing?.expression ?: "")
@@ -139,14 +140,18 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
             addHeaderRow(b.headersContainer, "", "set", null)
         }
 
-        val title = if (existing == null) "添加${phase.title}" else "编辑${phase.title}"
+        val title = if (existing == null)
+            ctx.getString(R.string.transform_add_phase_title, phaseTitle)
+        else
+            ctx.getString(R.string.transform_edit_phase_title, phaseTitle)
+
         MaterialAlertDialogBuilder(ctx)
             .setTitle(title)
             .setView(b.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val expr = b.expressionInput.text.toString().trim()
                 if (expr.isEmpty()) {
-                    toast("表达式不能为空"); return@setPositiveButton
+                    toast(getString(R.string.msg_expression_empty)); return@setPositiveButton
                 }
                 val desc = b.descriptionInput.text.toString().trim().ifBlank { null }
                 val enabled = b.enabledSwitch.isChecked
@@ -170,7 +175,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
                 )
                 saveRule(phase, existing?.id, draft)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -221,8 +226,8 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
                     repo.createTransformEntrypoint(account, zoneId, phase.raw, draft)
             }
             when (result) {
-                is Resource.Success -> { rulesets[phase.raw] = result.data; toast("已保存"); renderAll() }
-                is Resource.Error -> toast("保存失败: ${result.message}")
+                is Resource.Success -> { rulesets[phase.raw] = result.data; toast(getString(R.string.msg_saved)); renderAll() }
+                is Resource.Error -> toast(getString(R.string.msg_save_failed, result.message))
                 is Resource.Loading -> {}
             }
         }
@@ -232,12 +237,12 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
 
     private fun confirmDelete(phase: TransformPhase, rule: TransformRule) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除此规则？")
+            .setTitle(R.string.transform_delete_rule_title)
             .setMessage(rule.description?.takeIf { it.isNotBlank() } ?: rule.expression ?: "")
-            .setPositiveButton("删除") { _, _ ->
+            .setPositiveButton(R.string.delete) { _, _ ->
                 account?.let { deleteRule(it, phase, rule) }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -249,9 +254,9 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
                     // 重读该 phase（可能因删空而 entrypoint 消失）
                     val refreshed = repo.getTransformRuleset(account, zoneId, phase.raw)
                     rulesets[phase.raw] = (refreshed as? Resource.Success)?.data
-                    toast("已删除"); renderAll()
+                    toast(getString(R.string.msg_deleted)); renderAll()
                 }
-                is Resource.Error -> toast("删除失败: ${r.message}")
+                is Resource.Error -> toast(getString(R.string.msg_delete_failed, r.message))
                 is Resource.Loading -> {}
             }
         }
@@ -259,10 +264,16 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
 
     // ==================== Phase 定义 ====================
 
-    enum class TransformPhase(val raw: String, val title: String, val isUrlRewrite: Boolean) {
-        REQUEST_URL("http_request_transform", "URL 重写", true),
-        REQUEST_HEAD("http_request_late_transform", "请求头修改", false),
-        RESPONSE_HEAD("http_response_headers_transform", "响应头修改", false),
+    enum class TransformPhase(
+        val raw: String,
+        private val titleResId: Int,
+        val isUrlRewrite: Boolean,
+    ) {
+        REQUEST_URL("http_request_transform", R.string.transform_phase_url_rewrite, true),
+        REQUEST_HEAD("http_request_late_transform", R.string.transform_phase_request_head, false),
+        RESPONSE_HEAD("http_response_headers_transform", R.string.transform_phase_response_head, false);
+
+        fun title(ctx: android.content.Context): String = ctx.getString(titleResId)
     }
 
     companion object {
@@ -374,7 +385,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
             }
 
             fun bind(phase: TransformPhase) {
-                titleText.text = phase.title
+                titleText.text = phase.title(itemView.context)
                 addButton.setOnClickListener { onAdd(phase) }
             }
         }
@@ -389,7 +400,9 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
             private val b = ItemTransformRuleBinding.bind(itemView)
 
             fun bind(phase: TransformPhase, rule: TransformRule, togglingIds: Set<String>) {
-                val title = rule.description?.takeIf { it.isNotBlank() } ?: "未命名规则"
+                val ctx = itemView.context
+                val title = rule.description?.takeIf { it.isNotBlank() }
+                    ?: ctx.getString(R.string.transform_unnamed_rule)
                 b.titleText.text = title
                 b.expressionText.text = rule.expression ?: ""
                 b.expressionText.visibility = if (b.expressionText.text.isBlank()) View.GONE else View.VISIBLE
@@ -409,7 +422,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
         // ---- 空提示 ----
         class EmptyVH(parent: ViewGroup) : RecyclerView.ViewHolder(
             android.widget.TextView(parent.context).apply {
-                text = "暂无规则"
+                setText(R.string.transform_phase_empty_hint)
                 textSize = 13f
                 setTextColor(0xFF999999.toInt())
                 setPadding(56, 8, 16, 8)

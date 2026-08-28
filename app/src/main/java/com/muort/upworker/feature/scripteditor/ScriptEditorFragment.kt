@@ -30,6 +30,7 @@ import com.muort.upworker.core.model.ScriptVersion
 import com.muort.upworker.databinding.FragmentScriptEditorBinding
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -277,8 +278,8 @@ class ScriptEditorFragment : Fragment() {
         
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.error.collect { error ->
-                error?.let {
-                    Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
+                if (error != null && error != com.muort.upworker.core.model.UiMessage.Empty) {
+                    Snackbar.make(binding.root, error.asString(requireContext()), Snackbar.LENGTH_LONG).show()
                     viewModel.clearError()
                 }
             }
@@ -287,7 +288,7 @@ class ScriptEditorFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uploadSuccess.collect { success ->
                 if (success) {
-                    Snackbar.make(binding.root, "脚本上传成功", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, getString(R.string.se_upload_success), Snackbar.LENGTH_SHORT).show()
                     hasUnsavedChanges = false
                     viewModel.clearUploadSuccess()
                 }
@@ -345,7 +346,7 @@ class ScriptEditorFragment : Fragment() {
         val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText("Worker Script", content)
         clipboard.setPrimaryClip(clip)
-        Toast.makeText(requireContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), getString(R.string.msg_copied_to_clipboard), Toast.LENGTH_SHORT).show()
     }
     
     private fun saveVersion(content: String, isAutoSave: Boolean, description: String? = null) {
@@ -361,7 +362,7 @@ class ScriptEditorFragment : Fragment() {
         originalContent = content
         
         if (!isAutoSave) {
-            Toast.makeText(requireContext(), "手动保存成功", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.se_manual_save_success), Toast.LENGTH_SHORT).show()
         }
     }
     
@@ -370,125 +371,143 @@ class ScriptEditorFragment : Fragment() {
             try {
                 // 获取版本历史
                 val versions = viewModel.getVersionHistory(args.accountEmail, args.scriptName)
-                
+                val cloudflareLabel = getString(R.string.se_ver_from_cloudflare)
                 // 找到最后一个手动保存或Cloudflare同步的版本
                 val lastSavedVersion = versions.firstOrNull { version ->
-                    !version.isAutoSave || version.description == "从Cloudflare加载"
+                    !version.isAutoSave || version.description == cloudflareLabel
                 }
-                
+
+                val dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault())
+
                 if (lastSavedVersion != null) {
+                    val description = lastSavedVersion.description
+                        ?: getString(R.string.se_ver_type_manual_save)
+                    val timeStr = dateFormat.format(Date(lastSavedVersion.timestamp))
                     MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("撤销确认")
-                        .setMessage("确定要撤销到以下版本吗？\n\n${lastSavedVersion.description ?: "手动保存"}\n${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(lastSavedVersion.timestamp))}")
-                        .setPositiveButton("撤销") { _, _ ->
+                        .setTitle(R.string.se_undo_confirm_title)
+                        .setMessage(getString(R.string.se_undo_confirm_message, description, timeStr))
+                        .setPositiveButton(R.string.se_action_undo) { _, _ ->
                             setEditorContent(lastSavedVersion.content)
                             hasUnsavedChanges = true
-                            Toast.makeText(requireContext(), "已撤销到上一版本", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.se_undo_done), Toast.LENGTH_SHORT).show()
                         }
-                        .setNegativeButton("取消", null)
+                        .setNegativeButton(R.string.cancel, null)
                         .show()
                 } else {
-                    Toast.makeText(requireContext(), "没有可撤销的版本", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.se_no_undo_version), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to undo")
-                Toast.makeText(requireContext(), "撤销失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.se_undo_failed, e.message), Toast.LENGTH_SHORT).show()
             }
         }
     }
     
     private fun uploadScript(content: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("上传脚本")
-            .setMessage("确定要上传脚本到Cloudflare Workers吗?这将替换现有脚本。")
-            .setPositiveButton("上传") { _, _ ->
+            .setTitle(R.string.se_upload_confirm_title)
+            .setMessage(getString(R.string.se_upload_confirm_message))
+            .setPositiveButton(R.string.se_action_upload) { _, _ ->
                 viewModel.uploadScript(args.accountEmail, args.scriptName, content)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
-    
+
     private fun showVersionHistoryDialog() {
         viewLifecycleOwner.lifecycleScope.launch {
             val versions = viewModel.getVersionHistory(args.accountEmail, args.scriptName)
-            
+
             if (versions.isEmpty()) {
-                Toast.makeText(requireContext(), "暂无历史版本", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.se_no_versions), Toast.LENGTH_SHORT).show()
                 return@launch
             }
-            
+
+            val cloudflareLabel = getString(R.string.se_ver_from_cloudflare)
+            val dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault())
+
             val items = versions.map { version ->
-                val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(Date(version.timestamp))
+                val date = dateFormat.format(Date(version.timestamp))
                 val type = when {
-                    version.description == "从Cloudflare加载" -> "同步"
-                    version.isAutoSave -> "自动"
-                    else -> "手动"
+                    version.description == cloudflareLabel -> getString(R.string.se_ver_type_sync)
+                    version.isAutoSave -> getString(R.string.se_ver_type_auto)
+                    else -> getString(R.string.se_ver_type_manual)
                 }
                 val desc = version.description?.let { " - $it" } ?: ""
                 "$date [$type]$desc"
             }.toTypedArray()
-            
+
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("版本历史 (共${versions.size}个版本)")
+                .setTitle(getString(R.string.se_version_history_title, versions.size))
                 .setItems(items) { _, which ->
                     val selectedVersion = versions[which]
                     showVersionDetailDialog(selectedVersion)
                 }
-                .setNeutralButton("清除") { _, _ ->
+                .setNeutralButton(R.string.se_action_clear) { _, _ ->
                     showClearVersionsConfirmDialog()
                 }
-                .setNegativeButton("取消", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show()
         }
     }
-    
+
     private fun showVersionDetailDialog(version: ScriptVersion) {
-        val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(Date(version.timestamp))
+        val dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault())
+        val cloudflareLabel = getString(R.string.se_ver_from_cloudflare)
+        val date = dateFormat.format(Date(version.timestamp))
         val type = when {
-            version.description == "从Cloudflare加载" -> "同步"
-            version.isAutoSave -> "自动保存"
-            else -> "手动保存"
+            version.description == cloudflareLabel -> getString(R.string.se_ver_type_sync)
+            version.isAutoSave -> getString(R.string.se_ver_type_auto_save)
+            else -> getString(R.string.se_ver_type_manual_save)
         }
-        val desc = version.description?.let { "\n描述: $it" } ?: ""
-        
+        val desc = version.description?.let { "\n" + getString(R.string.se_version_desc_label, it) } ?: ""
+
+        val message = buildString {
+            appendLine(getString(R.string.se_version_time_label, date))
+            append(getString(R.string.se_version_type_label, type))
+            append(desc)
+        }
+
         val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("版本详情")
-            .setMessage("时间: $date\n类型: $type$desc")
-            .setPositiveButton("恢复到编辑器") { _, _ ->
+            .setTitle(R.string.se_version_detail_title)
+            .setMessage(message)
+            .setPositiveButton(R.string.se_restore_to_editor) { _, _ ->
                 setEditorContent(version.content)
                 hasUnsavedChanges = true
-                Toast.makeText(requireContext(), "已恢复到此版本", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.se_version_restored), Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("取消", null)
-        
-        dialog.setNeutralButton("回滚并上传") { _, _ ->
+            .setNegativeButton(R.string.cancel, null)
+
+        dialog.setNeutralButton(R.string.se_rollback_and_upload) { _, _ ->
             showRollbackConfirmDialog(version)
         }
-        
-        if (version.description == "从Cloudflare加载") {
-            dialog.setNegativeButton("删除") { _, _ ->
+
+        if (version.description == cloudflareLabel) {
+            dialog.setNegativeButton(R.string.delete) { _, _ ->
                 showDeleteVersionConfirmDialog(version)
             }
         }
-        
+
         dialog.show()
     }
-    
+
     private fun showRollbackConfirmDialog(version: ScriptVersion) {
-        val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(Date(version.timestamp))
+        val dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault())
+        val cloudflareLabel = getString(R.string.se_ver_from_cloudflare)
+        val date = dateFormat.format(Date(version.timestamp))
         val type = when {
-            version.description == "从Cloudflare加载" -> "同步"
-            version.isAutoSave -> "自动保存"
-            else -> "手动保存"
+            version.description == cloudflareLabel -> getString(R.string.se_ver_type_sync)
+            version.isAutoSave -> getString(R.string.se_ver_type_auto_save)
+            else -> getString(R.string.se_ver_type_manual_save)
         }
-        
+
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("确认回滚")
-            .setMessage("确定要回滚到此版本并上传到Cloudflare吗？\n\n时间: $date\n类型: $type\n\n此操作将替换当前部署的脚本。")
-            .setPositiveButton("回滚") { _, _ ->
+            .setTitle(R.string.se_rollback_confirm_title)
+            .setMessage(getString(R.string.se_rollback_confirm_message, date, type))
+            .setPositiveButton(R.string.se_action_rollback) { _, _ ->
                 viewModel.rollbackScript(args.accountEmail, args.scriptName, version)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -611,26 +630,27 @@ class ScriptEditorFragment : Fragment() {
     
     private fun showClearVersionsConfirmDialog() {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("清除历史版本")
-            .setMessage("确定要清除所有自动保存和手动保存的版本吗？\n\n只会保留从Cloudflare加载的版本。")
-            .setPositiveButton("清除") { _, _ ->
+            .setTitle(R.string.se_clear_versions_title)
+            .setMessage(getString(R.string.se_clear_versions_message))
+            .setPositiveButton(R.string.se_action_clear) { _, _ ->
                 viewModel.clearNonCloudflareVersions(args.accountEmail, args.scriptName)
-                Toast.makeText(requireContext(), "已清除历史版本", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.se_versions_cleared), Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun showDeleteVersionConfirmDialog(version: ScriptVersion) {
-        val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(Date(version.timestamp))
+        val dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault())
+        val date = dateFormat.format(Date(version.timestamp))
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除版本")
-            .setMessage("确定要删除这个Cloudflare同步版本吗？\n\n时间: $date")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.se_delete_version_title)
+            .setMessage(getString(R.string.se_delete_version_message, date))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 viewModel.deleteVersion(version)
-                Toast.makeText(requireContext(), "已删除版本", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.se_version_deleted), Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 }

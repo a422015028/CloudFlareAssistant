@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.muort.upworker.R
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -44,10 +45,10 @@ class BackupFilesAdapter(
             // 解析文件名中的时间戳
             val timestamp = parseTimestamp(fileName)
             fileTimeText.text = if (timestamp != null) {
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault())
                 dateFormat.format(timestamp)
             } else {
-                "未知时间"
+                itemView.context.getString(R.string.datetime_unknown)
             }
             
             restoreButton.setOnClickListener {

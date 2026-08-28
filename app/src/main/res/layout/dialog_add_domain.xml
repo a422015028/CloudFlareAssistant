@@ -16,7 +16,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="添加域名"
+            android:text="@string/domain_add_title"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
@@ -24,7 +24,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="域名"
+            android:hint="@string/domain_hint"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -39,7 +39,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="输入根域名（如 example.com），Cloudflare 将作为权威 DNS。"
+            android:text="@string/domain_root_hint"
             android:textSize="12sp"
             android:textColor="?android:textColorSecondary"
             android:layout_marginTop="8dp" />
@@ -85,7 +85,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="待激活：请在域名注册商处更换名称服务器"
+            android:text="@string/domain_pending_activation"
             android:textSize="13sp"
             android:textColor="?android:textColorSecondary"
             android:layout_marginTop="4dp" />
@@ -93,7 +93,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cloudflare 名称服务器"
+            android:text="@string/domain_cloudflare_nameservers"
             android:textSize="13sp"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
@@ -122,14 +122,14 @@
             android:id="@+id/copyButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="复制名称服务器"
+            android:text="@string/domain_copy_nameservers"
             android:layout_marginTop="12dp"
             style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="操作步骤"
+            android:text="@string/domain_setup_steps"
             android:textSize="13sp"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
@@ -150,28 +150,28 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="1. 登录你的域名注册商后台"
+                    android:text="@string/domain_step1_login_registrar"
                     android:textSize="13sp"
                     android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="2. 找到 DNS / 名称服务器设置"
+                    android:text="@string/domain_step2_find_dns_settings"
                     android:textSize="13sp"
                     android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="3. 将现有名称服务器替换为上方 Cloudflare 名称服务器"
+                    android:text="@string/domain_step3_replace_nameservers"
                     android:textSize="13sp"
                     android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="4. 保存并等待生效（最长 24 小时）"
+                    android:text="@string/domain_step4_save_wait"
                     android:textSize="13sp" />
 
             </LinearLayout>

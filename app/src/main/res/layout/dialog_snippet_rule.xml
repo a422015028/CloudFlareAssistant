@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="如果确定请求匹配，运行此片段"
+            android:text="@string/snippet_rule_title"
             android:textSize="14sp"
             android:textStyle="bold"
             android:layout_marginBottom="4dp" />
@@ -28,7 +28,7 @@
                 android:id="@+id/radioAllRequests"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="所有格式化请求"
+                android:text="@string/snippet_all_requests"
                 android:textSize="14sp"
                 android:paddingStart="4dp"
                 android:paddingEnd="0dp" />
@@ -36,7 +36,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="对所有请求应用规则"
+                android:text="@string/snippet_all_requests_desc"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:paddingStart="40dp"
@@ -46,7 +46,7 @@
                 android:id="@+id/radioCustomExpression"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="自定义表达式"
+                android:text="@string/snippet_custom_expression"
                 android:textSize="14sp"
                 android:paddingStart="4dp"
                 android:paddingEnd="0dp" />
@@ -54,7 +54,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="仅将规则评估与自定义筛选表达式匹配的请求"
+                android:text="@string/snippet_custom_expression_desc"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:paddingStart="40dp" />
@@ -80,7 +80,7 @@
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+ 添加条件" />
+                android:text="@string/snippet_add_condition" />
 
             <LinearLayout
                 android:id="@+id/logicSwitchRow"
@@ -93,7 +93,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="条件之间的连接方式"
+                    android:text="@string/snippet_logic_connection"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -108,14 +108,14 @@
                         android:id="@+id/andChip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="AND (全部满足)"
+                        android:text="@string/snippet_logic_and"
                         style="@style/Widget.Material3.Chip.Filter" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/orChip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="OR (任一满足)"
+                        android:text="@string/snippet_logic_or"
                         style="@style/Widget.Material3.Chip.Filter" />
                 </com.google.android.material.chip.ChipGroup>
             </LinearLayout>
@@ -123,7 +123,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="表达式预览"
+                android:text="@string/snippet_expression_preview"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp" />
@@ -136,7 +136,7 @@
                 android:textSize="12sp"
                 android:background="?attr/colorSurfaceContainerHighest"
                 android:padding="12dp"
-                android:text="（请添加条件）"
+                android:text="@string/snippet_please_add_condition"
                 android:minHeight="44dp" />
 
             <TextView
@@ -154,7 +154,7 @@
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="编辑表达式"
+                android:text="@string/snippet_edit_expression"
                 android:layout_gravity="end" />
         </LinearLayout>
 
@@ -170,7 +170,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="表达式"
+                android:hint="@string/snippet_expression_hint"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -200,7 +200,7 @@
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="使用构建器"
+                android:text="@string/snippet_use_builder"
                 android:layout_gravity="end" />
         </LinearLayout>
 
@@ -216,7 +216,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="启用规则"
+                android:text="@string/snippet_enable_rule"
                 android:textSize="14sp"
                 android:clickable="true"
                 android:focusable="true" />
@@ -230,7 +230,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="规则描述（可选）"
+            android:hint="@string/snippet_rule_description"
             android:layout_marginTop="12dp"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
@@ -248,7 +248,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="移除此规则"
+            android:text="@string/snippet_remove_rule"
             android:textColor="?attr/colorError"
             android:visibility="gone" />
 
@@ -257,7 +257,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="保存" />
+            android:text="@string/save" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancel"
@@ -265,7 +265,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="取消" />
+            android:text="@string/cancel" />
 
     </LinearLayout>
 </ScrollView>

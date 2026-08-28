@@ -31,7 +31,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="添加触发器"
+            android:text="@string/xml_dialog_build_triggers"
             app:backgroundTint="?attr/colorPrimary"
             android:textColor="@color/white" />
 
@@ -40,7 +40,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="关闭"
+            android:text="@string/ssl_mode_off"
             android:layout_marginStart="8dp" />
 
     </LinearLayout>

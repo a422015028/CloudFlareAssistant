@@ -8,6 +8,7 @@ import com.muort.upworker.core.model.RateLimitRule
 import com.muort.upworker.core.model.RateLimitRuleCreate
 import com.muort.upworker.core.model.RateLimitRuleset
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.repository.ZoneRulesetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +47,7 @@ class RateLimitViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     Timber.e("load rate limit ruleset error: ${result.message}")
-                    _state.update { it.copy(isLoading = false, error = result.message) }
+                    _state.update { it.copy(isLoading = false, error = UiMessage.RawString(result.message)) }
                 }
                 is Resource.Loading -> {}
             }
@@ -98,7 +99,7 @@ class RateLimitViewModel @Inject constructor(
         mitigationTimeout: Int,
         description: String?,
         enabled: Boolean,
-        onDone: (Boolean, String?) -> Unit,
+        onDone: (Boolean, UiMessage?) -> Unit,
     ) {
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
@@ -132,7 +133,7 @@ class RateLimitViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     _state.update { it.copy(isSaving = false) }
-                    onDone(false, result.message)
+                    onDone(false, UiMessage.RawString(result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -143,6 +144,6 @@ class RateLimitViewModel @Inject constructor(
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val rules: List<RateLimitRule> = emptyList(),
-        val error: String? = null,
+        val error: UiMessage? = null,
     )
 }

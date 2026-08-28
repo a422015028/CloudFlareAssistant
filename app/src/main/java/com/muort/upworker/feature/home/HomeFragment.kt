@@ -1,4 +1,4 @@
-﻿package com.muort.upworker.feature.home
+package com.muort.upworker.feature.home
 
 import com.muort.upworker.core.log.LogRepository
 import com.muort.upworker.core.util.LocaleHelper
@@ -432,7 +432,8 @@ class HomeFragment : Fragment() {
         }
 
         // 显示大小
-        val currentSize = DisplaySizeHelper.OPTIONS[DisplaySizeHelper.getSelectedIndex(requireContext())].first
+        val options = DisplaySizeHelper.getOptions(requireContext())
+        val currentSize = options[DisplaySizeHelper.getSelectedIndex(requireContext())].first
         dialogBinding.displaySizeCurrentText.text = getString(R.string.display_size_current, currentSize)
         dialogBinding.displaySizeButton.setOnClickListener {
             showDisplaySizeDialog()
@@ -450,12 +451,13 @@ class HomeFragment : Fragment() {
     }
 
     private fun showDisplaySizeDialog() {
-        val labels = DisplaySizeHelper.OPTIONS.map { it.first }.toTypedArray()
+        val displayOptions = DisplaySizeHelper.getOptions(requireContext())
+        val labels = displayOptions.map { it.first }.toTypedArray()
         val selectedIndex = DisplaySizeHelper.getSelectedIndex(requireContext())
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.display_size)
             .setSingleChoiceItems(labels, selectedIndex) { dialog, which ->
-                val scale = DisplaySizeHelper.OPTIONS[which].second
+                val scale = displayOptions[which].second
                 DisplaySizeHelper.setFontScale(requireContext(), scale)
                 dialog.dismiss()
                 // 重启 Activity 以应用新的字体缩放
@@ -679,7 +681,7 @@ class HomeFragment : Fragment() {
                                 binding.accountAnalyticsCard.showData(state.overview)
                             }
                             is AccountAnalyticsState.Error -> {
-                                binding.accountAnalyticsCard.showError(state.message)
+                                binding.accountAnalyticsCard.showError(state.message.asString(requireContext()))
                                 Timber.e("Account analytics error: ${state.message}")
                             }
                         }

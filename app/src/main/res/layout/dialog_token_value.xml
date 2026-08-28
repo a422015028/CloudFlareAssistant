@@ -13,14 +13,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="令牌创建成功"
+            android:text="@string/token_created_success"
             android:textSize="20sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="请立即复制保存，此令牌值仅显示一次，关闭后无法再次查看"
+            android:text="@string/xml_dialog_token_value"
             android:textSize="13sp"
             android:textColor="?attr/colorError"
             android:layout_marginTop="8dp"
@@ -47,7 +47,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="复制令牌值" />
+            android:text="@string/xml_dialog_token_value_2" />
 
     </LinearLayout>
 

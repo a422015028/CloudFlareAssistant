@@ -72,7 +72,7 @@ class AccessFragment : Fragment() {
                 accessViewModel.selectApplication(app)
                 val action = AccessFragmentDirections.actionAccessToDetail(app.id)
                 findNavController().navigate(action)
-                android.widget.Toast.makeText(requireContext(), "应用: ${app.name}", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(requireContext(), getString(R.string.zt_app_selected_toast, app.name), android.widget.Toast.LENGTH_SHORT).show()
             },
             onDeleteClick = { app ->
                 confirmDelete(app)
@@ -107,14 +107,14 @@ class AccessFragment : Fragment() {
                 // Messages
                 launch {
                     accessViewModel.message.collect { message ->
-                        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), message.asString(requireContext()), android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
                 
                 // Errors
                 launch {
                     accessViewModel.error.collect { error ->
-                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), error.asString(requireContext()), android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -136,14 +136,14 @@ class AccessFragment : Fragment() {
         
         // Setup app type spinner
         val appTypes = arrayOf(
-            "self_hosted" to "自托管应用",
-            "saas" to "SaaS 应用",
-            "ssh" to "SSH",
-            "vnc" to "VNC",
-            "app_launcher" to "应用启动器",
-            "warp" to "WARP",
-            "biso" to "浏览器隔离",
-            "bookmark" to "书签"
+            "self_hosted" to getString(R.string.zt_app_type_self_hosted),
+            "saas" to getString(R.string.zt_app_type_saas),
+            "ssh" to getString(R.string.zt_app_type_ssh),
+            "vnc" to getString(R.string.zt_app_type_vnc),
+            "app_launcher" to getString(R.string.zt_app_type_app_launcher),
+            "warp" to getString(R.string.zt_app_type_warp),
+            "biso" to getString(R.string.zt_app_type_biso),
+            "bookmark" to getString(R.string.zt_app_type_bookmark)
         )
         val adapter = ArrayAdapter(
             requireContext(),
@@ -163,15 +163,15 @@ class AccessFragment : Fragment() {
         }
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("创建 Access 应用")
+            .setTitle(R.string.zt_access_create_app_title)
             .setView(dialogView)
-            .setPositiveButton("创建") { _, _ ->
+            .setPositiveButton(R.string.dialog_create) { _, _ ->
                 val name = nameInput.text.toString()
                 val domain = domainInput.text.toString()
                 val selectedType = appTypes[typeSpinner.selectedItemPosition].first
                 val sessionDuration = sessionDurationInput.text.toString()
                 if (name.isBlank()) {
-                    android.widget.Toast.makeText(requireContext(), "应用名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), R.string.msg_app_name_empty, android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 
@@ -201,20 +201,20 @@ class AccessFragment : Fragment() {
                     accessViewModel.createApplication(account, request)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun confirmDelete(app: com.muort.upworker.core.model.AccessApplication) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除应用")
-            .setMessage("确定要删除 ${app.name} 吗？此操作无法撤销。")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.zt_access_delete_app_title)
+            .setMessage(getString(R.string.zt_access_delete_app_confirm, app.name))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     accessViewModel.deleteApplication(account, app.id)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     

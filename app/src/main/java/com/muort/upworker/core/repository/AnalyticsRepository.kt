@@ -1,9 +1,12 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -14,6 +17,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AnalyticsRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi
 ) {
     
@@ -29,6 +33,7 @@ class AnalyticsRepository @Inject constructor(
     ): Resource<DashboardMetrics> =
         withContext(Dispatchers.IO) {
             safeApiCall {
+                @Suppress("DEPRECATION") // deprecated displayName is the static fallback intended for logs
                 Timber.d("Fetching dashboard metrics for zone: $zoneId, timeRange: ${timeRange.displayName}")
                 
                 // 使用时间范围枚举获取开始和结束时间
@@ -648,6 +653,7 @@ class AnalyticsRepository @Inject constructor(
     ): Resource<AccountAnalyticsOverview> =
         withContext(Dispatchers.IO) {
             safeApiCall {
+                @Suppress("DEPRECATION") // deprecated displayName is the static fallback intended for logs
                 Timber.d("Fetching account analytics overview for account: ${account.accountId}, timeRange: ${timeRange.displayName}")
 
                 // 获取账户下所有 Zone
@@ -657,7 +663,7 @@ class AnalyticsRepository @Inject constructor(
                     apiKey = AuthHelper.getGlobalApiKey(account)
                 )
                 if (!zonesResponse.isSuccessful) {
-                    return@safeApiCall Resource.Error("获取域名列表失败: ${zonesResponse.message()}")
+                    return@safeApiCall Resource.Error(appContext.getString(R.string.repo_analytics_zone_list_failed_format, zonesResponse.message()))
                 }
                 val zoneIds = zonesResponse.body()?.result?.map { it.id } ?: emptyList()
                 if (zoneIds.isEmpty()) {
@@ -692,7 +698,7 @@ class AnalyticsRepository @Inject constructor(
                     if (body?.errors?.isNotEmpty() == true) {
                         val errorMsg = body.errors.joinToString(", ") { it.message }
                         Timber.e("GraphQL errors: $errorMsg")
-                        return@safeApiCall Resource.Error("分析查询失败: $errorMsg")
+                        return@safeApiCall Resource.Error(appContext.getString(R.string.repo_analytics_query_failed_format, errorMsg))
                     }
                     val overview = parseAccountAnalytics(body?.data, hourly)
                     Timber.d("Parsed account analytics overview: requests=${overview.requests}")
@@ -724,7 +730,7 @@ class AnalyticsRepository @Inject constructor(
                 } else {
                     val errorBody = response.errorBody()?.string()
                     Timber.e("Failed to fetch account analytics: ${response.code()}, $errorBody")
-                    Resource.Error("获取分析数据失败: ${response.message()}")
+                    Resource.Error(appContext.getString(R.string.repo_analytics_fetch_failed_format, response.message()))
                 }
             }
         }

@@ -1,0 +1,14 @@
+<resources>
+  <!-- 全局 UI 尺寸：**中英文统一基线**。
+       不再区分 locale（原来"中文紧凑/英文宽松"两套 → 现在一套统一规范），
+       彻底避免以后中文也可能出现按钮/文字溢出卡片看不见的问题。
+       说明：以下值与原 values-en/dimens.xml（英文友好版）完全一致，
+       采用"按钮更宽(minWidth 112dp) + padding 略减 + 字号略小 + 均分结构 + maxLines=2"
+       组合策略，Material 触摸目标 & 可读性都符合规范。 -->
+  <dimen name="app_button_min_height">48dp</dimen>
+  <dimen name="app_button_min_width">112dp</dimen>
+  <dimen name="app_button_padding_h">10dp</dimen>
+  <dimen name="app_button_text_size">13sp</dimen>
+  <!-- 列表 item 里的 Icon+Text 紧凑功能按钮（item_worker_script / item_pages_project）：统一 10sp -->
+  <dimen name="app_button_icon_text_size">10sp</dimen>
+</resources>

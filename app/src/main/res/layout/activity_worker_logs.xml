@@ -44,7 +44,7 @@
                 android:id="@+id/connectionStatusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="未连接"
+                android:text="@string/status_not_connected"
                 android:textSize="14sp"
                 android:textColor="?attr/colorOnSurface"
                 android:layout_marginStart="8dp" />
@@ -124,7 +124,7 @@
                         android:id="@+id/waitingText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="等待日志...触发该 Worker 后将实时显示"
+                        android:text="@string/xml_activity_worker_logs"
                         android:textSize="14sp"
                         android:textColor="@color/grey_500"
                         android:gravity="center" />
@@ -166,7 +166,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="全选"
+            android:text="@string/snippet_select_all"
             android:textSize="14sp"
             android:layout_marginEnd="8dp" />
         <com.google.android.material.button.MaterialButton
@@ -174,7 +174,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="复制"
+            android:text="@string/snippet_copy"
             android:textSize="14sp"
             android:layout_marginEnd="8dp" />
         <com.google.android.material.button.MaterialButton
@@ -182,7 +182,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="关闭"
+            android:text="@string/ssl_mode_off"
             android:textSize="14sp" />
     </LinearLayout>
 

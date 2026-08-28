@@ -37,7 +37,8 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
     private lateinit var adapter: SettingsAdapter
     private var state = ZoneSettingsState(isLoading = true)
 
-    override val emptyText: String = "加载中…"
+    override val emptyTextResId: Int = R.string.zone_settings_loading
+    override val showAddFab: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -98,7 +99,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
                     adapter.notifyDataSetChanged()
                 }
                 is Resource.Error -> {
-                    toast("更新失败: ${r.message}")
+                    toast(getString(R.string.msg_update_failed, r.message))
                     load(account)
                 }
                 is Resource.Loading -> {}
@@ -117,7 +118,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
                     adapter.notifyDataSetChanged()
                 }
                 is Resource.Error -> {
-                    toast("更新失败: ${r.message}")
+                    toast(getString(R.string.msg_update_failed, r.message))
                     load(account)
                 }
                 is Resource.Loading -> {}
@@ -127,10 +128,10 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
 
     private fun showPurgeConfirmDialog() {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("清理缓存")
-            .setMessage("确认清理该域名所有缓存？此操作不可撤销。")
-            .setPositiveButton("清理") { _, _ -> purgeAllCache() }
-            .setNegativeButton("取消", null)
+            .setTitle(R.string.zone_purge_all_title)
+            .setMessage(R.string.zone_purge_all_message)
+            .setPositiveButton(R.string.zone_purge_button) { _, _ -> purgeAllCache() }
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -141,10 +142,10 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = settingsRepo.purgeAllCache(account, zoneId)) {
                 is Resource.Success -> {
-                    toast("已清理全部缓存")
+                    toast(getString(R.string.zone_purge_all_success))
                 }
                 is Resource.Error -> {
-                    toast("清理失败: ${r.message}")
+                    toast(getString(R.string.zone_purge_all_failed, r.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -154,9 +155,14 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
     }
 
     private fun showPurgeUrlDialog() {
+        val ctx = requireContext()
         val binding = DialogPurgeUrlBinding.inflate(layoutInflater)
-        binding.hintText.text = "输入 URL，每行一个（最多 ${MAX_PURGE_URLS} 个）\n例如:\nhttps://${zoneName.ifBlank { "example.com" }}/path"
-        binding.countText.text = "0 / ${MAX_PURGE_URLS}"
+        binding.hintText.text = ctx.getString(
+            R.string.zone_purge_url_hint,
+            MAX_PURGE_URLS,
+            zoneName.ifBlank { "example.com" }
+        )
+        binding.countText.text = ctx.getString(R.string.email_url_count_format, 0, MAX_PURGE_URLS)
 
         binding.urlInput.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -164,7 +170,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
             override fun afterTextChanged(s: android.text.Editable?) {
                 val text = s?.toString() ?: ""
                 val urls = text.split('\n').map { it.trim() }.filter { it.isNotEmpty() }
-                binding.countText.text = "${urls.size} / ${MAX_PURGE_URLS}"
+                binding.countText.text = ctx.getString(R.string.email_url_count_format, urls.size, MAX_PURGE_URLS)
                 binding.countText.setTextColor(
                     if (urls.size > MAX_PURGE_URLS) {
                         resources.getColor(android.R.color.holo_red_light, null)
@@ -175,23 +181,23 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
             }
         })
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("按 URL 清理缓存")
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.zone_purge_url_title)
             .setView(binding.root)
-            .setPositiveButton("清理") { _, _ ->
+            .setPositiveButton(R.string.zone_purge_button) { _, _ ->
                 val text = binding.urlInput.text.toString()
                 val urls = text.split('\n').map { it.trim() }.filter { it.isNotEmpty() }
                 if (urls.isEmpty()) {
-                    toast("请输入 URL")
+                    toast(getString(R.string.zone_purge_url_empty))
                     return@setPositiveButton
                 }
                 if (urls.size > MAX_PURGE_URLS) {
-                    toast("最多支持 ${MAX_PURGE_URLS} 个 URL")
+                    toast(getString(R.string.zone_purge_url_limit_exceeded, MAX_PURGE_URLS))
                     return@setPositiveButton
                 }
                 purgeUrls(urls)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -202,10 +208,10 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = settingsRepo.purgeFiles(account, zoneId, urls.take(MAX_PURGE_URLS))) {
                 is Resource.Success -> {
-                    toast("已清理 ${urls.size} 条 URL")
+                    toast(getString(R.string.zone_purge_url_success, urls.size))
                 }
                 is Resource.Error -> {
-                    toast("清理失败: ${r.message}")
+                    toast(getString(R.string.zone_purge_url_failed, r.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -244,26 +250,27 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+            val ctx = holder.itemView.context
             when (position) {
                 0 -> (holder as ToggleVH).bind(
-                    title = "开发模式",
-                    subtitle = "绕过 Cloudflare 缓存，直接访问源站",
+                    title = ctx.getString(R.string.zone_dev_mode_title),
+                    subtitle = ctx.getString(R.string.zone_dev_mode_subtitle),
                     checked = state.developmentMode,
                     onClick = { account?.let { acc -> setDevelopmentMode(acc, it) } },
                 )
                 1 -> (holder as ToggleVH).bind(
-                    title = "攻击模式",
-                    subtitle = "启用后会对所有请求进行更严格的检查",
+                    title = ctx.getString(R.string.zone_attack_mode_title),
+                    subtitle = ctx.getString(R.string.zone_attack_mode_subtitle),
                     checked = state.underAttack,
                     onClick = { account?.let { acc -> setUnderAttack(acc, it) } },
                 )
                 2 -> (holder as ButtonVH).bind(
-                    text = "清理缓存",
+                    text = ctx.getString(R.string.zone_purge_all_text),
                     enabled = !state.isPurging,
                     onClick = { showPurgeConfirmDialog() },
                 )
                 3 -> (holder as ButtonVH).bind(
-                    text = "按 URL 清理缓存",
+                    text = ctx.getString(R.string.zone_purge_url_text),
                     enabled = !state.isPurging,
                     onClick = { showPurgeUrlDialog() },
                 )

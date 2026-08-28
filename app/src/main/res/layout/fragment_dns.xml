@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="暂无 DNS 记录\n点击 + 添加"
+            android:text="@string/dns_empty_hint"
             android:gravity="center"
             android:textColor="?android:textColorSecondary"
             android:visibility="gone" />
@@ -42,6 +42,6 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
         android:src="@android:drawable/ic_input_add"
-        android:contentDescription="添加 DNS 记录" />
+        android:contentDescription="@string/dns_add_record_desc" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

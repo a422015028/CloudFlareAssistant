@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import com.google.gson.Gson
+import com.muort.upworker.R
 import com.muort.upworker.core.database.AccountDao
 import com.muort.upworker.core.database.WebDavConfigDao
 import com.muort.upworker.core.database.R2BackupConfigDao
@@ -121,7 +122,7 @@ class BackupRepository @Inject constructor(
     private fun buildBackupJson(): String {
         val accounts = runBlocking { accountDao.getAllAccountsSync() }
         if (accounts.isEmpty()) {
-            throw Exception("没有账号可备份")
+            throw Exception(context.getString(R.string.repo_generic_no_account))
         }
         val accountsData = accounts.map { account ->
             val zones = runBlocking {
@@ -146,9 +147,9 @@ class BackupRepository @Inject constructor(
         return try {
             val json = if (password != null) {
                 try {
-                    BackupCrypto.decrypt(content.trim(), password)
+                    BackupCrypto.decrypt(content.trim(), password, context)
                 } catch (e: Exception) {
-                    return Result.failure(Exception("解密失败，请检查密码是否正确"))
+                    return Result.failure(Exception(context.getString(R.string.repo_generic_decrypt_failed)))
                 }
             } else {
                 content
@@ -201,7 +202,7 @@ class BackupRepository @Inject constructor(
     suspend fun backupAccounts(password: String?): Result<String> {
         try {
             val config = webDavConfigDao.getConfigSync()
-                ?: return Result.failure(Exception("未配置WebDAV"))
+                ?: return Result.failure(Exception(context.getString(R.string.repo_backup_webdav_not_configured)))
 
             val json = buildBackupJson()
             val content = if (password.isNullOrBlank()) json else BackupCrypto.encrypt(json, password)
@@ -223,7 +224,7 @@ class BackupRepository @Inject constructor(
             return if (result.isSuccess) {
                 Result.success(fileName)
             } else {
-                Result.failure(result.exceptionOrNull() ?: Exception("上传失败"))
+                Result.failure(result.exceptionOrNull() ?: Exception(context.getString(R.string.repo_generic_upload_failed)))
             }
 
         } catch (e: Exception) {
@@ -238,7 +239,7 @@ class BackupRepository @Inject constructor(
     suspend fun restoreAccounts(fileName: String, password: String?): Result<Int> {
         try {
             val config = webDavConfigDao.getConfigSync()
-                ?: return Result.failure(Exception("未配置WebDAV"))
+                ?: return Result.failure(Exception(context.getString(R.string.repo_backup_webdav_not_configured)))
 
             val filePath = if (config.backupPath.endsWith("/")) {
                 "${config.backupPath}$fileName"
@@ -254,16 +255,16 @@ class BackupRepository @Inject constructor(
             )
 
             if (downloadResult.isFailure) {
-                return Result.failure(downloadResult.exceptionOrNull() ?: Exception("下载失败"))
+                return Result.failure(downloadResult.exceptionOrNull() ?: Exception(context.getString(R.string.repo_generic_download_failed)))
             }
 
-            val content = downloadResult.getOrNull() ?: return Result.failure(Exception("下载内容为空"))
+            val content = downloadResult.getOrNull() ?: return Result.failure(Exception(context.getString(R.string.repo_generic_download_empty)))
 
             val json = if (password != null) {
                 try {
-                    BackupCrypto.decrypt(content.trim(), password)
+                    BackupCrypto.decrypt(content.trim(), password, context)
                 } catch (e: Exception) {
-                    return Result.failure(Exception("解密失败，请检查密码是否正确"))
+                    return Result.failure(Exception(context.getString(R.string.repo_generic_decrypt_failed)))
                 }
             } else {
                 content
@@ -282,7 +283,7 @@ class BackupRepository @Inject constructor(
     suspend fun listBackupFiles(): Result<List<String>> {
         try {
             val config = webDavConfigDao.getConfigSync()
-                ?: return Result.failure(Exception("未配置WebDAV"))
+                ?: return Result.failure(Exception(context.getString(R.string.repo_backup_webdav_not_configured)))
 
             val result = webDavClient.listFiles(
                 config.url,
@@ -301,7 +302,7 @@ class BackupRepository @Inject constructor(
                     .sortedDescending()
                 Result.success(backupFiles)
             } else {
-                Result.failure(result.exceptionOrNull() ?: Exception("列表获取失败"))
+                Result.failure(result.exceptionOrNull() ?: Exception(context.getString(R.string.repo_generic_list_failed)))
             }
 
         } catch (e: Exception) {
@@ -315,7 +316,7 @@ class BackupRepository @Inject constructor(
     suspend fun deleteBackupFile(fileName: String): Result<Unit> {
         try {
             val config = webDavConfigDao.getConfigSync()
-                ?: return Result.failure(Exception("未配置WebDAV"))
+                ?: return Result.failure(Exception(context.getString(R.string.repo_backup_webdav_not_configured)))
 
             val filePath = if (config.backupPath.endsWith("/")) {
                 "${config.backupPath}$fileName"
@@ -345,13 +346,13 @@ class BackupRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val r2Config = r2BackupConfigDao.getConfigSync()
-                    ?: return@withContext Result.failure(Exception("未配置R2备份"))
+                    ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_r2_not_configured)))
 
                 val account = accountDao.getAccountById(r2Config.accountId)
-                    ?: return@withContext Result.failure(Exception("未找到指定的账号"))
+                    ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_account_not_found)))
 
                 if (account.r2AccessKeyId.isNullOrEmpty() || account.r2SecretAccessKey.isNullOrEmpty()) {
-                    return@withContext Result.failure(Exception("账号未配置R2访问凭证"))
+                    return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_account_no_r2_credential)))
                 }
 
                 val s3Config = R2S3Client.S3Config(
@@ -395,13 +396,13 @@ class BackupRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val r2Config = r2BackupConfigDao.getConfigSync()
-                    ?: return@withContext Result.failure(Exception("未配置R2备份"))
+                    ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_r2_not_configured)))
 
                 val account = accountDao.getAccountById(r2Config.accountId)
-                    ?: return@withContext Result.failure(Exception("未找到指定的账号"))
+                    ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_account_not_found)))
 
                 if (account.r2AccessKeyId.isNullOrEmpty() || account.r2SecretAccessKey.isNullOrEmpty()) {
-                    return@withContext Result.failure(Exception("账号未配置R2访问凭证"))
+                    return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_account_no_r2_credential)))
                 }
 
                 val s3Config = R2S3Client.S3Config(
@@ -421,9 +422,9 @@ class BackupRepository @Inject constructor(
 
                 val json = if (password != null) {
                     try {
-                        BackupCrypto.decrypt(content.trim(), password)
+                        BackupCrypto.decrypt(content.trim(), password, context)
                     } catch (e: Exception) {
-                        return@withContext Result.failure(Exception("解密失败，请检查密码是否正确"))
+                        return@withContext Result.failure(Exception(context.getString(R.string.repo_crypto_decrypt_failed)))
                     }
                 } else {
                     content
@@ -467,13 +468,13 @@ class BackupRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val r2Config = r2BackupConfigDao.getConfigSync()
-                    ?: return@withContext Result.failure(Exception("未配置R2备份"))
+                    ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_r2_not_configured)))
 
                 val account = accountDao.getAccountById(r2Config.accountId)
-                    ?: return@withContext Result.failure(Exception("未找到指定的账号"))
+                    ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_account_not_found)))
 
                 if (account.r2AccessKeyId.isNullOrEmpty() || account.r2SecretAccessKey.isNullOrEmpty()) {
-                    return@withContext Result.failure(Exception("账号未配置R2访问凭证"))
+                    return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_account_no_r2_credential)))
                 }
 
                 val s3Config = R2S3Client.S3Config(
@@ -509,13 +510,13 @@ class BackupRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val r2Config = r2BackupConfigDao.getConfigSync()
-                    ?: return@withContext Result.failure(Exception("未配置R2备份"))
+                    ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_r2_not_configured)))
 
                 val account = accountDao.getAccountById(r2Config.accountId)
-                    ?: return@withContext Result.failure(Exception("未找到指定的账号"))
+                    ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_account_not_found)))
 
                 if (account.r2AccessKeyId.isNullOrEmpty() || account.r2SecretAccessKey.isNullOrEmpty()) {
-                    return@withContext Result.failure(Exception("账号未配置R2访问凭证"))
+                    return@withContext Result.failure(Exception(context.getString(R.string.repo_backup_account_no_r2_credential)))
                 }
 
                 val s3Config = R2S3Client.S3Config(
@@ -599,10 +600,10 @@ class BackupRepository @Inject constructor(
                     is LocalBackupDir.UserSelected -> {
                         val mimeType = if (password.isNullOrBlank()) "application/json" else "application/octet-stream"
                         val file = dir.docFile.createFile(mimeType, fileName)
-                            ?: return@withContext Result.failure(Exception("创建备份文件失败"))
+                            ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_generic_create_file_failed)))
                         context.contentResolver.openOutputStream(file.uri)?.use { output ->
                             output.write(content.toByteArray(Charsets.UTF_8))
-                        } ?: return@withContext Result.failure(Exception("写入备份文件失败"))
+                        } ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_generic_write_file_failed)))
                     }
                     is LocalBackupDir.AppPrivate -> {
                         val file = File(dir.dir, fileName)
@@ -629,23 +630,23 @@ class BackupRepository @Inject constructor(
                 val content = when (dir) {
                     is LocalBackupDir.UserSelected -> {
                         val file = dir.docFile.findFile(fileName)
-                            ?: return@withContext Result.failure(Exception("备份文件不存在"))
+                            ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_generic_file_not_found)))
                         context.contentResolver.openInputStream(file.uri)?.use { input ->
                             input.bufferedReader().use { it.readText() }
-                        } ?: return@withContext Result.failure(Exception("读取备份文件失败"))
+                        } ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_generic_read_file_failed)))
                     }
                     is LocalBackupDir.AppPrivate -> {
                         val file = File(dir.dir, fileName)
-                        if (!file.exists()) return@withContext Result.failure(Exception("备份文件不存在"))
+                        if (!file.exists()) return@withContext Result.failure(Exception(context.getString(R.string.repo_generic_file_not_found)))
                         file.readText()
                     }
                 }
 
                 val json = if (password != null) {
                     try {
-                        BackupCrypto.decrypt(content.trim(), password)
+                        BackupCrypto.decrypt(content.trim(), password, context)
                     } catch (e: Exception) {
-                        return@withContext Result.failure(Exception("解密失败，请检查密码是否正确"))
+                        return@withContext Result.failure(Exception(context.getString(R.string.repo_crypto_decrypt_failed)))
                     }
                 } else {
                     content
@@ -748,10 +749,10 @@ class BackupRepository @Inject constructor(
                     is LocalBackupDir.UserSelected -> {
                         val mimeType = if (fileName.endsWith(".enc")) "application/octet-stream" else "application/json"
                         val file = dir.docFile.createFile(mimeType, fileName)
-                            ?: return@withContext Result.failure(Exception("创建备份文件失败"))
+                            ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_generic_create_file_failed)))
                         context.contentResolver.openOutputStream(file.uri)?.use { output ->
                             output.write(content.toByteArray(Charsets.UTF_8))
-                        } ?: return@withContext Result.failure(Exception("写入备份文件失败"))
+                        } ?: return@withContext Result.failure(Exception(context.getString(R.string.repo_generic_write_file_failed)))
                     }
                     is LocalBackupDir.AppPrivate -> {
                         val file = File(dir.dir, fileName)

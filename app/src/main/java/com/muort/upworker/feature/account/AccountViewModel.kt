@@ -3,14 +3,15 @@ package com.muort.upworker.feature.account
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.AccountInfo
 import com.muort.upworker.core.model.AuthType
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.repository.AccountRepository
 import com.muort.upworker.core.repository.ZoneRepository
-import com.muort.upworker.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
@@ -34,8 +35,8 @@ class AccountViewModel @Inject constructor(
     private val _defaultAccount = MutableStateFlow<Account?>(null)
     val defaultAccount: StateFlow<Account?> = _defaultAccount.asStateFlow()
     
-    private val _message = MutableSharedFlow<String>()
-    val message: SharedFlow<String> = _message.asSharedFlow()
+    private val _message = MutableSharedFlow<UiMessage>()
+    val message: SharedFlow<UiMessage> = _message.asSharedFlow()
     
     // Zone management
     private val _zones = MutableStateFlow<List<Zone>>(emptyList())
@@ -70,7 +71,7 @@ class AccountViewModel @Inject constructor(
                         }
                     }
                     is Resource.Error -> {
-                        _uiState.value = AccountUiState.Error(resource.message)
+                        _uiState.value = AccountUiState.Error(UiMessage.RawString(resource.message))
                         Timber.e("Failed to load accounts: ${resource.message}")
                     }
                     is Resource.Loading -> {
@@ -115,7 +116,7 @@ class AccountViewModel @Inject constructor(
     ) {
         if (name.isBlank() || accountId.isBlank()) {
             viewModelScope.launch {
-                _message.emit(context.getString(R.string.account_please_fill_required))
+                _message.emit(UiMessage.of(R.string.account_please_fill_required))
             }
             return
         }
@@ -128,10 +129,10 @@ class AccountViewModel @Inject constructor(
         }
         
         val validationError = when (authTypeEnum) {
-            AuthType.TOKEN -> if (token.isBlank()) context.getString(R.string.account_token_cannot_be_empty) else null
+            AuthType.TOKEN -> if (token.isBlank()) UiMessage.of(R.string.account_token_cannot_be_empty) else null
             AuthType.GLOBAL_API_KEY -> {
-                if (email?.isBlank() != false) context.getString(R.string.account_email_cannot_be_empty)
-                else if (globalApiKey?.isBlank() != false) context.getString(R.string.account_global_key_cannot_be_empty)
+                if (email?.isBlank() != false) UiMessage.of(R.string.account_email_cannot_be_empty)
+                else if (globalApiKey?.isBlank() != false) UiMessage.of(R.string.account_global_key_cannot_be_empty)
                 else null
             }
         }
@@ -158,13 +159,13 @@ class AccountViewModel @Inject constructor(
             
             when (val result = accountRepository.insertAccount(account)) {
                 is Resource.Success -> {
-                    _message.emit(context.getString(R.string.account_add_success))
+                    _message.emit(UiMessage.of(R.string.account_add_success))
                     if (isDefault) {
                         accountRepository.setDefaultAccount(result.data)
                     }
                 }
                 is Resource.Error -> {
-                    _message.emit(context.getString(R.string.account_add_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.account_add_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -175,13 +176,13 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.updateAccount(account)) {
                 is Resource.Success -> {
-                    _message.emit(context.getString(R.string.account_update_success))
+                    _message.emit(UiMessage.of(R.string.account_update_success))
                     if (account.isDefault) {
                         accountRepository.setDefaultAccount(account.id)
                     }
                 }
                 is Resource.Error -> {
-                    _message.emit(context.getString(R.string.account_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.account_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -192,10 +193,10 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.deleteAccount(account)) {
                 is Resource.Success -> {
-                    _message.emit(context.getString(R.string.account_delete_success))
+                    _message.emit(UiMessage.of(R.string.account_delete_success))
                 }
                 is Resource.Error -> {
-                    _message.emit(context.getString(R.string.account_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.account_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -209,7 +210,7 @@ class AccountViewModel @Inject constructor(
                     // 账号切换成功，不显示提示
                 }
                 is Resource.Error -> {
-                    _message.emit(context.getString(R.string.account_set_default_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.account_set_default_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -220,7 +221,7 @@ class AccountViewModel @Inject constructor(
         return when (val result = accountRepository.exportAccounts()) {
             is Resource.Success -> result.data
             is Resource.Error -> {
-                _message.emit(context.getString(R.string.account_export_failed, result.message))
+                _message.emit(UiMessage.of(R.string.account_export_failed, result.message))
                 null
             }
             is Resource.Loading -> null
@@ -231,10 +232,10 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.importAccounts(accounts)) {
                 is Resource.Success -> {
-                    _message.emit(context.getString(R.string.account_import_success))
+                    _message.emit(UiMessage.of(R.string.account_import_success))
                 }
                 is Resource.Error -> {
-                    _message.emit(context.getString(R.string.account_import_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.account_import_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -264,11 +265,11 @@ class AccountViewModel @Inject constructor(
             _loadingZones.value = true
             when (val result = zoneRepository.fetchAndSaveZones(account)) {
                 is Resource.Success -> {
-                    if (!silent) _message.emit(context.getString(R.string.account_fetch_zones_success, result.data.size))
+                    if (!silent) _message.emit(UiMessage.of(R.string.account_fetch_zones_success, result.data.size))
                     loadZonesForAccount(account.id)
                 }
                 is Resource.Error -> {
-                    if (!silent) _message.emit(context.getString(R.string.account_fetch_zones_failed, result.message))
+                    if (!silent) _message.emit(UiMessage.of(R.string.account_fetch_zones_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -307,11 +308,11 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.fetchAccountsFromApi(account)) {
                 is Resource.Success -> {
-                    _message.emit(context.getString(R.string.account_fetch_accounts_success, result.data.size))
+                    _message.emit(UiMessage.of(R.string.account_fetch_accounts_success, result.data.size))
                     onResult(result.data)
                 }
                 is Resource.Error -> {
-                    _message.emit(context.getString(R.string.account_fetch_accounts_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.account_fetch_accounts_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -323,5 +324,5 @@ sealed class AccountUiState {
     object Loading : AccountUiState()
     object Empty : AccountUiState()
     data class Success(val accounts: List<Account>) : AccountUiState()
-    data class Error(val message: String) : AccountUiState()
+    data class Error(val message: UiMessage) : AccountUiState()
 }

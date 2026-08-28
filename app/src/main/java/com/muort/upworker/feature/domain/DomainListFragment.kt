@@ -110,8 +110,8 @@ class DomainListFragment : Fragment() {
 
         addDialog = MaterialAlertDialogBuilder(requireContext())
             .setView(addDialogBinding!!.root)
-            .setPositiveButton("添加域名", null)
-            .setNegativeButton("取消", null)
+            .setPositiveButton(R.string.domain_add_title, null)
+            .setNegativeButton(R.string.cancel, null)
             .create()
 
         addDialog!!.setOnShowListener {
@@ -124,7 +124,7 @@ class DomainListFragment : Fragment() {
                         }
                     } else {
                         addDialogBinding!!.errorText.visibility = View.VISIBLE
-                        addDialogBinding!!.errorText.text = "域名格式不正确（如 example.com）"
+                        addDialogBinding!!.errorText.text = getString(R.string.dns_invalid_format)
                     }
                 }
         }
@@ -140,9 +140,9 @@ class DomainListFragment : Fragment() {
                     val db = addDialogBinding ?: return@collect
                     db.savingProgress.visibility = if (state.isSaving) View.VISIBLE else View.GONE
 
-                    state.error?.let {
+                    state.error?.let { err ->
                         db.errorText.visibility = View.VISIBLE
-                        db.errorText.text = it
+                        db.errorText.text = err.asString(requireContext())
                     }
 
                     val zone = state.createdZone
@@ -173,12 +173,12 @@ class DomainListFragment : Fragment() {
 
         db.copyButton.setOnClickListener {
             copyToClipboard(servers.joinToString("\n"))
-            requireContext().showToast("已复制名称服务器")
+            requireContext().showToast(getString(R.string.msg_nameservers_copied))
         }
 
         // 切换确定按钮文本
         addDialog?.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.let { btn ->
-            btn.text = "完成"
+            btn.text = getString(R.string.done)
             btn.setOnClickListener {
                 addDialog?.dismiss()
             }
@@ -250,9 +250,9 @@ class DomainListFragment : Fragment() {
             }
 
             private fun statusLabel(status: String): String = when (status) {
-                "active" -> "已激活"
-                "pending", "initializing" -> "待激活"
-                "paused" -> "已暂停"
+                "active" -> binding.root.context.getString(R.string.status_activated)
+                "pending", "initializing" -> binding.root.context.getString(R.string.domain_pending)
+                "paused" -> binding.root.context.getString(R.string.status_paused_short)
                 else -> status
             }
 

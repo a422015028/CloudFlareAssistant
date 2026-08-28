@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="添加/编辑 DNS 记录"
+            android:text="@string/dns_add_edit_record_title"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
@@ -21,7 +21,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="记录类型"
+            android:hint="@string/dns_record_type"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_marginBottom="8dp">
 
@@ -36,7 +36,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="记录名"
+            android:hint="@string/dns_record_name"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="8dp">
 
@@ -58,7 +58,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="TTL (秒)"
+            android:hint="@string/dns_ttl_seconds"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="8dp">
 
@@ -76,7 +76,7 @@
             android:id="@+id/dnsProxied"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="启用 Cloudflare 代理"
+            android:text="@string/dns_enable_proxy"
             android:checked="true" />
 
     </LinearLayout>

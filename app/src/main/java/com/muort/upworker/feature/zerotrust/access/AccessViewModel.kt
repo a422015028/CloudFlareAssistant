@@ -2,6 +2,7 @@ package com.muort.upworker.feature.zerotrust.access
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.repository.ZeroTrustRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,12 +40,12 @@ class AccessViewModel @Inject constructor(
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
     
     // Message events
-    private val _message = MutableSharedFlow<String>()
-    val message: SharedFlow<String> = _message.asSharedFlow()
+    private val _message = MutableSharedFlow<UiMessage>()
+    val message: SharedFlow<UiMessage> = _message.asSharedFlow()
     
     // Error events
-    private val _error = MutableSharedFlow<String>()
-    val error: SharedFlow<String> = _error.asSharedFlow()
+    private val _error = MutableSharedFlow<UiMessage>()
+    val error: SharedFlow<UiMessage> = _error.asSharedFlow()
     
     /**
      * Load all Access applications
@@ -58,9 +59,8 @@ class AccessViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} Access applications")
                 }
                 is Resource.Error -> {
-                    val errorMsg = "加载应用失败: ${result.message}"
-                    _error.emit(errorMsg)
-                    Timber.e(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_apps_load_failed, result.message))
+                    Timber.e("Failed to load access apps: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -80,9 +80,8 @@ class AccessViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} Access groups")
                 }
                 is Resource.Error -> {
-                    val errorMsg = "加载组失败: ${result.message}"
-                    _error.emit(errorMsg)
-                    Timber.e(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_groups_load_failed, result.message))
+                    Timber.e("Failed to load access groups: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -102,9 +101,8 @@ class AccessViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} policies for app $appId")
                 }
                 is Resource.Error -> {
-                    val errorMsg = "加载策略失败: ${result.message}"
-                    _error.emit(errorMsg)
-                    Timber.e(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_policies_load_failed, result.message))
+                    Timber.e("Failed to load access policies: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -126,9 +124,8 @@ class AccessViewModel @Inject constructor(
                     Timber.d("Loaded app detail: ${result.data.name}")
                 }
                 is Resource.Error -> {
-                    val errorMsg = "加载应用详情失败: ${result.message}"
-                    _error.emit(errorMsg)
-                    Timber.e(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_app_detail_load_failed, result.message))
+                    Timber.e("Failed to load app detail: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -155,12 +152,11 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.createAccessApplication(account, request)) {
                 is Resource.Success -> {
-                    _message.emit("应用创建成功: ${result.data.name}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_access_app_created, result.data.name))
                     loadApplications(account) // Reload list
                 }
                 is Resource.Error -> {
-                    val errorMsg = "创建应用失败: ${result.message}"
-                    _error.emit(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_app_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -180,7 +176,7 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.updateAccessApplication(account, appId, request)) {
                 is Resource.Success -> {
-                    _message.emit("应用更新成功: ${result.data.name}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_access_app_updated, result.data.name))
                     // Cloudflare API响应可能不包含所有字段(如enable_binding_cookie等)，
                     // 用请求数据填充响应中缺失的字段
                     val mergedApp = result.data.copy(
@@ -193,8 +189,7 @@ class AccessViewModel @Inject constructor(
                     loadApplications(account)
                 }
                 is Resource.Error -> {
-                    val errorMsg = "更新应用失败: ${result.message}"
-                    _error.emit(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_app_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -210,12 +205,11 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.deleteAccessApplication(account, appId)) {
                 is Resource.Success -> {
-                    _message.emit("应用删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_access_app_deleted))
                     loadApplications(account)
                 }
                 is Resource.Error -> {
-                    val errorMsg = "删除应用失败: ${result.message}"
-                    _error.emit(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_app_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -231,12 +225,11 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.createAccessGroup(account, request)) {
                 is Resource.Success -> {
-                    _message.emit("组创建成功: ${result.data.name}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_access_group_created, result.data.name))
                     loadGroups(account)
                 }
                 is Resource.Error -> {
-                    val errorMsg = "创建组失败: ${result.message}"
-                    _error.emit(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_group_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -252,12 +245,11 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.updateAccessGroup(account, groupId, request)) {
                 is Resource.Success -> {
-                    _message.emit("组更新成功: ${result.data.name}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_access_group_updated, result.data.name))
                     loadGroups(account)
                 }
                 is Resource.Error -> {
-                    val errorMsg = "更新组失败: ${result.message}"
-                    _error.emit(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_group_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -273,12 +265,11 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.deleteAccessGroup(account, groupId)) {
                 is Resource.Success -> {
-                    _message.emit("组删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_access_group_deleted))
                     loadGroups(account)
                 }
                 is Resource.Error -> {
-                    val errorMsg = "删除组失败: ${result.message}"
-                    _error.emit(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_group_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -294,12 +285,11 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.createAppPolicy(account, appId, request)) {
                 is Resource.Success -> {
-                    _message.emit("策略创建成功: ${result.data.name}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_created, result.data.name))
                     loadAppPolicies(account, appId)
                 }
                 is Resource.Error -> {
-                    val errorMsg = "创建策略失败: ${result.message}"
-                    _error.emit(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -320,12 +310,11 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.updateAppPolicy(account, appId, policyId, request)) {
                 is Resource.Success -> {
-                    _message.emit("策略更新成功: ${result.data.name}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_updated, result.data.name))
                     loadAppPolicies(account, appId)
                 }
                 is Resource.Error -> {
-                    val errorMsg = "更新策略失败: ${result.message}"
-                    _error.emit(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -341,12 +330,11 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.deleteAppPolicy(account, appId, policyId)) {
                 is Resource.Success -> {
-                    _message.emit("策略删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_deleted))
                     loadAppPolicies(account, appId)
                 }
                 is Resource.Error -> {
-                    val errorMsg = "删除策略失败: ${result.message}"
-                    _error.emit(errorMsg)
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }

@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="添加环境变量"
+        android:text="@string/xml_dialog_add_variable"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
@@ -17,7 +17,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="变量名称 (如: API_URL)"
+        android:hint="@string/xml_dialog_add_variable_hint"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_marginBottom="12dp">
 
@@ -26,14 +26,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:singleLine="true" />
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:imeOptions="actionNext" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="变量类型"
+        android:text="@string/xml_dialog_add_variable_2"
         android:textSize="14sp"
         android:textStyle="bold"
         android:layout_marginBottom="8dp" />
@@ -50,7 +52,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="文本"
+            android:text="@string/xml_dialog_add_variable_3"
             android:checked="true" />
 
         <RadioButton
@@ -65,7 +67,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="变量值"
+        android:hint="@string/xml_dialog_add_variable_hint_2"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_marginBottom="12dp">
 
@@ -82,7 +84,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="💡 文本类型：普通字符串\n📋 JSON 类型：JSON 对象或数组，需符合 JSON 格式"
+        android:text="@string/xml_dialog_add_variable_4"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
         android:layout_marginTop="8dp"

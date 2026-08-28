@@ -1,5 +1,8 @@
 package com.muort.upworker.feature.zone
 
+import android.content.Context
+import com.muort.upworker.R
+
 /**
  * Snippet 规则表达式目录与构建/解析。
  * 字段与运算符清单基于 Cloudflare Rules 语言，并在 http_request_snippets 阶段（Pro 套餐）实测验证；
@@ -11,17 +14,21 @@ object SnippetRuleExpression {
 
     data class Field(
         val expr: String,
-        val label: String,
+        val labelResId: Int,
         val type: ValueType,
         val needsHeaderName: Boolean = false,
-    )
+    ) {
+        fun label(ctx: Context): String = ctx.getString(labelResId)
+    }
 
     data class Op(
         val expr: String,
-        val label: String,
+        val labelResId: Int,
         val types: List<ValueType>,
         val noValue: Boolean = false,
-    )
+    ) {
+        fun label(ctx: Context): String = ctx.getString(labelResId)
+    }
 
     data class Condition(
         var fieldIndex: Int = 0,
@@ -36,42 +43,42 @@ object SnippetRuleExpression {
     )
 
     val FIELDS = listOf(
-        Field("http.request.uri.path", "URI 路径", ValueType.STRING),
-        Field("http.request.uri.query", "URI 查询字符串", ValueType.STRING),
-        Field("http.request.full_uri", "完整 URI", ValueType.STRING),
-        Field("http.host", "主机名", ValueType.STRING),
-        Field("http.request.method", "请求方法", ValueType.STRING),
-        Field("http.request.version", "HTTP 版本", ValueType.STRING),
-        Field("http.user_agent", "User-Agent", ValueType.STRING),
-        Field("http.cookie", "Cookie", ValueType.STRING),
-        Field("http.referer", "Referer", ValueType.STRING),
-        Field("http.x_forwarded_for", "X-Forwarded-For", ValueType.STRING),
-        Field("http.request.headers", "指定请求头", ValueType.STRING, needsHeaderName = true),
-        Field("ip.src", "客户端 IP", ValueType.IP),
-        Field("ip.src.country", "国家代码", ValueType.STRING),
-        Field("ip.src.continent", "大洲代码", ValueType.STRING),
-        Field("ip.src.city", "城市", ValueType.STRING),
-        Field("ip.src.region", "地区", ValueType.STRING),
-        Field("ip.src.asnum", "ASN 编号", ValueType.NUMBER),
-        Field("ssl", "HTTPS 连接", ValueType.BOOLEAN),
-        Field("cf.tls_version", "TLS 版本", ValueType.STRING),
-        Field("cf.zone.name", "区域名", ValueType.STRING),
+        Field("http.request.uri.path", R.string.snippet_field_uri_path, ValueType.STRING),
+        Field("http.request.uri.query", R.string.snippet_field_uri_query, ValueType.STRING),
+        Field("http.request.full_uri", R.string.snippet_field_full_uri, ValueType.STRING),
+        Field("http.host", R.string.snippet_field_hostname, ValueType.STRING),
+        Field("http.request.method", R.string.snippet_field_request_method, ValueType.STRING),
+        Field("http.request.version", R.string.snippet_field_http_version, ValueType.STRING),
+        Field("http.user_agent", R.string.snippet_field_user_agent, ValueType.STRING),
+        Field("http.cookie", R.string.snippet_field_cookie, ValueType.STRING),
+        Field("http.referer", R.string.snippet_field_referer, ValueType.STRING),
+        Field("http.x_forwarded_for", R.string.snippet_field_x_forwarded_for, ValueType.STRING),
+        Field("http.request.headers", R.string.snippet_field_request_headers, ValueType.STRING, needsHeaderName = true),
+        Field("ip.src", R.string.snippet_field_client_ip, ValueType.IP),
+        Field("ip.src.country", R.string.snippet_field_country_code, ValueType.STRING),
+        Field("ip.src.continent", R.string.snippet_field_continent_code, ValueType.STRING),
+        Field("ip.src.city", R.string.snippet_field_city, ValueType.STRING),
+        Field("ip.src.region", R.string.snippet_field_region, ValueType.STRING),
+        Field("ip.src.asnum", R.string.snippet_field_asnum, ValueType.NUMBER),
+        Field("ssl", R.string.snippet_field_ssl, ValueType.BOOLEAN),
+        Field("cf.tls_version", R.string.snippet_field_tls_version, ValueType.STRING),
+        Field("cf.zone.name", R.string.snippet_field_zone_name, ValueType.STRING),
     )
 
     val OPS = listOf(
-        Op("eq", "等于", ValueType.entries.toList()),
-        Op("ne", "不等于", ValueType.entries.toList()),
-        Op("contains", "包含", listOf(ValueType.STRING)),
-        Op("wildcard", "通配符匹配", listOf(ValueType.STRING)),
-        Op("in", "属于集合", listOf(ValueType.STRING, ValueType.IP, ValueType.NUMBER)),
-        Op("lt", "小于", listOf(ValueType.NUMBER)),
-        Op("le", "小于等于", listOf(ValueType.NUMBER)),
-        Op("gt", "大于", listOf(ValueType.NUMBER)),
-        Op("ge", "大于等于", listOf(ValueType.NUMBER)),
-        Op("starts_with", "开头是", listOf(ValueType.STRING)),
-        Op("ends_with", "结尾是", listOf(ValueType.STRING)),
-        Op("is_true", "为真", listOf(ValueType.BOOLEAN), noValue = true),
-        Op("is_false", "为假", listOf(ValueType.BOOLEAN), noValue = true),
+        Op("eq", R.string.snippet_op_eq, ValueType.entries.toList()),
+        Op("ne", R.string.snippet_op_ne, ValueType.entries.toList()),
+        Op("contains", R.string.snippet_op_contains, listOf(ValueType.STRING)),
+        Op("wildcard", R.string.snippet_op_wildcard, listOf(ValueType.STRING)),
+        Op("in", R.string.snippet_op_in, listOf(ValueType.STRING, ValueType.IP, ValueType.NUMBER)),
+        Op("lt", R.string.snippet_op_lt, listOf(ValueType.NUMBER)),
+        Op("le", R.string.snippet_op_le, listOf(ValueType.NUMBER)),
+        Op("gt", R.string.snippet_op_gt, listOf(ValueType.NUMBER)),
+        Op("ge", R.string.snippet_op_ge, listOf(ValueType.NUMBER)),
+        Op("starts_with", R.string.snippet_op_starts_with, listOf(ValueType.STRING)),
+        Op("ends_with", R.string.snippet_op_ends_with, listOf(ValueType.STRING)),
+        Op("is_true", R.string.snippet_op_is_true, listOf(ValueType.BOOLEAN), noValue = true),
+        Op("is_false", R.string.snippet_op_is_false, listOf(ValueType.BOOLEAN), noValue = true),
     )
 
     fun opsFor(type: ValueType): List<Op> = OPS.filter { type in it.types }

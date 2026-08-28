@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="创建 Pages 项目"
+        android:text="@string/xml_dialog_pages_create_project"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
@@ -17,7 +17,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="项目名称 *"
+        android:hint="@string/xml_dialog_pages_create_project_hint"
         app:boxBackgroundMode="outline"
         android:layout_marginBottom="12dp">
 
@@ -32,7 +32,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="生产分支 *"
+        android:hint="@string/xml_dialog_pages_create_project_hint_2"
         app:boxBackgroundMode="outline"
         android:layout_marginBottom="12dp">
 
@@ -48,7 +48,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="构建命令 (可选)"
+        android:hint="@string/xml_dialog_pages_create_project_hint_3"
         app:boxBackgroundMode="outline"
         android:layout_marginBottom="12dp">
 
@@ -64,7 +64,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="输出目录 (可选)"
+        android:hint="@string/xml_dialog_pages_create_project_hint_4"
         app:boxBackgroundMode="outline"
         android:layout_marginBottom="12dp">
 
@@ -80,7 +80,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="根目录 (可选)"
+        android:hint="@string/xml_dialog_pages_create_project_hint_5"
         app:boxBackgroundMode="outline"
         android:layout_marginBottom="12dp">
 
@@ -96,7 +96,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="兼容日期 (可选，格式: YYYY-MM-DD)"
+        android:hint="@string/xml_dialog_pages_create_project_hint_6"
         app:boxBackgroundMode="outline"
         android:layout_marginBottom="16dp">
 
@@ -118,7 +118,7 @@
             android:id="@+id/buildCachingCheck"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="启用构建缓存"
+            android:text="@string/xml_dialog_pages_create_project_2"
             android:checked="true" />
 
     </LinearLayout>

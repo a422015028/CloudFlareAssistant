@@ -44,7 +44,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="部署 Worker 脚本"
+                            android:text="@string/xml_fragment_worker"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -68,7 +68,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Worker 名称"
+                            android:hint="@string/xml_fragment_worker_hint"
                             app:boxBackgroundMode="outline"
                             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                             android:layout_marginBottom="10dp">
@@ -84,7 +84,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="脚本文件(仅支持：.js)"
+                            android:hint="@string/xml_fragment_worker_hint_2"
                             app:boxBackgroundMode="outline"
                             app:endIconMode="custom"
                             app:endIconDrawable="@android:drawable/ic_menu_search"
@@ -103,7 +103,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="默认兼容日期 2026-06-16"
+                            android:hint="@string/xml_fragment_worker_hint_3"
                             app:placeholderText="输入格式：2026-06-16"
                             app:boxBackgroundMode="outline"
                             android:layout_marginBottom="12dp">
@@ -120,7 +120,7 @@
                             android:id="@+id/selectFileBtn"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="选择文件"
+                            android:text="@string/worker_select_file"
                             android:layout_marginBottom="12dp"
                             style="@style/Widget.Material3.Button.OutlinedButton" />
 
@@ -128,7 +128,7 @@
                             android:id="@+id/uploadBtn"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
-                            android:text="部署脚本"
+                            android:text="@string/xml_fragment_worker_2"
                             android:textSize="14sp"
                             style="@style/Widget.Material3.Button" />
 
@@ -159,52 +159,62 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <!-- Worker 主头部：Script 标题 + Manage Versions + Manage Scripts + Refresh
+                         同 Pages 页头方案（权重 2:3:3:2，合计 10）→ 字体任意放大也不会有任何元素溢出父容器边界。 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:baselineAligned="false"
                         android:layout_marginBottom="12dp">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="脚本"
+                            android:layout_weight="2"
+                            android:text="@string/xml_fragment_worker_3"
                             android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
                         
                         <Button
                             android:id="@+id/cleanupDeploymentsBtn"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="管理版本"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_marginEnd="8dp" />
+                            android:layout_weight="3"
+                            android:text="@string/xml_fragment_worker_4"
+                            style="@style/AppButton.Outlined"
+                            android:layout_marginEnd="4dp" />
 
                         <Button
                             android:id="@+id/toggleSelectionModeBtn"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="管理脚本"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_marginEnd="8dp" />
+                            android:layout_weight="3"
+                            android:text="@string/worker_manage_scripts"
+                            style="@style/AppButton.Outlined"
+                            android:layout_marginEnd="4dp" />
 
                         <Button
                             android:id="@+id/refreshBtn"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="刷新"
-                            style="@style/Widget.Material3.Button.TextButton" />
+                            android:layout_weight="2"
+                            android:text="@string/xml_fragment_worker_5"
+                            style="@style/AppButton.Text" />
 
                     </LinearLayout>
 
+                    <!-- Worker 选中模式操作栏：状态文本 + 全选 + 批量删除（权重 3:2:2，永不溢出） -->
                     <LinearLayout
                         android:id="@+id/selectionActionsLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:baselineAligned="false"
                         android:layout_marginBottom="12dp"
                         android:visibility="gone">
 
@@ -212,24 +222,28 @@
                             android:id="@+id/selectionStatusText"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="已选择 0 个脚本"
+                            android:layout_weight="3"
+                            android:text="@string/xml_fragment_worker_6"
+                            android:maxLines="1"
+                            android:ellipsize="end"
                             android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                         <Button
                             android:id="@+id/selectAllBtn"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="全选"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_marginEnd="8dp" />
+                            android:layout_weight="2"
+                            android:text="@string/snippet_select_all"
+                            style="@style/AppButton.Outlined"
+                            android:layout_marginEnd="4dp" />
 
                         <Button
                             android:id="@+id/batchDeleteBtn"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="批量删除"
-                            style="@style/Widget.Material3.Button" />
+                            android:layout_weight="2"
+                            android:text="@string/xml_fragment_worker_7"
+                            style="@style/AppButton" />
 
                     </LinearLayout>
 
@@ -244,7 +258,7 @@
                         android:id="@+id/emptyText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="暂无脚本"
+                        android:text="@string/xml_fragment_worker_8"
                         android:textAlignment="center"
                         android:padding="24dp"
                         android:textColor="?android:textColorSecondary"

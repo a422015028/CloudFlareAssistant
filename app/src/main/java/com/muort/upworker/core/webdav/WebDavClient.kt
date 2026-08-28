@@ -1,6 +1,9 @@
 package com.muort.upworker.core.webdav
 
+import android.content.Context
 import android.util.Log
+import com.muort.upworker.R
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Credentials
@@ -13,7 +16,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class WebDavClient @Inject constructor() {
+class WebDavClient @Inject constructor(
+    @ApplicationContext private val appContext: Context
+) {
     
     companion object {
         private const val TAG = "WebDavClient"
@@ -46,7 +51,7 @@ class WebDavClient @Inject constructor() {
                 if (response.isSuccessful) {
                     Result.success(Unit)
                 } else {
-                    Result.failure(Exception("连接失败: HTTP ${response.code}"))
+                    Result.failure(Exception(appContext.getString(R.string.repo_webdav_connect_failed_format, response.code)))
                 }
             } catch (e: Exception) {
                 Result.failure(e)
@@ -86,7 +91,7 @@ class WebDavClient @Inject constructor() {
                 if (response.isSuccessful || response.code == 201 || response.code == 204) {
                     Result.success(Unit)
                 } else {
-                    Result.failure(Exception("上传失败: HTTP ${response.code}"))
+                    Result.failure(Exception(appContext.getString(R.string.repo_webdav_upload_failed_format, response.code)))
                 }
             } catch (e: Exception) {
                 Result.failure(e)
@@ -120,7 +125,7 @@ class WebDavClient @Inject constructor() {
                     val content = response.body?.string() ?: ""
                     Result.success(content)
                 } else {
-                    Result.failure(Exception("下载失败: HTTP ${response.code}"))
+                    Result.failure(Exception(appContext.getString(R.string.repo_webdav_download_failed_format, response.code)))
                 }
             } catch (e: Exception) {
                 Result.failure(e)
@@ -183,7 +188,7 @@ class WebDavClient @Inject constructor() {
                 } else {
                     val errorBody = response.body?.string()
                     Log.e(TAG, "listFiles failed: HTTP ${response.code} - ${response.message}, body: $errorBody")
-                    Result.failure(Exception("列表获取失败: HTTP ${response.code} - ${response.message}"))
+                    Result.failure(Exception(appContext.getString(R.string.repo_webdav_list_failed_format, response.code, response.message)))
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "listFiles exception", e)
@@ -217,7 +222,7 @@ class WebDavClient @Inject constructor() {
                 if (response.isSuccessful || response.code == 204) {
                     Result.success(Unit)
                 } else {
-                    Result.failure(Exception("删除失败: HTTP ${response.code}"))
+                    Result.failure(Exception(appContext.getString(R.string.repo_webdav_delete_failed_format, response.code)))
                 }
             } catch (e: Exception) {
                 Result.failure(e)

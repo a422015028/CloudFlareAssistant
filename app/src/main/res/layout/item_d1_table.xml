@@ -25,7 +25,7 @@
                 android:id="@+id/tableNameText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="表名"
+                android:text="@string/d1_table_name"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorPrimary" />
@@ -34,7 +34,7 @@
                 android:id="@+id/tableColumnsText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="字段数"
+                android:text="@string/d1_field_count"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:layout_marginTop="4dp" />
@@ -47,7 +47,7 @@
             android:layout_height="36dp"
             android:src="@android:drawable/ic_menu_delete"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="删除表" />
+            android:contentDescription="@string/d1_delete_table" />
 
 
     </LinearLayout>

@@ -64,21 +64,21 @@ class DomainDetailFragment : Fragment() {
 
     private fun setupTools() {
         val tools = listOf(
-            ZoneToolItem("域名分析", android.R.drawable.ic_menu_mapmode, R.id.action_domainDetail_to_zoneAnalytics),
-            ZoneToolItem("DNS记录", android.R.drawable.ic_menu_edit, R.id.action_domainDetail_to_dns),
-            ZoneToolItem("路由", android.R.drawable.ic_menu_directions, R.id.action_domainDetail_to_route),
-            ZoneToolItem("WAF规则", android.R.drawable.ic_menu_search, R.id.action_domainDetail_to_waf),
-            ZoneToolItem("缓存规则", android.R.drawable.ic_menu_save, R.id.action_domainDetail_to_cache),
-            ZoneToolItem("速率限制", android.R.drawable.ic_menu_recent_history, R.id.action_domainDetail_to_rateLimit),
-            ZoneToolItem("电子邮件路由", android.R.drawable.ic_menu_send, R.id.action_domainDetail_to_emailRouting),
-            ZoneToolItem("负载均衡", android.R.drawable.ic_menu_share, R.id.action_domainDetail_to_loadBalancer),
+            ZoneToolItem(getString(R.string.zone_tool_analytics), android.R.drawable.ic_menu_mapmode, R.id.action_domainDetail_to_zoneAnalytics),
+            ZoneToolItem(getString(R.string.zone_tool_dns), android.R.drawable.ic_menu_edit, R.id.action_domainDetail_to_dns),
+            ZoneToolItem(getString(R.string.zone_tool_route), android.R.drawable.ic_menu_directions, R.id.action_domainDetail_to_route),
+            ZoneToolItem(getString(R.string.zone_tool_waf), android.R.drawable.ic_menu_search, R.id.action_domainDetail_to_waf),
+            ZoneToolItem(getString(R.string.zone_tool_cache_rules), android.R.drawable.ic_menu_save, R.id.action_domainDetail_to_cache),
+            ZoneToolItem(getString(R.string.zone_tool_rate_limit), android.R.drawable.ic_menu_recent_history, R.id.action_domainDetail_to_rateLimit),
+            ZoneToolItem(getString(R.string.zone_tool_email_routing), android.R.drawable.ic_menu_send, R.id.action_domainDetail_to_emailRouting),
+            ZoneToolItem(getString(R.string.zone_tool_load_balancer), android.R.drawable.ic_menu_share, R.id.action_domainDetail_to_loadBalancer),
             ZoneToolItem("SSL/TLS", android.R.drawable.ic_lock_lock, R.id.action_domainDetail_to_ssl),
-            ZoneToolItem("SSL证书", android.R.drawable.ic_menu_manage, R.id.action_domainDetail_to_sslCerts),
-            ZoneToolItem("转换规则", android.R.drawable.ic_menu_rotate, R.id.action_domainDetail_to_transform),
-            ZoneToolItem("IP访问规则", android.R.drawable.ic_menu_view, R.id.action_domainDetail_to_accessRules),
-            ZoneToolItem("性能与缓存", android.R.drawable.ic_menu_compass, R.id.action_domainDetail_to_performance),
-            ZoneToolItem("代码片段", android.R.drawable.ic_menu_agenda, R.id.action_domainDetail_to_snippets),
-            ZoneToolItem("设置", android.R.drawable.ic_menu_preferences, R.id.action_domainDetail_to_zoneSettings),
+            ZoneToolItem(getString(R.string.zone_tool_ssl_certs), android.R.drawable.ic_menu_manage, R.id.action_domainDetail_to_sslCerts),
+            ZoneToolItem(getString(R.string.zone_tool_transform_rules), android.R.drawable.ic_menu_rotate, R.id.action_domainDetail_to_transform),
+            ZoneToolItem(getString(R.string.zone_tool_access_rules), android.R.drawable.ic_menu_view, R.id.action_domainDetail_to_accessRules),
+            ZoneToolItem(getString(R.string.zone_tool_performance), android.R.drawable.ic_menu_compass, R.id.action_domainDetail_to_performance),
+            ZoneToolItem(getString(R.string.zone_tool_snippets), android.R.drawable.ic_menu_agenda, R.id.action_domainDetail_to_snippets),
+            ZoneToolItem(getString(R.string.zone_tool_settings), android.R.drawable.ic_menu_preferences, R.id.action_domainDetail_to_zoneSettings),
         )
         tools.forEach { tool -> binding.toolsContainer.addView(buildToolRow(tool)) }
     }
@@ -127,7 +127,7 @@ class DomainDetailFragment : Fragment() {
         }
         binding.nameServersCard.setOnClickListener {
             copyToClipboard(servers.joinToString("\n"))
-            requireContext().showToast("已复制名称服务器")
+            requireContext().showToast(getString(R.string.msg_nameservers_copied))
         }
     }
 

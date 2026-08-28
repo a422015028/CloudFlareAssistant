@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="存储类型"
+            android:text="@string/backup_storage_type"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginTop="8dp"
@@ -48,7 +48,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="本地"
+                android:text="@string/backup_local"
                 style="@style/Widget.Material3.Button.OutlinedButton" />
 
             <com.google.android.material.button.MaterialButton
@@ -70,7 +70,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="WebDAV 配置"
+                android:text="@string/backup_webdav_config"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginTop="8dp"
@@ -79,7 +79,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="WebDAV 地址"
+            android:hint="@string/backup_webdav_url"
             android:layout_marginBottom="8dp"
             app:boxBackgroundMode="outline">
 
@@ -88,13 +88,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textUri"
-                android:singleLine="true" />
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:imeOptions="actionNext" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="用户名"
+            android:hint="@string/backup_username"
             android:layout_marginBottom="8dp"
             app:boxBackgroundMode="outline">
 
@@ -103,13 +105,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:singleLine="true" />
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:imeOptions="actionNext" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="密码"
+            android:hint="@string/backup_password"
             android:layout_marginBottom="8dp"
             app:boxBackgroundMode="outline"
             app:endIconMode="password_toggle">
@@ -119,13 +123,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:singleLine="true" />
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:imeOptions="actionDone" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="备份路径（相对路径，例如: cloudflare_backups）"
+            android:hint="@string/backup_path_hint_local"
             android:layout_marginBottom="8dp"
             app:boxBackgroundMode="outline">
 
@@ -134,14 +140,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:singleLine="true" />
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:imeOptions="actionNext" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/webDavBackupPasswordLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="备份密码（开启自动备份时用于加密，留空则不加密）"
+            android:hint="@string/backup_password_hint"
             android:layout_marginBottom="8dp"
             app:boxBackgroundMode="outline"
             app:endIconMode="password_toggle">
@@ -151,14 +159,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:singleLine="true" />
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:imeOptions="actionDone" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/autoBackupSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="自动备份"
+            android:text="@string/backup_auto"
             android:layout_marginBottom="16dp" />
 
         <LinearLayout
@@ -172,7 +182,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="测试连接"
+                android:text="@string/backup_test_connection"
                 android:layout_marginEnd="8dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -180,7 +190,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="保存配置" />
+                android:text="@string/backup_save_config" />
         </LinearLayout>
         </LinearLayout>
 
@@ -194,7 +204,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="R2 配置"
+                android:text="@string/backup_r2_config"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginTop="8dp"
@@ -203,7 +213,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="选择账号"
+                android:hint="@string/account_select"
                 android:layout_marginBottom="8dp"
                 app:boxBackgroundMode="outline"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
@@ -218,7 +228,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="选择 Bucket"
+                android:hint="@string/backup_select_bucket"
                 android:layout_marginBottom="8dp"
                 app:boxBackgroundMode="outline"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
@@ -233,7 +243,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="备份路径（相对路径，例如: backups）"
+                android:hint="@string/backup_path_hint_r2"
                 android:layout_marginBottom="8dp"
                 app:boxBackgroundMode="outline">
 
@@ -242,14 +252,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text"
-                    android:singleLine="true" />
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:imeOptions="actionNext" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/r2BackupPasswordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="备份密码（开启自动备份时用于加密，留空则不加密）"
+                android:hint="@string/backup_password_hint"
                 android:layout_marginBottom="8dp"
                 app:boxBackgroundMode="outline"
                 app:endIconMode="password_toggle">
@@ -259,14 +271,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
-                    android:singleLine="true" />
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:imeOptions="actionDone" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/r2AutoBackupSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="自动备份"
+                android:text="@string/backup_auto"
                 android:layout_marginBottom="16dp" />
 
             <LinearLayout
@@ -280,7 +294,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="加载Bucket"
+                    android:text="@string/backup_load_buckets"
                     android:layout_marginEnd="8dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -288,7 +302,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="保存配置" />
+                    android:text="@string/backup_save_config" />
             </LinearLayout>
         </LinearLayout>
 
@@ -302,7 +316,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="本地备份"
+                android:text="@string/backup_local_backup"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginTop="8dp"
@@ -327,7 +341,7 @@
                         android:id="@+id/localDirText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="当前目录: 应用私有目录（默认）"
+                        android:text="@string/backup_current_dir"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"
                         android:layout_marginBottom="8dp" />
@@ -341,7 +355,7 @@
                             android:id="@+id/chooseDirButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="选择其他目录"
+                            android:text="@string/backup_choose_dir"
                             style="@style/Widget.Material3.Button.OutlinedButton" />
 
                         <Space
@@ -353,7 +367,7 @@
                             android:id="@+id/importBackupButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="导入备份"
+                            android:text="@string/backup_import"
                             style="@style/Widget.Material3.Button.OutlinedButton" />
                     </LinearLayout>
                 </LinearLayout>
@@ -363,7 +377,7 @@
                 android:id="@+id/localBackupPasswordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="备份密码（开启自动备份时用于加密，留空则不加密）"
+                android:hint="@string/backup_password_hint"
                 android:layout_marginBottom="8dp"
                 app:boxBackgroundMode="outline"
                 app:endIconMode="password_toggle">
@@ -373,21 +387,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
-                    android:singleLine="true" />
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:imeOptions="actionDone" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/localAutoBackupSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="自动备份"
+                android:text="@string/backup_auto"
                 android:layout_marginBottom="16dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveLocalConfigButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="保存配置"
+                android:text="@string/backup_save_config"
                 android:layout_marginBottom="16dp" />
         </LinearLayout>
 
@@ -400,7 +416,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="备份管理"
+            android:text="@string/backup_management"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />
@@ -416,7 +432,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="立即备份"
+                android:text="@string/backup_now"
                 android:layout_marginEnd="8dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -424,13 +440,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="刷新列表" />
+                android:text="@string/backup_refresh_list" />
         </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="备份文件列表"
+            android:text="@string/backup_file_list"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp" />

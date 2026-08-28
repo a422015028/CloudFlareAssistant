@@ -1,5 +1,7 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.database.AccountDao
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.AccountInfo
@@ -7,6 +9,7 @@ import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import dagger.Lazy
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +22,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AccountRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val accountDao: AccountDao,
     private val backupRepositoryLazy: Lazy<BackupRepository>,
     private val api: CloudFlareApi
@@ -204,14 +208,14 @@ class AccountRepository @Inject constructor(
                 if (body?.success == true && body.result != null) {
                     Resource.Success(body.result)
                 } else {
-                    val errorMsg = body?.errors?.firstOrNull()?.message ?: "获取账号列表失败"
+                    val errorMsg = body?.errors?.firstOrNull()?.message ?: appContext.getString(R.string.repo_account_fetch_list_failed)
                     Resource.Error(errorMsg)
                 }
             } else {
                 Resource.Error("HTTP ${response.code()}: ${response.message()}")
             }
         } catch (e: Exception) {
-            Resource.Error(e.message ?: "网络错误")
+            Resource.Error(e.message ?: appContext.getString(R.string.repo_generic_network_error))
         }
     }
 }

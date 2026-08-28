@@ -257,7 +257,7 @@ class AccountEditFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.message.collect { message ->
-                    showToast(message)
+                    showToast(message.asString(requireContext()))
                 }
             }
         }

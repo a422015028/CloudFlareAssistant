@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.EmailDestinationAddress
 import com.muort.upworker.core.model.EmailRoutingAction
@@ -47,7 +48,7 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
     private var rules: List<EmailRoutingRule> = emptyList()
     private var addresses: List<EmailDestinationAddress> = emptyList()
 
-    override val emptyText: String = ""
+    override val emptyTextResId: Int = R.string.empty_list
     override val showAddFab: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -92,7 +93,7 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
 
     private fun renderAll() {
         showList()
-        adapter.update(settings, rules, addresses)
+        adapter.update(requireContext(), settings, rules, addresses)
     }
 
     // ==================== 总开关 ====================
@@ -102,8 +103,11 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
         val current = settings?.isEnabled == true
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = emailRepo.setEnabled(account, zoneId, !current)) {
-                is Resource.Success -> { toast(if (!current) "已启用" else "已关闭"); load(account) }
-                is Resource.Error -> toast("操作失败: ${r.message}")
+                is Resource.Success -> {
+                    toast(if (!current) getString(R.string.msg_enabled) else getString(R.string.msg_disabled))
+                    load(account)
+                }
+                is Resource.Error -> toast(getString(R.string.msg_operation_failed, r.message))
                 is Resource.Loading -> {}
             }
         }
@@ -112,28 +116,30 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
     // ==================== 添加规则 ====================
 
     private fun showAddRuleDialog() {
-        val b = DialogEmailAddRuleBinding.inflate(LayoutInflater.from(requireContext()))
+        val ctx = requireContext()
+        val b = DialogEmailAddRuleBinding.inflate(LayoutInflater.from(ctx))
         val verifiedEmails = addresses.filter { it.isVerified }.map { it.email }
         if (verifiedEmails.isNotEmpty()) {
-            b.destinationHint.text = "已验证的目的地址：${verifiedEmails.joinToString(", ")}"
+            b.destinationHint.text = ctx.getString(R.string.email_destination_hint, verifiedEmails.joinToString(", "))
             b.destinationHint.visibility = View.VISIBLE
         }
         if (zoneName.isNotBlank()) {
-            b.matchInputLayout.hint = "匹配地址（如 alice@$zoneName）"
+            b.matchInputLayout.hint = ctx.getString(R.string.email_match_address_hint, zoneName)
         }
 
-        MaterialAlertDialogBuilder(requireContext())
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.email_add_rule_dialog_title)
             .setView(b.root)
-            .setPositiveButton("添加") { _, _ ->
+            .setPositiveButton(R.string.add) { _, _ ->
                 val match = b.matchInput.text.toString().trim()
                 val dest = b.destinationInput.text.toString().trim()
                 val name = b.nameInput.text.toString().trim().ifBlank { null }
                 if (match.isEmpty() || dest.isEmpty()) {
-                    toast("匹配地址和转发地址不能为空"); return@setPositiveButton
+                    toast(getString(R.string.email_match_destination_required)); return@setPositiveButton
                 }
                 account?.let { createRule(it, match, dest, name) }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -146,8 +152,8 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
                 actions = listOf(EmailRoutingAction(type = "forward", value = listOf(dest))),
             )
             when (val r = emailRepo.createRule(account, zoneId, input)) {
-                is Resource.Success -> { toast("已添加"); load(account) }
-                is Resource.Error -> toast("添加失败: ${r.message}")
+                is Resource.Success -> { toast(getString(R.string.msg_added)); load(account) }
+                is Resource.Error -> toast(getString(R.string.msg_add_failed, r.message))
                 is Resource.Loading -> {}
             }
         }
@@ -156,26 +162,30 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
     // ==================== 添加目的地址 ====================
 
     private fun showAddAddressDialog() {
-        val b = DialogEmailAddAddressBinding.inflate(LayoutInflater.from(requireContext()))
+        val ctx = requireContext()
+        val b = DialogEmailAddAddressBinding.inflate(LayoutInflater.from(ctx))
 
-        MaterialAlertDialogBuilder(requireContext())
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.email_add_address_dialog_title)
             .setView(b.root)
-            .setPositiveButton("添加") { _, _ ->
+            .setPositiveButton(R.string.add) { _, _ ->
                 val email = b.emailInput.text.toString().trim()
                 if (email.isEmpty()) {
-                    toast("邮箱不能为空"); return@setPositiveButton
+                    toast(getString(R.string.msg_email_empty)); return@setPositiveButton
                 }
                 account?.let { addAddress(it, email) }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun addAddress(account: Account, email: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = emailRepo.createAddress(account, email)) {
-                is Resource.Success -> { toast("已添加，请查收验证邮件"); load(account) }
-                is Resource.Error -> toast("添加失败: ${r.message}")
+                is Resource.Success -> {
+                    toast(getString(R.string.email_destination_verify_hint)); load(account)
+                }
+                is Resource.Error -> toast(getString(R.string.msg_add_failed, r.message))
                 is Resource.Loading -> {}
             }
         }
@@ -184,40 +194,42 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
     // ==================== 删除 ====================
 
     private fun confirmDeleteRule(rule: EmailRoutingRule) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除此路由规则？")
-            .setMessage("删除后邮件将不再按此规则转发。")
-            .setPositiveButton("删除") { _, _ ->
+        val ctx = requireContext()
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.email_delete_rule_title)
+            .setMessage(R.string.email_delete_rule_message)
+            .setPositiveButton(R.string.delete) { _, _ ->
                 account?.let { acct ->
                     viewLifecycleOwner.lifecycleScope.launch {
                         when (val r = emailRepo.deleteRule(acct, zoneId, rule.id)) {
-                            is Resource.Success -> { toast("已删除"); load(acct) }
-                            is Resource.Error -> toast("删除失败: ${r.message}")
+                            is Resource.Success -> { toast(getString(R.string.msg_deleted)); load(acct) }
+                            is Resource.Error -> toast(getString(R.string.msg_delete_failed, r.message))
                             is Resource.Loading -> {}
                         }
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun confirmDeleteAddress(addr: EmailDestinationAddress) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除此目的地址？")
+        val ctx = requireContext()
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.email_delete_destination_title)
             .setMessage(addr.email)
-            .setPositiveButton("删除") { _, _ ->
+            .setPositiveButton(R.string.delete) { _, _ ->
                 account?.let { acct ->
                     viewLifecycleOwner.lifecycleScope.launch {
                         when (val r = emailRepo.deleteAddress(acct, addr.id)) {
-                            is Resource.Success -> { toast("已删除"); load(acct) }
-                            is Resource.Error -> toast("删除失败: ${r.message}")
+                            is Resource.Success -> { toast(getString(R.string.msg_deleted)); load(acct) }
+                            is Resource.Error -> toast(getString(R.string.msg_delete_failed, r.message))
                             is Resource.Loading -> {}
                         }
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -225,11 +237,11 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
 
     private sealed class EmailItem {
         data class SettingsItem(val settings: EmailRoutingSettings?) : EmailItem()
-        data class SectionHeader(val title: String) : EmailItem()
+        data class SectionHeader(val titleResId: Int) : EmailItem()
         data class RuleItem(val rule: EmailRoutingRule) : EmailItem()
         data class AddressItem(val address: EmailDestinationAddress) : EmailItem()
-        data class AddButton(val label: String, val isRule: Boolean) : EmailItem()
-        data class EmptyHint(val text: String) : EmailItem()
+        data class AddButton(val labelResId: Int, val isRule: Boolean) : EmailItem()
+        data class EmptyHint(val textResId: Int) : EmailItem()
     }
 
     private class EmailRoutingAdapter(
@@ -252,26 +264,27 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
         }
 
         fun update(
+            @Suppress("UNUSED_PARAMETER") ctx: android.content.Context,
             settings: EmailRoutingSettings?,
             rules: List<EmailRoutingRule>,
             addresses: List<EmailDestinationAddress>,
         ) {
             items.clear()
             items += EmailItem.SettingsItem(settings)
-            items += EmailItem.SectionHeader("路由规则")
+            items += EmailItem.SectionHeader(R.string.email_section_routing_rules)
             if (rules.isEmpty()) {
-                items += EmailItem.EmptyHint("暂无路由规则")
+                items += EmailItem.EmptyHint(R.string.email_empty_routing_rules)
             } else {
                 items += rules.map { EmailItem.RuleItem(it) }
             }
-            items += EmailItem.AddButton("添加规则", isRule = true)
-            items += EmailItem.SectionHeader("目的地址")
+            items += EmailItem.AddButton(R.string.email_add_routing_rule, isRule = true)
+            items += EmailItem.SectionHeader(R.string.email_section_destinations)
             if (addresses.isEmpty()) {
-                items += EmailItem.EmptyHint("暂无目的地址")
+                items += EmailItem.EmptyHint(R.string.email_empty_destinations)
             } else {
                 items += addresses.map { EmailItem.AddressItem(it) }
             }
-            items += EmailItem.AddButton("添加目的地址", isRule = false)
+            items += EmailItem.AddButton(R.string.email_add_destination, isRule = false)
             notifyDataSetChanged()
         }
 
@@ -332,8 +345,8 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
                 icon = androidx.core.content.ContextCompat.getDrawable(
                     parent.context, android.R.drawable.ic_input_add
                 )
-                iconTint = androidx.core.content.ContextCompat.getColorStateList(parent.context, com.muort.upworker.R.color.md_theme_tertiary)
-                setTextColor(androidx.core.content.ContextCompat.getColorStateList(parent.context, com.muort.upworker.R.color.md_theme_tertiary))
+                iconTint = androidx.core.content.ContextCompat.getColorStateList(parent.context, R.color.md_theme_tertiary)
+                setTextColor(androidx.core.content.ContextCompat.getColorStateList(parent.context, R.color.md_theme_tertiary))
                 strokeWidth = 0
                 elevation = 0f
             }
@@ -343,13 +356,14 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
             (v * parent.resources.displayMetrics.density).toInt()
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+            val ctx = holder.itemView.context
             when (val item = items[position]) {
                 is EmailItem.SettingsItem -> (holder as SettingsVH).bind(item.settings, onToggleEnabled)
-                is EmailItem.SectionHeader -> (holder as HeaderVH).bind(item.title)
-                is EmailItem.RuleItem -> (holder as RuleVH).bind(item.rule, onDeleteRule)
-                is EmailItem.AddressItem -> (holder as AddressVH).bind(item.address, onDeleteAddress)
-                is EmailItem.AddButton -> (holder as AddVH).bind(item, onAddRule, onAddAddress)
-                is EmailItem.EmptyHint -> (holder as HintVH).bind(item.text)
+                is EmailItem.SectionHeader -> (holder as HeaderVH).bind(ctx.getString(item.titleResId))
+                is EmailItem.RuleItem -> (holder as RuleVH).bind(item.rule, onDeleteRule, ctx)
+                is EmailItem.AddressItem -> (holder as AddressVH).bind(item.address, onDeleteAddress, ctx)
+                is EmailItem.AddButton -> (holder as AddVH).bind(ctx.getString(item.labelResId), item.isRule, onAddRule, onAddAddress)
+                is EmailItem.EmptyHint -> (holder as HintVH).bind(ctx.getString(item.textResId))
             }
         }
 
@@ -357,7 +371,15 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
 
         class SettingsVH(private val b: ItemEmailSettingsBinding) : RecyclerView.ViewHolder(b.root) {
             fun bind(settings: EmailRoutingSettings?, onToggle: () -> Unit) {
-                b.statusText.text = "状态：${settings?.status ?: "未知"}"
+                val ctx = itemView.context
+                val status = settings?.status?.let {
+                    when (it) {
+                        "enabled" -> ctx.getString(R.string.email_status_enabled)
+                        "disabled" -> ctx.getString(R.string.email_status_disabled)
+                        else -> it
+                    }
+                } ?: ctx.getString(R.string.email_status_unknown)
+                b.statusText.text = ctx.getString(R.string.email_status_label, status)
                 b.toggleSwitch.isChecked = settings?.isEnabled == true
                 b.toggleSwitch.setOnCheckedChangeListener(null)
                 b.toggleSwitch.setOnCheckedChangeListener { _, _ -> onToggle() }
@@ -373,37 +395,38 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
         }
 
         class RuleVH(private val b: ItemEmailRuleBinding) : RecyclerView.ViewHolder(b.root) {
-            fun bind(rule: EmailRoutingRule, onDelete: (EmailRoutingRule) -> Unit) {
+            fun bind(rule: EmailRoutingRule, onDelete: (EmailRoutingRule) -> Unit, ctx: android.content.Context) {
                 val matchAddr = rule.matchAddress
                 val displayName = rule.name?.takeIf { it.isNotBlank() }
                     ?: matchAddr
-                    ?: "全部邮件"
+                    ?: ctx.getString(R.string.email_catch_all_label)
                 b.nameText.text = displayName
 
                 val dest = rule.actions.firstOrNull()?.value?.joinToString(", ").orEmpty()
-                b.forwardText.text = "${matchAddr ?: "全部邮件"} → $dest"
+                val matchOrCatch = matchAddr ?: ctx.getString(R.string.email_catch_all_label)
+                b.forwardText.text = ctx.getString(R.string.email_forward_format, matchOrCatch, dest)
 
                 b.deleteButton.setOnClickListener { onDelete(rule) }
             }
         }
 
         class AddressVH(private val b: ItemEmailAddressBinding) : RecyclerView.ViewHolder(b.root) {
-            fun bind(addr: EmailDestinationAddress, onDelete: (EmailDestinationAddress) -> Unit) {
+            fun bind(addr: EmailDestinationAddress, onDelete: (EmailDestinationAddress) -> Unit, ctx: android.content.Context) {
                 b.emailText.text = addr.email
                 if (addr.isVerified) {
-                    b.verifiedText.text = "已验证"
+                    b.verifiedText.setText(R.string.email_dest_verified)
                     b.verifiedText.setTextColor(
                         com.google.android.material.color.MaterialColors.getColor(
-                            itemView.context,
+                            ctx,
                             com.google.android.material.R.attr.colorPrimary,
                             0xFF4CAF50.toInt(),
                         )
                     )
                 } else {
-                    b.verifiedText.text = "待验证"
+                    b.verifiedText.setText(R.string.email_dest_pending)
                     b.verifiedText.setTextColor(
                         com.google.android.material.color.MaterialColors.getColor(
-                            itemView.context,
+                            ctx,
                             com.google.android.material.R.attr.colorOnSurfaceVariant,
                             0xFF888888.toInt(),
                         )
@@ -414,9 +437,9 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
         }
 
         class AddVH(private val btn: MaterialButton) : RecyclerView.ViewHolder(btn.rootView) {
-            fun bind(item: EmailItem.AddButton, onAddRule: () -> Unit, onAddAddress: () -> Unit) {
-                btn.text = item.label
-                btn.setOnClickListener { if (item.isRule) onAddRule() else onAddAddress() }
+            fun bind(label: String, isRule: Boolean, onAddRule: () -> Unit, onAddAddress: () -> Unit) {
+                btn.text = label
+                btn.setOnClickListener { if (isRule) onAddRule() else onAddAddress() }
             }
         }
     }

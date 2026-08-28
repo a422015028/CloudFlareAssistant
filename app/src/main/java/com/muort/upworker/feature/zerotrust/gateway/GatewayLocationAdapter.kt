@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.muort.upworker.R
 import com.muort.upworker.core.model.GatewayLocation
 import com.muort.upworker.databinding.ItemGatewayLocationBinding
 
@@ -40,6 +41,7 @@ class GatewayLocationAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(location: GatewayLocation) {
+            val ctx = binding.root.context
             binding.locationNameText.text = location.name
 
             binding.defaultChip.visibility = if (location.clientDefault == true) {
@@ -47,17 +49,20 @@ class GatewayLocationAdapter(
             } else {
                 android.view.View.GONE
             }
+            binding.defaultChip.text = ctx.getString(R.string.zt_location_default_label)
 
             binding.ecsChip.visibility = if (location.ecsSupport == true) {
                 android.view.View.VISIBLE
             } else {
                 android.view.View.GONE
             }
+            binding.ecsChip.text = ctx.getString(R.string.zt_location_ecs_label)
 
-            val networks = location.networks?.joinToString(", ") { it.network } ?: "无"
-            binding.locationNetworksText.text = "来源 IP 白名单: $networks"
+            val networks = location.networks?.joinToString(", ") { it.network } ?: ctx.getString(R.string.zt_location_no_networks)
+            binding.locationNetworksText.text = ctx.getString(R.string.zt_location_networks_label, networks)
 
-            binding.locationClientsText.text = "客户端: ${location.clientCount ?: 0}"
+            val clientCount = location.clientCount ?: 0
+            binding.locationClientsText.text = ctx.resources.getQuantityString(R.plurals.zt_location_clients, clientCount, clientCount)
 
             val endpoints = location.endpoints
             val ipv4 = location.ipv4Destination
@@ -65,41 +70,41 @@ class GatewayLocationAdapter(
             val ipv6 = location.ip
             val gatewayHost = location.dohSubdomain?.let { "$it.cloudflare-gateway.com" }
 
-            val ipv4Display = buildString {
-                append("IPv4: ").append(ipv4 ?: "未分配")
-                if (!ipv4Backup.isNullOrBlank()) append("（备用 $ipv4Backup）")
-            }
+            val ipv4Main = ipv4 ?: ctx.getString(R.string.zt_location_ipv4_not_assigned)
+            val ipv4BackupPart = if (!ipv4Backup.isNullOrBlank()) ctx.getString(R.string.zt_location_ipv4_backup, ipv4Backup) else ""
+            val ipv4Display = ctx.getString(R.string.zt_location_ipv4_label, ipv4Main) + ipv4BackupPart
             val ipv4Copy = if (ipv4.isNullOrBlank()) null else listOfNotNull(ipv4, ipv4Backup).joinToString(", ")
 
-            setEndpointText(binding.dnsIpv4Text, ipv4Display, endpoints?.ipv4?.enabled)
-            setEndpointText(binding.dnsIpv6Text, "IPv6: ${ipv6 ?: "未分配"}", endpoints?.ipv6?.enabled)
+            setEndpointText(ctx, binding.dnsIpv4Text, ipv4Display, endpoints?.ipv4?.enabled)
+            setEndpointText(ctx, binding.dnsIpv6Text, ctx.getString(R.string.zt_location_ipv6_label, ipv6 ?: ctx.getString(R.string.zt_location_ipv4_not_assigned)), endpoints?.ipv6?.enabled)
             setEndpointText(
+                ctx,
                 binding.dnsDotText,
-                gatewayHost?.let { "DoT: $it:853" } ?: "DoT: 未分配",
+                if (gatewayHost != null) ctx.getString(R.string.zt_location_dot_label, gatewayHost) else ctx.getString(R.string.zt_location_dot_unassigned),
                 endpoints?.dot?.enabled
             )
             val dohUrl = gatewayHost?.let { "https://$it/dns-query" }
-            setEndpointText(binding.dnsDohText, "DoH: ${dohUrl ?: "未分配"}", endpoints?.doh?.enabled)
+            setEndpointText(ctx, binding.dnsDohText, ctx.getString(R.string.zt_location_doh_label, dohUrl ?: ctx.getString(R.string.zt_location_ipv4_not_assigned)), endpoints?.doh?.enabled)
 
             binding.dnsIpv4Text.setOnClickListener {
                 if (!ipv4Copy.isNullOrBlank()) {
-                    copyToClipboard(binding.root.context, ipv4Copy, "IPv4 地址")
+                    copyToClipboard(ctx, ipv4Copy, "IPv4")
                 }
             }
 
             binding.dnsIpv6Text.setOnClickListener {
                 if (!ipv6.isNullOrBlank()) {
-                    copyToClipboard(binding.root.context, ipv6, "IPv6 地址")
+                    copyToClipboard(ctx, ipv6, "IPv6")
                 }
             }
 
             binding.dnsDotText.setOnClickListener {
-                gatewayHost?.let { copyToClipboard(binding.root.context, "$it:853", "DoT 地址") }
+                gatewayHost?.let { copyToClipboard(ctx, "$it:853", "DoT") }
             }
 
             binding.dnsDohText.setOnClickListener {
                 if (!dohUrl.isNullOrBlank()) {
-                    copyToClipboard(binding.root.context, dohUrl, "DoH 地址")
+                    copyToClipboard(ctx, dohUrl, "DoH")
                 }
             }
 
@@ -107,16 +112,16 @@ class GatewayLocationAdapter(
 
             binding.deleteButton.setOnClickListener {
                 if (location.clientDefault == true) {
-                    Toast.makeText(binding.root.context, "无法删除默认位置，请先设置其他位置为默认", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, ctx.getString(R.string.zt_location_cannot_delete_default), Toast.LENGTH_SHORT).show()
                 } else {
                     onDeleteClick(location)
                 }
             }
         }
 
-        private fun setEndpointText(textView: android.widget.TextView, text: String, enabled: Boolean?) {
+        private fun setEndpointText(ctx: Context, textView: android.widget.TextView, text: String, enabled: Boolean?) {
             if (enabled == false) {
-                val spannable = SpannableString("$text（已停用）")
+                val spannable = SpannableString(text + ctx.getString(R.string.zt_location_endpoint_disabled))
                 val typedValue = android.util.TypedValue()
                 textView.context.theme.resolveAttribute(com.google.android.material.R.attr.colorError, typedValue, true)
                 spannable.setSpan(
@@ -135,7 +140,7 @@ class GatewayLocationAdapter(
             val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clipData = ClipData.newPlainText(label, text)
             clipboardManager.setPrimaryClip(clipData)
-            Toast.makeText(context, "$label 已复制到剪贴板", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.zt_location_copy_label_format, label), Toast.LENGTH_SHORT).show()
         }
     }
 

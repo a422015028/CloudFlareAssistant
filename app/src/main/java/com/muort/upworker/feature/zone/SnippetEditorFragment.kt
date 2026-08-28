@@ -262,7 +262,7 @@ class SnippetEditorFragment : Fragment() {
         binding.progressBar.visibility = View.VISIBLE
 
                 if (account == null) {
-            android.widget.Toast.makeText(requireContext(), "账号未就绪", android.widget.Toast.LENGTH_LONG).show()
+            android.widget.Toast.makeText(requireContext(), getString(R.string.msg_account_not_ready), android.widget.Toast.LENGTH_LONG).show()
             binding.progressBar.visibility = View.GONE
             return
         }
@@ -281,7 +281,7 @@ class SnippetEditorFragment : Fragment() {
                     }
                 }
                 is Resource.Error -> {
-                    android.widget.Toast.makeText(requireContext(), "读取失败: ${r.message}", android.widget.Toast.LENGTH_LONG).show()
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.msg_read_failed, r.message), android.widget.Toast.LENGTH_LONG).show()
                 }
                 is Resource.Loading -> {}
             }
@@ -293,7 +293,7 @@ class SnippetEditorFragment : Fragment() {
         binding.progressBar.visibility = View.VISIBLE
 
         if (account == null) {
-            android.widget.Toast.makeText(requireContext(), "账号未就绪", android.widget.Toast.LENGTH_LONG).show()
+            android.widget.Toast.makeText(requireContext(), getString(R.string.msg_account_not_ready), android.widget.Toast.LENGTH_LONG).show()
             binding.progressBar.visibility = View.GONE
             return
         }
@@ -309,7 +309,7 @@ class SnippetEditorFragment : Fragment() {
             if (syntaxError != null) {
                 binding.progressBar.visibility = View.GONE
                 android.widget.Toast.makeText(requireContext(),
-                    "代码有语法错误，未保存。$syntaxError", android.widget.Toast.LENGTH_LONG).show()
+                    getString(R.string.msg_syntax_error_not_saved, syntaxError), android.widget.Toast.LENGTH_LONG).show()
             } else {
                 uploadSnippet(content, onSaved)
             }
@@ -320,13 +320,13 @@ class SnippetEditorFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
                     when (val r = snippetRepo.putSnippet(account!!, args.zoneId, args.snippetName, content)) {
                 is Resource.Success -> {
-                    android.widget.Toast.makeText(requireContext(), "保存成功", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.msg_saved), android.widget.Toast.LENGTH_SHORT).show()
                     hasUnsavedChanges = false
                     originalContent = content
                     onSaved?.invoke()
                 }
                 is Resource.Error -> {
-                    android.widget.Toast.makeText(requireContext(), "保存失败: ${r.message}", android.widget.Toast.LENGTH_LONG).show()
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.msg_save_failed, r.message), android.widget.Toast.LENGTH_LONG).show()
                 }
                 is Resource.Loading -> {}
             }
@@ -341,12 +341,12 @@ class SnippetEditorFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除代码片段")
-            .setMessage("确定要删除「${args.snippetName}」吗？此操作不可撤销。")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.snippet_delete_title)
+            .setMessage(getString(R.string.snippet_delete_confirm_message, args.snippetName))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 deleteSnippet()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -357,7 +357,7 @@ class SnippetEditorFragment : Fragment() {
     private fun deleteSnippet() {
         if (deleting) return
         val acct = account ?: run {
-            android.widget.Toast.makeText(requireContext(), "账号未就绪", android.widget.Toast.LENGTH_LONG).show()
+            android.widget.Toast.makeText(requireContext(), getString(R.string.msg_account_not_ready), android.widget.Toast.LENGTH_LONG).show()
             return
         }
         deleting = true
@@ -365,14 +365,14 @@ class SnippetEditorFragment : Fragment() {
 
         val ctx = requireContext().applicationContext
         requireActivity().lifecycleScope.launch {
-            android.widget.Toast.makeText(ctx, "正在删除「${args.snippetName}」（含规则与 DNS）…", android.widget.Toast.LENGTH_LONG).show()
+            android.widget.Toast.makeText(ctx, getString(R.string.snippet_delete_with_rules_progress, args.snippetName), android.widget.Toast.LENGTH_LONG).show()
             when (val r = snippetRepo.teardownSnippet(acct, args.zoneId, args.snippetName)) {
                 is Resource.Success -> {
-                    android.widget.Toast.makeText(ctx, "已删除（含规则与 DNS）", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(ctx, getString(R.string.msg_deleted_with_rules), android.widget.Toast.LENGTH_SHORT).show()
                     if (isAdded) findNavController().navigateUp()
                 }
                 is Resource.Error -> {
-                    android.widget.Toast.makeText(ctx, "删除失败: ${r.message}", android.widget.Toast.LENGTH_LONG).show()
+                    android.widget.Toast.makeText(ctx, getString(R.string.msg_delete_failed, r.message), android.widget.Toast.LENGTH_LONG).show()
                     if (isAdded) {
                         binding.progressBar.visibility = View.GONE
                         deleting = false
@@ -388,7 +388,7 @@ class SnippetEditorFragment : Fragment() {
         if (args.isNew && !contentSavedForRule) {
             getEditorContent { content ->
                 if (content.isBlank()) {
-                    Toast.makeText(requireContext(), "请先粘贴代码片段内容", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.msg_paste_content_first), Toast.LENGTH_SHORT).show()
                     return@getEditorContent
                 }
                 saveSnippet(content) {
@@ -403,7 +403,7 @@ class SnippetEditorFragment : Fragment() {
 
     private fun openRuleDialog() {
         val currentAccount = account ?: run {
-            Toast.makeText(requireContext(), "账号未就绪", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.msg_account_not_ready), Toast.LENGTH_SHORT).show()
             return
         }
         binding.progressBar.visibility = View.VISIBLE
@@ -411,7 +411,7 @@ class SnippetEditorFragment : Fragment() {
             val rule = when (val r = snippetRepo.listSnippetRules(currentAccount, args.zoneId)) {
                 is Resource.Success -> r.data.firstOrNull { it.snippetName == args.snippetName }
                 is Resource.Error -> {
-                    Toast.makeText(requireContext(), "读取规则失败：${r.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), getString(R.string.msg_rule_read_failed, r.message), Toast.LENGTH_LONG).show()
                     null
                 }
                 is Resource.Loading -> null
@@ -451,7 +451,7 @@ class SnippetEditorFragment : Fragment() {
         val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText("Snippet Code", content)
         clipboard.setPrimaryClip(clip)
-        Toast.makeText(requireContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), getString(R.string.msg_copied_to_clipboard), Toast.LENGTH_SHORT).show()
     }
 
     private fun importFileContent(uri: Uri) {
@@ -460,7 +460,7 @@ class SnippetEditorFragment : Fragment() {
                 it.bufferedReader().readText()
             }
             if (content == null) {
-                Toast.makeText(requireContext(), "读取文件失败", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.msg_read_file_failed), Toast.LENGTH_SHORT).show()
                 return
             }
             // 将内容转义后设置到编辑器
@@ -472,9 +472,9 @@ class SnippetEditorFragment : Fragment() {
                 .replace("\t", "\\t")
             executeJavaScript("setContent(\"$escaped\")")
             hasUnsavedChanges = true
-            Toast.makeText(requireContext(), "已导入 ${content.length} 字符", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.msg_snippet_imported, content.length), Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "导入失败: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), getString(R.string.msg_import_failed, e.message), Toast.LENGTH_LONG).show()
         }
     }
 

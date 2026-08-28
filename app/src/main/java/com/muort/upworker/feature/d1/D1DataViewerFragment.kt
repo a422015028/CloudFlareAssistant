@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.UiState
 import com.muort.upworker.databinding.FragmentD1DataViewerBinding
@@ -53,7 +54,7 @@ class D1DataViewerFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
-        binding.toolbar.title = arguments?.getString("title") ?: "数据查看器"
+        binding.toolbar.title = arguments?.getString("title") ?: getString(R.string.d1_table_data_viewer_title)
     }
 
     private fun setupRecyclerView() {
@@ -82,12 +83,12 @@ class D1DataViewerFragment : Fragment() {
                             val rows = result.results
                             dataAdapter.updateData(columns, rows)
                         } else {
-                            Snackbar.make(binding.root, result.error ?: "查询失败", Snackbar.LENGTH_SHORT).show()
+                            Snackbar.make(binding.root, result.error ?: getString(R.string.d1_query_failed_default), Snackbar.LENGTH_SHORT).show()
                         }
                     }
                     is UiState.Error -> {
                         binding.progressBar.visibility = View.GONE
-                        Snackbar.make(binding.root, "数据加载失败: ${state.message}", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root, getString(R.string.d1_data_load_failed, state.message), Snackbar.LENGTH_SHORT).show()
                     }
                     is UiState.Loading -> {
                         binding.progressBar.visibility = View.VISIBLE
@@ -108,7 +109,7 @@ class D1DataViewerFragment : Fragment() {
             val sql = "SELECT * FROM $tableName LIMIT 100"
             viewModel.executeQuery(currentAccount!!, databaseId, sql)
         } else {
-            Snackbar.make(binding.root, "缺少必要的参数", Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(binding.root, getString(R.string.d1_missing_required_params), Snackbar.LENGTH_SHORT).show()
         }
     }
 

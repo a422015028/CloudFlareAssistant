@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.muort.upworker.R
 import com.muort.upworker.core.model.AccessRule
 import com.muort.upworker.databinding.ItemPolicyRuleBinding
 
@@ -62,20 +63,21 @@ class PolicyRuleAdapter(
         }
 
         private fun getRuleValue(rule: AccessRule): String {
+            val ctx = binding.root.context
             return when {
                 rule.email != null -> rule.email["email"] ?: "N/A"
                 rule.emailDomain != null -> rule.emailDomain["domain"] ?: "N/A"
                 rule.ip != null -> rule.ip["ip"] ?: "N/A"
-                rule.everyone != null -> "所有人"
-                rule.accessGroup != null -> "Group ID: ${rule.accessGroup["id"]}"
-                rule.geo != null -> "Country: ${rule.geo["country_code"]?.joinToString()}"
+                rule.everyone != null -> ctx.getString(R.string.zt_rule_everyone)
+                rule.accessGroup != null -> ctx.getString(R.string.zt_rule_group_id, rule.accessGroup["id"] ?: "")
+                rule.geo != null -> ctx.getString(R.string.zt_rule_geo_country, rule.geo["country_code"]?.joinToString() ?: "")
                 rule.commonName != null -> rule.commonName["common_name"] ?: "N/A"
-                rule.ipList != null -> "IP List: ${rule.ipList["id"]}"
-                rule.certificate != null -> "Certificate"
+                rule.ipList != null -> ctx.getString(R.string.zt_rule_ip_list_id, rule.ipList["id"] ?: "")
+                rule.certificate != null -> ctx.getString(R.string.zt_rule_certificate)
                 rule.authMethod != null -> rule.authMethod["auth_method"] ?: "N/A"
-                rule.devicePosture != null -> "Posture: ${rule.devicePosture["integration_uid"]}"
-                rule.serviceToken != null -> "Token: ${rule.serviceToken["token_id"]}"
-                rule.anyValidServiceToken != null -> "Any Valid Token"
+                rule.devicePosture != null -> ctx.getString(R.string.zt_rule_posture, rule.devicePosture["integration_uid"] ?: "")
+                rule.serviceToken != null -> ctx.getString(R.string.zt_rule_service_token, rule.serviceToken["token_id"] ?: "")
+                rule.anyValidServiceToken != null -> ctx.getString(R.string.zt_rule_any_valid_token)
                 else -> "N/A"
             }
         }

@@ -2,6 +2,7 @@ package com.muort.upworker.feature.zerotrust.devices
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.repository.ZeroTrustRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,11 +28,11 @@ class DevicesViewModel @Inject constructor(
     private val _loadingState = MutableStateFlow(false)
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
     
-    private val _message = MutableSharedFlow<String>()
-    val message: SharedFlow<String> = _message.asSharedFlow()
+    private val _message = MutableSharedFlow<UiMessage>()
+    val message: SharedFlow<UiMessage> = _message.asSharedFlow()
     
-    private val _error = MutableSharedFlow<String>()
-    val error: SharedFlow<String> = _error.asSharedFlow()
+    private val _error = MutableSharedFlow<UiMessage>()
+    val error: SharedFlow<UiMessage> = _error.asSharedFlow()
     
     fun loadDevices(account: Account) {
         viewModelScope.launch {
@@ -42,7 +43,7 @@ class DevicesViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} devices")
                 }
                 is Resource.Error -> {
-                    _error.emit("加载设备失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_device_list_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -55,11 +56,11 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.revokeDevice(account, deviceId)) {
                 is Resource.Success -> {
-                    _message.emit("设备已撤销")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_device_revoked))
                     loadDevices(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("撤销设备失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_device_revoke_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -72,11 +73,11 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.deleteDevice(account, deviceId)) {
                 is Resource.Success -> {
-                    _message.emit("设备已删除")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_device_deleted))
                     loadDevices(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("删除设备失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_device_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -93,7 +94,7 @@ class DevicesViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} device policies")
                 }
                 is Resource.Error -> {
-                    _error.emit("加载配置文件失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_device_policies_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -106,11 +107,11 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.createDevicePolicy(account, request)) {
                 is Resource.Success -> {
-                    _message.emit("配置文件已创建")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_device_policy_created))
                     loadPolicies(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("创建配置文件失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_device_policy_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -123,11 +124,11 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.updateDevicePolicy(account, policyId, request)) {
                 is Resource.Success -> {
-                    _message.emit("配置文件已更新")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_device_policy_updated))
                     loadPolicies(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("更新配置文件失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_device_policy_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -140,11 +141,11 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.deleteDevicePolicy(account, policyId)) {
                 is Resource.Success -> {
-                    _message.emit("配置文件已删除")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_device_policy_deleted))
                     loadPolicies(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("删除配置文件失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_device_policy_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -157,11 +158,11 @@ class DevicesViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.updateDefaultDevicePolicy(account, update)) {
                 is Resource.Success -> {
-                    _message.emit("默认配置文件已更新")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_device_default_policy_updated))
                     loadPolicies(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("更新默认配置文件失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_device_default_policy_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -182,7 +183,7 @@ class DevicesViewModel @Inject constructor(
                 if (excludeItems != null) {
                     when (val result = zeroTrustRepository.setDefaultSplitTunnelExclude(account, excludeItems)) {
                         is Resource.Error -> {
-                            _error.emit("更新拆分隧道排除列表失败: ${result.message}")
+                            _error.emit(UiMessage.of(R.string.vm_msg_zt_device_split_tunnel_exclude_update_failed, result.message))
                         }
                         else -> {}
                     }
@@ -190,7 +191,7 @@ class DevicesViewModel @Inject constructor(
                 if (includeItems != null) {
                     when (val result = zeroTrustRepository.setDefaultSplitTunnelInclude(account, includeItems)) {
                         is Resource.Error -> {
-                            _error.emit("更新拆分隧道包含列表失败: ${result.message}")
+                            _error.emit(UiMessage.of(R.string.vm_msg_zt_device_split_tunnel_include_update_failed, result.message))
                         }
                         else -> {}
                     }
@@ -199,7 +200,7 @@ class DevicesViewModel @Inject constructor(
                 if (excludeItems != null) {
                     when (val result = zeroTrustRepository.setSplitTunnelExclude(account, policyId, excludeItems)) {
                         is Resource.Error -> {
-                            _error.emit("更新拆分隧道排除列表失败: ${result.message}")
+                            _error.emit(UiMessage.of(R.string.vm_msg_zt_device_split_tunnel_exclude_update_failed, result.message))
                         }
                         else -> {}
                     }
@@ -207,7 +208,7 @@ class DevicesViewModel @Inject constructor(
                 if (includeItems != null) {
                     when (val result = zeroTrustRepository.setSplitTunnelInclude(account, policyId, includeItems)) {
                         is Resource.Error -> {
-                            _error.emit("更新拆分隧道包含列表失败: ${result.message}")
+                            _error.emit(UiMessage.of(R.string.vm_msg_zt_device_split_tunnel_include_update_failed, result.message))
                         }
                         else -> {}
                     }

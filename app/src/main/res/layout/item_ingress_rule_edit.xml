@@ -19,7 +19,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="主机名（可选，留空为 catch-all）"
+            android:hint="@string/xml_item_ingress_rule_edit_hint"
             app:boxBackgroundMode="outline"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="路径前缀（可选）"
+            android:hint="@string/xml_item_ingress_rule_edit_hint_2"
             app:boxBackgroundMode="outline"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
@@ -53,9 +53,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="服务地址 (必填)"
+            android:hint="@string/xml_item_ingress_rule_edit_hint_3"
             app:boxBackgroundMode="outline"
-            app:helperText="例如: http://localhost:8080 或 http_status:404"
+            app:helperText="@string/xml_item_ingress_rule_edit_helper"
             app:helperTextEnabled="true"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
@@ -74,7 +74,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_gravity="end"
-            android:text="删除"
+            android:text="@string/delete"
             android:textColor="@android:color/holo_red_light"
             style="@style/Widget.Material3.Button.TextButton" />
 

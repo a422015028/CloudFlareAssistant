@@ -93,7 +93,7 @@ class AccountListFragment : Fragment() {
                             }
                             is AccountUiState.Error -> {
                                 binding.progressBar.visibility = View.GONE
-                                showToast(state.message)
+                                showToast(state.message.asString(requireContext()))
                             }
                         }
                     }
@@ -101,7 +101,7 @@ class AccountListFragment : Fragment() {
                 
                 launch {
                     viewModel.message.collect { message ->
-                        showToast(message)
+                        showToast(message.asString(requireContext()))
                     }
                 }
             }

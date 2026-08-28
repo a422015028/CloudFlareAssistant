@@ -44,7 +44,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="总规则"
+                        android:text="@string/gateway_total_rules"
                         android:textSize="11sp"
                         android:textColor="?android:attr/textColorSecondary" />
 
@@ -74,7 +74,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="已启用"
+                        android:text="@string/gateway_enabled"
                         android:textSize="11sp"
                         android:textColor="?android:attr/textColorSecondary" />
 
@@ -104,7 +104,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="已禁用"
+                        android:text="@string/gateway_disabled"
                         android:textSize="11sp"
                         android:textColor="?android:attr/textColorSecondary" />
 
@@ -127,7 +127,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="类型:"
+                android:text="@string/gateway_type_label"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
 
@@ -144,7 +144,7 @@
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="全部"
+                    android:text="@string/gateway_all"
                     android:textSize="11sp" />
 
                 <Button
@@ -190,7 +190,7 @@
             android:id="@+id/emptyText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="暂无规则\n点击右下角 + 按钮创建"
+            android:text="@string/gateway_no_rules"
             android:textAlignment="center"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
@@ -211,7 +211,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="创建规则"
+        android:contentDescription="@string/gateway_create_rule"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

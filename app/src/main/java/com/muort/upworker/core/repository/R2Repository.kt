@@ -1,10 +1,13 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.network.R2S3Client
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -18,6 +21,7 @@ import javax.inject.Singleton
 
 @Singleton
 class R2Repository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
     private val r2S3Client: R2S3Client
 ) {
@@ -128,9 +132,9 @@ class R2Repository @Inject constructor(
                 val result = r2S3Client.listObjects(s3Config, bucketName, prefix)
                 Resource.Success(result)
             } catch (e: IllegalArgumentException) {
-                Resource.Error("请先配置R2访问凭证（Access Key ID和Secret Access Key）")
+                Resource.Error(appContext.getString(R.string.repo_r2_missing_credentials))
             } catch (e: Exception) {
-                Resource.Error("加载对象列表失败: ${e.message}")
+                Resource.Error(appContext.getString(R.string.repo_r2_list_objects_failed_format, e.message))
             }
         }
     }
@@ -147,9 +151,9 @@ class R2Repository @Inject constructor(
                 r2S3Client.uploadObject(s3Config, bucketName, objectKey, file)
                 Resource.Success(R2ObjectUpload(objectKey, file.length(), null))
             } catch (e: IllegalArgumentException) {
-                Resource.Error("请先配置R2访问凭证（Access Key ID和Secret Access Key）")
+                Resource.Error(appContext.getString(R.string.repo_r2_missing_credentials))
             } catch (e: Exception) {
-                Resource.Error("上传失败: ${e.message}")
+                Resource.Error(appContext.getString(R.string.repo_r2_upload_failed_format, e.message))
             }
         }
     }
@@ -165,13 +169,13 @@ class R2Repository @Inject constructor(
                 val data = r2S3Client.downloadObject(s3Config, bucketName, objectKey)
                 Resource.Success(data)
             } catch (e: IllegalArgumentException) {
-                Resource.Error("请先配置R2访问凭证（Access Key ID和Secret Access Key）")
+                Resource.Error(appContext.getString(R.string.repo_r2_missing_credentials))
             } catch (e: Exception) {
-                Resource.Error("下载失败: ${e.message}")
+                Resource.Error(appContext.getString(R.string.repo_r2_download_failed_format, e.message))
             }
         }
     }
-    
+
     /**
      * 流式下载到文件（推荐用于大文件，避免 OOM）
      */
@@ -187,13 +191,13 @@ class R2Repository @Inject constructor(
                 r2S3Client.downloadObjectToFile(s3Config, bucketName, objectKey, destinationFile)
                 Resource.Success(Unit)
             } catch (e: IllegalArgumentException) {
-                Resource.Error("请先配置R2访问凭证（Access Key ID和Secret Access Key）")
+                Resource.Error(appContext.getString(R.string.repo_r2_missing_credentials))
             } catch (e: Exception) {
-                Resource.Error("下载失败: ${e.message}")
+                Resource.Error(appContext.getString(R.string.repo_r2_download_failed_format, e.message))
             }
         }
     }
-    
+
     suspend fun deleteObject(
         account: Account,
         bucketName: String,
@@ -205,9 +209,9 @@ class R2Repository @Inject constructor(
                 r2S3Client.deleteObject(s3Config, bucketName, objectKey)
                 Resource.Success(Unit)
             } catch (e: IllegalArgumentException) {
-                Resource.Error("请先配置R2访问凭证（Access Key ID和Secret Access Key）")
+                Resource.Error(appContext.getString(R.string.repo_r2_missing_credentials))
             } catch (e: Exception) {
-                Resource.Error("删除失败: ${e.message}")
+                Resource.Error(appContext.getString(R.string.repo_r2_delete_failed_format, e.message))
             }
         }
     }
@@ -265,7 +269,7 @@ class R2Repository @Inject constructor(
                 if (customDomain != null) {
                     Resource.Success(customDomain)
                 } else {
-                    Resource.Error("创建成功但无返回数据")
+                    Resource.Error(appContext.getString(R.string.repo_r2_create_no_result))
                 }
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 

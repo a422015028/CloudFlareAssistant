@@ -25,7 +25,7 @@
                 android:id="@+id/titleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="电子邮件路由"
+                android:text="@string/email_routing_title"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 

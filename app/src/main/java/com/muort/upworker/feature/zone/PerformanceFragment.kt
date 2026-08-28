@@ -22,17 +22,21 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class CacheLevel(val raw: String, val label: String) {
-    BASIC("basic", "无查询字符串"),
-    SIMPLIFIED("simplified", "忽略查询字符串"),
-    AGGRESSIVE("aggressive", "标准");
+enum class CacheLevel(val raw: String, private val labelResId: Int) {
+    BASIC("basic", R.string.perf_cache_level_basic),
+    SIMPLIFIED("simplified", R.string.perf_cache_level_simplified),
+    AGGRESSIVE("aggressive", R.string.perf_cache_level_aggressive);
+
+    fun label(ctx: android.content.Context): String = ctx.getString(labelResId)
 
     companion object {
         fun fromRaw(raw: String?): CacheLevel = entries.firstOrNull { it.raw == raw } ?: AGGRESSIVE
     }
 }
 
-data class PerfToggle(val id: String, val label: String)
+data class PerfToggle(val id: String, private val labelResId: Int) {
+    fun label(ctx: android.content.Context): String = ctx.getString(labelResId)
+}
 
 data class PerfState(
     val values: Map<String, String> = emptyMap(),
@@ -40,7 +44,7 @@ data class PerfState(
     val updating: Set<String> = emptySet(),
 ) {
     fun isOn(id: String): Boolean = values[id] == "on"
-    val cacheLevel: CacheLevel get() = CacheLevel.fromRaw(values["cache_level"])
+    fun cacheLevel(): CacheLevel = CacheLevel.fromRaw(values["cache_level"])
 }
 
 @AndroidEntryPoint
@@ -51,7 +55,8 @@ class PerformanceFragment : BaseZoneFeatureFragment() {
     private lateinit var adapter: PerfAdapter
     private var state = PerfState(isLoading = true)
 
-    override val emptyText: String = "加载中…"
+    override val emptyTextResId: Int = R.string.perf_empty_loading
+    override val showAddFab: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -93,40 +98,40 @@ class PerformanceFragment : BaseZoneFeatureFragment() {
                 }
                 state = state.copy(values = acc, isLoading = false)
                 showList()
-                adapter.submitList(buildItems())
+                adapter.submitList(buildItems(requireContext()))
             } finally {
                 state = state.copy(isLoading = false)
             }
         }
     }
 
-    private fun buildItems(): List<PerfItem> {
+    private fun buildItems(ctx: android.content.Context): List<PerfItem> {
         val items = mutableListOf<PerfItem>()
-        items += PerfItem.Section("网络优化")
+        items += PerfItem.Section(ctx.getString(R.string.perf_section_network_optimization))
         NETWORK_TOGGLES.forEach { toggle ->
             items += PerfItem.Toggle(
                 id = toggle.id,
-                title = toggle.label,
+                title = toggle.label(ctx),
                 checked = state.isOn(toggle.id),
                 enabled = toggle.id !in state.updating && toggle.id in state.values,
             )
         }
-        items += PerfItem.Section("缓存")
+        items += PerfItem.Section(ctx.getString(R.string.perf_section_cache))
         items += PerfItem.Selector(
             id = "cache_level",
-            title = "缓存级别",
-            value = state.cacheLevel.label,
+            title = ctx.getString(R.string.perf_cache_level_title),
+            value = state.cacheLevel().label(ctx),
             enabled = "cache_level" !in state.updating && "cache_level" in state.values,
         )
         items += PerfItem.Toggle(
             id = "always_online",
-            title = "Always Online",
+            title = ctx.getString(R.string.perf_always_online_title),
             checked = state.isOn("always_online"),
             enabled = "always_online" !in state.updating && "always_online" in state.values,
         )
         items += PerfItem.Toggle(
             id = "sort_query_string_for_cache",
-            title = "查询字符串排序",
+            title = ctx.getString(R.string.perf_query_string_sort_title),
             checked = state.isOn("sort_query_string_for_cache"),
             enabled = "sort_query_string_for_cache" !in state.updating &&
                 "sort_query_string_for_cache" in state.values,
@@ -138,68 +143,69 @@ class PerformanceFragment : BaseZoneFeatureFragment() {
         val account = account ?: return
         if (id in state.updating) return
         state = state.copy(updating = state.updating + id)
-        adapter.submitList(buildItems())
+        adapter.submitList(buildItems(requireContext()))
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = settingsRepo.setSetting(account, zoneId, id, if (checked) "on" else "off")) {
                 is Resource.Success -> {
                     state = state.copy(values = state.values + (id to r.data))
                 }
                 is Resource.Error -> {
-                    toast("更新失败: ${r.message}")
+                    toast(getString(R.string.msg_update_failed, r.message))
                 }
                 is Resource.Loading -> {}
             }
             state = state.copy(updating = state.updating - id)
-            adapter.submitList(buildItems())
+            adapter.submitList(buildItems(requireContext()))
         }
     }
 
     private fun onCacheLevelClick() {
         val account = account ?: return
+        val ctx = requireContext()
         if ("cache_level" in state.updating) return
 
         val levels = CacheLevel.entries
-        val currentIndex = levels.indexOf(state.cacheLevel)
+        val currentIndex = levels.indexOf(state.cacheLevel())
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("缓存级别")
-            .setSingleChoiceItems(levels.map { it.label }.toTypedArray(), currentIndex) { dialog, which ->
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.perf_cache_level_title)
+            .setSingleChoiceItems(levels.map { it.label(ctx) }.toTypedArray(), currentIndex) { dialog, which ->
                 val level = levels[which]
                 dialog.dismiss()
                 setCacheLevel(account, level)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun setCacheLevel(account: Account, level: CacheLevel) {
         if ("cache_level" in state.updating) return
         state = state.copy(updating = state.updating + "cache_level")
-        adapter.submitList(buildItems())
+        adapter.submitList(buildItems(requireContext()))
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = settingsRepo.setSetting(account, zoneId, "cache_level", level.raw)) {
                 is Resource.Success -> {
                     state = state.copy(values = state.values + ("cache_level" to r.data))
                 }
                 is Resource.Error -> {
-                    toast("更新失败: ${r.message}")
+                    toast(getString(R.string.msg_update_failed, r.message))
                 }
                 is Resource.Loading -> {}
             }
             state = state.copy(updating = state.updating - "cache_level")
-            adapter.submitList(buildItems())
+            adapter.submitList(buildItems(requireContext()))
         }
     }
 
     companion object {
         val NETWORK_TOGGLES = listOf(
-            PerfToggle("brotli", "Brotli 压缩"),
-            PerfToggle("http2", "HTTP/2"),
-            PerfToggle("http3", "HTTP/3 (QUIC)"),
-            PerfToggle("0rtt", "0-RTT 连接恢复"),
-            PerfToggle("early_hints", "Early Hints"),
-            PerfToggle("websockets", "WebSockets"),
-            PerfToggle("ipv6", "IPv6 兼容"),
+            PerfToggle("brotli", R.string.perf_toggle_brotli),
+            PerfToggle("http2", R.string.perf_toggle_http2),
+            PerfToggle("http3", R.string.perf_toggle_http3),
+            PerfToggle("0rtt", R.string.perf_toggle_0rtt),
+            PerfToggle("early_hints", R.string.perf_toggle_early_hints),
+            PerfToggle("websockets", R.string.perf_toggle_websockets),
+            PerfToggle("ipv6", R.string.perf_toggle_ipv6),
         )
     }
 

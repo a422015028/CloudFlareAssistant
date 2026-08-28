@@ -27,6 +27,7 @@ import com.google.gson.JsonParser
 import com.muort.upworker.R
 import com.muort.upworker.core.model.TailTraceItem
 import com.muort.upworker.core.util.DisplaySizeHelper
+import com.muort.upworker.core.util.LocaleHelper
 import com.muort.upworker.core.util.ThemeHelper
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -46,7 +47,7 @@ import java.util.concurrent.TimeUnit
 class PagesLogsActivity : AppCompatActivity() {
 
     override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(DisplaySizeHelper.wrap(newBase))
+        super.attachBaseContext(DisplaySizeHelper.wrap(LocaleHelper.applyLocale(newBase)))
     }
 
     private lateinit var toolbar: MaterialToolbar
@@ -114,7 +115,7 @@ class PagesLogsActivity : AppCompatActivity() {
         val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
         if (wssUrl.isNullOrEmpty()) {
             Log.e("PagesLogs", "WSS URL is empty")
-            showToast("WSS URL为空")
+            showToast(getString(R.string.status_wss_url_empty))
             return
         }
         currentWssUrl = wssUrl
@@ -155,7 +156,7 @@ class PagesLogsActivity : AppCompatActivity() {
         runOnUiThread {
             isConnected = false
             connectionStatusDot.background = getDrawable(R.drawable.circle_yellow)
-            connectionStatusText.text = "连接中..."
+            connectionStatusText.text = getString(R.string.status_connecting)
         }
 
         val request = Request.Builder()
@@ -170,7 +171,7 @@ class PagesLogsActivity : AppCompatActivity() {
                 runOnUiThread {
                     isConnected = true
                     connectionStatusDot.background = getDrawable(R.drawable.circle_green)
-                    connectionStatusText.text = "已连接"
+                    connectionStatusText.text = getString(R.string.status_connected)
                 }
             }
 
@@ -197,7 +198,7 @@ class PagesLogsActivity : AppCompatActivity() {
                 runOnUiThread {
                     isConnected = false
                     connectionStatusDot.background = getDrawable(R.drawable.circle_red)
-                    connectionStatusText.text = "已断开"
+                    connectionStatusText.text = getString(R.string.status_disconnected)
                 }
                 webSocket.close(code, reason)
                 scheduleReconnect()
@@ -207,7 +208,7 @@ class PagesLogsActivity : AppCompatActivity() {
                 runOnUiThread {
                     isConnected = false
                     connectionStatusDot.background = getDrawable(R.drawable.circle_red)
-                    connectionStatusText.text = "连接失败: ${t.message}"
+                    connectionStatusText.text = getString(R.string.status_connection_failed, t.message ?: "null")
                 }
                 Log.e("PagesLogs", "WebSocket failure: ${t.message}", t)
                 scheduleReconnect()
@@ -438,7 +439,7 @@ class PagesLogsActivity : AppCompatActivity() {
         }
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
         clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Pages log event", text))
-        showToast("已复制该卡片内容")
+        showToast(getString(R.string.pages_card_content_copied))
     }
 
     // ==================== 连接管理 ====================
@@ -461,10 +462,10 @@ class PagesLogsActivity : AppCompatActivity() {
         isPaused = !isPaused
         if (isPaused) {
             pauseBtn.setIconResource(R.drawable.ic_play)
-            connectionStatusText.text = "已暂停"
+            connectionStatusText.text = getString(R.string.status_paused)
         } else {
             pauseBtn.setIconResource(R.drawable.ic_pause)
-            connectionStatusText.text = if (isConnected) "已连接" else "未连接"
+            connectionStatusText.text = if (isConnected) getString(R.string.status_connected) else getString(R.string.status_not_connected)
         }
     }
 
@@ -485,7 +486,7 @@ class PagesLogsActivity : AppCompatActivity() {
         webSocket = null
         isConnected = false
         connectionStatusDot.background = getDrawable(R.drawable.circle_yellow)
-        connectionStatusText.text = "连接中..."
+        connectionStatusText.text = getString(R.string.status_connecting)
         connectWebSocket(currentWssUrl)
     }
 

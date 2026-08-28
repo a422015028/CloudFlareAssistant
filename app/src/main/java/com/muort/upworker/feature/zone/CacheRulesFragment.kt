@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.CacheActionParameters
 import com.muort.upworker.core.model.CacheBrowserTTL
@@ -31,7 +32,7 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class CacheRulesFragment : BaseZoneFeatureFragment() {
 
-    override val emptyText: String = "暂无缓存规则"
+    override val emptyTextResId: Int = R.string.cache_empty_rules
     override val showAddFab: Boolean = true
 
     private val viewModel: CacheRulesViewModel by viewModels()
@@ -39,10 +40,10 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
     private lateinit var adapter: CacheRuleAdapter
 
     // TTL 模式
-    private val ttlModes = listOf(
-        "respect_origin" to "遵循源站",
-        "override_origin" to "覆盖为固定值",
-        "bypass_by_default" to "源站无指令则不缓存",
+    private fun ttlModes(ctx: android.content.Context) = listOf(
+        "respect_origin" to ctx.getString(R.string.cache_tl_respect_origin),
+        "override_origin" to ctx.getString(R.string.cache_tl_override_origin),
+        "bypass_by_default" to ctx.getString(R.string.cache_tl_bypass_by_default),
     )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -76,7 +77,7 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
                 viewModel.state.collect { state ->
                     if (state.isLoading) showLoading() else showList()
                     if (state.error != null) {
-                        showError(state.error)
+                        showError(state.error.asString(requireContext()))
                     } else if (state.rules.isEmpty() && !state.isLoading) {
                         showEmpty()
                     } else {
@@ -116,8 +117,9 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
 
         inner class VH(private val b: ItemCacheRuleBinding) : RecyclerView.ViewHolder(b.root) {
             fun bind(rule: CacheRule) {
+                val ctx = itemView.context
                 // 徽章
-                b.badgeText.text = cacheSummary(rule)
+                b.badgeText.text = cacheSummary(rule, ctx)
 
                 // 描述
                 val desc = rule.description?.takeIf { it.isNotBlank() }
@@ -145,9 +147,9 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
                 // 点击编辑（含高级设置的规则不可编辑）
                 b.root.setOnClickListener {
                     if (hasAdvanced) {
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setMessage("该规则含高级设置（自定义缓存键、Cache Reserve 等），无法在此编辑。请到 Cloudflare 控制台修改。")
-                            .setPositiveButton("确定", null)
+                        MaterialAlertDialogBuilder(ctx)
+                            .setMessage(ctx.getString(R.string.cache_advanced_not_editable_message))
+                            .setPositiveButton(R.string.confirm, null)
                             .show()
                     } else {
                         onEdit(rule)
@@ -158,30 +160,32 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
     }
 
     /** 缓存摘要徽章文本。 */
-    private fun cacheSummary(rule: CacheRule): String {
-        val p = rule.actionParameters ?: return "默认缓存设置"
-        if (p.cache == false) return "绕过缓存"
-        return "可缓存"
+    private fun cacheSummary(rule: CacheRule, ctx: android.content.Context): String {
+        val p = rule.actionParameters ?: return ctx.getString(R.string.cache_default_settings)
+        if (p.cache == false) return ctx.getString(R.string.cache_bypass)
+        return ctx.getString(R.string.cache_eligible)
     }
 
     // ==================== 删除确认 ====================
 
     private fun confirmDelete(rule: CacheRule) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除此缓存规则？")
-            .setMessage("删除后将不再按此规则缓存，操作不可撤销。")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.cache_delete_rule_title)
+            .setMessage(R.string.cache_delete_rule_message)
+            .setPositiveButton(R.string.delete) { _, _ ->
                 account?.let { viewModel.deleteRule(it, zoneId, rule) }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     // ==================== 添加 / 编辑表单 ====================
 
     private fun showRuleDialog(editingRule: CacheRule?) {
+        val ctx = requireContext()
         val isEdit = editingRule != null
-        val b = DialogCacheRuleBinding.inflate(LayoutInflater.from(requireContext()))
+        val ttlModes = ttlModes(ctx)
+        val b = DialogCacheRuleBinding.inflate(LayoutInflater.from(ctx))
 
         // 描述
         b.descriptionInput.setText(editingRule?.description ?: "")
@@ -195,8 +199,8 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
 
         // TTL 模式下拉
         val ttlLabels = ttlModes.map { it.second }
-        val edgeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, ttlLabels)
-        val browserAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, ttlLabels)
+        val edgeAdapter = ArrayAdapter(ctx, android.R.layout.simple_list_item_1, ttlLabels)
+        val browserAdapter = ArrayAdapter(ctx, android.R.layout.simple_list_item_1, ttlLabels)
         b.edgeTtlModeInput.setAdapter(edgeAdapter)
         b.browserTtlModeInput.setAdapter(browserAdapter)
 
@@ -235,12 +239,12 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
         b.edgeTtlModeInput.setOnItemClickListener { _, _, _, _ -> updateSecondsVisibility() }
         b.browserTtlModeInput.setOnItemClickListener { _, _, _, _ -> updateSecondsVisibility() }
 
-        val dialog = MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(ctx)
             .setView(b.root)
-            .setPositiveButton(if (isEdit) "保存" else "添加") { _, _ ->
+            .setPositiveButton(if (isEdit) R.string.save else R.string.add) { _, _ ->
                 val expression = b.expressionInput.text.toString().trim()
                 if (expression.isEmpty()) {
-                    toast("表达式不能为空")
+                    toast(getString(R.string.msg_expression_empty))
                     return@setPositiveButton
                 }
                 val description = b.descriptionInput.text.toString().trim().ifBlank { null }
@@ -278,11 +282,11 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
                         enabled = enabled,
                         params = params,
                     ) { ok, err ->
-                        toast(if (ok) "已保存" else "保存失败: $err")
+                        toast(if (ok) getString(R.string.msg_saved) else getString(R.string.msg_save_failed, err?.asString(requireContext()).orEmpty()))
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .create()
 
         dialog.show()
@@ -292,7 +296,7 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
                 saveButton.isEnabled = !state.isSaving
-                saveButton.text = if (state.isSaving) "保存中..." else if (isEdit) "保存" else "添加"
+                saveButton.text = if (state.isSaving) getString(R.string.msg_saving) else if (isEdit) getString(R.string.save) else getString(R.string.add)
             }
         }
     }

@@ -14,7 +14,7 @@
             android:id="@+id/formTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="添加 WAF 规则"
+            android:text="@string/waf_add_rule_title"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
@@ -22,7 +22,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="规则名称"
+            android:hint="@string/waf_rule_name"
             android:layout_marginBottom="12dp"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
@@ -37,7 +37,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="动作"
+            android:hint="@string/access_rule_action"
             android:layout_marginBottom="12dp"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
@@ -51,7 +51,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="表达式（Wirefilter 语法）"
+            android:hint="@string/waf_expression_hint"
             android:layout_marginBottom="4dp"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
@@ -68,7 +68,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text='示例: (ip.src eq 1.2.3.4) or (http.request.uri.path contains "/admin")'
+            android:text="@string/waf_expression_example"
             android:textSize="12sp"
             android:textColor="?attr/colorOutline"
             android:layout_marginBottom="8dp" />
@@ -78,7 +78,7 @@
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="可视化表达式构建器"
+            android:text="@string/waf_expression_builder_title"
             android:layout_marginBottom="12dp" />
 
         <LinearLayout
@@ -92,7 +92,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="启用此规则"
+                android:text="@string/waf_enable_rule"
                 android:textSize="15sp" />
 
             <com.google.android.material.materialswitch.MaterialSwitch

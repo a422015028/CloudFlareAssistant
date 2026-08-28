@@ -33,7 +33,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="基本信息"
+                        android:text="@string/access_basic_info"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
@@ -42,7 +42,7 @@
                         android:id="@+id/appNameLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="应用名称"
+                        android:text="@string/access_app_name"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
 
@@ -59,7 +59,7 @@
                         android:id="@+id/domainLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="域名"
+                        android:text="@string/common_domain"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
 
@@ -75,7 +75,7 @@
                         android:id="@+id/typeLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="应用类型"
+                        android:text="@string/access_app_type"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
 
@@ -90,13 +90,13 @@
                         android:paddingBottom="4dp"
                         android:textSize="12sp"
                         android:layout_marginBottom="12dp"
-                        tools:text="自托管应用" />
+                        tools:text="@string/access_self_hosted_app" />
 
                     <TextView
                         android:id="@+id/sessionDurationLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="会话时长"
+                        android:text="@string/access_session_duration"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
 
@@ -112,7 +112,7 @@
                         android:id="@+id/createdAtLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="创建时间"
+                        android:text="@string/access_created_time"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
 
@@ -145,7 +145,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="高级配置"
+                        android:text="@string/access_advanced_config"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
@@ -154,28 +154,28 @@
                         android:id="@+id/appLauncherSwitch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="App Launcher 可见"
+                        android:text="@string/access_app_launcher_visible"
                         android:layout_marginBottom="8dp" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/autoRedirectSwitch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="自动重定向到身份验证"
+                        android:text="@string/access_auto_redirect_auth"
                         android:layout_marginBottom="8dp" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/bindingCookieSwitch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="启用 Binding Cookie"
+                        android:text="@string/access_enable_binding_cookie"
                         android:layout_marginBottom="8dp" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/skipInterstitialSwitch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="跳过过渡页面" />
+                        android:text="@string/access_skip_interstitial" />
 
                 </LinearLayout>
 
@@ -201,7 +201,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="SaaS 应用配置"
+                        android:text="@string/access_saas_config"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
@@ -279,7 +279,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="访问策略"
+                            android:text="@string/access_policies"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -288,7 +288,7 @@
                             style="@style/Widget.Material3.Button.TextButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="添加策略" />
+                            android:text="@string/access_add_policy" />
 
                     </LinearLayout>
 
@@ -304,7 +304,7 @@
                         android:id="@+id/noPoliciesText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="暂无访问策略"
+                        android:text="@string/access_no_policies"
                         android:textColor="?android:attr/textColorSecondary"
                         android:visibility="gone"
                         tools:visibility="visible" />
@@ -327,7 +327,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginEnd="8dp"
-                    android:text="编辑应用" />
+                    android:text="@string/access_edit_app" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/deleteButton"
@@ -336,7 +336,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:text="删除应用"
+                    android:text="@string/access_delete_app"
                     android:textColor="?attr/colorError" />
 
             </LinearLayout>

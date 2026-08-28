@@ -44,7 +44,7 @@
                 android:id="@+id/connectionStatusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="未连接"
+                android:text="@string/status_not_connected"
                 android:textSize="14sp"
                 android:textColor="?attr/colorOnSurface"
                 android:layout_marginStart="8dp" />
@@ -121,7 +121,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="24dp"
-                    android:text="等待日志...触发该Pages项目后将实时显示"
+                    android:text="@string/xml_activity_pages_logs"
                     android:textSize="13sp"
                     android:textColor="@color/grey_500" />
 

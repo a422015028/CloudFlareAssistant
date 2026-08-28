@@ -51,22 +51,22 @@ class D1ManagerFragment : Fragment() {
         val db = currentDatabase
         val account = currentAccount
         MaterialAlertDialogBuilder(context)
-            .setTitle("在表 ${table.name} 执行 SQL")
+            .setTitle(getString(R.string.d1_execute_sql_on_table, table.name))
             .setView(dialogView)
-            .setPositiveButton("执行") { _, _ ->
+            .setPositiveButton(R.string.d1_execute) { _, _ ->
                 val sql = editTextSql.text.toString()
                 if (account == null || db == null) {
-                    Snackbar.make(requireView(), "请先选择数据库", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(requireView(), getString(R.string.d1_please_select_database), Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 if (sql.isBlank()) {
-                    Snackbar.make(requireView(), "请输入SQL语句", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(requireView(), getString(R.string.d1_please_enter_sql), Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 isUserSqlExecution = true
                 viewModel.executeQuery(account, db.uuid, sql)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -80,25 +80,25 @@ class D1ManagerFragment : Fragment() {
         val dbName = db?.name
         if (db == null || account == null) {
             MaterialAlertDialogBuilder(context)
-                .setTitle("未选择数据库")
-                .setMessage("请先在左侧选择一个数据库，再执行 SQL。")
-                .setPositiveButton("确定", null)
+                .setTitle(R.string.d1_no_database_selected_title)
+                .setMessage(R.string.d1_no_database_selected_message)
+                .setPositiveButton(R.string.confirm, null)
                 .show()
             return
         }
         MaterialAlertDialogBuilder(context)
-            .setTitle("在数据库 $dbName 执行 SQL")
+            .setTitle(getString(R.string.d1_execute_sql_on_database, dbName))
             .setView(dialogView)
-            .setPositiveButton("执行") { _, _ ->
+            .setPositiveButton(R.string.d1_execute) { _, _ ->
                 val sql = editTextSql.text.toString()
                 if (sql.isBlank()) {
-                    Snackbar.make(requireView(), "请输入SQL语句", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(requireView(), getString(R.string.d1_please_enter_sql), Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 isUserSqlExecution = true
                 viewModel.executeQuery(account, db.uuid, sql)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -179,12 +179,12 @@ class D1ManagerFragment : Fragment() {
                     binding.databaseProgressBar.visibility = View.GONE
                     // 不再自动选中数据库，也不自动加载表
                     tableAdapter.submitList(emptyList())
-                    binding.tableTitleText.text = "数据表"
+                    binding.tableTitleText.setText(R.string.d1_tables_title)
                 } else if (state is com.muort.upworker.core.model.UiState.Loading) {
                     binding.databaseProgressBar.visibility = View.VISIBLE
                 } else if (state is com.muort.upworker.core.model.UiState.Error) {
                     binding.databaseProgressBar.visibility = View.GONE
-                    Snackbar.make(binding.root, "数据库加载失败: ${state.message}", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, getString(R.string.d1_databases_load_failed, state.message), Snackbar.LENGTH_SHORT).show()
                 }
             }
         }
@@ -197,12 +197,12 @@ class D1ManagerFragment : Fragment() {
                     binding.tableProgressBar.visibility = View.GONE
                     // 数据表标签显示数据库名称
                     val dbName = currentDatabase?.name ?: ""
-                    binding.tableTitleText.text = "数据表（$dbName）"
+                    binding.tableTitleText.text = getString(R.string.d1_tables_title_with_db, dbName)
                 } else if (state is com.muort.upworker.core.model.UiState.Loading) {
                     binding.tableProgressBar.visibility = View.VISIBLE
                 } else if (state is com.muort.upworker.core.model.UiState.Error) {
                     binding.tableProgressBar.visibility = View.GONE
-                    Snackbar.make(binding.root, "表加载失败: ${state.message}", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, getString(R.string.d1_tables_load_failed, state.message), Snackbar.LENGTH_SHORT).show()
                 }
             }
         }
@@ -213,15 +213,15 @@ class D1ManagerFragment : Fragment() {
                     if (isUserSqlExecution) {
                         setupRecyclerView(result)
                         // 更新标题显示SQL结果
-                        binding.tableTitleText.text = "SQL 执行结果"
+                        binding.tableTitleText.setText(R.string.d1_sql_result_title)
                         switchToDataViewMode()
                         // 新增：SQL 执行成功后弹窗详情
                         val rowCount = result.results?.size ?: 0
                         val columns = result.results?.firstOrNull()?.keys?.toList() ?: emptyList()
                         val msg = if (rowCount > 0) {
-                            "共 $rowCount 行，字段：${columns.joinToString(", ")}"
+                            getString(R.string.d1_sql_result_rows_and_columns, rowCount, columns.joinToString(", "))
                         } else {
-                            "SQL 执行成功，无返回数据。"
+                            getString(R.string.d1_sql_success_no_data)
                         }
                         // 优化：显示 Cloudflare D1 meta 详情
                         val meta = result.meta
@@ -234,18 +234,18 @@ class D1ManagerFragment : Fragment() {
                             val sb = StringBuilder()
                             sb.appendLine(msg)
                             sb.appendLine()
-                            sb.appendLine("--- Cloudflare D1 执行详情 ---")
-                            sb.appendLine("SQL耗时: ${metaMap["sql_duration_ms"] ?: metaMap["duration"] ?: "-"} ms")
-                            sb.appendLine("变更: ${metaMap["changes"] ?: 0}")
-                            sb.appendLine("写入行: ${metaMap["rows_written"] ?: 0}")
-                            sb.appendLine("读取行: ${metaMap["rows_read"] ?: 0}")
-                            sb.appendLine("DB大小: ${metaMap["size_after"] ?: "-"}")
+                            sb.appendLine(getString(R.string.d1_sql_meta_header))
+                            sb.appendLine(getString(R.string.d1_sql_meta_duration, metaMap["sql_duration_ms"] ?: metaMap["duration"] ?: "-"))
+                            sb.appendLine(getString(R.string.d1_sql_meta_changes, metaMap["changes"] ?: 0))
+                            sb.appendLine(getString(R.string.d1_sql_meta_rows_written, metaMap["rows_written"] ?: 0))
+                            sb.appendLine(getString(R.string.d1_sql_meta_rows_read, metaMap["rows_read"] ?: 0))
+                            sb.appendLine(getString(R.string.d1_sql_meta_size_after, metaMap["size_after"] ?: "-"))
                             sb.toString()
                         } else msg
                         MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("SQL 执行结果")
+                            .setTitle(R.string.d1_sql_result_title)
                             .setMessage(metaMsg)
-                            .setPositiveButton("确定", null)
+                            .setPositiveButton(R.string.confirm, null)
                             .show()
                         // 自动刷新表和数据列表
                         val account = currentAccount
@@ -257,9 +257,9 @@ class D1ManagerFragment : Fragment() {
                         }
                         isUserSqlExecution = false
                     } else if (isTableDataLoad) {
-                        // 导航到数据查看器Fragment，传递数据库和表信息
+        // 导航到数据查看器Fragment，传递数据库和表信息
                         val bundle = Bundle().apply {
-                            putString("title", "${currentTable?.name ?: "表"} 数据 (前100行)")
+                            putString("title", getString(R.string.d1_bundle_table_data_title, currentTable?.name ?: getString(R.string.d1_default_table_name), 100))
                             putString("databaseId", currentDatabase?.uuid)
                             putString("tableName", currentTable?.name)
                         }
@@ -277,86 +277,86 @@ class D1ManagerFragment : Fragment() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_d1_create_database, null)
         val editName = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editDatabaseName)
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("新建数据库")
+            .setTitle(R.string.d1_create_database)
             .setView(dialogView)
-            .setPositiveButton("创建") { dialog, _ ->
+            .setPositiveButton(R.string.dialog_create) { dialog, _ ->
                 val name = editName.text?.toString()?.trim()
                 if (name.isNullOrEmpty()) {
-                    Snackbar.make(binding.root, "数据库名称不能为空", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, getString(R.string.d1_database_name_required), Snackbar.LENGTH_SHORT).show()
                 } else {
                     val account = currentAccount
                     if (account == null) {
-                        Snackbar.make(binding.root, "未获取到账号信息", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root, getString(R.string.d1_account_info_unavailable), Snackbar.LENGTH_SHORT).show()
                         return@setPositiveButton
                     }
                     lifecycleScope.launch {
                         val result = viewModel.createDatabase(account, name)
                         if (result) {
-                            Snackbar.make(binding.root, "数据库创建成功", Snackbar.LENGTH_SHORT).show()
+                            Snackbar.make(binding.root, getString(R.string.d1_create_database_success), Snackbar.LENGTH_SHORT).show()
                             viewModel.loadDatabases(account)
                         } else {
-                            Snackbar.make(binding.root, "数据库创建失败", Snackbar.LENGTH_SHORT).show()
+                            Snackbar.make(binding.root, getString(R.string.d1_create_database_failed), Snackbar.LENGTH_SHORT).show()
                         }
                     }
                 }
                 dialog.dismiss()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun showDeleteDatabaseDialog(db: D1Database) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除数据库")
-            .setMessage("确定要删除数据库 \"${db.name}\" 吗？")
-            .setPositiveButton("删除") { dialog, _ ->
+            .setTitle(R.string.d1_delete_database_title)
+            .setMessage(getString(R.string.d1_delete_database_confirm, db.name))
+            .setPositiveButton(R.string.delete) { dialog, _ ->
                 val account = currentAccount
                 if (account == null) {
-                    Snackbar.make(binding.root, "未获取到账号信息", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, getString(R.string.d1_account_info_unavailable), Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 lifecycleScope.launch {
                     val result = viewModel.deleteDatabase(account, db.uuid)
                     if (result) {
-                        Snackbar.make(binding.root, "数据库已删除", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root, getString(R.string.d1_database_deleted), Snackbar.LENGTH_SHORT).show()
                         viewModel.loadDatabases(account)
                     } else {
-                        Snackbar.make(binding.root, "数据库删除失败", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root, getString(R.string.d1_database_delete_failed), Snackbar.LENGTH_SHORT).show()
                     }
                 }
                 dialog.dismiss()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun showAddTableDialog() {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("新建表")
-            .setMessage("暂未实现新建表功能")
-            .setPositiveButton("确定", null)
+            .setTitle(R.string.d1_create_table)
+            .setMessage(R.string.d1_create_table_not_implemented)
+            .setPositiveButton(R.string.confirm, null)
             .show()
     }
 
     private fun showDeleteTableDialog(table: D1Table) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除表")
-            .setMessage("确定要删除表 \"${table.name}\" 吗？")
-            .setPositiveButton("删除") { dialog, _ ->
+            .setTitle(R.string.d1_delete_table_title)
+            .setMessage(getString(R.string.d1_delete_table_confirm, table.name))
+            .setPositiveButton(R.string.delete) { dialog, _ ->
                 val account = currentAccount
                 val db = currentDatabase
                 if (account == null || db == null) {
-                    Snackbar.make(requireView(), "请先选择数据库", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(requireView(), getString(R.string.d1_please_select_database), Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 val sql = "DROP TABLE IF EXISTS `${table.name}`;"
                 viewModel.executeQuery(account, db.uuid, sql)
                 // 删除后刷新表列表
                 viewModel.loadTables(account, db.uuid)
-                Snackbar.make(requireView(), "表已删除", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(requireView(), getString(R.string.d1_table_deleted), Snackbar.LENGTH_SHORT).show()
                 dialog.dismiss()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -441,7 +441,7 @@ class D1ManagerFragment : Fragment() {
                 val uuidText = itemView.findViewById<android.widget.TextView>(R.id.databaseUuidText)
                 val deleteBtn = itemView.findViewById<android.widget.ImageButton>(R.id.deleteDatabaseBtn)
                 nameText.text = db.name
-                uuidText.text = "ID: ${db.uuid}"
+                uuidText.text = itemView.context.getString(R.string.d1_db_id_label, db.uuid)
                 itemView.setOnClickListener { onDatabaseClick(db) }
                 deleteBtn.setOnClickListener { onDeleteClick(db) }
             }
@@ -472,7 +472,7 @@ class D1ManagerFragment : Fragment() {
                 val columnsText = itemView.findViewById<android.widget.TextView>(R.id.tableColumnsText)
                 val deleteBtn = itemView.findViewById<android.widget.ImageButton>(R.id.deleteTableBtn)
                 nameText.text = table.name
-                columnsText.text = "字段数: ${table.columns?.size ?: 0}"
+                columnsText.text = itemView.context.getString(R.string.d1_field_count, table.columns?.size ?: 0)
                 itemView.setOnClickListener { onTableClick(table) }
                 deleteBtn.setOnClickListener { onDeleteClick(table) }
                 itemView.setOnLongClickListener {
@@ -494,8 +494,8 @@ class D1ManagerFragment : Fragment() {
         if (columns.isEmpty()) {
             // No columns, show message
             val textView = android.widget.TextView(context).apply {
-                text = if (rows.isEmpty()) "表为空或无数据" else "表数据无有效列"
-                setPadding(16, 16, 16, 16)
+                text = if (rows.isEmpty()) getString(R.string.d1_table_empty_or_no_data) else getString(R.string.d1_table_no_columns)
+                setPaddingRelative(16, 16, 16, 16)
                 gravity = android.view.Gravity.CENTER
             }
             tableLayout.addView(textView)
@@ -509,7 +509,7 @@ class D1ManagerFragment : Fragment() {
             for (column in columns) {
                 val textView = android.widget.TextView(context).apply {
                     text = column
-                    setPadding(12, 12, 12, 12)
+                    setPaddingRelative(12, 12, 12, 12)
                     setBackgroundColor(0xFFEEEEEE.toInt())
                     setTypeface(null, android.graphics.Typeface.BOLD)
                     gravity = android.view.Gravity.CENTER
@@ -528,7 +528,7 @@ class D1ManagerFragment : Fragment() {
                     val value = row[column]?.toString() ?: "NULL"
                     val textView = android.widget.TextView(context).apply {
                         text = value
-                        setPadding(12, 12, 12, 12)
+                        setPaddingRelative(12, 12, 12, 12)
                         gravity = android.view.Gravity.START
                         setTextColor(0xFF333333.toInt())
                         // Add border
@@ -541,11 +541,11 @@ class D1ManagerFragment : Fragment() {
             }
         }
 
-        val tableName = currentTable?.name ?: "表"
+        val tableName = currentTable?.name ?: getString(R.string.d1_default_table_name)
         MaterialAlertDialogBuilder(context)
-            .setTitle("$tableName 表数据 (前100行)")
+            .setTitle(getString(R.string.d1_bundle_table_data_title, tableName, 100))
             .setView(dialogView)
-            .setPositiveButton("关闭", null)
+            .setPositiveButton(R.string.dialog_close, null)
             .show()
     }
 
@@ -578,7 +578,7 @@ class D1ManagerFragment : Fragment() {
         params.weight = 0f
         binding.recyclerViewData.layoutParams = params
         // 恢复标题
-        binding.tableTitleText.text = "数据表"
+        binding.tableTitleText.setText(R.string.d1_tables_title)
     }
 
     private fun createBorderDrawable(color: Int): android.graphics.drawable.Drawable {

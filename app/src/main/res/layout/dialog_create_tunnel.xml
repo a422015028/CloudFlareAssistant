@@ -10,7 +10,7 @@
         android:id="@+id/nameInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="隧道名称"
+        android:hint="@string/tunnel_name"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:hint="配置来源"
+        android:hint="@string/tunnel_config_source"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
         <AutoCompleteTextView
@@ -41,7 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="注意：创建隧道后需要在服务器上运行 cloudflared 进行连接"
+        android:text="@string/tunnel_create_note"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="12sp" />
 

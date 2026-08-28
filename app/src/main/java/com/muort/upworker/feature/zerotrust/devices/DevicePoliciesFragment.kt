@@ -82,7 +82,7 @@ ff05::/16"""
             },
             onDeleteClick = { policy ->
                 policy.policyId?.let { id ->
-                    confirmDeletePolicy(id, policy.name ?: "配置文件")
+                    confirmDeletePolicy(id, policy.name ?: getString(R.string.zt_policy_unnamed_profile))
                 }
             },
             onEnabledChange = { policy, enabled ->
@@ -119,13 +119,13 @@ ff05::/16"""
 
                 launch {
                     viewModel.message.collect { message ->
-                        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()      
+                        android.widget.Toast.makeText(requireContext(), message.asString(requireContext()), android.widget.Toast.LENGTH_SHORT).show()      
                     }
                 }
 
                 launch {
                     viewModel.error.collect { error ->
-                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), error.asString(requireContext()), android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -203,15 +203,15 @@ ff05::/16"""
         
         // Match expression selectors and operators
         val matchSelectorOptions = arrayOf(
-            "用户电子邮件",
-            "操作系统"
+            getString(R.string.zt_device_match_user_email),
+            getString(R.string.zt_device_match_os)
         )
         val matchSelectorAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item_left, matchSelectorOptions)
         matchSelectorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         matchSelectorSpinner.adapter = matchSelectorAdapter
         
-        val emailOperatorOptions = arrayOf("是", "在", "不在", "匹配")
-        val osOperatorOptions = arrayOf("是", "在", "不在")
+        val emailOperatorOptions = arrayOf(getString(R.string.zt_device_op_is), getString(R.string.zt_device_op_in), getString(R.string.zt_device_op_not_in), getString(R.string.zt_device_op_matches))
+        val osOperatorOptions = arrayOf(getString(R.string.zt_device_op_is), getString(R.string.zt_device_op_in), getString(R.string.zt_device_op_not_in))
         
         val matchOperatorAdapter = android.widget.ArrayAdapter(
             requireContext(),
@@ -282,7 +282,7 @@ ff05::/16"""
             if (isAdvancedMode) {
                 matchBuilderLayout.visibility = View.GONE
                 matchInputLayout.visibility = View.VISIBLE
-                matchAdvancedToggle.text = "简化模式"
+                matchAdvancedToggle.text = getString(R.string.zt_device_simple_mode)
                 val value = if (matchSelectorSpinner.selectedItemPosition == 1) {
                     getSelectedOsValuesLocal()
                 } else {
@@ -296,7 +296,7 @@ ff05::/16"""
             } else {
                 matchBuilderLayout.visibility = View.VISIBLE
                 matchInputLayout.visibility = View.GONE
-                matchAdvancedToggle.text = "高级：直接编辑表达式"
+                matchAdvancedToggle.text = getString(R.string.zt_device_advanced_mode)
                 parseMatchExpressionToBuilder(matchInput.text?.toString())?.let { (selectorIdx, operatorIdx, value) ->
                     matchSelectorSpinner.setSelection(selectorIdx)
                     matchOperatorSpinner.setSelection(operatorIdx)
@@ -309,30 +309,44 @@ ff05::/16"""
             }
         }
         
-        val serviceModeOptions = arrayOf("流量和 DNS 模式", "纯 DNS 模式", "本地代理模式", "纯态势模式")
+        val serviceModeOptions = arrayOf(
+            getString(R.string.zt_device_service_mode_warp),
+            getString(R.string.zt_device_service_mode_1dot1),
+            getString(R.string.zt_device_service_mode_proxy),
+            getString(R.string.zt_device_service_mode_posture_only)
+        )
         val serviceModeAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, serviceModeOptions)
         serviceModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         serviceModeSpinner.adapter = serviceModeAdapter
         
         // 强制网络门户检测: 仅支持 3、5、10 分钟
-        val captivePortalOptions = arrayOf("3 分钟", "5 分钟", "10 分钟")
+        val captivePortalOptions = arrayOf(
+            resources.getQuantityString(R.plurals.zt_device_minutes, 3, 3),
+            resources.getQuantityString(R.plurals.zt_device_minutes, 5, 5),
+            resources.getQuantityString(R.plurals.zt_device_minutes, 10, 10)
+        )
         val captivePortalAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, captivePortalOptions)
         captivePortalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         captivePortalMinutesSpinner.adapter = captivePortalAdapter
         
         // 自动连接: 1-1440 分钟，常用选项
-        val autoConnectOptions = arrayOf("3 分钟", "5 分钟", "10 分钟", "15 分钟", "30 分钟", "60 分钟", "120 分钟", "240 分钟", "480 分钟", "720 分钟", "1440 分钟")
+        val autoConnectValues = intArrayOf(3, 5, 10, 15, 30, 60, 120, 240, 480, 720, 1440)
+        val autoConnectOptions = autoConnectValues.map { resources.getQuantityString(R.plurals.zt_device_minutes, it, it) }.toTypedArray()
         val autoConnectAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, autoConnectOptions)
         autoConnectAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         autoConnectMinutesSpinner.adapter = autoConnectAdapter
         
         // 本地网络排除: 1-120 分钟，常用选项
-        val localNetworkExcludeOptions = arrayOf("5 分钟", "10 分钟", "15 分钟", "30 分钟", "60 分钟", "90 分钟", "120 分钟")
+        val localNetValues = intArrayOf(5, 10, 15, 30, 60, 90, 120)
+        val localNetworkExcludeOptions = localNetValues.map { resources.getQuantityString(R.plurals.zt_device_minutes, it, it) }.toTypedArray()
         val localNetworkExcludeAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, localNetworkExcludeOptions)
         localNetworkExcludeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         localNetworkExcludeMinutesSpinner.adapter = localNetworkExcludeAdapter
         
-        val splitTunnelModeOptions = arrayOf("排除模式", "包含模式")
+        val splitTunnelModeOptions = arrayOf(
+            getString(R.string.zt_device_split_exclude_mode),
+            getString(R.string.zt_device_split_include_mode)
+        )
         val splitTunnelModeAdapter = android.widget.ArrayAdapter(requireContext(), R.layout.spinner_item, splitTunnelModeOptions)
         splitTunnelModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         splitTunnelModeSpinner.adapter = splitTunnelModeAdapter
@@ -347,7 +361,7 @@ ff05::/16"""
                             splitTunnelExcludeInput.setText(DEFAULT_SPLIT_TUNNEL_EXCLUDE)
                                 android.widget.Toast.makeText(
                                     requireContext(),
-                                    "已自动填入默认排除列表，请检查后点击保存",
+                                    R.string.msg_default_split_tunnel_filled,
                                     android.widget.Toast.LENGTH_LONG
                                 ).show()
                         }
@@ -429,9 +443,9 @@ ff05::/16"""
         }
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(if (existingPolicy == null) "创建配置文件" else "编辑配置文件")
+            .setTitle(if (existingPolicy == null) R.string.zt_policy_create_profile else R.string.zt_policy_edit_profile)
             .setView(dialogView)
-            .setPositiveButton(if (existingPolicy == null) "创建" else "保存") { _, _ ->
+            .setPositiveButton(if (existingPolicy == null) R.string.dialog_create else R.string.save) { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
                 
                 val captivePortalMinutes = getCaptivePortalMinutes(captivePortalMinutesSpinner.selectedItemPosition)
@@ -491,7 +505,7 @@ ff05::/16"""
                 if (existingPolicy == null) {
                     val name = nameInput.text?.toString()
                     if (name.isNullOrBlank()) {
-                        android.widget.Toast.makeText(requireContext(), "配置文件名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), R.string.msg_policy_name_empty, android.widget.Toast.LENGTH_SHORT).show()
                         return@setPositiveButton
                     }
                     
@@ -546,7 +560,7 @@ ff05::/16"""
                         } else {
                         val name = nameInput.text?.toString()
                         if (name.isNullOrBlank()) {
-                            android.widget.Toast.makeText(requireContext(), "配置文件名称不能为空", android.widget.Toast.LENGTH_SHORT).show()   
+                            android.widget.Toast.makeText(requireContext(), R.string.msg_policy_name_empty, android.widget.Toast.LENGTH_SHORT).show()   
                             return@setPositiveButton
                         }
                         
@@ -583,7 +597,7 @@ ff05::/16"""
                 }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -697,11 +711,11 @@ ff05::/16"""
     
     private fun getServiceModeLabel(serviceMode: String?): String {
         return when (serviceMode) {
-            "warp" -> "流量和 DNS 模式"
-            "1dot1" -> "纯 DNS 模式"
-            "proxy" -> "本地代理模式"
-            "posture_only" -> "纯态势模式"
-            else -> "流量和 DNS 模式"
+            "warp" -> getString(R.string.zt_device_service_mode_warp)
+            "1dot1" -> getString(R.string.zt_device_service_mode_1dot1)
+            "proxy" -> getString(R.string.zt_device_service_mode_proxy)
+            "posture_only" -> getString(R.string.zt_device_service_mode_posture_only)
+            else -> getString(R.string.zt_device_service_mode_warp)
         }
     }
     
@@ -716,11 +730,15 @@ ff05::/16"""
     }
     
     private fun getServiceModeValue(label: String?): String? {
+        val warpMode = getString(R.string.zt_device_service_mode_warp)
+        val dnsMode = getString(R.string.zt_device_service_mode_1dot1)
+        val proxyMode = getString(R.string.zt_device_service_mode_proxy)
+        val postureMode = getString(R.string.zt_device_service_mode_posture_only)
         return when (label) {
-            "流量和 DNS 模式" -> "warp"
-            "纯 DNS 模式" -> "1dot1"
-            "本地代理模式" -> "proxy"
-            "纯态势模式" -> "posture_only"
+            warpMode -> "warp"
+            dnsMode -> "1dot1"
+            proxyMode -> "proxy"
+            postureMode -> "posture_only"
             else -> "warp"
         }
     }
@@ -777,14 +795,14 @@ ff05::/16"""
 
     private fun confirmDeletePolicy(policyId: String, policyName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除配置文件")
-            .setMessage("确定要删除配置文件 \"$policyName\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.zt_policy_delete_profile_title)
+            .setMessage(getString(R.string.zt_policy_delete_profile_confirm, policyName))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     viewModel.deletePolicy(account, policyId)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 

@@ -31,7 +31,7 @@
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
                     android:textSize="16sp"
-                    android:text="记录名" />
+                    android:text="@string/dns_record_name" />
 
                 <TextView
                     android:id="@+id/dnsTypeText"
@@ -40,7 +40,7 @@
                     android:textSize="12sp"
                     android:textColor="?attr/colorPrimary"
                     android:layout_marginTop="4dp"
-                    android:text="类型" />
+                    android:text="@string/dns_type" />
 
             </LinearLayout>
 
@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_menu_more"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="更多操作" />
+                android:contentDescription="@string/account_more_actions" />
 
         </LinearLayout>
 
@@ -61,7 +61,7 @@
             android:textSize="14sp"
             android:textColor="?android:textColorSecondary"
             android:layout_marginTop="8dp"
-            android:text="内容" />
+            android:text="@string/dns_content" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -84,7 +84,7 @@
                 android:textSize="12sp"
                 android:textColor="?android:textColorSecondary"
                 android:layout_marginStart="16dp"
-                android:text="状态" />
+                android:text="@string/dns_status" />
 
         </LinearLayout>
 

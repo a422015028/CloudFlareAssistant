@@ -1,9 +1,12 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -15,6 +18,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class EmailRoutingRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
 ) {
     // —— 设置 ——
@@ -30,7 +34,7 @@ class EmailRoutingRepository @Inject constructor(
                 )
                 if (resp.isSuccessful && resp.body()?.success == true) {
                     resp.body()?.result?.let { Resource.Success(it) }
-                        ?: Resource.Error("获取设置失败：无返回数据")
+                        ?: Resource.Error(appContext.getString(R.string.repo_email_settings_no_result))
                 } else {
                     Resource.Error(resp.body()?.errors?.firstOrNull()?.message
                         ?: "HTTP ${resp.code()}: ${resp.message()}")
@@ -88,7 +92,7 @@ class EmailRoutingRepository @Inject constructor(
                 zoneId, input,
             )
             if (resp.isSuccessful && resp.body()?.success == true) {
-                resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error("创建失败：无返回数据")
+                resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error(appContext.getString(R.string.repo_generic_create_no_result))
             } else {
                 Resource.Error(resp.body()?.errors?.firstOrNull()?.message
                     ?: "HTTP ${resp.code()}: ${resp.message()}")
@@ -144,7 +148,7 @@ class EmailRoutingRepository @Inject constructor(
                     account.accountId, EmailDestinationCreate(email),
                 )
                 if (resp.isSuccessful && resp.body()?.success == true) {
-                    resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error("添加失败：无返回数据")
+                    resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error(appContext.getString(R.string.repo_generic_add_no_result))
                 } else {
                     Resource.Error(resp.body()?.errors?.firstOrNull()?.message
                         ?: "HTTP ${resp.code()}: ${resp.message()}")

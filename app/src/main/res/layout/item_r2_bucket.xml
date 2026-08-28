@@ -26,7 +26,7 @@
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:text="存储桶名" />
+                android:text="@string/r2_bucket_name" />
 
             <TextView
                 android:id="@+id/bucketLocationText"
@@ -35,7 +35,7 @@
                 android:textSize="12sp"
                 android:textColor="?android:textColorSecondary"
                 android:layout_marginTop="4dp"
-                android:text="位置" />
+                android:text="@string/r2_location" />
 
         </LinearLayout>
 
@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_more"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="更多操作" />
+            android:contentDescription="@string/account_more_actions" />
 
     </LinearLayout>
 

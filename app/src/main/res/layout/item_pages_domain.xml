@@ -48,7 +48,7 @@
             android:layout_marginStart="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_delete"
-            android:contentDescription="删除域名"
+            android:contentDescription="@string/domain_delete"
             android:visibility="gone"
             tools:visibility="visible" />
 

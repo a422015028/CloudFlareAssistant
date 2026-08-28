@@ -10,10 +10,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.app.AlertDialog
-import com.google.android.material.materialswitch.MaterialSwitch
-import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.DnsRecord
@@ -169,7 +165,8 @@ class SnippetRuleDialog : DialogFragment() {
     }
 
     private fun inflateConditionView(index: Int): View {
-        val inflater = LayoutInflater.from(requireContext())
+        val ctx = requireContext()
+        val inflater = LayoutInflater.from(ctx)
         val row = ItemSnippetConditionBinding.inflate(inflater, binding.conditionsContainer, false)
         val cond = conditions[index]
 
@@ -179,20 +176,20 @@ class SnippetRuleDialog : DialogFragment() {
             row.headerNameLayout.visibility =
                 if (field.needsHeaderName) View.VISIBLE else View.GONE
             row.valueLayout.visibility = if (op.noValue) View.GONE else View.VISIBLE
-            val valueHint = when {
-                op.expr == "in" -> "多个值用逗号分隔"
-                field.type == SnippetRuleExpression.ValueType.IP -> "IP 或 CIDR"
-                field.type == SnippetRuleExpression.ValueType.NUMBER -> "数字"
-                field.expr == "ip.src.country" -> "国家代码（如 CN）"
-                else -> "值"
+            val valueHintRes = when {
+                op.expr == "in" -> R.string.snippet_value_multiple_values
+                field.type == SnippetRuleExpression.ValueType.IP -> R.string.snippet_value_ip_or_cidr
+                field.type == SnippetRuleExpression.ValueType.NUMBER -> R.string.snippet_value_number
+                field.expr == "ip.src.country" -> R.string.snippet_value_country_code
+                else -> R.string.snippet_value_default
             }
-            row.valueLayout.hint = valueHint
+            row.valueLayout.hint = ctx.getString(valueHintRes)
         }
 
         // 字段
-        val fieldLabels = SnippetRuleExpression.FIELDS.map { it.label }
+        val fieldLabels = SnippetRuleExpression.FIELDS.map { it.label(ctx) }
         row.fieldSpinner.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, fieldLabels)
+            ArrayAdapter(ctx, android.R.layout.simple_list_item_1, fieldLabels)
         )
         row.fieldSpinner.setText(fieldLabels[cond.fieldIndex], false)
         // 初始运算符需与字段类型匹配
@@ -211,9 +208,9 @@ class SnippetRuleDialog : DialogFragment() {
             val field = SnippetRuleExpression.FIELDS[cond.fieldIndex]
             val ops = SnippetRuleExpression.opsFor(field.type)
             row.opSpinner.setAdapter(
-                ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, ops.map { it.label })
+                ArrayAdapter(ctx, android.R.layout.simple_list_item_1, ops.map { it.label(ctx) })
             )
-            row.opSpinner.setText(ops[cond.opIndex.coerceAtMost(ops.size - 1)].label, false)
+            row.opSpinner.setText(ops[cond.opIndex.coerceAtMost(ops.size - 1)].label(ctx), false)
         }
         refreshOps()
         row.opSpinner.setOnItemClickListener { _, _, position, _ ->
@@ -263,8 +260,12 @@ class SnippetRuleDialog : DialogFragment() {
 
     private fun updatePreview() {
         val expr = SnippetRuleExpression.build(conditions, useAnd)
-        binding.previewText.text = expr.ifBlank { "（请添加条件）" }
-        binding.builderCharCount.text = "${expr.length} / ${SnippetRepository.MAX_EXPRESSION_LENGTH}"
+        binding.previewText.text = expr.ifBlank { getString(R.string.snippet_expr_preview_empty) }
+        binding.builderCharCount.text = getString(
+            R.string.snippet_expr_char_count_format,
+            expr.length,
+            SnippetRepository.MAX_EXPRESSION_LENGTH,
+        )
         binding.builderCharCount.setTextColor(charCountColor(expr.length))
     }
 
@@ -286,7 +287,7 @@ class SnippetRuleDialog : DialogFragment() {
             if (parsed == null) {
                 Toast.makeText(
                     requireContext(),
-                    "表达式包含构建器不支持的高级特性（嵌套/not/函数），请继续使用表达式编辑器",
+                    getString(R.string.snippet_expr_advanced_not_supported),
                     Toast.LENGTH_LONG,
                 ).show()
                 return@setOnClickListener
@@ -307,7 +308,11 @@ class SnippetRuleDialog : DialogFragment() {
 
     private fun updateEditorCounter() {
         val len = binding.expressionInput.text?.toString()?.length ?: 0
-        binding.editorCharCount.text = "${len} / ${SnippetRepository.MAX_EXPRESSION_LENGTH}"
+        binding.editorCharCount.text = getString(
+            R.string.snippet_expr_char_count_format,
+            len,
+            SnippetRepository.MAX_EXPRESSION_LENGTH,
+        )
         binding.editorCharCount.setTextColor(charCountColor(len))
     }
 
@@ -328,9 +333,9 @@ class SnippetRuleDialog : DialogFragment() {
 
         binding.btnRemoveRule.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
-                .setMessage("确定移除「$snippetName」的规则吗？移除后该片段将不会执行。")
-                .setPositiveButton("移除") { _, _ -> removeRule() }
-                .setNegativeButton("取消", null)
+                .setMessage(getString(R.string.snippet_remove_rule_message, snippetName))
+                .setPositiveButton(R.string.snippet_remove_rule_button) { _, _ -> removeRule() }
+                .setNegativeButton(R.string.cancel, null)
                 .show()
         }
     }
@@ -339,12 +344,12 @@ class SnippetRuleDialog : DialogFragment() {
         if (binding.radioAllRequests.isChecked) return "true"
         return if (isBuilderMode) {
             SnippetRuleExpression.build(conditions, useAnd).ifBlank {
-                Toast.makeText(requireContext(), "请至少填写一个完整条件", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.msg_condition_required), Toast.LENGTH_SHORT).show()
                 null
             }
         } else {
             binding.expressionInput.text.toString().trim().ifBlank {
-                Toast.makeText(requireContext(), "表达式不能为空", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.msg_expression_empty), Toast.LENGTH_SHORT).show()
                 null
             }
         }
@@ -353,14 +358,18 @@ class SnippetRuleDialog : DialogFragment() {
     private fun saveRule() {
         if (saving) return
         val account = accountViewModel.defaultAccount.value ?: run {
-            Toast.makeText(requireContext(), "账号未就绪", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.msg_account_not_ready), Toast.LENGTH_SHORT).show()
             return
         }
         val expr = buildFinalExpression() ?: return
         if (expr.length > SnippetRepository.MAX_EXPRESSION_LENGTH) {
             Toast.makeText(
                 requireContext(),
-                "表达式长度 ${expr.length} 超过上限 ${SnippetRepository.MAX_EXPRESSION_LENGTH} 字符",
+                getString(
+                    R.string.msg_expr_too_long,
+                    expr.length,
+                    SnippetRepository.MAX_EXPRESSION_LENGTH,
+                ),
                 Toast.LENGTH_SHORT,
             ).show()
             return
@@ -375,20 +384,20 @@ class SnippetRuleDialog : DialogFragment() {
 
         saving = true
         binding.btnSave.isEnabled = false
-        binding.btnSave.text = "保存中…"
+        binding.btnSave.setText(R.string.msg_saving_ellipsis)
 
         lifecycleScope.launch {
             val result = snippetRepo.saveSnippetRule(account, zoneId, rule)
             saving = false
             binding.btnSave.isEnabled = true
-            binding.btnSave.text = "保存"
+            binding.btnSave.setText(R.string.save)
             when (result) {
                 is Resource.Success -> {
-                    Toast.makeText(requireContext(), "规则已保存", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.msg_rule_saved), Toast.LENGTH_SHORT).show()
                     checkDnsCoverageAndFinish(account, expr)
                 }
                 is Resource.Error ->
-                    Toast.makeText(requireContext(), "保存失败：${result.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), getString(R.string.msg_save_failed, result.message), Toast.LENGTH_LONG).show()
                 is Resource.Loading -> {}
             }
         }
@@ -396,17 +405,17 @@ class SnippetRuleDialog : DialogFragment() {
 
     private fun removeRule() {
         val account = accountViewModel.defaultAccount.value ?: run {
-            Toast.makeText(requireContext(), "账号未就绪", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.msg_account_not_ready), Toast.LENGTH_SHORT).show()
             return
         }
         lifecycleScope.launch {
             when (val r = snippetRepo.deleteSnippetRule(account, zoneId, snippetName)) {
                 is Resource.Success -> {
-                    Toast.makeText(requireContext(), "规则已移除", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.msg_rule_removed), Toast.LENGTH_SHORT).show()
                     dismiss()
                 }
                 is Resource.Error ->
-                    Toast.makeText(requireContext(), "移除失败：${r.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), getString(R.string.msg_remove_failed, r.message), Toast.LENGTH_LONG).show()
                 is Resource.Loading -> {}
             }
         }
@@ -498,7 +507,7 @@ class SnippetRuleDialog : DialogFragment() {
     }
 
     /**
-     * 对齐 Cloudflare 网页版样式：标题"此规则可能不适用于您的流量"，
+     * 对齐 Cloudflare 网页版样式：标题，
      * 单对话框内含 [忽略并继续] / [创建新代理 DNS 记录]（默认）单选 + 记录表单。
      */
     private fun showDnsBindingWarning(uncovered: List<String>) {
@@ -510,11 +519,12 @@ class SnippetRuleDialog : DialogFragment() {
         val fqdn = if (zoneName.isNotEmpty() && !host.endsWith(zoneName)) "$host.$zoneName" else host
         val dBinding = DialogSnippetDnsBinding.inflate(layoutInflater)
 
-        dBinding.dnsExplainText.text = "您的 DNS 配置可能不是 $host 的代理流量，这意味着请求可能不符合此规则。"
+        dBinding.dnsExplainText.text = getString(R.string.snippet_dns_explain, host)
 
         fun updateTargetText(b: DialogSnippetDnsBinding, f: String) {
             val content = b.recordContentInput.text?.toString()?.trim().orEmpty()
-            b.dnsTargetText.text = "$f 指向 ${if (content.isEmpty()) "-" else content} 并通过 Cloudflare 代理其流量。"
+            val contentArg = content.ifEmpty { "-" }
+            b.dnsTargetText.text = getString(R.string.snippet_dns_target_format, f, contentArg)
         }
 
         val types = listOf("A", "AAAA", "CNAME")
@@ -522,17 +532,19 @@ class SnippetRuleDialog : DialogFragment() {
         fun applyType(type: String) {
             when (type) {
                 "A" -> {
-                    dBinding.recordContentLayout.hint = "IPv4 地址（必填）"
-                    dBinding.recordContentLayout.helperText = "使用 192.0.2.1 放弃请求"
+                    dBinding.recordContentLayout.setHint(R.string.snippet_dns_hint_ipv4_required)
+                    dBinding.recordContentLayout.helperText =
+                        getString(R.string.snippet_dns_helper_ipv4_blackhole)
                     dBinding.recordContentInput.setText("192.0.2.1")
                 }
                 "AAAA" -> {
-                    dBinding.recordContentLayout.hint = "IPv6 地址（必填）"
-                    dBinding.recordContentLayout.helperText = "使用 100:: 放弃请求"
+                    dBinding.recordContentLayout.setHint(R.string.snippet_dns_hint_ipv6_required)
+                    dBinding.recordContentLayout.helperText =
+                        getString(R.string.snippet_dns_helper_ipv6_blackhole)
                     dBinding.recordContentInput.setText("100::")
                 }
                 else -> {
-                    dBinding.recordContentLayout.hint = "[content]"
+                    dBinding.recordContentLayout.setHint(R.string.snippet_dns_hint_content)
                     dBinding.recordContentLayout.helperText = null
                     dBinding.recordContentInput.setText("")
                 }
@@ -563,11 +575,15 @@ class SnippetRuleDialog : DialogFragment() {
 
         // 先把引导对话框弹出，再让规则面板退场，避免两层 Dialog 叠加互相遮挡
         val dialog = MaterialAlertDialogBuilder(act)
-            .setTitle("此规则可能不适用于您的流量")
+            .setTitle(R.string.snippet_dns_warning_title)
             .setView(dBinding.root)
-            .setPositiveButton(if (dBinding.radioCreate.isChecked) "创建记录和部署规则" else "部署规则", null)
+            .setPositiveButton(
+                if (dBinding.radioCreate.isChecked) R.string.snippet_dns_btn_create_and_deploy
+                else R.string.snippet_dns_btn_deploy_only,
+                null,
+            )
             // “取消”走 AlertDialog 默认行为只关引导框；规则面板已在下方 dismiss 退场
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
         dismiss()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener { btn ->
@@ -576,7 +592,7 @@ class SnippetRuleDialog : DialogFragment() {
             val name = dBinding.recordNameInput.text?.toString()?.trim() ?: ""
             val content = dBinding.recordContentInput.text?.toString()?.trim() ?: ""
             if (name.isEmpty() || content.isEmpty()) {
-                Toast.makeText(ctx, "请填写名称和内容", Toast.LENGTH_SHORT).show()
+                Toast.makeText(ctx, getString(R.string.msg_name_and_content_required), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             btn.isEnabled = false
@@ -594,11 +610,11 @@ class SnippetRuleDialog : DialogFragment() {
                 )
                 when (result) {
                     is Resource.Success -> {
-                        Toast.makeText(ctx, "DNS 记录已创建并开启代理", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(ctx, getString(R.string.msg_dns_created_and_proxied), Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
                     }
                     is Resource.Error -> {
-                        Toast.makeText(ctx, "创建失败：${result.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(ctx, getString(R.string.msg_create_failed, result.message), Toast.LENGTH_LONG).show()
                         btn.isEnabled = true
                     }
                     is Resource.Loading -> {}

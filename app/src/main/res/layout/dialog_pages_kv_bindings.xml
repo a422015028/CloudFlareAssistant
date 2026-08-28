@@ -10,7 +10,7 @@
         android:id="@+id/projectNameTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="配置 Pages 的 KV 绑定"
+        android:text="@string/xml_dialog_pages_kv_bindings"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="8dp" />
@@ -19,7 +19,7 @@
         android:id="@+id/projectNameText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="项目名称: my-pages"
+        android:text="@string/xml_dialog_pages_kv_bindings_2"
         android:textSize="14sp"
         android:textColor="?attr/colorPrimary"
         android:layout_marginBottom="16dp" />
@@ -35,7 +35,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="KV 绑定列表"
+            android:text="@string/kv_binding_list"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -43,7 +43,7 @@
             android:id="@+id/addBindingBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+ 添加绑定"
+            android:text="@string/binding_add"
             android:textSize="12sp"
             style="@style/Widget.Material3.Button.TextButton" />
 
@@ -61,7 +61,7 @@
         android:id="@+id/noBindingsText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="暂无 KV 绑定"
+        android:text="@string/kv_no_bindings"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
         android:padding="16dp"
@@ -71,7 +71,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="⚠️ 注意：更新绑定配置不会影响已部署的版本，需要重新部署"
+        android:text="@string/xml_dialog_pages_kv_bindings_3"
         android:textSize="12sp"
         android:textColor="?attr/colorError"
         android:layout_marginTop="16dp"

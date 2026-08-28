@@ -2,10 +2,12 @@ package com.muort.upworker.feature.kv
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.KvKey
 import com.muort.upworker.core.model.KvNamespace
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.repository.KvRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -39,8 +41,8 @@ class KvViewModel @Inject constructor(
     private val _keysLoadingState = MutableStateFlow(false)
     val keysLoadingState: StateFlow<Boolean> = _keysLoadingState.asStateFlow()
     
-    private val _message = MutableSharedFlow<String>()
-    val message: SharedFlow<String> = _message.asSharedFlow()
+    private val _message = MutableSharedFlow<UiMessage>()
+    val message: SharedFlow<UiMessage> = _message.asSharedFlow()
     
     fun loadNamespaces(account: Account) {
         viewModelScope.launch {
@@ -52,7 +54,7 @@ class KvViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} namespaces")
                 }
                 is Resource.Error -> {
-                    _message.emit("加载命名空间失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_namespaces_load_failed, result.message))
                     Timber.e("Failed to load namespaces: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -65,7 +67,7 @@ class KvViewModel @Inject constructor(
     fun createNamespace(account: Account, title: String) {
         if (title.isBlank()) {
             viewModelScope.launch {
-                _message.emit("请输入命名空间名称")
+                _message.emit(UiMessage.of(R.string.vm_msg_kv_namespace_name_required))
             }
             return
         }
@@ -75,11 +77,11 @@ class KvViewModel @Inject constructor(
             
             when (val result = kvRepository.createNamespace(account, title)) {
                 is Resource.Success -> {
-                    _message.emit("命名空间创建成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_namespace_create_success))
                     loadNamespaces(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("创建命名空间失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_namespace_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -94,7 +96,7 @@ class KvViewModel @Inject constructor(
             
             when (val result = kvRepository.deleteNamespace(account, namespaceId)) {
                 is Resource.Success -> {
-                    _message.emit("命名空间删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_namespace_delete_success))
                     if (_selectedNamespace.value?.id == namespaceId) {
                         _selectedNamespace.value = null
                         _keys.value = emptyList()
@@ -102,7 +104,7 @@ class KvViewModel @Inject constructor(
                     loadNamespaces(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除命名空间失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_namespace_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -135,7 +137,7 @@ class KvViewModel @Inject constructor(
                     Timber.d("Loaded ${keysWithValues.size} keys with values")
                 }
                 is Resource.Error -> {
-                    _message.emit("加载 Key 列表失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_keys_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -155,7 +157,7 @@ class KvViewModel @Inject constructor(
                     onResult(result.data)
                 }
                 is Resource.Error -> {
-                    _message.emit("获取 Value 失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_value_get_failed, result.message))
                     onResult(null)
                 }
                 is Resource.Loading -> {}
@@ -168,7 +170,7 @@ class KvViewModel @Inject constructor(
     fun putValue(account: Account, namespaceId: String, keyName: String, value: String) {
         if (keyName.isBlank()) {
             viewModelScope.launch {
-                _message.emit("请输入 Key 名称")
+                _message.emit(UiMessage.of(R.string.vm_msg_kv_key_name_required))
             }
             return
         }
@@ -178,11 +180,11 @@ class KvViewModel @Inject constructor(
             
             when (val result = kvRepository.putValue(account, namespaceId, keyName, value)) {
                 is Resource.Success -> {
-                    _message.emit("Value 保存成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_value_save_success))
                     loadKeys(account, namespaceId)
                 }
                 is Resource.Error -> {
-                    _message.emit("保存 Value 失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_value_save_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -197,7 +199,7 @@ class KvViewModel @Inject constructor(
             
             when (val result = kvRepository.deleteValue(account, namespaceId, keyName)) {
                 is Resource.Success -> {
-                    _message.emit("Value 删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_value_delete_success))
                     if (_selectedKey.value?.name == keyName) {
                         _selectedKey.value = null
                         _keyValue.value = ""
@@ -205,7 +207,7 @@ class KvViewModel @Inject constructor(
                     loadKeys(account, namespaceId)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除 Value 失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_kv_value_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }

@@ -2,10 +2,12 @@ package com.muort.upworker.feature.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.DashboardMetrics
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.TimeRange
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.repository.AnalyticsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,11 +36,11 @@ class DashboardViewModel @Inject constructor(
      */
     fun loadDashboard(account: Account?, zoneId: String, timeRange: TimeRange = TimeRange.ONE_DAY) {
         if (account == null) {
-            _dashboardState.value = DashboardState.Error("请先选择账号")
+            _dashboardState.value = DashboardState.Error(UiMessage.of(R.string.msg_please_select_account_first))
             return
         }
         if (zoneId.isBlank()) {
-            _dashboardState.value = DashboardState.Error("域名 ID 不能为空")
+            _dashboardState.value = DashboardState.Error(UiMessage.of(R.string.vm_msg_dash_zone_id_empty))
             return
         }
         
@@ -51,12 +53,12 @@ class DashboardViewModel @Inject constructor(
                 is Resource.Success -> {
                     _metrics.value = result.data
                     _dashboardState.value = DashboardState.Success(result.data)
+                    @Suppress("DEPRECATION") // deprecated displayName is the static fallback intended for logs
                     Timber.d("Dashboard loaded successfully for zone $zoneId, ${timeRange.displayName}: ${result.data}")
                 }
                 is Resource.Error -> {
-                    val errorMsg = result.message
-                    _dashboardState.value = DashboardState.Error(errorMsg)
-                    Timber.e("Failed to load dashboard: $errorMsg")
+                    _dashboardState.value = DashboardState.Error(UiMessage.RawString(result.message))
+                    Timber.e("Failed to load dashboard: ${result.message}")
                 }
                 is Resource.Loading -> {
                     // Already in loading state
@@ -94,5 +96,5 @@ sealed class DashboardState {
     object Idle : DashboardState()
     object Loading : DashboardState()
     data class Success(val metrics: DashboardMetrics) : DashboardState()
-    data class Error(val message: String) : DashboardState()
+    data class Error(val message: UiMessage) : DashboardState()
 }

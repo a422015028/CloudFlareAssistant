@@ -26,7 +26,7 @@
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:text="对象Key" />
+                android:text="@string/r2_object_key" />
 
             <TextView
                 android:id="@+id/objectSizeText"
@@ -35,7 +35,7 @@
                 android:textSize="12sp"
                 android:textColor="?android:textColorSecondary"
                 android:layout_marginTop="4dp"
-                android:text="大小" />
+                android:text="@string/r2_size" />
 
         </LinearLayout>
 
@@ -52,7 +52,7 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="下载"
+                android:contentDescription="@string/r2_download"
                 android:src="@android:drawable/stat_sys_download"
                 app:tint="?android:textColorSecondary" />
 
@@ -66,7 +66,7 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="删除"
+                android:contentDescription="@string/delete"
                 android:src="@android:drawable/ic_menu_delete"
                 app:tint="?android:textColorSecondary" />
 

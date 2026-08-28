@@ -39,23 +39,24 @@ class GatewayListAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(list: GatewayList) {
+            val ctx = binding.root.context
             binding.listNameText.text = list.name
             binding.listTypeChip.text = when (list.type) {
-                "DOMAIN" -> "域名"
-                "IP" -> "IP 地址"
-                "URL" -> "URL"
+                "DOMAIN" -> ctx.getString(R.string.zt_list_type_domain)
+                "IP" -> ctx.getString(R.string.zt_list_type_ip)
+                "URL" -> ctx.getString(R.string.zt_list_type_url)
                 else -> list.type
             }
             binding.listTypeChip.setTextColor(getListTypeColor(list.type))
-            binding.listDescriptionText.text = list.description ?: "无描述"
-            binding.itemCountText.text = "项目数: ${list.count ?: 0}"
-            binding.listIdText.text = "ID: ${list.id}"
+            binding.listDescriptionText.text = list.description ?: ctx.getString(R.string.zt_list_no_description)
+            val listCount = list.count ?: 0
+            binding.itemCountText.text = ctx.resources.getQuantityString(R.plurals.zt_list_items, listCount, listCount)
+            binding.listIdText.text = ctx.getString(R.string.zt_list_id_label, list.id)
 
             binding.listIdText.setOnClickListener {
-                val clipboard = binding.root.context
-                    .getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clipboard = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("List ID", list.id))
-                Toast.makeText(binding.root.context, "已复制ID: ${list.id}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(ctx, ctx.getString(R.string.zt_list_id_copied, list.id), Toast.LENGTH_SHORT).show()
             }
 
             binding.editButton.setOnClickListener { onEditClick(list) }

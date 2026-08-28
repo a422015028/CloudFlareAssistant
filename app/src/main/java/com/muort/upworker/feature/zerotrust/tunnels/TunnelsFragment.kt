@@ -100,13 +100,13 @@ class TunnelsFragment : Fragment() {
                 }
                 launch {
                     viewModel.message.collect { message ->
-                        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), message.asString(requireContext()), android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
 
                 launch {
                     viewModel.error.collect { error ->
-                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), error.asString(requireContext()), android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -131,8 +131,8 @@ class TunnelsFragment : Fragment() {
         
         // Config source options
         val configSources = listOf(
-            "local" to "本地 (cloudflared 配置)",
-            "cloudflare" to "远程 (Dashboard 配置)"
+            "local" to getString(R.string.zt_tunnel_config_src_local),
+            "cloudflare" to getString(R.string.zt_tunnel_config_src_cloudflare)
         )
         val adapter = ArrayAdapter(
             requireContext(),
@@ -143,14 +143,14 @@ class TunnelsFragment : Fragment() {
         configSrcSpinner.setText(configSources[0].second, false)
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("创建隧道")
+            .setTitle(R.string.zt_tunnel_create_title)
             .setView(dialogView)
-            .setPositiveButton("创建") { _, _ ->
+            .setPositiveButton(R.string.dialog_create) { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
                 val name = nameInput.text?.toString()
                 
                 if (name.isNullOrBlank()) {
-                    android.widget.Toast.makeText(requireContext(), "隧道名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.msg_tunnel_name_empty), android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -166,7 +166,7 @@ class TunnelsFragment : Fragment() {
                 
                 viewModel.createTunnel(account, request)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -188,15 +188,15 @@ class TunnelsFragment : Fragment() {
         
         // Config Source Chip
         val configSourceChip = dialogView.findViewById<Chip>(R.id.configSourceChip)
-        configSourceChip.text = if (tunnel.remoteConfig == true) "远程配置" else "本地配置"
+        configSourceChip.text = if (tunnel.remoteConfig == true) getString(R.string.zt_tunnel_config_remote) else getString(R.string.zt_tunnel_config_local)
         
         // Tunnel ID
         dialogView.findViewById<TextView>(R.id.tunnelIdText).text = tunnel.id
         
         // Connection Count
         val connectionCount = tunnel.connections?.size ?: 0
-        dialogView.findViewById<TextView>(R.id.connectionCountText).text = 
-            "活跃连接: $connectionCount"
+        dialogView.findViewById<TextView>(R.id.connectionCountText).text =
+            resources.getQuantityString(R.plurals.zt_tunnel_active_conns, connectionCount, connectionCount)
         
         // Connections
         val connectionsContainer = dialogView.findViewById<LinearLayout>(R.id.connectionsContainer)
@@ -218,15 +218,15 @@ class TunnelsFragment : Fragment() {
         }
         
         // Time Info
-        dialogView.findViewById<TextView>(R.id.createdAtText).text = 
-            "创建时间: ${formatDateTime(tunnel.createdAt)}"
-        dialogView.findViewById<TextView>(R.id.activeAtText).text = 
-            "最后活跃: ${formatDateTime(tunnel.connsActiveAt)}"
+        dialogView.findViewById<TextView>(R.id.createdAtText).text =
+            getString(R.string.zt_tunnel_created_at, formatDateTime(tunnel.createdAt))
+        dialogView.findViewById<TextView>(R.id.activeAtText).text =
+            getString(R.string.zt_tunnel_last_active, formatDateTime(tunnel.connsActiveAt))
         
         // Inactive time
         val inactiveAtText = dialogView.findViewById<TextView>(R.id.inactiveAtText)
         if (tunnel.connsInactiveAt != null) {
-            inactiveAtText.text = "不活跃时间: ${formatDateTime(tunnel.connsInactiveAt)}"
+            inactiveAtText.text = getString(R.string.zt_tunnel_inactive_at, formatDateTime(tunnel.connsInactiveAt))
             inactiveAtText.visibility = View.VISIBLE
         } else {
             inactiveAtText.visibility = View.GONE
@@ -235,7 +235,7 @@ class TunnelsFragment : Fragment() {
         // Deleted time
         val deletedAtText = dialogView.findViewById<TextView>(R.id.deletedAtText)
         if (tunnel.deletedAt != null) {
-            deletedAtText.text = "删除时间: ${formatDateTime(tunnel.deletedAt)}"
+            deletedAtText.text = getString(R.string.zt_tunnel_deleted_at, formatDateTime(tunnel.deletedAt))
             deletedAtText.visibility = View.VISIBLE
         } else {
             deletedAtText.visibility = View.GONE
@@ -254,28 +254,28 @@ class TunnelsFragment : Fragment() {
                         val fullCommand = "cloudflared service install $token"
                         var isTokenHidden = true
                         tokenText.text = "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
-                        hideTokenButton.setText("显示令牌")
+                        hideTokenButton.setText(R.string.zt_tunnel_show_token)
                         
                         hideTokenButton.setOnClickListener {
                             isTokenHidden = !isTokenHidden
                             tokenText.text = if (isTokenHidden) "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else fullCommand
-                            hideTokenButton.setText(if (isTokenHidden) "显示令牌" else "隐藏令牌")
+                            hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.zt_tunnel_hide_token)
                         }
                         
                         copyCommandButton.setOnClickListener {
                             val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                             val clip = android.content.ClipData.newPlainText("Cloudflared Service Command", fullCommand)
                             clipboard.setPrimaryClip(clip)
-                            android.widget.Toast.makeText(requireContext(), "命令已复制", android.widget.Toast.LENGTH_SHORT).show()
+                            android.widget.Toast.makeText(requireContext(), getString(R.string.zt_tunnel_command_copied), android.widget.Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        tokenText.text = "获取令牌失败"
+                        tokenText.text = getString(R.string.zt_tunnel_token_fetch_failed)
                         hideTokenButton.visibility = View.GONE
                         copyCommandButton.visibility = View.GONE
                     }
                 }
             } ?: run {
-                tokenText.text = "请先选择账号"
+                tokenText.text = getString(R.string.zt_tunnel_please_select_account)
                 hideTokenButton.visibility = View.GONE
                 copyCommandButton.visibility = View.GONE
             }
@@ -286,20 +286,20 @@ class TunnelsFragment : Fragment() {
         }
         
         val builder = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("隧道详情")
+            .setTitle(R.string.zt_tunnel_detail_title)
             .setView(dialogView)
-            .setNegativeButton("关闭", null)
+            .setNegativeButton(R.string.dialog_close, null)
         
         // Add config button for remote config tunnels
         if (tunnel.remoteConfig == true && tunnel.deletedAt == null) {
-            builder.setPositiveButton("配置") { _, _ ->
+            builder.setPositiveButton(R.string.zt_tunnel_configure_button) { _, _ ->
                 showTunnelConfigDialog(tunnel)
             }
         }
         
         // Add delete button if not deleted
         if (tunnel.deletedAt == null) {
-            builder.setNeutralButton("删除") { _, _ ->
+            builder.setNeutralButton(R.string.delete) { _, _ ->
                 confirmDeleteTunnel(tunnel.id, tunnel.name)
             }
         }
@@ -375,9 +375,9 @@ class TunnelsFragment : Fragment() {
         }
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("隧道配置: ${tunnel.name}")
+            .setTitle(getString(R.string.zt_tunnel_config_title, tunnel.name))
             .setView(dialogView)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 // Build ingress rules
                 val rules = ingressRules.mapNotNull { holder ->
                     val service = holder.serviceInput.text?.toString()
@@ -405,20 +405,20 @@ class TunnelsFragment : Fragment() {
                 val request = TunnelConfigurationRequest(config = tunnelConfig)
                 viewModel.updateTunnelConfiguration(account, tunnel.id, request)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun confirmDeleteTunnel(tunnelId: String, tunnelName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除隧道")
-            .setMessage("确定要删除隧道 \"$tunnelName\" 吗？\n\n删除后，所有通过此隧道的连接将中断。")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.zt_tunnel_delete_title)
+            .setMessage(getString(R.string.zt_tunnel_delete_confirm, tunnelName))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     viewModel.deleteTunnel(account, tunnelId)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -437,35 +437,35 @@ class TunnelsFragment : Fragment() {
             val fullCommand = "cloudflared tunnel run --token $token"
             var isTokenHidden = true
             tokenTextView.text = "cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
-            hideTokenButton.setText("显示令牌")
+            hideTokenButton.setText(R.string.zt_tunnel_show_token)
             
             hideTokenButton.setOnClickListener {
                 isTokenHidden = !isTokenHidden
                 tokenTextView.text = if (isTokenHidden) "cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else fullCommand
-                hideTokenButton.setText(if (isTokenHidden) "显示令牌" else "隐藏令牌")
+                hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.zt_tunnel_hide_token)
             }
             
             copyCommandButton.setOnClickListener {
                 val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                 val clip = android.content.ClipData.newPlainText("Cloudflared Tunnel Command", fullCommand)
                 clipboard.setPrimaryClip(clip)
-                android.widget.Toast.makeText(requireContext(), "命令已复制", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(requireContext(), getString(R.string.zt_tunnel_command_copied), android.widget.Toast.LENGTH_SHORT).show()
             }
             
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("运行命令")
+                .setTitle(R.string.zt_tunnel_run_command_title)
                 .setView(dialogView)
-                .setPositiveButton("关闭", null)
+                .setPositiveButton(R.string.dialog_close, null)
                 .show()
         }
     }
 
     private fun getStatusLabel(status: String): String {
         return when (status.lowercase()) {
-            "active" -> "活跃"
-            "inactive" -> "未活跃"
-            "degraded" -> "降级"
-            "down" -> "离线"
+            "active" -> getString(R.string.zt_tunnel_status_active)
+            "inactive" -> getString(R.string.zt_tunnel_status_inactive)
+            "degraded" -> getString(R.string.zt_tunnel_status_degraded)
+            "down" -> getString(R.string.zt_tunnel_status_down)
             else -> status
         }
     }
@@ -501,25 +501,26 @@ class TunnelsFragment : Fragment() {
     }
 
     private fun bindConnectionItem(binding: ItemTunnelConnectionBinding, connection: TunnelConnection) {
+        val ctx = requireContext()
         binding.coloNameText.text = connection.coloName ?: "Unknown Colo"
 
         val isPendingReconnect = connection.isPendingReconnect == true
-        binding.connectionStatusChip.text = if (isPendingReconnect) "重连中" else "已连接"
+        binding.connectionStatusChip.text = if (isPendingReconnect) getString(R.string.zt_tunnel_connection_reconnecting) else getString(R.string.zt_tunnel_connection_connected)
         binding.connectionStatusChip.setChipBackgroundColorResource(
             if (isPendingReconnect) android.R.color.holo_orange_light else android.R.color.holo_green_light
         )
 
         val clientVersion = connection.clientVersion ?: "Unknown"
-        binding.clientInfoText.text = "cloudflared $clientVersion"
+        binding.clientInfoText.text = getString(R.string.zt_tunnel_client_version, clientVersion)
 
         val originIp = connection.originIp
         if (!originIp.isNullOrBlank()) {
-            binding.originIpText.text = "源 IP: $originIp"
+            binding.originIpText.text = getString(R.string.zt_tunnel_origin_ip, originIp)
         } else {
-            binding.originIpText.text = "源 IP: N/A"
+            binding.originIpText.text = getString(R.string.zt_tunnel_origin_ip, ctx.getString(R.string.zt_device_status_unknown))
         }
 
-        binding.openedAtText.text = "连接时间: ${formatConnectionDateTime(connection.openedAt)}"
+        binding.openedAtText.text = getString(R.string.zt_tunnel_connection_time, formatConnectionDateTime(connection.openedAt))
     }
 
     private fun formatConnectionDateTime(dateString: String?): String {

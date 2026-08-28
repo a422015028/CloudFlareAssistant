@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.WafRule
 import com.muort.upworker.core.model.WafRuleCreate
@@ -22,17 +23,17 @@ import kotlinx.coroutines.launch
 
 /**
  * WAF / Cache / RateLimit / Transform 四个 Ruleset 功能页的共享基类。
- * 子类只需提供 [phase] 与 [addDialogTitle]。
+ * 子类只需提供 [phase] 与 [addDialogTitleResId]。
  */
 @AndroidEntryPoint
 abstract class BaseZoneRulesetFragment : BaseZoneFeatureFragment() {
 
     protected abstract val phase: String
-    protected open val addDialogTitle: String = "添加规则"
+    protected open val addDialogTitleResId: Int = R.string.add
 
     private lateinit var rulesetAdapter: ZoneRuleAdapter
 
-    override val emptyText: String = "暂无规则"
+    override val emptyTextResId: Int = R.string.empty_list
     override val showAddFab: Boolean = true
 
     /** 供子类访问 ViewModel。 */
@@ -87,7 +88,7 @@ abstract class BaseZoneRulesetFragment : BaseZoneFeatureFragment() {
                 rulesetViewModel.state.collect { state ->
                     if (state.isLoading) showLoading() else showList()
                     if (state.error != null) {
-                        showError(state.error)
+                        showError(state.error.asString(requireContext()))
                     } else if (state.rules.isEmpty() && !state.isLoading) {
                         showEmpty()
                     } else {
@@ -107,7 +108,7 @@ abstract class BaseZoneRulesetFragment : BaseZoneFeatureFragment() {
             id = id,
             title = title,
             subtitle = exprPreview,
-            meta = "动作: $actionLabel",
+            meta = requireContext().getString(R.string.waf_action_label, actionLabel),
             enabled = enabled,
             canDelete = true,
         )
@@ -115,48 +116,49 @@ abstract class BaseZoneRulesetFragment : BaseZoneFeatureFragment() {
 
     /** 弹出添加规则对话框，子类可重写以自定义表单。 */
     protected open fun showAddRuleDialog() {
-        val editText = EditText(requireContext()).apply {
-            hint = "表达式（如 (ip.src eq 1.2.3.4)）"
+        val ctx = requireContext()
+        val editText = EditText(ctx).apply {
+            hint = ctx.getString(R.string.waf_expression_edit_hint)
             setSingleLine(false)
             setPadding(48, 32, 48, 32)
         }
-        val descEditText = EditText(requireContext()).apply {
-            hint = "描述（可选）"
+        val descEditText = EditText(ctx).apply {
+            hint = ctx.getString(R.string.waf_desc_hint)
             setSingleLine(false)
             setPadding(48, 32, 48, 32)
         }
-        val actionAutoComplete = AutoCompleteTextView(requireContext()).apply {
-            hint = "动作"
+        val actionAutoComplete = AutoCompleteTextView(ctx).apply {
+            hint = ctx.getString(R.string.waf_action_hint)
             val actions = listOf("block", "challenge", "managed_challenge", "js_challenge", "log", "skip")
-            setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, actions))
+            setAdapter(ArrayAdapter(ctx, android.R.layout.simple_list_item_1, actions))
             setText("block", false)
             setPadding(48, 32, 48, 32)
         }
-        val container = android.widget.LinearLayout(requireContext()).apply {
+        val container = android.widget.LinearLayout(ctx).apply {
             orientation = android.widget.LinearLayout.VERTICAL
             addView(descEditText)
             addView(actionAutoComplete)
             addView(editText)
         }
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(addDialogTitle)
+        MaterialAlertDialogBuilder(ctx)
+            .setTitle(addDialogTitleResId)
             .setView(container)
-            .setPositiveButton("添加") { _, _ ->
+            .setPositiveButton(R.string.add) { _, _ ->
                 val expr = editText.text.toString().trim()
                 val desc = descEditText.text.toString().trim().ifBlank { null }
                 val action = actionAutoComplete.text.toString().trim()
                 if (expr.isEmpty()) {
-                    toast("表达式不能为空")
+                    toast(getString(R.string.msg_expression_empty))
                     return@setPositiveButton
                 }
                 account?.let {
                     rulesetViewModel.addRule(it, zoneId, WafRuleCreate(action, expr, desc, true)) { ok, err ->
-                        toast(if (ok) "添加成功" else "添加失败: $err")
+                        toast(if (ok) getString(R.string.msg_added) else getString(R.string.msg_add_failed, err?.asString(requireContext()).orEmpty()))
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 }

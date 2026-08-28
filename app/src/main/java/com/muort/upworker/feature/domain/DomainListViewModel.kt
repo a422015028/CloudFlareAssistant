@@ -3,6 +3,7 @@ package com.muort.upworker.feature.domain
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.muort.upworker.core.model.Account
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.repository.ZoneRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +26,7 @@ data class DomainListUiState(
 /** 添加域名状态：createdZone 非空时表单切到「名称服务器」结果页。 */
 data class AddDomainUiState(
     val isSaving: Boolean = false,
-    val error: String? = null,
+    val error: UiMessage? = null,
     val createdZone: Zone? = null,
 )
 
@@ -85,7 +86,7 @@ class DomainListViewModel @Inject constructor(
                     _addState.update { it.copy(createdZone = result.data, isSaving = false) }
                 }
                 is com.muort.upworker.core.model.Resource.Error -> {
-                    _addState.update { it.copy(error = result.message, isSaving = false) }
+                    _addState.update { it.copy(error = UiMessage.RawString(result.message), isSaving = false) }
                 }
                 is com.muort.upworker.core.model.Resource.Loading -> {}
             }

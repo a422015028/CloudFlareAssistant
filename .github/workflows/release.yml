@@ -41,6 +41,26 @@ jobs:
     - name: Clean Build Cache
       run: ./gradlew clean
 
+    - name: Run Lint (Release) — HardcodedText 拦截 & i18n 回归
+      run: |
+        ./gradlew :app:lintRelease --console=plain
+      # 说明：
+      # 1. abortOnError=true + warningsAsErrors=true → 未基线的 HardcodedText/MissingTranslation 立即 FAIL
+      # 2. checkReleaseBuilds=true 也会让 assembleRelease 自动 dependOn lintRelease，
+      #    这里单独拆一步是为了让 CI 日志更早、更清晰地显示 "lint 失败" vs "打包失败"。
+
+    - name: Upload Lint Report (Debug + Release)
+      if: always()  # 即使 build 失败，也要上传报告给排查
+      uses: actions/upload-artifact@v4
+      with:
+        name: lint-reports
+        path: |
+          app/build/reports/lint-results-debug.html
+          app/build/reports/lint-results-debug.xml
+          app/build/reports/lint-results-release.html
+          app/build/reports/lint-results-release.xml
+        if-no-files-found: warn
+
     - name: Build Release APK
       env:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}

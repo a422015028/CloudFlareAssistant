@@ -2,6 +2,7 @@ package com.muort.upworker.feature.zerotrust.tunnels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.repository.ZeroTrustRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,11 +34,11 @@ class TunnelsViewModel @Inject constructor(
     private val _loadingState = MutableStateFlow(false)
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
     
-    private val _message = MutableSharedFlow<String>()
-    val message: SharedFlow<String> = _message.asSharedFlow()
+    private val _message = MutableSharedFlow<UiMessage>()
+    val message: SharedFlow<UiMessage> = _message.asSharedFlow()
     
-    private val _error = MutableSharedFlow<String>()
-    val error: SharedFlow<String> = _error.asSharedFlow()
+    private val _error = MutableSharedFlow<UiMessage>()
+    val error: SharedFlow<UiMessage> = _error.asSharedFlow()
     
     fun loadTunnels(account: Account) {
         viewModelScope.launch {
@@ -48,7 +49,7 @@ class TunnelsViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} tunnels")
                 }
                 is Resource.Error -> {
-                    _error.emit("加载隧道失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_list_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -65,7 +66,7 @@ class TunnelsViewModel @Inject constructor(
                     Timber.d("Loaded tunnel: ${result.data.name}")
                 }
                 is Resource.Error -> {
-                    _error.emit("获取隧道详情失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_detail_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -115,10 +116,10 @@ class TunnelsViewModel @Inject constructor(
             when (val result = zeroTrustRepository.updateTunnelConfiguration(account, tunnelId, request)) {
                 is Resource.Success -> {
                     _tunnelConfiguration.value = result.data
-                    _message.emit("隧道配置已更新")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_updated))
                 }
                 is Resource.Error -> {
-                    _error.emit("更新配置失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -131,11 +132,11 @@ class TunnelsViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.createTunnel(account, request)) {
                 is Resource.Success -> {
-                    _message.emit("隧道创建成功: ${result.data.name}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_created, result.data.name))
                     loadTunnels(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("创建隧道失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -148,11 +149,11 @@ class TunnelsViewModel @Inject constructor(
             _loadingState.value = true
             when (val result = zeroTrustRepository.deleteTunnel(account, tunnelId)) {
                 is Resource.Success -> {
-                    _message.emit("隧道删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_deleted))
                     loadTunnels(account)
                 }
                 is Resource.Error -> {
-                    _error.emit("删除隧道失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -167,7 +168,7 @@ class TunnelsViewModel @Inject constructor(
                     callback(result.data)
                 }
                 is Resource.Error -> {
-                    _error.emit("获取隧道令牌失败: ${result.message}")
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_token_load_failed, result.message))
                     callback(null)
                 }
                 is Resource.Loading -> {}

@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.TimeRange
 import com.muort.upworker.feature.dashboard.DashboardState
@@ -43,7 +44,7 @@ class ZoneAnalyticsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activity?.title = "域名分析"
+        activity?.setTitle(R.string.zone_analytics_title)
 
         // 隐藏仪表盘卡片的开关控件（独立页面不需要）
         binding.dashboardCard.hideToggle()
@@ -81,7 +82,7 @@ class ZoneAnalyticsFragment : Fragment() {
                             is DashboardState.Loading -> binding.dashboardCard.showLoading()
                             is DashboardState.Success -> binding.dashboardCard.showData(state.metrics)
                             is DashboardState.Error -> {
-                                binding.dashboardCard.showError(state.message)
+                                binding.dashboardCard.showError(state.message.asString(requireContext()))
                                 Timber.e("Zone analytics error: ${state.message}")
                             }
                         }

@@ -27,7 +27,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="📊 仪表盘概览"
+                android:text="@string/xml_card_dashboard"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurface" />
@@ -55,7 +55,7 @@
                 android:id="@+id/statusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="正常"
+                android:text="@string/analytics_status_normal"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -89,7 +89,7 @@
                 android:id="@+id/chip1Day"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="24小时"
+                android:text="@string/analytics_time_range_24h"
                 android:checked="true"
                 style="@style/AppChip.Filter" />
 
@@ -97,14 +97,14 @@
                 android:id="@+id/chip7Days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="7天"
+                android:text="@string/analytics_time_range_7d"
                 style="@style/AppChip.Filter" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip30Days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="30天"
+                android:text="@string/analytics_time_range_30d"
                 style="@style/AppChip.Filter" />
 
         </com.google.android.material.chip.ChipGroup>
@@ -145,7 +145,7 @@
                 android:id="@+id/errorText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="加载失败"
+                android:text="@string/analytics_error"
                 android:textSize="14sp"
                 android:textColor="?attr/colorError"
                 android:gravity="center" />
@@ -181,7 +181,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="总请求数"
+                        android:text="@string/analytics_total_requests"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -208,7 +208,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="带宽使用"
+                        android:text="@string/xml_card_dashboard_2"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -235,7 +235,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="独立访客"
+                        android:text="@string/analytics_unique_visitors"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -264,7 +264,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="缓存命中率"
+                        android:text="@string/xml_card_dashboard_3"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -291,7 +291,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="已节省流量"
+                        android:text="@string/xml_card_dashboard_4"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -318,7 +318,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="源站流量"
+                        android:text="@string/xml_card_dashboard_5"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -347,7 +347,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="页面浏览"
+                        android:text="@string/xml_card_dashboard_6"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -374,7 +374,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="人均浏览"
+                        android:text="@string/xml_card_dashboard_7"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -401,7 +401,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Workers 调用"
+                        android:text="@string/xml_card_dashboard_8"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -430,7 +430,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="威胁拦截"
+                        android:text="@string/xml_card_dashboard_9"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -457,7 +457,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="HTTPS 加密"
+                        android:text="@string/xml_card_dashboard_10"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -484,7 +484,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="HTTP 请求"
+                        android:text="@string/xml_card_dashboard_11"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -513,7 +513,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="错误率"
+                        android:text="@string/xml_card_dashboard_12"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -540,7 +540,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="平均体积"
+                        android:text="@string/xml_card_dashboard_13"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -567,7 +567,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="子请求数"
+                        android:text="@string/xml_card_dashboard_14"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -590,7 +590,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📊 趋势图"
+                android:text="@string/xml_card_dashboard_15"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurface"
@@ -607,7 +607,7 @@
                 android:id="@+id/timeRangeHintText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="过去 24 小时数据"
+                android:text="@string/xml_card_dashboard_16"
                 android:textSize="11sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:layout_gravity="center"
@@ -632,7 +632,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🍰 流量分布"
+                        android:text="@string/xml_card_dashboard_17"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:textColor="?attr/colorOnSurface"
@@ -656,7 +656,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="📊 指标对比"
+                        android:text="@string/xml_card_dashboard_18"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:textColor="?attr/colorOnSurface"

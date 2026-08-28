@@ -15,7 +15,7 @@
             android:id="@+id/policyNameLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="配置文件名称"
+            android:hint="@string/device_profile_name"
             app:boxBackgroundMode="outline"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -34,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:hint="描述（可选）"
+            android:hint="@string/device_description_optional"
             app:boxBackgroundMode="outline"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -59,7 +59,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="匹配规则"
+                android:text="@string/device_match_rules"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorPrimary" />
@@ -101,7 +101,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="选择操作系统"
+                    android:text="@string/device_select_os"
                     android:textSize="12sp"
                     android:textColor="?android:textColorSecondary" />
 
@@ -167,9 +167,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="匹配值"
+                android:hint="@string/device_match_value"
                 app:boxBackgroundMode="outline"
-                app:helperText="多个值用逗号分隔（in 运算符）"
+                app:helperText="@string/device_match_value_helper"
                 app:helperTextEnabled="true"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -188,7 +188,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="高级：直接编辑表达式"
+                android:text="@string/device_advanced_expression"
                 android:textSize="12sp"
                 android:textColor="?attr/colorPrimary" />
         </LinearLayout>
@@ -199,7 +199,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:hint="匹配表达式（高级）"
+            android:hint="@string/device_match_expression_advanced"
             android:visibility="gone"
             app:boxBackgroundMode="outline"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -220,9 +220,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:hint="优先级"
+            android:hint="@string/device_priority"
             app:boxBackgroundMode="outline"
-            app:helperText="数值越小优先级越高"
+            app:helperText="@string/device_priority_helper"
             app:helperTextEnabled="true"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -248,7 +248,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="配置文件设置"
+            android:text="@string/device_profile_settings"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?attr/colorPrimary" />
@@ -265,7 +265,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="强制网络门户检测"
+                android:text="@string/device_captive_portal_detection"
                 android:textSize="13sp" />
             <Spinner
                 android:id="@+id/captivePortalMinutesSpinner"
@@ -286,7 +286,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:checked="true"
-            android:text="模式切换"
+            android:text="@string/device_mode_switch"
             android:textSize="13sp" />
 
         <!-- 设备隧道协议 -->
@@ -300,7 +300,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="设备隧道协议"
+                android:text="@string/device_tunnel_protocol"
                 android:textSize="13sp"
                 android:textColor="?android:textColorPrimary"
                 android:paddingTop="10dp"
@@ -319,7 +319,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="锁定设备客户端"
+            android:text="@string/device_lock_client"
             android:textSize="13sp" />
 
         <!-- 允许设备离开组织 -->
@@ -328,7 +328,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="允许设备离开组织"
+            android:text="@string/device_allow_leave_org"
             android:textSize="13sp" />
 
         <!-- 允许更新 -->
@@ -338,7 +338,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:checked="true"
-            android:text="允许更新"
+            android:text="@string/device_allow_updates"
             android:textSize="13sp" />
 
         <!-- 自动连接 -->
@@ -353,7 +353,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="自动连接"
+                android:text="@string/device_auto_connect"
                 android:textSize="13sp" />
             <Spinner
                 android:id="@+id/autoConnectMinutesSpinner"
@@ -378,7 +378,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="服务模式"
+                android:text="@string/device_service_mode"
                 android:textSize="13sp"
                 android:textColor="?android:textColorPrimary"
                 android:paddingTop="10dp"
@@ -396,7 +396,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="拆分隧道"
+            android:text="@string/device_split_tunnel"
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="?attr/colorPrimary" />
@@ -412,7 +412,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="模式"
+                android:text="@string/device_mode"
                 android:textSize="13sp"
                 android:textColor="?android:textColorPrimary" />
             <Spinner
@@ -429,7 +429,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:hint="排除（每行一个地址）"
+            android:hint="@string/device_exclude_list_hint"
             app:boxBackgroundMode="outline"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -449,7 +449,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:hint="包含（每行一个地址）"
+            android:hint="@string/device_include_list_hint"
             app:boxBackgroundMode="outline"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -469,7 +469,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="直接路由 Microsoft 365 流量"
+            android:text="@string/device_direct_m365"
             android:textSize="13sp" />
 
         <!-- 允许用户以启用本地网络排除 -->
@@ -484,7 +484,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="允许用户以启用本地网络排除"
+                android:text="@string/device_allow_local_exclusion"
                 android:textSize="13sp" />
             <Spinner
                 android:id="@+id/localNetworkExcludeMinutesSpinner"
@@ -504,7 +504,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="设备客户端接口 IP DNS 注册"
+            android:text="@string/device_client_ip_dns_registration"
             android:textSize="13sp" />
 
         <!-- SCCM VPN 边界支持 -->
@@ -513,7 +513,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="SCCM VPN 边界支持"
+            android:text="@string/device_sccm_vpn_boundary"
             android:textSize="13sp" />
 
         <!-- 开启 NETBT（TCP/IP 上的 NetBIOS） -->
@@ -522,7 +522,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="开启 NETBT（TCP/IP 上的 NetBIOS）"
+            android:text="@string/device_enable_netbt"
             android:textSize="13sp" />
 
         <!-- 网关ID -->
@@ -530,7 +530,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:hint="网关ID（自动勿填）"
+            android:hint="@string/device_gateway_id_hint"
             app:boxBackgroundMode="outline"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -550,7 +550,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:checked="true"
-            android:text="启用配置文件"
+            android:text="@string/device_enable_profile"
             android:textSize="13sp" />
 
     </LinearLayout>

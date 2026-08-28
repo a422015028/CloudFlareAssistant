@@ -106,14 +106,14 @@ class GatewayLocationsFragment : Fragment() {
     private fun loadLocations() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            android.widget.Toast.makeText(requireContext(), "未选择账户", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), getString(R.string.msg_no_account_selected), android.widget.Toast.LENGTH_SHORT).show()
             return
         }
 
         lifecycleScope.launch {
             val result = viewModel.loadLocations(account)
             if (result is Resource.Error) {
-                android.widget.Toast.makeText(requireContext(), "加载位置失败: ${result.message}", android.widget.Toast.LENGTH_LONG).show()
+                android.widget.Toast.makeText(requireContext(), getString(R.string.msg_load_locations_failed, result.message), android.widget.Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -161,9 +161,9 @@ class GatewayLocationsFragment : Fragment() {
                     if (ip != null) {
                         prefilledIp = ip
                         networksInput.setText("$ip/32")
-                        android.widget.Toast.makeText(requireContext(), "已填充当前网络出口 IP: $ip/32", android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), getString(R.string.msg_location_filled_current_ip, "$ip/32"), android.widget.Toast.LENGTH_SHORT).show()
                     } else {
-                        android.widget.Toast.makeText(requireContext(), "自动获取出口 IP 失败，请手动填写来源 IP 白名单", android.widget.Toast.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), getString(R.string.msg_location_fetch_ip_failed), android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -175,15 +175,15 @@ class GatewayLocationsFragment : Fragment() {
         if (ipv4Switch.isChecked) prefillCurrentNetwork()
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(if (existingLocation == null) "创建位置" else "编辑位置")
+            .setTitle(if (existingLocation == null) R.string.zt_location_create_title else R.string.zt_location_edit_title)
             .setView(dialogView)
-            .setPositiveButton(if (existingLocation == null) "创建" else "保存") { _, _ ->
+            .setPositiveButton(if (existingLocation == null) R.string.dialog_create else R.string.save) { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
                 val name = nameInput.text?.toString()
                 val networksText = networksInput.text?.toString()
                 
                 if (name.isNullOrBlank()) {
-                    android.widget.Toast.makeText(requireContext(), "位置名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.msg_location_name_empty), android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -192,7 +192,7 @@ class GatewayLocationsFragment : Fragment() {
                 for (network in networks) {
                     val validation = validateNetwork(network)
                     if (validation.isNotEmpty()) {
-                        android.widget.Toast.makeText(requireContext(), "网络 $network $validation", android.widget.Toast.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), getString(R.string.msg_location_network_invalid, network, validation), android.widget.Toast.LENGTH_LONG).show()
                         return@setPositiveButton
                     }
                 }
@@ -200,19 +200,19 @@ class GatewayLocationsFragment : Fragment() {
                 if (ipv4Switch.isChecked && networks.isEmpty()) {
                     android.widget.Toast.makeText(
                         requireContext(),
-                        "共享 IPv4 端点必须配置来源 IP 网络才能启用，请填写来源 IP 白名单（如 123.45.67.89/32）或关闭 IPv4 端点",
+                        getString(R.string.msg_location_ipv4_needs_network),
                         android.widget.Toast.LENGTH_LONG
                     ).show()
                     return@setPositiveButton
                 }
 
                 if (!ipv4Switch.isChecked && !ipv6Switch.isChecked && !dotSwitch.isChecked && !dohSwitch.isChecked) {
-                    android.widget.Toast.makeText(requireContext(), "至少需要启用一个 DNS 端点", android.widget.Toast.LENGTH_LONG).show()
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.msg_location_need_dns_endpoint), android.widget.Toast.LENGTH_LONG).show()
                     return@setPositiveButton
                 }
 
                 if (defaultSwitch.isChecked && !dohSwitch.isChecked) {
-                    android.widget.Toast.makeText(requireContext(), "默认位置必须启用 DoH 端点", android.widget.Toast.LENGTH_LONG).show()
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.msg_location_default_needs_doh), android.widget.Toast.LENGTH_LONG).show()
                     return@setPositiveButton
                 }
 
@@ -239,8 +239,8 @@ class GatewayLocationsFragment : Fragment() {
                     lifecycleScope.launch {
                         val result = viewModel.createLocation(account, request)
                         val msg = when (result) {
-                            is Resource.Success -> "位置创建成功: ${result.data.name}"
-                            is Resource.Error -> "创建位置失败: ${result.message}"
+                            is Resource.Success -> getString(R.string.msg_location_create_success, result.data.name)
+                            is Resource.Error -> getString(R.string.msg_location_create_failed, result.message)
                             else -> return@launch
                         }
                         android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
@@ -249,15 +249,15 @@ class GatewayLocationsFragment : Fragment() {
                     lifecycleScope.launch {
                         val result = viewModel.updateLocation(account, existingLocation.id, request)
                         val msg = when (result) {
-                            is Resource.Success -> "位置更新成功: ${result.data.name}"
-                            is Resource.Error -> "更新位置失败: ${result.message}"
+                            is Resource.Success -> getString(R.string.msg_location_update_success, result.data.name)
+                            is Resource.Error -> getString(R.string.msg_location_update_failed, result.message)
                             else -> return@launch
                         }
                         android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -298,12 +298,12 @@ class GatewayLocationsFragment : Fragment() {
 
     private fun confirmDeleteLocation(locationId: String, locationName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除位置")
-            .setMessage("确定要删除位置 \"$locationName\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.zt_location_delete_title)
+            .setMessage(getString(R.string.zt_location_delete_confirm, locationName))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 deleteLocation(locationId)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -312,8 +312,8 @@ class GatewayLocationsFragment : Fragment() {
         lifecycleScope.launch {
             val result = viewModel.deleteLocation(account, locationId)
             val msg = when (result) {
-                is Resource.Success -> "位置删除成功"
-                is Resource.Error -> "删除位置失败: ${result.message}"
+                is Resource.Success -> getString(R.string.msg_location_delete_success)
+                is Resource.Error -> getString(R.string.msg_location_delete_failed, result.message)
                 else -> return@launch
             }
             android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
@@ -323,23 +323,23 @@ class GatewayLocationsFragment : Fragment() {
     private fun validateNetwork(cidr: String): String {
         val parts = cidr.split("/")
         if (parts.size != 2) {
-            return "格式错误，需要 CIDR 格式（如 123.45.67.89/32）"
+            return getString(R.string.zt_validate_cidr_format_error)
         }
         
         val ip = parts[0]
         val prefix = parts[1].toIntOrNull()
         
         if (prefix == null || prefix < 8 || prefix > 32) {
-            return "前缀必须在 8-32 之间"
+            return getString(R.string.zt_validate_cidr_prefix_range)
         }
         
         if (prefix < 24) {
-            return "网络太大，最大支持 /24（如 /24, /28, /32）"
+            return getString(R.string.zt_validate_cidr_network_too_large)
         }
         
         val ipParts = ip.split(".").mapNotNull { it.toIntOrNull() }
         if (ipParts.size != 4 || ipParts.any { it < 0 || it > 255 }) {
-            return "IP 地址格式错误"
+            return getString(R.string.zt_validate_ip_format_error)
         }
         
         val firstOctet = ipParts[0]
@@ -348,15 +348,15 @@ class GatewayLocationsFragment : Fragment() {
         if (firstOctet == 10 ||
             (firstOctet == 172 && secondOctet in 16..31) ||
             (firstOctet == 192 && secondOctet == 168)) {
-            return "请填写公网 IP，私有地址（10.x.x.x、172.16-31.x.x、192.168.x.x）不支持"
+            return getString(R.string.zt_validate_ip_private_not_supported)
         }
         
         if (firstOctet == 0 || firstOctet == 127 || firstOctet == 169) {
-            return "保留地址不支持，请使用公网 IP 地址"
+            return getString(R.string.zt_validate_ip_reserved_not_supported)
         }
         
         if (firstOctet >= 224) {
-            return "组播/特殊地址不支持，请使用公网 IP 地址"
+            return getString(R.string.zt_validate_ip_multicast_not_supported)
         }
         
         return ""

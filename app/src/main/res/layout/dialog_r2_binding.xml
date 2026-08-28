@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="添加 R2 绑定"
+        android:text="@string/r2_add_binding"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
@@ -17,7 +17,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="绑定名称 (如: MY_R2)"
+        android:hint="@string/r2_binding_name_hint"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_marginBottom="12dp">
 
@@ -26,14 +26,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:singleLine="true" />
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:imeOptions="actionNext" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="选择 R2 存储桶"
+        android:text="@string/r2_select_bucket"
         android:textSize="14sp"
         android:layout_marginBottom="8dp" />
 
@@ -46,7 +48,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="💡 提示：绑定名称将作为环境变量在 Worker 脚本中使用"
+        android:text="@string/kv_binding_hint_worker"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
         android:layout_marginTop="16dp"

@@ -1,9 +1,12 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -12,6 +15,7 @@ import javax.inject.Singleton
 
 @Singleton
 class DnsRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi
 ) {
 
@@ -60,9 +64,9 @@ class DnsRepository @Inject constructor(
                 
                 // Provide helpful error message based on HTTP status code
                 val friendlyMsg = when (response.code()) {
-                    403 -> "权限不足：API Token 没有访问此 Zone DNS 记录的权限。请检查 Token 权限设置。"
-                    401 -> "认证失败：API Token 无效或已过期。"
-                    404 -> "Zone ID 不存在或无法访问。"
+                    403 -> appContext.getString(R.string.repo_dns_error_403)
+                    401 -> appContext.getString(R.string.repo_dns_error_401)
+                    404 -> appContext.getString(R.string.repo_dns_error_404)
                     else -> errorMsg
                 }
                 

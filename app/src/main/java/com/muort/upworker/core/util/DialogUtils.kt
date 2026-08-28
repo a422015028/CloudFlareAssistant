@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.R
 import com.muort.upworker.databinding.DialogAccountSelectionBinding
 
 /**
@@ -19,19 +20,21 @@ object DialogUtils {
         context: Context,
         title: String,
         message: String,
-        positiveText: String = "确定",
-        negativeText: String = "取消",
+        positiveText: String? = null,
+        negativeText: String? = null,
         onConfirm: () -> Unit = {},
         onCancel: () -> Unit = {}
     ) {
+        val pos = positiveText ?: context.getString(R.string.dialog_utils_positive_confirm)
+        val neg = negativeText ?: context.getString(R.string.dialog_utils_negative_cancel)
         MaterialAlertDialogBuilder(context)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(positiveText) { dialog, _ ->
+            .setPositiveButton(pos) { dialog, _ ->
                 onConfirm()
                 dialog.dismiss()
             }
-            .setNegativeButton(negativeText) { dialog, _ ->
+            .setNegativeButton(neg) { dialog, _ ->
                 onCancel()
                 dialog.dismiss()
             }
@@ -54,7 +57,7 @@ object DialogUtils {
                 onItemSelected(which)
                 dialog.dismiss()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(context.getString(R.string.dialog_utils_negative_cancel), null)
             .show()
     }
     
@@ -66,10 +69,12 @@ object DialogUtils {
         title: String,
         hint: String = "",
         defaultValue: String = "",
-        positiveText: String = "确定",
-        negativeText: String = "取消",
+        positiveText: String? = null,
+        negativeText: String? = null,
         onConfirm: (String) -> Unit
     ) {
+        val pos = positiveText ?: context.getString(R.string.dialog_utils_positive_confirm)
+        val neg = negativeText ?: context.getString(R.string.dialog_utils_negative_cancel)
         val editText = android.widget.EditText(context).apply {
             this.hint = hint
             setText(defaultValue)
@@ -79,11 +84,11 @@ object DialogUtils {
         MaterialAlertDialogBuilder(context)
             .setTitle(title)
             .setView(editText)
-            .setPositiveButton(positiveText) { dialog, _ ->
+            .setPositiveButton(pos) { dialog, _ ->
                 onConfirm(editText.text.toString())
                 dialog.dismiss()
             }
-            .setNegativeButton(negativeText, null)
+            .setNegativeButton(neg, null)
             .show()
     }
     
@@ -92,9 +97,9 @@ object DialogUtils {
      */
     fun showLoadingDialog(
         context: Context,
-        message: String = "加载中..."
+        message: String? = null
     ) = MaterialAlertDialogBuilder(context)
-        .setMessage(message)
+        .setMessage(message ?: context.getString(R.string.dialog_utils_loading_message))
         .setCancelable(false)
         .create()
 }

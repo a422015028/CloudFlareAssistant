@@ -33,28 +33,28 @@
             android:id="@+id/logSwitch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="开"
+            android:text="@string/xml_activity_log"
             android:textSize="14sp"
             android:layout_marginEnd="8dp" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/logClearBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="清除"
+            android:text="@string/xml_activity_log_2"
             android:textSize="14sp"
             android:layout_marginEnd="8dp" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/logCopyBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="复制"
+            android:text="@string/snippet_copy"
             android:textSize="14sp"
             android:layout_marginEnd="8dp" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/logCloseBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="返回"
+            android:text="@string/dialog_back"
             android:textSize="14sp" />
     </LinearLayout>
 

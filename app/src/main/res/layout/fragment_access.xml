@@ -29,7 +29,7 @@
             android:id="@+id/emptyView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="暂无 Access 应用\n点击下方按钮创建"
+            android:text="@string/access_no_apps"
             android:textAlignment="center"
             android:textSize="16sp"
             android:visibility="gone"
@@ -57,7 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="创建应用"
+        android:contentDescription="@string/access_create_app"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayoutMediator
+import com.muort.upworker.R
 import com.muort.upworker.databinding.FragmentGatewayBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -38,9 +39,9 @@ class GatewayFragment : Fragment() {
 
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = when (position) {
-                0 -> "规则"
-                1 -> "列表"
-                2 -> "位置"
+                0 -> getString(R.string.zt_gateway_tab_rules)
+                1 -> getString(R.string.zt_gateway_tab_lists)
+                2 -> getString(R.string.zt_gateway_tab_locations)
                 else -> ""
             }
         }.attach()

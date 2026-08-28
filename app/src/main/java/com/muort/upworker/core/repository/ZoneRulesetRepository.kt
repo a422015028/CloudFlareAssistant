@@ -1,9 +1,12 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response
@@ -23,6 +26,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class ZoneRulesetRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
 ) {
     /** 取某 phase 的 entrypoint ruleset；phase 还没规则集时返回 null。 */
@@ -58,7 +62,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, phase, WafEntrypointUpdate(listOf(rule)),
             )
-            resp.toResource("创建规则集失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_create_failed))
         }
     }
 
@@ -73,7 +77,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, rule,
             )
-            resp.toResource("添加规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_add_rule_failed))
         }
     }
 
@@ -94,7 +98,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, rule.id, body,
             )
-            resp.toResource("切换规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_toggle_rule_failed))
         }
     }
 
@@ -109,7 +113,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, ruleId, rule,
             )
-            resp.toResource("更新规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_update_rule_failed))
         }
     }
 
@@ -141,7 +145,7 @@ class ZoneRulesetRepository @Inject constructor(
 
     private fun <T> Response<CloudFlareResponse<T>>.toResource(errorMsg: String): Resource<T> {
         return if (isSuccessful && body()?.success == true) {
-            body()?.result?.let { Resource.Success(it) } ?: Resource.Error("$errorMsg: 无返回数据")
+            body()?.result?.let { Resource.Success(it) } ?: Resource.Error(appContext.getString(R.string.repo_generic_operation_no_result_format, errorMsg))
         } else {
             Resource.Error(body()?.errors?.firstOrNull()?.message
                 ?: "HTTP ${code()}: ${message()}")
@@ -182,7 +186,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, cachePhase, CacheEntrypointUpdate(listOf(rule)),
             )
-            resp.toResource("创建缓存规则集失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_create_cache_failed))
         }
     }
 
@@ -196,7 +200,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, rule,
             )
-            resp.toResource("添加缓存规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_add_cache_rule_failed))
         }
     }
 
@@ -217,7 +221,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, rule.id, body,
             )
-            resp.toResource("切换缓存规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_toggle_cache_rule_failed))
         }
     }
 
@@ -231,7 +235,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, ruleId, rule,
             )
-            resp.toResource("更新缓存规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_update_cache_rule_failed))
         }
     }
 
@@ -288,7 +292,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rlPhase, RateLimitEntrypointUpdate(listOf(rule)),
             )
-            resp.toResource("创建速率限制规则集失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_create_ratelimit_failed))
         }
     }
 
@@ -302,7 +306,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, rule,
             )
-            resp.toResource("添加速率限制规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_add_ratelimit_rule_failed))
         }
     }
 
@@ -331,7 +335,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, rule.id, body,
             )
-            resp.toResource("切换速率限制规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_toggle_ratelimit_rule_failed))
         }
     }
 
@@ -345,7 +349,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, ruleId, rule,
             )
-            resp.toResource("更新速率限制规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_update_ratelimit_rule_failed))
         }
     }
 
@@ -402,7 +406,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, phase, TransformEntrypointUpdate(listOf(rule)),
             )
-            resp.toResource("创建转换规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_create_transform_failed))
         }
     }
 
@@ -416,7 +420,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, rule,
             )
-            resp.toResource("添加转换规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_add_transform_rule_failed))
         }
     }
 
@@ -430,7 +434,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, ruleId, rule,
             )
-            resp.toResource("更新转换规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_update_transform_rule_failed))
         }
     }
 
@@ -451,7 +455,7 @@ class ZoneRulesetRepository @Inject constructor(
                 AuthHelper.getGlobalApiKey(account),
                 zoneId, rulesetId, rule.id, body,
             )
-            resp.toResource("切换转换规则失败")
+            resp.toResource(appContext.getString(R.string.repo_ruleset_toggle_transform_rule_failed))
         }
     }
 

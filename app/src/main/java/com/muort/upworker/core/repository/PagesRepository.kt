@@ -1,5 +1,7 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
@@ -8,6 +10,7 @@ import com.muort.upworker.core.util.EsbuildInput
 import com.muort.upworker.core.util.SucraseInput
 import com.muort.upworker.core.util.SucraseTransformer
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -26,6 +29,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PagesRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
     private val sucraseTransformer: SucraseTransformer,
     private val esbuildBundler: EsbuildBundler
@@ -147,7 +151,7 @@ class PagesRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error("更新失败: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_pages_update_failed_format, errorMsg))
             }
         }
     }
@@ -521,11 +525,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("创建日志通道失败: 无返回结果")
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_log_channel_create_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error("创建日志通道失败: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_pages_log_channel_create_failed_format, errorMsg))
             }
         }
     }
@@ -552,7 +556,7 @@ class PagesRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error("删除日志通道失败: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_pages_log_channel_delete_failed_format, errorMsg))
             }
         }
     }
@@ -568,8 +572,8 @@ class PagesRepository @Inject constructor(
     ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {
         safeApiCall {
             if (!file.exists()) {
-                onLog?.invoke("✗ 文件不存在")
-                return@safeApiCall Resource.Error("文件不存在")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_file_not_found_log))
+                return@safeApiCall Resource.Error(appContext.getString(R.string.repo_pages_file_not_found))
             }
 
             val isZip = file.name.endsWith(".zip", ignoreCase = true)
@@ -577,47 +581,47 @@ class PagesRepository @Inject constructor(
             val isHtml = file.name.endsWith(".htm", ignoreCase = true) ||
                          file.name.endsWith(".html", ignoreCase = true)
             if (!isZip && !isJs && !isHtml) {
-                onLog?.invoke("✗ 仅支持 .zip、.js 或 .html 文件部署")
-                return@safeApiCall Resource.Error("仅支持 .zip、.js 或 .html 文件部署。")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_unsupported_file_type_log))
+                return@safeApiCall Resource.Error(appContext.getString(R.string.repo_pages_unsupported_file_type))
             }
 
             val finalCompatibilityDate = customCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
-            onLog?.invoke("▶ 开始部署项目: $projectName")
-            onLog?.invoke("  ├─ 文件: ${file.name} (${formatFileSize(file.length())})")
-            onLog?.invoke("  ├─ 分支: $branch")
-            onLog?.invoke("  └─ 兼容性日期: $finalCompatibilityDate")
+            onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_start_log, projectName))
+            onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_file_info_log, file.name, formatFileSize(file.length())))
+            onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_branch_log, branch))
+            onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_compat_date_log, finalCompatibilityDate))
 
             // 1. 校验并创建项目
             val projectExists = checkProjectExists(account, projectName)
             if (!projectExists) {
-                onLog?.invoke("◇ 项目不存在，正在创建新项目...")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_creating_project_log))
                 // 新项目：用户自定义日期 > 默认兼容日期
                 createProject(account, projectName, branch, finalCompatibilityDate)
-                onLog?.invoke("  └─ 项目创建完成")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_project_created_log))
             } else {
-                onLog?.invoke("◇ 项目已存在")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_project_exists_log))
                 // 已有项目：只有用户自定义日期时才更新，没有自定义则不修改
                 customCompatibilityDate?.let {
                     updateProjectCompatibilityDate(account, projectName, it)
-                    onLog?.invoke("  └─ 已更新兼容性日期")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_compat_date_updated_log))
                 }
             }
 
             // 更新 compatibility_flags（无论项目是否新建，都确保 flags 同步）
             if (customCompatibilityFlags != null) {
-                onLog?.invoke("◇ 同步兼容性标志: $customCompatibilityFlags")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_sync_compat_flags_log, customCompatibilityFlags))
                 updateProjectCompatibilityFlags(account, projectName, customCompatibilityFlags)
             }
 
             // 单文件 .js 部署：直接作为 Worker 脚本上传（bundle 接口）
             if (isJs) {
-                onLog?.invoke("◇ 检测到 .js 文件，使用 Worker 脚本模式部署")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_worker_mode_log))
                 return@safeApiCall deployWorkerOnly(account, projectName, file, onLog)
             }
 
             // 单文件 .htm/.html 部署：走原有 manifest-only 流程
             if (isHtml) {
-                onLog?.invoke("◇ 检测到 HTML 文件，使用静态资源模式部署")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_html_mode_log))
                 return@safeApiCall deployStaticAssetOnly(account, projectName, file, onLog)
             }
 
@@ -626,9 +630,9 @@ class PagesRepository @Inject constructor(
             tempDir.mkdirs()
 
             try {
-                onLog?.invoke("◇ 解压 ZIP 文件...")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_unzipping_log))
                 unzip(file, tempDir)
-                onLog?.invoke("  └─ 解压完成")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_unzip_done_log))
 
                 // 智能穿透嵌套目录
                 var baseDir = tempDir
@@ -706,27 +710,27 @@ class PagesRepository @Inject constructor(
                 }
                 baseDir.listFiles()?.forEach { collectFiles(it) }
 
-                onLog?.invoke("◇ 收集文件完成: ${allFiles.size} 个静态资产" +
+                onLog?.invoke(appContext.getString(R.string.repo_pages_collect_done_log, allFiles.size,
                     (if (workerJsFile != null) " + _worker.js" else "") +
-                    (if (hasFunctionsDir) " + functions 目录" else ""))
+                        (if (hasFunctionsDir) appContext.getString(R.string.repo_pages_collect_functions_suffix) else "")))
 
                 // 如果是 _worker.js 单文件模式，构建 bundle
                 val effectiveWorkerBundle: RequestBody? = if (workerJsFile != null) {
                     Timber.d("使用 _worker.js 单文件模式")
-                    onLog?.invoke("◇ 构建 _worker.js bundle...")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_building_worker_bundle_log))
                     buildWorkerBundle(workerJsFile!!)
                 } else {
                     null
                 }
 
                 if (allFiles.isEmpty() && effectiveWorkerBundle == null && !hasFunctionsDir) {
-                    onLog?.invoke("✗ 压缩包内无有效文件")
-                    return@safeApiCall Resource.Error("压缩包内无有效文件")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_zip_empty_error_log))
+                    return@safeApiCall Resource.Error(appContext.getString(R.string.repo_pages_zip_empty_error))
                 }
 
                 // 2. 【Wrangler 步骤一】向 Cloudflare 申请专属资源上传 JWT Token
                 // 如果只有 _worker.js 没有静态资产，也需要获取 token（资产库为空时也可创建部署）
-                onLog?.invoke("◇ 申请资产上传 Token...")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_requesting_token_log))
                 val tokenResponse = api.getPagesUploadToken(
                     token = AuthHelper.getBearerToken(account),  
                     email = AuthHelper.getEmail(account),  
@@ -736,14 +740,14 @@ class PagesRepository @Inject constructor(
                 )
                 val jwt = tokenResponse.body()?.result?.jwt
                 if (jwt == null) {
-                    onLog?.invoke("✗ 无法获取资产上传 Token")
-                    return@safeApiCall Resource.Error("无法获取资产上传 Token")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_token_failed_log))
+                    return@safeApiCall Resource.Error(appContext.getString(R.string.repo_pages_token_failed_error))
                 }
-                onLog?.invoke("  └─ Token 获取成功")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_token_success_log))
 
                 // 3. 【Wrangler 步骤二】把本地解压出的文件转为 Base64 对象批量上传至资源库
                 if (allFiles.isNotEmpty()) {
-                    onLog?.invoke("◇ 上传 ${allFiles.size} 个静态资产...")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_uploading_assets_log, allFiles.size))
                     val assetPayloads = allFiles.map { currentFile ->
                         val relativePath = "/" + currentFile.relativeTo(baseDir).path.replace("\\", "/")
                         val cfHash = manifestMap[relativePath] ?: ""
@@ -789,14 +793,14 @@ class PagesRepository @Inject constructor(
                     // 执行资产库推送
                     val uploadResponse = api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = assetPayloads)
                     if (!uploadResponse.isSuccessful) {
-                        onLog?.invoke("✗ 资产上传失败，HTTP ${uploadResponse.code()}")
-                        return@safeApiCall Resource.Error("资产原子层同步失败，HTTP Code: ${uploadResponse.code()}")
+                        onLog?.invoke(appContext.getString(R.string.repo_pages_assets_upload_failed_log, uploadResponse.code()))
+                        return@safeApiCall Resource.Error(appContext.getString(R.string.repo_pages_assets_sync_failed_format, uploadResponse.code()))
                     }
-                    onLog?.invoke("  └─ 资产上传完成")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_assets_upload_done_log))
                 }
 
                 // 3.b 【Wrangler upsert-hashes】更新资产哈希列表，初始化部署会话（即使没有静态资产也需要）
-                onLog?.invoke("◇ 更新资产哈希列表...")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_updating_hash_log))
                 val allHashes = manifestMap.values.toList()
                 val upsertResponse = api.upsertPagesAssetHashes(
                     jwtToken = "Bearer $jwt",
@@ -804,9 +808,9 @@ class PagesRepository @Inject constructor(
                 )
                 if (!upsertResponse.isSuccessful) {
                     Timber.w("upsert-hashes 返回非成功状态: HTTP ${upsertResponse.code()}，继续尝试部署")
-                    onLog?.invoke("  └─ 哈希更新返回 HTTP ${upsertResponse.code()}（继续尝试部署）")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_hash_updated_warn_log, upsertResponse.code()))
                 } else {
-                    onLog?.invoke("  └─ 哈希列表已更新")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_hash_updated_log))
                 }
 
                 // 4. 【Wrangler 步骤三】组装纯清单 Manifest JSON 触发 CDN 全球路由刷新
@@ -819,7 +823,7 @@ class PagesRepository @Inject constructor(
                 // 优先级: _worker.js (高级模式, 单文件) > functions/ (标准模式) > 纯静态
                 val response = if (effectiveWorkerBundle != null) {
                     Timber.d("_worker.bundle 大小: ${effectiveWorkerBundle.contentLength()} 字节")
-                    onLog?.invoke("◇ 创建部署（Worker Bundle 模式）...")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_creating_deployment_worker_log))
                     val workerBundlePart = MultipartBody.Part.createFormData(
                         "_worker.bundle", "_worker.bundle", effectiveWorkerBundle
                     )
@@ -835,7 +839,7 @@ class PagesRepository @Inject constructor(
                 } else if (hasFunctionsDir) {
                     // Pages Functions 标准模式：检测到 functions/ 目录
                     Timber.d("检测到 functions 目录，使用 Pages Functions 标准模式部署")
-                    onLog?.invoke("◇ 创建部署（Pages Functions 标准模式）...")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_creating_deployment_functions_log))
                     return@safeApiCall deployWithFunctions(
                         account = account,
                         projectName = projectName,
@@ -844,7 +848,7 @@ class PagesRepository @Inject constructor(
                         onLog = onLog
                     )
                 } else {
-                    onLog?.invoke("◇ 创建部署（静态资源模式）...")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_creating_deployment_direct_log))
                     api.createPagesDeploymentManifestOnly(
                         token = AuthHelper.getBearerToken(account),
                         email = AuthHelper.getEmail(account),
@@ -858,19 +862,20 @@ class PagesRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     val deployment = response.body()?.result
                     if (deployment != null) {
-                        onLog?.invoke("✓ 部署成功")
+                        onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_done_log))
                         deployment.url?.let { onLog?.invoke("  └─ URL: $it") }
                         Resource.Success(deployment)
                     } else {
-                        onLog?.invoke("△ 部署成功，但没有返回结果")
-                        Resource.Error("部署创建成功，但没有返回结果")
+                        onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_success_no_result_log))
+                        Resource.Error(appContext.getString(R.string.repo_pages_deploy_success_no_result))
                     }
                 } else {
-                    val errorBody = response.errorBody()?.string() ?: "无错误响应体"
+                    val errorBody = response.errorBody()?.string() ?: appContext.getString(R.string.repo_pages_no_error_body)
                     val apiErrors = response.body()?.errors?.joinToString("; ") { "${it.code}: ${it.message}" }
-                    val errorMsg = "部署失败: HTTP ${response.code()}, ${response.message()}. API错误: $apiErrors. 响应体: $errorBody"
+                    val errorMsg = appContext.getString(R.string.repo_pages_deploy_failed_format,
+                        "HTTP ${response.code()}, ${response.message()}. API错误: $apiErrors. 响应体: $errorBody")
                     Timber.e(errorMsg)
-                    onLog?.invoke("✗ 部署失败: HTTP ${response.code()}")
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_failed_log, "HTTP ${response.code()}"))
                     apiErrors?.let { onLog?.invoke("  └─ $it") }
                     Resource.Error(errorMsg)
                 }
@@ -906,12 +911,12 @@ class PagesRepository @Inject constructor(
         onLog: ((String) -> Unit)? = null
     ): Resource<PagesDeployment> {
         if (htmlFile.length() == 0L) {
-            onLog?.invoke("✗ 文件内容为空（0字节）")
-            return Resource.Error("文件内容为空（0字节）")
+            onLog?.invoke(appContext.getString(R.string.repo_pages_file_empty_log))
+            return Resource.Error(appContext.getString(R.string.repo_generic_download_empty))
         }
 
         // 1. 获取 upload token
-        onLog?.invoke("◇ 申请资产上传 Token...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_requesting_token_log))
         val tokenResponse = api.getPagesUploadToken(
             token = AuthHelper.getBearerToken(account),
             email = AuthHelper.getEmail(account),
@@ -921,10 +926,10 @@ class PagesRepository @Inject constructor(
         )
         val jwt = tokenResponse.body()?.result?.jwt
         if (jwt == null) {
-            onLog?.invoke("✗ 无法获取资产上传 Token")
-            return Resource.Error("无法获取资产上传 Token")
+            onLog?.invoke(appContext.getString(R.string.repo_pages_token_failed_log))
+            return Resource.Error(appContext.getString(R.string.repo_pages_token_failed_error))
         }
-        onLog?.invoke("  └─ Token 获取成功")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_token_success_log))
 
         // 2. 计算文件 hash，构建 manifest
         val relativePath = "/index.html"
@@ -932,7 +937,7 @@ class PagesRepository @Inject constructor(
         val manifestMap = mapOf(relativePath to cfHash)
 
         // 3. 上传资产（Base64）
-        onLog?.invoke("◇ 上传 HTML 资产...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_upload_html_assets_log))
         val base64Str = android.util.Base64.encodeToString(htmlFile.readBytes(), android.util.Base64.NO_WRAP)
         val assetPayload = PagesAssetPayload(
             key = cfHash,
@@ -941,21 +946,21 @@ class PagesRepository @Inject constructor(
         )
         val uploadResponse = api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = listOf(assetPayload))
         if (!uploadResponse.isSuccessful) {
-            onLog?.invoke("✗ 资产上传失败，HTTP ${uploadResponse.code()}")
-            return Resource.Error("资产上传失败，HTTP Code: ${uploadResponse.code()}")
+            onLog?.invoke(appContext.getString(R.string.repo_pages_assets_upload_failed_log, uploadResponse.code()))
+            return Resource.Error(appContext.getString(R.string.repo_pages_assets_upload_http_failed_format, uploadResponse.code()))
         }
-        onLog?.invoke("  └─ 资产上传完成")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_assets_upload_done_log))
 
         // 4. upsert-hashes
-        onLog?.invoke("◇ 更新资产哈希列表...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_updating_hash_log))
         api.upsertPagesAssetHashes(
             jwtToken = "Bearer $jwt",
             body = PagesUpsertHashesPayload(hashes = manifestMap.values.toList())
         )
-        onLog?.invoke("  └─ 哈希列表已更新")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_hash_updated_log))
 
         // 5. 创建部署（manifest-only）
-        onLog?.invoke("◇ 创建部署（HTML 模式）...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_creating_deployment_html_log))
         val manifestJson = manifestMap.entries.joinToString(",", "{", "}") { entry ->
             "\"${entry.key}\":\"${entry.value}\""
         }
@@ -972,17 +977,18 @@ class PagesRepository @Inject constructor(
         return if (response.isSuccessful && response.body()?.success == true) {
             val deployment = response.body()?.result
             if (deployment != null) {
-                onLog?.invoke("✓ 部署成功")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_done_log))
                 deployment.url?.let { onLog?.invoke("  └─ URL: $it") }
                 Resource.Success(deployment)
             } else {
-                onLog?.invoke("△ 部署成功，但没有返回结果")
-                Resource.Error("部署创建成功，但没有返回结果")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_success_no_result_log))
+                Resource.Error(appContext.getString(R.string.repo_pages_deploy_success_no_result))
             }
         } else {
-            val errorBody = response.errorBody()?.string() ?: "无错误响应体"
-            onLog?.invoke("✗ 部署失败: HTTP ${response.code()}")
-            Resource.Error("部署失败: HTTP ${response.code()}, ${response.message()}. 响应体: $errorBody")
+            val errorBody = response.errorBody()?.string() ?: appContext.getString(R.string.repo_pages_no_error_body)
+            onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_failed_log, "HTTP ${response.code()}"))
+            Resource.Error(appContext.getString(R.string.repo_pages_deploy_failed_format,
+                "HTTP ${response.code()}, ${response.message()}. 响应体: $errorBody"))
         }
     }
 
@@ -996,12 +1002,12 @@ class PagesRepository @Inject constructor(
         onLog: ((String) -> Unit)? = null
     ): Resource<PagesDeployment> {
         if (workerFile.length() == 0L) {
-            onLog?.invoke("✗ Worker 脚本文件内容为空（0字节）")
-            return Resource.Error("Worker 脚本文件内容为空（0字节）")
+            onLog?.invoke(appContext.getString(R.string.repo_pages_worker_file_empty_log))
+            return Resource.Error(appContext.getString(R.string.repo_generic_download_empty))
         }
 
         // 获取 upload token（即使没有静态资产也需要）
-        onLog?.invoke("◇ 申请资产上传 Token...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_requesting_token_log))
         val tokenResponse = api.getPagesUploadToken(
             token = AuthHelper.getBearerToken(account),
             email = AuthHelper.getEmail(account),
@@ -1011,27 +1017,27 @@ class PagesRepository @Inject constructor(
         )
         val jwt = tokenResponse.body()?.result?.jwt
         if (jwt == null) {
-            onLog?.invoke("✗ 无法获取资产上传 Token")
-            return Resource.Error("无法获取资产上传 Token")
+            onLog?.invoke(appContext.getString(R.string.repo_pages_token_failed_log))
+            return Resource.Error(appContext.getString(R.string.repo_pages_token_failed_error))
         }
-        onLog?.invoke("  └─ Token 获取成功")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_token_success_log))
 
         // upsert-hashes（空列表，初始化部署会话）
-        onLog?.invoke("◇ 初始化部署会话...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_init_session_log))
         api.upsertPagesAssetHashes(
             jwtToken = "Bearer $jwt",
             body = PagesUpsertHashesPayload(hashes = emptyList())
         )
-        onLog?.invoke("  └─ 会话已初始化")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_init_session_done_log))
 
         // 空 manifest + _worker.bundle
-        onLog?.invoke("◇ 构建 _worker.js bundle...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_building_worker_bundle_log))
         val manifestBody = "{}".toRequestBody("application/json".toMediaType())
         val workerBundle = buildWorkerBundle(workerFile)
         val workerBundlePart = MultipartBody.Part.createFormData(
             "_worker.bundle", "_worker.bundle", workerBundle
         )
-        onLog?.invoke("◇ 创建部署（Worker 脚本模式）...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_creating_deployment_worker_script_log))
         val response = api.createPagesDeploymentWithWorker(
             token = AuthHelper.getBearerToken(account),
             email = AuthHelper.getEmail(account),
@@ -1045,17 +1051,18 @@ class PagesRepository @Inject constructor(
         return if (response.isSuccessful && response.body()?.success == true) {
             val deployment = response.body()?.result
             if (deployment != null) {
-                onLog?.invoke("✓ 部署成功")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_done_log))
                 deployment.url?.let { onLog?.invoke("  └─ URL: $it") }
                 Resource.Success(deployment)
             } else {
-                onLog?.invoke("△ 部署成功，但没有返回结果")
-                Resource.Error("部署创建成功，但没有返回结果")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_success_no_result_log))
+                Resource.Error(appContext.getString(R.string.repo_pages_deploy_success_no_result))
             }
         } else {
-            val errorBody = response.errorBody()?.string() ?: "无错误响应体"
-            onLog?.invoke("✗ 部署失败: HTTP ${response.code()}")
-            Resource.Error("部署失败: HTTP ${response.code()}, ${response.message()}. 响应体: $errorBody")
+            val errorBody = response.errorBody()?.string() ?: appContext.getString(R.string.repo_pages_no_error_body)
+            onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_failed_log, "HTTP ${response.code()}"))
+            Resource.Error(appContext.getString(R.string.repo_pages_deploy_failed_format,
+                "HTTP ${response.code()}, ${response.message()}. 响应体: $errorBody"))
         }
     }
 
@@ -2120,28 +2127,28 @@ class PagesRepository @Inject constructor(
     ): Resource<PagesDeployment> {
         val rawFunctionFiles = collectFunctions(baseDir)
         if (rawFunctionFiles == null) {
-            onLog?.invoke("✗ 未找到 functions 目录或目录为空")
-            return Resource.Error("未找到 functions 目录或目录为空")
+            onLog?.invoke(appContext.getString(R.string.repo_generic_download_empty))
+            return Resource.Error(appContext.getString(R.string.repo_pages_no_functions_dir))
         }
 
         Timber.d("deployWithFunctions: 找到 ${rawFunctionFiles.size} 个 Function 文件")
-        onLog?.invoke("◇ 收集到 ${rawFunctionFiles.size} 个 Function 文件")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_collect_functions_log, rawFunctionFiles.size))
 
         // 0. Sucrase 转换 TypeScript/JSX → 纯 JavaScript
-        onLog?.invoke("◇ 转换 TypeScript/JSX...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_transform_ts_log))
         val functionFiles = transformFunctionFiles(rawFunctionFiles)
-        onLog?.invoke("  └─ 转换完成")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_transform_done_log))
 
         // 1. 构建 Functions bundle（内部会重写 import 路径）
-        onLog?.invoke("◇ 构建 Functions bundle...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_build_functions_bundle_log))
         val workerBundle = buildFunctionsBundle(functionFiles)
         val workerBundlePart = MultipartBody.Part.createFormData(
             "_worker.bundle", "_worker.bundle", workerBundle
         )
-        onLog?.invoke("  └─ bundle 已构建")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_bundle_log, appContext.getString(R.string.repo_pages_bundle_built)))
 
         // 2. 构建 functions-filepath-routing-config.json
-        onLog?.invoke("◇ 构建路由配置...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_build_routes_log))
         val routingConfig = buildFunctionsRoutingConfig(functionFiles)
         val routingConfigBody = routingConfig.toRequestBody("application/json".toMediaType())
         val routingConfigPart = MultipartBody.Part.createFormData(
@@ -2161,7 +2168,7 @@ class PagesRepository @Inject constructor(
         val routesJsonPart = MultipartBody.Part.createFormData(
             "_routes.json", "_routes.json", routesJsonBody
         )
-        onLog?.invoke("  └─ 路由配置已就绪")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_build_routes_done_log))
 
         // 4. 构建 manifest（作为表单字段而非文件上传）
         val manifestJson = manifestMap.entries.joinToString(",", "{", "}") { entry ->
@@ -2178,7 +2185,7 @@ class PagesRepository @Inject constructor(
         parts.add(routesJsonPart)
 
         // 6. 发送部署请求
-        onLog?.invoke("◇ 发送部署请求...")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_sending_deploy_request_log))
         val response = api.createPagesDeploymentWithFunctions(
             token = AuthHelper.getBearerToken(account),
             email = AuthHelper.getEmail(account),
@@ -2191,19 +2198,20 @@ class PagesRepository @Inject constructor(
         return if (response.isSuccessful && response.body()?.success == true) {
             val deployment = response.body()?.result
             if (deployment != null) {
-                onLog?.invoke("✓ 部署成功")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_done_log))
                 deployment.url?.let { onLog?.invoke("  └─ URL: $it") }
                 Resource.Success(deployment)
             } else {
-                onLog?.invoke("△ 部署成功，但没有返回结果")
-                Resource.Error("部署创建成功，但没有返回结果")
+                onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_success_no_result_log))
+                Resource.Error(appContext.getString(R.string.repo_pages_deploy_success_no_result))
             }
         } else {
-            val errorBody = response.errorBody()?.string() ?: "无错误响应体"
+            val errorBody = response.errorBody()?.string() ?: appContext.getString(R.string.repo_pages_no_error_body)
             val apiErrors = response.body()?.errors?.joinToString("; ") { "${it.code}: ${it.message}" }
-            val errorMsg = "部署失败: HTTP ${response.code()}, ${response.message()}. API错误: $apiErrors. 响应体: $errorBody"
+            val errorMsg = appContext.getString(R.string.repo_pages_deploy_failed_format,
+                "HTTP ${response.code()}, ${response.message()}. API错误: $apiErrors. 响应体: $errorBody")
             Timber.e(errorMsg)
-            onLog?.invoke("✗ 部署失败: HTTP ${response.code()}")
+            onLog?.invoke(appContext.getString(R.string.repo_pages_deploy_failed_log, "HTTP ${response.code()}"))
             apiErrors?.let { onLog?.invoke("  └─ $it") }
             Resource.Error(errorMsg)
         }

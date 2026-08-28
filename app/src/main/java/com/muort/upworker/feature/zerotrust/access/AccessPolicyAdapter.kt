@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.muort.upworker.R
 import com.muort.upworker.core.model.AccessPolicy
 import com.muort.upworker.databinding.ItemAccessPolicyBinding
 
@@ -36,17 +37,18 @@ class AccessPolicyAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(policy: AccessPolicy) {
+            val ctx = binding.root.context
             binding.policyNameText.text = policy.name
-            binding.policyDecisionChip.text = getDecisionLabel(policy.decision)
-            binding.policyPrecedenceText.text = "优先级: ${policy.precedence ?: 0}"
+            binding.policyDecisionChip.text = getDecisionLabel(policy.decision, ctx)
+            binding.policyPrecedenceText.text = ctx.getString(R.string.zt_policy_precedence_label, policy.precedence ?: 0)
             
             val rulesInfo = buildString {
-                append("Include: ${policy.include.size} 规则")
+                append(ctx.resources.getQuantityString(R.plurals.zt_policy_include_rules, policy.include.size, policy.include.size))
                 if (!policy.exclude.isNullOrEmpty()) {
-                    append(" • Exclude: ${policy.exclude.size} 规则")
+                    append(ctx.resources.getQuantityString(R.plurals.zt_policy_exclude_rules, policy.exclude.size, policy.exclude.size))
                 }
                 if (!policy.require.isNullOrEmpty()) {
-                    append(" • Require: ${policy.require.size} 规则")
+                    append(ctx.resources.getQuantityString(R.plurals.zt_policy_require_rules, policy.require.size, policy.require.size))
                 }
             }
             binding.policyRulesText.text = rulesInfo
@@ -60,12 +62,12 @@ class AccessPolicyAdapter(
             }
         }
 
-        private fun getDecisionLabel(decision: String): String {
+        private fun getDecisionLabel(decision: String, ctx: android.content.Context): String {
             return when (decision) {
-                "allow" -> "允许"
-                "deny" -> "拒绝"
-                "bypass" -> "绕过"
-                "non_identity" -> "非身份"
+                "allow" -> ctx.getString(R.string.zt_policy_decision_allow)
+                "deny" -> ctx.getString(R.string.zt_policy_decision_deny)
+                "bypass" -> ctx.getString(R.string.zt_policy_decision_bypass)
+                "non_identity" -> ctx.getString(R.string.zt_policy_decision_non_identity)
                 else -> decision
             }
         }

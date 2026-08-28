@@ -44,7 +44,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="部署 Pages 项目"
+                            android:text="@string/xml_fragment_pages"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -68,7 +68,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="项目名称"
+                            android:hint="@string/xml_fragment_pages_hint"
                             app:boxBackgroundMode="outline"
                             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                             android:layout_marginBottom="10dp">
@@ -84,7 +84,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="生产分支"
+                            android:hint="@string/xml_fragment_pages_hint_2"
                             app:boxBackgroundMode="outline"
                             android:layout_marginBottom="10dp">
 
@@ -100,7 +100,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="默认兼容日期 2026-06-16"
+                            android:hint="@string/xml_fragment_pages_hint_3"
                             app:placeholderText="输入格式：2026-06-16"
                             app:boxBackgroundMode="outline"
                             android:layout_marginBottom="10dp">
@@ -116,7 +116,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="兼容性标志（逗号或换行分隔）"
+                            android:hint="@string/xml_fragment_pages_hint_4"
                             app:placeholderText="例如：nodejs_compat"
                             app:boxBackgroundMode="outline"
                             android:layout_marginBottom="10dp">
@@ -137,7 +137,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="项目文件(仅支持：.zip .js .htm .html )"
+                            android:hint="@string/xml_fragment_pages_hint_5"
                             app:boxBackgroundMode="outline"
                             app:endIconMode="custom"
                             app:endIconDrawable="@android:drawable/ic_menu_search"
@@ -157,7 +157,7 @@
                             android:id="@+id/selectFileBtn"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="选择文件"
+                            android:text="@string/worker_select_file"
                             android:layout_marginBottom="12dp"
                             style="@style/Widget.Material3.Button.OutlinedButton" />
 
@@ -171,7 +171,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="50dp"
                                 android:layout_weight="1"
-                                android:text="创建项目"
+                                android:text="@string/pages_create_project"
                                 android:textSize="14sp"
                                 android:layout_marginEnd="8dp"
                                 style="@style/Widget.Material3.Button.OutlinedButton" />
@@ -181,7 +181,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="50dp"
                                 android:layout_weight="1"
-                                android:text="部署项目"
+                                android:text="@string/xml_fragment_pages_2"
                                 android:textSize="14sp"
                                 style="@style/Widget.Material3.Button" />
 
@@ -214,53 +214,66 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <!-- Pages 主头部：标题 + Manage Deployments + Manage Projects + Refresh
+                         字体放大兜底方案：4 个子元素 width=0dp+weight 按比例分配父容器宽度
+                         （2 : 3 : 3 : 2，合计 10）→ 永远严格等于父宽度，绝不可能溢出；
+                         长文本在按钮内部由 AppButton.Outlined/Text 的 maxLines=2+ellipsize+hyphenation 自动处理；
+                         baselineAligned=false + gravity=center_vertical → 按钮间垂直中心线对齐（避免文字 2 行错落）。 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:baselineAligned="false"
                         android:layout_marginBottom="12dp">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="项目"
+                            android:layout_weight="2"
+                            android:text="@string/xml_fragment_pages_3"
                             android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
                         
                         <Button
                             android:id="@+id/pagesCleanupDeploymentsBtn"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="管理部署"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_marginEnd="8dp" />
+                            android:layout_weight="3"
+                            android:text="@string/xml_fragment_pages_4"
+                            style="@style/AppButton.Outlined"
+                            android:layout_marginEnd="4dp" />
 
 
                         <Button
                             android:id="@+id/pagesToggleSelectionModeBtn"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="管理项目"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_marginEnd="8dp" />
+                            android:layout_weight="3"
+                            android:text="@string/pages_manage_projects"
+                            style="@style/AppButton.Outlined"
+                            android:layout_marginEnd="4dp" />
 
                         <Button
                             android:id="@+id/refreshBtn"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="刷新"
-                            style="@style/Widget.Material3.Button.TextButton" />
+                            android:layout_weight="2"
+                            android:text="@string/xml_fragment_pages_5"
+                            style="@style/AppButton.Text" />
 
                     </LinearLayout>
 
+                    <!-- Pages 选中模式操作栏：状态文本 + 全选 + 批量删除 → 同主头部的权重分配（3:2:2，永不溢出） -->
                     <LinearLayout
                         android:id="@+id/pagesSelectionActionsLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:baselineAligned="false"
                         android:layout_marginBottom="12dp"
                         android:visibility="gone">
 
@@ -268,24 +281,28 @@
                             android:id="@+id/pagesSelectionStatusText"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="已选择 0 个项目"
+                            android:layout_weight="3"
+                            android:text="@string/xml_fragment_pages_6"
+                            android:maxLines="1"
+                            android:ellipsize="end"
                             android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                         <Button
                             android:id="@+id/pagesSelectAllBtn"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="全选"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_marginEnd="8dp" />
+                            android:layout_weight="2"
+                            android:text="@string/snippet_select_all"
+                            style="@style/AppButton.Outlined"
+                            android:layout_marginEnd="4dp" />
 
                         <Button
                             android:id="@+id/pagesBatchDeleteBtn"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="批量删除"
-                            style="@style/Widget.Material3.Button" />
+                            android:layout_weight="2"
+                            android:text="@string/xml_fragment_pages_7"
+                            style="@style/AppButton" />
 
                     </LinearLayout>
 
@@ -300,7 +317,7 @@
                         android:id="@+id/emptyText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="暂无项目"
+                        android:text="@string/xml_fragment_pages_8"
                         android:gravity="center"
                         android:padding="24dp"
                         android:textColor="?android:textColorSecondary"

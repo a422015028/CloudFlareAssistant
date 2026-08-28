@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
@@ -18,42 +19,47 @@
             android:id="@+id/fileNameText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="cloudflare_backup_20240101_120000.json"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="4dp"
+            tools:text="cloudflare_backup_20240101_120000.json" />
 
         <TextView
             android:id="@+id/fileTimeText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="2024-01-01 12:00:00"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            tools:text="2024-01-01 12:00:00" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/restoreButton"
+                style="?attr/materialButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="恢复"
-                android:layout_marginEnd="8dp"
-                style="@style/Widget.MaterialComponents.Button" />
+                android:text="@string/backup_restore"
+                android:layout_marginEnd="8dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/deleteButton"
+                style="?attr/materialButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="删除"
-                app:backgroundTint="@android:color/holo_red_light"
-                style="@style/Widget.MaterialComponents.Button" />
+                android:text="@string/delete"
+                app:backgroundTint="@android:color/holo_red_light" />
         </LinearLayout>
 
     </LinearLayout>

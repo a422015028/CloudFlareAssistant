@@ -14,7 +14,7 @@
             android:id="@+id/dialogTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="创建令牌"
+            android:text="@string/xml_dialog_token_edit"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
@@ -22,7 +22,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="令牌名称"
+            android:hint="@string/xml_dialog_token_edit_hint"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="12dp">
 
@@ -39,16 +39,16 @@
             android:id="@+id/tokenStatusSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="启用令牌"
+            android:text="@string/xml_dialog_token_edit_2"
             android:layout_marginBottom="12dp" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="过期日期 (yyyy-MM-dd, 留空永不过期)"
+            android:hint="@string/xml_dialog_token_edit_hint_2"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="12dp"
-            app:helperText="编辑时留空表示保持原有设置">
+            app:helperText="@string/xml_dialog_token_edit_helper">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/tokenExpiresInput"
@@ -62,10 +62,10 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="IP 白名单 (CIDR, 逗号分隔, 留空不限制)"
+            android:hint="@string/xml_dialog_token_edit_hint_3"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="12dp"
-            app:helperText="例如: 192.168.1.0/24, 2400:cb00::/32">
+            app:helperText="@string/xml_dialog_token_edit_helper_2">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/tokenIpInput"
@@ -81,7 +81,7 @@
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="选择权限组 (已选 0 个)" />
+            android:text="@string/xml_dialog_token_edit_3" />
 
     </LinearLayout>
 

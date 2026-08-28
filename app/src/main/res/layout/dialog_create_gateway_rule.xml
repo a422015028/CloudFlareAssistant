@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="规则用于控制网络流量，支持 DNS、HTTP 和网络层匹配。"
+            android:text="@string/gateway_rule_description"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="快速模板"
+            android:text="@string/gateway_quick_templates"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -39,7 +39,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="阻止域名" />
+                android:text="@string/gateway_block_domains" />
 
             <Button
                 android:id="@+id/templateAllowBtn"
@@ -47,7 +47,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="允许域名" />
+                android:text="@string/gateway_allow_domains" />
 
             <Button
                 android:id="@+id/templateSafeBtn"
@@ -55,7 +55,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="安全搜索" />
+                android:text="@string/gateway_safe_search" />
 
         </LinearLayout>
 
@@ -64,7 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="规则名称 *">
+            android:hint="@string/gateway_rule_name_required">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ruleNameInput"
@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="规则类型"
+            android:text="@string/gateway_rule_type"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -87,7 +87,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="DNS: 匹配域名查询 | HTTP: 匹配网站访问 | 网络: 匹配 IP 和端口"
+            android:text="@string/gateway_rule_type_desc"
             android:textSize="11sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -102,7 +102,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="动作"
+            android:text="@string/common_action"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -110,7 +110,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="允许: 放行流量 | 阻止: 拒绝访问 | 安全搜索: 过滤不良内容"
+            android:text="@string/gateway_rule_action_desc"
             android:textSize="11sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -132,7 +132,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="DNS 规则"
+                android:text="@string/gateway_dns_rules"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -140,7 +140,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="匹配域名查询，支持主域名和所有子域名"
+                android:text="@string/gateway_dns_match_desc"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
 
@@ -156,7 +156,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="域名"
+                    android:text="@string/common_domain"
                     android:checked="true"
                     android:visibility="gone" />
 
@@ -165,7 +165,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="域名列表"
+                    android:text="@string/gateway_domain_list"
                     android:visibility="gone" />
 
             </RadioGroup>
@@ -175,7 +175,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="规则表达式"
+                android:hint="@string/gateway_rule_expression"
                 app:helperText='如: dns.fqdn == "example.com" or dns.fqdn matches ".*\.example\.com"'>
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -195,7 +195,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:padding="12dp"
-                android:text="点击选择列表"
+                android:text="@string/gateway_tap_select_list"
                 android:textColor="?attr/colorPrimary"
                 android:background="@drawable/list_selector_background"
                 android:clickable="true"
@@ -207,7 +207,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="反向匹配 (not in list)"
+                android:text="@string/gateway_invert_match"
                 android:textSize="12sp"
                 android:visibility="gone" />
 
@@ -225,7 +225,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="HTTP 规则"
+                android:text="@string/gateway_http_rules"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -233,7 +233,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="匹配网站访问，支持主机名和 URL 路径"
+                android:text="@string/gateway_http_match_desc"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
 
@@ -242,7 +242,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="规则表达式"
+                android:hint="@string/gateway_rule_expression"
                 app:helperText='如: http.request.host == "example.com" and http.request.uri.path matches "/api/*"'>
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -268,7 +268,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="主机"
+                    android:text="@string/gateway_host"
                     android:checked="true"
                     android:visibility="gone" />
 
@@ -277,7 +277,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="域名列表"
+                    android:text="@string/gateway_domain_list"
                     android:visibility="gone" />
 
                 <RadioButton
@@ -285,7 +285,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="URL列表"
+                    android:text="@string/gateway_url_list"
                     android:visibility="gone" />
 
             </RadioGroup>
@@ -296,7 +296,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:padding="12dp"
-                android:text="点击选择列表"
+                android:text="@string/gateway_tap_select_list"
                 android:textColor="?attr/colorPrimary"
                 android:background="@drawable/list_selector_background"
                 android:clickable="true"
@@ -308,7 +308,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="反向匹配 (not in list)"
+                android:text="@string/gateway_invert_match"
                 android:textSize="12sp"
                 android:visibility="gone" />
 
@@ -318,7 +318,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:padding="12dp"
-                android:text="点击选择列表"
+                android:text="@string/gateway_tap_select_list"
                 android:textColor="?attr/colorPrimary"
                 android:background="@drawable/list_selector_background"
                 android:clickable="true"
@@ -330,7 +330,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="反向匹配 (not in list)"
+                android:text="@string/gateway_invert_match"
                 android:textSize="12sp"
                 android:visibility="gone" />
 
@@ -340,7 +340,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="策略URL重定向"
+                android:hint="@string/gateway_policy_redirect_url"
                 android:visibility="gone">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -365,7 +365,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="网络规则"
+                android:text="@string/gateway_network_rules"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -373,7 +373,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="匹配网络层流量，支持 IP 地址和端口"
+                android:text="@string/gateway_network_match_desc"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
 
@@ -382,7 +382,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="规则表达式"
+                android:hint="@string/gateway_rule_expression"
                 app:helperText='如: net.src.ip == 192.168.1.1 and net.dst.port == 443'>
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -417,7 +417,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="IP列表"
+                    android:text="@string/gateway_ip_list"
                     android:visibility="gone" />
 
             </RadioGroup>
@@ -428,7 +428,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:padding="12dp"
-                android:text="点击选择列表"
+                android:text="@string/gateway_tap_select_list"
                 android:textColor="?attr/colorPrimary"
                 android:background="@drawable/list_selector_background"
                 android:clickable="true"
@@ -440,7 +440,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="反向匹配 (not in list)"
+                android:text="@string/gateway_invert_match"
                 android:textSize="12sp"
                 android:visibility="gone" />
 
@@ -450,8 +450,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="替代IP"
-                app:helperText="例如: 192.168.1.1。可以是公共IP或连接到ZeroTrust网络的私有IP"
+                android:hint="@string/gateway_override_ip"
+                app:helperText="@string/gateway_override_ip_helper"
                 android:visibility="gone">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -468,8 +468,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="替代端口"
-                app:helperText="例如: 8080"
+                android:hint="@string/gateway_override_port"
+                app:helperText="@string/gateway_override_port_example"
                 android:visibility="gone">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -494,7 +494,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="覆盖设置"
+                android:text="@string/gateway_override_settings"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -502,7 +502,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="将匹配的 DNS 查询覆盖到指定目标（IP列表或单个主机名）"
+                android:text="@string/gateway_override_desc"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
 
@@ -519,14 +519,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:checked="true"
-                    android:text="IP列表" />
+                    android:text="@string/gateway_ip_list" />
 
                 <RadioButton
                     android:id="@+id/overrideHostname"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="单个主机名" />
+                    android:text="@string/gateway_single_hostname" />
 
             </RadioGroup>
 
@@ -535,7 +535,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="IP列表 (每行一个IP)">
+                android:hint="@string/gateway_ip_list_hint">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/overrideIpsInput"
@@ -552,7 +552,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="主机名 (如: example.com)"
+                android:hint="@string/gateway_hostname_hint"
                 android:visibility="gone">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -577,7 +577,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="生成的规则表达式"
+                android:text="@string/gateway_generated_expression"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary" />
 
@@ -601,7 +601,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="优先级 (越小越高)">
+            android:hint="@string/gateway_priority_hint">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/precedenceInput"
@@ -619,7 +619,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:checked="true"
-            android:text="启用规则" />
+            android:text="@string/gateway_enable_rule" />
 
     </LinearLayout>
 

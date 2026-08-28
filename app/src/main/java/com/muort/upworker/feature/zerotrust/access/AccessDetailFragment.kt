@@ -132,14 +132,14 @@ class AccessDetailFragment : Fragment() {
                 // Observe messages
                 launch {
                     viewModel.message.collect { message ->
-                        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), message.asString(requireContext()), android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
 
                 // Observe errors
                 launch {
                     viewModel.error.collect { error ->
-                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), error.asString(requireContext()), android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -149,7 +149,7 @@ class AccessDetailFragment : Fragment() {
     private fun loadAppDetail() {
         val account = accountViewModel.defaultAccount.value
                 if (account == null) {
-            android.widget.Toast.makeText(requireContext(), "未选择账户", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), R.string.msg_no_account_selected, android.widget.Toast.LENGTH_SHORT).show()
             findNavController().navigateUp()
             return
         }
@@ -160,10 +160,10 @@ class AccessDetailFragment : Fragment() {
 
     private fun displayAppDetails(app: com.muort.upworker.core.model.AccessApplication) {
         binding.appNameText.text = app.name
-        binding.domainText.text = app.domain ?: "未设置"
+        binding.domainText.text = app.domain ?: getString(R.string.zt_access_detail_not_set)
         binding.typeChip.text = getTypeLabel(app.type)
-        binding.sessionDurationText.text = app.sessionDuration ?: "默认"
-        binding.createdAtText.text = app.createdAt ?: "未知"
+        binding.sessionDurationText.text = app.sessionDuration ?: getString(R.string.zt_access_detail_default)
+        binding.createdAtText.text = app.createdAt ?: getString(R.string.zt_device_status_unknown)
 
         // Advanced config - 先移除listener防止程序设置触发更新
         binding.appLauncherSwitch.setOnCheckedChangeListener(null)
@@ -182,9 +182,9 @@ class AccessDetailFragment : Fragment() {
         // SaaS config
         if (app.type == "saas" && app.saasApp != null) {
             binding.saasConfigCard.visibility = View.VISIBLE
-            binding.saasConsumerUrlText.text = app.saasApp.consumerServiceUrl ?: "未设置"
-            binding.saasSpEntityIdText.text = app.saasApp.spEntityId ?: "未设置"
-            binding.saasNameIdFormatText.text = app.saasApp.nameIdFormat ?: "未设置"
+            binding.saasConsumerUrlText.text = app.saasApp.consumerServiceUrl ?: getString(R.string.zt_access_detail_not_set)
+            binding.saasSpEntityIdText.text = app.saasApp.spEntityId ?: getString(R.string.zt_access_detail_not_set)
+            binding.saasNameIdFormatText.text = app.saasApp.nameIdFormat ?: getString(R.string.zt_access_detail_not_set)
         } else {
             binding.saasConfigCard.visibility = View.GONE
         }
@@ -192,14 +192,14 @@ class AccessDetailFragment : Fragment() {
 
     private fun getTypeLabel(type: String): String {
         return when (type) {
-            "self_hosted" -> "自托管应用"
-            "saas" -> "SaaS 应用"
-            "ssh" -> "SSH"
-            "vnc" -> "VNC"
-            "app_launcher" -> "应用启动器"
-            "warp" -> "WARP"
-            "biso" -> "浏览器隔离"
-            "bookmark" -> "书签"
+            "self_hosted" -> getString(R.string.zt_app_type_self_hosted)
+            "saas" -> getString(R.string.zt_app_type_saas)
+            "ssh" -> getString(R.string.zt_app_type_ssh)
+            "vnc" -> getString(R.string.zt_app_type_vnc)
+            "app_launcher" -> getString(R.string.zt_app_type_app_launcher)
+            "warp" -> getString(R.string.zt_app_type_warp)
+            "biso" -> getString(R.string.zt_app_type_biso)
+            "bookmark" -> getString(R.string.zt_app_type_bookmark)
             else -> type
         }
     }
@@ -225,12 +225,12 @@ class AccessDetailFragment : Fragment() {
 
     private fun confirmDeletePolicy(policyId: String, policyName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除策略")
-            .setMessage("确定要删除策略 \"$policyName\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.zt_policy_delete_title)
+            .setMessage(getString(R.string.zt_policy_delete_confirm, policyName))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 deletePolicy(policyId)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -244,12 +244,12 @@ class AccessDetailFragment : Fragment() {
         val app = viewModel.selectedApp.value ?: return
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除应用")
-            .setMessage("确定要删除应用 \"${app.name}\" 吗？此操作不可恢复。")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.zt_access_delete_app_title)
+            .setMessage(getString(R.string.zt_access_delete_app_confirm_detail, app.name))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 deleteApplication()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -311,7 +311,16 @@ class AccessDetailFragment : Fragment() {
         autoRedirectSwitch?.isChecked = app.autoRedirectToIdentity ?: false
 
         // Set spinner type
-        val types = listOf("self_hosted" to "自托管应用", "saas" to "SaaS 应用", "ssh" to "SSH", "vnc" to "VNC", "app_launcher" to "应用启动器", "warp" to "WARP", "biso" to "浏览器隔离", "bookmark" to "书签")
+        val types = listOf(
+            "self_hosted" to getString(R.string.zt_app_type_self_hosted),
+            "saas" to getString(R.string.zt_app_type_saas),
+            "ssh" to getString(R.string.zt_app_type_ssh),
+            "vnc" to getString(R.string.zt_app_type_vnc),
+            "app_launcher" to getString(R.string.zt_app_type_app_launcher),
+            "warp" to getString(R.string.zt_app_type_warp),
+            "biso" to getString(R.string.zt_app_type_biso),
+            "bookmark" to getString(R.string.zt_app_type_bookmark)
+        )
         val typeAdapter = android.widget.ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_item,
@@ -339,21 +348,21 @@ class AccessDetailFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("编辑应用")
+            .setTitle(R.string.zt_access_edit_app_title)
             .setView(dialogView)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val name = nameInput?.text?.toString()
                 val domain = domainInput?.text?.toString()
                 val type = types[typeSpinner?.selectedItemPosition ?: 0].first
                 val sessionDuration = sessionDurationInput?.text?.toString()
 
                 if (name.isNullOrBlank()) {
-                    android.widget.Toast.makeText(requireContext(), "应用名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), R.string.msg_app_name_empty, android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
                 if (type != "app_launcher" && type != "bookmark" && domain.isNullOrBlank()) {
-                    android.widget.Toast.makeText(requireContext(), "域名不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), R.string.msg_domain_empty, android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -379,7 +388,7 @@ class AccessDetailFragment : Fragment() {
 
                 viewModel.updateApplication(account, app.id, updateRequest)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 

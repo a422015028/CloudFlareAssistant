@@ -2,11 +2,13 @@ package com.muort.upworker.feature.r2
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.R2CustomDomain
 import com.muort.upworker.core.model.R2Object
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.UiMessage
 import java.io.File
 import com.muort.upworker.core.repository.R2Repository
 import com.muort.upworker.core.repository.ZoneRepository
@@ -44,8 +46,8 @@ class R2ViewModel @Inject constructor(
     private val _objectsLoadingState = MutableStateFlow(false)
     val objectsLoadingState: StateFlow<Boolean> = _objectsLoadingState.asStateFlow()
     
-    private val _message = MutableSharedFlow<String>()
-    val message: SharedFlow<String> = _message.asSharedFlow()
+    private val _message = MutableSharedFlow<UiMessage>()
+    val message: SharedFlow<UiMessage> = _message.asSharedFlow()
     
     fun loadBuckets(account: Account) {
         viewModelScope.launch {
@@ -57,7 +59,7 @@ class R2ViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} buckets")
                 }
                 is Resource.Error -> {
-                    _message.emit("加载存储桶失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_buckets_load_failed, result.message))
                     Timber.e("Failed to load buckets: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -70,7 +72,7 @@ class R2ViewModel @Inject constructor(
     fun createBucket(account: Account, name: String, location: String? = null) {
         if (name.isBlank()) {
             viewModelScope.launch {
-                _message.emit("请输入存储桶名称")
+                _message.emit(UiMessage.of(R.string.vm_msg_r2_bucket_name_required))
             }
             return
         }
@@ -80,11 +82,11 @@ class R2ViewModel @Inject constructor(
             
             when (val result = r2Repository.createBucket(account, name, location)) {
                 is Resource.Success -> {
-                    _message.emit("存储桶创建成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_bucket_create_success))
                     loadBuckets(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("创建存储桶失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_bucket_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -99,7 +101,7 @@ class R2ViewModel @Inject constructor(
             
             when (val result = r2Repository.deleteBucket(account, bucketName)) {
                 is Resource.Success -> {
-                    _message.emit("存储桶删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_bucket_delete_success))
                     if (_selectedBucket.value?.name == bucketName) {
                         _selectedBucket.value = null
                         _objects.value = emptyList()
@@ -107,7 +109,7 @@ class R2ViewModel @Inject constructor(
                     loadBuckets(account)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除存储桶失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_bucket_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -136,7 +138,7 @@ class R2ViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.objects?.size ?: 0} objects")
                 }
                 is Resource.Error -> {
-                    _message.emit("加载对象列表失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_objects_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -151,12 +153,12 @@ class R2ViewModel @Inject constructor(
             
             when (val result = r2Repository.uploadObject(account, bucketName, objectKey, file)) {
                 is Resource.Success -> {
-                    _message.emit("对象上传成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_object_upload_success))
                     loadObjects(account, bucketName)
                     onComplete(true)
                 }
                 is Resource.Error -> {
-                    _message.emit("上传对象失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_object_upload_failed, result.message))
                     onComplete(false)
                 }
                 is Resource.Loading -> {}
@@ -175,7 +177,7 @@ class R2ViewModel @Inject constructor(
                     onResult(result.data)
                 }
                 is Resource.Error -> {
-                    _message.emit("下载对象失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_object_download_failed, result.message))
                     onResult(null)
                 }
                 is Resource.Loading -> {}
@@ -194,11 +196,11 @@ class R2ViewModel @Inject constructor(
             
             when (val result = r2Repository.downloadObjectToFile(account, bucketName, objectKey, destinationFile)) {
                 is Resource.Success -> {
-                    _message.emit("文件下载成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_file_downloaded_success))
                     onComplete(true)
                 }
                 is Resource.Error -> {
-                    _message.emit("下载对象失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_object_download_failed, result.message))
                     onComplete(false)
                 }
                 is Resource.Loading -> {}
@@ -214,11 +216,11 @@ class R2ViewModel @Inject constructor(
             
             when (val result = r2Repository.deleteObject(account, bucketName, objectKey)) {
                 is Resource.Success -> {
-                    _message.emit("对象删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_object_delete_success))
                     loadObjects(account, bucketName)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除对象失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_object_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -242,7 +244,7 @@ class R2ViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} custom domains for bucket $bucketName")
                 }
                 is Resource.Error -> {
-                    _message.emit("加载自定义域失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domains_load_failed, result.message))
                     Timber.e("Failed to load custom domains: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -257,18 +259,18 @@ class R2ViewModel @Inject constructor(
 
             val zone = zoneRepository.findZoneByHostname(account.id, domain)
             if (zone == null) {
-                _message.emit("添加失败：未找到对应的 Cloudflare 域名（Zone），请先在账号中添加该域名")
+                _message.emit(UiMessage.of(R.string.r2_custom_domain_zone_not_found))
                 _loadingState.value = false
                 return@launch
             }
 
             when (val result = r2Repository.createCustomDomain(account, bucketName, domain, zone.id)) {
                 is Resource.Success -> {
-                    _message.emit("自定义域添加成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domain_created_success))
                     loadCustomDomains(account, bucketName)
                 }
                 is Resource.Error -> {
-                    _message.emit("添加自定义域失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domain_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -283,11 +285,11 @@ class R2ViewModel @Inject constructor(
             
             when (val result = r2Repository.deleteCustomDomain(account, bucketName, domain)) {
                 is Resource.Success -> {
-                    _message.emit("自定义域删除成功")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domain_delete_success))
                     loadCustomDomains(account, bucketName)
                 }
                 is Resource.Error -> {
-                    _message.emit("删除自定义域失败: ${result.message}")
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domain_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }

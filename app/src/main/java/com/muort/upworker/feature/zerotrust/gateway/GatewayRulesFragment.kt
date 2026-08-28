@@ -174,19 +174,19 @@ class GatewayRulesFragment : Fragment() {
     private fun loadRules() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            android.widget.Toast.makeText(requireContext(), "未选择账户", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), getString(R.string.msg_no_account_selected), android.widget.Toast.LENGTH_SHORT).show()
             return
         }
         lifecycleScope.launch {
             val result = viewModel.loadRules(account)
             if (result is Resource.Error) {
-                android.widget.Toast.makeText(requireContext(), "加载规则失败: ${result.message}", android.widget.Toast.LENGTH_LONG).show()
+                android.widget.Toast.makeText(requireContext(), getString(R.string.zt_gateway_load_rules_failed, result.message), android.widget.Toast.LENGTH_LONG).show()
             }
         }
         lifecycleScope.launch {
             val result = viewModel.loadLists(account)
             if (result is Resource.Error) {
-                android.widget.Toast.makeText(requireContext(), "加载列表失败: ${result.message}", android.widget.Toast.LENGTH_LONG).show()
+                android.widget.Toast.makeText(requireContext(), getString(R.string.msg_load_lists_failed, result.message), android.widget.Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -255,7 +255,11 @@ class GatewayRulesFragment : Fragment() {
         val templateAllowBtn = dialogView.findViewById<Button>(R.id.templateAllowBtn)
         val templateSafeBtn = dialogView.findViewById<Button>(R.id.templateSafeBtn)
 
-        val types = listOf("dns" to "DNS", "http" to "HTTP", "l4" to "网络")
+        val types = listOf(
+            "dns" to getString(R.string.zt_gateway_rule_type_dns),
+            "http" to getString(R.string.zt_gateway_rule_type_http),
+            "l4" to getString(R.string.zt_gateway_rule_type_l4)
+        )
         val typeAdapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_item,
@@ -265,23 +269,23 @@ class GatewayRulesFragment : Fragment() {
         typeSpinner.adapter = typeAdapter
 
         val dnsActions = listOf(
-            "allow" to "允许",
-            "block" to "阻止",
-            "safesearch" to "安全搜索",
-            "ytrestricted" to "YouTube限制",
-            "override" to "覆盖"
+            "allow" to getString(R.string.zt_gateway_action_allow),
+            "block" to getString(R.string.zt_gateway_action_block),
+            "safesearch" to getString(R.string.zt_gateway_action_safesearch),
+            "ytrestricted" to getString(R.string.zt_gateway_action_ytrestricted),
+            "override" to getString(R.string.zt_gateway_action_override)
         )
         val httpActions = listOf(
-            "allow" to "允许",
-            "redirect" to "重定向",
-            "block" to "阻止",
-            "off" to "不检查",
-            "noscan" to "不扫描"
+            "allow" to getString(R.string.zt_gateway_action_allow),
+            "redirect" to getString(R.string.zt_gateway_action_redirect),
+            "block" to getString(R.string.zt_gateway_action_block),
+            "off" to getString(R.string.zt_gateway_action_off),
+            "noscan" to getString(R.string.zt_gateway_action_noscan)
         )
         val l4Actions = listOf(
-            "allow" to "允许",
-            "block" to "阻止",
-            "l4_override" to "覆盖"
+            "allow" to getString(R.string.zt_gateway_action_allow),
+            "block" to getString(R.string.zt_gateway_action_block),
+            "l4_override" to getString(R.string.zt_gateway_action_l4_override)
         )
 
         fun currentActions(): List<Pair<String, String>> = when (types[typeSpinner.selectedItemPosition].first) {
@@ -290,23 +294,23 @@ class GatewayRulesFragment : Fragment() {
             else -> dnsActions
         }
 
-        // 云端动作 → 中文标签映射（涵盖 Cloudflare Gateway 所有可能的动作值）
+        // 云端动作 → 资源标签映射（涵盖 Cloudflare Gateway 所有可能的动作值）
         fun actionLabel(action: String): String = when (action) {
-            "allow" -> "允许"
-            "block" -> "阻止"
-            "safesearch" -> "安全搜索"
-            "ytrestricted" -> "YouTube限制"
-            "override" -> "覆盖"
-            "redirect" -> "重定向"
-            "off" -> "不检查"
-            "noscan" -> "不扫描"
-            "on" -> "开启"
-            "scan" -> "扫描"
-            "isolate" -> "隔离"
-            "noisolate" -> "不隔离"
-            "l4_override" -> "L4覆盖"
-            "egress" -> "出口"
-            "audit_ssh" -> "SSH审计"
+            "allow" -> getString(R.string.zt_gateway_action_allow)
+            "block" -> getString(R.string.zt_gateway_action_block)
+            "safesearch" -> getString(R.string.zt_gateway_action_safesearch)
+            "ytrestricted" -> getString(R.string.zt_gateway_action_ytrestricted)
+            "override" -> getString(R.string.zt_gateway_action_override)
+            "redirect" -> getString(R.string.zt_gateway_action_redirect)
+            "off" -> getString(R.string.zt_gateway_action_off)
+            "noscan" -> getString(R.string.zt_gateway_action_noscan)
+            "on" -> getString(R.string.zt_gateway_action_on)
+            "scan" -> getString(R.string.zt_gateway_action_scan)
+            "isolate" -> getString(R.string.zt_gateway_action_isolate)
+            "noisolate" -> getString(R.string.zt_gateway_action_noisolate)
+            "l4_override" -> getString(R.string.zt_gateway_action_l4_override)
+            "egress" -> getString(R.string.zt_gateway_action_egress)
+            "audit_ssh" -> getString(R.string.zt_gateway_action_audit_ssh)
             else -> action
         }
 
@@ -315,7 +319,7 @@ class GatewayRulesFragment : Fragment() {
             val base = currentActions().toMutableList()
             existingRule?.let { rule ->
                 if (base.none { it.first == rule.action }) {
-                    base.add(rule.action to "${actionLabel(rule.action)} (云端)")
+                    base.add(rule.action to actionLabel(rule.action) + getString(R.string.zt_gateway_action_cloud_suffix))
                 }
             }
             return base
@@ -364,11 +368,11 @@ class GatewayRulesFragment : Fragment() {
 
         fun updateListSelectorText(selector: TextView, selectedIds: Set<String>, lists: List<com.muort.upworker.core.model.GatewayList>) {
             val names = lists.filter { selectedIds.contains(it.id) }.map { it.name }
-            selector.text = if (names.isEmpty()) "点击选择列表" else names.joinToString(", ")
+            selector.text = if (names.isEmpty()) getString(R.string.zt_gateway_tap_select_list) else names.joinToString(", ")
         }
 
         fun showMultiListDialog(
-            title: String,
+            title: Int,
             lists: List<com.muort.upworker.core.model.GatewayList>,
             selectedIds: MutableSet<String>,
             selector: TextView,
@@ -382,25 +386,25 @@ class GatewayRulesFragment : Fragment() {
                     if (isChecked) selectedIds.add(lists[which].id)
                     else selectedIds.remove(lists[which].id)
                 }
-                .setPositiveButton("确定") { _, _ ->
+                .setPositiveButton(R.string.confirm) { _, _ ->
                     updateListSelectorText(selector, selectedIds, lists)
                     onUpdate()
                 }
-                .setNegativeButton("取消", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show()
         }
 
         dnsListSelector.setOnClickListener {
-            showMultiListDialog("选择域名列表", domainLists, selectedDnsListIds, dnsListSelector) { updateTrafficPreview() }
+            showMultiListDialog(R.string.zt_gateway_select_domain_lists, domainLists, selectedDnsListIds, dnsListSelector) { updateTrafficPreview() }
         }
         httpDomainListSelector.setOnClickListener {
-            showMultiListDialog("选择域名列表", httpDomainLists, selectedHttpDomainListIds, httpDomainListSelector) { updateTrafficPreview() }
+            showMultiListDialog(R.string.zt_gateway_select_domain_lists, httpDomainLists, selectedHttpDomainListIds, httpDomainListSelector) { updateTrafficPreview() }
         }
         httpUrlListSelector.setOnClickListener {
-            showMultiListDialog("选择URL列表", httpUrlLists, selectedHttpUrlListIds, httpUrlListSelector) { updateTrafficPreview() }
+            showMultiListDialog(R.string.zt_gateway_select_url_lists, httpUrlLists, selectedHttpUrlListIds, httpUrlListSelector) { updateTrafficPreview() }
         }
         l4ListSelector.setOnClickListener {
-            showMultiListDialog("选择IP列表", ipLists, selectedL4ListIds, l4ListSelector) { updateTrafficPreview() }
+            showMultiListDialog(R.string.zt_gateway_select_ip_lists, ipLists, selectedL4ListIds, l4ListSelector) { updateTrafficPreview() }
         }
 
         dnsMatchTypeGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -510,28 +514,28 @@ class GatewayRulesFragment : Fragment() {
             val text = trafficExpressionText.text?.toString()
             if (!text.isNullOrBlank()) {
                 val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = ClipData.newPlainText("规则表达式", text)
+                val clip = ClipData.newPlainText(getString(R.string.zt_gateway_rule_expr_label), text)
                 clipboard.setPrimaryClip(clip)
-                Toast.makeText(requireContext(), "已复制到剪贴板", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.msg_copied_to_clipboard), Toast.LENGTH_SHORT).show()
             }
         }
 
         templateBlockBtn.setOnClickListener {
             typeSpinner.setSelection(0)
             actionSpinner.setSelection(1)
-            nameInput.setText("阻止域名")
+            nameInput.setText(getString(R.string.zt_gateway_template_block))
         }
 
         templateAllowBtn.setOnClickListener {
             typeSpinner.setSelection(0)
             actionSpinner.setSelection(0)
-            nameInput.setText("允许域名")
+            nameInput.setText(getString(R.string.zt_gateway_template_allow))
         }
 
         templateSafeBtn.setOnClickListener {
             typeSpinner.setSelection(0)
             actionSpinner.setSelection(2)
-            nameInput.setText("安全搜索")
+            nameInput.setText(getString(R.string.zt_gateway_template_safesearch))
         }
 
         existingRule?.let { rule ->
@@ -656,14 +660,14 @@ class GatewayRulesFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(if (existingRule == null) "创建规则" else "编辑规则")
+            .setTitle(if (existingRule == null) R.string.zt_gateway_create_rule_title else R.string.zt_gateway_edit_rule_title)
             .setView(dialogView)
-            .setPositiveButton(if (existingRule == null) "创建" else "保存") { _, _ ->
+            .setPositiveButton(if (existingRule == null) R.string.dialog_create else R.string.save) { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
                 val name = nameInput.text?.toString()
 
                 if (name.isNullOrBlank()) {
-                    android.widget.Toast.makeText(requireContext(), "规则名称不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.zt_gateway_rule_name_empty), android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -710,8 +714,8 @@ class GatewayRulesFragment : Fragment() {
                     lifecycleScope.launch {
                         val result = viewModel.createRule(account, request)
                         val msg = when (result) {
-                            is Resource.Success -> "规则创建成功: ${result.data.name}"
-                            is Resource.Error -> "创建规则失败: ${result.message}"
+                            is Resource.Success -> getString(R.string.zt_gateway_rule_create_success, result.data.name)
+                            is Resource.Error -> getString(R.string.zt_gateway_rule_create_failed, result.message)
                             else -> return@launch
                         }
                         android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
@@ -720,15 +724,15 @@ class GatewayRulesFragment : Fragment() {
                     lifecycleScope.launch {
                         val result = viewModel.updateRule(account, existingRule.id, request)
                         val msg = when (result) {
-                            is Resource.Success -> "规则更新成功: ${result.data.name}"
-                            is Resource.Error -> "更新规则失败: ${result.message}"
+                            is Resource.Success -> getString(R.string.zt_gateway_rule_update_success, result.data.name)
+                            is Resource.Error -> getString(R.string.zt_gateway_rule_update_failed, result.message)
                             else -> return@launch
                         }
                         android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -823,12 +827,12 @@ class GatewayRulesFragment : Fragment() {
 
     private fun confirmDeleteRule(ruleId: String, ruleName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除规则")
-            .setMessage("确定要删除规则 \"$ruleName\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.zt_gateway_delete_rule_title)
+            .setMessage(getString(R.string.zt_gateway_delete_rule_confirm, ruleName))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 deleteRule(ruleId)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -837,8 +841,8 @@ class GatewayRulesFragment : Fragment() {
         lifecycleScope.launch {
             val result = viewModel.deleteRule(account, ruleId)
             val msg = when (result) {
-                is Resource.Success -> "规则删除成功"
-                is Resource.Error -> "删除规则失败: ${result.message}"
+                is Resource.Success -> getString(R.string.zt_gateway_rule_delete_success)
+                is Resource.Error -> getString(R.string.zt_gateway_rule_delete_failed, result.message)
                 else -> return@launch
             }
             android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
@@ -859,8 +863,8 @@ class GatewayRulesFragment : Fragment() {
         lifecycleScope.launch {
             val result = viewModel.updateRule(account, rule.id, request)
             val msg = when (result) {
-                is Resource.Success -> "规则已${if (enabled) "启用" else "禁用"}"
-                is Resource.Error -> "更新失败: ${result.message}"
+                is Resource.Success -> getString(if (enabled) R.string.zt_gateway_rule_enabled_success else R.string.zt_gateway_rule_disabled_success)
+                is Resource.Error -> getString(R.string.zt_gateway_rule_update_failed, result.message)
                 else -> return@launch
             }
             android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()

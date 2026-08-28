@@ -291,9 +291,9 @@ class WorkerFragment : Fragment() {
             resources.getIdentifier("cleanupDeploymentsBtn", "id", requireContext().packageName)
         )
         
-        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "管理脚本"
+        toggleSelectionBtn?.text = if (isSelectionMode) getString(R.string.cancel) else getString(R.string.worker_manage_scripts)
         selectionActionsLayout?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
-        selectionStatusText?.text = "已选择 ${selectedScripts.size} 个脚本"
+        selectionStatusText?.text = resources.getQuantityString(R.plurals.worker_selected_scripts, selectedScripts.size, selectedScripts.size)
         batchDeleteBtn?.isEnabled = selectedScripts.isNotEmpty()
         
         toggleSelectionBtn?.setOnClickListener {
@@ -320,25 +320,25 @@ class WorkerFragment : Fragment() {
         val file = selectedFile
 
         if (workerName.isEmpty()) {
-            showToast("请输入 Worker 名称")
+            showToast(getString(R.string.worker_please_enter_name))
             return
         }
 
         if (file == null || !file.exists()) {
-            showToast("请选择脚本文件")
+            showToast(getString(R.string.worker_please_select_file))
             return
         }
 
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
 
         // 显示检查状态的 Loading
         val checkingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在准备...")
-            .setMessage("正在检查 Worker 状态")
+            .setTitle(R.string.dialog_preparing)
+            .setMessage(R.string.worker_checking_status)
             .setCancelable(false)
             .create()
         checkingDialog.show()
@@ -363,14 +363,14 @@ class WorkerFragment : Fragment() {
     private fun showConfigKvBindingsDialog(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取当前 KV 绑定配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_fetching_kv_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -388,7 +388,7 @@ class WorkerFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogScriptKvBindingsBinding.inflate(layoutInflater)
 
                 // Setup title
-                dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+                dialogBinding.scriptNameText.text = getString(R.string.worker_script_name_label, script.id)
 
                 // Temporary list for this dialog - initialize with existing bindings
                 val tempKvBindings = mutableListOf<Pair<String, String>>()
@@ -430,11 +430,11 @@ class WorkerFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         // Allow empty bindings (remove all bindings)
                         applyKvBindingsToScript(script, tempKvBindings)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -461,7 +461,7 @@ class WorkerFragment : Fragment() {
     ) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -472,7 +472,7 @@ class WorkerFragment : Fragment() {
                 val namespaces = result.data
                 
                 if (namespaces.isEmpty()) {
-                    showToast("暂无 KV 命名空间，请先创建")
+                    showToast(getString(R.string.worker_no_kv_namespace))
                     return@launch
                 }
                 
@@ -486,12 +486,12 @@ class WorkerFragment : Fragment() {
                 
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("添加") { _, _ ->
+                    .setPositiveButton(R.string.add) { _, _ ->
                         val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
                         val selectedIndex = dialogBinding.namespaceSpinner.selectedItemPosition
                         
                         if (bindingName.isEmpty()) {
-                            showToast("请输入绑定名称")
+                            showToast(getString(R.string.worker_please_enter_binding_name))
                             return@setPositiveButton
                         }
                         
@@ -499,13 +499,13 @@ class WorkerFragment : Fragment() {
                             val namespace = namespaces[selectedIndex]
                             tempBindings.add(Pair(bindingName, namespace.id))
                             onAdded()
-                            showToast("KV 绑定已添加")
+                            showToast(getString(R.string.worker_binding_added))
                         }
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
-                showToast("加载 KV 命名空间失败: ${result.message}")
+                showToast(getString(R.string.worker_kv_load_namespaces_failed_template, result.message))
             }
         }
     }
@@ -513,7 +513,7 @@ class WorkerFragment : Fragment() {
     private fun applyKvBindingsToScript(script: WorkerScript, bindings: List<Pair<String, String>>) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -521,8 +521,8 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新 KV 绑定配置（不重新上传脚本代码）")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.worker_updating_kv_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -534,7 +534,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("KV 绑定配置已更新")
+            showToast(getString(R.string.worker_kv_bindings_config_updated))
         }
     }
     
@@ -543,14 +543,14 @@ class WorkerFragment : Fragment() {
     private fun showConfigR2BindingsDialog(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在加载...")
-            .setMessage("正在获取当前 R2 绑定配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_fetching_r2_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -563,7 +563,7 @@ class WorkerFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogScriptR2BindingsBinding.inflate(layoutInflater)
                 
                 // Setup title
-                dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+                dialogBinding.scriptNameText.text = getString(R.string.worker_script_name_label, script.id)
                 
                 // Temporary list for this dialog - initialize with existing bindings
                 val tempR2Bindings = mutableListOf<Pair<String, String>>()
@@ -603,11 +603,11 @@ class WorkerFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         // Allow empty bindings (remove all bindings)
                         applyR2BindingsToScript(script, tempR2Bindings)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -634,7 +634,7 @@ class WorkerFragment : Fragment() {
     ) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -645,7 +645,7 @@ class WorkerFragment : Fragment() {
                 val buckets = result.data
                 
                 if (buckets.isEmpty()) {
-                    showToast("暂无 R2 存储桶，请先创建")
+                    showToast(getString(R.string.worker_no_r2_bucket))
                     return@launch
                 }
                 
@@ -653,7 +653,7 @@ class WorkerFragment : Fragment() {
                 
                 // Setup spinner
                 val bucketNames = buckets.map { 
-                    val location = it.location?.uppercase() ?: "自动选择"
+                    val location = it.location?.uppercase() ?: getString(R.string.worker_location_auto)
                     "${it.name} ($location)"
                 }
                 val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, bucketNames)
@@ -662,12 +662,12 @@ class WorkerFragment : Fragment() {
                 
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("添加") { _, _ ->
+                    .setPositiveButton(R.string.add) { _, _ ->
                         val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
                         val selectedIndex = dialogBinding.bucketSpinner.selectedItemPosition
                         
                         if (bindingName.isEmpty()) {
-                            showToast("请输入绑定名称")
+                            showToast(getString(R.string.worker_please_enter_binding_name))
                             return@setPositiveButton
                         }
                         
@@ -675,13 +675,13 @@ class WorkerFragment : Fragment() {
                             val bucket = buckets[selectedIndex]
                             tempBindings.add(Pair(bindingName, bucket.name))
                             onAdded()
-                            showToast("R2 绑定已添加")
+                            showToast(getString(R.string.worker_binding_added))
                         }
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
-                showToast("加载 R2 存储桶失败: ${result.message}")
+                showToast(getString(R.string.worker_r2_load_failed, result.message))
             }
         }
     }
@@ -689,7 +689,7 @@ class WorkerFragment : Fragment() {
     private fun applyR2BindingsToScript(script: WorkerScript, bindings: List<Pair<String, String>>) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -697,8 +697,8 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新 R2 绑定配置（不重新上传脚本代码）")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.worker_r2_updating_bindings_no_script)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -710,7 +710,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("R2 绑定配置已更新")
+            showToast(getString(R.string.worker_r2_bindings_updated))
         }
     }
     
@@ -719,14 +719,14 @@ class WorkerFragment : Fragment() {
     private fun showConfigD1BindingsDialog(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在加载...")
-            .setMessage("正在获取当前 D1 绑定配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_d1_fetching_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -747,7 +747,7 @@ class WorkerFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogScriptD1BindingsBinding.inflate(layoutInflater)
                 
                 // Setup title
-                dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+                dialogBinding.scriptNameText.text = getString(R.string.worker_script_name_label, script.id)
                 
                 // Temporary list for this dialog - initialize with existing bindings
                 val tempD1Bindings = mutableListOf<D1BindingItem>()
@@ -788,11 +788,11 @@ class WorkerFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         // Allow empty bindings (remove all bindings)
                         applyD1BindingsToScript(script, tempD1Bindings)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -819,7 +819,7 @@ class WorkerFragment : Fragment() {
     ) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -830,7 +830,7 @@ class WorkerFragment : Fragment() {
                 val databases = result.data
                 
                 if (databases.isEmpty()) {
-                    showToast("暂无 D1 数据库，请先创建")
+                    showToast(getString(R.string.worker_d1_no_databases))
                     return@launch
                 }
                 
@@ -847,12 +847,12 @@ class WorkerFragment : Fragment() {
                 
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("添加") { _, _ ->
+                    .setPositiveButton(R.string.add) { _, _ ->
                         val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
                         val selectedIndex = dialogBinding.databaseSpinner.selectedItemPosition
                         
                         if (bindingName.isEmpty()) {
-                            showToast("请输入绑定名称")
+                            showToast(getString(R.string.worker_please_enter_binding_name))
                             return@setPositiveButton
                         }
                         
@@ -860,13 +860,13 @@ class WorkerFragment : Fragment() {
                             val database = databases[selectedIndex]
                             tempBindings.add(D1BindingItem(bindingName, database.uuid, database.name))
                             onAdded()
-                            showToast("D1 绑定已添加")
+                            showToast(getString(R.string.worker_binding_added))
                         }
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
-                showToast("加载 D1 数据库失败: ${result.message}")
+                showToast(getString(R.string.worker_d1_load_databases_failed_template, result.message))
             }
         }
     }
@@ -874,7 +874,7 @@ class WorkerFragment : Fragment() {
     private fun applyD1BindingsToScript(script: WorkerScript, bindings: List<D1BindingItem>) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -882,8 +882,8 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新 D1 绑定配置（不重新上传脚本代码）")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.worker_d1_updating_bindings_no_script)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -896,7 +896,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("D1 绑定配置已更新")
+            showToast(getString(R.string.worker_d1_bindings_updated))
         }
     }
     
@@ -905,14 +905,14 @@ class WorkerFragment : Fragment() {
     private fun showConfigServiceBindingsDialog(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在加载...")
-            .setMessage("正在获取当前服务绑定配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_service_fetching_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -923,7 +923,7 @@ class WorkerFragment : Fragment() {
             val dialogBinding = com.muort.upworker.databinding.DialogScriptServiceBindingsBinding.inflate(layoutInflater)
             
             // Setup title
-            dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+            dialogBinding.scriptNameText.text = getString(R.string.worker_script_name_label, script.id)
             
             // Temporary list for this dialog - initialize with existing bindings
             val tempServiceBindings = mutableListOf<ServiceBindingItem>()
@@ -963,11 +963,11 @@ class WorkerFragment : Fragment() {
             // Show dialog
             MaterialAlertDialogBuilder(requireContext())
                 .setView(dialogBinding.root)
-                .setPositiveButton("应用配置") { _, _ ->
+                .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                     // Allow empty bindings (remove all bindings)
                     applyServiceBindingsToScript(script, tempServiceBindings)
                 }
-                .setNegativeButton("取消", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show()
         }
     }
@@ -994,7 +994,7 @@ class WorkerFragment : Fragment() {
     ) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -1005,7 +1005,7 @@ class WorkerFragment : Fragment() {
                 val workers = result.data.filter { it.id != currentScript.id }
                 
                 if (workers.isEmpty()) {
-                    showToast("暂无其他 Worker 脚本可绑定")
+                    showToast(getString(R.string.worker_service_no_workers))
                     return@launch
                 }
                 
@@ -1019,12 +1019,12 @@ class WorkerFragment : Fragment() {
 
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("添加") { _, _ ->
+                    .setPositiveButton(R.string.add) { _, _ ->
                         val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
                         val selectedIndex = dialogBinding.workerSpinner.selectedItemPosition
 
                         if (bindingName.isEmpty()) {
-                            showToast("请输入绑定名称")
+                            showToast(getString(R.string.worker_please_enter_binding_name))
                             return@setPositiveButton
                         }
 
@@ -1032,13 +1032,13 @@ class WorkerFragment : Fragment() {
                             val worker = workers[selectedIndex]
                             tempBindings.add(ServiceBindingItem(bindingName, worker.id, "production"))
                             onAdded()
-                            showToast("服务绑定已添加")
+                            showToast(getString(R.string.worker_binding_added))
                         }
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
-                showToast("加载 Worker 列表失败: ${result.message}")
+                showToast(getString(R.string.worker_service_load_workers_failed_template, result.message))
             }
         }
     }
@@ -1046,7 +1046,7 @@ class WorkerFragment : Fragment() {
     private fun applyServiceBindingsToScript(script: WorkerScript, bindings: List<ServiceBindingItem>) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -1054,8 +1054,8 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新服务绑定配置（不重新上传脚本代码）")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.worker_service_updating_bindings_no_script)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1067,7 +1067,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("服务绑定配置已更新")
+            showToast(getString(R.string.worker_service_bindings_updated))
         }
     }
     
@@ -1076,14 +1076,14 @@ class WorkerFragment : Fragment() {
     private fun showConfigVariablesDialog(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在加载...")
-            .setMessage("正在获取当前环境变量配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_env_fetching_vars)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1096,7 +1096,7 @@ class WorkerFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogScriptVariablesBinding.inflate(layoutInflater)
                 
                 // Setup title
-                dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+                dialogBinding.scriptNameText.text = getString(R.string.worker_script_name_label, script.id)
                 
                 // Temporary list for variables (name, value, type)
                 val tempVariables = mutableListOf<Triple<String, String, String>>()
@@ -1143,10 +1143,10 @@ class WorkerFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         applyVariablesToScript(script, tempVariables)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -1175,18 +1175,18 @@ class WorkerFragment : Fragment() {
         
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("添加") { _, _ ->
+            .setPositiveButton(R.string.add) { _, _ ->
                 val name = dialogBinding.variableNameEdit.text.toString().trim()
                 val value = dialogBinding.variableValueEdit.text.toString().trim()
                 val type = if (dialogBinding.typeJsonRadio.isChecked) "json" else "plain_text"
                 
                 if (name.isEmpty()) {
-                    showToast("请输入变量名称")
+                    showToast(getString(R.string.worker_env_please_enter_var_name))
                     return@setPositiveButton
                 }
                 
                 if (value.isEmpty()) {
-                    showToast("请输入变量值")
+                    showToast(getString(R.string.worker_env_please_enter_var_value))
                     return@setPositiveButton
                 }
                 
@@ -1195,16 +1195,16 @@ class WorkerFragment : Fragment() {
                     try {
                         com.google.gson.JsonParser.parseString(value)
                     } catch (e: Exception) {
-                        showToast("JSON 格式无效: ${e.message}")
+                        showToast(getString(R.string.worker_env_json_invalid_template, e.message ?: ""))
                         return@setPositiveButton
                     }
                 }
                 
                 tempVariables.add(Triple(name, value, type))
                 onAdded()
-                showToast("环境变量已添加")
+                showToast(getString(R.string.worker_env_added))
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -1226,20 +1226,20 @@ class WorkerFragment : Fragment() {
         }
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("编辑环境变量")
+            .setTitle(R.string.worker_env_edit_title)
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val name = dialogBinding.variableNameEdit.text.toString().trim()
                 val value = dialogBinding.variableValueEdit.text.toString().trim()
                 val type = if (dialogBinding.typeJsonRadio.isChecked) "json" else "plain_text"
                 
                 if (name.isEmpty()) {
-                    showToast("请输入变量名称")
+                    showToast(getString(R.string.worker_env_please_enter_var_name))
                     return@setPositiveButton
                 }
                 
                 if (value.isEmpty()) {
-                    showToast("请输入变量值")
+                    showToast(getString(R.string.worker_env_please_enter_var_value))
                     return@setPositiveButton
                 }
                 
@@ -1248,23 +1248,23 @@ class WorkerFragment : Fragment() {
                     try {
                         com.google.gson.JsonParser.parseString(value)
                     } catch (e: Exception) {
-                        showToast("JSON 格式无效: ${e.message}")
+                        showToast(getString(R.string.worker_env_json_invalid_template, e.message ?: ""))
                         return@setPositiveButton
                     }
                 }
                 
                 tempVariables[position] = Triple(name, value, type)
                 onEdited()
-                showToast("环境变量已更新")
+                showToast(getString(R.string.worker_env_updated))
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun applyVariablesToScript(script: WorkerScript, variables: List<Triple<String, String, String>>) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -1272,8 +1272,8 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新环境变量配置")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.worker_env_updating_vars)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1283,7 +1283,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("环境变量配置已更新")
+            showToast(getString(R.string.worker_env_vars_updated))
         }
     }
     
@@ -1292,14 +1292,14 @@ class WorkerFragment : Fragment() {
     private fun showConfigSecretsDialog(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在加载...")
-            .setMessage("正在获取当前机密变量配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_secret_fetching_vars)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1312,7 +1312,7 @@ class WorkerFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogScriptSecretsBinding.inflate(layoutInflater)
                 
                 // Setup title
-                dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+                dialogBinding.scriptNameText.text = getString(R.string.worker_script_name_label, script.id)
                 
                 // Temporary list for secrets (name only, values are not readable)
                 val tempSecrets = mutableListOf<Pair<String, String>>()
@@ -1358,10 +1358,10 @@ class WorkerFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         applySecretsToScript(script, tempSecrets)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -1390,25 +1390,25 @@ class WorkerFragment : Fragment() {
         
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("添加") { _, _ ->
+            .setPositiveButton(R.string.add) { _, _ ->
                 val name = dialogBinding.secretNameEdit.text.toString().trim()
                 val value = dialogBinding.secretValueEdit.text.toString().trim()
                 
                 if (name.isEmpty()) {
-                    showToast("请输入机密名称")
+                    showToast(getString(R.string.worker_secret_please_enter_name))
                     return@setPositiveButton
                 }
                 
                 if (value.isEmpty()) {
-                    showToast("请输入机密值")
+                    showToast(getString(R.string.worker_secret_please_enter_value))
                     return@setPositiveButton
                 }
                 
                 tempSecrets.add(Pair(name, value))
                 onAdded()
-                showToast("机密变量已添加")
+                showToast(getString(R.string.worker_secret_added))
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -1424,34 +1424,34 @@ class WorkerFragment : Fragment() {
         dialogBinding.secretNameEdit.setText(secret.first)
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("编辑机密变量")
+            .setTitle(R.string.worker_secret_edit_title)
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val name = dialogBinding.secretNameEdit.text.toString().trim()
                 val value = dialogBinding.secretValueEdit.text.toString().trim()
                 
                 if (name.isEmpty()) {
-                    showToast("请输入机密名称")
+                    showToast(getString(R.string.worker_secret_please_enter_name))
                     return@setPositiveButton
                 }
                 
                 if (value.isEmpty()) {
-                    showToast("请输入机密值")
+                    showToast(getString(R.string.worker_secret_please_enter_value))
                     return@setPositiveButton
                 }
                 
                 tempSecrets[position] = Pair(name, value)
                 onEdited()
-                showToast("机密变量已更新")
+                showToast(getString(R.string.worker_secret_updated))
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun applySecretsToScript(script: WorkerScript, secrets: List<Pair<String, String>>) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -1459,8 +1459,8 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新机密变量配置")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.worker_secret_updating_vars)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1470,7 +1470,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("机密变量配置已更新")
+            showToast(getString(R.string.worker_secrets_updated))
         }
     }
     
@@ -1479,14 +1479,14 @@ class WorkerFragment : Fragment() {
     private fun showWorkerRuntimeSettingsDialog(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在加载...")
-            .setMessage("正在获取当前运行时设置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_runtime_fetching_settings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1496,15 +1496,15 @@ class WorkerFragment : Fragment() {
             loadingDialog.dismiss()
             
             if (settingsResult !is com.muort.upworker.core.model.Resource.Success) {
-                val msg = (settingsResult as? com.muort.upworker.core.model.Resource.Error)?.message ?: "未知错误"
-                showToast("获取设置失败: $msg")
+                val msg = (settingsResult as? com.muort.upworker.core.model.Resource.Error)?.message ?: getString(R.string.msg_unknown_error)
+                showToast(getString(R.string.worker_settings_load_failed, msg))
                 return@runOnUiThread
             }
             
             val dialogBinding = com.muort.upworker.databinding.DialogWorkerRuntimeSettingsBinding.inflate(layoutInflater)
             
             // Setup title
-            dialogBinding.scriptNameText.text = "脚本名称: ${script.id}"
+            dialogBinding.scriptNameText.text = getString(R.string.worker_script_name_label, script.id)
             
             // Load current settings
             val settings = settingsResult.data
@@ -1529,9 +1529,9 @@ class WorkerFragment : Fragment() {
             
             // Show dialog
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("运行时设置")
+                .setTitle(R.string.worker_runtime_settings)
                 .setView(dialogBinding.root)
-                .setPositiveButton("保存") { _, _ ->
+                .setPositiveButton(R.string.save) { _, _ ->
                     val compatibilityDate = dialogBinding.compatibilityDateInput.text.toString().trim()
                         .takeIf { it.isNotEmpty() } ?: DEFAULT_COMPATIBILITY_DATE
                     val compatibilityFlags = dialogBinding.compatibilityFlagsInput.text.toString().trim()
@@ -1557,7 +1557,7 @@ class WorkerFragment : Fragment() {
                         placement = placement
                     )
                 }
-                .setNegativeButton("取消", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show()
             }
         }
@@ -1572,8 +1572,8 @@ class WorkerFragment : Fragment() {
     ) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在保存...")
-            .setMessage("正在更新运行时设置")
+            .setTitle(R.string.worker_runtime_saving_title)
+            .setMessage(R.string.worker_runtime_updating_settings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1590,9 +1590,9 @@ class WorkerFragment : Fragment() {
                 loadingDialog.dismiss()
                 when (result) {
                     is com.muort.upworker.core.model.Resource.Success ->
-                        showToast("运行时设置已更新")
+                        showToast(getString(R.string.worker_runtime_updated))
                     is com.muort.upworker.core.model.Resource.Error ->
-                        showToast("更新失败: ${result.message}")
+                        showToast(getString(R.string.worker_runtime_update_failed_template, result.message))
                     else -> {}
                 }
             }
@@ -1641,13 +1641,13 @@ class WorkerFragment : Fragment() {
     private fun showScriptHistoryDialog(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取版本历史")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_version_fetching_history)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1694,7 +1694,7 @@ class WorkerFragment : Fragment() {
                         
                         historyDialog?.show()
                     } else {
-                        showToast("暂无版本历史")
+                        showToast(getString(R.string.worker_version_no_history))
                     }
                 }
                 is Resource.Error -> {
@@ -1707,16 +1707,16 @@ class WorkerFragment : Fragment() {
     
     private fun showDeleteVersionConfirmDialog(script: WorkerScript, version: WorkerVersion) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除版本")
-            .setMessage("确定要删除版本 #${version.number} 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.delete)
+            .setMessage(getString(R.string.worker_version_delete_confirm_template, version.number))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 val account = accountViewModel.defaultAccount.value
                 if (account != null) {
                     lifecycleScope.launch {
                         val result = viewModel.deleteWorkerVersion(account, script.id, version.id)
                         when (result) {
                             is Resource.Success -> {
-                                showToast("删除成功")
+                                showToast(getString(R.string.worker_generic_delete_success))
                                 historyDialog?.dismiss()
                                 showScriptHistoryDialog(script)
                             }
@@ -1728,7 +1728,7 @@ class WorkerFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -1737,13 +1737,13 @@ class WorkerFragment : Fragment() {
     private fun showWorkerLogs(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
 
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在创建日志通道")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_logs_creating_channel)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1767,13 +1767,13 @@ class WorkerFragment : Fragment() {
     private fun showBuildTriggersDialog(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
 
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取触发器列表")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_triggers_fetching_list)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1864,7 +1864,7 @@ class WorkerFragment : Fragment() {
             val cron = cronEditText.text?.toString()?.trim() ?: ""
 
             if (cron.isEmpty()) {
-                showToast("请输入Cron表达式")
+                showToast(getString(R.string.worker_trigger_please_enter_cron))
                 return@setOnClickListener
             }
 
@@ -1883,7 +1883,7 @@ class WorkerFragment : Fragment() {
                     
                     when (result) {
                         is Resource.Success -> {
-                            showToast("创建成功")
+                            showToast(getString(R.string.worker_trigger_create_success))
                             dialog.dismiss()
                             triggersDialog?.dismiss()
                             showBuildTriggersDialog(script)
@@ -1906,9 +1906,9 @@ class WorkerFragment : Fragment() {
 
     private fun showDeleteTriggerConfirmDialog(script: WorkerScript, schedule: com.muort.upworker.core.model.Schedule) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除触发器")
-            .setMessage("确定要删除触发器 \"${schedule.cron}\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.delete)
+            .setMessage(getString(R.string.worker_trigger_delete_confirm_template, schedule.cron))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 val account = accountViewModel.defaultAccount.value
                 if (account != null) {
                     lifecycleScope.launch {
@@ -1920,7 +1920,7 @@ class WorkerFragment : Fragment() {
                             val result = viewModel.updateSchedules(account, script.id, currentCronList)
                             when (result) {
                                 is Resource.Success -> {
-                                    showToast("删除成功")
+                                    showToast(getString(R.string.worker_generic_delete_success))
                                     triggersDialog?.dismiss()
                                     showBuildTriggersDialog(script)
                                 }
@@ -1930,25 +1930,25 @@ class WorkerFragment : Fragment() {
                                 is Resource.Loading -> {}
                             }
                         } else {
-                            showToast("获取触发器列表失败")
+                            showToast(getString(R.string.worker_triggers_load_failed))
                         }
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun showVersionDetailDialog(script: WorkerScript, version: WorkerVersion, isRunning: Boolean) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
 
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取详情信息")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_detail_fetching_info)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1995,20 +1995,20 @@ class WorkerFragment : Fragment() {
             val accessBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.accessBtn)
             val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
 
-            titleText.text = "${script.id} - 版本详情"
+            titleText.text = getString(R.string.worker_version_detail_title_template, script.id)
             versionNumberText.text = "#${version.number}"
             versionIdText.text = version.id
             createTimeText.text = formatDate(version.metadata?.createdOn)
-            sourceText.text = version.metadata?.source ?: "未知"
+            sourceText.text = version.metadata?.source ?: getString(R.string.status_unknown)
             urlText.text = "https://${script.id}.${emailPrefix}.workers.dev"
-            authorText.text = version.metadata?.authorEmail ?: "未知"
-            authorIdText.text = version.metadata?.authorId ?: "未知"
-            hasPreviewText.text = version.metadata?.hasPreview?.let { if (it) "是" else "否" } ?: "未知"
+            authorText.text = version.metadata?.authorEmail ?: getString(R.string.status_unknown)
+            authorIdText.text = version.metadata?.authorId ?: getString(R.string.status_unknown)
+            hasPreviewText.text = version.metadata?.hasPreview?.let { if (it) getString(R.string.pages_detail_yes) else getString(R.string.pages_detail_no) } ?: getString(R.string.status_unknown)
 
             // 版本注解（workers/message, workers/triggered_by）
             val versionAnnotations = version.annotations
-            deploymentMessageText.text = versionAnnotations?.get("workers/message") ?: "无"
-            triggeredByText.text = versionAnnotations?.get("workers/triggered_by") ?: "无"
+            deploymentMessageText.text = versionAnnotations?.get("workers/message") ?: getString(R.string.status_none)
+            triggeredByText.text = versionAnnotations?.get("workers/triggered_by") ?: getString(R.string.status_none)
 
             // 查找包含当前版本的部署
             var matchedDeployment: com.muort.upworker.core.model.WorkerDeployment? = null
@@ -2030,10 +2030,10 @@ class WorkerFragment : Fragment() {
                 deploymentInfoSection.visibility = android.view.View.VISIBLE
                 deploymentIdText.text = matchedDeployment.id
                 deploymentCreatedText.text = formatDate(matchedDeployment.createdOn)
-                deploymentSourceText.text = matchedDeployment.source ?: "未知"
-                deploymentStrategyText.text = matchedDeployment.strategy ?: "未知"
-                deploymentPercentageText.text = versionPercentage?.let { "$it%" } ?: "未知"
-                deploymentAuthorText.text = matchedDeployment.authorEmail ?: "未知"
+                deploymentSourceText.text = matchedDeployment.source ?: getString(R.string.status_unknown)
+                deploymentStrategyText.text = matchedDeployment.strategy ?: getString(R.string.status_unknown)
+                deploymentPercentageText.text = versionPercentage?.let { "$it%" } ?: getString(R.string.status_unknown)
+                deploymentAuthorText.text = matchedDeployment.authorEmail ?: getString(R.string.status_unknown)
 
                 // 部署注解覆盖版本注解（如果存在）
                 matchedDeployment.annotations?.get("workers/message")?.let {
@@ -2052,7 +2052,7 @@ class WorkerFragment : Fragment() {
                     layoutParams = android.widget.LinearLayout.LayoutParams(14, 14)
                 }
                 val statusText = android.widget.TextView(requireContext()).apply {
-                    text = "运行中"
+                    text = getString(R.string.pages_detail_running)
                     textSize = 11f
                     setTextColor(resources.getColor(R.color.red_500, requireContext().theme))
                     layoutParams = android.widget.LinearLayout.LayoutParams(
@@ -2077,14 +2077,14 @@ class WorkerFragment : Fragment() {
 
             deleteBtn.setOnClickListener {
                 MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("删除版本")
-                    .setMessage("确定要删除版本 #${version.number} 吗？")
-                    .setPositiveButton("删除") { _, _ ->
+                    .setTitle(R.string.delete)
+                    .setMessage(getString(R.string.worker_version_delete_confirm_template, version.number))
+                    .setPositiveButton(R.string.delete) { _, _ ->
                         lifecycleScope.launch {
                             val result = viewModel.deleteWorkerVersion(account, script.id, version.id)
                             when (result) {
                                 is Resource.Success -> {
-                                    showToast("删除成功")
+                                    showToast(getString(R.string.worker_generic_delete_success))
                                     showScriptHistoryDialog(script)
                                 }
                                 is Resource.Error -> {
@@ -2094,7 +2094,7 @@ class WorkerFragment : Fragment() {
                             }
                         }
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
 
@@ -2113,7 +2113,7 @@ class WorkerFragment : Fragment() {
     private fun editScript(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -2125,7 +2125,7 @@ class WorkerFragment : Fragment() {
     }
     
     private fun formatDate(dateString: String?): String {
-        if (dateString == null) return "未知日期"
+        if (dateString == null) return getString(R.string.worker_detail_unknown_date)
         
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
@@ -2152,15 +2152,15 @@ class WorkerFragment : Fragment() {
     
     private fun showDeleteConfirmDialog(script: WorkerScript) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除脚本")
-            .setMessage("确定要删除 Worker 脚本 \"${script.id}\" 吗？此操作无法撤销。")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.delete)
+            .setMessage(getString(R.string.worker_script_delete_confirm_template, script.id))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 val account = accountViewModel.defaultAccount.value
                 if (account != null) {
                     viewModel.deleteWorkerScript(account, script.id)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -2198,40 +2198,40 @@ class WorkerFragment : Fragment() {
             resources.getIdentifier("batchDeleteBtn", "id", requireContext().packageName)
         )
         
-        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "管理脚本"
+        toggleSelectionBtn?.text = if (isSelectionMode) getString(R.string.cancel) else getString(R.string.worker_manage_scripts)
         selectionActionsLayout?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
-        selectionStatusText?.text = "已选择 ${selectedScripts.size} 个脚本"
+        selectionStatusText?.text = resources.getQuantityString(R.plurals.worker_selected_scripts, selectedScripts.size, selectedScripts.size)
         batchDeleteBtn?.isEnabled = selectedScripts.isNotEmpty()
     }
     
     private fun showBatchDeleteConfirmDialog() {
         val message = if (selectedScripts.size == 1) {
-            "确定要删除 1 个脚本吗？\n\n${selectedScripts.first()}\n\n此操作无法撤销。"
+            getString(R.string.worker_batch_delete_confirm_single_template, selectedScripts.first())
         } else {
-            "确定要删除 ${selectedScripts.size} 个脚本吗？此操作无法撤销。"
+            getString(R.string.worker_batch_delete_confirm_multi_template, selectedScripts.size)
         }
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("批量删除脚本")
+            .setTitle(R.string.worker_batch_delete_title)
             .setMessage(message)
-            .setPositiveButton("删除") { _, _ ->
+            .setPositiveButton(R.string.delete) { _, _ ->
                 performBatchDelete()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun performBatchDelete() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
         val scriptsToDelete = selectedScripts.toList()
         val progressDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除中...")
-            .setMessage("正在删除 ${scriptsToDelete.size} 个脚本")
+            .setTitle(R.string.worker_generic_deleting_title)
+            .setMessage(getString(R.string.worker_batch_deleting_message_template, scriptsToDelete.size))
             .setCancelable(false)
             .create()
         progressDialog.show()
@@ -2258,9 +2258,9 @@ class WorkerFragment : Fragment() {
             updateSelectionUI()
             
             val message = if (failedCount == 0) {
-                "成功删除 $deletedCount 个脚本"
+                getString(R.string.worker_batch_delete_success_template, deletedCount)
             } else {
-                "删除了 $deletedCount 个脚本，$failedCount 个失败"
+                getString(R.string.worker_batch_delete_mixed_template, deletedCount, failedCount)
             }
             showToast(message)
             
@@ -2330,7 +2330,7 @@ class WorkerFragment : Fragment() {
                 
                 launch {
                     viewModel.message.collect { message ->
-                        showToast(message)
+                        showToast(message.asString(requireContext()))
                     }
                 }
                 
@@ -2364,7 +2364,7 @@ class WorkerFragment : Fragment() {
         val scripts = viewModel.scripts.value
         
         if (scripts.isEmpty()) {
-            showToast("暂无脚本")
+            showToast(getString(R.string.worker_generic_no_scripts))
             return
         }
         
@@ -2382,7 +2382,7 @@ class WorkerFragment : Fragment() {
         
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("开始清理") { _, _ ->
+            .setPositiveButton(R.string.worker_cleanup_start_button) { _, _ ->
                 val retainCount = dialogBinding.retainCountEdit.text.toString().trim().toIntOrNull() ?: 10
                 
                 if (dialogBinding.cleanupAllProjectsRadio.isChecked) {
@@ -2390,35 +2390,35 @@ class WorkerFragment : Fragment() {
                 } else {
                     val selectedScriptName = dialogBinding.projectSpinner.selectedItem?.toString()
                     if (selectedScriptName.isNullOrEmpty()) {
-                        showToast("请选择脚本")
+                        showToast(getString(R.string.worker_cleanup_please_select_script))
                         return@setPositiveButton
                     }
                     showCleanupConfirmDialog(false, selectedScriptName, retainCount)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun showCleanupConfirmDialog(isAllScripts: Boolean, scriptName: String?, retainCount: Int) {
         val account = accountViewModel.defaultAccount.value ?: return
         
-        val title = if (isAllScripts) "清理所有脚本的旧版本" else "清理脚本 \"$scriptName\" 的旧版本"
+        val title = if (isAllScripts) getString(R.string.worker_cleanup_all_title) else getString(R.string.worker_cleanup_script_title_template, scriptName ?: "")
         val message = if (isAllScripts) {
-            "将清理账号下所有 Worker 脚本的旧版本，每个脚本保留最新 $retainCount 个版本。\n\n此操作不可撤销，确定继续吗？"
+            getString(R.string.worker_cleanup_all_message_template, retainCount)
         } else {
-            "将清理脚本 \"$scriptName\" 的旧版本，保留最新 $retainCount 个版本。\n\n此操作不可撤销，确定继续吗？"
+            getString(R.string.worker_cleanup_script_message_template, scriptName ?: "", retainCount)
         }
         
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("确定清理") { dialog, _ ->
+            .setPositiveButton(R.string.worker_cleanup_confirm_button) { dialog, _ ->
                 dialog.dismiss()
                 
                 val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("正在清理")
-                    .setMessage("正在清理旧版本，请稍候...")
+                    .setTitle(R.string.worker_cleanup_in_progress_title)
+                    .setMessage(R.string.worker_cleanup_in_progress_message)
                     .setCancelable(false)
                     .show()
                 
@@ -2440,7 +2440,7 @@ class WorkerFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -2449,27 +2449,27 @@ class WorkerFragment : Fragment() {
         val totalScripts = results.size
         
         val resultBuilder = StringBuilder()
-        resultBuilder.append("清理结果：\n\n")
+        resultBuilder.append(getString(R.string.worker_cleanup_result_header))
         
         results.forEach { result ->
             if (result.success) {
                 val status = if (result.deletedCount > 0) {
-                    "成功清理 ${result.deletedCount} 个旧版本"
+                    getString(R.string.worker_cleanup_script_success_template, result.deletedCount)
                 } else {
-                    "无需清理（当前 ${result.totalVersions} 个版本 ≤ 保留数量）"
+                    getString(R.string.worker_cleanup_script_no_need_template, result.totalVersions)
                 }
-                resultBuilder.append("• ${result.scriptName}: $status\n")
+                resultBuilder.append(getString(R.string.worker_cleanup_script_line_template, result.scriptName, status)).append("\n")
             } else {
-                resultBuilder.append("• ${result.scriptName}: 失败 - ${result.errorMessage}\n")
+                resultBuilder.append(getString(R.string.worker_cleanup_script_failed_line_template, result.scriptName, result.errorMessage ?: "")).append("\n")
             }
         }
         
-        resultBuilder.append("\n总计：处理 $totalScripts 个脚本，成功清理 $totalDeleted 个旧版本")
+        resultBuilder.append(getString(R.string.worker_cleanup_total_summary_template, totalScripts, totalDeleted))
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("清理完成")
+            .setTitle(R.string.worker_cleanup_finished_title)
             .setMessage(resultBuilder.toString())
-            .setPositiveButton("关闭", null)
+            .setPositiveButton(R.string.dialog_close, null)
             .show()
     }
     
@@ -2639,7 +2639,7 @@ class WorkerScriptsAdapter(
         }
         
         private fun formatSize(size: Long?): String {
-            if (size == null || size <= 0) return "未知大小"
+            if (size == null || size <= 0) return binding.root.context.getString(R.string.worker_detail_unknown_size)
             
             return when {
                 size < 1024 -> "${size}B"
@@ -2650,7 +2650,7 @@ class WorkerScriptsAdapter(
         }
         
         private fun formatDate(dateString: String?): String {
-            if (dateString == null) return "未知日期"
+            if (dateString == null) return binding.root.context.getString(R.string.worker_detail_unknown_date)
             
             return try {
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
@@ -2746,7 +2746,7 @@ class R2BindingsAdapter(
         
         fun bind(r2Binding: Pair<String, String>, position: Int) {
             binding.bindingNameText.text = r2Binding.first
-            binding.bucketNameText.text = "Bucket: ${r2Binding.second}"
+            binding.bucketNameText.text = binding.root.context.getString(R.string.worker_binding_bucket_label_template, r2Binding.second)
             
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(position)
@@ -2789,7 +2789,11 @@ class VariablesAdapter(
         fun bind(variable: Triple<String, String, String>, position: Int) {
             binding.variableNameText.text = variable.first
             binding.variableValueText.text = variable.second
-            binding.variableTypeText.text = if (variable.third == "json") "[JSON]" else "[文本]"
+            binding.variableTypeText.text = if (variable.third == "json") {
+                binding.root.context.getString(R.string.worker_var_type_json)
+            } else {
+                binding.root.context.getString(R.string.worker_var_type_text)
+            }
             
             binding.editVariableBtn.setOnClickListener {
                 onEditClick(position)

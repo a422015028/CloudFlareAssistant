@@ -31,7 +31,7 @@
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
                     android:textSize="16sp"
-                    android:text="路由模式" />
+                    android:text="@string/xml_item_route" />
 
                 <TextView
                     android:id="@+id/routeScriptText"
@@ -40,7 +40,7 @@
                     android:textSize="12sp"
                     android:textColor="?attr/colorPrimary"
                     android:layout_marginTop="4dp"
-                    android:text="Worker 脚本" />
+                    android:text="@string/domain_worker_script" />
 
             </LinearLayout>
 
@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_menu_more"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="更多操作" />
+                android:contentDescription="@string/account_more_actions" />
 
         </LinearLayout>
 

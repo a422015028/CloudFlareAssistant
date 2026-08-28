@@ -56,7 +56,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="短ID:"
+                        android:text="@string/xml_dialog_pages_deployment_detail"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -74,7 +74,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="项目:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_2"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -92,7 +92,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="环境:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_3"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -128,7 +128,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="状态:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_4"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <LinearLayout
@@ -152,7 +152,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="阶段:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_5"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -170,7 +170,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="创建时间:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_6"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -188,7 +188,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="修改时间:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_7"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -206,7 +206,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="触发类型:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_8"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -224,7 +224,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="分支:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_9"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -242,7 +242,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="提交哈希:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_10"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -260,7 +260,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="提交信息:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_11"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -278,7 +278,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="项目ID:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_12"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -296,7 +296,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="别名:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_13"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -314,7 +314,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="是否跳过:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_14"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -332,7 +332,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="使用函数:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_15"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -350,7 +350,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="提交修改:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_16"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -368,7 +368,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="构建命令:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_17"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -386,7 +386,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="输出目录:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_18"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -404,7 +404,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="根目录:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_19"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -422,7 +422,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="源码类型:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_20"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -440,7 +440,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="仓库:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_21"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -460,7 +460,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="阶段详情"
+                    android:text="@string/xml_dialog_pages_deployment_detail_22"
                     android:textSize="14sp"
                     android:textStyle="bold"/>
 
@@ -472,7 +472,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="阶段名称:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_23"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -490,7 +490,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="阶段状态:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_24"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -508,7 +508,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="阶段开始:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_25"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -526,7 +526,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="阶段结束:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_26"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -545,7 +545,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="所有阶段:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_27"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <LinearLayout
@@ -566,7 +566,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="构建配置"
+                    android:text="@string/xml_dialog_pages_deployment_detail_28"
                     android:textSize="14sp"
                     android:textStyle="bold"/>
 
@@ -578,7 +578,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="构建缓存:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_29"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -596,7 +596,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="分析标签:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_30"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -614,7 +614,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="分析令牌:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_31"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -634,7 +634,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="源码配置"
+                    android:text="@string/xml_dialog_pages_deployment_detail_32"
                     android:textSize="14sp"
                     android:textStyle="bold"/>
 
@@ -646,7 +646,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="所有者ID:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_33"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -664,7 +664,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="仓库ID:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_34"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -682,7 +682,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="生产分支:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_35"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -700,7 +700,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="自动部署:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_36"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -718,7 +718,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="生产部署:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_37"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -736,7 +736,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="PR评论:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_38"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -754,7 +754,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="预览部署:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_39"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -773,7 +773,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="排除路径:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_40"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -793,7 +793,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="包含路径:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_41"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -813,7 +813,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="排除分支:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_42"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -833,7 +833,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="包含分支:"
+                        android:text="@string/xml_dialog_pages_deployment_detail_43"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -859,7 +859,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="环境变量"
+                        android:text="@string/xml_dialog_pages_deployment_detail_44"
                         android:textSize="14sp"
                         android:textStyle="bold"/>
                     <LinearLayout
@@ -887,14 +887,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="日志"/>
+            android:text="@string/xml_dialog_pages_deployment_detail_45"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/deleteBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="删除"
+            android:text="@string/delete"
             app:backgroundTint="@color/red_500"
             android:textColor="@color/white"
             android:layout_marginStart="8dp"/>
@@ -904,7 +904,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="访问"
+            android:text="@string/xml_dialog_pages_deployment_detail_46"
             app:backgroundTint="?attr/colorPrimary"
             android:textColor="@color/white"
             android:layout_marginStart="8dp"/>
@@ -914,7 +914,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="关闭"
+            android:text="@string/ssl_mode_off"
             android:layout_marginStart="8dp"/>
 
     </LinearLayout>

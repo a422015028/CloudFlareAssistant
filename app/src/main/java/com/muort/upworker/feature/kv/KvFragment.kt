@@ -110,9 +110,9 @@ class KvFragment : Fragment() {
                 launch {
                     kvViewModel.selectedNamespace.collect { namespace ->
                         binding.fabAddKey.visibility = if (namespace != null) View.VISIBLE else View.GONE
-                        binding.keyEmptyText.text = if (namespace != null) "暂无键值对\n点击 + 添加" else "请先选择命名空间"
+                        binding.keyEmptyText.text = if (namespace != null) getString(R.string.kv_no_key_yet) else getString(R.string.kv_please_select_namespace_first)
                         // 动态更新右侧标题栏，格式：键值对（namespaceName）
-                        binding.keyTitleText.text = namespace?.let { "键值对（${it.title}）" } ?: getString(R.string.kv_key_value)
+                        binding.keyTitleText.text = namespace?.let { getString(R.string.kv_key_title_with_namespace, it.title) } ?: getString(R.string.kv_key_value)
                     }
                 }
                 
@@ -143,7 +143,7 @@ class KvFragment : Fragment() {
                 
                 launch {
                     kvViewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root, message.asString(requireContext()), Snackbar.LENGTH_SHORT).show()
                     }
                 }
                 
@@ -163,26 +163,26 @@ class KvFragment : Fragment() {
         
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("创建") { _, _ ->
+            .setPositiveButton(R.string.dialog_create) { _, _ ->
                 val title = dialogBinding.namespaceTitle.text.toString()
                 accountViewModel.defaultAccount.value?.let { account ->
                     kvViewModel.createNamespace(account, title)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun showDeleteNamespaceDialog(namespace: KvNamespace) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除命名空间")
-            .setMessage("确定要删除命名空间 \"${namespace.title}\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.kv_delete_namespace_title)
+            .setMessage(getString(R.string.kv_delete_namespace_message, namespace.title))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     kvViewModel.deleteNamespace(account, namespace.id)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -191,7 +191,7 @@ class KvFragment : Fragment() {
         
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val keyName = dialogBinding.keyName.text.toString()
                 val keyValue = dialogBinding.keyValue.text.toString()
                 
@@ -201,7 +201,7 @@ class KvFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -212,9 +212,9 @@ class KvFragment : Fragment() {
         dialogBinding.keyValue.setText(key.value ?: "")
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("编辑键值对")
+            .setTitle(R.string.kv_edit_key_title)
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val keyValue = dialogBinding.keyValue.text.toString()
                 accountViewModel.defaultAccount.value?.let { account ->
                     kvViewModel.selectedNamespace.value?.let { namespace ->
@@ -222,22 +222,22 @@ class KvFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun showDeleteKeyDialog(key: KvKey) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除键值对")
-            .setMessage("确定要删除键 \"${key.name}\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.kv_delete_key_title)
+            .setMessage(getString(R.string.kv_delete_key_message, key.name))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     kvViewModel.selectedNamespace.value?.let { namespace ->
                         kvViewModel.deleteValue(account, namespace.id, key.name)
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -336,7 +336,8 @@ class KvFragment : Fragment() {
             
             fun bind(key: KvKey) {
                 binding.keyNameText.text = key.name
-                binding.keyMetadataText.text = key.value?.let { "值: $it" } ?: "加载中..."
+                val ctx = binding.root.context
+                binding.keyMetadataText.text = key.value?.let { ctx.getString(R.string.kv_value_label, it) } ?: ctx.getString(R.string.kv_value_loading)
                 
                 binding.root.setOnClickListener {
                     onKeyClick(key)

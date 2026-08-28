@@ -1,9 +1,12 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -16,6 +19,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class TokenRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi
 ) {
 
@@ -37,7 +41,7 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result ?: emptyList())
                 } else {
-                    Resource.Error("获取令牌列表失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_list_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -55,9 +59,9 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     response.body()?.result?.let {
                         Resource.Success(it)
-                    } ?: Resource.Error("获取令牌详情失败: 无返回数据")
+                    } ?: Resource.Error(appContext.getString(R.string.repo_token_detail_no_result))
                 } else {
-                    Resource.Error("获取令牌详情失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_detail_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -97,9 +101,9 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     response.body()?.result?.let {
                         Resource.Success(it)
-                    } ?: Resource.Error("验证失败: 无返回数据")
+                    } ?: Resource.Error(appContext.getString(R.string.repo_token_verify_no_result))
                 } else {
-                    Resource.Error("验证失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_verify_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -116,7 +120,7 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result ?: emptyList())
                 } else {
-                    Resource.Error("获取权限组失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_pg_list_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -137,7 +141,7 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result ?: emptyList())
                 } else {
-                    Resource.Error("获取账户级权限组失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_account_pg_list_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -155,7 +159,7 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true && !uid.isNullOrBlank()) {
                     Resource.Success(uid)
                 } else {
-                    Resource.Error("获取用户信息失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_user_info_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -176,9 +180,9 @@ class TokenRepository @Inject constructor(
                 response.body()?.result?.let {
                     Timber.d("Token created: ${it.id}")
                     Resource.Success(it)
-                } ?: Resource.Error("创建成功但无返回数据")
+                } ?: Resource.Error(appContext.getString(R.string.repo_generic_create_no_result))
             } else {
-                Resource.Error("创建令牌失败: ${errorMessage(response)}")
+                Resource.Error(appContext.getString(R.string.repo_token_create_failed_format, errorMessage(response)))
             }
         }
     }
@@ -200,9 +204,9 @@ class TokenRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("更新成功但无返回数据")
+                } ?: Resource.Error(appContext.getString(R.string.repo_generic_update_no_result))
             } else {
-                Resource.Error("更新令牌失败: ${errorMessage(response)}")
+                Resource.Error(appContext.getString(R.string.repo_token_update_failed_format, errorMessage(response)))
             }
         }
     }
@@ -220,7 +224,7 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(Unit)
                 } else {
-                    Resource.Error("删除令牌失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_delete_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -244,9 +248,9 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     response.body()?.result?.let {
                         Resource.Success(it)
-                    } ?: Resource.Error("更换成功但未返回新令牌值")
+                    } ?: Resource.Error(appContext.getString(R.string.repo_token_roll_no_result))
                 } else {
-                    Resource.Error("更换令牌失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_roll_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -269,9 +273,9 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     response.body()?.result?.let {
                         Resource.Success(it)
-                    } ?: Resource.Error("更换成功但未返回新令牌值")
+                    } ?: Resource.Error(appContext.getString(R.string.repo_token_roll_no_result))
                 } else {
-                    Resource.Error("更换令牌失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_roll_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -292,7 +296,7 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result ?: emptyList())
                 } else {
-                    Resource.Error("获取账户级令牌列表失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_account_list_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -311,9 +315,9 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     response.body()?.result?.let {
                         Resource.Success(it)
-                    } ?: Resource.Error("获取令牌详情失败: 无返回数据")
+                    } ?: Resource.Error(appContext.getString(R.string.repo_token_detail_no_result))
                 } else {
-                    Resource.Error("获取令牌详情失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_detail_failed_format, errorMessage(response)))
                 }
             }
         }
@@ -335,9 +339,9 @@ class TokenRepository @Inject constructor(
                 response.body()?.result?.let {
                     Timber.d("Account token created: ${it.id}")
                     Resource.Success(it)
-                } ?: Resource.Error("创建成功但无返回数据")
+                } ?: Resource.Error(appContext.getString(R.string.repo_generic_create_no_result))
             } else {
-                Resource.Error("创建账户级令牌失败: ${errorMessage(response)}")
+                Resource.Error(appContext.getString(R.string.repo_token_account_create_failed_format, errorMessage(response)))
             }
         }
     }
@@ -360,9 +364,9 @@ class TokenRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("更新成功但无返回数据")
+                } ?: Resource.Error(appContext.getString(R.string.repo_generic_update_no_result))
             } else {
-                Resource.Error("更新账户级令牌失败: ${errorMessage(response)}")
+                Resource.Error(appContext.getString(R.string.repo_token_account_update_failed_format, errorMessage(response)))
             }
         }
     }
@@ -381,7 +385,7 @@ class TokenRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(Unit)
                 } else {
-                    Resource.Error("删除账户级令牌失败: ${errorMessage(response)}")
+                    Resource.Error(appContext.getString(R.string.repo_token_account_delete_failed_format, errorMessage(response)))
                 }
             }
         }

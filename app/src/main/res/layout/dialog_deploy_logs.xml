@@ -65,7 +65,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:text="部署中"
+                android:text="@string/xml_dialog_deploy_logs"
                 android:textColor="@color/red_500"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -110,7 +110,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="复制日志"
+            android:text="@string/xml_dialog_deploy_logs_2"
             app:icon="@drawable/ic_content_copy"
             app:iconGravity="textStart" />
 
@@ -122,7 +122,7 @@
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:enabled="false"
-            android:text="关闭" />
+            android:text="@string/ssl_mode_off" />
 
     </LinearLayout>
 

@@ -2,8 +2,10 @@ package com.muort.upworker.feature.zone
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.model.WafRule
 import com.muort.upworker.core.model.WafRuleCreate
 import com.muort.upworker.core.model.WafRuleset
@@ -56,7 +58,7 @@ class ZoneRulesetViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     Timber.e("load ruleset error: ${result.message}")
-                    _state.update { it.copy(isLoading = false, error = result.message) }
+                    _state.update { it.copy(isLoading = false, error = UiMessage.RawString(result.message)) }
                 }
                 is Resource.Loading -> {}
             }
@@ -98,7 +100,7 @@ class ZoneRulesetViewModel @Inject constructor(
     }
 
     /** 新建规则：Zone 没有规则集时先 PUT entrypoint 建集，否则 POST 追加。 */
-    fun addRule(account: Account, zoneId: String, rule: WafRuleCreate, onDone: (Boolean, String?) -> Unit) {
+    fun addRule(account: Account, zoneId: String, rule: WafRuleCreate, onDone: (Boolean, UiMessage?) -> Unit) {
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
             val result = if (hasEntrypoint) {
@@ -116,7 +118,7 @@ class ZoneRulesetViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     _state.update { it.copy(isSaving = false) }
-                    onDone(false, result.message)
+                    onDone(false, UiMessage.RawString(result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -124,9 +126,9 @@ class ZoneRulesetViewModel @Inject constructor(
     }
 
     /** 编辑既有规则（整条 PATCH：动作 / 表达式 / 名称 / 启用）。 */
-    fun updateRule(account: Account, zoneId: String, ruleId: String, rule: WafRuleCreate, onDone: (Boolean, String?) -> Unit) {
+    fun updateRule(account: Account, zoneId: String, ruleId: String, rule: WafRuleCreate, onDone: (Boolean, UiMessage?) -> Unit) {
         val rsId = rulesetId.ifBlank {
-            onDone(false, "规则集未初始化")
+            onDone(false, UiMessage.of(R.string.vm_msg_zone_ruleset_not_initialized))
             return
         }
         viewModelScope.launch {
@@ -140,7 +142,7 @@ class ZoneRulesetViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     _state.update { it.copy(isSaving = false) }
-                    onDone(false, result.message)
+                    onDone(false, UiMessage.RawString(result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -151,6 +153,6 @@ class ZoneRulesetViewModel @Inject constructor(
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val rules: List<WafRule> = emptyList(),
-        val error: String? = null,
+        val error: UiMessage? = null,
     )
 }

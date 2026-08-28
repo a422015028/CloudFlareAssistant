@@ -1,10 +1,13 @@
 package com.muort.upworker.core.repository
 
+import android.content.Context
 import com.google.gson.Gson
+import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.safeApiCall
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -18,6 +21,7 @@ import javax.inject.Singleton
 
 @Singleton
 class WorkerRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
     private val gson: Gson
 ) {
@@ -38,11 +42,11 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("域名更新成功但无返回结果")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_custom_domain_update_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error("更新自定义域名失败: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_custom_domain_update_failed_format, errorMsg))
             }
         }
     }
@@ -817,7 +821,7 @@ class WorkerRepository @Inject constructor(
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Failed to update secrets: Response code: ${response.code()}, Error body: $errorBody")
-                Resource.Error("更新机密失败: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_update_secrets_failed_format, errorMsg))
             }
         }
     }
@@ -879,12 +883,12 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("更新成功但无返回数据")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_env_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Failed to update runtime settings: $errorMsg")
-                Resource.Error("更新失败: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_update_env_failed_format, errorMsg))
             }
         }
     }
@@ -936,11 +940,11 @@ class WorkerRepository @Inject constructor(
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
                 Timber.e("Failed to list versions: $errorMsg, code: ${response.code()}")
-                Resource.Error("获取版本历史失败: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_versions_failed_format, errorMsg))
             }
         } catch (e: Exception) {
             Timber.e(e, "Exception when fetching worker versions for script: $scriptName")
-            Resource.Error("获取版本历史失败: ${e.javaClass.simpleName}: ${e.message}")
+            Resource.Error(appContext.getString(R.string.repo_worker_versions_exception_format, e.javaClass.simpleName, e.message))
         }
     }
 
@@ -1018,7 +1022,7 @@ class WorkerRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error("删除版本失败: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_version_delete_failed_format, errorMsg))
             }
         }
     }
@@ -1048,11 +1052,11 @@ class WorkerRepository @Inject constructor(
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Failed to list deployments: $errorMsg, code: ${response.code()}")
-                Resource.Error("获取部署记录失败: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_deployments_failed_format, errorMsg))
             }
         } catch (e: Exception) {
             Timber.e(e, "Exception when fetching worker deployments for script: $scriptName")
-            Resource.Error("获取部署记录失败: ${e.javaClass.simpleName}: ${e.message}")
+            Resource.Error(appContext.getString(R.string.repo_worker_deployments_exception_format, e.javaClass.simpleName, e.message))
         }
     }
 
@@ -1078,16 +1082,16 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("未返回部署详情")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_deployment_detail_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Failed to get deployment: $errorMsg, code: ${response.code()}")
-                Resource.Error("获取部署详情失败: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_deployment_detail_failed_format, errorMsg))
             }
         } catch (e: Exception) {
             Timber.e(e, "Exception when fetching worker deployment: $scriptName/$deploymentId")
-            Resource.Error("获取部署详情失败: ${e.javaClass.simpleName}: ${e.message}")
+            Resource.Error(appContext.getString(R.string.repo_worker_deployment_detail_exception_format, e.javaClass.simpleName, e.message))
         }
     }
 
@@ -1302,7 +1306,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error("获取日志通道失败: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_worker_log_channel_failed_format, errorMsg))
                 }
             }
         }
@@ -1337,11 +1341,11 @@ class WorkerRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     response.body()?.result?.let {
                         Resource.Success(it)
-                    } ?: Resource.Error("创建日志通道失败: 无返回结果")
+                    } ?: Resource.Error(appContext.getString(R.string.repo_worker_log_channel_create_no_result))
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error("创建日志通道失败: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_worker_log_channel_create_failed_format, errorMsg))
                 }
             }
         }
@@ -1363,7 +1367,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error("删除日志通道失败: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_worker_log_channel_delete_failed_format, errorMsg))
                 }
             }
         }
@@ -1384,7 +1388,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error("获取触发器列表失败: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_worker_trigger_list_failed_format, errorMsg))
                 }
             }
         }
@@ -1407,7 +1411,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error("更新触发器失败: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_worker_trigger_update_failed_format, errorMsg))
                 }
             }
         }

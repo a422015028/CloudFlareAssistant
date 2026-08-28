@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:hint="组名称"
+            android:hint="@string/xml_dialog_group_edit_hint"
             app:endIconMode="clear_text">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -54,7 +54,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="包含规则 (Include)"
+                        android:text="@string/xml_dialog_group_edit"
                         android:textStyle="bold"
                         android:textSize="14sp" />
 
@@ -63,7 +63,7 @@
                         style="@style/Widget.Material3.Button.TextButton.Icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="添加"
+                        android:text="@string/add"
                         app:icon="@android:drawable/ic_input_add" />
 
                 </LinearLayout>
@@ -80,7 +80,7 @@
                     android:id="@+id/noIncludeRulesText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="至少需要一条包含规则"
+                    android:text="@string/msg_group_need_include_rule"
                     android:textColor="?attr/colorError"
                     android:textSize="12sp"
                     android:visibility="visible" />
@@ -114,7 +114,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="排除规则 (Exclude)"
+                        android:text="@string/xml_dialog_group_edit_2"
                         android:textStyle="bold"
                         android:textSize="14sp" />
 
@@ -123,7 +123,7 @@
                         style="@style/Widget.Material3.Button.TextButton.Icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="添加"
+                        android:text="@string/add"
                         app:icon="@android:drawable/ic_input_add" />
 
                 </LinearLayout>
@@ -140,7 +140,7 @@
                     android:id="@+id/noExcludeRulesText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="无排除规则（可选）"
+                    android:text="@string/xml_dialog_group_edit_3"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp"
                     android:visibility="visible" />
@@ -174,7 +174,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="必需规则 (Require)"
+                        android:text="@string/xml_dialog_group_edit_4"
                         android:textStyle="bold"
                         android:textSize="14sp" />
 
@@ -183,7 +183,7 @@
                         style="@style/Widget.Material3.Button.TextButton.Icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="添加"
+                        android:text="@string/add"
                         app:icon="@android:drawable/ic_input_add" />
 
                 </LinearLayout>
@@ -200,7 +200,7 @@
                     android:id="@+id/noRequireRulesText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="无必需规则（可选）"
+                    android:text="@string/xml_dialog_group_edit_5"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp"
                     android:visibility="visible" />
@@ -214,7 +214,7 @@
             android:id="@+id/isDefaultSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="设为默认组" />
+            android:text="@string/xml_dialog_group_edit_6" />
 
     </LinearLayout>
 

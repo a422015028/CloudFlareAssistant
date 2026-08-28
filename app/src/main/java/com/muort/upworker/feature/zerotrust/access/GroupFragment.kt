@@ -91,14 +91,14 @@ class GroupFragment : Fragment() {
                 // Messages
                 launch {
                     viewModel.message.collect { message ->
-                        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(requireContext(), message.asString(requireContext()), android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
 
                 // Errors
                 launch {
                     viewModel.error.collect { error ->
-                        android.widget.Toast.makeText(requireContext(), error, android.widget.Toast.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(requireContext(), error.asString(requireContext()), android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -108,7 +108,7 @@ class GroupFragment : Fragment() {
     private fun loadGroups() {
         val account = accountViewModel.defaultAccount.value
                 if (account == null) {
-            android.widget.Toast.makeText(requireContext(), "未选择账户", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), R.string.msg_no_account_selected, android.widget.Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -183,17 +183,17 @@ class GroupFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("创建 Access 组")
+            .setTitle(R.string.zt_group_create_title)
             .setView(dialogView)
-            .setPositiveButton("创建") { _, _ ->
+            .setPositiveButton(R.string.dialog_create) { _, _ ->
                 val name = nameInput?.text?.toString()
                 if (name.isNullOrBlank()) {
-                    android.widget.Toast.makeText(requireContext(), "请输入组名称", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), R.string.msg_group_name_empty, android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
                 if (includeRules.isEmpty()) {
-                    android.widget.Toast.makeText(requireContext(), "至少需要一条包含规则", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), R.string.msg_group_need_include_rule, android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -207,7 +207,7 @@ class GroupFragment : Fragment() {
 
                 viewModel.createGroup(account, request)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -290,17 +290,17 @@ class GroupFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("编辑 Access 组")
+            .setTitle(R.string.zt_group_edit_title)
             .setView(dialogView)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val name = nameInput?.text?.toString()
                 if (name.isNullOrBlank()) {
-                    android.widget.Toast.makeText(requireContext(), "请输入组名称", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), R.string.msg_group_name_empty, android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
                 if (includeRules.isEmpty()) {
-                    android.widget.Toast.makeText(requireContext(), "至少需要一条包含规则", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(requireContext(), R.string.msg_group_need_include_rule, android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
@@ -314,18 +314,18 @@ class GroupFragment : Fragment() {
 
                 viewModel.updateGroup(account, group.id, request)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun confirmDeleteGroup(groupId: String, groupName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除组")
-            .setMessage("确定要删除组 \"$groupName\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.zt_group_delete_title)
+            .setMessage(getString(R.string.zt_group_delete_confirm, groupName))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 deleteGroup(groupId)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 

@@ -4,12 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.CacheActionParameters
-import com.muort.upworker.core.model.CacheBrowserTTL
-import com.muort.upworker.core.model.CacheEdgeTTL
 import com.muort.upworker.core.model.CacheRule
 import com.muort.upworker.core.model.CacheRuleCreate
 import com.muort.upworker.core.model.CacheRuleset
 import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.repository.ZoneRulesetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,7 +47,7 @@ class CacheRulesViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     Timber.e("load cache ruleset error: ${result.message}")
-                    _state.update { it.copy(isLoading = false, error = result.message) }
+                    _state.update { it.copy(isLoading = false, error = UiMessage.RawString(result.message)) }
                 }
                 is Resource.Loading -> {}
             }
@@ -97,7 +96,7 @@ class CacheRulesViewModel @Inject constructor(
         description: String?,
         enabled: Boolean,
         params: CacheActionParameters,
-        onDone: (Boolean, String?) -> Unit,
+        onDone: (Boolean, UiMessage?) -> Unit,
     ) {
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
@@ -126,7 +125,7 @@ class CacheRulesViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     _state.update { it.copy(isSaving = false) }
-                    onDone(false, result.message)
+                    onDone(false, UiMessage.RawString(result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -137,6 +136,6 @@ class CacheRulesViewModel @Inject constructor(
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val rules: List<CacheRule> = emptyList(),
-        val error: String? = null,
+        val error: UiMessage? = null,
     )
 }

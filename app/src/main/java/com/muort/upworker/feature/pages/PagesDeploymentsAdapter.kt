@@ -28,26 +28,27 @@ class PagesDeploymentsAdapter(
         private val retryBtn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.retryBtn)
 
         fun bind(deployment: PagesDeployment, position: Int) {
+            val context = itemView.context
             val status = deployment.latestStage?.status ?: "unknown"
             val statusText = when (status.lowercase()) {
-                "success" -> "成功"
-                "failed", "failure" -> "失败"
+                "success" -> context.getString(R.string.status_success)
+                "failed", "failure" -> context.getString(R.string.status_failed)
                 else -> status
             }
             val shortId = deployment.shortId ?: deployment.id.take(8)
             val time = formatDate(deployment.createdOn)
-            
+
             deploymentInfoText.text = "#${deployments.size - position} - $shortId ($statusText)"
             deploymentTimeText.text = time
-            
+
             val triggerType = deployment.deploymentTrigger?.type ?: "unknown"
             val sourceText = when (triggerType.lowercase()) {
-                "api" -> "来源: api"
-                "dash" -> "来源: dash"
-                "wrangler" -> "来源: wrangler"
-                "github" -> "来源: github"
-                "gitlab" -> "来源: gitlab"
-                else -> "来源: $triggerType"
+                "api" -> context.getString(R.string.pages_source_api)
+                "dash" -> context.getString(R.string.pages_source_dash)
+                "wrangler" -> context.getString(R.string.pages_source_wrangler)
+                "github" -> context.getString(R.string.pages_source_github)
+                "gitlab" -> context.getString(R.string.pages_source_gitlab)
+                else -> context.getString(R.string.pages_source_other, triggerType)
             }
             deploymentSourceText.text = sourceText
 

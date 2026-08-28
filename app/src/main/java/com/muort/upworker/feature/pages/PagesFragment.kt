@@ -154,7 +154,7 @@ class PagesFragment : Fragment() {
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to handle selected file")
-            showToast("文件处理失败: ${e.message}")
+            showToast(getString(R.string.msg_file_process_failed, e.message ?: "null"))
         }
     }
     
@@ -279,9 +279,9 @@ class PagesFragment : Fragment() {
             resources.getIdentifier("pagesBatchDeleteBtn", "id", requireContext().packageName)
         )
         
-        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "管理项目"
+        toggleSelectionBtn?.text = if (isSelectionMode) getString(R.string.cancel) else getString(R.string.pages_manage_projects)
         selectionActionsLayout?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
-        selectionStatusText?.text = "已选择 ${selectedProjects.size} 个项目"
+        selectionStatusText?.text = resources.getQuantityString(R.plurals.pages_selected_projects, selectedProjects.size, selectedProjects.size)
         batchDeleteBtn?.isEnabled = selectedProjects.isNotEmpty()
         
         toggleSelectionBtn?.setOnClickListener {
@@ -303,8 +303,8 @@ class PagesFragment : Fragment() {
 
     private fun showPagesRuntimeSettingsDialog(account: Account, project: PagesProject) {
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中")
-            .setMessage("正在获取当前运行时设置...")
+            .setTitle(R.string.dialog_loading)
+            .setMessage(R.string.pages_fetching_runtime_settings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -313,8 +313,8 @@ class PagesFragment : Fragment() {
             requireActivity().runOnUiThread {
                 loadingDialog.dismiss()
                 if (result !is Resource.Success) {
-                    val msg = (result as? Resource.Error)?.message ?: "未知错误"
-                    showToast("获取设置失败: $msg")
+                    val msg = (result as? Resource.Error)?.message ?: getString(R.string.msg_unknown_error)
+                    showToast(getString(R.string.pages_get_settings_failed, msg))
                     return@runOnUiThread
                 }
                 showPagesRuntimeSettingsForm(account, project, result.data)
@@ -329,7 +329,7 @@ class PagesFragment : Fragment() {
     ) {
         val dialogBinding = DialogPagesRuntimeSettingsBinding.inflate(layoutInflater)
 
-        dialogBinding.projectNameText.text = "项目名称: ${project.name}"
+        dialogBinding.projectNameText.text = getString(R.string.pages_project_name_label, project.name)
 
         // 读取当前生产环境配置（回显）
         val envConfig = detail.deploymentConfigs?.production
@@ -358,9 +358,9 @@ class PagesFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("运行时设置")
+            .setTitle(R.string.worker_runtime_settings)
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val compatibilityDate = dialogBinding.compatibilityDateInput.text.toString().trim()
                     .takeIf { it.isNotEmpty() } ?: "2025-01-01"
                 val compatibilityFlags = dialogBinding.compatibilityFlagsInput.text.toString().trim()
@@ -370,7 +370,8 @@ class PagesFragment : Fragment() {
                 val placement = if (dialogBinding.placementModeGroup.checkedRadioButtonId == R.id.placementSmart) Placement(mode = "smart") else null
 
                 // 保存时：环境选择仅用于回显提示，Cloudflare Pages API 会同时更新生产+预览
-                showToast("正在更新 ${if (selectedEnv == "production") "生产" else "预览"}环境运行时设置...")
+                val envLabel = if (selectedEnv == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                showToast(getString(R.string.pages_updating_runtime_settings, envLabel))
 
                 pagesViewModel.updateRuntimeSettings(
                     account = account,
@@ -381,14 +382,14 @@ class PagesFragment : Fragment() {
                 ) { saveResult ->
                     requireActivity().runOnUiThread {
                         when (saveResult) {
-                            is Resource.Success -> showToast("运行时设置已更新")
-                            is Resource.Error -> showToast("更新失败: ${saveResult.message}")
+                            is Resource.Success -> showToast(getString(R.string.pages_runtime_settings_updated))
+                            is Resource.Error -> showToast(getString(R.string.msg_update_failed, saveResult.message))
                             else -> {}
                         }
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -405,20 +406,20 @@ class PagesFragment : Fragment() {
 
     private fun showProjectManagementDialog(account: Account, project: PagesProject) {
         val options = arrayOf(
-            "查看部署",
-            "环境变量 (生产)",
-            "环境变量 (预览)",
-            "机密 (生产)",
-            "机密 (预览)",
-            "KV 绑定",
-            "R2 绑定",
-            "D1 绑定",
-            "服务绑定",
-            "运行时设置"
+            getString(R.string.pages_menu_view_deployments),
+            getString(R.string.pages_menu_env_vars_prod),
+            getString(R.string.pages_menu_env_vars_preview),
+            getString(R.string.pages_menu_secrets_prod),
+            getString(R.string.pages_menu_secrets_preview),
+            getString(R.string.pages_menu_kv_bindings),
+            getString(R.string.pages_menu_r2_bindings),
+            getString(R.string.pages_menu_d1_bindings),
+            getString(R.string.pages_menu_service_bindings),
+            getString(R.string.pages_menu_runtime_settings)
         )
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("${project.name} - 项目管理")
+            .setTitle(getString(R.string.pages_project_management, project.name))
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> showDeploymentsDialogWithLoading(account, project)
@@ -433,7 +434,7 @@ class PagesFragment : Fragment() {
                     9 -> showPagesRuntimeSettingsDialog(account, project)
                 }
             }
-            .setNegativeButton("关闭", null)
+            .setNegativeButton(R.string.dialog_close, null)
             .show()
     }
 
@@ -451,8 +452,8 @@ class PagesFragment : Fragment() {
     private fun showVariablesDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取当前环境变量配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_env_fetching_vars)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -465,10 +466,11 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesVariablesBinding.inflate(layoutInflater)
 
                 // Setup title
-                dialogBinding.titleText.text = "配置 Pages 项目的环境变量"
-                dialogBinding.projectNameText.text = "项目名称: ${project.name} (${if (environment == "production") "生产" else "预览"}环境)"
-                dialogBinding.listTitleText.text = "环境变量列表"
-                dialogBinding.noVariablesText.text = "暂无环境变量"
+                dialogBinding.titleText.text = getString(R.string.pages_configure_env_vars)
+                val env = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                dialogBinding.projectNameText.text = getString(R.string.pages_project_name_with_env, project.name, env)
+                dialogBinding.listTitleText.text = getString(R.string.pages_variables_list_title)
+                dialogBinding.noVariablesText.text = getString(R.string.pages_no_variables)
 
                 // Triple<名称, 值, 类型>: 环境变量对话框只管理 plain_text 类型
                 val tempVariables = mutableListOf<Triple<String, String, String>>()
@@ -515,7 +517,7 @@ class PagesFragment : Fragment() {
 
                 // Add variable button
                 dialogBinding.addVariableBtn.apply {
-                    text = "+ 添加变量"
+                    text = getString(R.string.pages_add_variable)
                     setOnClickListener {
                         showAddVariableOrSecretDialogForPages(tempVariables, isSecret = false) {
                             tempAdapter.submitList(tempVariables.toList())
@@ -529,10 +531,10 @@ class PagesFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         applyVariablesToPages(account, project, environment, originalVariables, tempVariables)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -541,8 +543,8 @@ class PagesFragment : Fragment() {
     private fun showSecretsDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取当前机密配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.worker_secret_fetching_vars)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -555,10 +557,11 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesVariablesBinding.inflate(layoutInflater)
 
                 // Setup title
-                dialogBinding.titleText.text = "配置 Pages 项目的机密"
-                dialogBinding.projectNameText.text = "项目名称: ${project.name} (${if (environment == "production") "生产" else "预览"}环境)"
-                dialogBinding.listTitleText.text = "机密列表"
-                dialogBinding.noVariablesText.text = "暂无机密"
+                dialogBinding.titleText.text = getString(R.string.pages_configure_secrets)
+                val env = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                dialogBinding.projectNameText.text = getString(R.string.pages_project_name_with_env, project.name, env)
+                dialogBinding.listTitleText.text = getString(R.string.pages_secrets_list_title)
+                dialogBinding.noVariablesText.text = getString(R.string.pages_no_secrets)
 
                 // Triple<名称, 值, 类型>: 机密对话框只管理 secret_text 类型
                 // 机密加密保存无法获取，加载时值设为空字符串
@@ -606,7 +609,7 @@ class PagesFragment : Fragment() {
 
                 // Add secret button
                 dialogBinding.addVariableBtn.apply {
-                    text = "+ 添加机密"
+                    text = getString(R.string.pages_add_secret)
                     setOnClickListener {
                         showAddVariableOrSecretDialogForPages(tempSecrets, isSecret = true) {
                             tempAdapter.submitList(tempSecrets.toList())
@@ -620,10 +623,10 @@ class PagesFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         applySecretsToPages(account, project, environment, originalSecrets, tempSecrets)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -652,32 +655,32 @@ class PagesFragment : Fragment() {
         val dialogBinding = com.muort.upworker.databinding.DialogAddPagesVariableBinding.inflate(layoutInflater)
 
         val type = if (isSecret) "secret_text" else "plain_text"
-        val label = if (isSecret) "机密" else "变量"
+        val label = if (isSecret) getString(R.string.pages_label_secret) else getString(R.string.pages_label_variable)
 
-        dialogBinding.dialogTitleText.text = "添加${label}"
+        dialogBinding.dialogTitleText.text = getString(R.string.pages_add_dialog_title, label)
         dialogBinding.variableTypeText.text = if (isSecret) "secret" else "txt"
 
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("添加") { _, _ ->
+            .setPositiveButton(R.string.add) { _, _ ->
                 val name = dialogBinding.variableNameEdit.text.toString().trim()
                 val value = dialogBinding.variableValueEdit.text.toString().trim()
 
                 if (name.isEmpty()) {
-                    showToast("请输入${label}名称")
+                    showToast(getString(R.string.pages_please_enter_name_template, label))
                     return@setPositiveButton
                 }
 
                 if (value.isEmpty()) {
-                    showToast("请输入${label}值")
+                    showToast(getString(R.string.pages_please_enter_value_template, label))
                     return@setPositiveButton
                 }
 
                 tempVariables.add(Triple(name, value, type))
                 onAdded()
-                showToast(if (isSecret) "机密已添加" else "环境变量已添加")
+                showToast(if (isSecret) getString(R.string.pages_generic_secret_added) else getString(R.string.pages_generic_env_added))
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -689,9 +692,9 @@ class PagesFragment : Fragment() {
         val dialogBinding = com.muort.upworker.databinding.DialogAddPagesVariableBinding.inflate(layoutInflater)
 
         val isSecret = variable.third == "secret_text"
-        val label = if (isSecret) "机密" else "变量"
+        val label = if (isSecret) getString(R.string.pages_label_secret) else getString(R.string.pages_label_variable)
 
-        dialogBinding.dialogTitleText.text = "编辑${label}"
+        dialogBinding.dialogTitleText.text = getString(R.string.pages_generic_edit_template, label)
         dialogBinding.variableTypeText.text = if (isSecret) "secret" else "txt"
 
         // Pre-fill with existing values
@@ -705,11 +708,11 @@ class PagesFragment : Fragment() {
 
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("保存") { _, _ ->
+            .setPositiveButton(R.string.save) { _, _ ->
                 val newValue = dialogBinding.variableValueEdit.text.toString().trim()
 
                 if (newValue.isEmpty()) {
-                    showToast("请输入值")
+                    showToast(getString(R.string.pages_please_enter_value))
                     return@setPositiveButton
                 }
 
@@ -718,10 +721,10 @@ class PagesFragment : Fragment() {
                 if (index >= 0) {
                     tempVariables[index] = Triple(variable.first, newValue, variable.third)
                     onEdited()
-                    showToast(if (isSecret) "机密已更新" else "环境变量已更新")
+                    showToast(if (isSecret) getString(R.string.pages_generic_secret_updated) else getString(R.string.pages_generic_env_updated))
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -736,8 +739,8 @@ class PagesFragment : Fragment() {
 
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新环境变量配置")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.pages_generic_updating_env_vars)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -762,7 +765,7 @@ class PagesFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("环境变量配置已更新")
+            showToast(getString(R.string.pages_generic_env_vars_updated))
         }
     }
 
@@ -777,8 +780,8 @@ class PagesFragment : Fragment() {
 
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新机密配置")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.pages_generic_updating_secrets)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -810,15 +813,15 @@ class PagesFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("机密配置已更新")
+            showToast(getString(R.string.pages_generic_secrets_updated))
         }
     }
     
     private fun showKvBindingsDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取当前 KV 绑定配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.pages_kv_fetching_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -835,7 +838,8 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesKvBindingsBinding.inflate(layoutInflater)
                 
                 // Setup title
-                dialogBinding.projectNameText.text = "项目名称: ${project.name} (${if (environment == "production") "生产" else "预览"}环境)"
+                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
                 
                 // Temporary list for this dialog - initialize with existing bindings
                 val tempKvBindings = mutableListOf<Pair<String, String>>()
@@ -884,10 +888,10 @@ class PagesFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         applyKvBindingsToPages(account, project, environment, originalKvBindings, tempKvBindings)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -920,7 +924,7 @@ class PagesFragment : Fragment() {
                 val namespaces = result.data
                 
                 if (namespaces.isEmpty()) {
-                    showToast("暂无 KV 命名空间，请先创建")
+                    showToast(getString(R.string.pages_kv_no_namespaces))
                     return@launch
                 }
                 
@@ -934,12 +938,12 @@ class PagesFragment : Fragment() {
                 
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("添加") { _, _ ->
+                    .setPositiveButton(R.string.add) { _, _ ->
                         val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
                         val selectedIndex = dialogBinding.namespaceSpinner.selectedItemPosition
                         
                         if (bindingName.isEmpty()) {
-                            showToast("请输入绑定名称")
+                            showToast(getString(R.string.pages_generic_please_enter_binding_name))
                             return@setPositiveButton
                         }
                         
@@ -947,13 +951,13 @@ class PagesFragment : Fragment() {
                             val namespace = namespaces[selectedIndex]
                             tempBindings.add(Pair(bindingName, namespace.id))
                             onAdded()
-                            showToast("KV 绑定已添加")
+                            showToast(getString(R.string.pages_kv_binding_added))
                         }
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             } else if (result is Resource.Error) {
-                showToast("加载 KV 命名空间失败: ${result.message}")
+                showToast(getString(R.string.pages_kv_load_namespaces_failed_template, result.message))
             }
         }
     }
@@ -969,8 +973,8 @@ class PagesFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新 KV 绑定配置")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.pages_kv_updating_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -994,15 +998,15 @@ class PagesFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("KV 绑定配置已更新")
+            showToast(getString(R.string.pages_kv_bindings_updated))
         }
     }
     
     private fun showR2BindingsDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取当前 R2 绑定配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.pages_r2_fetching_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1015,7 +1019,8 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesR2BindingsBinding.inflate(layoutInflater)
                 
                 // Setup title
-                dialogBinding.projectNameText.text = "项目名称: ${project.name} (${if (environment == "production") "生产" else "预览"}环境)"
+                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
                 
                 // Temporary list for this dialog - initialize with existing bindings
                 val tempR2Bindings = mutableListOf<Pair<String, String>>()
@@ -1062,10 +1067,10 @@ class PagesFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         applyR2BindingsToPages(account, project, environment, originalR2Bindings, tempR2Bindings)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -1098,7 +1103,7 @@ class PagesFragment : Fragment() {
                 val buckets = result.data
                 
                 if (buckets.isEmpty()) {
-                    showToast("暂无 R2 存储桶，请先创建")
+                    showToast(getString(R.string.pages_r2_no_buckets))
                     return@launch
                 }
                 
@@ -1112,12 +1117,12 @@ class PagesFragment : Fragment() {
                 
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("添加") { _, _ ->
+                    .setPositiveButton(R.string.add) { _, _ ->
                         val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
                         val selectedIndex = dialogBinding.bucketSpinner.selectedItemPosition
                         
                         if (bindingName.isEmpty()) {
-                            showToast("请输入绑定名称")
+                            showToast(getString(R.string.pages_generic_please_enter_binding_name))
                             return@setPositiveButton
                         }
                         
@@ -1125,13 +1130,13 @@ class PagesFragment : Fragment() {
                             val bucket = buckets[selectedIndex]
                             tempBindings.add(Pair(bindingName, bucket.name))
                             onAdded()
-                            showToast("R2 绑定已添加")
+                            showToast(getString(R.string.pages_r2_binding_added))
                         }
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             } else if (result is Resource.Error) {
-                showToast("加载 R2 存储桶失败: ${result.message}")
+                showToast(getString(R.string.pages_r2_load_buckets_failed_template, result.message))
             }
         }
     }
@@ -1147,8 +1152,8 @@ class PagesFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新 R2 绑定配置")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.pages_r2_updating_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1172,7 +1177,7 @@ class PagesFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("R2 绑定配置已更新")
+            showToast(getString(R.string.pages_r2_bindings_updated))
         }
     }
     
@@ -1180,8 +1185,8 @@ class PagesFragment : Fragment() {
     private fun showD1BindingsDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取当前 D1 绑定配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.pages_d1_fetching_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1194,7 +1199,8 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesD1BindingsBinding.inflate(layoutInflater)
                 
                 // Setup title
-                dialogBinding.projectNameText.text = "项目名称: ${project.name} (${if (environment == "production") "生产" else "预览"}环境)"
+                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
                 
                 // Temporary list for this dialog - initialize with existing bindings
                 val tempD1Bindings = mutableListOf<Pair<String, String>>()
@@ -1241,10 +1247,10 @@ class PagesFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         applyD1BindingsToPages(account, project, environment, originalD1Bindings, tempD1Bindings)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -1277,7 +1283,7 @@ class PagesFragment : Fragment() {
                 val databases = result.data
                 
                 if (databases.isEmpty()) {
-                    showToast("暂无 D1 数据库，请先创建")
+                    showToast(getString(R.string.pages_d1_no_databases))
                     return@launch
                 }
                 
@@ -1291,12 +1297,12 @@ class PagesFragment : Fragment() {
                 
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("添加") { _, _ ->
+                    .setPositiveButton(R.string.add) { _, _ ->
                         val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
                         val selectedIndex = dialogBinding.databaseSpinner.selectedItemPosition
                         
                         if (bindingName.isEmpty()) {
-                            showToast("请输入绑定名称")
+                            showToast(getString(R.string.pages_generic_please_enter_binding_name))
                             return@setPositiveButton
                         }
                         
@@ -1304,13 +1310,13 @@ class PagesFragment : Fragment() {
                             val database = databases[selectedIndex]
                             tempBindings.add(Pair(bindingName, database.uuid))
                             onAdded()
-                            showToast("D1 绑定已添加")
+                            showToast(getString(R.string.pages_d1_binding_added))
                         }
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             } else if (result is Resource.Error) {
-                showToast("加载 D1 数据库失败: ${result.message}")
+                showToast(getString(R.string.pages_d1_load_databases_failed_template, result.message))
             }
         }
     }
@@ -1326,8 +1332,8 @@ class PagesFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新 D1 绑定配置")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.pages_d1_updating_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1351,15 +1357,15 @@ class PagesFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("D1 绑定配置已更新")
+            showToast(getString(R.string.pages_d1_bindings_updated))
         }
     }
 
     private fun showServiceBindingsDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("加载中...")
-            .setMessage("正在获取当前服务绑定配置")
+            .setTitle(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.pages_service_fetching_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1372,7 +1378,8 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesServicesBinding.inflate(layoutInflater)
 
                 // Setup title
-                dialogBinding.projectNameText.text = "项目名称: ${project.name} (${if (environment == "production") "生产" else "预览"}环境)"
+                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
 
                 // Temporary list for this dialog - Triple: (bindingName, serviceName, serviceEnv)
                 val tempServiceBindings = mutableListOf<Triple<String, String, String>>()
@@ -1418,10 +1425,10 @@ class PagesFragment : Fragment() {
                 // Show dialog
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("应用配置") { _, _ ->
+                    .setPositiveButton(R.string.dialog_apply_config) { _, _ ->
                         applyServiceBindingsToPages(account, project, environment, originalBindingNames, tempServiceBindings)
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             }
         }
@@ -1455,7 +1462,7 @@ class PagesFragment : Fragment() {
                 val workers = result.data.filter { it.id != project.name }
 
                 if (workers.isEmpty()) {
-                    showToast("暂无其他 Worker 脚本可绑定")
+                    showToast(getString(R.string.pages_service_no_workers))
                     return@launch
                 }
 
@@ -1469,12 +1476,12 @@ class PagesFragment : Fragment() {
 
                 MaterialAlertDialogBuilder(requireContext())
                     .setView(dialogBinding.root)
-                    .setPositiveButton("添加") { _, _ ->
+                    .setPositiveButton(R.string.add) { _, _ ->
                         val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
                         val selectedIndex = dialogBinding.workerSpinner.selectedItemPosition
 
                         if (bindingName.isEmpty()) {
-                            showToast("请输入绑定名称")
+                            showToast(getString(R.string.pages_generic_please_enter_binding_name))
                             return@setPositiveButton
                         }
 
@@ -1482,13 +1489,13 @@ class PagesFragment : Fragment() {
                             val worker = workers[selectedIndex]
                             tempBindings.add(Triple(bindingName, worker.id, "production"))
                             onAdded()
-                            showToast("服务绑定已添加")
+                            showToast(getString(R.string.pages_service_binding_added))
                         }
                     }
-                    .setNegativeButton("取消", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show()
             } else if (result is Resource.Error) {
-                showToast("加载 Worker 列表失败: ${result.message}")
+                showToast(getString(R.string.pages_service_load_workers_failed_template, result.message))
             }
         }
     }
@@ -1504,8 +1511,8 @@ class PagesFragment : Fragment() {
 
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("正在更新...")
-            .setMessage("正在更新服务绑定配置")
+            .setTitle(R.string.dialog_updating)
+            .setMessage(R.string.pages_service_updating_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1528,7 +1535,7 @@ class PagesFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast("服务绑定配置已更新")
+            showToast(getString(R.string.pages_service_bindings_updated))
         }
     }
     
@@ -1605,37 +1612,37 @@ class PagesFragment : Fragment() {
 
         when {
             projectName.isEmpty() -> {
-                showToast("请输入项目名称")
+                showToast(getString(R.string.pages_deploy_please_enter_project_name))
                 return
             }
             branch.isEmpty() -> {
-                showToast("请输入分支名称")
+                showToast(getString(R.string.pages_deploy_please_enter_branch_name))
                 return
             }
             file == null -> {
-                showToast("请选择部署文件")
+                showToast(getString(R.string.pages_deploy_please_select_file))
                 return
             }
             !file.exists() -> {
-                showToast("文件不存在")
+                showToast(getString(R.string.pages_deploy_file_not_exists))
                 return
             }
             !file.name.endsWith(".zip", ignoreCase = true) &&
             !file.name.endsWith(".js", ignoreCase = true) &&
             !file.name.endsWith(".htm", ignoreCase = true) &&
             !file.name.endsWith(".html", ignoreCase = true) -> {
-                showToast("仅支持 .zip、.js 或 .html 文件")
+                showToast(getString(R.string.pages_deploy_unsupported_file_type))
                 return
             }
             file.length() > 25 * 1024 * 1024 -> {
-                showToast("文件大小不能超过 25MB")
+                showToast(getString(R.string.pages_deploy_file_size_exceeded))
                 return
             }
         }
 
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
 
@@ -1684,8 +1691,8 @@ class PagesFragment : Fragment() {
         val copyBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.copyBtn)
         val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
 
-        titleText.text = "部署日志"
-        projectNameText.text = "项目: $projectName"
+        titleText.text = getString(R.string.pages_deploy_title_logs)
+        projectNameText.text = getString(R.string.pages_deploy_project_label_template, projectName)
         logContent.text = ""
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
@@ -1709,14 +1716,14 @@ class PagesFragment : Fragment() {
         copyBtn.setOnClickListener {
             val logs = logBuilder.toString()
             if (logs.isEmpty()) {
-                showToast("暂无日志可复制")
+                showToast(getString(R.string.pages_deploy_no_logs))
                 return@setOnClickListener
             }
             val clipboard = requireContext()
                 .getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
             val clip = android.content.ClipData.newPlainText("deploy_logs", logs)
             clipboard.setPrimaryClip(clip)
-            showToast("日志已复制到剪贴板")
+            showToast(getString(R.string.msg_logs_copied))
         }
 
         // 关闭按钮（部署完成前禁用，完成后启用）
@@ -1755,7 +1762,7 @@ class PagesFragment : Fragment() {
                     // 更新状态徽章
                     val bgRes = if (success) R.drawable.bg_status_badge_success else R.drawable.bg_status_badge_error
                     statusBadge.setBackgroundResource(bgRes)
-                    statusText.text = if (success) "部署成功" else "部署失败"
+                    statusText.text = if (success) getString(R.string.pages_deploy_status_success) else getString(R.string.pages_deploy_status_failed)
                     val colorRes = if (success) R.color.green_500 else R.color.red_500
                     statusText.setTextColor(resources.getColor(colorRes, requireContext().theme))
                     statusProgress.indeterminateTintList = android.content.res.ColorStateList.valueOf(
@@ -1764,7 +1771,7 @@ class PagesFragment : Fragment() {
 
                     // 失败时追加错误信息
                     if (!success && errorMessage != null) {
-                        appendLog("✗ 错详情: $errorMessage")
+                        appendLog(getString(R.string.pages_deploy_error_detail_template, errorMessage))
                     }
 
                     // 启用关闭按钮
@@ -1777,7 +1784,7 @@ class PagesFragment : Fragment() {
     private fun showCreateProjectDialog() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -1786,7 +1793,7 @@ class PagesFragment : Fragment() {
         
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("创建") { _, _ ->
+            .setPositiveButton(R.string.dialog_create) { _, _ ->
                 val projectName = dialogBinding.projectNameInput.text.toString().trim()
                 val productionBranch = dialogBinding.productionBranchInput.text.toString().trim()
                 val buildCommand = dialogBinding.buildCommandInput.text.toString().trim().takeIf { it.isNotEmpty() }
@@ -1796,12 +1803,12 @@ class PagesFragment : Fragment() {
                 val compatibilityDate = dialogBinding.compatibilityDateInput.text.toString().trim().takeIf { it.isNotEmpty() }
                 
                 if (projectName.isEmpty()) {
-                    showToast("请输入项目名称")
+                    showToast(getString(R.string.pages_create_please_enter_project_name))
                     return@setPositiveButton
                 }
                 
                 if (productionBranch.isEmpty()) {
-                    showToast("请输入生产分支")
+                    showToast(getString(R.string.pages_create_please_enter_production_branch))
                     return@setPositiveButton
                 }
                 
@@ -1816,7 +1823,7 @@ class PagesFragment : Fragment() {
                     compatibilityDate = compatibilityDate
                 )
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -1843,8 +1850,9 @@ class PagesFragment : Fragment() {
                 
                 launch {
                     pagesViewModel.message.collect { message ->
-                        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
-                        if (message == "部署创建成功") {
+                        val msgStr = message.asString(requireContext())
+                        Snackbar.make(binding.root, msgStr, Snackbar.LENGTH_SHORT).show()
+                        if (msgStr == getString(R.string.vm_msg_pages_deployment_created)) {
                             binding.projectNameEdit.text?.clear()
                             binding.filePathEdit.text?.clear()
                             selectedFile = null
@@ -1883,27 +1891,27 @@ class PagesFragment : Fragment() {
         
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("创建") { _, _ ->
+            .setPositiveButton(R.string.dialog_create) { _, _ ->
                 val name = dialogBinding.projectName.text.toString()
                 val branch = dialogBinding.productionBranch.text.toString()
                 accountViewModel.defaultAccount.value?.let { account ->
                     pagesViewModel.createProject(account, name, branch)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun showDeleteProjectDialog(project: PagesProject) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除项目")
-            .setMessage("确定要删除项目 \"${project.name}\" 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.pages_delete_project_title)
+            .setMessage(getString(R.string.pages_delete_project_confirm_template, project.name))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     pagesViewModel.deleteProject(account, project.name)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -1941,40 +1949,40 @@ class PagesFragment : Fragment() {
             resources.getIdentifier("pagesBatchDeleteBtn", "id", requireContext().packageName)
         )
         
-        toggleSelectionBtn?.text = if (isSelectionMode) "取消" else "管理项目"
+        toggleSelectionBtn?.text = if (isSelectionMode) getString(R.string.cancel) else getString(R.string.pages_manage_projects)
         selectionActionsLayout?.visibility = if (isSelectionMode) android.view.View.VISIBLE else android.view.View.GONE
-        selectionStatusText?.text = "已选择 ${selectedProjects.size} 个项目"
+        selectionStatusText?.text = resources.getQuantityString(R.plurals.pages_selected_projects, selectedProjects.size, selectedProjects.size)
         batchDeleteBtn?.isEnabled = selectedProjects.isNotEmpty()
     }
     
     private fun showBatchDeleteConfirmDialog() {
         val message = if (selectedProjects.size == 1) {
-            "确定要删除 1 个项目吗？\n\n${selectedProjects.first()}\n\n此操作无法撤销。"
+            getString(R.string.pages_batch_delete_confirm_single_template, selectedProjects.first())
         } else {
-            "确定要删除 ${selectedProjects.size} 个项目吗？此操作无法撤销。"
+            getString(R.string.pages_batch_delete_confirm_multi_template, selectedProjects.size)
         }
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("批量删除项目")
+            .setTitle(R.string.pages_batch_delete_project_title)
             .setMessage(message)
-            .setPositiveButton("删除") { _, _ ->
+            .setPositiveButton(R.string.delete) { _, _ ->
                 performBatchDelete()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun performBatchDelete() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
         val projectsToDelete = selectedProjects.toList()
         val progressDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除中...")
-            .setMessage("正在删除 ${projectsToDelete.size} 个项目")
+            .setTitle(R.string.pages_generic_deleting)
+            .setMessage(getString(R.string.pages_batch_deleting_message_template, projectsToDelete.size))
             .setCancelable(false)
             .create()
         progressDialog.show()
@@ -2001,9 +2009,9 @@ class PagesFragment : Fragment() {
             updateSelectionUI()
             
             val message = if (failedCount == 0) {
-                "成功删除 $deletedCount 个项目"
+                getString(R.string.pages_batch_delete_success_template, deletedCount)
             } else {
-                "删除了 $deletedCount 个项目，$failedCount 个失败"
+                getString(R.string.pages_batch_delete_mixed_template, deletedCount, failedCount)
             }
             showToast(message)
             
@@ -2016,8 +2024,8 @@ class PagesFragment : Fragment() {
     
     private fun showDeploymentsDialogWithLoading(account: com.muort.upworker.core.model.Account, project: PagesProject) {
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("${project.name} - 部署记录")
-            .setMessage("加载中...")
+            .setTitle(getString(R.string.pages_deployments_title_template, project.name))
+            .setMessage(R.string.dialog_loading_ellipsis)
             .setCancelable(true)
             .create()
         loadingDialog.show()
@@ -2046,7 +2054,7 @@ class PagesFragment : Fragment() {
         val deployments = pagesViewModel.deployments.value
         
         if (deployments.isEmpty()) {
-            showToast("暂无部署记录")
+            showToast(getString(R.string.pages_deploy_no_records))
             return
         }
         
@@ -2118,33 +2126,33 @@ class PagesFragment : Fragment() {
         val liveLogsBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.liveLogsBtn)
         val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
 
-        titleText.text = "${project.name} - 部署详情"
+        titleText.text = getString(R.string.pages_deploy_detail_title_template, project.name)
         deploymentIdText.text = deployment.id
-        shortIdText.text = deployment.shortId ?: "未知"
+        shortIdText.text = deployment.shortId ?: getString(R.string.status_unknown)
         projectNameText.text = deployment.projectName ?: project.name
-        environmentText.text = deployment.environment ?: "未知"
+        environmentText.text = deployment.environment ?: getString(R.string.status_unknown)
         urlText.text = deployment.url ?: ""
-        stageNameText.text = deployment.latestStage?.name ?: "未知"
+        stageNameText.text = deployment.latestStage?.name ?: getString(R.string.status_unknown)
         createTimeText.text = formatDeploymentDate(deployment.createdOn)
         modifiedTimeText.text = formatDeploymentDate(deployment.modifiedOn)
-        triggerTypeText.text = deployment.deploymentTrigger?.type ?: "未知"
-        branchText.text = deployment.deploymentTrigger?.metadata?.branch ?: "未知"
-        commitHashText.text = deployment.deploymentTrigger?.metadata?.commitHash ?: "未知"
-        commitMessageText.text = deployment.deploymentTrigger?.metadata?.commitMessage ?: "未知"
-        projectIdText.text = deployment.projectId ?: "未知"
-        aliasesText.text = deployment.aliases?.takeIf { it.isNotEmpty() }?.joinToString("\n") ?: "无"
-        isSkippedText.text = deployment.isSkipped?.let { if (it) "是" else "否" } ?: "未知"
-        usesFunctionsText.text = deployment.usesFunctions?.let { if (it) "是" else "否" } ?: "未知"
-        commitDirtyText.text = deployment.deploymentTrigger?.metadata?.commitDirty?.let { if (it) "是" else "否" } ?: "未知"
-        buildCommandText.text = deployment.buildConfig?.buildCommand ?: "无"
-        destinationDirText.text = deployment.buildConfig?.destinationDir ?: "无"
-        rootDirText.text = deployment.buildConfig?.rootDir ?: "无"
-        sourceTypeText.text = deployment.source?.type ?: "无"
+        triggerTypeText.text = deployment.deploymentTrigger?.type ?: getString(R.string.status_unknown)
+        branchText.text = deployment.deploymentTrigger?.metadata?.branch ?: getString(R.string.status_unknown)
+        commitHashText.text = deployment.deploymentTrigger?.metadata?.commitHash ?: getString(R.string.status_unknown)
+        commitMessageText.text = deployment.deploymentTrigger?.metadata?.commitMessage ?: getString(R.string.status_unknown)
+        projectIdText.text = deployment.projectId ?: getString(R.string.status_unknown)
+        aliasesText.text = deployment.aliases?.takeIf { it.isNotEmpty() }?.joinToString("\n") ?: getString(R.string.status_none)
+        isSkippedText.text = deployment.isSkipped?.let { if (it) getString(R.string.pages_detail_yes) else getString(R.string.pages_detail_no) } ?: getString(R.string.status_unknown)
+        usesFunctionsText.text = deployment.usesFunctions?.let { if (it) getString(R.string.pages_detail_yes) else getString(R.string.pages_detail_no) } ?: getString(R.string.status_unknown)
+        commitDirtyText.text = deployment.deploymentTrigger?.metadata?.commitDirty?.let { if (it) getString(R.string.pages_detail_yes) else getString(R.string.pages_detail_no) } ?: getString(R.string.status_unknown)
+        buildCommandText.text = deployment.buildConfig?.buildCommand ?: getString(R.string.status_none)
+        destinationDirText.text = deployment.buildConfig?.destinationDir ?: getString(R.string.status_none)
+        rootDirText.text = deployment.buildConfig?.rootDir ?: getString(R.string.status_none)
+        sourceTypeText.text = deployment.source?.type ?: getString(R.string.status_none)
         repoInfoText.text = deployment.source?.config?.let { cfg ->
             val owner = cfg.owner ?: ""
             val repo = cfg.repoName ?: ""
-            if (owner.isEmpty() && repo.isEmpty()) "无" else "$owner/$repo"
-        } ?: "无"
+            if (owner.isEmpty() && repo.isEmpty()) getString(R.string.status_none) else "$owner/$repo"
+        } ?: getString(R.string.status_none)
 
         // 阶段详情
         val stageNameDetailText = dialogView.findViewById<android.widget.TextView>(R.id.stageNameDetailText)
@@ -2153,8 +2161,8 @@ class PagesFragment : Fragment() {
         val stageEndedText = dialogView.findViewById<android.widget.TextView>(R.id.stageEndedText)
         val stagesContainer = dialogView.findViewById<android.widget.LinearLayout>(R.id.stagesContainer)
 
-        stageNameDetailText.text = deployment.latestStage?.name ?: "未知"
-        stageStatusText.text = deployment.latestStage?.status ?: "未知"
+        stageNameDetailText.text = deployment.latestStage?.name ?: getString(R.string.status_unknown)
+        stageStatusText.text = deployment.latestStage?.status ?: getString(R.string.status_unknown)
         stageStartedText.text = formatDeploymentDate(deployment.latestStage?.startedOn)
         stageEndedText.text = formatDeploymentDate(deployment.latestStage?.endedOn)
 
@@ -2203,9 +2211,9 @@ class PagesFragment : Fragment() {
         val webAnalyticsTagText = dialogView.findViewById<android.widget.TextView>(R.id.webAnalyticsTagText)
         val webAnalyticsTokenText = dialogView.findViewById<android.widget.TextView>(R.id.webAnalyticsTokenText)
 
-        buildCachingText.text = deployment.buildConfig?.buildCaching?.let { if (it) "启用" else "禁用" } ?: "未知"
-        webAnalyticsTagText.text = deployment.buildConfig?.webAnalyticsTag ?: "无"
-        webAnalyticsTokenText.text = deployment.buildConfig?.webAnalyticsToken ?: "无"
+        buildCachingText.text = deployment.buildConfig?.buildCaching?.let { if (it) getString(R.string.pages_detail_enabled) else getString(R.string.pages_detail_disabled) } ?: getString(R.string.status_unknown)
+        webAnalyticsTagText.text = deployment.buildConfig?.webAnalyticsTag ?: getString(R.string.status_none)
+        webAnalyticsTokenText.text = deployment.buildConfig?.webAnalyticsToken ?: getString(R.string.status_none)
 
         // 源码配置补充字段
         val ownerIdText = dialogView.findViewById<android.widget.TextView>(R.id.ownerIdText)
@@ -2225,13 +2233,13 @@ class PagesFragment : Fragment() {
         val previewBranchIncludesText = dialogView.findViewById<android.widget.TextView>(R.id.previewBranchIncludesText)
 
         val srcCfg = deployment.source?.config
-        ownerIdText.text = srcCfg?.ownerId ?: "未知"
-        repoIdText.text = srcCfg?.repoId ?: "未知"
-        productionBranchText.text = srcCfg?.productionBranch ?: "未知"
-        deploymentsEnabledText.text = srcCfg?.deploymentsEnabled?.let { if (it) "启用" else "禁用" } ?: "未知"
-        prodDeploymentsText.text = srcCfg?.productionDeploymentsEnabled?.let { if (it) "启用" else "禁用" } ?: "未知"
-        prCommentsText.text = srcCfg?.prCommentsEnabled?.let { if (it) "启用" else "禁用" } ?: "未知"
-        previewDeploySettingText.text = srcCfg?.previewDeploymentSetting ?: "未知"
+        ownerIdText.text = srcCfg?.ownerId ?: getString(R.string.status_unknown)
+        repoIdText.text = srcCfg?.repoId ?: getString(R.string.status_unknown)
+        productionBranchText.text = srcCfg?.productionBranch ?: getString(R.string.status_unknown)
+        deploymentsEnabledText.text = srcCfg?.deploymentsEnabled?.let { if (it) getString(R.string.pages_detail_enabled) else getString(R.string.pages_detail_disabled) } ?: getString(R.string.status_unknown)
+        prodDeploymentsText.text = srcCfg?.productionDeploymentsEnabled?.let { if (it) getString(R.string.pages_detail_enabled) else getString(R.string.pages_detail_disabled) } ?: getString(R.string.status_unknown)
+        prCommentsText.text = srcCfg?.prCommentsEnabled?.let { if (it) getString(R.string.pages_detail_enabled) else getString(R.string.pages_detail_disabled) } ?: getString(R.string.status_unknown)
+        previewDeploySettingText.text = srcCfg?.previewDeploymentSetting ?: getString(R.string.status_unknown)
 
         pathExcludesSection.visibility = if (srcCfg?.pathExcludes?.isNotEmpty() == true)
             android.view.View.VISIBLE else android.view.View.GONE
@@ -2274,7 +2282,7 @@ class PagesFragment : Fragment() {
                     setTypeface(null, android.graphics.Typeface.BOLD)
                 }
                 val typeTv = android.widget.TextView(requireContext()).apply {
-                    text = if (value.type == "secret_text") "🔒 加密" else "📝 明文"
+                    text = if (value.type == "secret_text") getString(R.string.pages_detail_type_encrypted) else getString(R.string.pages_detail_type_plaintext)
                     textSize = 12f
                     setTextColor(resources.getColor(R.color.red_500, requireContext().theme))
                     layoutParams = android.widget.LinearLayout.LayoutParams(
@@ -2305,7 +2313,7 @@ class PagesFragment : Fragment() {
                 layoutParams = android.widget.LinearLayout.LayoutParams(14, 14)
             }
             val statusText = android.widget.TextView(requireContext()).apply {
-                text = "运行中"
+                text = getString(R.string.status_active)
                 textSize = 11f
                 setTextColor(resources.getColor(R.color.red_500, requireContext().theme))
                 layoutParams = android.widget.LinearLayout.LayoutParams(
@@ -2363,9 +2371,9 @@ class PagesFragment : Fragment() {
         val logInfoText = dialogView.findViewById<android.widget.TextView>(R.id.logInfoText)
         val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
 
-        titleText.text = "${project.name} - 构建日志"
+        titleText.text = getString(R.string.pages_build_logs_title_template, project.name)
         deploymentSelectorLayout.visibility = android.view.View.GONE
-        logContent.text = "加载中..."
+        logContent.text = getString(R.string.dialog_loading_ellipsis)
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(dialogView)
@@ -2384,8 +2392,8 @@ class PagesFragment : Fragment() {
      */
     private fun showProjectLiveLogs(account: com.muort.upworker.core.model.Account, project: PagesProject) {
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("实时日志")
-            .setMessage("正在创建日志通道...")
+            .setTitle(R.string.pages_live_logs_title)
+            .setMessage(R.string.pages_creating_log_channel)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -2400,7 +2408,7 @@ class PagesFragment : Fragment() {
             }
             if (deploymentId == null) {
                 loadingDialog.dismiss()
-                showToast("未找到可用的部署")
+                showToast(getString(R.string.pages_no_available_deployment))
                 return@launch
             }
 
@@ -2410,14 +2418,14 @@ class PagesFragment : Fragment() {
                     val tail = result.data as? TailResult
                     loadingDialog.dismiss()
                     if (tail?.url.isNullOrEmpty()) {
-                        showToast("创建日志通道失败: 无 WSS 地址")
+                        showToast(getString(R.string.pages_log_channel_no_wss))
                     } else {
                         PagesLogsActivity.start(requireContext(), project.name, tail!!.url)
                     }
                 }
                 is Resource.Error -> {
                     loadingDialog.dismiss()
-                    showToast("创建日志通道失败: ${result.message}")
+                    showToast(getString(R.string.pages_log_channel_failed_template, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -2438,17 +2446,20 @@ class PagesFragment : Fragment() {
                     val logs = result.data as? PagesDeploymentLogs
                     val lines: List<PagesDeploymentLogLine> = logs?.data ?: emptyList()
                     if (lines.isEmpty()) {
-                        logContent.text = "暂无日志"
+                        logContent.text = getString(R.string.pages_deploy_no_logs)
                     } else {
                         val logText = lines.joinToString("\n") { line -> line.line ?: "" }
                         logContent.text = logText
                     }
                     val total = logs?.total ?: lines.size
-                    val containerLogs = if (logs?.includesContainerLogs == true) "包含容器日志" else "仅构建日志"
-                    logInfoText.text = "共 $total 条 • $containerLogs"
+                    val containerLogs = if (logs?.includesContainerLogs == true)
+                        getString(R.string.pages_deploy_logs_include_container)
+                    else
+                        getString(R.string.pages_deploy_logs_build_only)
+                    logInfoText.text = getString(R.string.pages_deploy_logs_info_template, total, containerLogs)
                 }
                 is Resource.Error -> {
-                    logContent.text = "加载日志失败: ${result.message}"
+                    logContent.text = getString(R.string.pages_deploy_load_logs_failed_template, result.message)
                     logInfoText.text = ""
                 }
                 is Resource.Loading -> {}
@@ -2468,7 +2479,7 @@ class PagesFragment : Fragment() {
             )
         }
         val inputLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
-            hint = "自定义域名（例如：app.example.com）"
+            hint = getString(R.string.pages_domain_input_hint)
             boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
         }
         val editText = com.google.android.material.textfield.TextInputEditText(inputLayout.context).apply {
@@ -2478,12 +2489,12 @@ class PagesFragment : Fragment() {
         container.addView(inputLayout)
 
         MaterialAlertDialogBuilder(context)
-            .setTitle("为 ${project.name} 添加域名")
+            .setTitle(getString(R.string.pages_domain_add_title_template, project.name))
             .setView(container)
-            .setPositiveButton("添加") { _, _ ->
+            .setPositiveButton(R.string.add) { _, _ ->
                 val hostname = editText.text?.toString()?.trim().orEmpty()
                 if (hostname.isEmpty()) {
-                    Snackbar.make(binding.root, "域名不能为空", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, getString(R.string.pages_domain_cannot_be_empty), Snackbar.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 val subdomain = "${project.name}.pages.dev"
@@ -2494,7 +2505,7 @@ class PagesFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -2513,13 +2524,13 @@ class PagesFragment : Fragment() {
             if (zone == null) {
                 Snackbar.make(
                     binding.root,
-                    "域名已添加，但未找到对应的 Cloudflare 域名（Zone），无法自动添加 DNS 记录，请手动配置",
+                    getString(R.string.pages_domain_no_zone_found),
                     Snackbar.LENGTH_LONG
                 ).show()
                 return@launch
             }
 
-            Snackbar.make(binding.root, "正在自动配置 DNS 记录...", Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(binding.root, getString(R.string.pages_domain_auto_configuring_dns), Snackbar.LENGTH_SHORT).show()
             val dnsRequest = DnsRecordRequest(
                 type = recordType,
                 name = recordName,
@@ -2531,14 +2542,14 @@ class PagesFragment : Fragment() {
                 is Resource.Success -> {
                     Snackbar.make(
                         binding.root,
-                        "域名添加成功，DNS 记录已自动配置，验证可能需要几分钟",
+                        getString(R.string.pages_domain_added_and_dns_ok),
                         Snackbar.LENGTH_LONG
                     ).show()
                 }
                 is Resource.Error -> {
                     Snackbar.make(
                         binding.root,
-                        "域名已添加，DNS 自动配置失败: ${result.message}，请手动添加 $recordType 记录",
+                        getString(R.string.pages_domain_added_but_dns_failed_template, result.message, recordType),
                         Snackbar.LENGTH_LONG
                     ).show()
                 }
@@ -2554,7 +2565,7 @@ class PagesFragment : Fragment() {
         val domainsRecyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.domainsRecyclerView)
         val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
 
-        titleText.text = "${project.name} - 域名"
+        titleText.text = getString(R.string.pages_domain_list_title_template, project.name)
         loadingProgress.visibility = android.view.View.VISIBLE
         domainsRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
 
@@ -2602,23 +2613,23 @@ class PagesFragment : Fragment() {
         onDeleted: () -> Unit
     ) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除域名")
-            .setMessage("确定要删除域名 \"${domain.name}\" 吗？\n\n此操作不可恢复。")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.pages_domain_delete_title)
+            .setMessage(getString(R.string.pages_domain_delete_confirm_template, domain.name))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 viewLifecycleOwner.lifecycleScope.launch {
                     when (val result = pagesViewModel.deleteDomainSuspend(account, project.name, domain.name)) {
                         is Resource.Success -> {
-                            Snackbar.make(binding.root, "域名删除成功", Snackbar.LENGTH_SHORT).show()
+                            Snackbar.make(binding.root, getString(R.string.pages_domain_delete_success), Snackbar.LENGTH_SHORT).show()
                             onDeleted()
                         }
                         is Resource.Error -> {
-                            Snackbar.make(binding.root, "删除失败: ${result.message}", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(binding.root, getString(R.string.pages_domain_delete_failed_template, result.message), Snackbar.LENGTH_LONG).show()
                         }
                         is Resource.Loading -> {}
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -2661,16 +2672,16 @@ class PagesFragment : Fragment() {
             fun bindPreview(domain: String) {
                 nameText.text = domain
                 nameText.setOnClickListener {
-                    copyToClipboard("https://$domain", "预览域名已复制")
+                    copyToClipboard("https://$domain", itemView.context.getString(R.string.pages_domain_preview_copied))
                 }
-                statusText.text = "预览"
+                statusText.text = itemView.context.getString(R.string.pages_domain_status_preview)
                 statusText.setBackgroundColor(
                     ContextCompat.getColor(itemView.context, R.color.blue)
                 )
                 statusText.setTextColor(
                     ContextCompat.getColor(itemView.context, R.color.white)
                 )
-                infoText.text = "Pages 默认域名"
+                infoText.text = itemView.context.getString(R.string.pages_domain_pages_default)
                 errorText.visibility = android.view.View.GONE
                 // 预览域名不可删除
                 deleteBtn.visibility = android.view.View.GONE
@@ -2679,9 +2690,9 @@ class PagesFragment : Fragment() {
             fun bindCustom(domain: PagesDomain) {
                 nameText.text = domain.name
                 nameText.setOnClickListener {
-                    copyToClipboard("https://${domain.name}", "域名已复制")
+                    copyToClipboard("https://${domain.name}", itemView.context.getString(R.string.pages_domain_custom_copied))
                 }
-                statusText.text = domain.status ?: "未知"
+                statusText.text = domain.status ?: itemView.context.getString(R.string.status_unknown)
 
                 val statusColor = when (domain.status) {
                     "active" -> ContextCompat.getColor(itemView.context, R.color.status_success)
@@ -2695,16 +2706,16 @@ class PagesFragment : Fragment() {
                     ContextCompat.getColor(itemView.context, R.color.white)
                 )
 
-                val method = domain.validationData?.method ?: "未知"
-                val createdDate = domain.createdOn?.substringBefore('T') ?: "未知时间"
-                infoText.text = "验证方式: $method • 创建于: $createdDate"
+                val method = domain.validationData?.method ?: itemView.context.getString(R.string.status_unknown)
+                val createdDate = domain.createdOn?.substringBefore('T') ?: itemView.context.getString(R.string.pages_detail_unknown_time)
+                infoText.text = itemView.context.getString(R.string.pages_domain_validation_info_template, method, createdDate)
 
                 val validationError = domain.validationData?.errorMessage
                 val verificationError = domain.verificationData?.errorMessage
                 val errorStatus = domain.verificationData?.status
                 val errorToShow = validationError ?: verificationError
                 if (errorToShow != null || errorStatus == "error" || errorStatus == "blocked") {
-                    errorText.text = errorToShow ?: "状态异常: ${errorStatus ?: "未知"}"
+                    errorText.text = errorToShow ?: itemView.context.getString(R.string.pages_domain_status_error_template, errorStatus ?: itemView.context.getString(R.string.status_unknown))
                     errorText.visibility = android.view.View.VISIBLE
                 } else {
                     errorText.visibility = android.view.View.GONE
@@ -2727,9 +2738,9 @@ class PagesFragment : Fragment() {
     
     private fun showDeleteDeploymentConfirmDialog(project: PagesProject, deployment: PagesDeployment) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除部署")
-            .setMessage("确定要删除部署 ${deployment.shortId} 吗？\n\n此操作不可恢复。")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.pages_deployment_delete_title)
+            .setMessage(getString(R.string.pages_deployment_delete_confirm_template, deployment.shortId ?: deployment.id))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     viewLifecycleOwner.lifecycleScope.launch {
                         pagesViewModel.deleteDeployment(account, project.name, deployment.id)
@@ -2738,15 +2749,15 @@ class PagesFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun showRollbackDeploymentConfirmDialog(project: PagesProject, deployment: PagesDeployment) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("回滚部署")
-            .setMessage("确定要回滚到部署 ${deployment.shortId} 吗？\n\n这将使此部署成为活动部署。")
-            .setPositiveButton("回滚") { _, _ ->
+            .setTitle(R.string.pages_deployment_rollback_title)
+            .setMessage(getString(R.string.pages_deployment_rollback_confirm_template, deployment.shortId ?: deployment.id))
+            .setPositiveButton(getString(R.string.pages_rollback_deployment_btn)) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     viewLifecycleOwner.lifecycleScope.launch {
                         pagesViewModel.rollbackDeployment(account, project.name, deployment.id)
@@ -2755,15 +2766,15 @@ class PagesFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
     private fun showRetryDeploymentConfirmDialog(project: PagesProject, deployment: PagesDeployment) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("重新部署")
-            .setMessage("确定要重新部署 ${deployment.shortId} 吗？\n\n将基于此部署的配置重新发起一次部署。")
-            .setPositiveButton("重新部署") { _, _ ->
+            .setTitle(R.string.pages_deployment_retry_title)
+            .setMessage(getString(R.string.pages_deployment_retry_confirm_template, deployment.shortId ?: deployment.id))
+            .setPositiveButton(getString(R.string.pages_generic_redeploy)) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     viewLifecycleOwner.lifecycleScope.launch {
                         pagesViewModel.retryDeployment(account, project.name, deployment.id)
@@ -2772,12 +2783,12 @@ class PagesFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun formatDeploymentDate(dateString: String?): String {
-        if (dateString == null) return "未知"
+        if (dateString == null) return getString(R.string.status_unknown)
         
         return try {
             val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US)
@@ -2861,7 +2872,7 @@ class PagesFragment : Fragment() {
                 binding.projectNameText.text = project.name
                 
                 val dateText = formatDate(project.createdOn)
-                binding.projectInfoText.text = "${project.productionBranch} 分支 • $dateText"
+                binding.projectInfoText.text = binding.root.context.getString(R.string.pages_project_info_template, project.productionBranch, dateText)
                 
                 // 添加多选模式支持 - 通过改变卡片背景色表示选中状态
                 if (selectionMode) {
@@ -2957,7 +2968,7 @@ class PagesFragment : Fragment() {
             }
             
             private fun formatDate(dateString: String?): String {
-                if (dateString == null) return "未知日期"
+                if (dateString == null) return binding.root.context.getString(R.string.worker_detail_unknown_date)
                 
                 return try {
                     val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US)
@@ -2978,7 +2989,7 @@ class PagesFragment : Fragment() {
     private fun showCleanupDeploymentsDialog() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            showToast("请先选择账号")
+            showToast(getString(R.string.msg_please_select_account_first))
             return
         }
         
@@ -2996,7 +3007,7 @@ class PagesFragment : Fragment() {
         
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
-            .setPositiveButton("开始清理") { _, _ ->
+            .setPositiveButton(getString(R.string.worker_cleanup_start_button)) { _, _ ->
                 val retainCountStr = dialogBinding.retainCountEdit.text.toString().trim()
                 val retainCount = retainCountStr.toIntOrNull() ?: 10
                 
@@ -3005,36 +3016,39 @@ class PagesFragment : Fragment() {
                 } else {
                     val selectedProjectName = dialogBinding.projectSpinner.selectedItem?.toString()
                     if (selectedProjectName.isNullOrEmpty()) {
-                        showToast("请选择项目")
+                        showToast(getString(R.string.pages_cleanup_please_select_project))
                         return@setPositiveButton
                     }
                     showCleanupConfirmDialog(false, selectedProjectName, retainCount)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
     private fun showCleanupConfirmDialog(isAllProjects: Boolean, projectName: String?, retainCount: Int) {
         val account = accountViewModel.defaultAccount.value ?: return
         
-        val title = if (isAllProjects) "清理所有项目的旧部署" else "清理项目 \"$projectName\" 的旧部署"
+        val title = if (isAllProjects)
+            getString(R.string.pages_cleanup_all_title)
+        else
+            getString(R.string.pages_cleanup_single_title_template, projectName ?: "")
         val message = if (isAllProjects) {
-            "将清理账号下所有 Pages 项目的旧部署，每个项目保留最新 $retainCount 个部署记录。\n\n此操作不可撤销，确定继续吗？"
+            getString(R.string.pages_cleanup_all_message_template, retainCount)
         } else {
-            "将清理项目 \"$projectName\" 的旧部署，保留最新 $retainCount 个部署记录。\n\n此操作不可撤销，确定继续吗？"
+            getString(R.string.pages_cleanup_single_message_template, projectName ?: "", retainCount)
         }
         
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("确定清理") { dialog, _ ->
+            .setPositiveButton(getString(R.string.worker_cleanup_confirm_button)) { dialog, _ ->
                 dialog.dismiss()
                 
                 // 显示加载对话框
                 val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("正在清理")
-                    .setMessage("正在清理旧部署，请稍候...")
+                    .setTitle(R.string.worker_cleanup_in_progress_title)
+                    .setMessage(R.string.pages_cleaning_deployments_message)
                     .setCancelable(false)
                     .show()
                 
@@ -3057,7 +3071,7 @@ class PagesFragment : Fragment() {
                     }
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -3066,27 +3080,31 @@ class PagesFragment : Fragment() {
         val totalProjects = results.size
         
         val resultBuilder = StringBuilder()
-        resultBuilder.append("清理结果：\n\n")
+        resultBuilder.append(getString(R.string.worker_cleanup_result_header))
+        resultBuilder.append("\n\n")
         
         results.forEach { result ->
             if (result.success) {
                 val status = if (result.deletedCount > 0) {
-                    "成功清理 ${result.deletedCount} 个旧部署"
+                    getString(R.string.pages_cleanup_result_cleaned_template, result.deletedCount)
                 } else {
-                    "无需清理（当前 ${result.totalDeployments} 个部署 ≤ 保留数量）"
+                    getString(R.string.pages_cleanup_result_skip_template, result.totalDeployments)
                 }
-                resultBuilder.append("• ${result.projectName}: $status\n")
+                resultBuilder.append(getString(R.string.pages_cleanup_result_line_template, result.projectName, status))
+                resultBuilder.append('\n')
             } else {
-                resultBuilder.append("• ${result.projectName}: ❌ 失败 - ${result.errorMessage}\n")
+                resultBuilder.append(getString(R.string.pages_cleanup_result_error_line_template, result.projectName, result.errorMessage ?: ""))
+                resultBuilder.append('\n')
             }
         }
         
-        resultBuilder.append("\n总计：处理 $totalProjects 个项目，成功清理 $totalDeleted 个旧部署")
+        resultBuilder.append('\n')
+        resultBuilder.append(getString(R.string.pages_cleanup_result_total_template, totalProjects, totalDeleted))
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("清理完成")
+            .setTitle(R.string.worker_cleanup_finished_title)
             .setMessage(resultBuilder.toString())
-            .setPositiveButton("关闭", null)
+            .setPositiveButton(R.string.cancel, null)
             .show()
     }
 }
@@ -3166,7 +3184,7 @@ class PagesR2BindingsAdapter(
         
         fun bind(r2Binding: Pair<String, String>) {
             binding.bindingNameText.text = r2Binding.first
-            binding.bucketNameText.text = "Bucket: ${r2Binding.second}"
+            binding.bucketNameText.text = binding.root.context.getString(R.string.pages_binding_bucket_label_template, r2Binding.second)
             
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(r2Binding)
@@ -3207,7 +3225,7 @@ class PagesD1BindingsAdapter(
         
         fun bind(d1Binding: Pair<String, String>) {
             binding.bindingNameText.text = d1Binding.first
-            binding.databaseNameText.text = "Database: ${d1Binding.second}"
+            binding.databaseNameText.text = binding.root.context.getString(R.string.pages_binding_database_label_template, d1Binding.second)
             
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(d1Binding)
@@ -3248,7 +3266,7 @@ class PagesServiceBindingsAdapter(
 
         fun bind(serviceBinding: Triple<String, String, String>) {
             binding.bindingNameText.text = serviceBinding.first
-            binding.serviceNameText.text = "Service: ${serviceBinding.second}"
+            binding.serviceNameText.text = binding.root.context.getString(R.string.pages_binding_service_label_template, serviceBinding.second)
 
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(serviceBinding)
@@ -3297,7 +3315,7 @@ class PagesVariablesAndSecretsAdapter(
 
             // For secrets, show encrypted indicator; for plain text, show value
             if (isSecret) {
-                binding.variableValueText.text = "🔒 加密存储，无法查看"
+                binding.variableValueText.text = binding.root.context.getString(R.string.pages_var_encrypted_hidden)
                 binding.variableValueText.setTypeface(null, Typeface.ITALIC)
             } else {
                 binding.variableValueText.text = value
@@ -3306,7 +3324,10 @@ class PagesVariablesAndSecretsAdapter(
 
             // Show type label
             binding.variableTypeText.visibility = View.VISIBLE
-            binding.variableTypeText.text = if (isSecret) "机密" else "变量"
+            binding.variableTypeText.text = if (isSecret)
+                binding.root.context.getString(R.string.pages_label_secret)
+            else
+                binding.root.context.getString(R.string.pages_label_variable)
             binding.variableTypeText.setBackgroundColor(
                 if (isSecret)
                     binding.root.context.getColor(android.R.color.holo_red_light)

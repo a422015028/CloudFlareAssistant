@@ -41,7 +41,7 @@
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="账号"
+                        android:text="@string/xml_activity_main"
                         android:textSize="14sp"/>
                     
                     <LinearLayout
@@ -56,7 +56,7 @@
                             android:id="@+id/currentAccountText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="未选择账号"
+                            android:text="@string/xml_activity_main_2"
                             android:textColor="?attr/colorPrimary"
                             android:textSize="14sp"
                             android:maxLines="1"

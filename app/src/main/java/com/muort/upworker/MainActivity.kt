@@ -18,6 +18,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.util.DataMigrationHelper
 import com.muort.upworker.core.util.DisplaySizeHelper
@@ -101,7 +102,7 @@ class MainActivity : AppCompatActivity() {
         // 3. 处理系统栏 insets，为内容添加 padding
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val systemBars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            view.setPaddingRelative(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
         // 4. Toolbar 样式调整：设置背景色、去阴影、居中
@@ -123,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         val density = resources.displayMetrics.density
         val paddingH = (16 * density).toInt()
         val paddingV = (6 * density).toInt()
-        binding.selectAccountButton.setPadding(paddingH, paddingV, paddingH, paddingV)
+        binding.selectAccountButton.setPaddingRelative(paddingH, paddingV, paddingH, paddingV)
         
         // 6. 账号名称文字样式 - 使用主题属性以跟随动态配色
         binding.currentAccountText.typeface = android.graphics.Typeface.DEFAULT_BOLD
@@ -163,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val accounts = accountViewModel.accounts.value
             if (accounts.isEmpty()) {
-                showToast("没有可用账号，请先添加账号")
+                showToast(getString(R.string.app_no_account_please_add))
                 return@launch
             }
             
@@ -182,7 +183,7 @@ class MainActivity : AppCompatActivity() {
                 onAccountSelected = { account ->
                     accountViewModel.setDefaultAccount(account.id)
                     dialog.dismiss()
-                    showToast("已切换到 ${account.name}")
+                    showToast(getString(R.string.app_switched_to_account, account.name))
                 }
             )
             
@@ -260,7 +261,7 @@ class MainActivity : AppCompatActivity() {
                 
                 launch {
                     accountViewModel.message.collect { message ->
-                        showToast(message)
+                        showToast(message.asString(this@MainActivity))
                     }
                 }
             }
@@ -269,7 +270,7 @@ class MainActivity : AppCompatActivity() {
     
     private fun updateTitleBar(account: Account?) {
         if (account == null) {
-            binding.currentAccountText.text = "未选择账号"
+            binding.currentAccountText.text = getString(R.string.app_no_account_selected)
         } else {
             binding.currentAccountText.text = account.name
         }
@@ -280,12 +281,12 @@ class MainActivity : AppCompatActivity() {
             when (val result = migrationHelper.migrateDataIfNeeded()) {
                 is MigrationResult.Success -> {
                     if (result.migratedCount > 0) {
-                        showToast("已成功迁移 ${result.migratedCount} 个账号")
+                        showToast(getString(R.string.app_migration_success_count, result.migratedCount))
                         Timber.i("Successfully migrated ${result.migratedCount} accounts")
                     }
                 }
                 is MigrationResult.Failed -> {
-                    showToast("数据迁移失败: ${result.error}")
+                    showToast(getString(R.string.app_migration_failed, result.error))
                     Timber.e("Migration failed: ${result.error}")
                 }
                 is MigrationResult.AlreadyCompleted -> {

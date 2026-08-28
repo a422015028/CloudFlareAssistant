@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.muort.upworker.R
 import com.muort.upworker.core.model.CloudflareTunnel
 import com.muort.upworker.databinding.ItemTunnelBinding
 
@@ -36,11 +37,12 @@ class TunnelAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(tunnel: CloudflareTunnel) {
+            val ctx = binding.root.context
             binding.tunnelNameText.text = tunnel.name
             
             // Status chip
             val status = tunnel.status ?: "unknown"
-            binding.statusChip.text = getStatusLabel(status)
+            binding.statusChip.text = getStatusLabel(ctx, status)
             binding.statusChip.setChipBackgroundColorResource(getStatusColor(status))
             
             // Tunnel type
@@ -49,19 +51,19 @@ class TunnelAdapter(
             
             // Connections
             val connectionCount = tunnel.connections?.size ?: 0
-            binding.connectionsText.text = "连接数: $connectionCount"
+            binding.connectionsText.text = ctx.resources.getQuantityString(R.plurals.zt_tunnel_conns, connectionCount, connectionCount)
             
             // Connection details
             val colos = tunnel.connections?.mapNotNull { it.coloName }?.distinct()
             if (!colos.isNullOrEmpty()) {
-                binding.connectionDetailsText.text = "Colo: ${colos.joinToString(", ")}"
+                binding.connectionDetailsText.text = ctx.getString(R.string.zt_tunnel_colo_list, colos.joinToString(", "))
                 binding.connectionDetailsText.visibility = View.VISIBLE
             } else {
                 binding.connectionDetailsText.visibility = View.GONE
             }
             
             // Created date
-            binding.createdDateText.text = "创建: ${formatDate(tunnel.createdAt)}"
+            binding.createdDateText.text = ctx.getString(R.string.zt_tunnel_created_label, formatDate(ctx, tunnel.createdAt))
             
             // Delete button - only show if not deleted
             val isDeleted = tunnel.deletedAt != null
@@ -81,12 +83,12 @@ class TunnelAdapter(
             binding.root.setOnClickListener { onItemClick(tunnel) }
         }
 
-        private fun getStatusLabel(status: String): String {
+        private fun getStatusLabel(ctx: android.content.Context, status: String): String {
             return when (status.lowercase()) {
-                "active" -> "活跃"
-                "inactive" -> "未活跃"
-                "degraded" -> "降级"
-                "down" -> "离线"
+                "active" -> ctx.getString(R.string.zt_tunnel_status_active)
+                "inactive" -> ctx.getString(R.string.zt_tunnel_status_inactive)
+                "degraded" -> ctx.getString(R.string.zt_tunnel_status_degraded)
+                "down" -> ctx.getString(R.string.zt_tunnel_status_down)
                 else -> status
             }
         }
@@ -109,8 +111,8 @@ class TunnelAdapter(
             }
         }
 
-        private fun formatDate(dateString: String?): String {
-            if (dateString == null) return "未知"
+        private fun formatDate(ctx: android.content.Context, dateString: String?): String {
+            if (dateString == null) return ctx.getString(R.string.zt_tunnel_date_unknown)
             return try {
                 dateString.substring(0, 10)
             } catch (e: Exception) {

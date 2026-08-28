@@ -21,7 +21,7 @@
                 android:id="@+id/cronInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Cron 表达式"
+                android:hint="@string/xml_dialog_add_trigger_hint"
                 app:startIconDrawable="@android:drawable/ic_menu_today"
                 android:layout_marginTop="12dp">
 
@@ -36,7 +36,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="标准5字段：分 时 日 月 周 （UTC+8）"
+                android:text="@string/xml_dialog_add_trigger"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:layout_marginTop="8dp" />
@@ -44,7 +44,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="常用："
+                android:text="@string/xml_dialog_add_trigger_2"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurface"
@@ -76,7 +76,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="每5分钟"
+                        android:text="@string/xml_dialog_add_trigger_3"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -102,7 +102,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="每小时整点"
+                        android:text="@string/xml_dialog_add_trigger_4"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -128,7 +128,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="每天0点"
+                        android:text="@string/xml_dialog_add_trigger_5"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -154,7 +154,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="每周一0点"
+                        android:text="@string/xml_dialog_add_trigger_6"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -180,7 +180,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="每天中午12点"
+                        android:text="@string/xml_dialog_add_trigger_7"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -206,7 +206,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="每天8点和18点"
+                        android:text="@string/xml_dialog_add_trigger_8"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -232,7 +232,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="每月1号0点"
+                        android:text="@string/xml_dialog_add_trigger_9"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -258,7 +258,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="每周日0点"
+                        android:text="@string/xml_dialog_add_trigger_10"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -284,7 +284,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="每30分钟"
+                        android:text="@string/xml_dialog_add_trigger_11"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -310,7 +310,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="每月15号0点"
+                        android:text="@string/xml_dialog_add_trigger_12"
                         android:textSize="13sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -339,7 +339,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="保存"
+            android:text="@string/save"
             app:backgroundTint="?attr/colorPrimary"
             android:textColor="@color/white" />
 
@@ -348,7 +348,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="关闭"
+            android:text="@string/ssl_mode_off"
             android:layout_marginStart="8dp" />
 
     </LinearLayout>

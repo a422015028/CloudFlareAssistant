@@ -43,7 +43,7 @@ class AccessApplicationAdapter(
         
         fun bind(app: AccessApplication) {
             nameTextView.text = app.name
-            domainTextView.text = app.domain ?: "未设置域名"
+            domainTextView.text = app.domain ?: itemView.context.getString(R.string.zt_access_domain_not_set)
             typeTextView.text = getTypeLabel(app.type)
             
             cardView.setOnClickListener { onItemClick(app) }
@@ -51,15 +51,16 @@ class AccessApplicationAdapter(
         }
         
         private fun getTypeLabel(type: String): String {
+            val ctx = itemView.context
             return when (type) {
-                "self_hosted" -> "自托管应用"
-                "saas" -> "SaaS 应用"
-                "ssh" -> "SSH"
-                "vnc" -> "VNC"
-                "app_launcher" -> "应用启动器"
-                "warp" -> "WARP"
-                "biso" -> "浏览器隔离"
-                "bookmark" -> "书签"
+                "self_hosted" -> ctx.getString(R.string.zt_app_type_self_hosted)
+                "saas" -> ctx.getString(R.string.zt_app_type_saas)
+                "ssh" -> ctx.getString(R.string.zt_app_type_ssh)
+                "vnc" -> ctx.getString(R.string.zt_app_type_vnc)
+                "app_launcher" -> ctx.getString(R.string.zt_app_type_app_launcher)
+                "warp" -> ctx.getString(R.string.zt_app_type_warp)
+                "biso" -> ctx.getString(R.string.zt_app_type_biso)
+                "bookmark" -> ctx.getString(R.string.zt_app_type_bookmark)
                 else -> type
             }
         }
