@@ -22,6 +22,7 @@ import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.util.DataMigrationHelper
 import com.muort.upworker.core.util.DisplaySizeHelper
 import com.muort.upworker.core.util.MigrationResult
+import com.muort.upworker.core.util.ThemeHelper
 import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.ActivityMainBinding
 import com.muort.upworker.databinding.DialogAccountSelectionBinding
@@ -45,6 +46,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 在 setContentView 之前应用动态配色
+        ThemeHelper.applyDynamicColorIfEnabled(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

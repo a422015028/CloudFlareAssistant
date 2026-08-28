@@ -1,6 +1,7 @@
 ﻿package com.muort.upworker.feature.home
 
 import com.muort.upworker.core.log.LogRepository
+import com.muort.upworker.core.util.ThemeHelper
 import com.muort.upworker.core.util.safeNavigate
 import kotlinx.coroutines.flow.collectLatest
 
@@ -232,10 +233,70 @@ class HomeFragment : Fragment() {
             showAboutDialog()
         }
 
-        binding.displaySizeCard.setOnClickListener {
+        binding.settingsCard.setOnClickListener {
             AnimationHelper.scaleDown(it)
+            it.postDelayed({
+                showSettingsDialog()
+            }, 150)
+        }
+    }
+
+    private fun showSettingsDialog() {
+        val dialogBinding = com.muort.upworker.databinding.DialogSettingsBinding.inflate(
+            LayoutInflater.from(requireContext())
+        )
+
+        // 初始化主题模式
+        val themeMode = ThemeHelper.getThemeMode(requireContext())
+        val themeButtonId = when (themeMode) {
+            ThemeHelper.THEME_LIGHT -> R.id.themeLightBtn
+            ThemeHelper.THEME_DARK -> R.id.themeDarkBtn
+            else -> R.id.themeFollowSystemBtn
+        }
+        dialogBinding.themeModeToggleGroup.check(themeButtonId)
+
+        dialogBinding.themeModeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val mode = when (checkedId) {
+                    R.id.themeLightBtn -> ThemeHelper.THEME_LIGHT
+                    R.id.themeDarkBtn -> ThemeHelper.THEME_DARK
+                    else -> ThemeHelper.THEME_FOLLOW_SYSTEM
+                }
+                ThemeHelper.setThemeMode(requireContext(), mode)
+                // 延迟重启，让用户看到按钮切换效果
+                view?.postDelayed({
+                    if (isAdded) activity?.recreate()
+                }, 200)
+            }
+        }
+
+        // 动态配色
+        val dynamicAvailable = ThemeHelper.isDynamicColorAvailable()
+        if (dynamicAvailable) {
+            dialogBinding.dynamicColorSwitch.isChecked =
+                ThemeHelper.isDynamicColorEnabled(requireContext())
+            dialogBinding.dynamicColorSwitch.setOnCheckedChangeListener { _, isChecked ->
+                ThemeHelper.setDynamicColorEnabled(requireContext(), isChecked)
+                view?.postDelayed({
+                    if (isAdded) activity?.recreate()
+                }, 200)
+            }
+        } else {
+            dialogBinding.dynamicColorLayout.visibility = View.GONE
+        }
+
+        // 显示大小
+        val currentSize = DisplaySizeHelper.OPTIONS[DisplaySizeHelper.getSelectedIndex(requireContext())].first
+        dialogBinding.displaySizeCurrentText.text = "当前：$currentSize"
+        dialogBinding.displaySizeButton.setOnClickListener {
             showDisplaySizeDialog()
         }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("设置")
+            .setView(dialogBinding.root)
+            .setPositiveButton("完成", null)
+            .show()
     }
 
     private fun showDisplaySizeDialog() {

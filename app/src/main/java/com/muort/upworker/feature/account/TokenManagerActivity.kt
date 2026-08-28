@@ -35,6 +35,7 @@ import com.muort.upworker.core.model.TokenPermissionGroupRef
 import com.muort.upworker.core.model.TokenPolicy
 import com.muort.upworker.core.model.TokenUpsertRequest
 import com.muort.upworker.core.util.DisplaySizeHelper
+import com.muort.upworker.core.util.ThemeHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -70,6 +71,7 @@ class TokenManagerActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.applyDynamicColorIfEnabled(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_token_manager)
 

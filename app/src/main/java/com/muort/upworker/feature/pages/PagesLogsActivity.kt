@@ -27,6 +27,7 @@ import com.google.gson.JsonParser
 import com.muort.upworker.R
 import com.muort.upworker.core.model.TailTraceItem
 import com.muort.upworker.core.util.DisplaySizeHelper
+import com.muort.upworker.core.util.ThemeHelper
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -86,6 +87,7 @@ class PagesLogsActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.applyDynamicColorIfEnabled(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pages_logs)
 

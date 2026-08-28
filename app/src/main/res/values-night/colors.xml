@@ -1,11 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<!-- 兼容旧代码所需紫色（夜间模式可自定义） -->
-	<color name="purple_700">#BB86FC</color>
-	
+
+	<!-- ============================================ -->
 	<!-- 状态色（不随动态主题变化，保持功能语义一致性） -->
+	<!-- ============================================ -->
 	<color name="status_success">#4ADE80</color>
+	<color name="status_success_container">#064E3B</color>
 	<color name="status_warning">#FBBF24</color>
+	<color name="status_warning_container">#78350F</color>
 	<color name="status_error">#F87171</color>
+	<color name="status_error_container">#7F1D1D</color>
 	<color name="status_neutral">#9CA3AF</color>
+	<color name="status_info">#60A5FA</color>
+	<color name="status_info_container">#1E3A5F</color>
+
+	<!-- ============================================ -->
+	<!-- Dashboard 健康状态色（兼容旧代码） -->
+	<!-- ============================================ -->
+	<color name="md_theme_error">#F2B8B5</color>
+	<color name="md_theme_tertiary">#FFB74D</color>
+	<color name="md_theme_success">#81C784</color>
+	<color name="md_theme_light_primaryContainer">#4A4458</color>
+
+	<!-- ============================================ -->
+	<!-- 兼容旧代码的颜色（逐步迁移到语义命名） -->
+	<!-- ============================================ -->
+	<color name="purple_700">#BB86FC</color>
+	<color name="red_500">#F87171</color>
+	<color name="red_100">#7F1D1D</color>
+	<color name="green_500">#4ADE80</color>
+	<color name="green">#4ADE80</color>
+	<color name="blue">#60A5FA</color>
+	<color name="grey_500">#9CA3AF</color>
+
+	<!-- ============================================ -->
+	<!-- 基础色 -->
+	<!-- ============================================ -->
+	<color name="white">#FFFFFF</color>
+	<color name="black">#000000</color>
+	<color name="transparent">#00000000</color>
+
 </resources>

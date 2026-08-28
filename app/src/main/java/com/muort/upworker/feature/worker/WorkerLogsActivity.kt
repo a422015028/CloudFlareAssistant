@@ -22,6 +22,7 @@ import com.muort.upworker.core.model.TailException
 import com.muort.upworker.core.model.TailLog
 import com.muort.upworker.core.model.TailTraceItem
 import com.muort.upworker.core.util.DisplaySizeHelper
+import com.muort.upworker.core.util.ThemeHelper
 import okhttp3.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -70,6 +71,7 @@ class WorkerLogsActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.applyDynamicColorIfEnabled(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_worker_logs)
 

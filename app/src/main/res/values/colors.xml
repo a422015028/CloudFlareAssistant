@@ -1,29 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<!-- Material3 PrimaryContainer 示例色，可根据主题调整 -->
-	<color name="md_theme_light_primaryContainer">#F3EBF8</color>
-	<!-- 兼容旧代码所需紫色 -->
-	<color name="purple_700">#3700B3</color>
-	
-	<!-- Dashboard 健康状态颜色 -->
+
+	<!-- ============================================ -->
+	<!-- 状态色（不随动态主题变化，保持功能语义一致性） -->
+	<!-- ============================================ -->
+	<color name="status_success">#22C55E</color>
+	<color name="status_success_container">#DCFCE7</color>
+	<color name="status_warning">#F59E0B</color>
+	<color name="status_warning_container">#FEF3C7</color>
+	<color name="status_error">#EF4444</color>
+	<color name="status_error_container">#FEE2E2</color>
+	<color name="status_neutral">#9CA3AF</color>
+	<color name="status_info">#3B82F6</color>
+	<color name="status_info_container">#DBEAFE</color>
+
+	<!-- ============================================ -->
+	<!-- Dashboard 健康状态色（兼容旧代码） -->
+	<!-- ============================================ -->
 	<color name="md_theme_error">#BA1A1A</color>
 	<color name="md_theme_tertiary">#F57C00</color>
 	<color name="md_theme_success">#2E7D32</color>
-	
-	<!-- 状态色（不随动态主题变化，保持功能语义一致性） -->
-	<color name="status_success">#22C55E</color>
-	<color name="status_warning">#F59E0B</color>
-	<color name="status_error">#EF4444</color>
-	<color name="status_neutral">#9CA3AF</color>
-	
-	<!-- 运行中徽章颜色 -->
+	<color name="md_theme_light_primaryContainer">#F3EBF8</color>
+
+	<!-- ============================================ -->
+	<!-- 兼容旧代码的颜色（逐步迁移到语义命名） -->
+	<!-- ============================================ -->
+	<color name="purple_700">#3700B3</color>
 	<color name="red_500">#EF4444</color>
 	<color name="red_100">#FEE2E2</color>
-	<color name="white">#FFFFFF</color>
 	<color name="green_500">#22C55E</color>
 	<color name="green">#22C55E</color>
 	<color name="blue">#3B82F6</color>
 	<color name="grey_500">#9CA3AF</color>
+
+	<!-- ============================================ -->
+	<!-- 基础色 -->
+	<!-- ============================================ -->
+	<color name="white">#FFFFFF</color>
 	<color name="black">#000000</color>
 	<color name="transparent">#00000000</color>
+
 </resources>

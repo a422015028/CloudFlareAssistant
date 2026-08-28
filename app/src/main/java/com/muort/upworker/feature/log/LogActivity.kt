@@ -11,6 +11,7 @@ import androidx.core.view.WindowCompat
 import com.muort.upworker.R
 import com.muort.upworker.core.log.LogRepository
 import com.muort.upworker.core.util.DisplaySizeHelper
+import com.muort.upworker.core.util.ThemeHelper
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
@@ -31,6 +32,7 @@ class LogActivity : AppCompatActivity() {
     
     private val scope = MainScope()
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.applyDynamicColorIfEnabled(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log)
         

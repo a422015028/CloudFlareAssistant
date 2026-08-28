@@ -1,7 +1,7 @@
 package com.muort.upworker
 
 import android.app.Application
-import com.google.android.material.color.DynamicColors
+import com.muort.upworker.core.util.ThemeHelper
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
@@ -11,8 +11,8 @@ class CloudFlareApp : Application() {
     override fun onCreate() {
         super.onCreate()
         
-        // 应用 Material You 动态配色（仅 Android 12+ 生效，低版本自动降级）
-        DynamicColors.applyToActivitiesIfAvailable(this)
+        // 应用主题模式（跟随系统/浅色/深色）
+        ThemeHelper.applySavedTheme(this)
         
         // Initialize Timber for logging
         if (BuildConfig.DEBUG) {
