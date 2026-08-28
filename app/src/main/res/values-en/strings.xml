@@ -30,10 +30,56 @@
     
     <!-- Account -->
     <string name="account_empty">No account yet\nTap + to add</string>
+    <string name="account_empty_hint">Tap the button below to add an account</string>
     <string name="account_add">Add Account</string>
     <string name="account_edit">Edit Account</string>
-    <string name="account_delete_confirm">Delete this account?</string>
+    <string name="account_delete">Delete Account</string>
+    <string name="account_delete_confirm">Delete account %1$s?</string>
     <string name="account_set_default">Set as Default</string>
+    <string name="account_set_default_success">Set as default account</string>
+    <string name="account_name">Account Name</string>
+    <string name="account_id">Account ID</string>
+    <string name="account_fetch_from_api">Fetch from API</string>
+    <string name="account_auth_type">Authentication</string>
+    <string name="account_api_token">API Token</string>
+    <string name="account_global_api_key">Global API Key</string>
+    <string name="account_cloudflare_email">Cloudflare Email</string>
+    <string name="account_global_api_key_helper">Get from Cloudflare Dashboard → My Profile → API Tokens → Global API Key</string>
+    <string name="account_r2_credentials">R2 S3 API Credentials (optional, for object operations)</string>
+    <string name="account_r2_access_key_id">R2 Access Key ID</string>
+    <string name="account_r2_secret_access_key">R2 Secret Access Key</string>
+    <string name="account_set_as_default">Set as default account</string>
+    <string name="account_default">Default</string>
+    <string name="account_more_actions">More actions</string>
+    <string name="account_token_manager">Account API Token Manager</string>
+    <string name="account_select">Select Account</string>
+    <string name="account_temp_name">Temporary</string>
+    <string name="account_auto_filled">Account ID auto-filled</string>
+    <string name="account_please_enter_name">Please enter account name</string>
+    <string name="account_please_enter_id">Please enter Account ID</string>
+    <string name="account_please_enter_token">Please enter API Token</string>
+    <string name="account_please_enter_email">Please enter Cloudflare email</string>
+    <string name="account_please_enter_global_key">Please enter Global API Key</string>
+    <string name="account_please_fill_credentials">Please fill in API Token or Global API Key credentials first</string>
+    <string name="account_please_fill_auth">Please fill in authentication credentials first</string>
+    <string name="account_please_fill_required">Please fill in all required fields</string>
+    <string name="account_token_cannot_be_empty">API Token cannot be empty</string>
+    <string name="account_email_cannot_be_empty">Email cannot be empty</string>
+    <string name="account_global_key_cannot_be_empty">Global API Key cannot be empty</string>
+    <string name="account_add_success">Account added successfully</string>
+    <string name="account_add_failed">Failed to add account: %1$s</string>
+    <string name="account_update_success">Account updated successfully</string>
+    <string name="account_update_failed">Failed to update account: %1$s</string>
+    <string name="account_delete_success">Account deleted successfully</string>
+    <string name="account_delete_failed">Failed to delete account: %1$s</string>
+    <string name="account_set_default_failed">Failed to set default account: %1$s</string>
+    <string name="account_export_failed">Failed to export accounts: %1$s</string>
+    <string name="account_import_success">Accounts imported successfully</string>
+    <string name="account_import_failed">Failed to import accounts: %1$s</string>
+    <string name="account_fetch_zones_success">Successfully fetched %1$d domains</string>
+    <string name="account_fetch_zones_failed">Failed to fetch domains: %1$s</string>
+    <string name="account_fetch_accounts_success">Successfully fetched %1$d accounts</string>
+    <string name="account_fetch_accounts_failed">Failed to fetch account list: %1$s</string>
     
     <!-- Worker -->
     <string name="worker_upload">Upload Worker</string>

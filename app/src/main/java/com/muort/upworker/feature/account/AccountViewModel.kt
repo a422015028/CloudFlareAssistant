@@ -1,5 +1,6 @@
 package com.muort.upworker.feature.account
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.muort.upworker.core.model.Account
@@ -9,7 +10,9 @@ import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.repository.AccountRepository
 import com.muort.upworker.core.repository.ZoneRepository
+import com.muort.upworker.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -17,6 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AccountViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val accountRepository: AccountRepository,
     private val zoneRepository: ZoneRepository
 ) : ViewModel() {
@@ -111,7 +115,7 @@ class AccountViewModel @Inject constructor(
     ) {
         if (name.isBlank() || accountId.isBlank()) {
             viewModelScope.launch {
-                _message.emit("请填写所有必填项")
+                _message.emit(context.getString(R.string.account_please_fill_required))
             }
             return
         }
@@ -124,10 +128,10 @@ class AccountViewModel @Inject constructor(
         }
         
         val validationError = when (authTypeEnum) {
-            AuthType.TOKEN -> if (token.isBlank()) "API Token 不能为空" else null
+            AuthType.TOKEN -> if (token.isBlank()) context.getString(R.string.account_token_cannot_be_empty) else null
             AuthType.GLOBAL_API_KEY -> {
-                if (email?.isBlank() != false) "邮箱不能为空"
-                else if (globalApiKey?.isBlank() != false) "Global API Key 不能为空"
+                if (email?.isBlank() != false) context.getString(R.string.account_email_cannot_be_empty)
+                else if (globalApiKey?.isBlank() != false) context.getString(R.string.account_global_key_cannot_be_empty)
                 else null
             }
         }
@@ -154,13 +158,13 @@ class AccountViewModel @Inject constructor(
             
             when (val result = accountRepository.insertAccount(account)) {
                 is Resource.Success -> {
-                    _message.emit("账号添加成功")
+                    _message.emit(context.getString(R.string.account_add_success))
                     if (isDefault) {
                         accountRepository.setDefaultAccount(result.data)
                     }
                 }
                 is Resource.Error -> {
-                    _message.emit("添加账号失败: ${result.message}")
+                    _message.emit(context.getString(R.string.account_add_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -171,13 +175,13 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.updateAccount(account)) {
                 is Resource.Success -> {
-                    _message.emit("账号更新成功")
+                    _message.emit(context.getString(R.string.account_update_success))
                     if (account.isDefault) {
                         accountRepository.setDefaultAccount(account.id)
                     }
                 }
                 is Resource.Error -> {
-                    _message.emit("更新账号失败: ${result.message}")
+                    _message.emit(context.getString(R.string.account_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -188,10 +192,10 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.deleteAccount(account)) {
                 is Resource.Success -> {
-                    _message.emit("账号删除成功")
+                    _message.emit(context.getString(R.string.account_delete_success))
                 }
                 is Resource.Error -> {
-                    _message.emit("删除账号失败: ${result.message}")
+                    _message.emit(context.getString(R.string.account_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -205,7 +209,7 @@ class AccountViewModel @Inject constructor(
                     // 账号切换成功，不显示提示
                 }
                 is Resource.Error -> {
-                    _message.emit("设置默认账号失败: ${result.message}")
+                    _message.emit(context.getString(R.string.account_set_default_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -216,7 +220,7 @@ class AccountViewModel @Inject constructor(
         return when (val result = accountRepository.exportAccounts()) {
             is Resource.Success -> result.data
             is Resource.Error -> {
-                _message.emit("导出账号失败: ${result.message}")
+                _message.emit(context.getString(R.string.account_export_failed, result.message))
                 null
             }
             is Resource.Loading -> null
@@ -227,10 +231,10 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.importAccounts(accounts)) {
                 is Resource.Success -> {
-                    _message.emit("账号导入成功")
+                    _message.emit(context.getString(R.string.account_import_success))
                 }
                 is Resource.Error -> {
-                    _message.emit("导入账号失败: ${result.message}")
+                    _message.emit(context.getString(R.string.account_import_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -260,11 +264,11 @@ class AccountViewModel @Inject constructor(
             _loadingZones.value = true
             when (val result = zoneRepository.fetchAndSaveZones(account)) {
                 is Resource.Success -> {
-                    if (!silent) _message.emit("成功获取 ${result.data.size} 个域名")
+                    if (!silent) _message.emit(context.getString(R.string.account_fetch_zones_success, result.data.size))
                     loadZonesForAccount(account.id)
                 }
                 is Resource.Error -> {
-                    if (!silent) _message.emit("获取域名失败: ${result.message}")
+                    if (!silent) _message.emit(context.getString(R.string.account_fetch_zones_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -303,11 +307,11 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = accountRepository.fetchAccountsFromApi(account)) {
                 is Resource.Success -> {
-                    _message.emit("成功获取 ${result.data.size} 个账号")
+                    _message.emit(context.getString(R.string.account_fetch_accounts_success, result.data.size))
                     onResult(result.data)
                 }
                 is Resource.Error -> {
-                    _message.emit("获取账号列表失败: ${result.message}")
+                    _message.emit(context.getString(R.string.account_fetch_accounts_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }

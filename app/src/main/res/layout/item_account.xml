@@ -35,7 +35,7 @@
                         android:id="@+id/accountNameText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="账号名称"
+                        android:text="@string/account_name"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
@@ -43,7 +43,7 @@
                         android:id="@+id/defaultChip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="默认"
+                        android:text="@string/account_default"
                         android:textSize="10sp"
                         android:layout_marginStart="8dp"
                         android:visibility="gone"
@@ -55,7 +55,7 @@
                     android:id="@+id/accountIdText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Account ID"
+                    android:text="@string/account_id"
                     android:textSize="12sp"
                     android:textColor="?android:textColorSecondary"
                     android:layout_marginTop="4dp"
@@ -69,7 +69,7 @@
                 android:layout_height="40dp"
                 android:src="@android:drawable/ic_menu_more"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="更多操作" />
+                android:contentDescription="@string/account_more_actions" />
 
         </LinearLayout>
 

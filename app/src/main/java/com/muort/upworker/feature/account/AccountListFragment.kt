@@ -116,7 +116,7 @@ class AccountListFragment : Fragment() {
             when (item.itemId) {
                 R.id.action_set_default -> {
                     viewModel.setDefaultAccount(account.id)
-                    showToast("已设为默认账号")
+                    showToast(getString(R.string.account_set_default_success))
                     true
                 }
                 R.id.action_edit -> {
@@ -138,12 +138,12 @@ class AccountListFragment : Fragment() {
     
     private fun showDeleteConfirmation(account: Account) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("删除账号")
-            .setMessage("确定要删除账号 ${account.name} 吗？")
-            .setPositiveButton("删除") { _, _ ->
+            .setTitle(R.string.account_delete)
+            .setMessage(getString(R.string.account_delete_confirm, account.name))
+            .setPositiveButton(R.string.delete) { _, _ ->
                 viewModel.deleteAccount(account)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -185,7 +185,7 @@ class AccountAdapter : RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() 
         
         fun bind(account: Account) {
             binding.accountNameText.text = account.name
-            binding.accountIdText.text = "Account ID: ${account.accountId}"
+            binding.accountIdText.text = "${binding.root.context.getString(R.string.account_id)}: ${account.accountId}"
             
             binding.defaultChip.visibility = if (account.isDefault) View.VISIBLE else View.GONE
             

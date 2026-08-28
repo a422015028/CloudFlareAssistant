@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.muort.upworker.R
 import com.muort.upworker.core.model.AuthType
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.showToast
@@ -63,7 +64,7 @@ class AccountEditFragment : Fragment() {
             val hasGlobalKeyCredentials = email.isNotEmpty() && globalApiKey.isNotEmpty()
             
             if (!hasTokenCredentials && !hasGlobalKeyCredentials) {
-                showToast("请先填写 API Token 或 Global API Key 凭据")
+                showToast(getString(R.string.account_please_fill_credentials))
                 return@setOnClickListener
             }
             
@@ -74,14 +75,14 @@ class AccountEditFragment : Fragment() {
                 hasTokenCredentials -> AuthType.TOKEN
                 hasGlobalKeyCredentials -> AuthType.GLOBAL_API_KEY
                 else -> {
-                    showToast("请先填写认证凭据")
+                    showToast(getString(R.string.account_please_fill_auth))
                     return@setOnClickListener
                 }
             }
             
             val tempAccount = com.muort.upworker.core.model.Account(
                 id = 0,
-                name = "临时",
+                name = getString(R.string.account_temp_name),
                 accountId = "",
                 token = if (authTypeToUse == AuthType.TOKEN) token else "",
                 email = if (authTypeToUse == AuthType.GLOBAL_API_KEY) email else null,
@@ -96,7 +97,7 @@ class AccountEditFragment : Fragment() {
                     if (binding.nameEditText.text.toString().isBlank()) {
                         binding.nameEditText.setText(accounts[0].name)
                     }
-                    showToast("已自动填充 Account ID")
+                    showToast(getString(R.string.account_auto_filled))
                 } else {
                     // 多个账号，弹出选择对话框
                     showAccountSelectionDialog(accounts)
@@ -112,7 +113,7 @@ class AccountEditFragment : Fragment() {
         val items = accounts.map { "${it.name} (${it.id})" }.toTypedArray()
         
         com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-            .setTitle("选择账号")
+            .setTitle(R.string.account_select)
             .setItems(items) { _, which ->
                 val selected = accounts[which]
                 binding.accountIdEditText.setText(selected.id)
@@ -120,7 +121,7 @@ class AccountEditFragment : Fragment() {
                     binding.nameEditText.setText(selected.name)
                 }
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     
@@ -183,12 +184,12 @@ class AccountEditFragment : Fragment() {
             val isDefault = binding.defaultSwitch.isChecked
             
             if (name.isEmpty()) {
-                showToast("请输入账号名称")
+                showToast(getString(R.string.account_please_enter_name))
                 return@setOnClickListener
             }
             
             if (accountId.isEmpty()) {
-                showToast("请输入 Account ID")
+                showToast(getString(R.string.account_please_enter_id))
                 return@setOnClickListener
             }
             
@@ -196,17 +197,17 @@ class AccountEditFragment : Fragment() {
             when (selectedAuthType) {
                 AuthType.TOKEN -> {
                     if (token.isEmpty()) {
-                        showToast("请输入 API Token")
+                        showToast(getString(R.string.account_please_enter_token))
                         return@setOnClickListener
                     }
                 }
                 AuthType.GLOBAL_API_KEY -> {
                     if (email.isEmpty()) {
-                        showToast("请输入 Cloudflare 邮箱")
+                        showToast(getString(R.string.account_please_enter_email))
                         return@setOnClickListener
                     }
                     if (globalApiKey.isEmpty()) {
-                        showToast("请输入 Global API Key")
+                        showToast(getString(R.string.account_please_enter_global_key))
                         return@setOnClickListener
                     }
                 }

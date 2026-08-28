@@ -14,7 +14,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="账号名称"
+            android:hint="@string/account_name"
             app:boxBackgroundMode="outline"
             android:layout_marginBottom="16dp">
 
@@ -38,7 +38,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Account ID"
+                android:hint="@string/account_id"
                 app:boxBackgroundMode="outline">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -55,7 +55,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="从API获取"
+                android:text="@string/account_fetch_from_api"
                 android:textSize="12sp"
                 style="@style/Widget.Material3.Button.OutlinedButton" />
 
@@ -65,7 +65,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="认证方式"
+            android:text="@string/account_auth_type"
             android:textStyle="bold"
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
@@ -82,7 +82,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="API Token"
+                android:text="@string/account_api_token"
                 android:checked="true" />
 
             <com.google.android.material.radiobutton.MaterialRadioButton
@@ -90,7 +90,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Global API Key" />
+                android:text="@string/account_global_api_key" />
 
         </RadioGroup>
 
@@ -99,7 +99,7 @@
             android:id="@+id/tokenInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="API Token"
+            android:hint="@string/account_api_token"
             app:boxBackgroundMode="outline"
             android:layout_marginBottom="16dp"
             app:endIconMode="password_toggle">
@@ -123,7 +123,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Cloudflare 邮箱"
+                android:hint="@string/account_cloudflare_email"
                 app:boxBackgroundMode="outline"
                 android:layout_marginBottom="16dp">
 
@@ -139,11 +139,11 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Global API Key"
+                android:hint="@string/account_global_api_key"
                 app:boxBackgroundMode="outline"
                 android:layout_marginBottom="16dp"
                 app:endIconMode="password_toggle"
-                app:helperText="在 Cloudflare Dashboard → My Profile → API Tokens → Global API Key 获取">
+                app:helperText="@string/account_global_api_key_helper">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/globalApiKeyEditText"
@@ -159,7 +159,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="R2 S3 API凭证（可选，用于对象操作）"
+            android:text="@string/account_r2_credentials"
             android:textStyle="bold"
             android:textSize="14sp"
             android:layout_marginTop="8dp"
@@ -168,7 +168,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="R2 Access Key ID"
+            android:hint="@string/account_r2_access_key_id"
             app:boxBackgroundMode="outline"
             android:layout_marginBottom="16dp">
 
@@ -184,7 +184,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="R2 Secret Access Key"
+            android:hint="@string/account_r2_secret_access_key"
             app:boxBackgroundMode="outline"
             android:layout_marginBottom="16dp"
             app:endIconMode="password_toggle">
@@ -202,14 +202,14 @@
             android:id="@+id/defaultSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="设为默认账号"
+            android:text="@string/account_set_as_default"
             android:layout_marginBottom="24dp" />
 
         <Button
             android:id="@+id/saveBtn"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="保存"
+            android:text="@string/save"
             android:textSize="16sp"
             style="@style/Widget.Material3.Button" />
 
