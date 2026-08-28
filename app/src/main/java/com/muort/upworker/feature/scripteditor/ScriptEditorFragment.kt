@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.LayoutInflater
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.color.MaterialColors
 import com.muort.upworker.R
 import com.muort.upworker.core.model.ScriptVersion
 import com.muort.upworker.databinding.FragmentScriptEditorBinding
@@ -305,7 +307,9 @@ class ScriptEditorFragment : Fragment() {
         if (lastAppliedDarkMode == isDarkMode) return
         lastAppliedDarkMode = isDarkMode
 
-        val bgColor = if (isDarkMode) 0xFF282a36.toInt() else 0xFFFFFFFF.toInt()
+        val bgColor = MaterialColors.getColor(
+            requireContext(), com.google.android.material.R.attr.colorSurface, Color.WHITE
+        )
         binding.webView.setBackgroundColor(bgColor)
         executeJavaScript("setTheme($isDarkMode)")
     }

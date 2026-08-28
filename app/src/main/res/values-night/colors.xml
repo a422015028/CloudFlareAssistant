@@ -2,4 +2,10 @@
 <resources>
 	<!-- 兼容旧代码所需紫色（夜间模式可自定义） -->
 	<color name="purple_700">#BB86FC</color>
+	
+	<!-- 状态色（不随动态主题变化，保持功能语义一致性） -->
+	<color name="status_success">#4ADE80</color>
+	<color name="status_warning">#FBBF24</color>
+	<color name="status_error">#F87171</color>
+	<color name="status_neutral">#9CA3AF</color>
 </resources>

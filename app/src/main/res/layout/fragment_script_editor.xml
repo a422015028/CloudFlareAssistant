@@ -77,7 +77,7 @@
                 android:id="@+id/webView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#282a36" />
+                android:background="@android:color/white" />
 
             <!-- Search Bar Overlay -->
             <com.google.android.material.card.MaterialCardView

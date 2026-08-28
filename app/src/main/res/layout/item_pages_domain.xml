@@ -69,7 +69,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:textSize="11sp"
-        android:textColor="#F44336"
+        android:textColor="@color/status_error"
         android:visibility="gone"
         tools:text="错误信息"
         tools:visibility="visible" />

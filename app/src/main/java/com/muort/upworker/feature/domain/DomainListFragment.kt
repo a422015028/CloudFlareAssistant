@@ -16,6 +16,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.core.content.ContextCompat
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.util.AnimationHelper
@@ -256,10 +257,10 @@ class DomainListFragment : Fragment() {
             }
 
             private fun statusColor(status: String): Int = when (status) {
-                "active" -> 0xFF4CAF50.toInt()
-                "pending", "initializing" -> 0xFFC77C00.toInt()
-                "paused", "deactivated" -> 0xFFE5484D.toInt()
-                else -> 0xFF888888.toInt()
+                "active" -> ContextCompat.getColor(binding.root.context, R.color.status_success)
+                "pending", "initializing" -> ContextCompat.getColor(binding.root.context, R.color.status_warning)
+                "paused", "deactivated" -> ContextCompat.getColor(binding.root.context, R.color.status_error)
+                else -> ContextCompat.getColor(binding.root.context, R.color.status_neutral)
             }
         }
     }

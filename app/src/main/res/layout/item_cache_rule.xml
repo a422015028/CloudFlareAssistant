@@ -40,7 +40,7 @@
                     android:paddingVertical="3dp"
                     android:textSize="11sp"
                     android:textStyle="bold"
-                    android:textColor="#F57C00" />
+                    android:textColor="@color/status_warning" />
 
                 <TextView
                     android:id="@+id/descriptionText"

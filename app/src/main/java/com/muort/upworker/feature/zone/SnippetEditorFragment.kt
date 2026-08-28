@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.GestureDetector
@@ -22,6 +23,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.muort.upworker.R
@@ -546,7 +548,9 @@ class SnippetEditorFragment : Fragment() {
         if (lastAppliedDarkMode == isDarkMode) return
         lastAppliedDarkMode = isDarkMode
 
-        val bgColor = if (isDarkMode) 0xFF282a36.toInt() else 0xFFFFFFFF.toInt()
+        val bgColor = MaterialColors.getColor(
+            requireContext(), com.google.android.material.R.attr.colorSurface, Color.WHITE
+        )
         binding.webView.setBackgroundColor(bgColor)
         executeJavaScript("setTheme($isDarkMode)")
     }

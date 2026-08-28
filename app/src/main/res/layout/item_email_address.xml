@@ -24,7 +24,7 @@
             android:layout_height="44dp"
             app:icon="@android:drawable/ic_dialog_email"
             app:iconSize="28dp"
-            app:iconTint="#F57C00"
+            app:iconTint="@color/status_warning"
             android:enabled="false" />
 
         <LinearLayout

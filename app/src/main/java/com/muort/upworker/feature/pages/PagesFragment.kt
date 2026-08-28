@@ -23,6 +23,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import androidx.core.content.ContextCompat
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.DnsRecordRequest
@@ -2663,8 +2664,12 @@ class PagesFragment : Fragment() {
                     copyToClipboard("https://$domain", "预览域名已复制")
                 }
                 statusText.text = "预览"
-                statusText.setBackgroundColor(0xFF2196F3.toInt())
-                statusText.setTextColor(0xFFFFFFFF.toInt())
+                statusText.setBackgroundColor(
+                    ContextCompat.getColor(itemView.context, R.color.blue)
+                )
+                statusText.setTextColor(
+                    ContextCompat.getColor(itemView.context, R.color.white)
+                )
                 infoText.text = "Pages 默认域名"
                 errorText.visibility = android.view.View.GONE
                 // 预览域名不可删除
@@ -2679,14 +2684,16 @@ class PagesFragment : Fragment() {
                 statusText.text = domain.status ?: "未知"
 
                 val statusColor = when (domain.status) {
-                    "active" -> 0xFF4CAF50.toInt()
-                    "pending", "initializing" -> 0xFFFF9800.toInt()
-                    "error", "blocked" -> 0xFFF44336.toInt()
-                    "deactivated" -> 0xFF9E9E9E.toInt()
-                    else -> 0xFF9E9E9E.toInt()
+                    "active" -> ContextCompat.getColor(itemView.context, R.color.status_success)
+                    "pending", "initializing" -> ContextCompat.getColor(itemView.context, R.color.status_warning)
+                    "error", "blocked" -> ContextCompat.getColor(itemView.context, R.color.status_error)
+                    "deactivated" -> ContextCompat.getColor(itemView.context, R.color.status_neutral)
+                    else -> ContextCompat.getColor(itemView.context, R.color.status_neutral)
                 }
                 statusText.setBackgroundColor(statusColor)
-                statusText.setTextColor(0xFFFFFFFF.toInt())
+                statusText.setTextColor(
+                    ContextCompat.getColor(itemView.context, R.color.white)
+                )
 
                 val method = domain.validationData?.method ?: "未知"
                 val createdDate = domain.createdOn?.substringBefore('T') ?: "未知时间"
