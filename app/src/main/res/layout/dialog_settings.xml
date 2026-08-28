@@ -83,7 +83,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="跟随系统壁纸自动调整主题色（Android 12+）"
+                    android:text="跟随系统自动调整主题色（Android 12+）"
                     android:textSize="12sp"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:layout_marginTop="2dp" />
@@ -128,6 +128,17 @@
             android:layout_height="wrap_content"
             android:text="调整显示大小"
             style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <!-- 底部完成按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/settingsDoneButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="完成"
+            android:textSize="15sp"
+            android:layout_marginTop="24dp"
+            app:cornerRadius="12dp"
+            style="@style/Widget.Material3.Button" />
 
     </LinearLayout>
 

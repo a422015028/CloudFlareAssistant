@@ -54,12 +54,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Workers脚本"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -91,12 +95,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Pages项目"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -128,12 +136,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="域名管理"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -165,12 +177,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="自定义域"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -202,12 +218,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="KV命名空间"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -235,16 +255,20 @@
                     <ImageView
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:src="@android:drawable/ic_menu_manage"
+                        android:src="@android:drawable/ic_menu_send"
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="R2对象存储"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -276,12 +300,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="D1数据库"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -313,12 +341,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="ZeroTrust管理"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -350,12 +382,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="备份恢复"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -387,12 +423,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="HTTP日志"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -424,12 +464,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="设置"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 
@@ -461,12 +505,16 @@
                         app:tint="?attr/colorPrimary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="关于"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="8dp" />
+                        android:layout_marginTop="8dp" android:gravity="center"
+
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        />
 
                 </LinearLayout>
 

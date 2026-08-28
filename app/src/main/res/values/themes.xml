@@ -6,6 +6,12 @@
   </style>
 
   <style name="AppTheme" parent="Base.AppTheme" />
+
+  <!-- 自定义 Filter Chip 样式：选中态使用 primary 容器色，跟随动态主题 -->
+  <style name="AppChip.Filter" parent="Widget.Material3.Chip.Filter">
+    <item name="chipBackgroundColor">@color/chip_filter_bg</item>
+    <item name="android:textColor">@color/chip_filter_text</item>
+  </style>
   
   <!-- Toolbar标题文字样式 -->
   <style name="ToolbarTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">

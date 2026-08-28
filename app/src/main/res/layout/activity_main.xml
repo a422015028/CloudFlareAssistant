@@ -8,7 +8,6 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:elevation="0dp">
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
@@ -58,7 +57,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="未选择账号"
-                            android:textColor="?attr/colorOnSurface"
+                            android:textColor="?attr/colorPrimary"
                             android:textSize="14sp"
                             android:maxLines="1"
                             android:ellipsize="end"
@@ -75,7 +74,7 @@
                         android:layout_height="wrap_content"
                         android:minWidth="48dp"
                         app:icon="@android:drawable/ic_menu_sort_by_size"
-                        app:iconTint="?attr/colorOnSurface" />
+                        app:iconTint="?attr/colorPrimary" />
                 </LinearLayout>
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.card.MaterialCardView>

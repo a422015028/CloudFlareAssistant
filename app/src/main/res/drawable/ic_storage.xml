@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 云存储图标（线框风格，与系统 ic_menu_* 系列视觉重量一致） -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#000000"
+        android:strokeWidth="1.5"
+        android:pathData="M12,4c-2.76,0 -5.14,1.8 -5.84,4.34L6.12,8.5C6.08,8.5 6.04,8.5 6,8.5c-2.21,0 -4,1.79 -4,4s1.79,4 4,4h13c2.21,0 4,-1.79 4,-4 0,-2.09 -1.63,-3.79 -3.68,-3.97C16.77,5.78 14.58,4 12,4z" />
+</vector>

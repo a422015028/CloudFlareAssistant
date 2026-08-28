@@ -91,21 +91,21 @@
                 android:layout_height="wrap_content"
                 android:text="24小时"
                 android:checked="true"
-                style="@style/Widget.Material3.Chip.Filter" />
+                style="@style/AppChip.Filter" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip7Days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="7天"
-                style="@style/Widget.Material3.Chip.Filter" />
+                style="@style/AppChip.Filter" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip30Days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="30天"
-                style="@style/Widget.Material3.Chip.Filter" />
+                style="@style/AppChip.Filter" />
 
         </com.google.android.material.chip.ChipGroup>
 

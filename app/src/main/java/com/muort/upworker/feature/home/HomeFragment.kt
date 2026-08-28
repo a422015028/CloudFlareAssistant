@@ -56,6 +56,12 @@ class HomeFragment : Fragment() {
     private val accountViewModel: AccountViewModel by activityViewModels()
     private val accountAnalyticsViewModel: AccountAnalyticsViewModel by viewModels()
     
+    // 用于在 Fragment 销毁时移除布局监听
+    private var globalLayoutListener: android.view.ViewTreeObserver.OnGlobalLayoutListener? = null
+    
+    // 缓存当前卡片布局方向，避免重复修改导致布局循环
+    private var isCardHorizontal: Boolean? = null
+    
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -72,11 +78,22 @@ class HomeFragment : Fragment() {
         observeViewModel()
         setupAccountAnalytics()
 
+        // 监听布局变化，动态调整卡片方向（适配悬浮小窗/全屏切换）
+        globalLayoutListener = android.view.ViewTreeObserver.OnGlobalLayoutListener {
+            updateCardLayoutByAvailableHeight()
+        }
+        binding.featureGrid.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+
         // 日志卡片点击跳转新页面
         binding.logCard.setOnClickListener {
             startActivity(android.content.Intent(requireContext(), com.muort.upworker.feature.log.LogActivity::class.java))
         }
         // 日志开关已移至日志页面
+    }
+    
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        view?.post { updateCardLayoutByAvailableHeight() }
     }
 
     private fun setupAccountAnalytics() {
@@ -136,6 +153,8 @@ class HomeFragment : Fragment() {
                 params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED)
                 child.layoutParams = params
             }
+            // 布局变化后重新计算卡片方向
+            grid.post { updateCardLayoutByAvailableHeight() }
         } else {
             // 分析关闭：填满剩余空间，卡片平分高度，不留白
             val containerParams = container.layoutParams
@@ -153,6 +172,108 @@ class HomeFragment : Fragment() {
                 params.height = 0
                 params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                 child.layoutParams = params
+            }
+            // 布局变化后重新计算卡片方向
+            grid.post { updateCardLayoutByAvailableHeight() }
+        }
+    }
+
+    /**
+     * 根据可用高度调整卡片布局：
+     * - 高度充足（全屏等）：纵向布局，图标在上，文字在下
+     * - 高度不足（悬浮小窗等）：横向布局，图标在左，文字在右
+     */
+    private fun updateCardLayoutByAvailableHeight() {
+        // 安全检查：Fragment 已销毁时直接返回
+        val binding = _binding ?: return
+        val grid = binding.featureGrid
+        val childCount = grid.childCount
+        if (childCount == 0) return
+
+        // 获取可用高度
+        val availableHeight = grid.height
+        if (availableHeight <= 0) {
+            // 布局还未完成，延迟再试
+            grid.post { updateCardLayoutByAvailableHeight() }
+            return
+        }
+
+        // 计算行数（两列）
+        val rowCount = (childCount + 1) / 2
+        // 每行可用高度
+        val rowHeight = availableHeight / rowCount
+
+        // 阈值：当每行高度小于 80dp 时，认为高度不足，切换为横向布局
+        val density = resources.displayMetrics.density
+        val minHeightForVertical = (80 * density).toInt()
+        val useHorizontal = rowHeight < minHeightForVertical
+
+        // 方向未变化则跳过，避免重复修改布局导致循环触发 onGlobalLayout
+        if (isCardHorizontal == useHorizontal) return
+        isCardHorizontal = useHorizontal
+
+        // 遍历所有卡片调整内部布局
+        for (i in 0 until childCount) {
+            val card = grid.getChildAt(i) as? com.google.android.material.card.MaterialCardView ?: continue
+            val innerLayout = card.getChildAt(0) as? LinearLayout ?: continue
+            val imageView = innerLayout.getChildAt(0) as? android.widget.ImageView ?: continue
+            val textView = innerLayout.getChildAt(1) as? android.widget.TextView ?: continue
+
+            if (useHorizontal) {
+                // 横向布局：图标在左，文字在右
+                innerLayout.orientation = LinearLayout.HORIZONTAL
+                innerLayout.gravity = android.view.Gravity.CENTER_VERTICAL or android.view.Gravity.START
+
+                // 调整 padding
+                val paddingH = (12 * density).toInt()
+                val paddingV = (8 * density).toInt()
+                innerLayout.setPadding(paddingH, paddingV, paddingH, paddingV)
+
+                // 调整图标大小
+                val iconSize = (28 * density).toInt()
+                val iconParams = imageView.layoutParams as LinearLayout.LayoutParams
+                iconParams.width = iconSize
+                iconParams.height = iconSize
+                iconParams.topMargin = 0
+                iconParams.marginEnd = (10 * density).toInt()
+                imageView.layoutParams = iconParams
+
+                // 调整文字
+                val textParams = textView.layoutParams as LinearLayout.LayoutParams
+                textParams.width = 0
+                textParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
+                textParams.weight = 1f
+                textParams.topMargin = 0
+                textView.layoutParams = textParams
+                textView.gravity = android.view.Gravity.START or android.view.Gravity.CENTER_VERTICAL
+                textView.textSize = 13f
+            } else {
+                // 纵向布局：图标在上，文字在下（恢复默认）
+                innerLayout.orientation = LinearLayout.VERTICAL
+                innerLayout.gravity = android.view.Gravity.CENTER
+
+                // 调整 padding
+                val padding = (12 * density).toInt()
+                innerLayout.setPadding(padding, padding, padding, padding)
+
+                // 调整图标大小
+                val iconSize = (36 * density).toInt()
+                val iconParams = imageView.layoutParams as LinearLayout.LayoutParams
+                iconParams.width = iconSize
+                iconParams.height = iconSize
+                iconParams.topMargin = 0
+                iconParams.marginEnd = 0
+                imageView.layoutParams = iconParams
+
+                // 调整文字
+                val textParams = textView.layoutParams as LinearLayout.LayoutParams
+                textParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+                textParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
+                textParams.weight = 0f
+                textParams.topMargin = (8 * density).toInt()
+                textView.layoutParams = textParams
+                textView.gravity = android.view.Gravity.CENTER
+                textView.textSize = 14f
             }
         }
     }
@@ -292,11 +413,15 @@ class HomeFragment : Fragment() {
             showDisplaySizeDialog()
         }
 
-        MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle("设置")
             .setView(dialogBinding.root)
-            .setPositiveButton("完成", null)
             .show()
+
+        // 自定义完成按钮
+        dialogBinding.settingsDoneButton.setOnClickListener {
+            dialog.dismiss()
+        }
     }
 
     private fun showDisplaySizeDialog() {
@@ -540,6 +665,12 @@ class HomeFragment : Fragment() {
     }
     
     override fun onDestroyView() {
+        // 移除布局监听，避免 Fragment 销毁后回调导致 NPE
+        globalLayoutListener?.let {
+            view?.findViewById<android.view.View>(R.id.featureGrid)?.viewTreeObserver?.removeOnGlobalLayoutListener(it)
+        }
+        globalLayoutListener = null
+        isCardHorizontal = null
         super.onDestroyView()
         _binding = null
     }

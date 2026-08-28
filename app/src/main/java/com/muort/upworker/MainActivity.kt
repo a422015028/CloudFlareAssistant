@@ -122,16 +122,14 @@ class MainActivity : AppCompatActivity() {
         val paddingV = (6 * density).toInt()
         binding.selectAccountButton.setPadding(paddingH, paddingV, paddingH, paddingV)
         
-        // 6. 设置选择器内容颜色 (OnSecondaryContainer)
-        val contentColorFilter = PorterDuffColorFilter(colorOnSecondaryContainer, PorterDuff.Mode.SRC_IN)
-        
+        // 6. 账号名称文字样式 - 使用主题属性以跟随动态配色
         binding.currentAccountText.typeface = android.graphics.Typeface.DEFAULT_BOLD
-        binding.currentAccountText.setTextColor(colorOnSecondaryContainer)
         binding.currentAccountText.isSingleLine = false
         binding.currentAccountText.maxLines = 2
         binding.currentAccountText.ellipsize = android.text.TextUtils.TruncateAt.END
-        binding.currentAccountText.compoundDrawables.forEach { it?.mutate()?.colorFilter = contentColorFilter }
-        binding.currentAccountText.compoundDrawablesRelative.forEach { it?.mutate()?.colorFilter = contentColorFilter }
+        
+        // 选择器按钮内容颜色 (OnSecondaryContainer)
+        val contentColorFilter = PorterDuffColorFilter(colorOnSecondaryContainer, PorterDuff.Mode.SRC_IN)
         
         (binding.selectAccountButton as? android.widget.TextView)?.let { textView ->
             textView.text = ""

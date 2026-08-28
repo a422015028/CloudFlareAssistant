@@ -23,13 +23,6 @@ class LogActivity : AppCompatActivity() {
         super.attachBaseContext(DisplaySizeHelper.wrap(newBase))
     }
 
-    // 保证状态栏样式与主界面一致
-    override fun getTheme(): android.content.res.Resources.Theme {
-        val theme = super.getTheme()
-        theme.applyStyle(R.style.AppTheme, true)
-        return theme
-    }
-    
     private val scope = MainScope()
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.applyDynamicColorIfEnabled(this)
