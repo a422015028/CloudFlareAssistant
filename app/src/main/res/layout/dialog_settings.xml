@@ -104,7 +104,8 @@
             android:background="?attr/colorOutlineVariant"
             android:layout_marginBottom="20dp" />
 
-        <!-- 显示大小 -->
+        <!-- 显示大小：6 档分为两行（每行 3 个），与语言/主题模式同样的 ToggleGroup 样式。
+             两个 ToggleGroup 在代码层做互斥，保证整体单选。 -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -114,20 +115,79 @@
             android:textColor="?attr/colorOnSurface"
             android:layout_marginBottom="8dp" />
 
-        <TextView
-            android:id="@+id/displaySizeCurrentText"
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/displaySizeRow1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            app:singleSelection="true"
+            app:selectionRequired="true">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/displaySizeButton"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/displaySizeExtraSmallBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/helper_size_extra_small"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/displaySizeSmallerBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/helper_size_smaller"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/displaySizeSmallBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/helper_size_small"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/displaySizeRow2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/adjust_display_size"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:layout_marginBottom="24dp"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/displaySizeDefaultBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/helper_size_default"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/displaySizeLargeBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/helper_size_large"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/displaySizeExtraLargeBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/helper_size_extra_large"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <!-- 分割线 -->
         <View

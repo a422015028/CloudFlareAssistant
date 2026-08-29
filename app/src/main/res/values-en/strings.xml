@@ -139,8 +139,6 @@
     <string name="dynamic_color">Dynamic Color</string>
     <string name="dynamic_color_desc">Auto-theme color from wallpaper (Android 12+)</string>
     <string name="display_size">Display Size</string>
-    <string name="display_size_current">Current: %1$s</string>
-    <string name="adjust_display_size">Adjust Display Size</string>
     <string name="language">Language</string>
     <string name="language_follow_system">System Default</string>
     <string name="language_simplified_chinese">简体中文</string>
@@ -2903,6 +2901,12 @@
     <string name="pages_deploy_file_not_exists">File does not exist</string>
     <string name="pages_deploy_unsupported_file_type">Only .zip, .js, or .html files are supported</string>
     <string name="pages_deploy_file_size_exceeded">File size cannot exceed 25MB</string>
+    <!-- Remote URL download (when user pastes https:// into script/project file input) -->
+    <string name="remote_download_stage">Downloading remote file… %1$s</string>
+    <string name="remote_download_failed">Download failed: %1$s</string>
+    <string name="remote_download_unsupported_url">Only http(s):// URLs are supported</string>
+    <string name="remote_download_unsupported_type">Unsupported remote file type, only .js/.zip/.html/.htm are allowed</string>
+    <string name="remote_download_too_large">Remote file exceeds 25MB</string>
     <string name="pages_deploy_title_logs">Deployment Logs</string>
     <string name="pages_deploy_project_label_template">Project: %1$s</string>
     <string name="pages_deploy_no_logs_to_copy">No logs to copy</string>

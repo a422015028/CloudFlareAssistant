@@ -35,6 +35,9 @@ import com.muort.upworker.core.repository.R2Repository
 import com.muort.upworker.core.repository.D1Repository
 import com.muort.upworker.core.repository.AccountRepository
 import timber.log.Timber
+import com.muort.upworker.core.util.RemoteFileResolver
+import com.muort.upworker.core.util.hasSupportedExtension
+import com.muort.upworker.core.util.isRemoteUrl
 import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.DialogAddSecretBinding
 import com.muort.upworker.databinding.DialogAddVariableBinding
@@ -50,7 +53,9 @@ import com.muort.upworker.feature.account.AccountViewModel
 import com.muort.upworker.R
 import com.muort.upworker.core.model.WorkerVersion
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.dropWhile
 import java.io.File
@@ -319,10 +324,10 @@ class WorkerFragment : Fragment() {
         // 优先使用输入框中用户手动填写/修改的完整路径；
         // 若输入框为空，再回退到通过文件选择器已缓存的文件
         val filePathInput = binding.filePathEdit.text.toString().trim()
-        val file = if (filePathInput.isNotEmpty()) {
-            java.io.File(filePathInput)
+        val selectedOrNull = if (filePathInput.isNotEmpty()) {
+            filePathInput
         } else {
-            selectedFile
+            selectedFile?.absolutePath
         }
 
         if (workerName.isEmpty()) {
@@ -330,7 +335,7 @@ class WorkerFragment : Fragment() {
             return
         }
 
-        if (file == null || !file.exists()) {
+        if (selectedOrNull == null) {
             showToast(getString(R.string.worker_please_select_file))
             return
         }
@@ -341,6 +346,107 @@ class WorkerFragment : Fragment() {
             return
         }
 
+        // 获取用户输入的兼容性日期，为空时使用默认值
+        val customCompatibilityDate = binding.compatibilityDateEdit.text.toString().trim()
+            .takeIf { it.isNotEmpty() } ?: DEFAULT_COMPATIBILITY_DATE
+
+        val customCompatibilityFlags = binding.compatibilityFlagsEdit.text.toString().trim()
+            .takeIf { it.isNotEmpty() }
+            ?.split(Regex("[,\n]"))
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+
+        // —— 智能判断：如果输入的是 http(s):// URL → 先下载到临时文件，再复用原上传逻辑
+        if (isRemoteUrl(selectedOrNull)) {
+            if (!hasSupportedExtension(selectedOrNull)) {
+                showToast(getString(R.string.remote_download_unsupported_type))
+                return
+            }
+            // 下载期间复用上传进度条，按钮置灰，防止重复点击
+            binding.uploadProgress.visibility = View.VISIBLE
+            binding.uploadProgress.isIndeterminate = true
+            binding.uploadBtn.isEnabled = false
+            val selectedUrl = selectedOrNull
+            viewLifecycleOwner.lifecycleScope.launch {
+                val result = RemoteFileResolver.resolve(
+                    context = requireContext().applicationContext,
+                    url = selectedUrl,
+                    // Worker 不限制下载阶段文件大小：真正的脚本大小上限由服务端
+                    // （单文件 / multipart metadata 两条路径）兜底。
+                    maxSizeBytes = Long.MAX_VALUE,
+                    onProgress = { bytes, total, _ ->
+                        launch(Dispatchers.Main.immediate) {
+                            if (total != null && total > 0L) {
+                                binding.uploadProgress.isIndeterminate = false
+                                binding.uploadProgress.max = 10000
+                                binding.uploadProgress.progress =
+                                    ((bytes.toDouble() / total.toDouble()) * 10000).toInt()
+                            } else {
+                                binding.uploadProgress.isIndeterminate = true
+                            }
+                        }
+                    }
+                )
+                // 下载阶段完成：切换回"上传"视觉状态的准备逻辑（仍保持 indeterminate）
+                binding.uploadProgress.isIndeterminate = true
+                when {
+                    result.isSuccess -> {
+                        val remoteFile = result.getOrThrow()
+                        // 自动把输入框文本替换成临时文件路径，保持"输入框优先"语义一致
+                        binding.filePathEdit.setText(remoteFile.absolutePath)
+                        // 同时缓存到 selectedFile，成功/失败后统一清理
+                        selectedFile = remoteFile
+                        withContext(Dispatchers.Main.immediate) {
+                            binding.uploadProgress.visibility = View.GONE
+                            binding.uploadBtn.isEnabled = true
+                            // 直接进入真实上传流程（不要再递归 uploadWorker —— 用明确分支）
+                            doUploadWorker(
+                                account = account,
+                                workerName = workerName,
+                                file = remoteFile,
+                                customCompatibilityDate = customCompatibilityDate,
+                                customCompatibilityFlags = customCompatibilityFlags
+                            )
+                        }
+                    }
+                    else -> {
+                        binding.uploadProgress.visibility = View.GONE
+                        binding.uploadBtn.isEnabled = true
+                        val msg = (result.exceptionOrNull()?.message
+                            ?: getString(R.string.remote_download_unsupported_url))
+                        showToast(getString(R.string.remote_download_failed, msg))
+                    }
+                }
+            }
+            return
+        }
+
+        // —— 本地路径分支
+        val file = File(selectedOrNull)
+        if (!file.exists()) {
+            showToast(getString(R.string.worker_please_select_file))
+            return
+        }
+        doUploadWorker(
+            account = account,
+            workerName = workerName,
+            file = file,
+            customCompatibilityDate = customCompatibilityDate,
+            customCompatibilityFlags = customCompatibilityFlags
+        )
+    }
+
+    /**
+     * 上传 Worker（已保证 file 在本地可读）。
+     * 先静默检查 Worker 是否已存在：存在走 uploadWorkerScriptWithBindings（保留原有 bindings），否则走 uploadWorkerScript。
+     */
+    private fun doUploadWorker(
+        account: Account,
+        workerName: String,
+        file: File,
+        customCompatibilityDate: String,
+        customCompatibilityFlags: List<String>?
+    ) {
         // 显示检查状态的 Loading
         val checkingDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_preparing)
@@ -349,26 +455,16 @@ class WorkerFragment : Fragment() {
             .create()
         checkingDialog.show()
 
-        // 获取用户输入的兼容性日期，为空时使用默认值
-        val customCompatibilityDate = binding.compatibilityDateEdit.text.toString().trim()
-            .takeIf { it.isNotEmpty() } ?: DEFAULT_COMPATIBILITY_DATE
-
-        // 获取用户输入的兼容性标志（逗号或换行分隔，空值传 null）
-        val customCompatibilityFlags = binding.compatibilityFlagsEdit.text.toString().trim()
-            .takeIf { it.isNotEmpty() }
-            ?.split(Regex("[,\n]"))
-            ?.map { it.trim() }
-            ?.filter { it.isNotEmpty() }
-
-        // 直接从云端检查 Worker 是否存在，而不是依赖本地缓存列表
-        // 这样即使本地列表为空（如刚打开 App），也能正确识别已存在的 Worker 并保留绑定
-        // silent = true: 新脚本不存在时不显示错误提示
         viewModel.getWorkerSettings(account, workerName, silent = true) { result ->
             checkingDialog.dismiss()
             if (result is com.muort.upworker.core.model.Resource.Success) {
-                viewModel.uploadWorkerScriptWithBindings(account, workerName, file, customCompatibilityDate, customCompatibilityFlags)
+                viewModel.uploadWorkerScriptWithBindings(
+                    account, workerName, file, customCompatibilityDate, customCompatibilityFlags
+                )
             } else {
-                viewModel.uploadWorkerScript(account, workerName, file, customCompatibilityDate, customCompatibilityFlags)
+                viewModel.uploadWorkerScript(
+                    account, workerName, file, customCompatibilityDate, customCompatibilityFlags
+                )
             }
         }
     }

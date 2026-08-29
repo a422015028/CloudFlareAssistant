@@ -40,6 +40,9 @@ import com.muort.upworker.feature.pages.CleanupResult
 import com.muort.upworker.core.repository.KvRepository
 import com.muort.upworker.core.repository.R2Repository
 import com.muort.upworker.core.repository.D1Repository
+import com.muort.upworker.core.util.RemoteFileResolver
+import com.muort.upworker.core.util.hasSupportedExtension
+import com.muort.upworker.core.util.isRemoteUrl
 import com.muort.upworker.databinding.DialogPagesInputBinding
 import com.muort.upworker.databinding.DialogPagesRuntimeSettingsBinding
 import com.muort.upworker.core.model.Placement
@@ -54,6 +57,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
@@ -1610,10 +1614,10 @@ class PagesFragment : Fragment() {
         // 优先使用输入框中用户手动填写/修改的完整路径；
         // 若输入框为空，再回退到通过文件选择器已缓存的文件
         val filePathInput = binding.filePathEdit.text.toString().trim()
-        val file = if (filePathInput.isNotEmpty()) {
-            java.io.File(filePathInput)
+        val selectedOrNull = if (filePathInput.isNotEmpty()) {
+            filePathInput
         } else {
-            selectedFile
+            selectedFile?.absolutePath
         }
 
         when {
@@ -1625,31 +1629,10 @@ class PagesFragment : Fragment() {
                 showToast(getString(R.string.pages_deploy_please_enter_branch_name))
                 return
             }
-            file == null -> {
+            selectedOrNull == null -> {
                 showToast(getString(R.string.pages_deploy_please_select_file))
                 return
             }
-            !file.exists() -> {
-                showToast(getString(R.string.pages_deploy_file_not_exists))
-                return
-            }
-            !file.name.endsWith(".zip", ignoreCase = true) &&
-            !file.name.endsWith(".js", ignoreCase = true) &&
-            !file.name.endsWith(".htm", ignoreCase = true) &&
-            !file.name.endsWith(".html", ignoreCase = true) -> {
-                showToast(getString(R.string.pages_deploy_unsupported_file_type))
-                return
-            }
-            file.length() > 25 * 1024 * 1024 -> {
-                showToast(getString(R.string.pages_deploy_file_size_exceeded))
-                return
-            }
-        }
-
-        val account = accountViewModel.defaultAccount.value
-        if (account == null) {
-            showToast(getString(R.string.msg_please_select_account_first))
-            return
         }
 
         val customCompatibilityDate = binding.compatibilityDateEdit.text.toString().trim()
@@ -1661,17 +1644,119 @@ class PagesFragment : Fragment() {
             ?.map { it.trim() }
             ?.filter { it.isNotEmpty() }
 
-        Timber.d("Deploying project: $projectName, branch: $branch, file: ${file?.name}, compatibilityDate: $customCompatibilityDate, compatibilityFlags: $customCompatibilityFlags")
+        val account = accountViewModel.defaultAccount.value
+        if (account == null) {
+            showToast(getString(R.string.msg_please_select_account_first))
+            return
+        }
 
-        // 弹出部署日志对话框
+        // —— 智能判断：如果输入的是 http(s):// URL → 先下载临时文件，再进入部署流程
+        val selected: String = selectedOrNull ?: return
+        if (isRemoteUrl(selected)) {
+            if (!hasSupportedExtension(selected)) {
+                showToast(getString(R.string.remote_download_unsupported_type))
+                return
+            }
+            // 复用 deploy 的 uploadProgress + 禁用 deployBtn / createProjectBtn
+            binding.uploadProgress.visibility = View.VISIBLE
+            binding.uploadProgress.isIndeterminate = true
+            binding.deployBtn.isEnabled = false
+            binding.createProjectBtn.isEnabled = false
+            viewLifecycleOwner.lifecycleScope.launch {
+                val result = RemoteFileResolver.resolve(
+                    context = requireContext().applicationContext,
+                    url = selected,
+                    onProgress = { bytes, total, _ ->
+                        launch(Dispatchers.Main.immediate) {
+                            if (total != null && total > 0L) {
+                                binding.uploadProgress.isIndeterminate = false
+                                binding.uploadProgress.max = 10000
+                                binding.uploadProgress.progress =
+                                    ((bytes.toDouble() / total.toDouble()) * 10000).toInt()
+                            } else {
+                                binding.uploadProgress.isIndeterminate = true
+                            }
+                        }
+                    }
+                )
+                binding.uploadProgress.isIndeterminate = true
+                when {
+                    result.isSuccess -> {
+                        val remoteFile = result.getOrThrow()
+                        // 本地文件校验：扩展名、大小（RemoteFileResolver 内部其实已校验，但此处保持统一的中文提示文案）
+                        val err = validateLocalPagesFileOrShowError(remoteFile)
+                        binding.uploadProgress.visibility = View.GONE
+                        binding.deployBtn.isEnabled = true
+                        binding.createProjectBtn.isEnabled = true
+                        if (err != null) {
+                            showToast(err)
+                            if (remoteFile.exists()) remoteFile.delete()
+                            return@launch
+                        }
+                        // 输入框文本替换为本地路径，保持"输入框优先"一致
+                        binding.filePathEdit.setText(remoteFile.absolutePath)
+                        selectedFile = remoteFile
+                        Timber.d(
+                            "Deploying remote project: $projectName, branch: $branch, " +
+                                    "downloaded file: ${remoteFile.name}, size=${remoteFile.length()}"
+                        )
+                        showDeployLogsDialog(
+                            account = account,
+                            projectName = projectName,
+                            branch = branch,
+                            file = remoteFile,
+                            customCompatibilityDate = customCompatibilityDate,
+                            customCompatibilityFlags = customCompatibilityFlags
+                        )
+                    }
+                    else -> {
+                        binding.uploadProgress.visibility = View.GONE
+                        binding.deployBtn.isEnabled = true
+                        binding.createProjectBtn.isEnabled = true
+                        val msg = (result.exceptionOrNull()?.message
+                            ?: getString(R.string.remote_download_unsupported_url))
+                        showToast(getString(R.string.remote_download_failed, msg))
+                    }
+                }
+            }
+            return
+        }
+
+        // —— 本地路径分支
+        val file = File(selectedOrNull)
+        val localErr = validateLocalPagesFileOrShowError(file)
+        if (localErr != null) {
+            showToast(localErr)
+            return
+        }
+
+        Timber.d("Deploying project: $projectName, branch: $branch, file: ${file.name}, compatibilityDate: $customCompatibilityDate, compatibilityFlags: $customCompatibilityFlags")
+
         showDeployLogsDialog(
             account = account,
             projectName = projectName,
             branch = branch,
-            file = file!!,
+            file = file,
             customCompatibilityDate = customCompatibilityDate,
             customCompatibilityFlags = customCompatibilityFlags
         )
+    }
+
+    /**
+     * 对本地/下载完成后的 Pages 部署文件执行扩展名 + 存在性 + 大小校验。
+     * 若校验失败返回对应中文提示；全部通过返回 null。
+     */
+    private fun validateLocalPagesFileOrShowError(file: File): String? {
+        return when {
+            !file.exists() -> getString(R.string.pages_deploy_file_not_exists)
+            !file.name.endsWith(".zip", ignoreCase = true) &&
+                    !file.name.endsWith(".js", ignoreCase = true) &&
+                    !file.name.endsWith(".htm", ignoreCase = true) &&
+                    !file.name.endsWith(".html", ignoreCase = true) ->
+                getString(R.string.pages_deploy_unsupported_file_type)
+            file.length() > 25 * 1024 * 1024 -> getString(R.string.pages_deploy_file_size_exceeded)
+            else -> null
+        }
     }
 
     /**

@@ -84,26 +84,10 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/xml_fragment_worker_hint_2"
-                            app:boxBackgroundMode="outline"
-                            android:layout_marginBottom="10dp">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/filePathEdit"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:inputType="textUri"
-                                android:imeOptions="flagNoExtractUi" />
-
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
                             android:hint="@string/xml_fragment_worker_hint_3"
                             app:placeholderText="输入格式：2026-06-16"
                             app:boxBackgroundMode="outline"
-                            android:layout_marginBottom="12dp">
+                            android:layout_marginBottom="10dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/compatibilityDateEdit"
@@ -120,7 +104,7 @@
                             android:layout_height="wrap_content"
                             android:hint="@string/xml_fragment_pages_hint_4"
                             app:placeholderText="@string/compatibility_flags_placeholder"
-                            android:layout_marginBottom="12dp">
+                            android:layout_marginBottom="10dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/compatibilityFlagsEdit"
@@ -129,6 +113,22 @@
                                 android:inputType="textMultiLine"
                                 android:minLines="1"
                                 android:gravity="top|start"
+                                android:imeOptions="flagNoExtractUi" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/xml_fragment_worker_hint_2"
+                            app:boxBackgroundMode="outline"
+                            android:layout_marginBottom="12dp">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/filePathEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textUri"
                                 android:imeOptions="flagNoExtractUi" />
 
                         </com.google.android.material.textfield.TextInputLayout>

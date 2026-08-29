@@ -431,12 +431,45 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // 显示大小
-        val options = DisplaySizeHelper.getOptions(requireContext())
-        val currentSize = options[DisplaySizeHelper.getSelectedIndex(requireContext())].first
-        dialogBinding.displaySizeCurrentText.text = getString(R.string.display_size_current, currentSize)
-        dialogBinding.displaySizeButton.setOnClickListener {
-            showDisplaySizeDialog()
+        // 显示大小：6 档分两行 ToggleGroup，代码层保持互斥（单选）；选中后立即保存并 recreate。
+        val sizeOptions = DisplaySizeHelper.getOptions(requireContext())
+        val selectedIdx = DisplaySizeHelper.getSelectedIndex(requireContext())
+        // Map: Button id → options index (0..5)
+        val idToIndex = mapOf(
+            R.id.displaySizeExtraSmallBtn to 0,
+            R.id.displaySizeSmallerBtn    to 1,
+            R.id.displaySizeSmallBtn      to 2,
+            R.id.displaySizeDefaultBtn    to 3,
+            R.id.displaySizeLargeBtn      to 4,
+            R.id.displaySizeExtraLargeBtn to 5,
+        )
+        val indexToId = idToIndex.entries.associate { (k, v) -> v to k }
+        // 初始化：把当前档对应的按钮设为 checked
+        indexToId[selectedIdx]?.let { id ->
+            if (idToIndex[id]!! < 3) dialogBinding.displaySizeRow1.check(id)
+            else dialogBinding.displaySizeRow2.check(id)
+        }
+        // 互斥 + 应用新值
+        fun onSizeChecked(checkedId: Int, whichRow: Int) {
+            if (checkedId == View.NO_ID) return
+            val idx = idToIndex[checkedId] ?: return
+            // 清掉另一个 ToggleGroup 的选中，避免双选中态视觉
+            if (whichRow == 1) dialogBinding.displaySizeRow2.clearChecked()
+            else dialogBinding.displaySizeRow1.clearChecked()
+            val scale = sizeOptions[idx].second
+            if (scale != DisplaySizeHelper.getFontScale(requireContext())) {
+                DisplaySizeHelper.setFontScale(requireContext(), scale)
+                // 延迟重启，让用户看到按钮切换效果
+                view?.postDelayed({
+                    if (isAdded) requireActivity().recreate()
+                }, 250)
+            }
+        }
+        dialogBinding.displaySizeRow1.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) onSizeChecked(checkedId, 1)
+        }
+        dialogBinding.displaySizeRow2.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) onSizeChecked(checkedId, 2)
         }
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
@@ -450,23 +483,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun showDisplaySizeDialog() {
-        val displayOptions = DisplaySizeHelper.getOptions(requireContext())
-        val labels = displayOptions.map { it.first }.toTypedArray()
-        val selectedIndex = DisplaySizeHelper.getSelectedIndex(requireContext())
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.display_size)
-            .setSingleChoiceItems(labels, selectedIndex) { dialog, which ->
-                val scale = displayOptions[which].second
-                DisplaySizeHelper.setFontScale(requireContext(), scale)
-                dialog.dismiss()
-                // 重启 Activity 以应用新的字体缩放
-                requireActivity().recreate()
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
-    }
-    
     private fun showAboutDialog() {
         val dialogBinding = DialogAboutBinding.inflate(LayoutInflater.from(requireContext()))
         
