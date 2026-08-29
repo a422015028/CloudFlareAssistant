@@ -1644,6 +1644,7 @@
     <string name="xml_fragment_pages_hint_2">生产分支</string>
     <string name="xml_fragment_pages_hint_3">默认兼容日期 2026-06-16</string>
     <string name="xml_fragment_pages_hint_4">兼容性标志（逗号或换行分隔）</string>
+    <string name="compatibility_flags_placeholder">例如：nodejs_compat</string>
     <string name="xml_fragment_pages_hint_5">项目文件(仅支持：.zip .js .htm .html )</string>
     <string name="xml_fragment_pages_2">部署项目</string>
     <string name="xml_fragment_pages_3">项目</string>
@@ -1892,10 +1893,8 @@
     <string name="xml_dialog_pages_runtime_settings_hint">兼容性日期</string>
     <string name="xml_dialog_pages_runtime_settings_helper">格式: YYYY-MM-DD (例: 2024-01-01)，点日历图标选择</string>
     <string name="xml_dialog_pages_runtime_settings_3">兼容性标志</string>
-    <string name="xml_dialog_pages_runtime_settings_hint_2">快速添加常用标志</string>
-    <string name="xml_dialog_pages_runtime_settings_helper_2">选择后自动追加到下方输入框</string>
     <string name="xml_dialog_pages_runtime_settings_hint_3">兼容性标志（可手动输入）</string>
-    <string name="xml_dialog_pages_runtime_settings_helper_3">每行一个标志，也可从上方快速添加</string>
+    <string name="xml_dialog_pages_runtime_settings_helper_3">每行一个标志，点击右侧下拉可快速添加</string>
     <string name="xml_dialog_pages_runtime_settings_4">放置模式 (Placement)</string>
     <string name="xml_dialog_pages_runtime_settings_5">默认（始终在靠近最终用户的位置处理请求）</string>
     <string name="xml_dialog_pages_runtime_settings_6">智能（自动选择最佳位置，Pages 仅支持此模式）</string>
@@ -1962,10 +1961,8 @@
     <string name="xml_dialog_worker_runtime_settings_hint">兼容性日期</string>
     <string name="xml_dialog_worker_runtime_settings_helper">格式: YYYY-MM-DD (例: 2024-01-01)，点日历图标选择</string>
     <string name="xml_dialog_worker_runtime_settings_2">兼容性标志</string>
-    <string name="xml_dialog_worker_runtime_settings_hint_2">快速添加常用标志</string>
-    <string name="xml_dialog_worker_runtime_settings_helper_2">选择后自动追加到下方输入框</string>
     <string name="xml_dialog_worker_runtime_settings_hint_3">兼容性标志（可手动输入）</string>
-    <string name="xml_dialog_worker_runtime_settings_helper_3">每行一个标志，也可从上方快速添加</string>
+    <string name="xml_dialog_worker_runtime_settings_helper_3">每行一个标志，点击右侧下拉可快速添加</string>
     <string name="xml_dialog_worker_runtime_settings_3">放置模式 (Placement)</string>
     <string name="xml_dialog_worker_runtime_settings_4">默认（始终在靠近最终用户的位置处理请求）</string>
     <string name="xml_dialog_worker_runtime_settings_5">智能（自动选择最佳位置，最大程度减少访问数据库或 API 的延迟）</string>

@@ -1666,6 +1666,7 @@
     <string name="xml_fragment_pages_hint_2">Production Branch</string>
     <string name="xml_fragment_pages_hint_3">Default compatibility date 2026-06-16</string>
     <string name="xml_fragment_pages_hint_4">Compatibility flags (comma or newline separated)</string>
+    <string name="compatibility_flags_placeholder">e.g. nodejs_compat</string>
     <string name="xml_fragment_pages_hint_5">Project file (supported: .zip .js .htm .html)</string>
     <string name="xml_fragment_pages_2">Deploy Project</string>
     <string name="xml_fragment_pages_3">Project</string>
@@ -1914,10 +1915,8 @@
     <string name="xml_dialog_pages_runtime_settings_hint">Compatibility Date</string>
     <string name="xml_dialog_pages_runtime_settings_helper">Format: YYYY-MM-DD (e.g. 2024-01-01), tap the calendar icon to pick</string>
     <string name="xml_dialog_pages_runtime_settings_3">Compatibility Flags</string>
-    <string name="xml_dialog_pages_runtime_settings_hint_2">Quick add common flags</string>
-    <string name="xml_dialog_pages_runtime_settings_helper_2">Auto-appended to the input box below when selected</string>
     <string name="xml_dialog_pages_runtime_settings_hint_3">Compatibility flags (you may type manually)</string>
-    <string name="xml_dialog_pages_runtime_settings_helper_3">One flag per line, or use quick-add above</string>
+    <string name="xml_dialog_pages_runtime_settings_helper_3">One flag per line, or use dropdown on the right to quick-add</string>
     <string name="xml_dialog_pages_runtime_settings_4">Placement Mode</string>
     <string name="xml_dialog_pages_runtime_settings_5">Default (always process requests closest to end users)</string>
     <string name="xml_dialog_pages_runtime_settings_6">Smart (auto-selects best location; Pages supports only this mode)</string>
@@ -1984,10 +1983,8 @@
     <string name="xml_dialog_worker_runtime_settings_hint">Compatibility Date</string>
     <string name="xml_dialog_worker_runtime_settings_helper">Format: YYYY-MM-DD (e.g. 2024-01-01), tap the calendar icon to pick</string>
     <string name="xml_dialog_worker_runtime_settings_2">Compatibility Flags</string>
-    <string name="xml_dialog_worker_runtime_settings_hint_2">Quick add common flags</string>
-    <string name="xml_dialog_worker_runtime_settings_helper_2">Auto-appended to the input box below when selected</string>
     <string name="xml_dialog_worker_runtime_settings_hint_3">Compatibility flags (you may type manually)</string>
-    <string name="xml_dialog_worker_runtime_settings_helper_3">One flag per line, or use quick-add above</string>
+    <string name="xml_dialog_worker_runtime_settings_helper_3">One flag per line, or use dropdown on the right to quick-add</string>
     <string name="xml_dialog_worker_runtime_settings_3">Placement Mode</string>
     <string name="xml_dialog_worker_runtime_settings_4">Default (always process requests closest to end users)</string>
     <string name="xml_dialog_worker_runtime_settings_5">Smart (auto-select best location to minimize DB / API latency)</string>

@@ -114,11 +114,12 @@
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/compatibilityFlagsTIL"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/xml_fragment_pages_hint_4"
-                            app:placeholderText="例如：nodejs_compat"
-                            app:boxBackgroundMode="outline"
+                            app:placeholderText="@string/compatibility_flags_placeholder"
                             android:layout_marginBottom="10dp">
 
                             <com.google.android.material.textfield.TextInputEditText
@@ -127,9 +128,7 @@
                                 android:layout_height="wrap_content"
                                 android:inputType="textMultiLine"
                                 android:minLines="1"
-                                android:maxLines="4"
                                 android:gravity="top|start"
-                                android:scrollbars="vertical"
                                 android:imeOptions="flagNoExtractUi" />
 
                         </com.google.android.material.textfield.TextInputLayout>

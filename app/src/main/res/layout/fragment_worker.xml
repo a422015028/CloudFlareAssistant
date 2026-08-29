@@ -113,6 +113,26 @@
 
                         </com.google.android.material.textfield.TextInputLayout>
 
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/compatibilityFlagsTIL"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/xml_fragment_pages_hint_4"
+                            app:placeholderText="@string/compatibility_flags_placeholder"
+                            android:layout_marginBottom="12dp">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/compatibilityFlagsEdit"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textMultiLine"
+                                android:minLines="1"
+                                android:gravity="top|start"
+                                android:imeOptions="flagNoExtractUi" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
                         <Button
                             android:id="@+id/selectFileBtn"
                             android:layout_width="match_parent"

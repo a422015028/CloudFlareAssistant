@@ -45,7 +45,7 @@ import com.muort.upworker.databinding.DialogPagesRuntimeSettingsBinding
 import com.muort.upworker.core.model.Placement
 import com.muort.upworker.databinding.FragmentPagesBinding
 import com.muort.upworker.feature.attachDatePicker
-import com.muort.upworker.feature.attachFlagSuggestions
+import com.muort.upworker.feature.attachInlineFlagSuggestions
 import com.muort.upworker.feature.bindPlacement
 import com.muort.upworker.databinding.ItemPagesProjectBinding
 import com.muort.upworker.feature.account.AccountViewModel
@@ -339,7 +339,7 @@ class PagesFragment : Fragment() {
         }
         dialogBinding.placementModeGroup.bindPlacement(null, null, envConfig?.placement?.mode)
         dialogBinding.dateInputLayout.attachDatePicker(this, dialogBinding.compatibilityDateInput)
-        dialogBinding.flagSuggestionsInput.attachFlagSuggestions(dialogBinding.compatibilityFlagsInput)
+        dialogBinding.compatibilityFlagsInput.attachInlineFlagSuggestions()
 
         // 环境选择
         dialogBinding.chipProduction.isChecked = true
@@ -1583,6 +1583,9 @@ class PagesFragment : Fragment() {
         binding.pagesCleanupDeploymentsBtn.setOnClickListener {
             showCleanupDeploymentsDialog()
         }
+
+        // 部署卡片：快速添加常用兼容性标志（点击输入框右侧下拉箭头直接追加）
+        binding.compatibilityFlagsEdit.attachInlineFlagSuggestions()
     }
     
     private fun selectFile() {

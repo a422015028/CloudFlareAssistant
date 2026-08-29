@@ -1,0 +1,11 @@
+<!-- 简化版下拉箭头，与 Material ExposedDropdownMenu 使用的箭头样式一致；
+     供兼容性标志输入框尾部当末图标使用（避开 Material 库私有 drawable 引用限制）。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M7 10l5 5 5-5z" />
+</vector>

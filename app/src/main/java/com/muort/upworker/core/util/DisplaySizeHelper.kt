@@ -47,6 +47,9 @@ object DisplaySizeHelper {
      *
      * 注意：此函数通常在 LocaleHelper.applyLocale 之后链式调用，必须**保留前一步已设置的 Locale**
      * （locale / locales / layoutDirection），否则会把语言退回系统默认值。
+     *
+     * 另外：构建 clone Configuration 时会将 uiMode 的 NIGHT_MASK 清为 UNDEFINED，
+     * 防止 density/fontScale 变更把前一步清掉的夜间快照又带回来，破坏 MODE_NIGHT_FOLLOW_SYSTEM。
      */
     fun wrap(context: Context): Context {
         val dm = context.resources.displayMetrics
@@ -67,6 +70,10 @@ object DisplaySizeHelper {
             config.setLocale(locale)
             config.setLocales(android.os.LocaleList(locale))
             config.setLayoutDirection(locale)
+            // 清除 night 快照，保证 AppCompat 根据 defaultNightMode 重新推导
+            config.uiMode =
+                (config.uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                        Configuration.UI_MODE_NIGHT_UNDEFINED
             context.createConfigurationContext(config)
         } else {
             context

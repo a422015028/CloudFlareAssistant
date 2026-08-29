@@ -2,10 +2,11 @@ package com.muort.upworker.feature
 
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.ListPopupWindow
 import android.widget.RadioGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.muort.upworker.R
@@ -26,6 +27,16 @@ val COMMON_COMPATIBILITY_FLAGS = arrayOf(
     "experimental_service_binding_extra_handlers",
     "fetch_refuses_unknown_protocols",
 )
+
+/** 从当前 View 向上查找包裹它的 TextInputLayout */
+private fun findParentTextInputLayout(v: View): TextInputLayout? {
+    var parent: View? = v.parent as? View
+    while (parent != null) {
+        if (parent is TextInputLayout) return parent
+        parent = parent.parent as? View
+    }
+    return null
+}
 
 /** 点输入框尾部日历图标弹 MaterialDatePicker，结果写入 dateInput */
 fun TextInputLayout.attachDatePicker(fragment: Fragment, dateInput: TextInputEditText) {
@@ -50,23 +61,40 @@ fun TextInputLayout.attachDatePicker(fragment: Fragment, dateInput: TextInputEdi
     }
 }
 
-/** 快速添加常用标志下拉：选中即追加一行到 flagsInput，去重后清空选择框 */
-fun MaterialAutoCompleteTextView.attachFlagSuggestions(flagsInput: TextInputEditText) {
-    setAdapter(
-        ArrayAdapter(
-            context,
-            android.R.layout.simple_list_item_1,
-            COMMON_COMPATIBILITY_FLAGS,
+/**
+ * 在兼容性标志多行输入框所在的 TIL 右端手动设置下拉箭头图标（与项目名称下拉框视觉一致），
+ * 点击箭头弹出"常用标志快速添加"下拉。
+ * - 不使用 Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu 样式，
+ *   因为该样式会强制要求内部控件是 AutoCompleteTextView，会破坏我们的多行/手动输入能力。
+ * - 行为：选中任意标志自动追加（换行分隔、自动去重），光标移到末尾，不替换现有文本。
+ */
+fun TextInputEditText.attachInlineFlagSuggestions() {
+    val til = findParentTextInputLayout(this) ?: return
+    val ctx = this.context
+    // 使用项目内置的下拉箭头 drawable（与 ExposedDropdownMenu 视觉一致），
+    // 不引用 Material 库 private 资源以避免 PrivateResource lint 报错。
+    til.endIconMode = TextInputLayout.END_ICON_CUSTOM
+    til.setEndIconDrawable(R.drawable.ic_dropdown_arrow)
+    til.setEndIconOnClickListener {
+        val popup = ListPopupWindow(ctx)
+        popup.setAdapter(
+            ArrayAdapter(ctx, android.R.layout.simple_list_item_1, COMMON_COMPATIBILITY_FLAGS)
         )
-    )
-    setOnItemClickListener { _, _, position, _ ->
-        val flag = COMMON_COMPATIBILITY_FLAGS[position]
-        val existing = flagsInput.text?.toString()?.trim() ?: ""
-        val current = existing.split(Regex("[,\n]")).map { it.trim() }
-        if (flag !in current) {
-            flagsInput.setText(if (existing.isEmpty()) flag else "$existing\n$flag")
+        popup.anchorView = til
+        popup.isModal = true
+        popup.width = til.width
+        popup.setOnItemClickListener { _, _, position, _ ->
+            val flag = COMMON_COMPATIBILITY_FLAGS[position]
+            val existing = this.text?.toString()?.trim() ?: ""
+            val current = existing.split(Regex("[,\n]")).map { it.trim() }
+            if (flag !in current) {
+                val next = if (existing.isEmpty()) flag else "$existing\n$flag"
+                this.setText(next)
+                this.setSelection(next.length)
+            }
+            popup.dismiss()
         }
-        setText("", false)
+        popup.show()
     }
 }
 

@@ -27,7 +27,7 @@ import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.WorkerScript
 import com.muort.upworker.core.model.DEFAULT_COMPATIBILITY_DATE
 import com.muort.upworker.feature.attachDatePicker
-import com.muort.upworker.feature.attachFlagSuggestions
+import com.muort.upworker.feature.attachInlineFlagSuggestions
 import com.muort.upworker.feature.bindPlacement
 import com.muort.upworker.feature.readPlacement
 import com.muort.upworker.core.repository.KvRepository
@@ -257,7 +257,10 @@ class WorkerFragment : Fragment() {
         binding.refreshBtn.setOnClickListener {
             loadScripts()
         }
-        
+
+        // 部署卡片：快速添加常用兼容性标志（点击输入框右侧下拉箭头直接追加）
+        binding.compatibilityFlagsEdit.attachInlineFlagSuggestions()
+
         // 添加多选模式切换和批量操作按钮
         setupBatchOperationUI()
     }
@@ -349,16 +352,23 @@ class WorkerFragment : Fragment() {
         // 获取用户输入的兼容性日期，为空时使用默认值
         val customCompatibilityDate = binding.compatibilityDateEdit.text.toString().trim()
             .takeIf { it.isNotEmpty() } ?: DEFAULT_COMPATIBILITY_DATE
-        
+
+        // 获取用户输入的兼容性标志（逗号或换行分隔，空值传 null）
+        val customCompatibilityFlags = binding.compatibilityFlagsEdit.text.toString().trim()
+            .takeIf { it.isNotEmpty() }
+            ?.split(Regex("[,\n]"))
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+
         // 直接从云端检查 Worker 是否存在，而不是依赖本地缓存列表
         // 这样即使本地列表为空（如刚打开 App），也能正确识别已存在的 Worker 并保留绑定
         // silent = true: 新脚本不存在时不显示错误提示
         viewModel.getWorkerSettings(account, workerName, silent = true) { result ->
             checkingDialog.dismiss()
             if (result is com.muort.upworker.core.model.Resource.Success) {
-                viewModel.uploadWorkerScriptWithBindings(account, workerName, file, customCompatibilityDate)
+                viewModel.uploadWorkerScriptWithBindings(account, workerName, file, customCompatibilityDate, customCompatibilityFlags)
             } else {
-                viewModel.uploadWorkerScript(account, workerName, file, customCompatibilityDate)
+                viewModel.uploadWorkerScript(account, workerName, file, customCompatibilityDate, customCompatibilityFlags)
             }
         }
     }
@@ -1528,7 +1538,7 @@ class WorkerFragment : Fragment() {
             settings.placement?.region?.let { dialogBinding.placementRegionInput.setText(it) }
             settings.placement?.host?.let { dialogBinding.placementHostInput.setText(it) }
             dialogBinding.dateInputLayout.attachDatePicker(this, dialogBinding.compatibilityDateInput)
-            dialogBinding.flagSuggestionsInput.attachFlagSuggestions(dialogBinding.compatibilityFlagsInput)
+            dialogBinding.compatibilityFlagsInput.attachInlineFlagSuggestions()
             
             // Show dialog
             MaterialAlertDialogBuilder(requireContext())

@@ -31,8 +31,9 @@ class WorkerViewModel @Inject constructor(
      * 上传脚本内容并自动保留原有 bindings（KV/R2/变量等）
      * 使用与编辑器相同的上传逻辑
      * @param customCompatibilityDate 用户自定义的兼容性日期，为空时保留原有配置或使用默认值
+     * @param customCompatibilityFlags 用户自定义的兼容性标志，为空时保留原有配置
      */
-    fun uploadWorkerScriptWithBindings(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null) {
+    fun uploadWorkerScriptWithBindings(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null, customCompatibilityFlags: List<String>? = null) {
         viewModelScope.launch {
             _uploadState.value = UploadState.Uploading
             
@@ -45,16 +46,16 @@ class WorkerViewModel @Inject constructor(
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
                 
                 try {
-                    // 获取原有配置以保留bindings（新脚本可能没有配置，失败时使用空配置继续上传）
-                    val (originalBindings, originalCompatibilityDate) = when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
+                    // 获取原有配置以保留bindings和兼容性配置
+                    val (originalBindings, originalCompatibilityDate, originalCompatibilityFlags) = when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
                         is Resource.Success -> {
-                            Pair(settings.data.bindings, settings.data.compatibilityDate)
+                            Triple(settings.data.bindings, settings.data.compatibilityDate, settings.data.compatibilityFlags)
                         }
                         is Resource.Error -> {
                             Timber.w("No existing settings found for script '$scriptName' (new script?), proceeding with empty bindings")
-                            Pair(null, null)
+                            Triple(null, null, null)
                         }
-                        else -> Pair(null, null)
+                        else -> Triple(null, null, null)
                     }
                     
                     // 直接使用原始内容，不做任何转换
@@ -69,9 +70,14 @@ class WorkerViewModel @Inject constructor(
                     val finalCompatibilityDate = customCompatibilityDate?.takeIf { it.isNotBlank() } 
                         ?: originalCompatibilityDate
                     
+                    // 用户自定义标志（非空）> 原有标志 > null
+                    val finalCompatibilityFlags = customCompatibilityFlags?.takeIf { it.isNotEmpty() }
+                        ?: originalCompatibilityFlags
+                    
                     // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
                     val metadata = com.muort.upworker.core.model.WorkerMetadata(
                         compatibilityDate = finalCompatibilityDate,
+                        compatibilityFlags = finalCompatibilityFlags,
                         bindings = cleanedBindings
                     )
                     
@@ -130,7 +136,7 @@ class WorkerViewModel @Inject constructor(
         _cleanupResults.value = emptyList()
     }
     
-    fun uploadWorkerScript(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null) {
+    fun uploadWorkerScript(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null, customCompatibilityFlags: List<String>? = null) {
         viewModelScope.launch {
             _uploadState.value = UploadState.Uploading
             
@@ -142,7 +148,8 @@ class WorkerViewModel @Inject constructor(
                 tempFile.writeText(content, Charsets.UTF_8)
                 
                 val metadata = com.muort.upworker.core.model.WorkerMetadata(
-                    compatibilityDate = customCompatibilityDate?.takeIf { it.isNotBlank() }
+                    compatibilityDate = customCompatibilityDate?.takeIf { it.isNotBlank() },
+                    compatibilityFlags = customCompatibilityFlags?.takeIf { it.isNotEmpty() }
                 )
                 
                 when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {

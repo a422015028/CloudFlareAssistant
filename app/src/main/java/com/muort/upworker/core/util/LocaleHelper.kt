@@ -96,12 +96,20 @@ object LocaleHelper {
      *
      * minSdk = 26 (O) > N (24) → 直接使用 LocaleList 设置完整回退链，
      * 并调用 createConfigurationContext 让 Context 真正拿到新资源。
+     *
+     * 注意：会把 uiMode 的 NIGHT_MASK 清为 UNDEFINED，避免前一次 clone 的
+     * Configuration 里残留"浅色/深色快照"，导致 AppCompatDelegate 的
+     * MODE_NIGHT_FOLLOW_SYSTEM 无法根据系统重新计算主题。
      */
     private fun updateResources(context: Context, locale: Locale): Context {
         val config = Configuration(context.resources.configuration)
         config.setLocale(locale)
         config.setLayoutDirection(locale)
         config.setLocales(LocaleList(locale))
+        // 清除 night 快照，让 AppCompat 根据 defaultNightMode 重新生效
+        config.uiMode =
+            (config.uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                    Configuration.UI_MODE_NIGHT_UNDEFINED
         return context.createConfigurationContext(config)
     }
 
