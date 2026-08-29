@@ -17,40 +17,36 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
         cache: 'gradle'
-    
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    
+
     - name: Decode Keystore
       env:
         KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
       run: |
         echo $KEYSTORE_BASE64 | base64 -d > $GITHUB_WORKSPACE/app/keystore.jks
-    
+
     - name: Clean Build Cache
       run: ./gradlew clean
 
     - name: Run Lint (Release) — HardcodedText 拦截 & i18n 回归
       run: |
         ./gradlew :app:lintRelease --console=plain
-      # 说明：
-      # 1. abortOnError=true + warningsAsErrors=true → 未基线的 HardcodedText/MissingTranslation 立即 FAIL
-      # 2. checkReleaseBuilds=true 也会让 assembleRelease 自动 dependOn lintRelease，
-      #    这里单独拆一步是为了让 CI 日志更早、更清晰地显示 "lint 失败" vs "打包失败"。
 
     - name: Upload Lint Report (Debug + Release)
-      if: always()  # 即使 build 失败，也要上传报告给排查
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: lint-reports
@@ -72,7 +68,7 @@ jobs:
           -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
           -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
           -Pandroid.injected.signing.key.password=$KEY_PASSWORD
-    
+
     - name: Get version info
       id: version
       run: |
@@ -80,28 +76,25 @@ jobs:
         VERSION_CODE=$(grep "versionCode" app/build.gradle.kts | awk -F'=' '{print $2}' | tr -d ' ')
         echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
         echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
-        # 获取 tag（push tag 或手动输入）
         if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
           echo "tag_name=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
         else
           echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
         fi
-    
+
     - name: Rename APK
       run: |
         mv app/build/outputs/apk/release/app-release.apk \
            app/build/outputs/apk/release/CloudFlareAssistant-v${{ steps.version.outputs.version_name }}.apk
-    
+
     - name: Prepare Release Notes
       id: release_notes
       run: |
         TAG_NAME="${{ steps.version.outputs.tag_name }}"
-        # 检查是否存在对应的 release notes 文件
         RELEASE_NOTES_FILE="RELEASE_NOTES_${TAG_NAME}.md"
-        
+
         if [ -f "$RELEASE_NOTES_FILE" ]; then
           echo "使用 $RELEASE_NOTES_FILE 作为发布说明"
-          # 读取文件内容，添加版本信息头部
           {
             echo "## 🎉 CloudFlare Assistant ${TAG_NAME} 发布"
             echo ""
@@ -142,7 +135,8 @@ jobs:
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
+
+    # ==================== 修复后的 Telegram 推送步骤 ====================
     - name: Send APK to Telegram
       if: success()
       env:
@@ -153,40 +147,29 @@ jobs:
         TAG_NAME="${{ steps.version.outputs.tag_name }}"
         VERSION_NAME="${{ steps.version.outputs.version_name }}"
         VERSION_CODE="${{ steps.version.outputs.version_code }}"
-        RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG_NAME}"
         APK_FILE="app/build/outputs/apk/release/CloudFlareAssistant-v${VERSION_NAME}.apk"
-        
-        # 读取发布说明（简化版本）
-        RELEASE_NOTES_FILE="RELEASE_NOTES_${TAG_NAME}.md"
-        if [ -f "$RELEASE_NOTES_FILE" ]; then
-          # 提取主要功能点（前20行）
-          NOTES=$(head -n 20 "$RELEASE_NOTES_FILE" | sed 's/^#//' | sed 's/"/\\"/g')
-        else
-          NOTES="新版本发布"
-        fi
-        
-        # 构建 Telegram 消息
+
+        # 详细更新说明链接（直接指向 GitHub 仓库中的 RELEASE_NOTES 文件）
+        RELEASE_NOTES_URL="https://github.com/a422015028/CloudFlareAssistant/blob/main/RELEASE_NOTES_${TAG_NAME}.md"
+
+        # 构建简短 caption（不含长篇文本，只有链接）
         CAPTION="🎉 <b>CloudFlare Assistant ${TAG_NAME} 发布</b>
-        
+
         📱 <b>版本信息</b>
         • 版本号: ${VERSION_NAME}
         • Build: ${VERSION_CODE}
         • 发布日期: $(date +'%Y年%m月%d日')
-        
-        ${NOTES}
-        
-        🔗 <b>相关链接</b>
-        <a href=\"${RELEASE_URL}\">📄 查看完整发布说明</a>
-        
+
+        📄 <b>详细更新说明</b>
+        <a href=\"${RELEASE_NOTES_URL}\">点击查看完整更新日志</a>
+
         📦 <b>安装要求</b>
         • 最低版本: Android 8.0 (API 26)
         • 目标版本: Android 16 (API 36)"
-        
+
         # 发送 APK 文件到 Telegram（支持话题）
         echo "📤 正在发送 APK 文件到 Telegram..."
-        
         if [ -n "$TELEGRAM_TOPIC_ID" ]; then
-          # 发送到指定话题
           curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
             -F "chat_id=${TELEGRAM_CHAT_ID}" \
             -F "message_thread_id=${TELEGRAM_TOPIC_ID}" \
@@ -194,12 +177,10 @@ jobs:
             -F "caption=${CAPTION}" \
             -F "parse_mode=HTML"
         else
-          # 发送到群组主聊天
           curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
             -F "chat_id=${TELEGRAM_CHAT_ID}" \
             -F "document=@${APK_FILE}" \
             -F "caption=${CAPTION}" \
             -F "parse_mode=HTML"
         fi
-        
         echo "✅ APK 文件和发布说明已发送到 Telegram"
