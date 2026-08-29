@@ -8,6 +8,19 @@ import javax.inject.Inject
 class LogOkHttpInterceptor @Inject constructor() : Interceptor {
     companion object {
         private const val MAX_BODY_LOG_BYTES = 1024 * 1024L
+        private val SENSITIVE_HEADERS = setOf(
+            "authorization",
+            "x-auth-email",
+            "x-auth-key",
+            "x-auth-token",
+            "cf-access-client-id",
+            "cf-access-client-secret",
+            "cookie",
+            "set-cookie"
+        )
+
+        private fun redactHeaderValue(name: String, value: String): String =
+            if (name.lowercase() in SENSITIVE_HEADERS) "██" else value
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -18,7 +31,7 @@ class LogOkHttpInterceptor @Inject constructor() : Interceptor {
             append("\n--- 请求 ---    $timeStr\n")
             append("URL: ${request.url}\n")
             append("Method: ${request.method}\n")
-            request.headers.forEach { append("Header: ${it.first}: ${it.second}\n") }
+            request.headers.forEach { append("Header: ${it.first}: ${redactHeaderValue(it.first, it.second)}\n") }
             request.body?.let { body ->
                 val contentLength = body.contentLength()
                 when {
@@ -52,7 +65,7 @@ class LogOkHttpInterceptor @Inject constructor() : Interceptor {
             append("--- 响应 ---    $timeStr2\n")
             append("URL: ${response.request.url}\n")
             append("Code: ${response.code}\n")
-            response.headers.forEach { append("Header: ${it.first}: ${it.second}\n") }
+            response.headers.forEach { append("Header: ${it.first}: ${redactHeaderValue(it.first, it.second)}\n") }
             val peeked = response.peekBody(MAX_BODY_LOG_BYTES)
             append("Body: ${peeked.string()}\n")
         }

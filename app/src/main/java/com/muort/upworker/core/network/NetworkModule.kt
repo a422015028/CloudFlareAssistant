@@ -26,6 +26,17 @@ object NetworkModule {
     fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
+            // 脱敏敏感请求头，防止凭证泄露到 logcat
+            arrayOf(
+                "Authorization",
+                "X-Auth-Email",
+                "X-Auth-Key",
+                "X-Auth-Token",
+                "CF-Access-Client-Id",
+                "CF-Access-Client-Secret",
+                "Cookie",
+                "Set-Cookie"
+            ).forEach { redactHeader(it) }
         }
     }
     
