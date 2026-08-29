@@ -139,7 +139,7 @@ class PagesFragment : Fragment() {
                 inputStream.close()
                 
                 selectedFile = cacheFile
-                binding.filePathEdit.setText(cacheFile.name)
+                binding.filePathEdit.setText(cacheFile.absolutePath)
                 
                 // Auto-populate project name from file name if empty
                 // 格式：原文件名-4位随机字母 (如: test-hfdh)
@@ -1562,10 +1562,6 @@ class PagesFragment : Fragment() {
             selectFile()
         }
         
-        binding.filePathEdit.setOnClickListener {
-            selectFile()
-        }
-        
         // Create project button
         binding.createProjectBtn.setOnClickListener {
             showCreateProjectDialog()
@@ -1608,7 +1604,12 @@ class PagesFragment : Fragment() {
     private fun deployProject() {
         val projectName = binding.projectNameEdit.text.toString().trim()
         val branch = binding.branchEdit.text.toString().trim()
-        val file = selectedFile
+        // 优先使用通过文件选择器选择的文件（已拷贝到 cacheDir），
+        // 否则按输入框中的完整路径构造 File（支持用户手动填写路径）
+        val file = selectedFile ?: run {
+            val path = binding.filePathEdit.text.toString().trim()
+            if (path.isNotEmpty()) java.io.File(path) else null
+        }
 
         when {
             projectName.isEmpty() -> {
