@@ -2553,6 +2553,7 @@ class WorkerScriptsAdapter(
                 binding.historyBtn.visibility = android.view.View.GONE
                 binding.editBtn.visibility = android.view.View.GONE
                 binding.triggerBtn.visibility = android.view.View.GONE
+                binding.runtimeSettingsBtn.visibility = android.view.View.GONE
                 binding.logsBtn.visibility = android.view.View.GONE
                 
                 val isSelected = selectedItems.contains(script.id)
@@ -2573,6 +2574,7 @@ class WorkerScriptsAdapter(
                 binding.historyBtn.visibility = android.view.View.VISIBLE
                 binding.editBtn.visibility = android.view.View.VISIBLE
                 binding.triggerBtn.visibility = android.view.View.VISIBLE
+                binding.runtimeSettingsBtn.visibility = android.view.View.VISIBLE
                 binding.logsBtn.visibility = android.view.View.VISIBLE
                 updateSelectionUI(binding.root, false)
                 binding.root.setOnClickListener(null)

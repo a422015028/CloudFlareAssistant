@@ -36,7 +36,7 @@
     <issue id="NewerVersionAvailable" severity="ignore" />
     <issue id="AndroidGradlePluginVersion" severity="ignore" />
     <issue id="MinSdkTooLow" severity="ignore" />
-    <issue id="TargetApi" severity="warning" />
+    <issue id="OldTargetApi" severity="warning" />
 
     <!-- 第三方库内部 lint 问题一般不修复（只抓当前模块源码）-->
     <issue id="all">

@@ -2,39 +2,6 @@
 <issues format="6" by="lint 8.13.2" type="baseline" client="gradle" dependencies="true" name="AGP (8.13.2)" variant="all" version="8.13.2">
 
     <issue
-        id="UnknownIssueId"
-        message="Unknown issue id &quot;TargetApi&quot;. Did you mean &apos;OldTargetApi&apos; (Target SDK attribute is not targeting latest version) ?"
-        errorLine1="    &lt;issue id=&quot;TargetApi&quot; severity=&quot;warning&quot; />"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="lint.xml"
-            line="39"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="UnknownIssueId"
-        message="Unknown issue id &quot;TargetApi&quot;. Did you mean &apos;OldTargetApi&apos; (Target SDK attribute is not targeting latest version) ?"
-        errorLine1="    &lt;issue id=&quot;TargetApi&quot; severity=&quot;warning&quot; />"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="lint.xml"
-            line="39"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="UnknownIssueId"
-        message="Unknown issue id &quot;TargetApi&quot;. Did you mean &apos;OldTargetApi&apos; (Target SDK attribute is not targeting latest version) ?"
-        errorLine1="    &lt;issue id=&quot;TargetApi&quot; severity=&quot;warning&quot; />"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="lint.xml"
-            line="39"
-            column="5"/>
-    </issue>
-
-    <issue
         id="UseGetLayoutInflater"
         message="Use of LayoutInflater.from(Context) detected. Consider using layoutInflater instead"
         errorLine1="        _binding = DialogSnippetRuleBinding.inflate(LayoutInflater.from(requireContext()))"
@@ -646,28 +613,6 @@
             file="build.gradle.kts"
             line="24"
             column="9"/>
-    </issue>
-
-    <issue
-        id="PropertyEscape"
-        message="Windows file separators (`\`) and drive letter separators (&apos;:&apos;) must be escaped (`\\`) in property files; use F\\:/SDK\\r"
-        errorLine1="sdk.dir=F:/SDK"
-        errorLine2="         ~">
-        <location
-            file="../local.properties"
-            line="1"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="PropertyEscape"
-        message="Windows file separators (`\`) and drive letter separators (&apos;:&apos;) must be escaped (`\\`) in property files; use F\\:/jdk-21.0.11\\r"
-        errorLine1="jdk.dir=F:/jdk-21.0.11"
-        errorLine2="         ~">
-        <location
-            file="../local.properties"
-            line="2"
-            column="10"/>
     </issue>
 
     <issue
