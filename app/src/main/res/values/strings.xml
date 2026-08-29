@@ -2602,7 +2602,6 @@
     <string name="repo_r2_missing_credentials">请先配置R2访问凭证（Access Key ID和Secret Access Key）</string>
     <string name="repo_r2_list_objects_failed_format">加载对象列表失败: %1$s</string>
     <string name="repo_r2_upload_failed_format">上传失败: %1$s</string>
-    <string name="repo_r2_download_failed_format">下载失败: %1$s</string>
     <string name="repo_r2_delete_failed_format">删除失败: %1$s</string>
     <string name="repo_r2_create_no_result">创建成功但无返回数据</string>
 
@@ -2880,11 +2879,8 @@
     <string name="pages_deploy_unsupported_file_type">仅支持 .zip、.js 或 .html 文件</string>
     <string name="pages_deploy_file_size_exceeded">文件大小不能超过 25MB</string>
     <!-- 远程 URL 下载（脚本/项目文件输入框中粘贴 https:// 时使用） -->
-    <string name="remote_download_stage">正在下载远程文件… %1$s</string>
-    <string name="remote_download_failed">下载失败：%1$s</string>
     <string name="remote_download_unsupported_url">仅支持 http(s):// 链接</string>
     <string name="remote_download_unsupported_type">远程文件类型不支持，仅支持 .js/.zip/.html/.htm</string>
-    <string name="remote_download_too_large">远程文件超过 25MB</string>
     <string name="pages_deploy_title_logs">部署日志</string>
     <string name="pages_deploy_project_label_template">项目: %1$s</string>
     <string name="pages_deploy_no_logs_to_copy">暂无日志可复制</string>

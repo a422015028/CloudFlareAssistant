@@ -1,7 +1,7 @@
 package com.muort.upworker.core.util
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -32,7 +32,7 @@ fun isRemoteUrl(pathOrUrl: String): Boolean {
 fun hasSupportedExtension(nameOrUrl: String): Boolean {
     val clean = nameOrUrl.trim()
     val pathPart = when {
-        isRemoteUrl(clean) -> (Uri.parse(clean).path ?: clean.substringAfter("://"))
+        isRemoteUrl(clean) -> (clean.toUri().path ?: clean.substringAfter("://"))
         else -> clean.substringAfterLast(File.separatorChar, clean)
     }
     val ext = pathPart.substringAfterLast('.', "").lowercase()
@@ -179,7 +179,7 @@ internal object RemoteFileResolverInternals {
     val ALLOWED_EXTENSIONS = setOf("js", "zip", "html", "htm")
 
     fun extractFileName(url: String): String {
-        val uri = runCatching { Uri.parse(url) }.getOrNull()
+        val uri = runCatching { url.toUri() }.getOrNull()
         val path = uri?.path?.takeIf { it.isNotBlank() } ?: url.substringAfter("://")
         val last = path.trimEnd('/').substringAfterLast('/')
         if (last.isBlank() || '.' !in last) {

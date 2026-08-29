@@ -1715,7 +1715,7 @@ class PagesFragment : Fragment() {
                         binding.createProjectBtn.isEnabled = true
                         val msg = (result.exceptionOrNull()?.message
                             ?: getString(R.string.remote_download_unsupported_url))
-                        showToast(getString(R.string.remote_download_failed, msg))
+                        showToast(getString(R.string.msg_download_failed, msg))
                     }
                 }
             }

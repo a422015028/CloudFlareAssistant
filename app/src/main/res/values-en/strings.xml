@@ -2624,7 +2624,6 @@
     <string name="repo_r2_missing_credentials">Please configure R2 access credentials first (Access Key ID and Secret Access Key)</string>
     <string name="repo_r2_list_objects_failed_format">Failed to load object list: %1$s</string>
     <string name="repo_r2_upload_failed_format">Upload failed: %1$s</string>
-    <string name="repo_r2_download_failed_format">Download failed: %1$s</string>
     <string name="repo_r2_delete_failed_format">Delete failed: %1$s</string>
     <string name="repo_r2_create_no_result">Created successfully but no response data returned</string>
 
@@ -2902,11 +2901,8 @@
     <string name="pages_deploy_unsupported_file_type">Only .zip, .js, or .html files are supported</string>
     <string name="pages_deploy_file_size_exceeded">File size cannot exceed 25MB</string>
     <!-- Remote URL download (when user pastes https:// into script/project file input) -->
-    <string name="remote_download_stage">Downloading remote file… %1$s</string>
-    <string name="remote_download_failed">Download failed: %1$s</string>
     <string name="remote_download_unsupported_url">Only http(s):// URLs are supported</string>
     <string name="remote_download_unsupported_type">Unsupported remote file type, only .js/.zip/.html/.htm are allowed</string>
-    <string name="remote_download_too_large">Remote file exceeds 25MB</string>
     <string name="pages_deploy_title_logs">Deployment Logs</string>
     <string name="pages_deploy_project_label_template">Project: %1$s</string>
     <string name="pages_deploy_no_logs_to_copy">No logs to copy</string>

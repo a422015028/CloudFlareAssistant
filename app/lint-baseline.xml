@@ -8593,22 +8593,6 @@
 
     <issue
         id="DuplicateStrings"
-        message="Duplicate string value `下载失败: %1$s`, used in `msg_download_failed` and `repo_r2_download_failed_format`"
-        errorLine1="    &lt;string name=&quot;msg_download_failed&quot;>下载失败: %1$s&lt;/string>"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="585"
-            column="5"/>
-        <location
-            file="src/main/res/values/strings.xml"
-            line="2605"
-            column="5"
-            message="Duplicates value in `msg_download_failed`"/>
-    </issue>
-
-    <issue
-        id="DuplicateStrings"
         message="Duplicate string value `未知错误`, used in `msg_unknown_error`, `vm_msg_generic_unknown_error` and `vm_msg_worker_cleanup_state_unknown_error`"
         errorLine1="    &lt;string name=&quot;msg_unknown_error&quot;>未知错误&lt;/string>"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
@@ -8772,22 +8756,6 @@
             line="3083"
             column="5"
             message="Duplicates value in `dialog_rollback`"/>
-    </issue>
-
-    <issue
-        id="DuplicateStrings"
-        message="Duplicate string value `Download failed: %1$s`, used in `msg_download_failed` and `repo_r2_download_failed_format`"
-        errorLine1="    &lt;string name=&quot;msg_download_failed&quot;>Download failed: %1$s&lt;/string>"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values-en/strings.xml"
-            line="606"
-            column="5"/>
-        <location
-            file="src/main/res/values-en/strings.xml"
-            line="2627"
-            column="5"
-            message="Duplicates value in `msg_download_failed`"/>
     </issue>
 
     <issue
