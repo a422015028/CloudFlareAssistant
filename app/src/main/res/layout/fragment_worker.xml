@@ -86,17 +86,14 @@
                             android:layout_height="wrap_content"
                             android:hint="@string/xml_fragment_worker_hint_2"
                             app:boxBackgroundMode="outline"
-                            app:endIconMode="custom"
-                            app:endIconDrawable="@android:drawable/ic_menu_search"
                             android:layout_marginBottom="10dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/filePathEdit"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="none"
-                                android:focusable="false"
-                                android:clickable="true" />
+                                android:inputType="textUri"
+                                android:imeOptions="flagNoExtractUi" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 

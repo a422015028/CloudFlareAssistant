@@ -1604,11 +1604,13 @@ class PagesFragment : Fragment() {
     private fun deployProject() {
         val projectName = binding.projectNameEdit.text.toString().trim()
         val branch = binding.branchEdit.text.toString().trim()
-        // 优先使用通过文件选择器选择的文件（已拷贝到 cacheDir），
-        // 否则按输入框中的完整路径构造 File（支持用户手动填写路径）
-        val file = selectedFile ?: run {
-            val path = binding.filePathEdit.text.toString().trim()
-            if (path.isNotEmpty()) java.io.File(path) else null
+        // 优先使用输入框中用户手动填写/修改的完整路径；
+        // 若输入框为空，再回退到通过文件选择器已缓存的文件
+        val filePathInput = binding.filePathEdit.text.toString().trim()
+        val file = if (filePathInput.isNotEmpty()) {
+            java.io.File(filePathInput)
+        } else {
+            selectedFile
         }
 
         when {
