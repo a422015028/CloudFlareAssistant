@@ -24,6 +24,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.DnsRecordRequest
@@ -36,6 +37,7 @@ import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.PagesProjectDetail
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.TailResult
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.feature.pages.CleanupResult
 import com.muort.upworker.core.repository.KvRepository
 import com.muort.upworker.core.repository.R2Repository
@@ -245,6 +247,47 @@ class PagesFragment : Fragment() {
             onLogsClick = { project ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     showProjectLiveLogs(account, project)
+                }
+            },
+            onEnvSyncClick = { project, itemBinding ->
+                val account = accountViewModel.defaultAccount.value
+                if (account != null) {
+                    // 先禁用按钮、显示进行中文字；loadProjectDetail 拿到 production 环境配置
+                    itemBinding.envSyncButton.isEnabled = false
+                    itemBinding.envSyncProgressText.visibility = View.VISIBLE
+                    itemBinding.envSyncProgressText.text = getString(R.string.pages_env_sync_in_progress)
+                    pagesViewModel.getProjectDetail(account, project.name) { res ->
+                        val shared = when (res) {
+                            is Resource.Success ->
+                                res.data.deploymentConfigs?.production
+                                    ?: com.muort.upworker.core.model.EnvironmentConfig(
+                                        envVars = emptyMap(),
+                                        kvNamespaces = emptyMap(),
+                                        r2Buckets = emptyMap(),
+                                        d1Databases = emptyMap(),
+                                        durableObjects = emptyMap(),
+                                        services = emptyMap(),
+                                        compatibilityDate = null,
+                                        compatibilityFlags = null,
+                                        placement = null
+                                    )
+                            else ->
+                                com.muort.upworker.core.model.EnvironmentConfig(
+                                    envVars = emptyMap(),
+                                    kvNamespaces = emptyMap(),
+                                    r2Buckets = emptyMap(),
+                                    d1Databases = emptyMap(),
+                                    durableObjects = emptyMap(),
+                                    services = emptyMap(),
+                                    compatibilityDate = null,
+                                    compatibilityFlags = null,
+                                    placement = null
+                                )
+                        }
+                        pagesViewModel.syncDualEnvConfigs(account, project.name, shared)
+                    }
+                } else {
+                    showToast(getString(R.string.msg_please_select_account_first))
                 }
             },
             onSelectionModeClick = { project, isSelected ->
@@ -1958,6 +2001,30 @@ class PagesFragment : Fragment() {
                             binding.filePathEdit.text?.clear()
                             selectedFile = null
                         }
+                        // ====== Pages Env Sync 结果反馈到当前等待的项目卡片 ======
+                        val resStr = message as? UiMessage.ResourceString
+                        if (resStr != null) {
+                            val envSyncIds = setOf(
+                                R.string.pages_env_sync_in_progress,
+                                R.string.pages_env_sync_ok_format,
+                                R.string.pages_env_sync_production_fail_format,
+                                R.string.pages_env_sync_preview_fail_format
+                            )
+                            if (envSyncIds.contains(resStr.resId) &&
+                                resStr.resId != R.string.pages_env_sync_in_progress
+                            ) {
+                                val rv = binding.projectRecyclerView
+                                val formatted = getString(resStr.resId, *resStr.args)
+                                for (i in 0 until rv.childCount) {
+                                    val child = rv.getChildAt(i)
+                                    val itemBinding = ItemPagesProjectBinding.bind(child)
+                                    if (itemBinding.envSyncProgressText.isVisible) {
+                                        itemBinding.envSyncProgressText.text = formatted
+                                        itemBinding.envSyncButton.isEnabled = true
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 
@@ -2926,6 +2993,7 @@ class PagesFragment : Fragment() {
         private val onAddDomainClick: (PagesProject) -> Unit,
         private val onRuntimeSettingsClick: (PagesProject) -> Unit,
         private val onLogsClick: (PagesProject) -> Unit,
+        private val onEnvSyncClick: (PagesProject, ItemPagesProjectBinding) -> Unit = { _, _ -> },
         private val onSelectionModeClick: (PagesProject, Boolean) -> Unit = { _, _ -> }
     ) : RecyclerView.Adapter<ProjectAdapter.ViewHolder>() {
         
@@ -2983,6 +3051,8 @@ class PagesFragment : Fragment() {
                     binding.addDomainBtn.visibility = android.view.View.GONE
                     binding.runtimeSettingsBtn.visibility = android.view.View.GONE
                     binding.logsBtn.visibility = android.view.View.GONE
+                    binding.envSyncButton.visibility = android.view.View.GONE
+                    binding.envSyncProgressText.visibility = android.view.View.GONE
                     
                     val isSelected = selectedItems.contains(project.name)
                     updateSelectionUI(binding.root, isSelected)
@@ -3004,6 +3074,7 @@ class PagesFragment : Fragment() {
                     binding.addDomainBtn.visibility = android.view.View.VISIBLE
                     binding.runtimeSettingsBtn.visibility = android.view.View.VISIBLE
                     binding.logsBtn.visibility = android.view.View.VISIBLE
+                    binding.envSyncButton.visibility = android.view.View.VISIBLE
                     updateSelectionUI(binding.root, false)
                     binding.root.setOnClickListener(null)
                 }
@@ -3054,6 +3125,10 @@ class PagesFragment : Fragment() {
                 
                 binding.deleteBtn.setOnClickListener {
                     onDeleteClick(project)
+                }
+
+                binding.envSyncButton.setOnClickListener {
+                    onEnvSyncClick(project, binding)
                 }
             }
             

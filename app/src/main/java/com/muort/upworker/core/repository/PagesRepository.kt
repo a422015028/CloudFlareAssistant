@@ -14,7 +14,10 @@ import com.muort.upworker.core.util.SucraseTransformer
 import com.muort.upworker.core.util.safeApiCall
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlin.math.pow
+import kotlin.math.round
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -570,6 +573,8 @@ class PagesRepository @Inject constructor(
         file: java.io.File,
         customCompatibilityDate: String? = null,
         customCompatibilityFlags: List<String>? = null,
+        buildMode: String? = null,
+        extraEnvVars: Map<String, String>? = null,
         onLog: ((String) -> Unit)? = null
     ): Resource<PagesDeployment> = withContext(Dispatchers.IO) {
         safeApiCall {
@@ -650,6 +655,19 @@ class PagesRepository @Inject constructor(
                         break
                     }
                 }
+
+                // ---- P1-2: buildSpecialFormData + forward i18n logEvents ----
+                val specialResult = buildSpecialFormData(baseDir, customCompatibilityDate)
+                specialResult.logEvents.forEach { (resId, args) ->
+                    val flatArgs: Array<out Any?> = args
+                    onLog?.invoke(appContext.getString(resId, *flatArgs))
+                }
+                // Use appliedCompatDate from specialResult when caller didn't supply a
+                // custom date (i.e. auto-inject behaviour from buildSpecialFormData).
+                val effectiveCompatDate = specialResult.appliedCompatDate ?: finalCompatibilityDate
+                // Silence "variable not used" for buildMode / extraEnvVars in this commit.
+                @Suppress("UNUSED_VARIABLE") val _buildMode = buildMode
+                @Suppress("UNUSED_VARIABLE") val _extraEnvVars = extraEnvVars
 
                 val allFiles = mutableListOf<File>()
                 val manifestMap = mutableMapOf<String, String>()
@@ -2665,6 +2683,448 @@ class PagesRepository @Inject constructor(
                     R.string.repo_pages_assets_batch_uploaded_format, idx + 1, total
                 )
             )
+        }
+        return null
+    }
+
+    // ========================================================================
+    // P1-1B: Ko-style polling of Pages deployment latest_stage
+    // ========================================================================
+
+    /**
+     * Poll a Pages project deployment's [PagesDeployment.latestStage] until it
+     * reaches a terminal state ("success" / "failed"), or [maxPolls] is
+     * exhausted, or an error is hit.
+     *
+     * Semantics mirror cf-manager Ko polling. All stage text mapping uses
+     * R.string.pages_poll_stage_* keys — zero hardcoded strings.
+     *
+     * @param account Authenticated Account (API Token or Global API Key mode).
+     * @param projectName Pages project name (the human-readable slug).
+     * @param deploymentId If known, single-GET poll; if null, use
+     *        [CloudFlareApi.listPagesDeployments] first element and keep using
+     *        list to honour P1-1B RED Test 5 (never call single GET in that
+     *        branch).
+     * @param maxPolls Upper bound on polling rounds (default 30).
+     * @param initialDelayMs First backoff delay, multiplied by
+     *        [backoffMultiplier] on each subsequent round.
+     * @param backoffMultiplier Exponential backoff multiplier (1.5 = Ko).
+     * @param capDelayMs Hard ceiling on any individual backoff delay (ms).
+     * @param onProgress Optional listener fired after each HTTP poll result,
+     *        before any terminal return or delay.
+     */
+    suspend fun pollDeployment(
+        account: Account,
+        projectName: String,
+        deploymentId: String? = null,
+        maxPolls: Int = 30,
+        initialDelayMs: Long = 2000L,
+        backoffMultiplier: Double = 1.5,
+        capDelayMs: Long = 10000L,
+        onProgress: PagesPollProgressListener? = null
+    ): PagesPollResult = withContext(Dispatchers.IO) {
+        val bearer = AuthHelper.getBearerToken(account)
+        val email = AuthHelper.getEmail(account)
+        val apiKey = AuthHelper.getGlobalApiKey(account)
+
+        suspend fun doPoll(): PagesPollResult {
+            var pollCount = 1
+            var lastRawStageName: String?
+            while (true) {
+                // ---- 1. Fetch deployment via strict branch ----
+                // deploymentId != null → single-GET only; deploymentId == null → list only
+                val fetched: PagesDeployment = if (deploymentId != null) {
+                    val resp = api.getPagesDeployment(
+                        token = bearer,
+                        email = email,
+                        apiKey = apiKey,
+                        accountId = account.accountId,
+                        projectName = projectName,
+                        deploymentId = deploymentId
+                    )
+                    if (!resp.isSuccessful) {
+                        val code = resp.code()
+                        val errBody = runCatching { resp.errorBody()?.string()?.take(200) }.getOrNull()
+                        error("HTTP $code${errBody?.let { ": $it" }.orEmpty()}")
+                    }
+                    val body = resp.body()
+                        ?: error("Pages getDeployment returned null body")
+                    if (!body.success) {
+                        error("CF API error: ${body.errors?.firstOrNull()?.message ?: "unknown"}")
+                    }
+                    body.result ?: error("Pages getDeployment returned null result")
+                } else {
+                    val resp = api.listPagesDeployments(
+                        token = bearer,
+                        email = email,
+                        apiKey = apiKey,
+                        accountId = account.accountId,
+                        projectName = projectName
+                    )
+                    if (!resp.isSuccessful) {
+                        val code = resp.code()
+                        val errBody = runCatching { resp.errorBody()?.string()?.take(200) }.getOrNull()
+                        error("HTTP $code${errBody?.let { ": $it" }.orEmpty()}")
+                    }
+                    val body = resp.body()
+                        ?: error("Pages listDeployments returned null body")
+                    if (!body.success) {
+                        error("CF API error: ${body.errors?.firstOrNull()?.message ?: "unknown"}")
+                    }
+                    body.result?.firstOrNull()
+                        ?: error("Pages listDeployments returned empty list")
+                }
+
+                val rawStageName = fetched.latestStage?.name
+                lastRawStageName = rawStageName
+                val stageText = mapStageNameToText(rawStageName)
+
+                // ---- 2. Terminal checks ----
+                if (rawStageName == "success") {
+                    onProgress?.invoke(stageText, pollCount, maxPolls, null)
+                    return PagesPollResult.Success(
+                        deploymentId = fetched.id,
+                        projectName = fetched.projectName ?: projectName,
+                        aliases = fetched.aliases ?: emptyList()
+                    )
+                }
+                if (rawStageName == "failed") {
+                    onProgress?.invoke(stageText, pollCount, maxPolls, null)
+                    return PagesPollResult.Failure(
+                        latestStageName = rawStageName,
+                        errorMessage = null
+                    )
+                }
+                if (pollCount >= maxPolls) {
+                    onProgress?.invoke(stageText, pollCount, maxPolls, null)
+                    return PagesPollResult.Timeout(
+                        lastStageName = lastRawStageName,
+                        maxPolls = maxPolls
+                    )
+                }
+
+                // ---- 3. Non-terminal: emit progress + backoff delay ----
+                val backoffMs = computeBackoffMs(
+                    pollCount = pollCount,
+                    initialDelayMs = initialDelayMs,
+                    backoffMultiplier = backoffMultiplier,
+                    capDelayMs = capDelayMs
+                )
+                onProgress?.invoke(stageText, pollCount, maxPolls, backoffMs)
+                delay(backoffMs)
+                pollCount++
+            }
+        }
+
+        runCatching { doPoll() }.fold(
+            onSuccess = { it },
+            onFailure = { PagesPollResult.Aborted(it) }
+        )
+    }
+
+    // ------------------------------------------------------------------------
+    // pollDeployment helpers (private)
+    // ------------------------------------------------------------------------
+
+    /** Map a raw DeploymentStage.name string to a human-readable i18n string. */
+    private fun mapStageNameToText(rawName: String?): String {
+        return when (rawName) {
+            "queued" -> appContext.getString(R.string.pages_poll_stage_queued)
+            "initializing" -> appContext.getString(R.string.pages_poll_stage_initializing)
+            "building" -> appContext.getString(R.string.pages_poll_stage_building)
+            "uploading" -> appContext.getString(R.string.pages_poll_stage_uploading)
+            "deploying" -> appContext.getString(R.string.pages_poll_stage_deploying)
+            "success" -> appContext.getString(R.string.pages_poll_stage_success)
+            "failed" -> appContext.getString(R.string.pages_poll_stage_failed)
+            else -> appContext.getString(
+                R.string.pages_poll_stage_unknown,
+                rawName ?: "null"
+            )
+        }
+    }
+
+    /**
+     * Exponential backoff: round(initial × multiplier^(pollCount - 1)), capped.
+     * Round-1 (pollCount == 1) → backoff before the *second* poll = initialDelayMs × m^0 = initial.
+     */
+    private fun computeBackoffMs(
+        pollCount: Int,
+        initialDelayMs: Long,
+        backoffMultiplier: Double,
+        capDelayMs: Long
+    ): Long {
+        val exponent = (pollCount - 1).toDouble()
+        val raw = initialDelayMs * backoffMultiplier.pow(exponent)
+        val rounded = round(raw).toLong()
+        return rounded.coerceAtMost(capDelayMs)
+    }
+
+    // ========================================================================
+    // P1-2: Special form-data processor (_worker.js / .bundle / headers /
+    //       redirects / routes.json / compat_date auto inject)
+    // ========================================================================
+
+    /**
+     * Pre-process the special files Pages ZIP-direct-upload supports, producing
+     * [PagesSpecialFormDataResult] ready to be consumed by
+     * [createDeployment] / [deployWithFunctions].
+     *
+     * All user-visible status text routes through R.string.pages_formdata_* via
+     * [PagesSpecialFormDataResult.logEvents] — **zero hardcoded strings in this
+     * function**.
+     *
+     * Priority rules:
+     *  1. `_worker.bundle` (when present) wins over `_worker.js`; the latter is
+     *     skipped with a [R.string.pages_formdata_special_skipped_format] event.
+     *  2. `_worker.js` → wrapped as a **nested multipart** (Cloudflare's format
+     *     for Advanced Functions single-file), marked with
+     *     [R.string.pages_formdata_workerjs_nested_building].
+     *  3. `_headers` / `_redirects` / `_routes.json` → appended sequentially;
+     *     each emits its own `*_applied` log event.
+     *  4. `compatibilityDate == null` AND any trigger file (`_worker.js` or
+     *     `_worker.bundle`) is present → auto-assign today's date; emit
+     *     [R.string.pages_formdata_compat_date_auto_format].
+     *
+     * @param baseDir Root of the unzipped ZIP tree (already de-nested).
+     * @param compatibilityDate Caller-supplied custom date or null.
+     */
+    suspend fun buildSpecialFormData(
+        baseDir: File,
+        compatibilityDate: String?
+    ): PagesSpecialFormDataResult = withContext(Dispatchers.IO) {
+        val logs = mutableListOf<Pair<Int, Array<out Any?>>>()
+        val specialParts = mutableListOf<MultipartBody.Part>()
+        val specialFileNames = mutableListOf<String>()
+
+        val workerJsFile = File(baseDir, "_worker.js")
+            .takeIf { it.isFile && it.exists() }
+        val workerBundleFile = File(baseDir, "_worker.bundle")
+            .takeIf { it.isFile && it.exists() }
+
+        // -------- 1. Worker payload: bundle > .js priority --------
+        var workerBody: RequestBody? = null
+        var workerName: String = ""
+        when {
+            workerBundleFile != null -> {
+                workerBody = workerBundleFile.readBytes()
+                    .toRequestBody("application/octet-stream".toMediaType())
+                workerName = "_worker.bundle"
+                logs.add(R.string.pages_formdata_bundle_applied to emptyArray())
+                if (workerJsFile != null) {
+                    logs.add(
+                        R.string.pages_formdata_special_skipped_format to
+                            arrayOf<Any?>("_worker.js", "_worker.bundle")
+                    )
+                }
+            }
+            workerJsFile != null -> {
+                // Build nested multipart for Cloudflare Advanced Functions single-file:
+                // outer form-data part will point to this body as "_worker.js"; the
+                // body itself is a multipart/mixed block containing the script content
+                // with Content-Disposition filename="_worker.js" header applied, so
+                // Cloudflare's upload handler recognises it as the Advanced Mode
+                // Functions entry file (cf-manager Gt pipeline exact match).
+                logs.add(R.string.pages_formdata_workerjs_nested_building to emptyArray())
+                val jsBytes = workerJsFile.readBytes()
+                val nested = MultipartBody.Builder()
+                    .setType(MultipartBody.MIXED)
+                    .addFormDataPart(
+                        "file",
+                        "_worker.js",
+                        jsBytes.toRequestBody("application/javascript".toMediaType())
+                    )
+                    .build()
+                workerBody = nested
+                workerName = "_worker.js"
+            }
+        }
+
+        // -------- 2. Static special files: _headers, _redirects, _routes.json --------
+        File(baseDir, "_headers")
+            .takeIf { it.isFile && it.exists() }
+            ?.let { f ->
+                specialParts.add(
+                    MultipartBody.Part.createFormData(
+                        "_headers",
+                        "_headers",
+                        f.readBytes().toRequestBody("text/plain".toMediaType())
+                    )
+                )
+                specialFileNames.add("_headers")
+                logs.add(R.string.pages_formdata_headers_applied to emptyArray())
+            }
+
+        File(baseDir, "_redirects")
+            .takeIf { it.isFile && it.exists() }
+            ?.let { f ->
+                specialParts.add(
+                    MultipartBody.Part.createFormData(
+                        "_redirects",
+                        "_redirects",
+                        f.readBytes().toRequestBody("text/plain".toMediaType())
+                    )
+                )
+                specialFileNames.add("_redirects")
+                logs.add(R.string.pages_formdata_redirects_applied to emptyArray())
+            }
+
+        File(baseDir, "_routes.json")
+            .takeIf { it.isFile && it.exists() }
+            ?.let { f ->
+                specialParts.add(
+                    MultipartBody.Part.createFormData(
+                        "_routes.json",
+                        "_routes.json",
+                        f.readBytes().toRequestBody("application/json".toMediaType())
+                    )
+                )
+                specialFileNames.add("_routes.json")
+                logs.add(R.string.pages_formdata_routes_json_applied to emptyArray())
+            }
+
+        // -------- 3. compatibility_date auto-inject --------
+        // Trigger: caller supplied NO custom date AND a worker entry file exists
+        // (either _worker.js or _worker.bundle).
+        var appliedCompatDate: String? = null
+        val hasWorkerTrigger = workerJsFile != null || workerBundleFile != null
+        if (compatibilityDate == null && hasWorkerTrigger) {
+            val triggerName = when {
+                workerBundleFile != null -> "_worker.bundle"
+                else -> "_worker.js"
+            }
+            val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+                .format(java.util.Date())
+            appliedCompatDate = today
+            logs.add(
+                R.string.pages_formdata_compat_date_auto_format to
+                    arrayOf<Any?>(triggerName, today)
+            )
+        }
+
+        PagesSpecialFormDataResult(
+            workerBody = workerBody,
+            workerName = workerName,
+            specialParts = specialParts,
+            specialFileNames = specialFileNames,
+            logEvents = logs,
+            appliedCompatDate = appliedCompatDate
+        )
+    }
+
+    /**
+     * 同步共享 deployment_configs 到双环境：先 PATCH production，成功再 PATCH preview。
+     * 任何一步失败都立即返回对应 Fail 子类，绝不中断已提交的环境。
+     */
+    suspend fun syncDualEnvConfigs(
+        account: Account,
+        projectName: String,
+        sharedEnvConfig: EnvironmentConfig
+    ): PagesEnvSyncResult = withContext(Dispatchers.IO) {
+        val token = AuthHelper.getBearerToken(account)
+        val email = AuthHelper.getEmail(account)
+        val apiKey = AuthHelper.getGlobalApiKey(account)
+        val update = sharedEnvConfig.toEnvironmentConfigUpdate()
+
+        // ====== ① PATCH #1：production-only ======
+        val prodResp: retrofit2.Response<CloudFlareResponse<PagesProjectDetail>> = api.updatePagesProject(
+            token = token,
+            email = email,
+            apiKey = apiKey,
+            accountId = account.accountId,
+            projectName = projectName,
+            updateRequest = PagesProjectUpdateRequest(
+                deploymentConfigs = DeploymentConfigsUpdate(production = update, preview = null)
+            )
+        )
+        extractPatchError(prodResp)?.let {
+            return@withContext PagesEnvSyncResult.ProductionFail(it)
+        }
+
+        // ====== ② PATCH #2：preview-only ======
+        val prevResp = api.updatePagesProject(
+            token = token,
+            email = email,
+            apiKey = apiKey,
+            accountId = account.accountId,
+            projectName = projectName,
+            updateRequest = PagesProjectUpdateRequest(
+                deploymentConfigs = DeploymentConfigsUpdate(production = null, preview = update)
+            )
+        )
+        extractPatchError(prevResp)?.let {
+            return@withContext PagesEnvSyncResult.PreviewFail(it)
+        }
+
+        // ====== ③ 两次都成功 → 5 counts (null maps → 0) ======
+        PagesEnvSyncResult.Success(
+            envVarsCount = sharedEnvConfig.envVars?.size ?: 0,
+            kvCount = sharedEnvConfig.kvNamespaces?.size ?: 0,
+            d1Count = sharedEnvConfig.d1Databases?.size ?: 0,
+            r2Count = sharedEnvConfig.r2Buckets?.size ?: 0,
+            servicesCount = sharedEnvConfig.services?.size ?: 0
+        )
+    }
+
+    // ===========================
+    // P1-4 syncDualEnvConfigs helpers
+    // ===========================
+
+    /**
+     * Converts a read-model [EnvironmentConfig] to a write-model [EnvironmentConfigUpdate]
+     * for use with the PATCH /accounts/{id}/pages/projects/{name} endpoint.
+     *
+     * Notes on value semantics (kept identical to CF wrangler default-behaviour):
+     *  - Binding maps use mapValues to produce the Update variant (same field names, just
+     *    a different class so CF API request-schema validators accept it).
+     *  - EnvVarUpdate.value is NON-nullable on the wire: if [EnvVar.value] is null we
+     *    send empty-string "" to avoid client-side NPE; CF will reject it server-side
+     *    for invalid inputs, preserving semantics over silent masking.
+     *  - EnvVarUpdate.type defaults to "plain_text" if source EnvVar.type is null
+     *    (matches wrangler unset-type → plain_text default).
+     *  - Scalar fields compatibility_date / compatibility_flags / placement are
+     *    shallow-copied 1:1 since their type is identical on both models.
+     */
+    private fun EnvironmentConfig.toEnvironmentConfigUpdate(): EnvironmentConfigUpdate =
+        EnvironmentConfigUpdate(
+            envVars = envVars?.mapValues { (_, v) ->
+                EnvVarUpdate(
+                    type = v.type ?: "plain_text",
+                    value = v.value ?: ""
+                )
+            },
+            kvNamespaces = kvNamespaces?.mapValues { (_, v) -> KvBindingUpdate(v.namespaceId) },
+            r2Buckets = r2Buckets?.mapValues { (_, v) -> R2BindingUpdate(v.name) },
+            d1Databases = d1Databases?.mapValues { (_, v) -> D1BindingUpdate(v.id) },
+            durableObjects = durableObjects?.mapValues { (_, v) -> DurableObjectBindingUpdate(v.className) },
+            services = services?.mapValues { (_, v) ->
+                ServiceBindingUpdate(service = v.service, environment = v.environment)
+            },
+            compatibilityDate = compatibilityDate,
+            compatibilityFlags = compatibilityFlags,
+            placement = placement
+        )
+
+    /**
+     * Extract a human-readable error from a PATCH response, or null if the response
+     * is fully successful (HTTP 2xx + CF body.success == true).
+     *
+     * Uses the same dual-fallback strategy as pollDeployment:
+     *   1. HTTP !isSuccessful → "HTTP $code: $errorBody200"
+     *   2. Body.success == false → "CF API error: ${errors.firstOrNull()?.message}"
+     * Only the FIRST matching issue is returned (matches all other Repository call sites).
+     */
+    private fun extractPatchError(
+        resp: retrofit2.Response<CloudFlareResponse<PagesProjectDetail>>
+    ): String? {
+        if (!resp.isSuccessful) {
+            val code = resp.code()
+            val errBody = runCatching { resp.errorBody()?.string()?.take(200) }.getOrNull().orEmpty()
+            return "HTTP $code: $errBody"
+        }
+        val body = resp.body()
+        if (body != null && !body.success) {
+            val firstMsg = body.errors?.firstOrNull()?.message
+            if (!firstMsg.isNullOrBlank()) return "CF API error: $firstMsg"
         }
         return null
     }

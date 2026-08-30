@@ -468,9 +468,15 @@ class WorkerFragment : Fragment() {
 
         viewModel.getWorkerSettings(account, workerName, silent = true) { result ->
             checkingDialog.dismiss()
+            val enableObs = binding.switchEnableObservability.isChecked
+            val enableSub = binding.switchEnableSubdomain.isChecked
+            val enableDep = binding.switchEnableDeployment.isChecked
             if (result is com.muort.upworker.core.model.Resource.Success) {
                 viewModel.uploadWorkerScriptWithBindings(
-                    account, workerName, file, customCompatibilityDate, customCompatibilityFlags
+                    account, workerName, file, customCompatibilityDate, customCompatibilityFlags,
+                    enableObservability = enableObs,
+                    enableSubdomain = enableSub,
+                    enableDeployment = enableDep
                 )
             } else {
                 viewModel.uploadWorkerScript(

@@ -170,6 +170,72 @@
                             android:textAlignment="viewStart"
                             android:textColor="?android:attr/textColorSecondary" />
 
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/switchEnableObservability"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:checked="true"
+                            android:text="@string/worker_post_observability_title"
+                            android:textSize="14sp"
+                            app:showText="false" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="0dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/worker_post_observability_summary"
+                            android:textSize="12sp"
+                            android:textAlignment="viewStart"
+                            android:textColor="?android:attr/textColorSecondary" />
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/switchEnableSubdomain"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:checked="true"
+                            android:text="@string/worker_post_subdomain_title"
+                            android:textSize="14sp"
+                            app:showText="false" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="0dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/worker_post_subdomain_summary"
+                            android:textSize="12sp"
+                            android:textAlignment="viewStart"
+                            android:textColor="?android:attr/textColorSecondary" />
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/switchEnableDeployment"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:checked="true"
+                            android:text="@string/worker_post_deployment_title"
+                            android:textSize="14sp"
+                            app:showText="false" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="0dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/worker_post_deployment_summary"
+                            android:textSize="12sp"
+                            android:textAlignment="viewStart"
+                            android:textColor="?android:attr/textColorSecondary" />
+
                         <ProgressBar
                             android:id="@+id/uploadProgress"
                             android:layout_width="match_parent"

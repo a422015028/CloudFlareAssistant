@@ -3140,4 +3140,116 @@
     <string name="switch_allow_local_url_title">URL来源允许局域网 / 本地连接</string>
     <string name="switch_allow_local_url_summary">允许 http:// 明文协议与 127.x / 10.x / 192.168.x / 172.16–31.x 私网 IP；扩展名、大小、ZIP 魔数、Content-Type 等 7 条安全仍生效。仅在自建 NAS / 本地调试服务 / VPN场景开启。</string>
 
+    <!-- ============ P1 部署后动作补齐（8 前缀分区，双语 key 严格 1:1） ============ -->
+
+    <!-- ===== P1-1A Worker 上传后动作：observability / subdomain / percentage deployment ===== -->
+    <string name="worker_post_observability_title">启用可观测性</string>
+    <string name="worker_post_observability_summary">激活 Workers Trace + Logs 持久化（head 采样率=1），异常诊断可用。</string>
+    <string name="worker_post_observability_applying">正在应用可观测性设置…</string>
+    <string name="worker_post_observability_ok">可观测性已启用（Traces + Logs 持久化）</string>
+    <string name="worker_post_observability_fail_format">启用可观测性失败：%1$s</string>
+
+    <string name="worker_post_subdomain_enable_title">启用自定义子域名</string>
+    <string name="worker_post_subdomain_title">启用自定义子域名</string>
+    <string name="worker_post_subdomain_summary">为脚本开启 *.workers.dev 子域名访问（首次上传后自动执行）。</string>
+    <string name="worker_post_subdomain_enabling">正在激活子域名…</string>
+    <string name="worker_post_subdomain_ok_format">子域名已启用：%1$s.workers.dev</string>
+    <string name="worker_post_subdomain_already">子域名已启用，无需重复操作</string>
+    <string name="worker_post_subdomain_fail_format">启用子域名失败：%1$s</string>
+    <string name="worker_post_subdomain_403_dashboard_hint">提示：请先到 Cloudflare Dashboard → Workers &amp; Pages 完成 workers.dev 账号级子域名注册（一次性设置）。</string>
+
+    <string name="worker_post_deploy_title">切换生产流量</string>
+    <string name="worker_post_deployment_title">切换生产流量</string>
+    <string name="worker_post_deploy_summary">将最新版本 100% 切到生产环境（deployment percentage 策略）。</string>
+    <string name="worker_post_deployment_summary">将最新版本 100% 切到生产环境（deployment percentage 策略）。</string>
+    <string name="worker_post_deploy_deploying">正在执行生产流量切换（%1$d%%）…</string>
+    <string name="worker_post_deploy_ok_format">已部署版本 #%1$d，流量 %2$d%%</string>
+    <string name="worker_post_deploy_warn_format">版本上传成功，但流量切换失败（不影响脚本可用性）：%1$s</string>
+    <string name="worker_post_deploy_fail_format">生产部署失败：%1$s</string>
+
+    <string name="worker_post_sequence_summary_format">上传后阶段进度：%1$s → %2$s → %3$s</string>
+    <string name="worker_post_stage_observability">可观测性</string>
+    <string name="worker_post_stage_subdomain">子域名</string>
+    <string name="worker_post_stage_deployment">生产部署</string>
+
+    <!-- ===== P1-1B Pages Ko 式轮询 latest_stage + 指数退避 ===== -->
+    <string name="pages_poll_title">部署阶段进度</string>
+    <string name="pages_poll_summary">轮询 Cloudflare Pages latest_stage（最多 30 次，退避 2s→10s），完成即成功。</string>
+    <string name="pages_poll_stage_queued">① 排队中</string>
+    <string name="pages_poll_stage_initializing">② 初始化构建机</string>
+    <string name="pages_poll_stage_building">③ 构建资产</string>
+    <string name="pages_poll_stage_uploading">④ 上传到全球边缘</string>
+    <string name="pages_poll_stage_deploying">⑤ 部署中</string>
+    <string name="pages_poll_stage_success">✅ 部署成功</string>
+    <string name="pages_poll_stage_failed">❌ 部署失败</string>
+    <string name="pages_poll_stage_unknown">⏳ 未知阶段（%1$s）</string>
+
+    <string name="pages_poll_progress_format">第 %1$d / %2$d 次轮询，当前阶段：%3$s</string>
+    <string name="pages_poll_backoff_format">上一轮阶段无变化，退避等待 %1$d ms 后再查…</string>
+    <string name="pages_poll_timeout_format">已超过 %1$d 次轮询仍未完成，部署可能仍在后台进行。可稍后在部署列表中查看结果。</string>
+    <string name="pages_poll_aborted_format">轮询被中断：%1$s</string>
+    <string name="pages_poll_success_format">Pages 项目 %1$s 部署成功（Aliases: %2$s）</string>
+    <string name="pages_poll_failed_format">部署失败。最新阶段：%1$s\n错误：%2$s</string>
+    <string name="pages_poll_open_logs">查看部署日志</string>
+
+    <!-- ===== P1-3 nodejs_compat 自动探测 &amp; compatibility_flags 自动追加 ===== -->
+    <string name="worker_nodejs_detect_title">Node.js 兼容自动探测</string>
+    <string name="worker_nodejs_detect_summary">扫描入口脚本关键词（require / process / Buffer / node:*），命中则自动追加 nodejs_compat flag。</string>
+    <string name="worker_nodejs_detect_hit_hint_format">ℹ 检测到 Node.js 兼容关键词（%1$s），已自动追加 compatibility_flag: nodejs_compat</string>
+    <string name="worker_nodejs_detect_hit_patterns_format">命中关键词：%1$s</string>
+    <string name="worker_nodejs_detect_no_hit">未检测到 Node.js 关键词，保持原 compatibility_flags。</string>
+    <string name="worker_nodejs_flag_dup_skip_format">compatibility_flags 已包含 %1$s，跳过重复追加。</string>
+    <string name="worker_nodejs_flag_append_fail_format">追加 nodejs_compat flag 失败：%1$s</string>
+
+    <!-- ===== P1-4 双环境 deployment_configs（production + preview）同步 ===== -->
+    <string name="pages_env_sync_title">生产/预览 双环境配置同步</string>
+    <string name="pages_env_sync_summary">把环境变量、KV、D1、R2、Service bindings 同时写入 production 与 preview 两套 deployment_configs。</string>
+    <string name="pages_env_sync_in_progress">正在同步 production + preview deployment_configs…</string>
+    <string name="pages_env_sync_production_ok">✅ production 环境配置已写入</string>
+    <string name="pages_env_sync_preview_ok">✅ preview 环境配置已写入</string>
+    <string name="pages_env_sync_ok_format">双环境配置已同步：%1$d 个变量 + %2$d 个 KV + %3$d 个 D1 + %4$d 个 R2 + %5$d 个 Service</string>
+    <string name="pages_env_sync_preview_fail_format">preview 环境写入失败：%1$s\n生产环境配置已生效，请手动补全预览环境。</string>
+    <string name="pages_env_sync_production_fail_format">production 环境写入失败：%1$s\n请检查账号权限后重试。</string>
+
+    <!-- ===== P1-2 _worker.js/_worker.bundle/特殊文件 FormData 处理 ===== -->
+    <string name="pages_formdata_workerjs_title">Advanced Functions (_worker.js) 嵌套编码</string>
+    <string name="pages_formdata_workerjs_summary">_worker.js 必须嵌入 metadata + 内层 multipart FormData，否则 Functions 不激活。</string>
+    <string name="pages_formdata_workerjs_nested_building">正在构造 _worker.js 嵌套 FormData…</string>
+    <string name="pages_formdata_workerjs_nested_fail_format">_worker.js 嵌套 FormData 构造失败：%1$s\nAdvanced Functions 可能不生效，请改用 Zipped 上传重试。</string>
+    <string name="pages_formdata_bundle_applied">已应用 _worker.bundle（类型 application/octet-stream），跳过 _worker.js 分支。</string>
+    <string name="pages_formdata_special_skipped_format">忽略特殊文件冲突：%1$s 与 %2$s 同时存在，已优先 %2$s。</string>
+    <string name="pages_formdata_headers_applied">已附加 _headers（静态路由头覆写）</string>
+    <string name="pages_formdata_redirects_applied">已附加 _redirects（静态路由重定向）</string>
+    <string name="pages_formdata_routes_json_applied">已附加 _routes.json（Functions 路由显式清单）</string>
+    <string name="pages_formdata_compat_date_auto_format">检测到 %1$s 存在，已自动注入 compatibility_date=%2$s 到 deployment_configs。</string>
+
+    <!-- ===== Xr 风格绑定自动创建（KV/D1/R2/AI） ===== -->
+    <string name="deploy_binding_auto_title">绑定资源自动创建</string>
+    <string name="deploy_binding_auto_summary">部署时按 binding title/name 查或创建 KV Namespace / D1 Database / R2 Bucket，免手工预创建。</string>
+    <string name="deploy_binding_auto_kv_existed_format">KV：已复用已存在的 Namespace「%1$s」（id=%2$s）</string>
+    <string name="deploy_binding_auto_kv_created_format">KV：已自动新建 Namespace「%1$s」（id=%2$s）</string>
+    <string name="deploy_binding_auto_d1_existed_format">D1：已复用已存在的 Database「%1$s」（uuid=%2$s）</string>
+    <string name="deploy_binding_auto_d1_created_format">D1：已自动新建 Database「%1$s」（uuid=%2$s）</string>
+    <string name="deploy_binding_auto_r2_existed_format">R2：已复用已存在的 Bucket「%1$s」</string>
+    <string name="deploy_binding_auto_r2_created_format">R2：已自动新建 Bucket「%1$s」</string>
+    <string name="deploy_binding_auto_invalid_name_format">绑定名「%1$s」不合法（^[a-zA-Z0-9_]+$），跳过自动创建。</string>
+    <string name="deploy_binding_auto_create_fail_format">资源 %1$s「%2$s」自动创建失败：%3$s</string>
+    <string name="deploy_binding_auto_ai_binding_ok">AI Gateway binding 已挂载（@cf/* 模型族可用）</string>
+
+    <!-- ===== zr 风格指数退避（通用 retry 文案） ===== -->
+    <string name="deploy_retry_attempt_format">第 %1$d 次重试，延迟 %2$d ms（操作：%3$s）</string>
+    <string name="deploy_retry_max_exhausted_format">%1$s 已重试 %2$d 次仍失败，放弃。\n最后一次错误：%3$s</string>
+    <string name="deploy_retry_http_429_format">触发 Cloudflare API 429 限流，按 Retry-After=%1$d s 退避。</string>
+    <string name="deploy_retry_http_5xx_format">Cloudflare API %1$d 服务端错误，指数退避重试。</string>
+
+    <!-- ===== P0 JWT 刷新事件的 P1 UI 展示（deploy_jwt_*，与 repo_pages_jwt_* 日志不重复，用于 Toast/Dialog/LogActivity） ===== -->
+    <string name="deploy_jwt_countdown_format">Upload-Token 剩余 %1$d 秒过期，准备刷新…</string>
+    <string name="deploy_jwt_expired_refreshing">Upload-Token 已过期，正在重新获取…</string>
+    <string name="deploy_jwt_refreshed_ok">Upload-Token 刷新成功</string>
+    <string name="deploy_jwt_refresh_fail_format">Upload-Token 刷新失败：%1$s</string>
+    <string name="deploy_jwt_max_retry_exceeded_format">Upload-Token 已强制刷新 %1$d 次仍失败；本次部署中止。\n请检查：① API Token 是否含 pages:write 权限 ② 当前账号是否为项目 Owner。</string>
+    <string name="deploy_jwt_format_invalid_warn">JWT 字段无法解析（非 base64url 三段式），改为首次 401 时被动刷新。</string>
+
+    <!-- ============ P1 结束 ============ -->
+
 </resources>

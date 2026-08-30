@@ -266,6 +266,36 @@ interface CloudFlareApi {
     ): Response<CloudFlareResponse<List<WorkerDeployment>>>
 
     /**
+     * Create a Worker percentage deployment (Versions API flow)
+     * POST /accounts/{account_id}/workers/scripts/{script_name}/deployments
+     */
+    @Headers("Content-Type: application/json", "Accept: application/json")
+    @POST("accounts/{account_id}/workers/scripts/{script_name}/deployments")
+    suspend fun createWorkerDeployment(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Body request: WorkerDeploymentCreateRequest
+    ): Response<CloudFlareResponse<Map<String, @JvmSuppressWildcards Any>>>
+
+    /**
+     * Enable/disable Worker scripts subdomain
+     * POST /accounts/{account_id}/workers/scripts/{script_name}/subdomain
+     */
+    @Headers("Content-Type: application/json", "Accept: application/json")
+    @POST("accounts/{account_id}/workers/scripts/{script_name}/subdomain")
+    suspend fun enableWorkerSubdomain(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Body request: WorkerSubdomainEnableRequest
+    ): Response<CloudFlareResponse<Map<String, @JvmSuppressWildcards Any>>>
+
+    /**
      * Get a specific Worker Script deployment
      * GET /accounts/{account_id}/workers/scripts/{script_name}/deployments/{deployment_id}
      */
@@ -731,7 +761,22 @@ interface CloudFlareApi {
         @Path("project_name") projectName: String,
         @Path("deployment_id") deploymentId: String
     ): Response<CloudFlareResponse<PagesDeployment>>
-    
+
+    /**
+     * Fetch a single Pages deployment by id (for polling latest_stage).
+     * https://developers.cloudflare.com/api/operations/pages-deployment-get-deployment
+     */
+    @Headers("Accept: application/json")
+    @GET("accounts/{account_id}/pages/projects/{project_name}/deployments/{deployment_id}")
+    suspend fun getPagesDeployment(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("project_name") projectName: String,
+        @Path("deployment_id") deploymentId: String
+    ): Response<CloudFlareResponse<PagesDeployment>>
+
     @GET("accounts/{account_id}/pages/projects/{project_name}/deployments/{deployment_id}/history/logs")
     suspend fun getPagesDeploymentLogs(
         @Header("Authorization") token: String?,

@@ -1,5 +1,6 @@
 package com.muort.upworker.feature.pages
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.muort.upworker.R
@@ -9,15 +10,20 @@ import com.muort.upworker.core.model.PagesDeployment
 import com.muort.upworker.core.model.PagesDeploymentLogs
 import com.muort.upworker.core.model.PagesProject
 import com.muort.upworker.core.model.PagesProjectDetail
+import com.muort.upworker.core.model.EnvironmentConfig
+import com.muort.upworker.core.model.PagesEnvSyncResult
 import com.muort.upworker.core.model.Placement
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.TailResult
 import com.muort.upworker.core.model.UiMessage
+import com.muort.upworker.core.repository.PagesPollResult
 import com.muort.upworker.core.repository.PagesRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 
 data class CleanupResult(
@@ -30,6 +36,7 @@ data class CleanupResult(
 
 @HiltViewModel
 class PagesViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val pagesRepository: PagesRepository
 ) : ViewModel() {
     
@@ -320,7 +327,7 @@ class PagesViewModel @Inject constructor(
     }
 
     /**
-     * 带实时日志回调的部署方法。
+     * 带实时日志回调的部署方法（老签名，兼容现有调用方）。
      * @param onLog 每条日志回调（主线程派发由调用方负责）
      * @param onComplete 部署完成回调，参数为成功/失败标志和错误消息
      */
@@ -359,6 +366,122 @@ class PagesViewModel @Inject constructor(
 
             // 清理临时 zip 文件
             file.delete()
+
+            _loadingState.value = false
+        }
+    }
+
+    /**
+     * Task 2 签名：带部署轮询 + buildSpecialFormData logEvents 的 createDeploymentWithLogs。
+     *
+     *  - 内部调用 Repository.createDeployment(baseDir 映射为 file 参数)，Repository
+     *    在 buildSpecialFormData 完成后会逐条把 logEvents 通过 onLog(String) 推出；
+     *  - Resource.Success 后马上调用 pollDeployment 跟踪部署阶段，把
+     *    pages_poll_progress_format / pages_poll_backoff_format 也推给 onLog；
+     *  - 轮询结束按结果派发 UiMessage。
+     */
+    fun createDeploymentWithLogs(
+        account: Account,
+        projectName: String,
+        baseDir: File,
+        prodBranch: String,
+        compatDate: String? = null,
+        compatFlags: List<String>? = null,
+        buildMode: String? = null,
+        extraEnvVars: Map<String, String>? = null,
+        onLog: suspend (String) -> Unit
+    ) {
+        viewModelScope.launch outerLaunch@{
+            _loadingState.value = true
+
+            val result = pagesRepository.createDeployment(
+                account = account,
+                projectName = projectName,
+                branch = prodBranch,
+                file = baseDir,
+                customCompatibilityDate = compatDate,
+                customCompatibilityFlags = compatFlags,
+                buildMode = buildMode,
+                extraEnvVars = extraEnvVars,
+                onLog = { line ->
+                    // PagesRepository.createDeployment's onLog is non-suspend.
+                    // Fire via this (viewModel) scope so the suspend onLog can run.
+                    this@outerLaunch.launch { onLog(line) }
+                }
+            )
+
+            when (result) {
+                is Resource.Success -> {
+                    val deploymentId = result.data.id
+                    onLog("◇ 刷新项目列表...")
+                    loadProjects(account)
+
+                    val poll = pagesRepository.pollDeployment(
+                        account = account,
+                        projectName = projectName,
+                        deploymentId = deploymentId,
+                        onProgress = { stageText, pollCount, maxPolls, backoffMs ->
+                            val progressStr = appContext.getString(
+                                R.string.pages_poll_progress_format, pollCount, maxPolls, stageText
+                            )
+                            val backoffStr = if (backoffMs != null) {
+                                appContext.getString(R.string.pages_poll_backoff_format, backoffMs)
+                            } else null
+                            // Dispatch onLog through this scope's CoroutineContext.
+                            // `onProgress` is a non-suspend lambda (pages repo uses
+                            // withContext(IO) but onProgress itself is not suspend),
+                            // so we must bridge via launch.
+                            this@outerLaunch.launch {
+                                onLog(progressStr)
+                                if (backoffStr != null) onLog(backoffStr)
+                            }
+                            Unit
+                        }
+                    )
+
+                    when (poll) {
+                        is PagesPollResult.Success -> {
+                            val aliasesJoined = poll.aliases.joinToString(", ")
+                            _message.emit(
+                                UiMessage.of(
+                                    R.string.pages_poll_success_format,
+                                    poll.projectName, aliasesJoined
+                                )
+                            )
+                        }
+                        is PagesPollResult.Failure -> {
+                            _message.emit(
+                                UiMessage.of(
+                                    R.string.pages_poll_failed_format,
+                                    poll.latestStageName ?: "",
+                                    poll.errorMessage ?: ""
+                                )
+                            )
+                        }
+                        is PagesPollResult.Timeout -> {
+                            _message.emit(
+                                UiMessage.of(
+                                    R.string.pages_poll_timeout_format,
+                                    poll.maxPolls
+                                )
+                            )
+                        }
+                        is PagesPollResult.Aborted -> {
+                            val causeMsg = poll.cause.message ?: poll.cause.toString()
+                            _message.emit(
+                                UiMessage.of(
+                                    R.string.pages_poll_aborted_format,
+                                    causeMsg
+                                )
+                            )
+                        }
+                    }
+                }
+                is Resource.Error -> {
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_create_failed, result.message))
+                }
+                is Resource.Loading -> {}
+            }
 
             _loadingState.value = false
         }
@@ -560,6 +683,54 @@ class PagesViewModel @Inject constructor(
                 else -> {}
             }
             callback(result)
+        }
+    }
+
+    // ==================== Pages Env Sync (Task 3) ====================
+
+    /**
+     * 同步共享 EnvironmentConfig 到 production + preview 两套 deployment_configs。
+     * Repository 内部顺序执行：先 PATCH production，成功再 PATCH preview；任一步失败都立即返回
+     * 对应 PagesEnvSyncResult 子类。VM 负责 loadingState 切换与 UiMessage 派发。
+     */
+    fun syncDualEnvConfigs(
+        account: Account,
+        projectName: String,
+        sharedEnvConfig: EnvironmentConfig
+    ) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            _message.emit(UiMessage.of(R.string.pages_env_sync_in_progress))
+
+            val r = pagesRepository.syncDualEnvConfigs(account, projectName, sharedEnvConfig)
+            when (r) {
+                is PagesEnvSyncResult.Success -> {
+                    _message.emit(
+                        UiMessage.of(
+                            R.string.pages_env_sync_ok_format,
+                            r.envVarsCount, r.kvCount, r.d1Count, r.r2Count, r.servicesCount
+                        )
+                    )
+                }
+                is PagesEnvSyncResult.ProductionFail -> {
+                    _message.emit(
+                        UiMessage.of(
+                            R.string.pages_env_sync_production_fail_format,
+                            r.errorMessage ?: ""
+                        )
+                    )
+                }
+                is PagesEnvSyncResult.PreviewFail -> {
+                    _message.emit(
+                        UiMessage.of(
+                            R.string.pages_env_sync_preview_fail_format,
+                            r.errorMessage ?: ""
+                        )
+                    )
+                }
+            }
+
+            _loadingState.value = false
         }
     }
     

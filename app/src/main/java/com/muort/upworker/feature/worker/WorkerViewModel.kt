@@ -12,6 +12,10 @@ import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.model.WorkerVersion
 import com.muort.upworker.core.model.WorkerScript
 import com.muort.upworker.core.model.WorkerDeployment
+import com.muort.upworker.core.repository.WorkerAfterUploadResult
+import com.muort.upworker.core.repository.WorkerNodejsDetectResult
+import com.muort.upworker.core.repository.WorkerPostActionStage
+import com.muort.upworker.core.repository.WorkerPostStageKind
 import com.muort.upworker.core.repository.WorkerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -33,7 +37,7 @@ class WorkerViewModel @Inject constructor(
      * @param customCompatibilityDate 用户自定义的兼容性日期，为空时保留原有配置或使用默认值
      * @param customCompatibilityFlags 用户自定义的兼容性标志，为空时保留原有配置
      */
-    fun uploadWorkerScriptWithBindings(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null, customCompatibilityFlags: List<String>? = null) {
+    fun uploadWorkerScriptWithBindings(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null, customCompatibilityFlags: List<String>? = null, enableObservability: Boolean = true, enableSubdomain: Boolean = true, enableDeployment: Boolean = true) {
         viewModelScope.launch {
             _uploadState.value = UploadState.Uploading
             
@@ -86,6 +90,72 @@ class WorkerViewModel @Inject constructor(
                             _uploadState.value = UploadState.Success
                             _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_with_bindings_success))
                             Timber.d("Script uploaded with preserved bindings: $scriptName")
+
+                            // ====== P2 Worker post-upload three-stage flow ======
+                            val contentForDetect = content
+                            val detectFlagsBase: List<String> = finalCompatibilityFlags.orEmpty()
+                            val detectResult: WorkerNodejsDetectResult =
+                                workerRepository.detectAndAppendNodejsCompat(contentForDetect, detectFlagsBase)
+                            // Forward detect log events as UiMessage
+                            _message.emit(UiMessage.of(detectResult.logResId, *detectResult.logFormatArgs))
+
+                            val flagsChanged = detectResult.finalFlags != detectFlagsBase
+                            val effectiveResult: Resource<WorkerScript>
+                            val finalMetadataForUpload: com.muort.upworker.core.model.WorkerMetadata
+                            if (flagsChanged) {
+                                finalMetadataForUpload = metadata.copy(
+                                    compatibilityFlags = detectResult.finalFlags
+                                )
+                                // Re-run uploadMultipart second time if flags changed
+                                val reupload = workerRepository.uploadWorkerScriptMultipart(
+                                    account, scriptName, tempFile, finalMetadataForUpload
+                                )
+                                if (reupload is Resource.Error) {
+                                    _uploadState.value = UploadState.Error(UiMessage.RawString(reupload.message))
+                                    _message.emit(
+                                        UiMessage.of(
+                                            R.string.worker_nodejs_flag_append_fail_format,
+                                            reupload.message ?: ""
+                                        )
+                                    )
+                                    return@launch
+                                }
+                                effectiveResult = reupload
+                            } else {
+                                finalMetadataForUpload = metadata
+                                effectiveResult = result
+                            }
+
+                            // uploadWorkerScriptMultipart returns Resource<WorkerScript>. WorkerScript has
+                            // only etag/id; versionId for promotePercentageDeployment comes from
+                            // listWorkerVersions path, not multipart response — pass null.
+                            val versionId: String? = null
+
+                            val enabledStages: Set<WorkerPostStageKind> = buildSet {
+                                if (enableObservability) add(WorkerPostStageKind.Observability)
+                                if (enableSubdomain) add(WorkerPostStageKind.Subdomain)
+                                if (enableDeployment) add(WorkerPostStageKind.Deployment)
+                            }
+                            val postResult: WorkerAfterUploadResult = workerRepository.afterUpload(
+                                account = account,
+                                uploadResult = effectiveResult,
+                                scriptName = scriptName,
+                                versionId = versionId,
+                                percentage = 100,
+                                enabledStages = enabledStages
+                            )
+                            postResult.stages.forEach { stage ->
+                                when (stage) {
+                                    is WorkerPostActionStage.Success -> _message.emit(
+                                        UiMessage.of(stage.messageResId, *stage.formatArgs)
+                                    )
+                                    is WorkerPostActionStage.Failure -> _message.emit(
+                                        UiMessage.of(stage.messageResId, *stage.formatArgs)
+                                    )
+                                }
+                            }
+                            // ====== END P2 Worker post-upload ======
+
                             loadWorkerScripts(account)
                         }
                         is Resource.Error -> {

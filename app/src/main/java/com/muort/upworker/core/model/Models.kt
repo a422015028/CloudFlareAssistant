@@ -631,6 +631,43 @@ data class PagesProjectUpdateRequest(
     @SerializedName("pretty_urls") val prettyUrls: Boolean? = null
 )
 
+// ============================================================================
+// P1-4: PagesRepository.syncDualEnvConfigs result model (com.muort.upworker.core.model)
+// ============================================================================
+
+/**
+ * Terminal result for production + preview dual deployment_configs synchronization.
+ * Three sub-types match the three pages_env_sync outcomes:
+ *   Success → pages_env_sync_ok_format (5 counts)
+ *   PreviewFail → pages_env_sync_preview_fail_format (production already committed)
+ *   ProductionFail → pages_env_sync_production_fail_format (abort before touching preview)
+ */
+sealed class PagesEnvSyncResult {
+    /**
+     * Both PATCH requests succeeded. 5 counts are the *actual sizes* of
+     * [EnvironmentConfig] non-null maps sent to Cloudflare (null maps → 0).
+     */
+    data class Success(
+        val envVarsCount: Int,
+        val kvCount: Int,
+        val d1Count: Int,
+        val r2Count: Int,
+        val servicesCount: Int
+    ) : PagesEnvSyncResult()
+
+    /**
+     * Production PATCH succeeded but preview PATCH rolled back / failed.
+     * Caller must surface pages_env_sync_preview_fail_format with this message.
+     */
+    data class PreviewFail(val errorMessage: String?) : PagesEnvSyncResult()
+
+    /**
+     * Production PATCH itself failed — we never attempted preview.
+     * Caller must surface pages_env_sync_production_fail_format with this message.
+     */
+    data class ProductionFail(val errorMessage: String?) : PagesEnvSyncResult()
+}
+
 data class DeploymentConfigsUpdate(
     @SerializedName("preview") val preview: EnvironmentConfigUpdate? = null,
     @SerializedName("production") val production: EnvironmentConfigUpdate? = null
@@ -1529,4 +1566,56 @@ data class SchedulesResponse(
 
 data class ScheduleRequest(
     @SerializedName("cron") val cron: String
+)
+
+// ==================== P1-1A Workers post-upload API models ====================
+
+/**
+ * Observability settings (ScriptAndVersionSettings PATCH model).
+ * mirrors: {observability:{traces:{enabled,head_sampling_rate,persist},logs:{enabled,persist,head_sampling_rate,invocation_logs}}}
+ */
+data class WorkerObservabilityTraces(
+    @SerializedName("enabled") val enabled: Boolean = true,
+    @SerializedName("head_sampling_rate") val headSamplingRate: Double = 1.0,
+    @SerializedName("persist") val persist: Boolean = true,
+    @SerializedName("destinations") val destinations: List<String>? = null
+)
+
+data class WorkerObservabilityLogs(
+    @SerializedName("enabled") val enabled: Boolean = true,
+    @SerializedName("persist") val persist: Boolean = true,
+    @SerializedName("head_sampling_rate") val headSamplingRate: Double = 1.0,
+    @SerializedName("invocation_logs") val invocationLogs: Boolean = true
+)
+
+data class WorkerObservability(
+    @SerializedName("traces") val traces: WorkerObservabilityTraces = WorkerObservabilityTraces(),
+    @SerializedName("logs") val logs: WorkerObservabilityLogs = WorkerObservabilityLogs()
+)
+
+data class WorkerScriptSettingsPatch(
+    @SerializedName("observability") val observability: WorkerObservability? = null
+)
+
+/**
+ * Subdomain enable/disable request body for POST /scripts/{name}/subdomain.
+ */
+data class WorkerSubdomainEnableRequest(
+    @SerializedName("enabled") val enabled: Boolean = true,
+    @SerializedName("previews_enabled") val previewsEnabled: Boolean = true
+)
+
+/**
+ * Worker deployment creation (POST /scripts/{name}/deployments) — Versions-enabled flow.
+ */
+data class WorkerDeploymentVersionRequest(
+    @SerializedName("version_id") val versionId: String,
+    @SerializedName("percentage") val percentage: Int
+)
+
+data class WorkerDeploymentCreateRequest(
+    @SerializedName("strategy") val strategy: String = "percentage",
+    @SerializedName("versions") val versions: List<WorkerDeploymentVersionRequest>?,
+    @SerializedName("annotations") val annotations: Map<String, String>? = null,
+    @SerializedName("message") val message: String? = null
 )

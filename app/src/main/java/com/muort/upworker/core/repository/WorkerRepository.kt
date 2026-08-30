@@ -1415,4 +1415,312 @@ class WorkerRepository @Inject constructor(
                 }
             }
         }
+
+    // ==================== P1-1A Post-Upload pipeline (3 stages) ====================
+
+    /**
+     * Public entry: runs the 3 post-upload stages in order after a successful script upload.
+     * Policy (user-chosen 2026-08-31):
+     *  - Individual stage failures DO NOT abort later stages; upload overall result is preserved
+     *  - Deployment only hits network if versionId is non-null (Versions API path).
+     *    Otherwise PUT /scripts already deployed at 100% implicitly, so stage 3 is a
+     *    Success no-op.
+     */
+    suspend fun afterUpload(
+        account: Account,
+        uploadResult: Resource<WorkerScript>,
+        scriptName: String,
+        versionId: String? = null,
+        percentage: Int = 100,
+        enabledStages: Set<WorkerPostStageKind> = WorkerPostStageKind.values().toSet()
+    ): WorkerAfterUploadResult = withContext(Dispatchers.IO) {
+        val stages = mutableListOf<WorkerPostActionStage>()
+        if (uploadResult !is Resource.Success) {
+            return@withContext WorkerAfterUploadResult(uploadResult, stages)
+        }
+        if (WorkerPostStageKind.Observability in enabledStages) {
+            runCatching {
+                stages.add(applyObservability(account, scriptName))
+            }.getOrElse { t: Throwable ->
+                stages.add(
+                    WorkerPostActionStage.Failure(
+                        kind = WorkerPostStageKind.Observability,
+                        messageResId = R.string.worker_post_observability_fail_format,
+                        formatArgs = arrayOf(t.message ?: "Unknown error")
+                    )
+                )
+            }
+        }
+        if (WorkerPostStageKind.Subdomain in enabledStages) {
+            runCatching {
+                stages.add(enableSubdomain(account, scriptName))
+            }.getOrElse { t: Throwable ->
+                stages.add(
+                    WorkerPostActionStage.Failure(
+                        kind = WorkerPostStageKind.Subdomain,
+                        messageResId = R.string.worker_post_subdomain_fail_format,
+                        formatArgs = arrayOf(t.message ?: "Unknown error")
+                    )
+                )
+            }
+        }
+        if (WorkerPostStageKind.Deployment in enabledStages) {
+            runCatching {
+                stages.add(promotePercentageDeployment(account, scriptName, versionId, percentage))
+            }.getOrElse { t: Throwable ->
+                stages.add(
+                    WorkerPostActionStage.Failure(
+                        kind = WorkerPostStageKind.Deployment,
+                        messageResId = R.string.worker_post_deploy_fail_format,
+                        formatArgs = arrayOf(t.message ?: "Unknown error")
+                    )
+                )
+            }
+        }
+        WorkerAfterUploadResult(uploadResult, stages.toList())
+    }
+
+    /** Stage 1: Enable Observability — PATCH script settings with traces+logs enabled. */
+    suspend fun applyObservability(account: Account, scriptName: String): WorkerPostActionStage =
+        withContext(Dispatchers.IO) {
+            try {
+                val patch = WorkerScriptSettingsPatch(observability = WorkerObservability())
+                val bodyJson = gson.toJson(patch)
+                val requestBody = bodyJson.toRequestBody("application/json".toMediaType())
+                val response = api.updateWorkerSettings(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    scriptName = scriptName,
+                    settings = requestBody
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    WorkerPostActionStage.Success(
+                        kind = WorkerPostStageKind.Observability,
+                        messageResId = R.string.worker_post_observability_ok
+                    )
+                } else {
+                    val err = response.body()?.errors?.firstOrNull()?.message
+                        ?: response.errorBody()?.string()?.take(200)
+                        ?: response.message()
+                    WorkerPostActionStage.Failure(
+                        kind = WorkerPostStageKind.Observability,
+                        messageResId = R.string.worker_post_observability_fail_format,
+                        formatArgs = arrayOf(err)
+                    )
+                }
+            } catch (t: Throwable) {
+                WorkerPostActionStage.Failure(
+                    kind = WorkerPostStageKind.Observability,
+                    messageResId = R.string.worker_post_observability_fail_format,
+                    formatArgs = arrayOf(t.message ?: "Unknown error")
+                )
+            }
+        }
+
+    /**
+     * Stage 2: Enable workers.dev subdomain for this script.
+     * Special-case: HTTP 403 usually means the account-level workers.dev subdomain has not
+     * been registered yet via the Cloudflare dashboard, so we append a guidance sentence.
+     */
+    suspend fun enableSubdomain(account: Account, scriptName: String): WorkerPostActionStage =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.enableWorkerSubdomain(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    scriptName = scriptName,
+                    request = WorkerSubdomainEnableRequest()
+                )
+                when {
+                    response.isSuccessful && response.body()?.success == true -> {
+                        WorkerPostActionStage.Success(
+                            kind = WorkerPostStageKind.Subdomain,
+                            messageResId = R.string.worker_post_subdomain_ok_format,
+                            formatArgs = arrayOf(scriptName)
+                        )
+                    }
+                    response.code() == 403 -> {
+                        val rawErr = response.body()?.errors?.firstOrNull()?.message
+                            ?: response.errorBody()?.string()?.take(200)
+                            ?: "HTTP 403 Forbidden"
+                        val dashboardHint = appContext.getString(
+                            R.string.worker_post_subdomain_403_dashboard_hint
+                        )
+                        val combined = "$rawErr\n$dashboardHint"
+                        WorkerPostActionStage.Failure(
+                            kind = WorkerPostStageKind.Subdomain,
+                            messageResId = R.string.worker_post_subdomain_fail_format,
+                            formatArgs = arrayOf(combined)
+                        )
+                    }
+                    else -> {
+                        val err = response.body()?.errors?.firstOrNull()?.message
+                            ?: response.errorBody()?.string()?.take(200)
+                            ?: response.message()
+                        WorkerPostActionStage.Failure(
+                            kind = WorkerPostStageKind.Subdomain,
+                            messageResId = R.string.worker_post_subdomain_fail_format,
+                            formatArgs = arrayOf(err)
+                        )
+                    }
+                }
+            } catch (t: Throwable) {
+                WorkerPostActionStage.Failure(
+                    kind = WorkerPostStageKind.Subdomain,
+                    messageResId = R.string.worker_post_subdomain_fail_format,
+                    formatArgs = arrayOf(t.message ?: "Unknown error")
+                )
+            }
+        }
+
+    /**
+     * Stage 3: Promote a Worker version to a traffic percentage using POST /deployments.
+     *
+     * Decision (user-chosen 2026-08-31: "两种并存，自动选择"):
+     *  - versionId == null  → Legacy PUT /scripts path, which already auto-deploys at 100%.
+     *                         Return a descriptive Success (no-op) so the 3-stage UI still shows
+     *                         "Deployment" as complete.
+     *  - versionId != null  → Versions API active → actually call POST /deployments with the
+     *                         strategy=percentage payload.
+     */
+    suspend fun promotePercentageDeployment(
+        account: Account,
+        scriptName: String,
+        versionId: String?,
+        percentage: Int
+    ): WorkerPostActionStage = withContext(Dispatchers.IO) {
+        val safePercentage = percentage.coerceIn(0, 100)
+        if (versionId.isNullOrBlank()) {
+            return@withContext WorkerPostActionStage.Success(
+                kind = WorkerPostStageKind.Deployment,
+                messageResId = R.string.worker_post_deploy_ok_format,
+                formatArgs = arrayOf(0, safePercentage)
+            )
+        }
+        try {
+            val req = WorkerDeploymentCreateRequest(
+                strategy = "percentage",
+                versions = listOf(
+                    WorkerDeploymentVersionRequest(
+                        versionId = versionId,
+                        percentage = safePercentage
+                    )
+                ),
+                message = "CloudFlareAssistant promote $safePercentage%"
+            )
+            val response = api.createWorkerDeployment(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName,
+                request = req
+            )
+            if (response.isSuccessful && response.body()?.success == true) {
+                val realVersion = versionId.filter { it.isDigit() }.toIntOrNull() ?: 0
+                WorkerPostActionStage.Success(
+                    kind = WorkerPostStageKind.Deployment,
+                    messageResId = R.string.worker_post_deploy_ok_format,
+                    formatArgs = arrayOf(realVersion, safePercentage)
+                )
+            } else {
+                val err = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.errorBody()?.string()?.take(200)
+                    ?: response.message()
+                WorkerPostActionStage.Failure(
+                    kind = WorkerPostStageKind.Deployment,
+                    messageResId = R.string.worker_post_deploy_warn_format,
+                    formatArgs = arrayOf(err)
+                )
+            }
+        } catch (t: Throwable) {
+            WorkerPostActionStage.Failure(
+                kind = WorkerPostStageKind.Deployment,
+                messageResId = R.string.worker_post_deploy_warn_format,
+                formatArgs = arrayOf(t.message ?: "Unknown error")
+            )
+        }
+    }
+
+    // ========================================================================
+    // P1-3: detectAndAppendNodejsCompat — auto Node.js compat flag detection
+    // ========================================================================
+
+    /**
+     * Scans the Worker script source for 7+1 well-known Node.js compatibility signals
+     * (aligned with P1-3 DETECT spec) and decides whether to append the
+     * `"nodejs_compat"` compatibility_flag to [existingFlags].
+     *
+     * Pure string function — **no I/O, no HTTP, no suspend**. Safe to call from
+     * ViewModel UI / unit tests / Repository HTTP pipeline without dispatcher hops.
+     *
+     * @param scriptContent  Full Worker script as UTF-8 text. Will be scanned as-is
+     *                       (multiline OK; comments/strings NOT stripped — false positives
+     *                       accepted because flag is additive-only and flag-dup is handled).
+     * @param existingFlags  Caller-supplied compatibility_flags list (or null if empty).
+     *                       Entries preserved in original order; new `"nodejs_compat"` appends
+     *                       at END when first pattern hit.
+     */
+    fun detectAndAppendNodejsCompat(
+        scriptContent: String,
+        existingFlags: List<String>?
+    ): WorkerNodejsDetectResult {
+        // ---- P1-3 DETECT: 7+1 patterns ordered per spec (friendlyName, regex) ----
+        // Distinct hits are preserved in this order (no scrambling), so users see a
+        // stable left-to-right display of what their script is actually using.
+        val patterns: List<Pair<String, Regex>> = listOf(
+            "__commonJS" to Regex("""__commonJS\b"""),
+            """require(" (CJS)""" to Regex("""require\s*\(\s*["']"""),
+            """require("node:" (内置模块)""" to Regex("""require\s*\(\s*["']node:"""),
+            "process.*" to Regex("""(?<![.\w])process\s*\.\s*\w+"""),
+            "globalThis.process" to Regex("""globalThis\s*\.\s*process\b"""),
+            // Negative lookahead (?!This) ensures we never match the "global" prefix
+            // inside "globalThis.process" — that's pattern #5 territory.
+            "global.process" to Regex("""(?<!\w)global\s*\.\s*process\b(?!This)"""),
+            "Buffer.*" to Regex("""(?<!\w)Buffer\s*\.\s*\w+"""),
+            "node:async_hooks" to Regex("""node:async_hooks\b""")
+        )
+
+        val hitPatterns = patterns
+            .filter { (_, regex) -> regex.containsMatchIn(scriptContent) }
+            .map { (name, _) -> name }
+            .distinct()
+
+        val baseFlags = existingFlags.orEmpty()
+        val hasHit = hitPatterns.isNotEmpty()
+        val nodejsFlag = "nodejs_compat"
+        val alreadyPresent = nodejsFlag in baseFlags
+
+        return when {
+            !hasHit -> WorkerNodejsDetectResult(
+                finalFlags = baseFlags,
+                hitPatterns = emptyList(),
+                logResId = R.string.worker_nodejs_detect_no_hit,
+                logFormatArgs = emptyArray()
+            )
+            alreadyPresent -> WorkerNodejsDetectResult(
+                finalFlags = baseFlags,
+                hitPatterns = hitPatterns,
+                logResId = R.string.worker_nodejs_flag_dup_skip_format,
+                logFormatArgs = arrayOf(nodejsFlag)
+            )
+            else -> {
+                // Append "nodejs_compat" at the END, preserving original order.
+                val finalFlags = baseFlags + nodejsFlag
+                // worker_nodejs_detect_hit_hint_format has exactly 1 placeholder:
+                //   %1$s — the comma-separated friendly names of matched patterns.
+                val patternCsv = hitPatterns.joinToString(", ")
+                WorkerNodejsDetectResult(
+                    finalFlags = finalFlags,
+                    hitPatterns = hitPatterns,
+                    logResId = R.string.worker_nodejs_detect_hit_hint_format,
+                    logFormatArgs = arrayOf(patternCsv)
+                )
+            }
+        }
+    }
 }

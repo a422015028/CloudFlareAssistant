@@ -446,7 +446,7 @@
         errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/core/repository/PagesRepository.kt"
-            line="2519"
+            line="2537"
             column="27"/>
     </issue>
 
@@ -457,7 +457,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/core/repository/PagesRepository.kt"
-            line="2520"
+            line="2538"
             column="21"/>
     </issue>
 
@@ -468,7 +468,7 @@
         errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2267"
+            line="2273"
             column="35"/>
     </issue>
 
@@ -479,7 +479,7 @@
         errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2268"
+            line="2274"
             column="42"/>
     </issue>
 
@@ -490,7 +490,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2269"
+            line="2275"
             column="21"/>
     </issue>
 
@@ -501,7 +501,7 @@
         errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2768"
+            line="2774"
             column="39"/>
     </issue>
 
@@ -512,7 +512,7 @@
         errorLine2="                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2769"
+            line="2775"
             column="46"/>
     </issue>
 
@@ -523,7 +523,7 @@
         errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2770"
+            line="2776"
             column="25"/>
     </issue>
 
@@ -703,7 +703,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="267"
+            line="310"
             column="23"/>
     </issue>
 
@@ -714,7 +714,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="271"
+            line="314"
             column="23"/>
     </issue>
 
@@ -725,7 +725,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="275"
+            line="318"
             column="23"/>
     </issue>
 
@@ -736,7 +736,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="279"
+            line="322"
             column="23"/>
     </issue>
 
@@ -747,7 +747,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="283"
+            line="326"
             column="23"/>
     </issue>
 
@@ -758,7 +758,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2038"
+            line="2105"
             column="23"/>
     </issue>
 
@@ -769,7 +769,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2042"
+            line="2109"
             column="23"/>
     </issue>
 
@@ -780,7 +780,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2046"
+            line="2113"
             column="23"/>
     </issue>
 
@@ -791,7 +791,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2050"
+            line="2117"
             column="23"/>
     </issue>
 
@@ -868,7 +868,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2306"
+            line="2312"
             column="23"/>
     </issue>
 
@@ -879,7 +879,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2310"
+            line="2316"
             column="23"/>
     </issue>
 
@@ -890,7 +890,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2314"
+            line="2320"
             column="23"/>
     </issue>
 
@@ -901,7 +901,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2318"
+            line="2324"
             column="23"/>
     </issue>
 
@@ -1703,7 +1703,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2938"
+            line="3006"
             column="13"/>
     </issue>
 
@@ -1714,7 +1714,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2944"
+            line="3012"
             column="13"/>
     </issue>
 
@@ -1725,7 +1725,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2952"
+            line="3020"
             column="13"/>
     </issue>
 
@@ -1736,7 +1736,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="3223"
+            line="3298"
             column="9"/>
     </issue>
 
@@ -1747,7 +1747,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="3264"
+            line="3339"
             column="9"/>
     </issue>
 
@@ -1758,7 +1758,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="3305"
+            line="3380"
             column="9"/>
     </issue>
 
@@ -1769,7 +1769,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="3346"
+            line="3421"
             column="9"/>
     </issue>
 
@@ -1780,7 +1780,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="3389"
+            line="3464"
             column="9"/>
     </issue>
 
@@ -1923,19 +1923,8 @@
         errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="1747"
+            line="1753"
             column="33"/>
-    </issue>
-
-    <issue
-        id="NotifyDataSetChanged"
-        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort."
-        errorLine1="        notifyDataSetChanged()"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2625"
-            column="9"/>
     </issue>
 
     <issue
@@ -1956,7 +1945,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2639"
+            line="2637"
             column="9"/>
     </issue>
 
@@ -1967,7 +1956,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2802"
+            line="2645"
             column="9"/>
     </issue>
 
@@ -1978,7 +1967,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2847"
+            line="2808"
             column="9"/>
     </issue>
 
@@ -1989,7 +1978,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2889"
+            line="2853"
             column="9"/>
     </issue>
 
@@ -2000,7 +1989,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2940"
+            line="2895"
             column="9"/>
     </issue>
 
@@ -2011,7 +2000,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2984"
+            line="2946"
             column="9"/>
     </issue>
 
@@ -2022,7 +2011,18 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="3025"
+            line="2990"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort."
+        errorLine1="        notifyDataSetChanged()"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
+            line="3031"
             column="9"/>
     </issue>
 
@@ -5791,6 +5791,457 @@
         <location
             file="src/main/res/values/strings.xml"
             line="3114"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_post_subdomain_enable_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_post_subdomain_enable_title&quot;>启用自定义子域名&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3152"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_post_subdomain_enabling` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_post_subdomain_enabling&quot;>正在激活子域名…&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3155"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_post_deploy_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_post_deploy_title&quot;>切换生产流量&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3161"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_post_deploy_summary` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_post_deploy_summary&quot;>将最新版本 100% 切到生产环境（deployment percentage 策略）。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3163"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_post_sequence_summary_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_post_sequence_summary_format&quot;>上传后阶段进度：%1$s → %2$s → %3$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3170"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_post_stage_observability` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_post_stage_observability&quot;>可观测性&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3171"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_post_stage_subdomain` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_post_stage_subdomain&quot;>子域名&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3172"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_post_stage_deployment` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_post_stage_deployment&quot;>生产部署&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3173"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pages_poll_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pages_poll_title&quot;>部署阶段进度&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3176"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pages_poll_summary` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pages_poll_summary&quot;>轮询 Cloudflare Pages latest_stage（最多 30 次，退避 2s→10s），完成即成功。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3177"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pages_poll_open_logs` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pages_poll_open_logs&quot;>查看部署日志&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3193"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_nodejs_detect_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_nodejs_detect_title&quot;>Node.js 兼容自动探测&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3196"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_nodejs_detect_summary` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_nodejs_detect_summary&quot;>扫描入口脚本关键词（require / process / Buffer / node:*），命中则自动追加 nodejs_compat flag。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3197"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.worker_nodejs_detect_hit_patterns_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;worker_nodejs_detect_hit_patterns_format&quot;>命中关键词：%1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3199"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pages_env_sync_summary` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pages_env_sync_summary&quot;>把环境变量、KV、D1、R2、Service bindings 同时写入 production 与 preview 两套 deployment_configs。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3206"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pages_env_sync_production_ok` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pages_env_sync_production_ok&quot;>✅ production 环境配置已写入&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3208"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pages_env_sync_preview_ok` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pages_env_sync_preview_ok&quot;>✅ preview 环境配置已写入&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3209"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pages_formdata_workerjs_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pages_formdata_workerjs_title&quot;>Advanced Functions (_worker.js) 嵌套编码&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3215"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pages_formdata_workerjs_summary` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pages_formdata_workerjs_summary&quot;>_worker.js 必须嵌入 metadata + 内层 multipart FormData，否则 Functions 不激活。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3216"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.pages_formdata_workerjs_nested_fail_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;pages_formdata_workerjs_nested_fail_format&quot;>_worker.js 嵌套 FormData 构造失败：%1$s\nAdvanced Functions 可能不生效，请改用 Zipped 上传重试。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3218"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_title&quot;>绑定资源自动创建&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3227"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_summary` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_summary&quot;>部署时按 binding title/name 查或创建 KV Namespace / D1 Database / R2 Bucket，免手工预创建。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3228"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_kv_existed_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_kv_existed_format&quot;>KV：已复用已存在的 Namespace「%1$s」（id=%2$s）&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3229"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_kv_created_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_kv_created_format&quot;>KV：已自动新建 Namespace「%1$s」（id=%2$s）&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3230"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_d1_existed_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_d1_existed_format&quot;>D1：已复用已存在的 Database「%1$s」（uuid=%2$s）&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3231"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_d1_created_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_d1_created_format&quot;>D1：已自动新建 Database「%1$s」（uuid=%2$s）&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3232"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_r2_existed_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_r2_existed_format&quot;>R2：已复用已存在的 Bucket「%1$s」&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3233"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_r2_created_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_r2_created_format&quot;>R2：已自动新建 Bucket「%1$s」&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3234"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_invalid_name_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_invalid_name_format&quot;>绑定名「%1$s」不合法（^[a-zA-Z0-9_]+$），跳过自动创建。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3235"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_create_fail_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_create_fail_format&quot;>资源 %1$s「%2$s」自动创建失败：%3$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3236"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_binding_auto_ai_binding_ok` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_ai_binding_ok&quot;>AI Gateway binding 已挂载（@cf/* 模型族可用）&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3237"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_retry_attempt_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_retry_attempt_format&quot;>第 %1$d 次重试，延迟 %2$d ms（操作：%3$s）&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3240"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_retry_max_exhausted_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_retry_max_exhausted_format&quot;>%1$s 已重试 %2$d 次仍失败，放弃。\n最后一次错误：%3$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3241"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_retry_http_429_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_retry_http_429_format&quot;>触发 Cloudflare API 429 限流，按 Retry-After=%1$d s 退避。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3242"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_retry_http_5xx_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_retry_http_5xx_format&quot;>Cloudflare API %1$d 服务端错误，指数退避重试。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3243"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_jwt_countdown_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_jwt_countdown_format&quot;>Upload-Token 剩余 %1$d 秒过期，准备刷新…&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3246"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_jwt_expired_refreshing` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_jwt_expired_refreshing&quot;>Upload-Token 已过期，正在重新获取…&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3247"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_jwt_refreshed_ok` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_jwt_refreshed_ok&quot;>Upload-Token 刷新成功&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3248"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_jwt_refresh_fail_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_jwt_refresh_fail_format&quot;>Upload-Token 刷新失败：%1$s&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3249"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_jwt_max_retry_exceeded_format` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_jwt_max_retry_exceeded_format&quot;>Upload-Token 已强制刷新 %1$d 次仍失败；本次部署中止。\n请检查：① API Token 是否含 pages:write 权限 ② 当前账号是否为项目 Owner。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3250"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.deploy_jwt_format_invalid_warn` appears to be unused"
+        errorLine1="    &lt;string name=&quot;deploy_jwt_format_invalid_warn&quot;>JWT 字段无法解析（非 base64url 三段式），改为首次 401 时被动刷新。&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3251"
             column="13"/>
     </issue>
 
@@ -18021,6 +18472,102 @@
     </issue>
 
     <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `启用自定义子域名`, used in `worker_post_subdomain_enable_title` and `worker_post_subdomain_title`"
+        errorLine1="    &lt;string name=&quot;worker_post_subdomain_enable_title&quot;>启用自定义子域名&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3152"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3153"
+            column="5"
+            message="Duplicates value in `worker_post_subdomain_enable_title`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `切换生产流量`, used in `worker_post_deploy_title` and `worker_post_deployment_title`"
+        errorLine1="    &lt;string name=&quot;worker_post_deploy_title&quot;>切换生产流量&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3161"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3162"
+            column="5"
+            message="Duplicates value in `worker_post_deploy_title`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `将最新版本 100% 切到生产环境（deployment percentage 策略）。`, used in `worker_post_deploy_summary` and `worker_post_deployment_summary`"
+        errorLine1="    &lt;string name=&quot;worker_post_deploy_summary&quot;>将最新版本 100% 切到生产环境（deployment percentage 策略）。&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3163"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3164"
+            column="5"
+            message="Duplicates value in `worker_post_deploy_summary`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Enable Custom Subdomain`, used in `worker_post_subdomain_enable_title` and `worker_post_subdomain_title`"
+        errorLine1="    &lt;string name=&quot;worker_post_subdomain_enable_title&quot;>Enable Custom Subdomain&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3174"
+            column="5"/>
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3175"
+            column="5"
+            message="Duplicates value in `worker_post_subdomain_enable_title`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Promote to Production`, used in `worker_post_deploy_title` and `worker_post_deployment_title`"
+        errorLine1="    &lt;string name=&quot;worker_post_deploy_title&quot;>Promote to Production&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3183"
+            column="5"/>
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3184"
+            column="5"
+            message="Duplicates value in `worker_post_deploy_title`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Route 100%% production traffic to the latest version (percentage deployment strategy).`, used in `worker_post_deploy_summary` and `worker_post_deployment_summary`"
+        errorLine1="    &lt;string name=&quot;worker_post_deploy_summary&quot;>Route 100%% production traffic to the latest version (percentage deployment strategy).&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3185"
+            column="5"/>
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3186"
+            column="5"
+            message="Duplicates value in `worker_post_deploy_summary`"/>
+    </issue>
+
+    <issue
         id="TypographyDashes"
         message="Replace &quot;-&quot; with an &quot;en dash&quot; character (–, &amp;#8211;) ?"
         errorLine1="    &lt;string name=&quot;device_updated_preview&quot;>更新: 2024-01-01&lt;/string>"
@@ -18205,6 +18752,28 @@
             file="src/main/res/values-en/strings.xml"
             line="1982"
             column="62"/>
+    </issue>
+
+    <issue
+        id="TypographyDashes"
+        message="Replace &quot;-&quot; with an &quot;en dash&quot; character (–, &amp;#8211;) ?"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_invalid_name_format&quot;>绑定名「%1$s」不合法（^[a-zA-Z0-9_]+$），跳过自动创建。&lt;/string>"
+        errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3235"
+            column="60"/>
+    </issue>
+
+    <issue
+        id="TypographyDashes"
+        message="Replace &quot;-&quot; with an &quot;en dash&quot; character (–, &amp;#8211;) ?"
+        errorLine1="    &lt;string name=&quot;deploy_binding_auto_invalid_name_format&quot;>Binding name &quot;%1$s&quot; is invalid (^[a-zA-Z0-9_]+$); skipping auto-create.&lt;/string>"
+        errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3257"
+            column="60"/>
     </issue>
 
     <issue
@@ -19559,7 +20128,7 @@
         errorLine2="            ~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="1560"
+            line="1603"
             column="13"/>
     </issue>
 
@@ -19570,7 +20139,7 @@
         errorLine2="            ~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="1568"
+            line="1611"
             column="13"/>
     </issue>
 
@@ -19581,7 +20150,7 @@
         errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2292"
+            line="2359"
             column="42"/>
     </issue>
 
@@ -19592,7 +20161,7 @@
         errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2293"
+            line="2360"
             column="42"/>
     </issue>
 
@@ -19603,7 +20172,7 @@
         errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2294"
+            line="2361"
             column="41"/>
     </issue>
 
@@ -19614,7 +20183,7 @@
         errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2295"
+            line="2362"
             column="43"/>
     </issue>
 
@@ -19625,7 +20194,7 @@
         errorLine2="                                                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2437"
+            line="2504"
             column="89"/>
     </issue>
 
@@ -19812,7 +20381,7 @@
         errorLine2="                                                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2194"
+            line="2200"
             column="89"/>
     </issue>
 
@@ -20714,7 +21283,7 @@
         errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2119"
+            line="2125"
             column="38"/>
     </issue>
 
@@ -20725,7 +21294,7 @@
         errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2123"
+            line="2129"
             column="28"/>
     </issue>
 
@@ -20736,7 +21305,7 @@
         errorLine2="                            ~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2123"
+            line="2129"
             column="29"/>
     </issue>
 
@@ -20747,7 +21316,7 @@
         errorLine2="                                                               ~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2123"
+            line="2129"
             column="64"/>
     </issue>
 
@@ -20758,7 +21327,7 @@
         errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2668"
+            line="2674"
             column="43"/>
     </issue>
 
@@ -20769,7 +21338,7 @@
         errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="3049"
+            line="3055"
             column="44"/>
     </issue>
 
@@ -20780,7 +21349,7 @@
         errorLine2="                                            ~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="3049"
+            line="3055"
             column="45"/>
     </issue>
 

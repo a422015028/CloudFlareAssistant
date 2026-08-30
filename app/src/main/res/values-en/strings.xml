@@ -3162,4 +3162,116 @@
     <string name="switch_allow_local_url_title">Allow LAN / local URL sources</string>
     <string name="switch_allow_local_url_summary">Allow http:// plaintext protocol and private IPs (127.x / 10.x / 192.168.x / 172.16–31.x). The other 7 safeguards (file extension, size, ZIP magic, Content-Type allowlist, redirect limit, HTTP status 2xx, host allowlist) remain strictly enforced. Only enable for self-hosted NAS, local dev servers, or VPN scenarios.</string>
 
+    <!-- ============ P1 Deploy Post-Actions (8 prefix groups, bilingual keys strictly 1:1) ============ -->
+
+    <!-- ===== P1-1A Worker post-upload: observability / subdomain / percentage deployment ===== -->
+    <string name="worker_post_observability_title">Enable Observability</string>
+    <string name="worker_post_observability_summary">Enable Workers Trace + persistent Logs (head sampling rate = 1) for diagnostics.</string>
+    <string name="worker_post_observability_applying">Applying observability settings…</string>
+    <string name="worker_post_observability_ok">Observability enabled (Traces + persistent Logs)</string>
+    <string name="worker_post_observability_fail_format">Failed to enable observability: %1$s</string>
+
+    <string name="worker_post_subdomain_enable_title">Enable Custom Subdomain</string>
+    <string name="worker_post_subdomain_title">Enable Custom Subdomain</string>
+    <string name="worker_post_subdomain_summary">Enable *.workers.dev subdomain access (auto-runs after the first upload).</string>
+    <string name="worker_post_subdomain_enabling">Activating subdomain…</string>
+    <string name="worker_post_subdomain_ok_format">Subdomain enabled: %1$s.workers.dev</string>
+    <string name="worker_post_subdomain_already">Subdomain already enabled, skipping</string>
+    <string name="worker_post_subdomain_fail_format">Failed to enable subdomain: %1$s</string>
+    <string name="worker_post_subdomain_403_dashboard_hint">Hint: Please first register your account-level workers.dev subdomain at Cloudflare Dashboard → Workers &amp; Pages (one-time setup).</string>
+
+    <string name="worker_post_deploy_title">Promote to Production</string>
+    <string name="worker_post_deployment_title">Promote to Production</string>
+    <string name="worker_post_deploy_summary">Route 100%% production traffic to the latest version (percentage deployment strategy).</string>
+    <string name="worker_post_deployment_summary">Route 100%% production traffic to the latest version (percentage deployment strategy).</string>
+    <string name="worker_post_deploy_deploying">Promoting production traffic (%1$d%%)…</string>
+    <string name="worker_post_deploy_ok_format">Version #%1$d deployed with %2$d%% traffic</string>
+    <string name="worker_post_deploy_warn_format">Upload OK but traffic promotion failed (script still usable): %1$s</string>
+    <string name="worker_post_deploy_fail_format">Production deployment failed: %1$s</string>
+
+    <string name="worker_post_sequence_summary_format">Post-upload pipeline: %1$s → %2$s → %3$s</string>
+    <string name="worker_post_stage_observability">Observability</string>
+    <string name="worker_post_stage_subdomain">Subdomain</string>
+    <string name="worker_post_stage_deployment">Deployment</string>
+
+    <!-- ===== P1-1B Pages Ko-style polling of latest_stage + exponential backoff ===== -->
+    <string name="pages_poll_title">Deployment Stages</string>
+    <string name="pages_poll_summary">Poll Cloudflare Pages latest_stage up to 30 times (backoff 2s→10s). Finished = success.</string>
+    <string name="pages_poll_stage_queued">① Queued</string>
+    <string name="pages_poll_stage_initializing">② Initializing build runner</string>
+    <string name="pages_poll_stage_building">③ Building assets</string>
+    <string name="pages_poll_stage_uploading">④ Uploading to global edge</string>
+    <string name="pages_poll_stage_deploying">⑤ Deploying</string>
+    <string name="pages_poll_stage_success">✅ Deployed</string>
+    <string name="pages_poll_stage_failed">❌ Deployment failed</string>
+    <string name="pages_poll_stage_unknown">⏳ Unknown stage (%1$s)</string>
+
+    <string name="pages_poll_progress_format">Poll %1$d / %2$d · Current stage: %3$s</string>
+    <string name="pages_poll_backoff_format">Stage unchanged; backing off %1$d ms before next poll…</string>
+    <string name="pages_poll_timeout_format">Still not finished after %1$d polls. Deployment may still be running in the background — please check the deployment list later.</string>
+    <string name="pages_poll_aborted_format">Polling aborted: %1$s</string>
+    <string name="pages_poll_success_format">Pages project %1$s deployed (Aliases: %2$s)</string>
+    <string name="pages_poll_failed_format">Deployment failed. Latest stage: %1$s\nError: %2$s</string>
+    <string name="pages_poll_open_logs">View deployment logs</string>
+
+    <!-- ===== P1-3 nodejs_compat auto-detect &amp; auto-append compatibility_flags ===== -->
+    <string name="worker_nodejs_detect_title">Node.js Compat Auto-Detect</string>
+    <string name="worker_nodejs_detect_summary">Scan entry script keywords (require / process / Buffer / node:*). On hit, auto-append the nodejs_compat flag.</string>
+    <string name="worker_nodejs_detect_hit_hint_format">ℹ Node.js compat keywords detected (%1$s); auto-appended compatibility_flag: nodejs_compat</string>
+    <string name="worker_nodejs_detect_hit_patterns_format">Matched keywords: %1$s</string>
+    <string name="worker_nodejs_detect_no_hit">No Node.js keywords found; keeping original compatibility_flags.</string>
+    <string name="worker_nodejs_flag_dup_skip_format">compatibility_flags already contains %1$s; skipping duplicate append.</string>
+    <string name="worker_nodejs_flag_append_fail_format">Failed to append nodejs_compat flag: %1$s</string>
+
+    <!-- ===== P1-4 Dual-env deployment_configs (production + preview) sync ===== -->
+    <string name="pages_env_sync_title">Production / Preview Env Sync</string>
+    <string name="pages_env_sync_summary">Write env vars, KV, D1, R2, and Service bindings into BOTH deployment_configs (production + preview).</string>
+    <string name="pages_env_sync_in_progress">Syncing production + preview deployment_configs…</string>
+    <string name="pages_env_sync_production_ok">✅ Production environment config written</string>
+    <string name="pages_env_sync_preview_ok">✅ Preview environment config written</string>
+    <string name="pages_env_sync_ok_format">Dual-envs synced: %1$d vars + %2$d KV + %3$d D1 + %4$d R2 + %5$d Service bindings</string>
+    <string name="pages_env_sync_preview_fail_format">Preview env write failed: %1$s\nProduction config is active; please fill in preview manually.</string>
+    <string name="pages_env_sync_production_fail_format">Production env write failed: %1$s\nPlease check account permissions, then retry.</string>
+
+    <!-- ===== P1-2 _worker.js/_worker.bundle/special files FormData handling ===== -->
+    <string name="pages_formdata_workerjs_title">Advanced Functions (_worker.js) nested encoding</string>
+    <string name="pages_formdata_workerjs_summary">_worker.js MUST be wrapped in metadata + an inner multipart FormData; otherwise Advanced Functions stay inactive.</string>
+    <string name="pages_formdata_workerjs_nested_building">Building _worker.js nested FormData…</string>
+    <string name="pages_formdata_workerjs_nested_fail_format">Failed to build _worker.js nested FormData: %1$s\nAdvanced Functions may not work. Please retry with a ZIP upload.</string>
+    <string name="pages_formdata_bundle_applied">Applied _worker.bundle (application/octet-stream); skipped _worker.js branch.</string>
+    <string name="pages_formdata_special_skipped_format">Special-file conflict ignored: both %1$s and %2$s present; preferring %2$s.</string>
+    <string name="pages_formdata_headers_applied">Attached _headers (static route header overrides)</string>
+    <string name="pages_formdata_redirects_applied">Attached _redirects (static route redirects)</string>
+    <string name="pages_formdata_routes_json_applied">Attached _routes.json (explicit Functions route manifest)</string>
+    <string name="pages_formdata_compat_date_auto_format">Detected %1$s; auto-injected compatibility_date=%2$s into deployment_configs.</string>
+
+    <!-- ===== Xr-style binding auto-create (KV/D1/R2/AI) ===== -->
+    <string name="deploy_binding_auto_title">Auto-Create Missing Bindings</string>
+    <string name="deploy_binding_auto_summary">During deploy, look up or create KV Namespace / D1 Database / R2 Bucket by title/name — no manual pre-creation needed.</string>
+    <string name="deploy_binding_auto_kv_existed_format">KV: reused existing Namespace "%1$s" (id=%2$s)</string>
+    <string name="deploy_binding_auto_kv_created_format">KV: auto-created Namespace "%1$s" (id=%2$s)</string>
+    <string name="deploy_binding_auto_d1_existed_format">D1: reused existing Database "%1$s" (uuid=%2$s)</string>
+    <string name="deploy_binding_auto_d1_created_format">D1: auto-created Database "%1$s" (uuid=%2$s)</string>
+    <string name="deploy_binding_auto_r2_existed_format">R2: reused existing Bucket "%1$s"</string>
+    <string name="deploy_binding_auto_r2_created_format">R2: auto-created Bucket "%1$s"</string>
+    <string name="deploy_binding_auto_invalid_name_format">Binding name "%1$s" is invalid (^[a-zA-Z0-9_]+$); skipping auto-create.</string>
+    <string name="deploy_binding_auto_create_fail_format">Failed to auto-create %1$s "%2$s": %3$s</string>
+    <string name="deploy_binding_auto_ai_binding_ok">AI Gateway binding attached (@cf/* model families available)</string>
+
+    <!-- ===== zr-style exponential backoff (generic retry messages) ===== -->
+    <string name="deploy_retry_attempt_format">Attempt %1$d retry, delay %2$d ms (op: %3$s)</string>
+    <string name="deploy_retry_max_exhausted_format">%1$s retried %2$d time(s) and still failed. Aborting.\nLast error: %3$s</string>
+    <string name="deploy_retry_http_429_format">Cloudflare API 429 rate-limited; backing off by Retry-After=%1$d s.</string>
+    <string name="deploy_retry_http_5xx_format">Cloudflare API %1$d server error; retrying with exponential backoff.</string>
+
+    <!-- ===== P1 UI for P0 JWT refresh (deploy_jwt_* — separate from repo_pages_jwt_* logs) ===== -->
+    <string name="deploy_jwt_countdown_format">Upload-Token expires in %1$d second(s); preparing to refresh…</string>
+    <string name="deploy_jwt_expired_refreshing">Upload-Token expired, re-acquiring…</string>
+    <string name="deploy_jwt_refreshed_ok">Upload-Token refreshed successfully</string>
+    <string name="deploy_jwt_refresh_fail_format">Upload-Token refresh failed: %1$s</string>
+    <string name="deploy_jwt_max_retry_exceeded_format">Forced Upload-Token refresh failed %1$d time(s); deployment aborted.\nPlease verify: ① the API Token has pages:write scope, ② this account owns the project.</string>
+    <string name="deploy_jwt_format_invalid_warn">JWT payload unparseable (not 3-part base64url); falling back to passive refresh on first 401.</string>
+
+    <!-- ============ END P1 ============ -->
+
 </resources>
