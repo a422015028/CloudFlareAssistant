@@ -248,6 +248,27 @@ class WorkerFragment : Fragment() {
         binding.localUrlAllowedSwitch.setOnCheckedChangeListener { _, checked ->
             prefs.edit().putBoolean(localKey, checked).apply()
         }
+
+        // Observability 开关（默认开）：恢复 + 持久化
+        val obsKey = "enable_observability"
+        binding.switchEnableObservability.isChecked = prefs.getBoolean(obsKey, true)
+        binding.switchEnableObservability.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(obsKey, checked).apply()
+        }
+
+        // Subdomain 开关（默认开）：恢复 + 持久化
+        val subKey = "enable_subdomain"
+        binding.switchEnableSubdomain.isChecked = prefs.getBoolean(subKey, true)
+        binding.switchEnableSubdomain.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(subKey, checked).apply()
+        }
+
+        // Deployment 开关（默认开）：恢复 + 持久化
+        val depKey = "enable_deployment"
+        binding.switchEnableDeployment.isChecked = prefs.getBoolean(depKey, true)
+        binding.switchEnableDeployment.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(depKey, checked).apply()
+        }
         
         binding.selectFileBtn.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
