@@ -1552,6 +1552,13 @@ class PagesFragment : Fragment() {
         isDeployCardExpanded = prefs.getBoolean("deploy_card_expanded", false)
         binding.deployCardContent.visibility = if (isDeployCardExpanded) android.view.View.VISIBLE else android.view.View.GONE
         binding.deployCardArrow.rotation = if (isDeployCardExpanded) 180f else 0f
+
+        // 本地连接开关（默认关）：恢复 + 持久化
+        val localKey = "allow_local_url"
+        binding.localUrlAllowedSwitch.isChecked = prefs.getBoolean(localKey, false)
+        binding.localUrlAllowedSwitch.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(localKey, checked).apply()
+        }
         
         // Deploy card expand/collapse
         binding.deployCardHeader.setOnClickListener {
@@ -1663,6 +1670,7 @@ class PagesFragment : Fragment() {
             binding.deployBtn.isEnabled = false
             binding.createProjectBtn.isEnabled = false
             viewLifecycleOwner.lifecycleScope.launch {
+                val localAllow = prefs.getBoolean("allow_local_url", false)
                 val result = RemoteFileResolver.resolve(
                     context = requireContext().applicationContext,
                     url = selected,
@@ -1677,7 +1685,9 @@ class PagesFragment : Fragment() {
                                 binding.uploadProgress.isIndeterminate = true
                             }
                         }
-                    }
+                    },
+                    allowInsecureProtocol = localAllow,
+                    allowPrivateIp = localAllow,
                 )
                 binding.uploadProgress.isIndeterminate = true
                 when {

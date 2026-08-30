@@ -446,7 +446,7 @@
         errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/core/repository/PagesRepository.kt"
-            line="2509"
+            line="2519"
             column="27"/>
     </issue>
 
@@ -457,7 +457,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/core/repository/PagesRepository.kt"
-            line="2510"
+            line="2520"
             column="21"/>
     </issue>
 
@@ -468,7 +468,7 @@
         errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2160"
+            line="2267"
             column="35"/>
     </issue>
 
@@ -479,7 +479,7 @@
         errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2161"
+            line="2268"
             column="42"/>
     </issue>
 
@@ -490,7 +490,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2162"
+            line="2269"
             column="21"/>
     </issue>
 
@@ -501,7 +501,7 @@
         errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2661"
+            line="2768"
             column="39"/>
     </issue>
 
@@ -512,7 +512,7 @@
         errorLine2="                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2662"
+            line="2769"
             column="46"/>
     </issue>
 
@@ -523,7 +523,7 @@
         errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2663"
+            line="2770"
             column="25"/>
     </issue>
 
@@ -703,17 +703,6 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="263"
-            column="23"/>
-    </issue>
-
-    <issue
-        id="DiscouragedApi"
-        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;pagesToggleSelectionModeBtn&quot;, &quot;id&quot;, requireContext().packageName)"
-        errorLine2="                      ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
             line="267"
             column="23"/>
     </issue>
@@ -721,7 +710,7 @@
     <issue
         id="DiscouragedApi"
         message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;pagesSelectionStatusText&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine1="            resources.getIdentifier(&quot;pagesToggleSelectionModeBtn&quot;, &quot;id&quot;, requireContext().packageName)"
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
@@ -732,7 +721,7 @@
     <issue
         id="DiscouragedApi"
         message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;pagesSelectAllBtn&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine1="            resources.getIdentifier(&quot;pagesSelectionStatusText&quot;, &quot;id&quot;, requireContext().packageName)"
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
@@ -743,7 +732,7 @@
     <issue
         id="DiscouragedApi"
         message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;pagesBatchDeleteBtn&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine1="            resources.getIdentifier(&quot;pagesSelectAllBtn&quot;, &quot;id&quot;, requireContext().packageName)"
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
@@ -754,11 +743,22 @@
     <issue
         id="DiscouragedApi"
         message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="            resources.getIdentifier(&quot;pagesBatchDeleteBtn&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine2="                      ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
+            line="283"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
         errorLine1="            resources.getIdentifier(&quot;pagesSelectionActionsLayout&quot;, &quot;id&quot;, requireContext().packageName)"
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="1943"
+            line="2038"
             column="23"/>
     </issue>
 
@@ -769,7 +769,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="1947"
+            line="2042"
             column="23"/>
     </issue>
 
@@ -780,7 +780,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="1951"
+            line="2046"
             column="23"/>
     </issue>
 
@@ -791,7 +791,7 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="1955"
+            line="2050"
             column="23"/>
     </issue>
 
@@ -799,39 +799,6 @@
         id="DiscouragedApi"
         message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
         errorLine1="            resources.getIdentifier(&quot;toggleSelectionModeBtn&quot;, &quot;id&quot;, requireContext().packageName)"
-        errorLine2="                      ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="270"
-            column="23"/>
-    </issue>
-
-    <issue
-        id="DiscouragedApi"
-        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;selectionActionsLayout&quot;, &quot;id&quot;, requireContext().packageName)"
-        errorLine2="                      ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="274"
-            column="23"/>
-    </issue>
-
-    <issue
-        id="DiscouragedApi"
-        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;selectionStatusText&quot;, &quot;id&quot;, requireContext().packageName)"
-        errorLine2="                      ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="278"
-            column="23"/>
-    </issue>
-
-    <issue
-        id="DiscouragedApi"
-        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;selectAllBtn&quot;, &quot;id&quot;, requireContext().packageName)"
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
@@ -842,7 +809,7 @@
     <issue
         id="DiscouragedApi"
         message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;batchDeleteBtn&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine1="            resources.getIdentifier(&quot;selectionActionsLayout&quot;, &quot;id&quot;, requireContext().packageName)"
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
@@ -853,7 +820,7 @@
     <issue
         id="DiscouragedApi"
         message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;cleanupDeploymentsBtn&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine1="            resources.getIdentifier(&quot;selectionStatusText&quot;, &quot;id&quot;, requireContext().packageName)"
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
@@ -864,33 +831,11 @@
     <issue
         id="DiscouragedApi"
         message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;selectionActionsLayout&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine1="            resources.getIdentifier(&quot;selectAllBtn&quot;, &quot;id&quot;, requireContext().packageName)"
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2199"
-            column="23"/>
-    </issue>
-
-    <issue
-        id="DiscouragedApi"
-        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;toggleSelectionModeBtn&quot;, &quot;id&quot;, requireContext().packageName)"
-        errorLine2="                      ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2203"
-            column="23"/>
-    </issue>
-
-    <issue
-        id="DiscouragedApi"
-        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
-        errorLine1="            resources.getIdentifier(&quot;selectionStatusText&quot;, &quot;id&quot;, requireContext().packageName)"
-        errorLine2="                      ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2207"
+            line="294"
             column="23"/>
     </issue>
 
@@ -901,7 +846,62 @@
         errorLine2="                      ~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2211"
+            line="298"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="            resources.getIdentifier(&quot;cleanupDeploymentsBtn&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine2="                      ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
+            line="302"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="            resources.getIdentifier(&quot;selectionActionsLayout&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine2="                      ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
+            line="2306"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="            resources.getIdentifier(&quot;toggleSelectionModeBtn&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine2="                      ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
+            line="2310"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="            resources.getIdentifier(&quot;selectionStatusText&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine2="                      ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
+            line="2314"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="DiscouragedApi"
+        message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
+        errorLine1="            resources.getIdentifier(&quot;batchDeleteBtn&quot;, &quot;id&quot;, requireContext().packageName)"
+        errorLine2="                      ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
+            line="2318"
             column="23"/>
     </issue>
 
@@ -1703,7 +1703,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2843"
+            line="2938"
             column="13"/>
     </issue>
 
@@ -1714,7 +1714,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2849"
+            line="2944"
             column="13"/>
     </issue>
 
@@ -1725,7 +1725,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2857"
+            line="2952"
             column="13"/>
     </issue>
 
@@ -1736,7 +1736,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="3128"
+            line="3223"
             column="9"/>
     </issue>
 
@@ -1747,7 +1747,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="3169"
+            line="3264"
             column="9"/>
     </issue>
 
@@ -1758,7 +1758,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="3210"
+            line="3305"
             column="9"/>
     </issue>
 
@@ -1769,7 +1769,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="3251"
+            line="3346"
             column="9"/>
     </issue>
 
@@ -1780,7 +1780,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="3294"
+            line="3389"
             column="9"/>
     </issue>
 
@@ -1923,7 +1923,7 @@
         errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="1640"
+            line="1747"
             column="33"/>
     </issue>
 
@@ -1934,7 +1934,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2518"
+            line="2625"
             column="9"/>
     </issue>
 
@@ -1945,7 +1945,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2524"
+            line="2631"
             column="9"/>
     </issue>
 
@@ -1956,7 +1956,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2532"
+            line="2639"
             column="9"/>
     </issue>
 
@@ -1967,7 +1967,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2695"
+            line="2802"
             column="9"/>
     </issue>
 
@@ -1978,7 +1978,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2740"
+            line="2847"
             column="9"/>
     </issue>
 
@@ -1989,7 +1989,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2782"
+            line="2889"
             column="9"/>
     </issue>
 
@@ -2000,7 +2000,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2833"
+            line="2940"
             column="9"/>
     </issue>
 
@@ -2011,7 +2011,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2877"
+            line="2984"
             column="9"/>
     </issue>
 
@@ -2022,7 +2022,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2918"
+            line="3025"
             column="9"/>
     </issue>
 
@@ -5246,12 +5246,34 @@
 
     <issue
         id="UnusedResources"
+        message="The resource `R.string.repo_pages_requesting_token_log` appears to be unused"
+        errorLine1="    &lt;string name=&quot;repo_pages_requesting_token_log&quot;>◇ 申请资产上传 Token...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="2645"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.repo_pages_token_success_log` appears to be unused"
+        errorLine1="    &lt;string name=&quot;repo_pages_token_success_log&quot;>  └─ Token 获取成功&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="2648"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
         message="The resource `R.string.repo_pages_env_vars_failed_format` appears to be unused"
         errorLine1="    &lt;string name=&quot;repo_pages_env_vars_failed_format&quot;>获取环境变量失败: %1$s&lt;/string>"
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2662"
+            line="2661"
             column="13"/>
     </issue>
 
@@ -5262,7 +5284,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2663"
+            line="2662"
             column="13"/>
     </issue>
 
@@ -5273,7 +5295,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2664"
+            line="2663"
             column="13"/>
     </issue>
 
@@ -5284,7 +5306,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2665"
+            line="2664"
             column="13"/>
     </issue>
 
@@ -5295,7 +5317,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2666"
+            line="2665"
             column="13"/>
     </issue>
 
@@ -5306,7 +5328,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2667"
+            line="2666"
             column="13"/>
     </issue>
 
@@ -5317,7 +5339,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2668"
+            line="2667"
             column="13"/>
     </issue>
 
@@ -5328,7 +5350,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2669"
+            line="2668"
             column="13"/>
     </issue>
 
@@ -5339,7 +5361,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2670"
+            line="2669"
             column="13"/>
     </issue>
 
@@ -5350,7 +5372,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2671"
+            line="2670"
             column="13"/>
     </issue>
 
@@ -5361,7 +5383,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2672"
+            line="2671"
             column="13"/>
     </issue>
 
@@ -5372,7 +5394,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2673"
+            line="2672"
             column="13"/>
     </issue>
 
@@ -5383,7 +5405,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2674"
+            line="2673"
             column="13"/>
     </issue>
 
@@ -5394,7 +5416,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2675"
+            line="2674"
             column="13"/>
     </issue>
 
@@ -5405,7 +5427,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2676"
+            line="2675"
             column="13"/>
     </issue>
 
@@ -5416,7 +5438,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2677"
+            line="2676"
             column="13"/>
     </issue>
 
@@ -5427,7 +5449,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2678"
+            line="2677"
             column="13"/>
     </issue>
 
@@ -5438,7 +5460,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2679"
+            line="2678"
             column="13"/>
     </issue>
 
@@ -5449,7 +5471,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2680"
+            line="2679"
             column="13"/>
     </issue>
 
@@ -5460,7 +5482,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2681"
+            line="2680"
             column="13"/>
     </issue>
 
@@ -5471,7 +5493,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2682"
+            line="2681"
             column="13"/>
     </issue>
 
@@ -5482,7 +5504,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2683"
+            line="2682"
             column="13"/>
     </issue>
 
@@ -5493,7 +5515,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2684"
+            line="2683"
             column="13"/>
     </issue>
 
@@ -5504,7 +5526,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2685"
+            line="2684"
             column="13"/>
     </issue>
 
@@ -5515,7 +5537,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2686"
+            line="2685"
             column="13"/>
     </issue>
 
@@ -5526,7 +5548,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2687"
+            line="2686"
             column="13"/>
     </issue>
 
@@ -5537,7 +5559,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2690"
+            line="2689"
             column="13"/>
     </issue>
 
@@ -5548,7 +5570,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2809"
+            line="2808"
             column="13"/>
     </issue>
 
@@ -5559,7 +5581,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2816"
+            line="2815"
             column="13"/>
     </issue>
 
@@ -5570,7 +5592,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2824"
+            line="2823"
             column="13"/>
     </issue>
 
@@ -5581,7 +5603,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2825"
+            line="2824"
             column="13"/>
     </issue>
 
@@ -5592,7 +5614,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2827"
+            line="2826"
             column="13"/>
     </issue>
 
@@ -5603,7 +5625,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2828"
+            line="2827"
             column="13"/>
     </issue>
 
@@ -5614,7 +5636,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2829"
+            line="2828"
             column="13"/>
     </issue>
 
@@ -5625,7 +5647,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2884"
+            line="2886"
             column="13"/>
     </issue>
 
@@ -5636,7 +5658,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2885"
+            line="2887"
             column="13"/>
     </issue>
 
@@ -5647,7 +5669,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2905"
+            line="2907"
             column="13"/>
     </issue>
 
@@ -5658,7 +5680,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2964"
+            line="2966"
             column="13"/>
     </issue>
 
@@ -5669,7 +5691,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2987"
+            line="2989"
             column="13"/>
     </issue>
 
@@ -5680,7 +5702,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3016"
+            line="3018"
             column="13"/>
     </issue>
 
@@ -5691,7 +5713,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3018"
+            line="3020"
             column="13"/>
     </issue>
 
@@ -5702,7 +5724,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3027"
+            line="3029"
             column="13"/>
     </issue>
 
@@ -5713,7 +5735,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3034"
+            line="3036"
             column="13"/>
     </issue>
 
@@ -5724,7 +5746,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3039"
+            line="3041"
             column="13"/>
     </issue>
 
@@ -5735,7 +5757,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3040"
+            line="3042"
             column="13"/>
     </issue>
 
@@ -5746,7 +5768,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3041"
+            line="3043"
             column="13"/>
     </issue>
 
@@ -5757,7 +5779,18 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3045"
+            line="3047"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.repo_pages_blake3_provider_missing_error` appears to be unused"
+        errorLine1="    &lt;string name=&quot;repo_pages_blake3_provider_missing_error&quot;>Pages 资产哈希算法初始化失败（BouncyCastle 不可用），已回退旧算法部署&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3114"
             column="13"/>
     </issue>
 
@@ -5934,7 +5967,7 @@
             message="Duplicates value in `loading`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2927"
+            line="2929"
             column="5"
             message="Duplicates value in `loading`"/>
     </issue>
@@ -6013,7 +6046,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2817"
+            line="2816"
             column="5"
             message="Duplicates value in `cancel`"/>
     </issue>
@@ -6029,7 +6062,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2795"
+            line="2794"
             column="5"
             message="Duplicates value in `cancel`"/>
     </issue>
@@ -6208,7 +6241,7 @@
             message="Duplicates value in `account_default`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2781"
+            line="2780"
             column="5"
             message="Duplicates value in `account_default`"/>
     </issue>
@@ -6239,7 +6272,7 @@
             message="Duplicates value in `account_default`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2803"
+            line="2802"
             column="5"
             message="Duplicates value in `account_default`"/>
     </issue>
@@ -6255,7 +6288,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2789"
+            line="2788"
             column="5"
             message="Duplicates value in `account_token_cannot_be_empty`"/>
     </issue>
@@ -6276,7 +6309,7 @@
             message="Duplicates value in `account_email_cannot_be_empty`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2790"
+            line="2789"
             column="5"
             message="Duplicates value in `account_email_cannot_be_empty`"/>
     </issue>
@@ -6292,7 +6325,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2791"
+            line="2790"
             column="5"
             message="Duplicates value in `account_global_key_cannot_be_empty`"/>
     </issue>
@@ -6308,7 +6341,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2811"
+            line="2810"
             column="5"
             message="Duplicates value in `account_token_cannot_be_empty`"/>
     </issue>
@@ -6329,7 +6362,7 @@
             message="Duplicates value in `account_email_cannot_be_empty`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2812"
+            line="2811"
             column="5"
             message="Duplicates value in `account_email_cannot_be_empty`"/>
     </issue>
@@ -6345,7 +6378,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2813"
+            line="2812"
             column="5"
             message="Duplicates value in `account_global_key_cannot_be_empty`"/>
     </issue>
@@ -6505,7 +6538,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2810"
+            line="2809"
             column="5"
             message="Duplicates value in `analytics_time_range_24h`"/>
     </issue>
@@ -6521,7 +6554,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2811"
+            line="2810"
             column="5"
             message="Duplicates value in `analytics_time_range_7d`"/>
     </issue>
@@ -6537,7 +6570,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2812"
+            line="2811"
             column="5"
             message="Duplicates value in `analytics_time_range_30d`"/>
     </issue>
@@ -6744,7 +6777,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2939"
+            line="2941"
             column="5"
             message="Duplicates value in `domain_delete`"/>
     </issue>
@@ -6760,7 +6793,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2961"
+            line="2963"
             column="5"
             message="Duplicates value in `domain_delete`"/>
     </issue>
@@ -6786,7 +6819,7 @@
             message="Duplicates value in `domain_hint`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2806"
+            line="2805"
             column="5"
             message="Duplicates value in `domain_hint`"/>
     </issue>
@@ -6844,7 +6877,7 @@
             message="Duplicates value in `domain_pending`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2992"
+            line="2994"
             column="5"
             message="Duplicates value in `domain_pending`"/>
     </issue>
@@ -6924,12 +6957,12 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2839"
+            line="2838"
             column="5"
             message="Duplicates value in `waf_preview`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2945"
+            line="2947"
             column="5"
             message="Duplicates value in `waf_preview`"/>
     </issue>
@@ -6966,12 +6999,12 @@
             message="Duplicates value in `waf_preview`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2861"
+            line="2860"
             column="5"
             message="Duplicates value in `waf_preview`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2967"
+            line="2969"
             column="5"
             message="Duplicates value in `waf_preview`"/>
     </issue>
@@ -7931,7 +7964,7 @@
             message="Duplicates value in `gateway_enabled`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2976"
+            line="2978"
             column="5"
             message="Duplicates value in `gateway_enabled`"/>
     </issue>
@@ -8062,12 +8095,12 @@
             message="Duplicates value in `gateway_disabled`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2946"
+            line="2948"
             column="5"
             message="Duplicates value in `gateway_disabled`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3002"
+            line="3004"
             column="5"
             message="Duplicates value in `gateway_disabled`"/>
     </issue>
@@ -8125,7 +8158,7 @@
             message="Duplicates value in `gateway_enabled`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2945"
+            line="2947"
             column="5"
             message="Duplicates value in `gateway_enabled`"/>
     </issue>
@@ -8453,7 +8486,7 @@
             message="Duplicates value in `tunnel_active`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2993"
+            line="2995"
             column="5"
             message="Duplicates value in `tunnel_active`"/>
     </issue>
@@ -8607,7 +8640,7 @@
             message="Duplicates value in `msg_unknown_error`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2964"
+            line="2966"
             column="5"
             message="Duplicates value in `msg_unknown_error`"/>
     </issue>
@@ -8643,17 +8676,17 @@
             message="Duplicates value in `msg_update_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2620"
+            line="2619"
             column="5"
             message="Duplicates value in `msg_update_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2736"
+            line="2735"
             column="5"
             message="Duplicates value in `msg_update_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3022"
+            line="3024"
             column="5"
             message="Duplicates value in `msg_update_failed`"/>
     </issue>
@@ -8679,12 +8712,12 @@
             message="Duplicates value in `dialog_loading_ellipsis`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2796"
+            line="2795"
             column="5"
             message="Duplicates value in `dialog_loading_ellipsis`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2905"
+            line="2907"
             column="5"
             message="Duplicates value in `dialog_loading_ellipsis`"/>
     </issue>
@@ -8700,7 +8733,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2906"
+            line="2908"
             column="5"
             message="Duplicates value in `msg_no_logs_to_copy`"/>
     </issue>
@@ -8753,9 +8786,25 @@
             message="Duplicates value in `dialog_rollback`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3083"
+            line="3085"
             column="5"
             message="Duplicates value in `dialog_rollback`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `Download failed: %1$s`, used in `msg_download_failed` and `remote_url_security_fetch_io_error_format`"
+        errorLine1="    &lt;string name=&quot;msg_download_failed&quot;>Download failed: %1$s&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="606"
+            column="5"/>
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3150"
+            column="5"
+            message="Duplicates value in `msg_download_failed`"/>
     </issue>
 
     <issue
@@ -8774,7 +8823,7 @@
             message="Duplicates value in `msg_unknown_error`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2986"
+            line="2988"
             column="5"
             message="Duplicates value in `msg_unknown_error`"/>
     </issue>
@@ -8826,17 +8875,17 @@
             message="Duplicates value in `msg_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2642"
+            line="2641"
             column="5"
             message="Duplicates value in `msg_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2758"
+            line="2757"
             column="5"
             message="Duplicates value in `msg_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3044"
+            line="3046"
             column="5"
             message="Duplicates value in `msg_update_failed`"/>
     </issue>
@@ -8889,7 +8938,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2923"
+            line="2925"
             column="5"
             message="Duplicates value in `status_active`"/>
     </issue>
@@ -8910,7 +8959,7 @@
             message="Duplicates value in `status_expired`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2981"
+            line="2983"
             column="5"
             message="Duplicates value in `status_expired`"/>
     </issue>
@@ -8946,7 +8995,7 @@
             message="Duplicates value in `status_unknown`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2809"
+            line="2808"
             column="5"
             message="Duplicates value in `status_unknown`"/>
     </issue>
@@ -8983,7 +9032,7 @@
             message="Duplicates value in `dialog_rollback`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3105"
+            line="3107"
             column="5"
             message="Duplicates value in `dialog_rollback`"/>
     </issue>
@@ -9004,7 +9053,7 @@
             message="Duplicates value in `status_activated`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2971"
+            line="2973"
             column="5"
             message="Duplicates value in `status_activated`"/>
     </issue>
@@ -9025,7 +9074,7 @@
             message="Duplicates value in `status_deleted`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2973"
+            line="2975"
             column="5"
             message="Duplicates value in `status_deleted`"/>
     </issue>
@@ -9073,7 +9122,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2803"
+            line="2802"
             column="5"
             message="Duplicates value in `perm_read`"/>
     </issue>
@@ -9110,7 +9159,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2804"
+            line="2803"
             column="5"
             message="Duplicates value in `perm_write`"/>
     </issue>
@@ -9131,7 +9180,7 @@
             message="Duplicates value in `status_expired`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3003"
+            line="3005"
             column="5"
             message="Duplicates value in `status_expired`"/>
     </issue>
@@ -9167,12 +9216,12 @@
             message="Duplicates value in `status_unknown`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2831"
+            line="2830"
             column="5"
             message="Duplicates value in `status_unknown`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3005"
+            line="3007"
             column="5"
             message="Duplicates value in `status_unknown`"/>
     </issue>
@@ -9225,7 +9274,7 @@
             message="Duplicates value in `status_deleted`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2995"
+            line="2997"
             column="5"
             message="Duplicates value in `status_deleted`"/>
     </issue>
@@ -9241,7 +9290,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2825"
+            line="2824"
             column="5"
             message="Duplicates value in `perm_read`"/>
     </issue>
@@ -9257,7 +9306,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2826"
+            line="2825"
             column="5"
             message="Duplicates value in `perm_write`"/>
     </issue>
@@ -9692,7 +9741,7 @@
             message="Duplicates value in `worker_d1_bindings_update_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2672"
+            line="2671"
             column="5"
             message="Duplicates value in `worker_d1_bindings_update_failed`"/>
     </issue>
@@ -9708,7 +9757,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2673"
+            line="2672"
             column="5"
             message="Duplicates value in `worker_service_bindings_update_failed`"/>
     </issue>
@@ -9729,7 +9778,7 @@
             message="Duplicates value in `worker_env_vars_update_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2668"
+            line="2667"
             column="5"
             message="Duplicates value in `worker_env_vars_update_failed`"/>
     </issue>
@@ -10127,7 +10176,7 @@
             message="Duplicates value in `worker_d1_bindings_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2694"
+            line="2693"
             column="5"
             message="Duplicates value in `worker_d1_bindings_update_failed`"/>
     </issue>
@@ -10174,7 +10223,7 @@
             message="Duplicates value in `worker_service_bindings_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2695"
+            line="2694"
             column="5"
             message="Duplicates value in `worker_service_bindings_update_failed`"/>
     </issue>
@@ -10221,7 +10270,7 @@
             message="Duplicates value in `worker_env_vars_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2690"
+            line="2689"
             column="5"
             message="Duplicates value in `worker_env_vars_update_failed`"/>
     </issue>
@@ -10290,12 +10339,12 @@
             message="Duplicates value in `worker_secrets_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2691"
+            line="2690"
             column="5"
             message="Duplicates value in `worker_secrets_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2756"
+            line="2755"
             column="5"
             message="Duplicates value in `worker_secrets_update_failed`"/>
     </issue>
@@ -10412,7 +10461,7 @@
             message="Duplicates value in `worker_custom_domain_update_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2733"
+            line="2732"
             column="5"
             message="Duplicates value in `worker_custom_domain_update_failed`"/>
     </issue>
@@ -10449,7 +10498,7 @@
             message="Duplicates value in `worker_versions_load_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2737"
+            line="2736"
             column="5"
             message="Duplicates value in `worker_versions_load_failed`"/>
     </issue>
@@ -10517,7 +10566,7 @@
             message="Duplicates value in `worker_rollback_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2674"
+            line="2673"
             column="5"
             message="Duplicates value in `worker_rollback_failed`"/>
     </issue>
@@ -10706,7 +10755,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2843"
+            line="2842"
             column="5"
             message="Duplicates value in `worker_fetching_kv_bindings`"/>
     </issue>
@@ -10774,7 +10823,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2844"
+            line="2843"
             column="5"
             message="Duplicates value in `worker_no_kv_namespace`"/>
     </issue>
@@ -10816,7 +10865,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2845"
+            line="2844"
             column="5"
             message="Duplicates value in `worker_please_enter_binding_name`"/>
     </issue>
@@ -10853,7 +10902,7 @@
             message="Duplicates value in `worker_custom_domain_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2755"
+            line="2754"
             column="5"
             message="Duplicates value in `worker_custom_domain_update_failed`"/>
     </issue>
@@ -10869,12 +10918,12 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2847"
+            line="2846"
             column="5"
             message="Duplicates value in `worker_kv_load_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2986"
+            line="2988"
             column="5"
             message="Duplicates value in `worker_kv_load_failed`"/>
     </issue>
@@ -10895,7 +10944,7 @@
             message="Duplicates value in `worker_kv_bindings_config_updated`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2849"
+            line="2848"
             column="5"
             message="Duplicates value in `worker_kv_bindings_config_updated`"/>
     </issue>
@@ -10931,7 +10980,7 @@
             message="Duplicates value in `worker_rollback_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2696"
+            line="2695"
             column="5"
             message="Duplicates value in `worker_rollback_failed`"/>
     </issue>
@@ -10947,7 +10996,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2852"
+            line="2851"
             column="5"
             message="Duplicates value in `worker_fetching_r2_bindings`"/>
     </issue>
@@ -10963,7 +11012,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2853"
+            line="2852"
             column="5"
             message="Duplicates value in `worker_no_r2_bucket`"/>
     </issue>
@@ -11010,12 +11059,12 @@
             message="Duplicates value in `worker_r2_load_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2855"
+            line="2854"
             column="5"
             message="Duplicates value in `worker_r2_load_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2987"
+            line="2989"
             column="5"
             message="Duplicates value in `worker_r2_load_failed`"/>
     </issue>
@@ -11116,7 +11165,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2865"
+            line="2864"
             column="5"
             message="Duplicates value in `worker_fetching_kv_bindings`"/>
     </issue>
@@ -11164,7 +11213,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2866"
+            line="2865"
             column="5"
             message="Duplicates value in `worker_no_kv_namespace`"/>
     </issue>
@@ -11196,7 +11245,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2867"
+            line="2866"
             column="5"
             message="Duplicates value in `worker_please_enter_binding_name`"/>
     </issue>
@@ -11244,12 +11293,12 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2869"
+            line="2868"
             column="5"
             message="Duplicates value in `worker_kv_load_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3008"
+            line="3010"
             column="5"
             message="Duplicates value in `worker_kv_load_failed`"/>
     </issue>
@@ -11297,7 +11346,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2871"
+            line="2870"
             column="5"
             message="Duplicates value in `worker_kv_bindings_config_updated`"/>
     </issue>
@@ -11329,7 +11378,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2874"
+            line="2873"
             column="5"
             message="Duplicates value in `worker_fetching_r2_bindings`"/>
     </issue>
@@ -11361,7 +11410,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2875"
+            line="2874"
             column="5"
             message="Duplicates value in `worker_no_r2_bucket`"/>
     </issue>
@@ -11414,12 +11463,12 @@
             message="Duplicates value in `worker_r2_load_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2877"
+            line="2876"
             column="5"
             message="Duplicates value in `worker_r2_load_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3009"
+            line="3011"
             column="5"
             message="Duplicates value in `worker_r2_load_failed`"/>
     </issue>
@@ -12132,12 +12181,12 @@
             message="Duplicates value in `pages_please_enter_project_name`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2876"
+            line="2875"
             column="5"
             message="Duplicates value in `pages_please_enter_project_name`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2891"
+            line="2893"
             column="5"
             message="Duplicates value in `pages_please_enter_project_name`"/>
     </issue>
@@ -12174,7 +12223,7 @@
             message="Duplicates value in `pages_project_create_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2684"
+            line="2683"
             column="5"
             message="Duplicates value in `pages_project_create_failed`"/>
     </issue>
@@ -12211,7 +12260,7 @@
             message="Duplicates value in `pages_project_delete_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2685"
+            line="2684"
             column="5"
             message="Duplicates value in `pages_project_delete_failed`"/>
     </issue>
@@ -12232,7 +12281,7 @@
             message="Duplicates value in `pages_project_detail_load_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2683"
+            line="2682"
             column="5"
             message="Duplicates value in `pages_project_detail_load_failed`"/>
     </issue>
@@ -12253,7 +12302,7 @@
             message="Duplicates value in `pages_deployments_load_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2678"
+            line="2677"
             column="5"
             message="Duplicates value in `pages_deployments_load_failed`"/>
     </issue>
@@ -12290,7 +12339,7 @@
             message="Duplicates value in `pages_redeploy_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2679"
+            line="2678"
             column="5"
             message="Duplicates value in `pages_redeploy_failed`"/>
     </issue>
@@ -12343,7 +12392,7 @@
             message="Duplicates value in `pages_deployment_delete_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2676"
+            line="2675"
             column="5"
             message="Duplicates value in `pages_deployment_delete_failed`"/>
     </issue>
@@ -12438,7 +12487,7 @@
             message="Duplicates value in `pages_deployment_create_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2660"
+            line="2659"
             column="5"
             message="Duplicates value in `pages_deployment_create_failed`"/>
     </issue>
@@ -12549,12 +12598,12 @@
             message="Duplicates value in `pages_please_enter_project_name`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2898"
+            line="2897"
             column="5"
             message="Duplicates value in `pages_please_enter_project_name`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2913"
+            line="2915"
             column="5"
             message="Duplicates value in `pages_please_enter_project_name`"/>
     </issue>
@@ -12591,7 +12640,7 @@
             message="Duplicates value in `pages_project_create_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2706"
+            line="2705"
             column="5"
             message="Duplicates value in `pages_project_create_failed`"/>
     </issue>
@@ -12670,7 +12719,7 @@
             message="Duplicates value in `pages_project_delete_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2707"
+            line="2706"
             column="5"
             message="Duplicates value in `pages_project_delete_failed`"/>
     </issue>
@@ -12691,7 +12740,7 @@
             message="Duplicates value in `pages_project_detail_load_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2705"
+            line="2704"
             column="5"
             message="Duplicates value in `pages_project_detail_load_failed`"/>
     </issue>
@@ -12723,7 +12772,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2700"
+            line="2699"
             column="5"
             message="Duplicates value in `pages_deployments_load_failed`"/>
     </issue>
@@ -12786,7 +12835,7 @@
             message="Duplicates value in `pages_runtime_settings_updated`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3021"
+            line="3023"
             column="5"
             message="Duplicates value in `pages_runtime_settings_updated`"/>
     </issue>
@@ -12839,7 +12888,7 @@
             message="Duplicates value in `pages_deployment_delete_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2698"
+            line="2697"
             column="5"
             message="Duplicates value in `pages_deployment_delete_failed`"/>
     </issue>
@@ -12876,7 +12925,7 @@
             message="Duplicates value in `pages_cleanup_result_success`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2961"
+            line="2963"
             column="5"
             message="Duplicates value in `pages_cleanup_result_success`"/>
     </issue>
@@ -12929,7 +12978,7 @@
             message="Duplicates value in `pages_deployment_create_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2682"
+            line="2681"
             column="5"
             message="Duplicates value in `pages_deployment_create_failed`"/>
     </issue>
@@ -12987,7 +13036,7 @@
             message="Duplicates value in `pages_kv_bindings_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2692"
+            line="2691"
             column="5"
             message="Duplicates value in `pages_kv_bindings_update_failed`"/>
     </issue>
@@ -13019,7 +13068,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3018"
+            line="3020"
             column="5"
             message="Duplicates value in `pages_get_settings_failed`"/>
     </issue>
@@ -13045,7 +13094,7 @@
             message="Duplicates value in `pages_r2_bindings_update_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2693"
+            line="2692"
             column="5"
             message="Duplicates value in `pages_r2_bindings_update_failed`"/>
     </issue>
@@ -13103,7 +13152,7 @@
             message="Duplicates value in `pages_runtime_settings_updated`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3043"
+            line="3045"
             column="5"
             message="Duplicates value in `pages_runtime_settings_updated`"/>
     </issue>
@@ -13135,7 +13184,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3000"
+            line="3002"
             column="5"
             message="Duplicates value in `pages_fetching_env_vars`"/>
     </issue>
@@ -13151,7 +13200,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2840"
+            line="2839"
             column="5"
             message="Duplicates value in `pages_project_name_with_env`"/>
     </issue>
@@ -13167,7 +13216,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2825"
+            line="2824"
             column="5"
             message="Duplicates value in `pages_label_secret`"/>
     </issue>
@@ -13183,7 +13232,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2824"
+            line="2823"
             column="5"
             message="Duplicates value in `pages_label_variable`"/>
     </issue>
@@ -13236,7 +13285,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3022"
+            line="3024"
             column="5"
             message="Duplicates value in `pages_fetching_env_vars`"/>
     </issue>
@@ -13252,7 +13301,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2862"
+            line="2861"
             column="5"
             message="Duplicates value in `pages_project_name_with_env`"/>
     </issue>
@@ -13268,7 +13317,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2847"
+            line="2846"
             column="5"
             message="Duplicates value in `pages_label_secret`"/>
     </issue>
@@ -13284,7 +13333,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2846"
+            line="2845"
             column="5"
             message="Duplicates value in `pages_label_variable`"/>
     </issue>
@@ -13316,7 +13365,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2860"
+            line="2859"
             column="5"
             message="Duplicates value in `env_production`"/>
     </issue>
@@ -13332,7 +13381,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2933"
+            line="2935"
             column="5"
             message="Duplicates value in `msg_domain_empty`"/>
     </issue>
@@ -13369,7 +13418,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2955"
+            line="2957"
             column="5"
             message="Duplicates value in `msg_domain_empty`"/>
     </issue>
@@ -13559,12 +13608,12 @@
             message="Duplicates value in `zt_device_op_is`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2921"
+            line="2923"
             column="5"
             message="Duplicates value in `zt_device_op_is`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3039"
+            line="3041"
             column="5"
             message="Duplicates value in `zt_device_op_is`"/>
     </issue>
@@ -13696,7 +13745,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2818"
+            line="2817"
             column="5"
             message="Duplicates value in `zt_list_loading_hint`"/>
     </issue>
@@ -13844,12 +13893,12 @@
             message="Duplicates value in `msg_delete_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2606"
+            line="2605"
             column="5"
             message="Duplicates value in `msg_delete_failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2942"
+            line="2944"
             column="5"
             message="Duplicates value in `msg_delete_failed`"/>
     </issue>
@@ -13865,7 +13914,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2612"
+            line="2611"
             column="5"
             message="Duplicates value in `msg_expression_empty`"/>
     </issue>
@@ -13934,7 +13983,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2613"
+            line="2612"
             column="5"
             message="Duplicates value in `msg_expr_too_long`"/>
     </issue>
@@ -14024,12 +14073,12 @@
             message="Duplicates value in `msg_delete_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2628"
+            line="2627"
             column="5"
             message="Duplicates value in `msg_delete_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2964"
+            line="2966"
             column="5"
             message="Duplicates value in `msg_delete_failed`"/>
     </issue>
@@ -14061,7 +14110,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2634"
+            line="2633"
             column="5"
             message="Duplicates value in `msg_expression_empty`"/>
     </issue>
@@ -14093,7 +14142,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2980"
+            line="2982"
             column="5"
             message="Duplicates value in `msg_deactivated`"/>
     </issue>
@@ -14109,7 +14158,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3041"
+            line="3043"
             column="5"
             message="Duplicates value in `msg_saving_ellipsis`"/>
     </issue>
@@ -14487,7 +14536,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2826"
+            line="2825"
             column="5"
             message="Duplicates value in `transform_edit_phase_title`"/>
     </issue>
@@ -14567,7 +14616,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2848"
+            line="2847"
             column="5"
             message="Duplicates value in `transform_edit_phase_title`"/>
     </issue>
@@ -14759,12 +14808,12 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2922"
+            line="2924"
             column="5"
             message="Duplicates value in `status_no`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3040"
+            line="3042"
             column="5"
             message="Duplicates value in `status_no`"/>
     </issue>
@@ -14860,12 +14909,12 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2943"
+            line="2945"
             column="5"
             message="Duplicates value in `status_yes`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3061"
+            line="3063"
             column="5"
             message="Duplicates value in `status_yes`"/>
     </issue>
@@ -14881,12 +14930,12 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2944"
+            line="2946"
             column="5"
             message="Duplicates value in `status_no`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3062"
+            line="3064"
             column="5"
             message="Duplicates value in `status_no`"/>
     </issue>
@@ -15061,7 +15110,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3054"
+            line="3056"
             column="5"
             message="Duplicates value in `xml_fragment_worker_8`"/>
     </issue>
@@ -15210,7 +15259,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3076"
+            line="3078"
             column="5"
             message="Duplicates value in `xml_fragment_worker_8`"/>
     </issue>
@@ -15471,7 +15520,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3090"
+            line="3092"
             column="5"
             message="Duplicates value in `xml_dialog_cleanup_deployments_2`"/>
     </issue>
@@ -15503,7 +15552,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3059"
+            line="3061"
             column="5"
             message="Duplicates value in `xml_dialog_cleanup_versions_2`"/>
     </issue>
@@ -16364,12 +16413,12 @@
             message="Duplicates value in `xml_item_pages_deployment`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2925"
+            line="2927"
             column="5"
             message="Duplicates value in `xml_item_pages_deployment`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3041"
+            line="3043"
             column="5"
             message="Duplicates value in `xml_item_pages_deployment`"/>
     </issue>
@@ -16401,7 +16450,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3105"
+            line="3107"
             column="5"
             message="Duplicates value in `xml_item_secret`"/>
     </issue>
@@ -16417,7 +16466,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3074"
+            line="3076"
             column="5"
             message="Duplicates value in `xml_item_variable`"/>
     </issue>
@@ -16438,12 +16487,12 @@
             message="Duplicates value in `xml_item_pages_deployment`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2947"
+            line="2949"
             column="5"
             message="Duplicates value in `xml_item_pages_deployment`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3063"
+            line="3065"
             column="5"
             message="Duplicates value in `xml_item_pages_deployment`"/>
     </issue>
@@ -16475,7 +16524,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2914"
+            line="2916"
             column="5"
             message="Duplicates value in `app_log_empty`"/>
     </issue>
@@ -16491,7 +16540,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3096"
+            line="3098"
             column="5"
             message="Duplicates value in `xml_item_variable`"/>
     </issue>
@@ -16523,7 +16572,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2936"
+            line="2938"
             column="5"
             message="Duplicates value in `app_log_empty`"/>
     </issue>
@@ -16539,7 +16588,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2926"
+            line="2928"
             column="5"
             message="Duplicates value in `datetime_unknown`"/>
     </issue>
@@ -16571,7 +16620,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2948"
+            line="2950"
             column="5"
             message="Duplicates value in `datetime_unknown`"/>
     </issue>
@@ -16587,7 +16636,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2941"
+            line="2943"
             column="5"
             message="Duplicates value in `route_pages_domain_deleted_success`"/>
     </issue>
@@ -16619,7 +16668,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2963"
+            line="2965"
             column="5"
             message="Duplicates value in `route_pages_domain_deleted_success`"/>
     </issue>
@@ -16635,7 +16684,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2805"
+            line="2804"
             column="5"
             message="Duplicates value in `d1_execute`"/>
     </issue>
@@ -16667,7 +16716,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2957"
+            line="2959"
             column="5"
             message="Duplicates value in `route_dns_configuring`"/>
     </issue>
@@ -16683,7 +16732,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2827"
+            line="2826"
             column="5"
             message="Duplicates value in `d1_execute`"/>
     </issue>
@@ -16731,7 +16780,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3027"
+            line="3029"
             column="5"
             message="Duplicates value in `se_delete_version_title`"/>
     </issue>
@@ -16747,7 +16796,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3049"
+            line="3051"
             column="5"
             message="Duplicates value in `se_delete_version_title`"/>
     </issue>
@@ -16827,7 +16876,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2962"
+            line="2964"
             column="5"
             message="Duplicates value in `vm_msg_backup_list_load_failed`"/>
     </issue>
@@ -16843,7 +16892,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3029"
+            line="3031"
             column="5"
             message="Duplicates value in `vm_msg_backup_delete_success`"/>
     </issue>
@@ -16859,7 +16908,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2963"
+            line="2965"
             column="5"
             message="Duplicates value in `vm_msg_backup_import_success_but_save_failed`"/>
     </issue>
@@ -16928,7 +16977,7 @@
             message="Duplicates value in `vm_msg_backup_list_load_failed`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2984"
+            line="2986"
             column="5"
             message="Duplicates value in `vm_msg_backup_list_load_failed`"/>
     </issue>
@@ -16944,7 +16993,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3051"
+            line="3053"
             column="5"
             message="Duplicates value in `vm_msg_backup_delete_success`"/>
     </issue>
@@ -17136,12 +17185,12 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2836"
+            line="2835"
             column="5"
             message="Duplicates value in `vm_msg_pages_env_vars_update_success`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3008"
+            line="3010"
             column="5"
             message="Duplicates value in `vm_msg_pages_env_vars_update_success`"/>
     </issue>
@@ -17157,12 +17206,12 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2857"
+            line="2856"
             column="5"
             message="Duplicates value in `vm_msg_pages_r2_bindings_update_success`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2989"
+            line="2991"
             column="5"
             message="Duplicates value in `vm_msg_pages_r2_bindings_update_success`"/>
     </issue>
@@ -17178,12 +17227,12 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2865"
+            line="2864"
             column="5"
             message="Duplicates value in `vm_msg_pages_d1_bindings_update_success`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2994"
+            line="2996"
             column="5"
             message="Duplicates value in `vm_msg_pages_d1_bindings_update_success`"/>
     </issue>
@@ -17199,12 +17248,12 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2873"
+            line="2872"
             column="5"
             message="Duplicates value in `vm_msg_pages_service_bindings_update_success`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2999"
+            line="3001"
             column="5"
             message="Duplicates value in `vm_msg_pages_service_bindings_update_success`"/>
     </issue>
@@ -17236,7 +17285,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2709"
+            line="2708"
             column="5"
             message="Duplicates value in `vm_msg_pages_deployment_create_failed`"/>
     </issue>
@@ -17252,7 +17301,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2800"
+            line="2799"
             column="5"
             message="Duplicates value in `repo_generic_decrypt_failed`"/>
     </issue>
@@ -17264,11 +17313,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2621"
+            line="2620"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2746"
+            line="2745"
             column="5"
             message="Duplicates value in `repo_pages_log_channel_create_no_result`"/>
     </issue>
@@ -17280,16 +17329,16 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2622"
+            line="2621"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2747"
+            line="2746"
             column="5"
             message="Duplicates value in `repo_pages_log_channel_create_failed_format`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2913"
+            line="2915"
             column="5"
             message="Duplicates value in `repo_pages_log_channel_create_failed_format`"/>
     </issue>
@@ -17301,11 +17350,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2623"
+            line="2622"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2748"
+            line="2747"
             column="5"
             message="Duplicates value in `repo_pages_log_channel_delete_failed_format`"/>
     </issue>
@@ -17317,11 +17366,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2624"
+            line="2623"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2879"
+            line="2878"
             column="5"
             message="Duplicates value in `repo_pages_file_not_found`"/>
     </issue>
@@ -17333,11 +17382,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2643"
+            line="2642"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2768"
+            line="2767"
             column="5"
             message="Duplicates value in `repo_pages_log_channel_create_no_result`"/>
     </issue>
@@ -17349,16 +17398,16 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2644"
+            line="2643"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2769"
+            line="2768"
             column="5"
             message="Duplicates value in `repo_pages_log_channel_create_failed_format`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2935"
+            line="2937"
             column="5"
             message="Duplicates value in `repo_pages_log_channel_create_failed_format`"/>
     </issue>
@@ -17370,11 +17419,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2645"
+            line="2644"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2770"
+            line="2769"
             column="5"
             message="Duplicates value in `repo_pages_log_channel_delete_failed_format`"/>
     </issue>
@@ -17386,11 +17435,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2646"
+            line="2645"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2901"
+            line="2900"
             column="5"
             message="Duplicates value in `repo_pages_file_not_found`"/>
     </issue>
@@ -17402,11 +17451,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2669"
+            line="2668"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2734"
+            line="2733"
             column="5"
             message="Duplicates value in `repo_pages_update_secrets_failed_format`"/>
     </issue>
@@ -17418,11 +17467,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2827"
+            line="2826"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3080"
+            line="3082"
             column="5"
             message="Duplicates value in `pages_generic_please_enter_label_name`"/>
     </issue>
@@ -17434,11 +17483,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2828"
+            line="2827"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3081"
+            line="3083"
             column="5"
             message="Duplicates value in `pages_generic_please_enter_label_value`"/>
     </issue>
@@ -17450,11 +17499,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2830"
+            line="2829"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3004"
+            line="3006"
             column="5"
             message="Duplicates value in `pages_generic_env_added`"/>
     </issue>
@@ -17466,11 +17515,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2831"
+            line="2830"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3006"
+            line="3008"
             column="5"
             message="Duplicates value in `pages_generic_env_updated`"/>
     </issue>
@@ -17482,11 +17531,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2834"
+            line="2833"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3007"
+            line="3009"
             column="5"
             message="Duplicates value in `pages_generic_updating_env_vars`"/>
     </issue>
@@ -17498,11 +17547,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2849"
+            line="2848"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3102"
+            line="3104"
             column="5"
             message="Duplicates value in `pages_generic_please_enter_label_name`"/>
     </issue>
@@ -17514,11 +17563,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2850"
+            line="2849"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3103"
+            line="3105"
             column="5"
             message="Duplicates value in `pages_generic_please_enter_label_value`"/>
     </issue>
@@ -17530,11 +17579,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2852"
+            line="2851"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3026"
+            line="3028"
             column="5"
             message="Duplicates value in `pages_generic_env_added`"/>
     </issue>
@@ -17546,11 +17595,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2853"
+            line="2852"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3028"
+            line="3030"
             column="5"
             message="Duplicates value in `pages_generic_env_updated`"/>
     </issue>
@@ -17562,11 +17611,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2856"
+            line="2855"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3029"
+            line="3031"
             column="5"
             message="Duplicates value in `pages_generic_updating_env_vars`"/>
     </issue>
@@ -17578,11 +17627,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2858"
+            line="2857"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3030"
+            line="3032"
             column="5"
             message="Duplicates value in `pages_generic_env_vars_updated`"/>
     </issue>
@@ -17594,11 +17643,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2860"
+            line="2859"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2990"
+            line="2992"
             column="5"
             message="Duplicates value in `pages_d1_fetching_bindings`"/>
     </issue>
@@ -17610,11 +17659,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2861"
+            line="2860"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2991"
+            line="2993"
             column="5"
             message="Duplicates value in `pages_d1_no_databases`"/>
     </issue>
@@ -17626,11 +17675,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2863"
+            line="2862"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2992"
+            line="2994"
             column="5"
             message="Duplicates value in `pages_d1_load_databases_failed_template`"/>
     </issue>
@@ -17642,11 +17691,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2868"
+            line="2867"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2995"
+            line="2997"
             column="5"
             message="Duplicates value in `pages_service_fetching_bindings`"/>
     </issue>
@@ -17658,11 +17707,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2869"
+            line="2868"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2996"
+            line="2998"
             column="5"
             message="Duplicates value in `pages_service_no_workers`"/>
     </issue>
@@ -17674,11 +17723,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2871"
+            line="2870"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2997"
+            line="2999"
             column="5"
             message="Duplicates value in `pages_service_load_workers_failed_template`"/>
     </issue>
@@ -17690,11 +17739,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2879"
+            line="2878"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3011"
+            line="3013"
             column="5"
             message="Duplicates value in `pages_r2_bindings_updated`"/>
     </issue>
@@ -17706,11 +17755,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2882"
+            line="2881"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3012"
+            line="3014"
             column="5"
             message="Duplicates value in `pages_d1_fetching_bindings`"/>
     </issue>
@@ -17722,11 +17771,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2883"
+            line="2882"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3013"
+            line="3015"
             column="5"
             message="Duplicates value in `pages_d1_no_databases`"/>
     </issue>
@@ -17738,11 +17787,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2885"
+            line="2884"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3014"
+            line="3016"
             column="5"
             message="Duplicates value in `pages_d1_load_databases_failed_template`"/>
     </issue>
@@ -17754,11 +17803,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2887"
+            line="2886"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3016"
+            line="3018"
             column="5"
             message="Duplicates value in `pages_d1_bindings_updated`"/>
     </issue>
@@ -17770,11 +17819,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2890"
+            line="2889"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3017"
+            line="3019"
             column="5"
             message="Duplicates value in `pages_service_fetching_bindings`"/>
     </issue>
@@ -17786,11 +17835,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2891"
+            line="2890"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3018"
+            line="3020"
             column="5"
             message="Duplicates value in `pages_service_no_workers`"/>
     </issue>
@@ -17802,11 +17851,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2893"
+            line="2892"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3019"
+            line="3021"
             column="5"
             message="Duplicates value in `pages_service_load_workers_failed_template`"/>
     </issue>
@@ -17818,11 +17867,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2895"
+            line="2894"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3021"
+            line="3023"
             column="5"
             message="Duplicates value in `pages_service_bindings_updated`"/>
     </issue>
@@ -17834,11 +17883,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2898"
+            line="2900"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3050"
+            line="3052"
             column="5"
             message="Duplicates value in `pages_generic_deleting`"/>
     </issue>
@@ -17850,11 +17899,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2920"
+            line="2922"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3072"
+            line="3074"
             column="5"
             message="Duplicates value in `pages_generic_deleting`"/>
     </issue>
@@ -17866,11 +17915,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2955"
+            line="2957"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="2957"
+            line="2959"
             column="5"
             message="Duplicates value in `pages_deployment_retry_title`"/>
     </issue>
@@ -17882,11 +17931,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2977"
+            line="2979"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2979"
+            line="2981"
             column="5"
             message="Duplicates value in `pages_deployment_retry_title`"/>
     </issue>
@@ -17898,11 +17947,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3002"
+            line="3004"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3082"
+            line="3084"
             column="5"
             message="Duplicates value in `worker_env_please_enter_var_value`"/>
     </issue>
@@ -17914,11 +17963,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3077"
+            line="3079"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3097"
+            line="3099"
             column="5"
             message="Duplicates value in `worker_cleanup_script_line_template`"/>
     </issue>
@@ -17930,11 +17979,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3099"
+            line="3101"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3119"
+            line="3121"
             column="5"
             message="Duplicates value in `worker_cleanup_script_line_template`"/>
     </issue>
@@ -17946,11 +17995,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3102"
+            line="3104"
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3108"
+            line="3110"
             column="5"
             message="Duplicates value in `pages_binding_bucket_label_template`"/>
     </issue>
@@ -17962,11 +18011,11 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3124"
+            line="3126"
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3130"
+            line="3132"
             column="5"
             message="Duplicates value in `pages_binding_bucket_label_template`"/>
     </issue>
@@ -18352,7 +18401,7 @@
         errorLine2="                                                   ~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2632"
+            line="2631"
             column="52"/>
     </issue>
 
@@ -18363,7 +18412,7 @@
         errorLine2="                                            ~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2639"
+            line="2638"
             column="45"/>
     </issue>
 
@@ -18374,7 +18423,7 @@
         errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2643"
+            line="2642"
             column="58"/>
     </issue>
 
@@ -18385,7 +18434,7 @@
         errorLine2="                                                   ~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2646"
+            line="2645"
             column="52"/>
     </issue>
 
@@ -18396,7 +18445,7 @@
         errorLine2="                                                   ~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2650"
+            line="2649"
             column="52"/>
     </issue>
 
@@ -18407,7 +18456,7 @@
         errorLine2="                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2654"
+            line="2653"
             column="52"/>
     </issue>
 
@@ -18418,7 +18467,7 @@
         errorLine2="                                                ~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2654"
+            line="2653"
             column="49"/>
     </issue>
 
@@ -18429,7 +18478,7 @@
         errorLine2="                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2657"
+            line="2656"
             column="62"/>
     </issue>
 
@@ -18440,7 +18489,7 @@
         errorLine2="                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2658"
+            line="2657"
             column="62"/>
     </issue>
 
@@ -18451,7 +18500,7 @@
         errorLine2="                                            ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2661"
+            line="2660"
             column="45"/>
     </issue>
 
@@ -18462,7 +18511,7 @@
         errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2665"
+            line="2664"
             column="58"/>
     </issue>
 
@@ -18473,7 +18522,7 @@
         errorLine2="                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2668"
+            line="2667"
             column="52"/>
     </issue>
 
@@ -18484,7 +18533,7 @@
         errorLine2="                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2672"
+            line="2671"
             column="52"/>
     </issue>
 
@@ -18495,7 +18544,7 @@
         errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2676"
+            line="2675"
             column="49"/>
     </issue>
 
@@ -18506,7 +18555,7 @@
         errorLine2="                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2679"
+            line="2678"
             column="62"/>
     </issue>
 
@@ -18517,7 +18566,7 @@
         errorLine2="                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2680"
+            line="2679"
             column="62"/>
     </issue>
 
@@ -18528,7 +18577,7 @@
         errorLine2="                                                     ~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2692"
+            line="2691"
             column="54"/>
     </issue>
 
@@ -18539,7 +18588,7 @@
         errorLine2="                                                           ~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2695"
+            line="2694"
             column="60"/>
     </issue>
 
@@ -18550,7 +18599,7 @@
         errorLine2="                                                                    ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2696"
+            line="2695"
             column="69"/>
     </issue>
 
@@ -18561,7 +18610,7 @@
         errorLine2="                                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2697"
+            line="2696"
             column="65"/>
     </issue>
 
@@ -18572,7 +18621,7 @@
         errorLine2="                                               ~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2698"
+            line="2697"
             column="48"/>
     </issue>
 
@@ -18583,7 +18632,7 @@
         errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2701"
+            line="2700"
             column="48"/>
     </issue>
 
@@ -18594,7 +18643,7 @@
         errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2703"
+            line="2702"
             column="58"/>
     </issue>
 
@@ -18605,7 +18654,7 @@
         errorLine2="                                               ~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2704"
+            line="2703"
             column="48"/>
     </issue>
 
@@ -18616,7 +18665,7 @@
         errorLine2="                                                         ~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2706"
+            line="2705"
             column="58"/>
     </issue>
 
@@ -18627,7 +18676,7 @@
         errorLine2="                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2714"
+            line="2713"
             column="54"/>
     </issue>
 
@@ -18638,7 +18687,7 @@
         errorLine2="                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2717"
+            line="2716"
             column="60"/>
     </issue>
 
@@ -18649,7 +18698,7 @@
         errorLine2="                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2718"
+            line="2717"
             column="69"/>
     </issue>
 
@@ -18660,7 +18709,7 @@
         errorLine2="                                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2719"
+            line="2718"
             column="65"/>
     </issue>
 
@@ -18671,7 +18720,7 @@
         errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2720"
+            line="2719"
             column="48"/>
     </issue>
 
@@ -18682,7 +18731,7 @@
         errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2723"
+            line="2722"
             column="48"/>
     </issue>
 
@@ -18693,7 +18742,7 @@
         errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2725"
+            line="2724"
             column="58"/>
     </issue>
 
@@ -18704,7 +18753,7 @@
         errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2726"
+            line="2725"
             column="48"/>
     </issue>
 
@@ -18715,7 +18764,7 @@
         errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2728"
+            line="2727"
             column="58"/>
     </issue>
 
@@ -18726,7 +18775,7 @@
         errorLine2="                                                ~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2796"
+            line="2795"
             column="49"/>
     </issue>
 
@@ -18737,7 +18786,7 @@
         errorLine2="                                                ~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="2818"
+            line="2817"
             column="49"/>
     </issue>
 
@@ -18748,7 +18797,7 @@
         errorLine2="                                          ~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2898"
+            line="2900"
             column="43"/>
     </issue>
 
@@ -18759,7 +18808,7 @@
         errorLine2="                                                     ~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2905"
+            line="2907"
             column="54"/>
     </issue>
 
@@ -18770,7 +18819,7 @@
         errorLine2="                                              ~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2910"
+            line="2912"
             column="47"/>
     </issue>
 
@@ -18781,7 +18830,7 @@
         errorLine2="                                                     ~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="2935"
+            line="2937"
             column="54"/>
     </issue>
 
@@ -18792,7 +18841,7 @@
         errorLine2="                                               ~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3019"
+            line="3021"
             column="48"/>
     </issue>
 
@@ -18803,7 +18852,7 @@
         errorLine2="                                                 ~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3050"
+            line="3052"
             column="50"/>
     </issue>
 
@@ -18814,7 +18863,7 @@
         errorLine2="                                                      ~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3065"
+            line="3067"
             column="55"/>
     </issue>
 
@@ -18825,7 +18874,7 @@
         errorLine2="                                                      ~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values/strings.xml"
-            line="3094"
+            line="3096"
             column="55"/>
     </issue>
 
@@ -18836,7 +18885,7 @@
         errorLine2="                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3116"
+            line="3118"
             column="55"/>
     </issue>
 
@@ -19506,11 +19555,22 @@
     <issue
         id="UseKtx"
         message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        errorLine1="            prefs.edit().putBoolean(localKey, checked).apply()"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
+            line="1560"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
         errorLine1="            prefs.edit().putBoolean(&quot;deploy_card_expanded&quot;, isDeployCardExpanded).apply()"
         errorLine2="            ~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="1557"
+            line="1568"
             column="13"/>
     </issue>
 
@@ -19521,7 +19581,7 @@
         errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2197"
+            line="2292"
             column="42"/>
     </issue>
 
@@ -19532,7 +19592,7 @@
         errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2198"
+            line="2293"
             column="42"/>
     </issue>
 
@@ -19543,7 +19603,7 @@
         errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2199"
+            line="2294"
             column="41"/>
     </issue>
 
@@ -19554,7 +19614,7 @@
         errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2200"
+            line="2295"
             column="43"/>
     </issue>
 
@@ -19565,7 +19625,7 @@
         errorLine2="                                                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/pages/PagesFragment.kt"
-            line="2342"
+            line="2437"
             column="89"/>
     </issue>
 
@@ -19730,7 +19790,18 @@
         errorLine2="            ~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="237"
+            line="242"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `SharedPreferences.edit` instead?"
+        errorLine1="            prefs.edit().putBoolean(localKey, checked).apply()"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
+            line="249"
             column="13"/>
     </issue>
 
@@ -19741,7 +19812,7 @@
         errorLine2="                                                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2087"
+            line="2194"
             column="89"/>
     </issue>
 
@@ -20632,7 +20703,7 @@
         errorLine2="                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="147"
+            line="152"
             column="52"/>
     </issue>
 
@@ -20643,7 +20714,7 @@
         errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2012"
+            line="2119"
             column="38"/>
     </issue>
 
@@ -20654,7 +20725,7 @@
         errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2016"
+            line="2123"
             column="28"/>
     </issue>
 
@@ -20665,7 +20736,7 @@
         errorLine2="                            ~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2016"
+            line="2123"
             column="29"/>
     </issue>
 
@@ -20676,7 +20747,7 @@
         errorLine2="                                                               ~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2016"
+            line="2123"
             column="64"/>
     </issue>
 
@@ -20687,7 +20758,7 @@
         errorLine2="                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2561"
+            line="2668"
             column="43"/>
     </issue>
 
@@ -20698,7 +20769,7 @@
         errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2942"
+            line="3049"
             column="44"/>
     </issue>
 
@@ -20709,7 +20780,7 @@
         errorLine2="                                            ~~~~~~~~~">
         <location
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
-            line="2942"
+            line="3049"
             column="45"/>
     </issue>
 

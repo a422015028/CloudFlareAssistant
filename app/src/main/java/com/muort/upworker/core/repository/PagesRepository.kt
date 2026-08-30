@@ -2,11 +2,13 @@ package com.muort.upworker.core.repository
 
 import android.content.Context
 import com.muort.upworker.R
+import com.muort.upworker.core.crypto.PagesBlake3Hasher
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.EsbuildBundler
 import com.muort.upworker.core.util.EsbuildInput
+import com.muort.upworker.core.util.ExponentialRetry
 import com.muort.upworker.core.util.SucraseInput
 import com.muort.upworker.core.util.SucraseTransformer
 import com.muort.upworker.core.util.safeApiCall
@@ -704,7 +706,7 @@ class PagesRepository @Inject constructor(
                         // 检查 .assetsignore
                         if (isIgnored(relativePath)) return
                         allFiles.add(currentFile)
-                        val cfHash = getCfHash(currentFile)
+                        val cfHash = getCfHash(currentFile, onLog)
                         manifestMap[relativePath] = cfHash
                     }
                 }
@@ -728,22 +730,15 @@ class PagesRepository @Inject constructor(
                     return@safeApiCall Resource.Error(appContext.getString(R.string.repo_pages_zip_empty_error))
                 }
 
-                // 2. 【Wrangler 步骤一】向 Cloudflare 申请专属资源上传 JWT Token
-                // 如果只有 _worker.js 没有静态资产，也需要获取 token（资产库为空时也可创建部署）
-                onLog?.invoke(appContext.getString(R.string.repo_pages_requesting_token_log))
-                val tokenResponse = api.getPagesUploadToken(
-                    token = AuthHelper.getBearerToken(account),  
-                    email = AuthHelper.getEmail(account),  
-                    apiKey = AuthHelper.getGlobalApiKey(account),  
-                    accountId = account.accountId,  
-                    projectName = projectName
-                )
-                val jwt = tokenResponse.body()?.result?.jwt
-                if (jwt == null) {
+                // 2. 【Wrangler 步骤一】Pages 上传 JWT：自动过期刷新 + 3 次指数退避 + 401/403 force refresh (≤2)
+                val jwtSession = JwtRefreshSession(account, projectName, onLog)
+                try {
+                    jwtSession.ensureFresh(force = false)
+                } catch (t: Throwable) {
                     onLog?.invoke(appContext.getString(R.string.repo_pages_token_failed_log))
+                    Timber.w(t, "createDeployment: JWT 首次刷新失败")
                     return@safeApiCall Resource.Error(appContext.getString(R.string.repo_pages_token_failed_error))
                 }
-                onLog?.invoke(appContext.getString(R.string.repo_pages_token_success_log))
 
                 // 3. 【Wrangler 步骤二】把本地解压出的文件转为 Base64 对象批量上传至资源库
                 if (allFiles.isNotEmpty()) {
@@ -790,22 +785,37 @@ class PagesRepository @Inject constructor(
                         PagesAssetPayload(key = cfHash, value = base64Str, metadata = AssetMeta(contentType))
                     }
 
-                    // 执行资产库推送
-                    val uploadResponse = api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = assetPayloads)
-                    if (!uploadResponse.isSuccessful) {
-                        onLog?.invoke(appContext.getString(R.string.repo_pages_assets_upload_failed_log, uploadResponse.code()))
-                        return@safeApiCall Resource.Error(appContext.getString(R.string.repo_pages_assets_sync_failed_format, uploadResponse.code()))
+                    // 执行资产库推送（分 batch ≤50；含 401/403 force refresh）
+                    val failCode: Int? = try {
+                        uploadAssetsBatched(assetPayloads, jwtSession, onLog)
+                    } catch (t: Throwable) {
+                        Timber.w(t, "createDeployment: uploadAssetsBatched 抛异常")
+                        onLog?.invoke(
+                            appContext.getString(
+                                R.string.repo_pages_assets_upload_failed_log, -1
+                            )
+                        )
+                        -1
+                    }
+                    if (failCode != null) {
+                        return@safeApiCall Resource.Error(
+                            appContext.getString(
+                                R.string.repo_pages_assets_sync_failed_format, failCode
+                            )
+                        )
                     }
                     onLog?.invoke(appContext.getString(R.string.repo_pages_assets_upload_done_log))
                 }
 
-                // 3.b 【Wrangler upsert-hashes】更新资产哈希列表，初始化部署会话（即使没有静态资产也需要）
+                // 3.b 【Wrangler upsert-hashes】含 401/403 force refresh
                 onLog?.invoke(appContext.getString(R.string.repo_pages_updating_hash_log))
                 val allHashes = manifestMap.values.toList()
-                val upsertResponse = api.upsertPagesAssetHashes(
-                    jwtToken = "Bearer $jwt",
-                    body = PagesUpsertHashesPayload(hashes = allHashes)
-                )
+                val upsertResponse = runWithJwtAuth(jwtSession, stage = "upsert-hashes") { jwt ->
+                    api.upsertPagesAssetHashes(
+                        jwtToken = "Bearer $jwt",
+                        body = PagesUpsertHashesPayload(hashes = allHashes)
+                    )
+                }
                 if (!upsertResponse.isSuccessful) {
                     Timber.w("upsert-hashes 返回非成功状态: HTTP ${upsertResponse.code()}，继续尝试部署")
                     onLog?.invoke(appContext.getString(R.string.repo_pages_hash_updated_warn_log, upsertResponse.code()))
@@ -915,28 +925,22 @@ class PagesRepository @Inject constructor(
             return Resource.Error(appContext.getString(R.string.repo_generic_download_empty))
         }
 
-        // 1. 获取 upload token
-        onLog?.invoke(appContext.getString(R.string.repo_pages_requesting_token_log))
-        val tokenResponse = api.getPagesUploadToken(
-            token = AuthHelper.getBearerToken(account),
-            email = AuthHelper.getEmail(account),
-            apiKey = AuthHelper.getGlobalApiKey(account),
-            accountId = account.accountId,
-            projectName = projectName
-        )
-        val jwt = tokenResponse.body()?.result?.jwt
-        if (jwt == null) {
+        // 1. 获取 upload token（过期刷新 + 指数退避 + 401/403 force refresh）
+        val jwtSession = JwtRefreshSession(account, projectName, onLog)
+        try {
+            jwtSession.ensureFresh(force = false)
+        } catch (t: Throwable) {
             onLog?.invoke(appContext.getString(R.string.repo_pages_token_failed_log))
+            Timber.w(t, "deployStaticAssetOnly: JWT 刷新失败")
             return Resource.Error(appContext.getString(R.string.repo_pages_token_failed_error))
         }
-        onLog?.invoke(appContext.getString(R.string.repo_pages_token_success_log))
 
         // 2. 计算文件 hash，构建 manifest
         val relativePath = "/index.html"
-        val cfHash = getCfHash(htmlFile)
+        val cfHash = getCfHash(htmlFile, onLog)
         val manifestMap = mapOf(relativePath to cfHash)
 
-        // 3. 上传资产（Base64）
+        // 3. 上传资产（Base64；401/403 自动 force refresh 再试 1 次）
         onLog?.invoke(appContext.getString(R.string.repo_pages_upload_html_assets_log))
         val base64Str = android.util.Base64.encodeToString(htmlFile.readBytes(), android.util.Base64.NO_WRAP)
         val assetPayload = PagesAssetPayload(
@@ -944,19 +948,26 @@ class PagesRepository @Inject constructor(
             value = base64Str,
             metadata = AssetMeta(contentType = "text/html")
         )
-        val uploadResponse = api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = listOf(assetPayload))
-        if (!uploadResponse.isSuccessful) {
-            onLog?.invoke(appContext.getString(R.string.repo_pages_assets_upload_failed_log, uploadResponse.code()))
-            return Resource.Error(appContext.getString(R.string.repo_pages_assets_upload_http_failed_format, uploadResponse.code()))
+        val failCode: Int? = try {
+            uploadAssetsBatched(listOf(assetPayload), jwtSession, onLog)
+        } catch (t: Throwable) {
+            Timber.w(t, "deployStaticAssetOnly: upload failed")
+            onLog?.invoke(appContext.getString(R.string.repo_pages_assets_upload_failed_log, -1))
+            -1
+        }
+        if (failCode != null) {
+            return Resource.Error(appContext.getString(R.string.repo_pages_assets_upload_http_failed_format, failCode))
         }
         onLog?.invoke(appContext.getString(R.string.repo_pages_assets_upload_done_log))
 
         // 4. upsert-hashes
         onLog?.invoke(appContext.getString(R.string.repo_pages_updating_hash_log))
-        api.upsertPagesAssetHashes(
-            jwtToken = "Bearer $jwt",
-            body = PagesUpsertHashesPayload(hashes = manifestMap.values.toList())
-        )
+        runWithJwtAuth(jwtSession, stage = "html-upsert-hashes") { token ->
+            api.upsertPagesAssetHashes(
+                jwtToken = "Bearer $token",
+                body = PagesUpsertHashesPayload(hashes = manifestMap.values.toList())
+            )
+        }
         onLog?.invoke(appContext.getString(R.string.repo_pages_hash_updated_log))
 
         // 5. 创建部署（manifest-only）
@@ -1006,28 +1017,24 @@ class PagesRepository @Inject constructor(
             return Resource.Error(appContext.getString(R.string.repo_generic_download_empty))
         }
 
-        // 获取 upload token（即使没有静态资产也需要）
-        onLog?.invoke(appContext.getString(R.string.repo_pages_requesting_token_log))
-        val tokenResponse = api.getPagesUploadToken(
-            token = AuthHelper.getBearerToken(account),
-            email = AuthHelper.getEmail(account),
-            apiKey = AuthHelper.getGlobalApiKey(account),
-            accountId = account.accountId,
-            projectName = projectName
-        )
-        val jwt = tokenResponse.body()?.result?.jwt
-        if (jwt == null) {
+        // 获取 upload token：3 次指数退避 + 401/403 force refresh
+        val jwtSession = JwtRefreshSession(account, projectName, onLog)
+        try {
+            jwtSession.ensureFresh(force = false)
+        } catch (t: Throwable) {
             onLog?.invoke(appContext.getString(R.string.repo_pages_token_failed_log))
+            Timber.w(t, "deployWorkerOnly: JWT 刷新失败")
             return Resource.Error(appContext.getString(R.string.repo_pages_token_failed_error))
         }
-        onLog?.invoke(appContext.getString(R.string.repo_pages_token_success_log))
 
-        // upsert-hashes（空列表，初始化部署会话）
+        // upsert-hashes（空列表，初始化部署会话；401/403 force refresh 再试 1 次）
         onLog?.invoke(appContext.getString(R.string.repo_pages_init_session_log))
-        api.upsertPagesAssetHashes(
-            jwtToken = "Bearer $jwt",
-            body = PagesUpsertHashesPayload(hashes = emptyList())
-        )
+        runWithJwtAuth(jwtSession, stage = "worker-init-session") { token ->
+            api.upsertPagesAssetHashes(
+                jwtToken = "Bearer $token",
+                body = PagesUpsertHashesPayload(hashes = emptyList())
+            )
+        }
         onLog?.invoke(appContext.getString(R.string.repo_pages_init_session_done_log))
 
         // 空 manifest + _worker.bundle
@@ -2490,15 +2497,18 @@ class PagesRepository @Inject constructor(
         }
     }
 
-    private fun getCfHash(file: File): String {
+    private fun getCfHash(file: File, onLog: ((String) -> Unit)? = null): String {
         val bytes = file.readBytes()
-        val base64Content = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
         val ext = file.extension.lowercase()
-        val digest = MessageDigest.getInstance("SHA-256")
-        digest.update(base64Content.toByteArray(Charsets.UTF_8))
-        digest.update(ext.toByteArray(Charsets.UTF_8))
-        val hashBytes = digest.digest()
-        return hashBytes.joinToString("") { "%02x".format(it) }.substring(0, 32)
+        return try {
+            PagesBlake3Hasher.hash(bytes, ext)
+        } catch (t: Throwable) {
+            Timber.w(t, "getCfHash: Blake3 不可用，回退旧 SHA-256")
+            // R.string.repo_pages_hash_fallback_log 与 R.string.repo_pages_blake3_provider_missing_error
+            // 由 P0-1D 声明。onLog 是用户可见 UI 面板，先打 fallback 提示；异常本身只做 Timber 记录。
+            onLog?.invoke(appContext.getString(R.string.repo_pages_hash_fallback_log))
+            PagesBlake3Hasher.legacySha256Truncated(bytes, ext)
+        }
     }
 
     private fun formatFileSize(bytes: Long): String {
@@ -2509,5 +2519,158 @@ class PagesRepository @Inject constructor(
             bytes < mb -> String.format("%.1fKB", bytes / kb)
             else -> String.format("%.1fMB", bytes / mb)
         }
+    }
+
+    // ======================================================================
+    // P0-3B: JWT 过期刷新 (3 次指数退避) + 401/403 自动 force refresh (max 2)
+    // ======================================================================
+
+    /**
+     * 向 Cloudflare 拉 Pages 上传 JWT，包 3 次指数退避。
+     * 异常上抛（401 / 网络错误 / 非成功响应 都通过 Retrofit HttpException/IOException），
+     * 调用方 [JwtRefreshSession] 负责决定是否进一步 force 刷新。
+     */
+    private suspend fun requestFreshJwt(
+        account: Account,
+        projectName: String,
+        onLog: ((String) -> Unit)?,
+    ): String {
+        return ExponentialRetry.withRetry(
+            attempts = ExponentialRetry.DEFAULT_ATTEMPTS,
+            baseDelayMs = ExponentialRetry.DEFAULT_BASE_DELAY_MS,
+            multiplier = ExponentialRetry.DEFAULT_MULTIPLIER,
+            tag = "requestFreshJwt",
+            onBeforeRetry = { i, d ->
+                onLog?.invoke(
+                    appContext.getString(
+                        R.string.repo_pages_retry_backoff_log_format,
+                        "requestFreshJwt", (i + 1), d
+                    )
+                )
+            },
+        ) {
+            val tokenResponse = api.getPagesUploadToken(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                projectName = projectName
+            )
+            val jwt = tokenResponse.body()?.result?.jwt
+            if (jwt == null) {
+                val msg = appContext.getString(R.string.repo_pages_token_failed_log)
+                val code = tokenResponse.code()
+                val err = tokenResponse.errorBody()?.string()?.take(200) ?: ""
+                Timber.w("requestFreshJwt: body jwt=null HTTP=$code err=$err")
+                throw IllegalStateException("$msg (HTTP $code)")
+            }
+            jwt
+        }
+    }
+
+    /**
+     * JWT 会话持有者：对外只暴露 [ensureFresh]。
+     * - 首次或 nearExpiry(≤30s) 会调 [requestFreshJwt]（3 次指数退避）
+     * - 401/403 回调 [onAuthFailure] 后，调用方需要 force=true 再 ensureFresh；
+     *   但最大允许 [maxForcedRefresh]（=2）次 force，超过抛用户可见错误。
+     */
+    private inner class JwtRefreshSession(
+        private val account: Account,
+        private val projectName: String,
+        private val onLog: ((String) -> Unit)?,
+        private val maxForcedRefresh: Int = 2,
+    ) {
+        private var current: String? = null
+        private var forcedCount = 0
+
+        suspend fun ensureFresh(force: Boolean = false): String {
+            val cur = current
+            if (!force && cur != null && !PagesJwtRefresher.isNearExpiry(cur)) {
+                return cur
+            }
+            if (force) {
+                if (forcedCount >= maxForcedRefresh) {
+                    val err = appContext.getString(
+                        R.string.repo_pages_jwt_max_refresh_error_format, forcedCount
+                    )
+                    Timber.w(err)
+                    throw IllegalStateException(err)
+                }
+                forcedCount++
+            }
+            // JWT 格式异常（parseExp null）时仅打 warn onLog，不中断刷新
+            if (cur != null && PagesJwtRefresher.parseExp(cur) == null) {
+                onLog?.invoke(appContext.getString(R.string.repo_pages_jwt_invalid_format_warn))
+            }
+            onLog?.invoke(appContext.getString(R.string.repo_pages_jwt_refreshing_log))
+            val fresh = requestFreshJwt(account, projectName, onLog)
+            onLog?.invoke(appContext.getString(R.string.repo_pages_jwt_refresh_ok_log))
+            current = fresh
+            return fresh
+        }
+    }
+
+    /**
+     * 把 HTTP 401/403 从 Response 中识别出来，调用 force=true ensureFresh。
+     * 如果 [Runnable] block 抛异常/返回非 2xx：由调用方决定是否抛 max_refresh_error。
+     *
+     * @param stage 日志标识阶段（如 "upload-assets-batch-3"/"upsert-hashes"/"check-missing"），
+     *              仅用于 log + retry 提示；不得直接抛给用户（避免硬编码）。
+     */
+    private suspend inline fun <R> runWithJwtAuth(
+        session: JwtRefreshSession,
+        stage: String,
+        crossinline call: suspend (jwt: String) -> retrofit2.Response<R>,
+    ): retrofit2.Response<R> {
+        val jwt1 = session.ensureFresh(force = false)
+        val r1 = call(jwt1)
+        if (r1.code() != 401 && r1.code() != 403) return r1
+        Timber.w("runWithJwtAuth[$stage]: HTTP ${r1.code()}, force refresh JWT then retry once")
+        val jwt2 = session.ensureFresh(force = true)
+        return call(jwt2)
+    }
+
+    /**
+     * 批量上传 Pages 静态资产（每批 ≤[BATCH_SIZE]=50，cf-manager Be 默认上限 50），
+     * 每批前打 `repo_pages_assets_batch_uploading_format`，完成打 `repo_pages_assets_batch_uploaded_format`。
+     *
+     * @return 成功 null；失败为失败 HTTP code (Int)。这样调用方可直接传入需要 `%1$d` 的 string format。
+     */
+    private suspend fun uploadAssetsBatched(
+        assets: List<PagesAssetPayload>,
+        session: JwtRefreshSession,
+        onLog: ((String) -> Unit)?,
+    ): Int? {
+        if (assets.isEmpty()) return null
+        val batches = assets.chunked(BATCH_SIZE)
+        val total = batches.size
+        batches.forEachIndexed { idx, batch ->
+            onLog?.invoke(
+                appContext.getString(
+                    R.string.repo_pages_assets_batch_uploading_format, idx + 1, total
+                )
+            )
+            val resp = runWithJwtAuth(session, stage = "upload-batch-${idx + 1}") { jwt ->
+                api.uploadPagesAssets(jwtToken = "Bearer $jwt", assets = batch)
+            }
+            if (!resp.isSuccessful) {
+                val c = resp.code()
+                onLog?.invoke(
+                    appContext.getString(R.string.repo_pages_assets_upload_failed_log, c)
+                )
+                return c
+            }
+            onLog?.invoke(
+                appContext.getString(
+                    R.string.repo_pages_assets_batch_uploaded_format, idx + 1, total
+                )
+            )
+        }
+        return null
+    }
+
+    companion object {
+        /** 单次 uploadPagesAssets 请求最大资产数 (cf-manager / wrangler 官方限制) */
+        private const val BATCH_SIZE = 50
     }
 }

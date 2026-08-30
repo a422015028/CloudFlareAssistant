@@ -1665,7 +1665,7 @@
     <string name="xml_fragment_pages_hint_3">Default compatibility date 2026-06-16</string>
     <string name="xml_fragment_pages_hint_4">Compatibility flags (comma or newline separated)</string>
     <string name="compatibility_flags_placeholder">e.g. nodejs_compat</string>
-    <string name="xml_fragment_pages_hint_5">Project file (supported: .zip .js .htm .html)</string>
+    <string name="xml_fragment_pages_hint_5">Project file path or URL (supported: .zip .js .htm .html)</string>
     <string name="xml_fragment_pages_2">Deploy Project</string>
     <string name="xml_fragment_pages_3">Project</string>
     <string name="xml_fragment_pages_4">Manage Deployments</string>
@@ -1675,7 +1675,7 @@
     <string name="xml_fragment_pages_8">No projects yet</string>
     <string name="xml_fragment_worker">Deploy Worker Script</string>
     <string name="xml_fragment_worker_hint">Worker Name</string>
-    <string name="xml_fragment_worker_hint_2">Script file (supported: .js only)</string>
+    <string name="xml_fragment_worker_hint_2">Script file path or URL (supported: .js only)</string>
     <string name="xml_fragment_worker_hint_3">Default compatibility date 2026-06-16</string>
     <string name="xml_fragment_worker_2">Deploy Script</string>
     <string name="xml_fragment_worker_3">Script</string>
@@ -3130,5 +3130,36 @@
 
     <!-- ===== Worker R2 binding adapter prefix ===== -->
     <string name="worker_binding_bucket_label_template">Bucket: %1$s</string>
+
+    <!-- ===== P0-1: Pages Blake3 asset hashing ===== -->
+    <string name="repo_pages_hash_fallback_log">⚠ Pages asset hashing falling back to legacy algorithm (deploy may be slower)</string>
+    <string name="repo_pages_blake3_provider_missing_error">Pages asset hash algorithm init failed (BouncyCastle unavailable); fell back to legacy algorithm for this deployment</string>
+
+    <!-- ===== P0-2: Remote URL download security (RemoteFileResolver / Wn pipeline) ===== -->
+    <string name="remote_url_security_invalid_url_format">Invalid remote URL format</string>
+    <string name="remote_url_security_not_https">Only HTTPS is allowed for remote resource downloads</string>
+    <string name="remote_url_security_ssrf_blocked_format">Request blocked (SSRF protection): target %1$s resolves to a private/reserved IP address</string>
+    <string name="remote_url_security_host_not_allowed_format">Host %1$s is not in the allowlist</string>
+    <string name="remote_url_security_too_many_redirects">Exceeded maximum redirect hops (5)</string>
+    <string name="remote_url_security_redirect_to_non_https">Redirect targets must also be HTTPS</string>
+    <string name="remote_url_security_content_type_disallowed_format">Refused insecure response content type: Content-Type=%1$s</string>
+    <string name="remote_url_security_script_size_exceeded_5mib">Script exceeds the 5 MiB size limit</string>
+    <string name="remote_url_security_zip_size_exceeded_25mib">Archive exceeds the 25 MiB size limit</string>
+    <string name="remote_url_security_zip_magic_mismatch">Downloaded file is not a valid ZIP archive (missing PK magic bytes)</string>
+    <string name="remote_url_security_http_status_error_format">HTTP %1$d error: %2$s</string>
+    <string name="remote_url_security_fetch_io_error_format">Download failed: %1$s</string>
+
+    <!-- ===== P0-3: Pages JWT refresh, exponential backoff &amp; batched uploads ===== -->
+    <string name="repo_pages_jwt_invalid_format_warn">⚠ JWT format unrecognized, skipping pre-expiry check (will auto-refresh on first 401)</string>
+    <string name="repo_pages_jwt_refreshing_log">◇ Pages upload token near expiry, refreshing…</string>
+    <string name="repo_pages_jwt_refresh_ok_log">  └─ Token refreshed successfully</string>
+    <string name="repo_pages_jwt_max_refresh_error_format">Token auto-refreshed %1$d time(s) but auth still failed. Please check account permissions and retry.</string>
+    <string name="repo_pages_retry_backoff_log_format">  ├─ [%1$s] attempt %2$d retry, waiting %3$d ms…</string>
+    <string name="repo_pages_assets_batch_uploading_format">◇ Uploading asset batch %1$d / %2$d …</string>
+    <string name="repo_pages_assets_batch_uploaded_format">  └─ Batch %1$d / %2$d uploaded</string>
+
+    <!-- ===== Local URL toggle (shared by Pages / Worker fragments) ===== -->
+    <string name="switch_allow_local_url_title">Allow LAN / local URL sources</string>
+    <string name="switch_allow_local_url_summary">Allow http:// plaintext protocol and private IPs (127.x / 10.x / 192.168.x / 172.16–31.x). The other 7 safeguards (file extension, size, ZIP magic, Content-Type allowlist, redirect limit, HTTP status 2xx, host allowlist) remain strictly enforced. Only enable for self-hosted NAS, local dev servers, or VPN scenarios.</string>
 
 </resources>

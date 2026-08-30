@@ -1643,7 +1643,7 @@
     <string name="xml_fragment_pages_hint_3">默认兼容日期 2026-06-16</string>
     <string name="xml_fragment_pages_hint_4">兼容性标志（逗号或换行分隔）</string>
     <string name="compatibility_flags_placeholder">例如：nodejs_compat</string>
-    <string name="xml_fragment_pages_hint_5">项目文件(仅支持：.zip .js .htm .html )</string>
+    <string name="xml_fragment_pages_hint_5">项目文件路径/URL(仅支持：.zip .js .htm .html )</string>
     <string name="xml_fragment_pages_2">部署项目</string>
     <string name="xml_fragment_pages_3">项目</string>
     <string name="xml_fragment_pages_4">管理部署</string>
@@ -1653,7 +1653,7 @@
     <string name="xml_fragment_pages_8">暂无项目</string>
     <string name="xml_fragment_worker">部署 Worker 脚本</string>
     <string name="xml_fragment_worker_hint">Worker 名称</string>
-    <string name="xml_fragment_worker_hint_2">脚本文件(仅支持：.js)</string>
+    <string name="xml_fragment_worker_hint_2">脚本文件路径/URL(仅支持：.js)</string>
     <string name="xml_fragment_worker_hint_3">默认兼容日期 2026-06-16</string>
     <string name="xml_fragment_worker_2">部署脚本</string>
     <string name="xml_fragment_worker_3">脚本</string>
@@ -3108,5 +3108,36 @@
 
     <!-- ===== Worker R2 绑定 Adapter 前缀 ===== -->
     <string name="worker_binding_bucket_label_template">Bucket: %1$s</string>
+
+    <!-- ===== P0-1: Pages Blake3 资产哈希 ===== -->
+    <string name="repo_pages_hash_fallback_log">⚠ Pages 资产哈希使用旧算法（部署会较慢）</string>
+    <string name="repo_pages_blake3_provider_missing_error">Pages 资产哈希算法初始化失败（BouncyCastle 不可用），已回退旧算法部署</string>
+
+    <!-- ===== P0-2: 远程 URL 下载安全 (RemoteFileResolver / Wn 管线) ===== -->
+    <string name="remote_url_security_invalid_url_format">无效的远程 URL 格式</string>
+    <string name="remote_url_security_not_https">只允许 HTTPS 协议下载远程资源</string>
+    <string name="remote_url_security_ssrf_blocked_format">请求被拒绝（SSRF 防护）：目标 %1$s 解析至私网/保留 IP 地址</string>
+    <string name="remote_url_security_host_not_allowed_format">主机 %1$s 不在允许列表中</string>
+    <string name="remote_url_security_too_many_redirects">超过最大重定向次数（5 跳）</string>
+    <string name="remote_url_security_redirect_to_non_https">重定向目标必须是 HTTPS 协议</string>
+    <string name="remote_url_security_content_type_disallowed_format">拒绝不安全的响应类型：Content-Type=%1$s</string>
+    <string name="remote_url_security_script_size_exceeded_5mib">脚本大小超过 5 MiB 限制</string>
+    <string name="remote_url_security_zip_size_exceeded_25mib">压缩包大小超过 25 MiB 限制</string>
+    <string name="remote_url_security_zip_magic_mismatch">下载文件不是合法的 ZIP 压缩包（缺少 PK 魔数）</string>
+    <string name="remote_url_security_http_status_error_format">HTTP %1$d 错误：%2$s</string>
+    <string name="remote_url_security_fetch_io_error_format">下载失败：%1$s</string>
+
+    <!-- ===== P0-3: Pages JWT 刷新、指数退避、分批上传 ===== -->
+    <string name="repo_pages_jwt_invalid_format_warn">⚠ JWT 格式异常，跳过过期提前判断（首次 401 时会自动刷新）</string>
+    <string name="repo_pages_jwt_refreshing_log">◇ Pages 上传 Token 即将过期，正在刷新…</string>
+    <string name="repo_pages_jwt_refresh_ok_log">  └─ Token 刷新成功</string>
+    <string name="repo_pages_jwt_max_refresh_error_format">Token 已自动刷新 %1$d 次仍鉴权失败，请检查账号权限后重试</string>
+    <string name="repo_pages_retry_backoff_log_format">  ├─ [%1$s] 第 %2$d 次重试，等待 %3$d ms…</string>
+    <string name="repo_pages_assets_batch_uploading_format">◇ 上传资产批次 %1$d / %2$d …</string>
+    <string name="repo_pages_assets_batch_uploaded_format">  └─ 批次 %1$d / %2$d 完成</string>
+
+    <!-- ===== 本地连接开关（Pages / Worker 共用） ===== -->
+    <string name="switch_allow_local_url_title">URL来源允许局域网 / 本地连接</string>
+    <string name="switch_allow_local_url_summary">允许 http:// 明文协议与 127.x / 10.x / 192.168.x / 172.16–31.x 私网 IP；扩展名、大小、ZIP 魔数、Content-Type 等 7 条安全仍生效。仅在自建 NAS / 本地调试服务 / VPN场景开启。</string>
 
 </resources>

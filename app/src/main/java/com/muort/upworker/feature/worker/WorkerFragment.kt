@@ -241,6 +241,13 @@ class WorkerFragment : Fragment() {
             binding.deployCardArrow.rotation = if (isExpanded) 180f else 0f
             prefs.edit().putBoolean("deploy_card_expanded", isExpanded).apply()
         }
+
+        // 本地连接开关（默认关）：恢复 + 持久化
+        val localKey = "allow_local_url"
+        binding.localUrlAllowedSwitch.isChecked = prefs.getBoolean(localKey, false)
+        binding.localUrlAllowedSwitch.setOnCheckedChangeListener { _, checked ->
+            prefs.edit().putBoolean(localKey, checked).apply()
+        }
         
         binding.selectFileBtn.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
@@ -368,6 +375,8 @@ class WorkerFragment : Fragment() {
             binding.uploadBtn.isEnabled = false
             val selectedUrl = selectedOrNull
             viewLifecycleOwner.lifecycleScope.launch {
+                val localPrefs = requireContext().getSharedPreferences("worker_prefs", android.content.Context.MODE_PRIVATE)
+                val localAllow = localPrefs.getBoolean("allow_local_url", false)
                 val result = RemoteFileResolver.resolve(
                     context = requireContext().applicationContext,
                     url = selectedUrl,
@@ -385,7 +394,9 @@ class WorkerFragment : Fragment() {
                                 binding.uploadProgress.isIndeterminate = true
                             }
                         }
-                    }
+                    },
+                    allowInsecureProtocol = localAllow,
+                    allowPrivateIp = localAllow,
                 )
                 // 下载阶段完成：切换回"上传"视觉状态的准备逻辑（仍保持 indeterminate）
                 binding.uploadProgress.isIndeterminate = true

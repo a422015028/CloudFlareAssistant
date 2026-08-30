@@ -149,6 +149,27 @@
                             android:textSize="14sp"
                             style="@style/Widget.Material3.Button" />
 
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/localUrlAllowedSwitch"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="4dp"
+                            android:text="@string/switch_allow_local_url_title"
+                            android:textSize="14sp"
+                            app:showText="false" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="0dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/switch_allow_local_url_summary"
+                            android:textSize="12sp"
+                            android:textAlignment="viewStart"
+                            android:textColor="?android:attr/textColorSecondary" />
+
                         <ProgressBar
                             android:id="@+id/uploadProgress"
                             android:layout_width="match_parent"
