@@ -68,10 +68,12 @@ class WorkerRepository @Inject constructor(
      * 构造 Worker settings PATCH 请求体 JSON 的统一入口：
      *   1) 将 typed request 序列化为 JSON
      *   2) 若提供了 existingSettings（来自 getWorkerSettings），将 request 未显式设置的保留字段
-     *      （exports、migrations、limits、tags、cache_options、tail_consumers、observability、
-     *       usage_model、logpush）从现有设置中回填，避免 Cloudflare PATCH "omit = clear" 语义
+     *      （exports、exports_reconciliation、migrations、limits、tags、cache_options、
+     *       tail_consumers、observability、usage_model、logpush、compatibility_flags、
+     *       placement）从现有设置中回填，避免 Cloudflare PATCH "omit = clear" 语义
      *      意外清除关键元数据（最典型的是 ES Module 的 exports 被清空 → 脚本被降级为 Service Worker
-     *      解析 → `export` 关键字 SyntaxError 10021）。
+     *      解析 → `export` 关键字 SyntaxError 10021；以及 KV/R2/D1 等单 binding 便捷操作意外
+     *      清空兼容性标志或 placement 放置模式）。
      *   3) 最后再执行 fixD1BindingFields 双字段兼容。
      */
     private fun buildPatchSettingsJson(
@@ -86,7 +88,7 @@ class WorkerRepository @Inject constructor(
             listOf(
                 "exports", "exports_reconciliation", "migrations", "limits", "tags",
                 "cache_options", "tail_consumers", "observability",
-                "usage_model", "logpush"
+                "usage_model", "logpush", "compatibility_flags", "placement"
             ).forEach { key ->
                 val reqVal = reqTree.get(key)
                 if ((reqVal == null || reqVal.isJsonNull) && existing.has(key) && !existing.get(key).isJsonNull) {
@@ -433,13 +435,17 @@ class WorkerRepository @Inject constructor(
             val allBindings = existingBindings + kvBindingsList
             Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${kvBindingsList.size} KV)")
             
-            // Create settings request with preserved compatibilityDate
+            // Create settings request with preserved compatibilityDate + compatibilityFlags + placement.
+            // All three fields must be present in the PATCH body; any omission would be
+            // interpreted as "clear this field" by the Worker settings PATCH semantics.
+            val existingSettings = (settingsResult as? Resource.Success)?.data
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE,
+                compatibilityFlags = existingSettings?.compatibilityFlags,
+                placement = existingSettings?.placement
             )
-            
-            val existingSettings = (settingsResult as? Resource.Success)?.data
+
             val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
             Timber.d("KV Settings request: $settingsRequest")
             
@@ -514,13 +520,17 @@ class WorkerRepository @Inject constructor(
             val allBindings = existingBindings + r2BindingsList
             Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${r2BindingsList.size} R2)")
             
-            // Create settings request with preserved compatibilityDate
+            // Create settings request with preserved compatibilityDate + compatibilityFlags + placement.
+            // All three fields must be present in the PATCH body; any omission would be
+            // interpreted as "clear this field" by the Worker settings PATCH semantics.
+            val existingSettings = (settingsResult as? Resource.Success)?.data
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE,
+                compatibilityFlags = existingSettings?.compatibilityFlags,
+                placement = existingSettings?.placement
             )
-            
-            val existingSettings = (settingsResult as? Resource.Success)?.data
+
             val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
             Timber.d("R2 Settings request: $settingsRequest")
             
@@ -596,15 +606,19 @@ class WorkerRepository @Inject constructor(
             val allBindings = existingBindings + d1BindingsList
             Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${d1BindingsList.size} D1)")
             
-            // Create settings request with preserved compatibilityDate
+            // Create settings request with preserved compatibilityDate + compatibilityFlags + placement.
+            // All three fields must be present in the PATCH body; any omission would be
+            // interpreted as "clear this field" by the Worker settings PATCH semantics.
+            val existingSettings = (settingsResult as? Resource.Success)?.data
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE,
+                compatibilityFlags = existingSettings?.compatibilityFlags,
+                placement = existingSettings?.placement
             )
-            
+
             Timber.d("D1 Settings request: $settingsRequest")
-            
-            val existingSettings = (settingsResult as? Resource.Success)?.data
+
             val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
             
             // Convert to RequestBody for multipart
@@ -679,15 +693,19 @@ class WorkerRepository @Inject constructor(
             val allBindings = existingBindings + svcBindingsList
             Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${svcBindingsList.size} service)")
 
-            // Create settings request with preserved compatibilityDate
+            // Create settings request with preserved compatibilityDate + compatibilityFlags + placement.
+            // All three fields must be present in the PATCH body; any omission would be
+            // interpreted as "clear this field" by the Worker settings PATCH semantics.
+            val existingSettings = (settingsResult as? Resource.Success)?.data
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE,
+                compatibilityFlags = existingSettings?.compatibilityFlags,
+                placement = existingSettings?.placement
             )
 
             Timber.d("Service Settings request: $settingsRequest")
 
-            val existingSettings = (settingsResult as? Resource.Success)?.data
             val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
 
             // Convert to RequestBody for multipart
@@ -781,13 +799,17 @@ class WorkerRepository @Inject constructor(
             val allBindings = existingBindings + variableBindings
             Timber.d("Total bindings: ${allBindings.size} (${existingBindings.size} preserved + ${variableBindings.size} variables)")
             
-            // Create settings request with preserved compatibilityDate
+            // Create settings request with preserved compatibilityDate + compatibilityFlags + placement.
+            // All three fields must be present in the PATCH body; any omission would be
+            // interpreted as "clear this field" by the Worker settings PATCH semantics.
+            val existingSettings = (settingsResult as? Resource.Success)?.data
             val settingsRequest = WorkerSettingsRequest(
                 bindings = allBindings,
-                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
+                compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE,
+                compatibilityFlags = existingSettings?.compatibilityFlags,
+                placement = existingSettings?.placement
             )
-            
-            val existingSettings = (settingsResult as? Resource.Success)?.data
+
             val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
             Timber.d("Settings request: $settingsJson")
             

@@ -491,7 +491,11 @@ class WorkerFragment : Fragment() {
 
     /**
      * 上传 Worker（已保证 file 在本地可读）。
-     * 先静默检查 Worker 是否已存在：存在走 uploadWorkerScriptWithBindings（保留原有 bindings），否则走 uploadWorkerScript。
+     * 统一走 uploadWorkerScriptWithBindings 单一路径：
+     *   - 同名 Worker 已存在 → 内部 getWorkerSettings 成功 → 保留原有 bindings + 全量保留字段
+     *   - 全新 Worker 名 → 内部 getWorkerSettings 失败 → existingSettings 回退 null，
+     *     POST-upload 三阶段（observability / subdomain / percentage deployment）照常执行，
+     *     从而使卡片上三个开关对"第一次部署"用户也生效。
      */
     private fun doUploadWorker(
         account: Account,
@@ -508,23 +512,19 @@ class WorkerFragment : Fragment() {
             .create()
         checkingDialog.show()
 
-        viewModel.getWorkerSettings(account, workerName, silent = true) { result ->
+        viewModel.getWorkerSettings(account, workerName, silent = true) { _ ->
             checkingDialog.dismiss()
             val enableObs = binding.switchEnableObservability.isChecked
             val enableSub = binding.switchEnableSubdomain.isChecked
             val enableDep = binding.switchEnableDeployment.isChecked
-            if (result is com.muort.upworker.core.model.Resource.Success) {
-                viewModel.uploadWorkerScriptWithBindings(
-                    account, workerName, file, customCompatibilityDate, customCompatibilityFlags,
-                    enableObservability = enableObs,
-                    enableSubdomain = enableSub,
-                    enableDeployment = enableDep
-                )
-            } else {
-                viewModel.uploadWorkerScript(
-                    account, workerName, file, customCompatibilityDate, customCompatibilityFlags
-                )
-            }
+            // 全新/已存在 Worker 复用同一条 post-upload 硬化路径（保留字段回填 +
+            // applyObservability 走 buildPatchSettingsJson，避免 exports 被 omit=clear 清空 → 10021）
+            viewModel.uploadWorkerScriptWithBindings(
+                account, workerName, file, customCompatibilityDate, customCompatibilityFlags,
+                enableObservability = enableObs,
+                enableSubdomain = enableSub,
+                enableDeployment = enableDep
+            )
         }
     }
     

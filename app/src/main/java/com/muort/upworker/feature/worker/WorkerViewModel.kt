@@ -222,6 +222,22 @@ class WorkerViewModel @Inject constructor(
         _cleanupResults.value = emptyList()
     }
     
+    /**
+     * （已废弃，不再使用）
+     *
+     * 原先用于"新建全新 Worker 名"的上传路径，不传 observability/subdomain/deployment
+     * 开关，也不执行 post-upload 三阶段，会导致卡片上三个开关对首次部署用户无效。
+     *
+     * 请使用 [uploadWorkerScriptWithBindings] 单一路径：
+     *   - 它对"已存在脚本"会保留原有 bindings 和 PATCH 保留字段（避免 exports 被
+     *     omit=clear 清空 → SyntaxError 10021）；
+     *   - 对"全新脚本"同样执行 post-upload 三阶段，卡片开关对首次部署也生效；
+     *   - 现有 settings 不存在时 existingSettings 回退 null，metadata 构造无副作用。
+     */
+    @Deprecated(
+        message = "Use uploadWorkerScriptWithBindings with enableObservability/enableSubdomain/enableDeployment params",
+        replaceWith = ReplaceWith("uploadWorkerScriptWithBindings(account, scriptName, scriptFile, customCompatibilityDate, customCompatibilityFlags, enableObservability = true, enableSubdomain = true, enableDeployment = true)")
+    )
     fun uploadWorkerScript(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null, customCompatibilityFlags: List<String>? = null) {
         viewModelScope.launch {
             _uploadState.value = UploadState.Uploading

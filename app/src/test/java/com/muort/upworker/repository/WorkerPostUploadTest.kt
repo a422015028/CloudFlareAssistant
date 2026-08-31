@@ -5,6 +5,9 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
+import com.muort.upworker.core.model.Placement
+import com.muort.upworker.core.model.Resource
+import com.muort.upworker.core.model.WorkerBinding
 import com.muort.upworker.core.model.WorkerScript
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.repository.WorkerPostActionStage
@@ -304,6 +307,112 @@ class WorkerPostUploadTest {
         coVerify(exactly = 1) { mockApi.createWorkerDeployment(any(), any(), any(), any(), any(), any()) }
         assertFalse("stages list should contain exactly 3 non-null items", v2.stages.size != 3)
         assertEquals(3, v2.stages.size)
+    }
+
+    // =========================================================================
+    // RED 3: updateWorkerKvBindings — captured PATCH body must retain
+    //        compatibility_flags and placement (otherwise they get cleared by
+    //        Worker settings PATCH omit=clear semantics, bug W2)
+    // =========================================================================
+    @Test
+    fun `updateWorkerKvBindings preserves compatibility_flags placement and non-KV bindings in captured PATCH body`() = runTest {
+        // Arrange: existing settings with KV + a non-KV binding (D1), plus the two
+        // scalar settings this bug was dropping: compatibility_flags and placement,
+        // plus exports as a canary for 10021-style regressions.
+        val existingBindings = listOf(
+            // Old KV binding that should be replaced by the incoming list
+            WorkerBinding(
+                type = "kv_namespace",
+                name = "MY_OLD_KV",
+                namespaceId = "old_kv_ns_123"
+            ),
+            // Non-KV binding — must survive the KV-specific update (cross-type keep)
+            WorkerBinding(
+                type = "d1",
+                name = "MY_DB",
+                databaseId = "d1-uuid-0000"
+            )
+        )
+        val existingExports = mapOf("default" to "main-entry", "named" to "my-helper")
+        val existingObservability = mapOf("enabled" to false)
+        val baselineSettings = WorkerScript(
+            id = scriptName,
+            createdOn = null,
+            modifiedOn = null,
+            etag = "etag-baseline",
+            size = 512L,
+            bindings = existingBindings,
+            compatibilityDate = "2026-06-16",
+            compatibilityFlags = listOf("url_standard", "nodejs_compat"),
+            placement = Placement(mode = "smart"),
+            usageModel = "standard",
+            logpush = false,
+            exports = existingExports,
+            observability = existingObservability
+        )
+        // Incoming brand-new KV bindings (name, namespace_id pairs as accepted by the API).
+        // Should replace the existing kv_namespace bindings.
+        val newKvBindings = listOf(
+            "NEW_KV_A" to "ns_a",
+            "NEW_KV_B" to "ns_b"
+        )
+
+        coEvery {
+            mockApi.getWorkerSettings(any(), any(), any(), any(), any())
+        } returns cfOk(baselineSettings)
+        coEvery {
+            mockApi.updateWorkerSettings(any(), any(), any(), any(), any(), any())
+        } returns cfOk(fakeScript.copy(size = 2048L))
+
+        // Act
+        val result = repository.updateWorkerKvBindings(
+            account = testAccount,
+            scriptName = scriptName,
+            kvBindings = newKvBindings
+        )
+
+        // Assert: function itself succeeds
+        assertTrue("result=$result", result is Resource.Success)
+
+        // Capture the exact PATCH settings body
+        val slot = mutableListOf<okhttp3.RequestBody>()
+        coVerify(exactly = 1) {
+            mockApi.updateWorkerSettings(any(), any(), any(), any(), any(), capture(slot))
+        }
+        val raw = slot.first().readUtf8ForTest()
+        val json = gson.fromJson(raw, com.google.gson.JsonObject::class.java)
+
+        // --- Bug assertions (these FAIL before fix, PASS after) ---
+        assertTrue("compatibility_flags key must be present (was omitted by bug W2), raw=$raw",
+            json.has("compatibility_flags"))
+        val flagsArr = json.getAsJsonArray("compatibility_flags")
+        assertEquals("compatibility_flags must preserve all 2 existing flags",
+            2, flagsArr.size())
+        assertTrue("flags should contain url_standard, raw=$raw",
+            flagsArr.any { it.asString == "url_standard" })
+        assertTrue("flags should contain nodejs_compat, raw=$raw",
+            flagsArr.any { it.asString == "nodejs_compat" })
+
+        assertTrue("placement key must be present (was omitted by bug W2), raw=$raw",
+            json.has("placement"))
+        val placementObj = json.getAsJsonObject("placement")
+        assertEquals("placement.mode must be preserved as 'smart'",
+            "smart", placementObj.get("mode").asString)
+
+        // --- Regression assertions (these should PASS both before and after) ---
+        assertTrue("exports canary must be preserved to guard against 10021 regressions, raw=$raw",
+            json.has("exports"))
+
+        val bindingsArr = json.getAsJsonArray("bindings")
+        // 2 new KV + 1 kept D1 = 3 bindings total
+        assertEquals("bindings array size should be 2 new KV + 1 kept D1",
+            3, bindingsArr.size())
+        val bindingNames = bindingsArr.map { it.asJsonObject.get("name").asString }.toSet()
+        assertTrue("NEW_KV_A should be in bindings", bindingNames.contains("NEW_KV_A"))
+        assertTrue("NEW_KV_B should be in bindings", bindingNames.contains("NEW_KV_B"))
+        assertTrue("MY_DB (non-KV D1) should be preserved", bindingNames.contains("MY_DB"))
+        assertFalse("MY_OLD_KV (old KV) should be replaced",
+            bindingNames.contains("MY_OLD_KV"))
     }
 
     // Small helper: okio-less reading of a RequestBody for assertions.
