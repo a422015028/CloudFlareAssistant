@@ -3223,33 +3223,6 @@
     <string name="pages_formdata_routes_json_applied">已附加 _routes.json（Functions 路由显式清单）</string>
     <string name="pages_formdata_compat_date_auto_format">检测到 %1$s 存在，已自动注入 compatibility_date=%2$s 到 deployment_configs。</string>
 
-    <!-- ===== Xr 风格绑定自动创建（KV/D1/R2/AI） ===== -->
-    <string name="deploy_binding_auto_title">绑定资源自动创建</string>
-    <string name="deploy_binding_auto_summary">部署时按 binding title/name 查或创建 KV Namespace / D1 Database / R2 Bucket，免手工预创建。</string>
-    <string name="deploy_binding_auto_kv_existed_format">KV：已复用已存在的 Namespace「%1$s」（id=%2$s）</string>
-    <string name="deploy_binding_auto_kv_created_format">KV：已自动新建 Namespace「%1$s」（id=%2$s）</string>
-    <string name="deploy_binding_auto_d1_existed_format">D1：已复用已存在的 Database「%1$s」（uuid=%2$s）</string>
-    <string name="deploy_binding_auto_d1_created_format">D1：已自动新建 Database「%1$s」（uuid=%2$s）</string>
-    <string name="deploy_binding_auto_r2_existed_format">R2：已复用已存在的 Bucket「%1$s」</string>
-    <string name="deploy_binding_auto_r2_created_format">R2：已自动新建 Bucket「%1$s」</string>
-    <string name="deploy_binding_auto_invalid_name_format">绑定名「%1$s」不合法（^[a-zA-Z0-9_]+$），跳过自动创建。</string>
-    <string name="deploy_binding_auto_create_fail_format">资源 %1$s「%2$s」自动创建失败：%3$s</string>
-    <string name="deploy_binding_auto_ai_binding_ok">AI Gateway binding 已挂载（@cf/* 模型族可用）</string>
-
-    <!-- ===== zr 风格指数退避（通用 retry 文案） ===== -->
-    <string name="deploy_retry_attempt_format">第 %1$d 次重试，延迟 %2$d ms（操作：%3$s）</string>
-    <string name="deploy_retry_max_exhausted_format">%1$s 已重试 %2$d 次仍失败，放弃。\n最后一次错误：%3$s</string>
-    <string name="deploy_retry_http_429_format">触发 Cloudflare API 429 限流，按 Retry-After=%1$d s 退避。</string>
-    <string name="deploy_retry_http_5xx_format">Cloudflare API %1$d 服务端错误，指数退避重试。</string>
-
-    <!-- ===== P0 JWT 刷新事件的 P1 UI 展示（deploy_jwt_*，与 repo_pages_jwt_* 日志不重复，用于 Toast/Dialog/LogActivity） ===== -->
-    <string name="deploy_jwt_countdown_format">Upload-Token 剩余 %1$d 秒过期，准备刷新…</string>
-    <string name="deploy_jwt_expired_refreshing">Upload-Token 已过期，正在重新获取…</string>
-    <string name="deploy_jwt_refreshed_ok">Upload-Token 刷新成功</string>
-    <string name="deploy_jwt_refresh_fail_format">Upload-Token 刷新失败：%1$s</string>
-    <string name="deploy_jwt_max_retry_exceeded_format">Upload-Token 已强制刷新 %1$d 次仍失败；本次部署中止。\n请检查：① API Token 是否含 pages:write 权限 ② 当前账号是否为项目 Owner。</string>
-    <string name="deploy_jwt_format_invalid_warn">JWT 字段无法解析（非 base64url 三段式），改为首次 401 时被动刷新。</string>
-
     <!-- ============ P1 结束 ============ -->
 
 </resources>

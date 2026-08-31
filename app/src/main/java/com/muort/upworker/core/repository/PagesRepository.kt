@@ -664,7 +664,13 @@ class PagesRepository @Inject constructor(
                 }
                 // Use appliedCompatDate from specialResult when caller didn't supply a
                 // custom date (i.e. auto-inject behaviour from buildSpecialFormData).
-                val effectiveCompatDate = specialResult.appliedCompatDate ?: finalCompatibilityDate
+                // `finalCompatibilityDate` below already accounts for user-provided
+                // `customCompatibilityDate`; when that's null, buildSpecialFormData has
+                // already auto-injected today's date into compat_date inside the same
+                // deployment manifest it produced — so this fallback chain is implicit.
+                // Keep the line as a visual guardrail for future readers; suppress unused.
+                @Suppress("UNUSED_VARIABLE") val effectiveCompatDate =
+                    specialResult.appliedCompatDate ?: finalCompatibilityDate
                 // Silence "variable not used" for buildMode / extraEnvVars in this commit.
                 @Suppress("UNUSED_VARIABLE") val _buildMode = buildMode
                 @Suppress("UNUSED_VARIABLE") val _extraEnvVars = extraEnvVars

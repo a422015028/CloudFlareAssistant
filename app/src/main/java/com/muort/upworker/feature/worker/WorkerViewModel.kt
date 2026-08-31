@@ -100,12 +100,12 @@ class WorkerViewModel @Inject constructor(
                             _message.emit(UiMessage.of(detectResult.logResId, *detectResult.logFormatArgs))
 
                             val flagsChanged = detectResult.finalFlags != detectFlagsBase
-                            val effectiveResult: Resource<WorkerScript>
-                            val finalMetadataForUpload: com.muort.upworker.core.model.WorkerMetadata
-                            if (flagsChanged) {
-                                finalMetadataForUpload = metadata.copy(
-                                    compatibilityFlags = detectResult.finalFlags
-                                )
+                            val finalMetadataForUpload = if (flagsChanged) {
+                                metadata.copy(compatibilityFlags = detectResult.finalFlags)
+                            } else {
+                                metadata
+                            }
+                            val effectiveResult = if (flagsChanged) {
                                 // Re-run uploadMultipart second time if flags changed
                                 val reupload = workerRepository.uploadWorkerScriptMultipart(
                                     account, scriptName, tempFile, finalMetadataForUpload
@@ -115,15 +115,14 @@ class WorkerViewModel @Inject constructor(
                                     _message.emit(
                                         UiMessage.of(
                                             R.string.worker_nodejs_flag_append_fail_format,
-                                            reupload.message ?: ""
+                                            reupload.message
                                         )
                                     )
                                     return@launch
                                 }
-                                effectiveResult = reupload
+                                reupload
                             } else {
-                                finalMetadataForUpload = metadata
-                                effectiveResult = result
+                                result
                             }
 
                             // uploadWorkerScriptMultipart returns Resource<WorkerScript>. WorkerScript has

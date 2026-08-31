@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -239,35 +240,35 @@ class WorkerFragment : Fragment() {
             isExpanded = !isExpanded
             binding.deployCardContent.visibility = if (isExpanded) android.view.View.VISIBLE else android.view.View.GONE
             binding.deployCardArrow.rotation = if (isExpanded) 180f else 0f
-            prefs.edit().putBoolean("deploy_card_expanded", isExpanded).apply()
+            prefs.edit { putBoolean("deploy_card_expanded", isExpanded) }
         }
 
         // 本地连接开关（默认关）：恢复 + 持久化
         val localKey = "allow_local_url"
         binding.localUrlAllowedSwitch.isChecked = prefs.getBoolean(localKey, false)
         binding.localUrlAllowedSwitch.setOnCheckedChangeListener { _, checked ->
-            prefs.edit().putBoolean(localKey, checked).apply()
+            prefs.edit { putBoolean(localKey, checked) }
         }
 
         // Observability 开关（默认开）：恢复 + 持久化
         val obsKey = "enable_observability"
         binding.switchEnableObservability.isChecked = prefs.getBoolean(obsKey, true)
         binding.switchEnableObservability.setOnCheckedChangeListener { _, checked ->
-            prefs.edit().putBoolean(obsKey, checked).apply()
+            prefs.edit { putBoolean(obsKey, checked) }
         }
 
         // Subdomain 开关（默认开）：恢复 + 持久化
         val subKey = "enable_subdomain"
         binding.switchEnableSubdomain.isChecked = prefs.getBoolean(subKey, true)
         binding.switchEnableSubdomain.setOnCheckedChangeListener { _, checked ->
-            prefs.edit().putBoolean(subKey, checked).apply()
+            prefs.edit { putBoolean(subKey, checked) }
         }
 
         // Deployment 开关（默认开）：恢复 + 持久化
         val depKey = "enable_deployment"
         binding.switchEnableDeployment.isChecked = prefs.getBoolean(depKey, true)
         binding.switchEnableDeployment.setOnCheckedChangeListener { _, checked ->
-            prefs.edit().putBoolean(depKey, checked).apply()
+            prefs.edit { putBoolean(depKey, checked) }
         }
         
         binding.selectFileBtn.setOnClickListener {

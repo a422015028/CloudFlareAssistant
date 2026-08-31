@@ -3245,33 +3245,6 @@
     <string name="pages_formdata_routes_json_applied">Attached _routes.json (explicit Functions route manifest)</string>
     <string name="pages_formdata_compat_date_auto_format">Detected %1$s; auto-injected compatibility_date=%2$s into deployment_configs.</string>
 
-    <!-- ===== Xr-style binding auto-create (KV/D1/R2/AI) ===== -->
-    <string name="deploy_binding_auto_title">Auto-Create Missing Bindings</string>
-    <string name="deploy_binding_auto_summary">During deploy, look up or create KV Namespace / D1 Database / R2 Bucket by title/name — no manual pre-creation needed.</string>
-    <string name="deploy_binding_auto_kv_existed_format">KV: reused existing Namespace "%1$s" (id=%2$s)</string>
-    <string name="deploy_binding_auto_kv_created_format">KV: auto-created Namespace "%1$s" (id=%2$s)</string>
-    <string name="deploy_binding_auto_d1_existed_format">D1: reused existing Database "%1$s" (uuid=%2$s)</string>
-    <string name="deploy_binding_auto_d1_created_format">D1: auto-created Database "%1$s" (uuid=%2$s)</string>
-    <string name="deploy_binding_auto_r2_existed_format">R2: reused existing Bucket "%1$s"</string>
-    <string name="deploy_binding_auto_r2_created_format">R2: auto-created Bucket "%1$s"</string>
-    <string name="deploy_binding_auto_invalid_name_format">Binding name "%1$s" is invalid (^[a-zA-Z0-9_]+$); skipping auto-create.</string>
-    <string name="deploy_binding_auto_create_fail_format">Failed to auto-create %1$s "%2$s": %3$s</string>
-    <string name="deploy_binding_auto_ai_binding_ok">AI Gateway binding attached (@cf/* model families available)</string>
-
-    <!-- ===== zr-style exponential backoff (generic retry messages) ===== -->
-    <string name="deploy_retry_attempt_format">Attempt %1$d retry, delay %2$d ms (op: %3$s)</string>
-    <string name="deploy_retry_max_exhausted_format">%1$s retried %2$d time(s) and still failed. Aborting.\nLast error: %3$s</string>
-    <string name="deploy_retry_http_429_format">Cloudflare API 429 rate-limited; backing off by Retry-After=%1$d s.</string>
-    <string name="deploy_retry_http_5xx_format">Cloudflare API %1$d server error; retrying with exponential backoff.</string>
-
-    <!-- ===== P1 UI for P0 JWT refresh (deploy_jwt_* — separate from repo_pages_jwt_* logs) ===== -->
-    <string name="deploy_jwt_countdown_format">Upload-Token expires in %1$d second(s); preparing to refresh…</string>
-    <string name="deploy_jwt_expired_refreshing">Upload-Token expired, re-acquiring…</string>
-    <string name="deploy_jwt_refreshed_ok">Upload-Token refreshed successfully</string>
-    <string name="deploy_jwt_refresh_fail_format">Upload-Token refresh failed: %1$s</string>
-    <string name="deploy_jwt_max_retry_exceeded_format">Forced Upload-Token refresh failed %1$d time(s); deployment aborted.\nPlease verify: ① the API Token has pages:write scope, ② this account owns the project.</string>
-    <string name="deploy_jwt_format_invalid_warn">JWT payload unparseable (not 3-part base64url); falling back to passive refresh on first 401.</string>
-
     <!-- ============ END P1 ============ -->
 
 </resources>
