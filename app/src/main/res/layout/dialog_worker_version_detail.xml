@@ -371,10 +371,15 @@
 
     </ScrollView>
 
+    <!-- 【按钮对齐关键】参见 dialog_pages_deployment_detail.xml 注释：
+         baselineAligned=false + gravity=center_vertical，避免中英文字行数差异
+         导致按钮整体上下错落；layout_marginHorizontal 让所有按钮留白对称。 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
         android:layout_marginTop="16dp">
 
         <com.google.android.material.button.MaterialButton
@@ -382,27 +387,31 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/delete"
+            android:layout_marginHorizontal="4dp"
+            style="@style/AppButton.Tonal"
             app:backgroundTint="@color/red_500"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white"
+            android:text="@string/delete"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/accessBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/xml_dialog_worker_version_detail_18"
-            app:backgroundTint="?attr/colorPrimary"
-            android:textColor="@color/white"
-            android:layout_marginStart="8dp"/>
+            android:layout_marginHorizontal="4dp"
+            style="@style/AppButton"
+            android:text="@string/xml_dialog_worker_version_detail_18"/>
 
+        <!-- 统一：关闭按钮使用填充背景 Filled Button，与访问按钮的 Filled 保持同一视觉体系，
+             避免 Outlined（白底描边）造成"背景色不统一、空白一块"的观感。 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/closeBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/ssl_mode_off"
-            android:layout_marginStart="8dp"/>
+            android:layout_marginHorizontal="4dp"
+            style="@style/AppButton"
+            android:text="@string/ssl_mode_off"/>
 
     </LinearLayout>
 

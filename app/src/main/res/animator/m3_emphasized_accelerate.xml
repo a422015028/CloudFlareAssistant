@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material3 Emphasized Accelerate easing: cubic-bezier(0.3, 0, 0.8, 0.15)
+     强调离开屏内的动画（末端加速更猛）。 -->
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@animator/m3_emphasized_accelerate"
+    android:controlX1="0.3"
+    android:controlY1="0.0"
+    android:controlX2="0.8"
+    android:controlY2="0.15" />

@@ -65,16 +65,22 @@ class WorkerRepository @Inject constructor(
     }
 
     /**
-     * 构造 Worker settings PATCH 请求体 JSON 的统一入口：
+     * 构造 Worker versioned settings PATCH 请求体 JSON 的统一入口：
      *   1) 将 typed request 序列化为 JSON
-     *   2) 若提供了 existingSettings（来自 getWorkerSettings），将 request 未显式设置的保留字段
-     *      （exports、exports_reconciliation、migrations、limits、tags、cache_options、
-     *       tail_consumers、observability、usage_model、logpush、compatibility_flags、
-     *       placement）从现有设置中回填，避免 Cloudflare PATCH "omit = clear" 语义
-     *      意外清除关键元数据（最典型的是 ES Module 的 exports 被清空 → 脚本被降级为 Service Worker
-     *      解析 → `export` 关键字 SyntaxError 10021；以及 KV/R2/D1 等单 binding 便捷操作意外
-     *      清空兼容性标志或 placement 放置模式）。
-     *   3) 最后再执行 fixD1BindingFields 双字段兼容。
+     *   2) 若提供了 existingSettings（来自 getWorkerSettings），将 request 未显式设置的
+     *      VERSIONED 保留字段（exports、exports_reconciliation、migrations、limits、
+     *      cache_options、usage_model、compatibility_flags、placement）从现有设置回填，
+     *      避免 Cloudflare PATCH "omit = clear" 语义意外清空关键元数据（ES Module
+     *      exports 被清空 → SyntaxError 10021；单 binding 便捷操作意外清兼容性标志
+     *      或 placement 放置模式 → Bug W2）。
+     *   3) 从最终 JSON 中 **无条件剥离** 4 个 SCRIPT-LEVEL 字段（logpush、
+     *      tail_consumers、observability、tags）。这些字段属于 Cloudflare Worker
+     *      Versions 模型的脚本级共享配置，**只能通过单独的 PATCH
+     *      /workers/scripts/{name}/script-settings (application/json) endpoint 修改**，
+     *      绝对不能出现在 versioned /settings multipart body 中。在启用 Versions
+     *      的 Worker 上（latest version 未部署时），只要 versioned body 包含任何
+     *      字段就会返回 10214，而脚本级 4 字段在错误信息中被显式点名。
+     *   4) 最后执行 fixD1BindingFields 双字段兼容。
      */
     private fun buildPatchSettingsJson(
         request: WorkerSettingsRequest,
@@ -83,12 +89,13 @@ class WorkerRepository @Inject constructor(
         val reqTree = gson.toJsonTree(request).asJsonObject
         if (existingSettings != null) {
             val existing = gson.toJsonTree(existingSettings).asJsonObject
-            // settings 字段（如 exports）在 data class 中默认 null 时，gson.toJsonTree 会产生 JsonNull，
-            // 所以这里判断 isJsonNull 而非单纯 has(key) 来识别"调用方未显式提供"
+            // settings 字段在 data class 中默认 null 时，gson.toJsonTree 会产生 JsonNull，
+            // 所以这里判断 isJsonNull 而非单纯 has(key) 来识别"调用方未显式提供"。
+            // 仅覆盖 PURE VERSIONED-FIELDS（8 项），4 项 script-level 字段绝对不能在
+            // versioned body 中出现（见下方 STRIP step）。
             listOf(
-                "exports", "exports_reconciliation", "migrations", "limits", "tags",
-                "cache_options", "tail_consumers", "observability",
-                "usage_model", "logpush", "compatibility_flags", "placement"
+                "exports", "exports_reconciliation", "migrations", "limits",
+                "cache_options", "usage_model", "compatibility_flags", "placement"
             ).forEach { key ->
                 val reqVal = reqTree.get(key)
                 if ((reqVal == null || reqVal.isJsonNull) && existing.has(key) && !existing.get(key).isJsonNull) {
@@ -96,6 +103,12 @@ class WorkerRepository @Inject constructor(
                 }
             }
         }
+        // ===== CRITICAL: Strip all script-level fields from versioned settings body =====
+        // These 4 keys belong to the /script-settings (PATCH JSON) endpoint ONLY.
+        // Even if the caller explicitly set them in WorkerSettingsRequest, or the merge
+        // step added them (shouldn't after the 8-key list above), we remove them here.
+        setOf("logpush", "tail_consumers", "observability", "tags").forEach(reqTree::remove)
+
         val mergedJson = gson.toJson(reqTree)
         return fixD1BindingFields(mergedJson)
     }
@@ -1006,6 +1019,52 @@ class WorkerRepository @Inject constructor(
         }
     }
 
+    /**
+     * 更新 Worker SCRIPT-LEVEL 共享配置（跨所有 version，不随版本变更）。
+     * 唯一正确的 endpoint：PATCH /workers/scripts/{name}/script-settings (application/json)
+     * 可修改的字段 = 4 个：observability（启用/配置可观测性）、logpush（启用 Logpush）、
+     * tail_consumers（配置 Tail Consumer）、tags（脚本标签）。
+     *
+     * PATCH 语义：省略=不动；传值=覆盖；传 null=清除。versioned 字段（bindings、
+     * compatibility 系列、exports 等）完全不受此 API 影响。
+     *
+     * 这 4 个字段 **绝对不能通过 versioned PATCH /settings endpoint 写入**：
+     * 在 Worker Versions 模式下（latest version 未部署），versioned PATCH 会直接返回 10214
+     * 并提示"使用 script-settings API 修改 logpush/tail_consumers"。所有其他路径
+     * （applyObservability / updateWorkerRuntimeSettings / 上传脚本后阶段）必须经过此函数。
+     *
+     * @param bodyJson 已序列化的 JSON 字符串，只包含 caller 想改动的 script-level 字段。
+     */
+    suspend fun updateWorkerScriptSettings(
+        account: Account,
+        scriptName: String,
+        bodyJson: String
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val requestBody = bodyJson.toRequestBody("application/json".toMediaType())
+            val response = api.updateWorkerScriptSettings(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName,
+                body = requestBody
+            )
+
+            if (response.isSuccessful && response.body()?.success == true) {
+                Timber.d("Successfully updated script-level settings for '$scriptName'")
+                response.body()?.result?.let {
+                    Resource.Success(it)
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_env_no_result))
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.message()
+                Timber.e("Failed to update script-level settings: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_update_env_failed_format, errorMsg))
+            }
+        }
+    }
+
     suspend fun deleteWorkerScript(
         account: Account,
         scriptName: String
@@ -1593,59 +1652,38 @@ class WorkerRepository @Inject constructor(
         WorkerAfterUploadResult(uploadResult, stages.toList())
     }
 
-    /** Stage 1: Enable Observability — PATCH script settings with traces+logs enabled.
+    /** Stage 1: Enable Observability — PATCH SCRIPT-LEVEL shared settings with
+     *  traces+logs enabled.
      *
-     * 必须通过 buildPatchSettingsJson 统一入口构造 PATCH body：
-     *   - 先 GET /settings 拿到 existingSettings
-     *   - 使用 WorkerSettingsRequest 只显式设置 observability + 从 existingSettings 透传
-     *     bindings / compatibilityDate / usageModel / logpush 等当前值
-     *   - buildPatchSettingsJson 进一步自动回填 exports、migrations、limits、tags 等
-     *     保留字段，避免 Cloudflare PATCH "omit = clear" 语义清空 ES Module 的
-     *     exports → 脚本被降级为 SW 解析 → SyntaxError 10021。
+     *  Observability is a script-level field (cross-version, shared by all versions),
+     *  so it MUST be modified through the dedicated PATCH /script-settings JSON endpoint
+     *  — never through the versioned multipart PATCH /settings endpoint. On Workers with
+     *  Versions enabled, the versioned endpoint returns error 10214 whenever latest
+     *  version is not currently deployed (and the endpoint has no effect on script-level
+     *  fields anyway). The /script-settings PATCH semantics are: omitted fields = keep,
+     *  supplied fields = overwrite. So by sending only the "observability" key we
+     *  preserve the user's existing logpush/tail_consumers/tags untouched AND we
+     *  never touch any versioned settings (bindings, exports, compatibility flags,
+     *  placement, ...) — this completely avoids both 10214 and any omit=clear risk
+     *  on the versioned settings side.
      */
     suspend fun applyObservability(account: Account, scriptName: String): WorkerPostActionStage =
         withContext(Dispatchers.IO) {
             try {
-                val existing = when (val s = getWorkerSettings(account, scriptName)) {
-                    is Resource.Success -> s.data
-                    else -> null
-                }
-                val request = WorkerSettingsRequest(
-                    // 只显式设置 observability（开启 traces + logs）
-                    observability = WorkerObservability(),
-                    // 从现有 settings 透传当前值，防止只改 observability 时其他字段被意外回退
-                    bindings = existing?.bindings,
-                    compatibilityDate = existing?.compatibilityDate,
-                    compatibilityFlags = existing?.compatibilityFlags,
-                    usageModel = existing?.usageModel,
-                    logpush = existing?.logpush,
-                    tailConsumers = existing?.tailConsumers,
-                    exports = existing?.exports,
-                    exportsReconciliation = existing?.exportsReconciliation,
-                    migrations = existing?.migrations,
-                    limits = existing?.limits,
-                    tags = existing?.tags,
-                    cacheOptions = existing?.cacheOptions
+                // Only set the observability sub-tree (all defaults = enabled head/traces/logs)
+                val bodyObj = mapOf<String, Any?>(
+                    "observability" to WorkerObservability()
                 )
-                val bodyJson = buildPatchSettingsJson(request, existing)
-                val requestBody = bodyJson.toRequestBody("application/json".toMediaType())
-                val response = api.updateWorkerSettings(
-                    token = AuthHelper.getBearerToken(account),
-                    email = AuthHelper.getEmail(account),
-                    apiKey = AuthHelper.getGlobalApiKey(account),
-                    accountId = account.accountId,
-                    scriptName = scriptName,
-                    settings = requestBody
-                )
-                if (response.isSuccessful && response.body()?.success == true) {
+                val bodyJson = gson.toJson(bodyObj)
+                val result = updateWorkerScriptSettings(account, scriptName, bodyJson)
+                if (result is Resource.Success) {
                     WorkerPostActionStage.Success(
                         kind = WorkerPostStageKind.Observability,
                         messageResId = R.string.worker_post_observability_ok
                     )
                 } else {
-                    val err = response.body()?.errors?.firstOrNull()?.message
-                        ?: response.errorBody()?.string()?.take(200)
-                        ?: response.message()
+                    val err = (result as? Resource.Error)?.message
+                        ?: "Unknown observability PATCH error"
                     WorkerPostActionStage.Failure(
                         kind = WorkerPostStageKind.Observability,
                         messageResId = R.string.worker_post_observability_fail_format,

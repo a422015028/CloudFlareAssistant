@@ -81,7 +81,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 默认位置 -->
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/defaultSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
             android:text="@string/xml_dialog_create_location_6" />
 
         <!-- EDNS 支持 -->
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/ecsSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -113,7 +113,7 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/ipv4Switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -129,7 +129,7 @@
             android:textSize="11sp"
             android:textColor="?android:attr/textColorSecondary" />
 
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/ipv6Switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -137,7 +137,7 @@
             android:checked="true"
             android:text="@string/xml_dialog_create_location_12" />
 
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/dotSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -145,7 +145,7 @@
             android:checked="true"
             android:text="@string/xml_dialog_create_location_13" />
 
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/dohSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

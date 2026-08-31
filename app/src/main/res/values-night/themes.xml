@@ -1,27 +1,194 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <!-- Base application theme. -->
+  <!-- Base application theme.
+       夜间模式：透明系统栏 + 关闭浅色图标；其余组件族/形状/动效主题与日间同源，
+       仅将颜色资源层（colors.xml values-night）覆盖色值即可，不必在此重复声明。 -->
   <style name="Base.AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
-    <!-- Customize your theme here. -->
-    <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <!-- 形状系统（与日间一致：8/12/16dp）-->
+    <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.App.SmallComponent</item>
+    <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.App.MediumComponent</item>
+    <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.App.LargeComponent</item>
 
-    <!-- 全局文本/按钮样式：英文下文字更长，统一兜底避免溢出卡片/隐藏文字 -->
+    <!-- 状态栏 & 导航栏：透明 + 深色图标=false（夜间模式使用白色图标）
+         注：API 27+ 的 attrs（navigationBarDividerColor / windowLightNavigationBar /
+         windowLayoutInDisplayCutoutMode）已提取到 values-night-v27 限定资源中。-->
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowContentOverlay">@null</item>
+
+    <!-- 全局文本/按钮/组件家族默认样式 -->
     <item name="android:textViewStyle">@style/AppTextView</item>
     <item name="android:buttonStyle">@style/AppButton</item>
     <item name="materialButtonStyle">@style/AppMaterialButton</item>
+    <item name="materialButtonOutlinedStyle">@style/AppButton.Outlined</item>
     <item name="chipStyle">@style/AppChip</item>
+    <item name="switchStyle">@style/AppMaterialSwitch</item>
+    <item name="checkboxStyle">@style/AppMaterialCheckBox</item>
+    <item name="radioButtonStyle">@style/AppMaterialRadioButton</item>
+    <item name="sliderStyle">@style/AppMaterialSlider</item>
+    <item name="textInputStyle">@style/AppTextInputLayout</item>
+    <item name="bottomNavigationStyle">@style/AppBottomNavigationView</item>
+    <item name="materialCardViewStyle">@style/AppMaterialCardView</item>
 
-    <!-- 全局对话框主题：统一使用 Material You (Material3) AlertDialog 样式 -->
+    <!-- 对话框 / 选择器 / Popup -->
     <item name="materialAlertDialogTheme">@style/AppMaterialAlertDialog</item>
     <item name="alertDialogTheme">@style/AppMaterialAlertDialog</item>
+    <item name="materialTimePickerTheme">@style/ThemeOverlay.Material3.MaterialTimePicker</item>
+    <item name="popupMenuStyle">@style/AppPopupMenu</item>
+    <item name="dropdownListPreferredItemHeight">48dp</item>
   </style>
 
-  <!-- ====================================================================== -->
-  <!-- Material You AlertDialog 全局样式：继承 Material3 MaterialAlertDialog，
-       确保所有对话框统一圆角、颜色、排版，跟随动态取色。 -->
-  <!-- ====================================================================== -->
+  <!-- Material3 形状家族：与日间一致 -->
+  <style name="ShapeAppearance.App.SmallComponent" parent="ShapeAppearance.Material3.SmallComponent">
+    <item name="cornerSize">8dp</item>
+  </style>
+  <style name="ShapeAppearance.App.MediumComponent" parent="ShapeAppearance.Material3.MediumComponent">
+    <item name="cornerSize">12dp</item>
+  </style>
+  <style name="ShapeAppearance.App.LargeComponent" parent="ShapeAppearance.Material3.LargeComponent">
+    <item name="cornerSize">16dp</item>
+  </style>
+
+  <!-- Material You 动效：空壳 style（占位即可，所有 Motion Duration attrs 在 Material 1.11.0 下
+       不使用父类避免链接失败；Easing 仍通过 @animator/m3_* XML 资源显式引用）-->
+  <style name="AppMotionTheme" tools:keep="@style/AppMotionTheme" />
+
+  <!-- Material You AlertDialog -->
   <style name="AppMaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
     <item name="android:windowIsFloating">true</item>
+    <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.App.MediumComponent</item>
   </style>
+
+  <!-- PopupMenu -->
+  <style name="AppPopupMenu" parent="Widget.Material3.PopupMenu">
+    <item name="android:dropDownHorizontalOffset">0dp</item>
+  </style>
+
+  <!-- 全局 TextView 样式（与日间一致）：normal 断字频率 + 保留 full justification -->
+  <style name="AppTextView" parent="@android:style/Widget.DeviceDefault.TextView">
+    <item name="android:breakStrategy">simple</item>
+    <item name="android:hyphenationFrequency">normal</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:justificationMode">inter_word</item>
+    <item name="android:textIsSelectable">false</item>
+  </style>
+
+  <!-- 全局 Button / MaterialButton 家族（与日间对齐：单行 + 禁用 hyphenation + balanced 换行）-->
+  <style name="AppButton" parent="Widget.Material3.Button">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">@dimen/app_button_min_width</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">@dimen/app_button_padding_h</item>
+    <item name="android:paddingEnd">@dimen/app_button_padding_h</item>
+    <item name="android:breakStrategy">balanced</item>
+    <item name="android:hyphenationFrequency">none</item>
+    <item name="android:textSize">@dimen/app_button_text_size</item>
+  </style>
+
+  <style name="AppMaterialButton" parent="Widget.Material3.Button">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">@dimen/app_button_min_width</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">@dimen/app_button_padding_h</item>
+    <item name="android:paddingEnd">@dimen/app_button_padding_h</item>
+    <item name="android:breakStrategy">balanced</item>
+    <item name="android:hyphenationFrequency">none</item>
+    <item name="android:textAllCaps">false</item>
+    <item name="android:textSize">@dimen/app_button_text_size</item>
+  </style>
+
+  <style name="AppButton.Tonal" parent="Widget.Material3.Button.TonalButton" tools:keep="@style/AppButton_Tonal">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">@dimen/app_button_min_width</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">@dimen/app_button_padding_h</item>
+    <item name="android:paddingEnd">@dimen/app_button_padding_h</item>
+    <item name="android:breakStrategy">balanced</item>
+    <item name="android:hyphenationFrequency">none</item>
+    <item name="android:textSize">@dimen/app_button_text_size</item>
+  </style>
+
+  <style name="AppButton.Outlined" parent="Widget.Material3.Button.OutlinedButton" tools:keep="@style/AppButton_Outlined">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">@dimen/app_button_min_width</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">@dimen/app_button_padding_h</item>
+    <item name="android:paddingEnd">@dimen/app_button_padding_h</item>
+    <item name="android:breakStrategy">balanced</item>
+    <item name="android:hyphenationFrequency">none</item>
+    <item name="android:textSize">@dimen/app_button_text_size</item>
+  </style>
+
+  <style name="AppButton.Text" parent="Widget.Material3.Button.TextButton" tools:keep="@style/AppButton_Text">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">@dimen/app_button_min_width</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">@dimen/app_button_padding_h</item>
+    <item name="android:paddingEnd">@dimen/app_button_padding_h</item>
+    <item name="android:breakStrategy">balanced</item>
+    <item name="android:hyphenationFrequency">none</item>
+    <item name="android:textSize">@dimen/app_button_text_size</item>
+  </style>
+
+  <style name="AppButton.Text.Icon" parent="Widget.Material3.Button.TextButton.Icon" tools:keep="@style/AppButton_Text_Icon">
+    <item name="android:minHeight">@dimen/app_button_min_height</item>
+    <item name="android:minWidth">0dp</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:ellipsize">end</item>
+    <item name="android:paddingStart">4dp</item>
+    <item name="android:paddingEnd">4dp</item>
+    <item name="android:breakStrategy">balanced</item>
+    <item name="android:hyphenationFrequency">none</item>
+    <item name="android:textSize">@dimen/app_button_icon_text_size</item>
+    <item name="android:textAllCaps">false</item>
+    <item name="iconGravity">start</item>
+  </style>
+
+  <!-- Chip -->
+  <style name="AppChip" parent="Widget.Material3.Chip.Assist">
+    <item name="android:textIsSelectable">false</item>
+  </style>
+
+  <style name="AppChip.Filter" parent="Widget.Material3.Chip.Filter">
+    <item name="chipBackgroundColor">@color/chip_filter_bg</item>
+    <item name="android:textColor">@color/chip_filter_text</item>
+  </style>
+
+  <!-- MaterialToolbar / 标题外观 -->
+  <style name="AppMaterialToolbar" parent="Widget.Material3.Toolbar.Surface">
+    <item name="android:elevation">0dp</item>
+    <item name="titleCentered">true</item>
+    <item name="titleTextAppearance">@style/ToolbarTitleTextAppearance</item>
+  </style>
+
+  <!-- Toolbar 标题文字样式：与日间一致，AppCompat 基 + MD3 常用字号 -->
+  <style name="ToolbarTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+    <item name="android:textSize">16sp</item>
+    <item name="android:maxLines">1</item>
+    <item name="android:ellipsize">end</item>
+  </style>
+
+  <!-- Switch / CheckBox / RadioButton -->
+  <style name="AppMaterialSwitch" parent="Widget.Material3.CompoundButton.Switch" />
+  <style name="AppMaterialCheckBox" parent="Widget.Material3.CompoundButton.CheckBox" />
+  <style name="AppMaterialRadioButton" parent="Widget.Material3.CompoundButton.RadioButton" />
+
+  <!-- Slider / Card / BottomNav / TextInput -->
+  <style name="AppMaterialSlider" parent="Widget.Material3.Slider" />
+
+  <style name="AppMaterialCardView" parent="Widget.Material3.CardView.Elevated">
+    <item name="cardCornerRadius">16dp</item>
+    <item name="cardElevation">1dp</item>
+  </style>
+
+  <style name="AppBottomNavigationView" parent="Widget.Material3.BottomNavigationView" />
+
+  <style name="AppTextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox" />
 
   <style name="AppTheme" parent="Base.AppTheme" />
 </resources>

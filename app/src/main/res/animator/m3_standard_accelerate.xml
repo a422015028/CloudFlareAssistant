@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material3 Standard Accelerate easing: cubic-bezier(0.3, 0, 1, 1)
+     用于离开屏内的动画。 -->
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@animator/m3_standard_accelerate"
+    android:controlX1="0.3"
+    android:controlY1="0.0"
+    android:controlX2="1.0"
+    android:controlY2="1.0" />

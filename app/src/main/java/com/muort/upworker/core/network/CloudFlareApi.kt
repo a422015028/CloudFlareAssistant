@@ -163,6 +163,14 @@ interface CloudFlareApi {
     /**
      * Update Worker Script settings (bindings, etc.) without uploading script content
      * https://developers.cloudflare.com/api/operations/worker-script-update-settings
+     *
+     * NOTE: This is the VERSIONED settings endpoint (multipart). Only 8 pure versioned
+     * fields are allowed here (bindings, compatibility_date/flags, placement, exports,
+     * migrations, limits, cache_options, usage_model). Script-level shared fields
+     * (logpush, tail_consumers, observability, tags) MUST NOT be sent here — they belong
+     * to the separate updateWorkerScriptSettings (PATCH JSON /script-settings) endpoint.
+     * On Workers with Versions enabled (latest version not deployed), sending any
+     * versioned PATCH returns 10214.
      */
     @Multipart
     @PATCH("accounts/{account_id}/workers/scripts/{script_name}/settings")
@@ -173,6 +181,27 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String,
         @Path("script_name") scriptName: String,
         @Part("settings") settings: RequestBody
+    ): Response<CloudFlareResponse<WorkerScript>>
+
+    /**
+     * Update Worker SCRIPT-LEVEL shared settings (cross-version).
+     * https://developers.cloudflare.com/api/operations/worker-script-patch-script-settings
+     *
+     * Handles exactly these 4 fields: logpush, tail_consumers, observability, tags.
+     * This is the ONLY endpoint that can modify these fields when using Worker Versions.
+     * (On legacy single-version Workers these fields also accept writes through this
+     * endpoint.) Content-Type must be application/json — unlike versioned settings this
+     * endpoint does NOT take multipart.
+     */
+    @Headers("Content-Type: application/json")
+    @PATCH("accounts/{account_id}/workers/scripts/{script_name}/script-settings")
+    suspend fun updateWorkerScriptSettings(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Body body: RequestBody
     ): Response<CloudFlareResponse<WorkerScript>>
 
     /**

@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -194,12 +195,12 @@ ff05::/16"""
         protocolSpinner.adapter = protocolAdapter
         
         val osSelectorLayout = dialogView.findViewById<LinearLayout>(R.id.osSelectorLayout)
-        val osWindows = dialogView.findViewById<android.widget.CheckBox>(R.id.osWindows)
-        val osMacos = dialogView.findViewById<android.widget.CheckBox>(R.id.osMacos)
-        val osLinux = dialogView.findViewById<android.widget.CheckBox>(R.id.osLinux)
-        val osIos = dialogView.findViewById<android.widget.CheckBox>(R.id.osIos)
-        val osAndroid = dialogView.findViewById<android.widget.CheckBox>(R.id.osAndroid)
-        val osChromeOs = dialogView.findViewById<android.widget.CheckBox>(R.id.osChromeOs)
+        val osWindows = dialogView.findViewById<MaterialCheckBox>(R.id.osWindows)
+        val osMacos = dialogView.findViewById<MaterialCheckBox>(R.id.osMacos)
+        val osLinux = dialogView.findViewById<MaterialCheckBox>(R.id.osLinux)
+        val osIos = dialogView.findViewById<MaterialCheckBox>(R.id.osIos)
+        val osAndroid = dialogView.findViewById<MaterialCheckBox>(R.id.osAndroid)
+        val osChromeOs = dialogView.findViewById<MaterialCheckBox>(R.id.osChromeOs)
         
         // Match expression selectors and operators
         val matchSelectorOptions = arrayOf(

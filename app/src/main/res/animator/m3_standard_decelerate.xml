@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material3 Standard Decelerate easing: cubic-bezier(0, 0, 0, 1)
+     用于进入屏内（由外部到可见）的动画。 -->
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@animator/m3_standard_decelerate"
+    android:controlX1="0.0"
+    android:controlY1="0.0"
+    android:controlX2="0.0"
+    android:controlY2="1.0" />

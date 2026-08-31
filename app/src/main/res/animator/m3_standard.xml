@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material3 Standard easing (symmetric): cubic-bezier(0.2, 0, 0, 1)
+     用于屏内组件出现/消失、元素变形。 -->
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@animator/m3_standard"
+    android:controlX1="0.2"
+    android:controlY1="0.0"
+    android:controlX2="0.0"
+    android:controlY2="1.0" />

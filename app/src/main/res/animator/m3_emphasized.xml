@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material3 Emphasized easing (symmetric): cubic-bezier(0.2, 0, 0, 1)
+     用于带"强调"的过渡，如展开/收起较大的内容区，配合更长时长。 -->
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@animator/m3_emphasized"
+    android:controlX1="0.2"
+    android:controlY1="0.0"
+    android:controlX2="0.0"
+    android:controlY2="1.0" />

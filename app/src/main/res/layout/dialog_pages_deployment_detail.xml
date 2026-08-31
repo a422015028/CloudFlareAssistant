@@ -876,10 +876,20 @@
 
     </ScrollView>
 
+    <!-- 【按钮对齐关键】
+         baselineAligned=false：禁止 LinearLayout 默认按"子 View 文字基线"对齐，
+             否则 2 行断字按钮（Logs/Delete/Visit…）的最末行基线比 Off（1 行）低，
+             整个按钮会视觉下沉，导致"高低错落"。
+         gravity=center_vertical：按父容器**垂直中心**统一对齐所有子按钮，
+             再配合所有按钮使用相同 minHeight，视觉绝对齐平。
+         layout_marginHorizontal=4dp on button：四按钮之间 + 左右外侧留白完全对称，
+             不再是"第 1 个贴边、之后逐个 8dp start"的错位布局。 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
         android:layout_marginTop="16dp">
 
         <com.google.android.material.button.MaterialButton
@@ -887,6 +897,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginHorizontal="4dp"
+            style="@style/AppButton"
             android:text="@string/xml_dialog_pages_deployment_detail_45"/>
 
         <com.google.android.material.button.MaterialButton
@@ -894,28 +906,31 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/delete"
+            android:layout_marginHorizontal="4dp"
+            style="@style/AppButton.Tonal"
             app:backgroundTint="@color/red_500"
             android:textColor="@color/white"
-            android:layout_marginStart="8dp"/>
+            android:text="@string/delete"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/accessBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/xml_dialog_pages_deployment_detail_46"
-            app:backgroundTint="?attr/colorPrimary"
-            android:textColor="@color/white"
-            android:layout_marginStart="8dp"/>
+            android:layout_marginHorizontal="4dp"
+            style="@style/AppButton"
+            android:text="@string/xml_dialog_pages_deployment_detail_46"/>
 
+        <!-- 统一：关闭按钮使用填充背景 Filled Button，与日志/访问的 Filled 保持视觉一致。
+             避免 Outlined（白底描边）与其他"整面填充"按钮对比产生"颜色不统一"观感。 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/closeBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/ssl_mode_off"
-            android:layout_marginStart="8dp"/>
+            android:layout_marginHorizontal="4dp"
+            style="@style/AppButton"
+            android:text="@string/ssl_mode_off"/>
 
     </LinearLayout>
 

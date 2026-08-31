@@ -18,6 +18,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.muort.upworker.R
@@ -214,7 +215,7 @@ class GatewayRulesFragment : Fragment() {
         val dnsMatchTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.dnsMatchTypeGroup)
         val dnsExpressionLayout = dialogView.findViewById<View>(R.id.dnsExpressionLayout)
         val dnsListSelector = dialogView.findViewById<TextView>(R.id.dnsListSelector)
-        val dnsListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.dnsListNotInCheckbox)
+        val dnsListNotInCheckbox = dialogView.findViewById<MaterialCheckBox>(R.id.dnsListNotInCheckbox)
         val selectedDnsListIds = mutableSetOf<String>()
         dnsListSelector.tag = selectedDnsListIds
 
@@ -222,8 +223,8 @@ class GatewayRulesFragment : Fragment() {
         val httpExpressionLayout = dialogView.findViewById<View>(R.id.httpExpressionLayout)
         val httpDomainListSelector = dialogView.findViewById<TextView>(R.id.httpDomainListSelector)
         val httpUrlListSelector = dialogView.findViewById<TextView>(R.id.httpUrlListSelector)
-        val httpDomainListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.httpDomainListNotInCheckbox)
-        val httpUrlListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.httpUrlListNotInCheckbox)
+        val httpDomainListNotInCheckbox = dialogView.findViewById<MaterialCheckBox>(R.id.httpDomainListNotInCheckbox)
+        val httpUrlListNotInCheckbox = dialogView.findViewById<MaterialCheckBox>(R.id.httpUrlListNotInCheckbox)
         val selectedHttpDomainListIds = mutableSetOf<String>()
         httpDomainListSelector.tag = selectedHttpDomainListIds
         val selectedHttpUrlListIds = mutableSetOf<String>()
@@ -232,7 +233,7 @@ class GatewayRulesFragment : Fragment() {
         val l4MatchTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.l4MatchTypeGroup)
         val l4ExpressionLayout = dialogView.findViewById<View>(R.id.l4ExpressionLayout)
         val l4ListSelector = dialogView.findViewById<TextView>(R.id.l4ListSelector)
-        val l4ListNotInCheckbox = dialogView.findViewById<android.widget.CheckBox>(R.id.l4ListNotInCheckbox)
+        val l4ListNotInCheckbox = dialogView.findViewById<MaterialCheckBox>(R.id.l4ListNotInCheckbox)
         val selectedL4ListIds = mutableSetOf<String>()
         l4ListSelector.tag = selectedL4ListIds
 
@@ -562,7 +563,7 @@ class GatewayRulesFragment : Fragment() {
                             selectedDnsListIds.clear()
                             selectedDnsListIds.addAll(listIds)
                             updateListSelectorText(dnsListSelector, selectedDnsListIds, editDomainLists)
-                            dialogView.findViewById<android.widget.CheckBox>(R.id.dnsListNotInCheckbox)?.isChecked = isNotInList(traffic)
+                            dialogView.findViewById<MaterialCheckBox>(R.id.dnsListNotInCheckbox)?.isChecked = isNotInList(traffic)
                             dnsListNotInCheckbox.visibility = View.VISIBLE
                         } else {
                             dialogView.findViewById<android.widget.RadioGroup>(R.id.dnsMatchTypeGroup)?.check(R.id.dnsMatchSingle)
@@ -582,7 +583,7 @@ class GatewayRulesFragment : Fragment() {
                                 selectedHttpUrlListIds.clear()
                                 selectedHttpUrlListIds.addAll(listIds)
                                 updateListSelectorText(httpUrlListSelector, selectedHttpUrlListIds, editUrlLists)
-                                dialogView.findViewById<android.widget.CheckBox>(R.id.httpUrlListNotInCheckbox)?.isChecked = isNotInList(traffic)
+                                dialogView.findViewById<MaterialCheckBox>(R.id.httpUrlListNotInCheckbox)?.isChecked = isNotInList(traffic)
                                 httpUrlListNotInCheckbox.visibility = View.VISIBLE
                             } else {
                                 dialogView.findViewById<android.widget.RadioGroup>(R.id.httpMatchTypeGroup)?.check(R.id.httpMatchDomainList)
@@ -590,7 +591,7 @@ class GatewayRulesFragment : Fragment() {
                                 selectedHttpDomainListIds.clear()
                                 selectedHttpDomainListIds.addAll(listIds)
                                 updateListSelectorText(httpDomainListSelector, selectedHttpDomainListIds, editDomainLists)
-                                dialogView.findViewById<android.widget.CheckBox>(R.id.httpDomainListNotInCheckbox)?.isChecked = isNotInList(traffic)
+                                dialogView.findViewById<MaterialCheckBox>(R.id.httpDomainListNotInCheckbox)?.isChecked = isNotInList(traffic)
                                 httpDomainListNotInCheckbox.visibility = View.VISIBLE
                             }
                         } else {
@@ -609,7 +610,7 @@ class GatewayRulesFragment : Fragment() {
                             selectedL4ListIds.clear()
                             selectedL4ListIds.addAll(listIds)
                             updateListSelectorText(l4ListSelector, selectedL4ListIds, editIpLists)
-                            dialogView.findViewById<android.widget.CheckBox>(R.id.l4ListNotInCheckbox)?.isChecked = isNotInList(traffic)
+                            dialogView.findViewById<MaterialCheckBox>(R.id.l4ListNotInCheckbox)?.isChecked = isNotInList(traffic)
                             l4ListNotInCheckbox.visibility = View.VISIBLE
                         } else {
                             dialogView.findViewById<android.widget.RadioGroup>(R.id.l4MatchTypeGroup)?.check(R.id.l4MatchSingle)
@@ -752,7 +753,7 @@ class GatewayRulesFragment : Fragment() {
             "dns" -> {
                 val dnsMatchTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.dnsMatchTypeGroup)
                 if (dnsMatchTypeGroup?.checkedRadioButtonId == R.id.dnsMatchList) {
-                    val notIn = dialogView.findViewById<android.widget.CheckBox>(R.id.dnsListNotInCheckbox)?.isChecked == true
+                    val notIn = dialogView.findViewById<MaterialCheckBox>(R.id.dnsListNotInCheckbox)?.isChecked == true
                     buildListExpression("dns.fqdn", getSelectedIds(dialogView, R.id.dnsListSelector), notIn)
                 } else {
                     val expr = dialogView.findViewById<TextInputEditText>(R.id.dnsExpressionInput)?.text?.toString()
@@ -763,11 +764,11 @@ class GatewayRulesFragment : Fragment() {
                 val httpMatchTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.httpMatchTypeGroup)
                 when (httpMatchTypeGroup?.checkedRadioButtonId) {
                     R.id.httpMatchDomainList -> {
-                        val notIn = dialogView.findViewById<android.widget.CheckBox>(R.id.httpDomainListNotInCheckbox)?.isChecked == true
+                        val notIn = dialogView.findViewById<MaterialCheckBox>(R.id.httpDomainListNotInCheckbox)?.isChecked == true
                         buildListExpression("http.request.host", getSelectedIds(dialogView, R.id.httpDomainListSelector), notIn)
                     }
                     R.id.httpMatchUrlList -> {
-                        val notIn = dialogView.findViewById<android.widget.CheckBox>(R.id.httpUrlListNotInCheckbox)?.isChecked == true
+                        val notIn = dialogView.findViewById<MaterialCheckBox>(R.id.httpUrlListNotInCheckbox)?.isChecked == true
                         buildListExpression("http.request.uri", getSelectedIds(dialogView, R.id.httpUrlListSelector), notIn)
                     }
                     else -> {
@@ -779,7 +780,7 @@ class GatewayRulesFragment : Fragment() {
             "l4" -> {
                 val l4MatchTypeGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.l4MatchTypeGroup)
                 if (l4MatchTypeGroup?.checkedRadioButtonId == R.id.l4MatchList) {
-                    val notIn = dialogView.findViewById<android.widget.CheckBox>(R.id.l4ListNotInCheckbox)?.isChecked == true
+                    val notIn = dialogView.findViewById<MaterialCheckBox>(R.id.l4ListNotInCheckbox)?.isChecked == true
                     buildListExpression("net.dst.ip", getSelectedIds(dialogView, R.id.l4ListSelector), notIn)
                 } else {
                     val expr = dialogView.findViewById<TextInputEditText>(R.id.l4ExpressionInput)?.text?.toString()

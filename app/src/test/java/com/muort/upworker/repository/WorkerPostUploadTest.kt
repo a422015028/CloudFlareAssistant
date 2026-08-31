@@ -113,45 +113,65 @@ class WorkerPostUploadTest {
     }
 
     // =========================================================================
-    // RED 1: applyObservability — should PATCH /settings with observability JSON
+    // RED 1: applyObservability — should PATCH /script-settings with observability JSON
+    //         (script-level 4 fields endpoint, NOT versioned /settings multipart).
+    //         This is the only endpoint allowed to touch observability/logpush/tags/
+    //         tail_consumers when Worker Versions are enabled (otherwise 10214).
     // =========================================================================
     @Test
-    fun `applyObservability sends PATCH settings with observability body`() = runTest {
+    fun `applyObservability sends PATCH script-settings with observability body`() = runTest {
         coEvery {
-            mockApi.updateWorkerSettings(any(), any(), any(), any(), any(), any())
+            mockApi.updateWorkerScriptSettings(any(), any(), any(), any(), any(), any())
         } returns cfOk(fakeScript.copy(size = 2048L))
 
         val result = repository.applyObservability(testAccount, scriptName)
 
         assertTrue("result=$result", result is WorkerPostActionStage.Success)
         coVerify(exactly = 1) {
-            mockApi.updateWorkerSettings(
+            mockApi.updateWorkerScriptSettings(
                 token = "Bearer tok_xyz",
                 email = null,
                 apiKey = null,
                 accountId = "acct_123",
                 scriptName = scriptName,
-                settings = any()
+                body = any()
             )
         }
-        // Capture the settings JSON and confirm observability structure
+        // applyObservability must NOT touch versioned settings endpoint anymore
+        coVerify(exactly = 0) { mockApi.updateWorkerSettings(any(), any(), any(), any(), any(), any()) }
+        // Capture the script-settings JSON and confirm observability structure
         val slot = mutableListOf<okhttp3.RequestBody>()
         coVerify(exactly = 1) {
-            mockApi.updateWorkerSettings(any(), any(), any(), any(), any(), capture(slot))
+            mockApi.updateWorkerScriptSettings(any(), any(), any(), any(), any(), capture(slot))
         }
         val json = slot.first().readUtf8ForTest()
-        // Contains fields required by Cloudflare ScriptAndVersionSettings PATCH model
-        assertTrue("observability key missing in: $json", json.contains("observability"))
-        assertTrue("traces.enabled missing in: $json", json.contains("\"enabled\":true"))
-        assertTrue("head_sampling_rate missing in: $json", json.contains("\"head_sampling_rate\":1.0") || json.contains("\"head_sampling_rate\":1"))
-        assertTrue("logs.enabled missing in: $json", json.contains("\"logs\"") || json.contains("\"enabled\""))
+        val tree = gson.fromJson(json, com.google.gson.JsonObject::class.java)
+        // observability key must be the ONLY key present (patch semantics: omit = keep others)
+        assertEquals("script-settings PATCH body should only contain observability key",
+            1, tree.entrySet().size)
+        assertTrue("observability key missing in: $json", tree.has("observability"))
+        val obs = tree.getAsJsonObject("observability")
+        assertTrue("traces sub-tree must exist", obs.has("traces"))
+        assertTrue("logs sub-tree must exist", obs.has("logs"))
+        val traces = obs.getAsJsonObject("traces")
+        assertTrue("traces.enabled should default to true", traces.get("enabled").asBoolean)
+        assertEquals("traces.head_sampling_rate should default to 1.0",
+            1.0, traces.get("head_sampling_rate").asDouble, 1e-9)
+        assertTrue("traces.persist should default to true", traces.get("persist").asBoolean)
+        val logs = obs.getAsJsonObject("logs")
+        assertTrue("logs.enabled should default to true", logs.get("enabled").asBoolean)
+        assertTrue("logs.persist should default to true", logs.get("persist").asBoolean)
+        assertEquals("logs.head_sampling_rate should default to 1.0",
+            1.0, logs.get("head_sampling_rate").asDouble, 1e-9)
+        assertTrue("logs.invocation_logs should default to true",
+            logs.get("invocation_logs").asBoolean)
     }
 
     @Test
-    fun `applyObservability returns Failure with user-visible message on API error`() = runTest {
+    fun `applyObservability returns Failure with user-visible message on script-settings API error`() = runTest {
         coEvery {
-            mockApi.updateWorkerSettings(any(), any(), any(), any(), any(), any())
-        } returns cfError(400, "bad settings")
+            mockApi.updateWorkerScriptSettings(any(), any(), any(), any(), any(), any())
+        } returns cfError(400, "bad script-settings body")
 
         val result = repository.applyObservability(testAccount, scriptName)
         assertTrue("result=$result", result is WorkerPostActionStage.Failure)
@@ -263,8 +283,8 @@ class WorkerPostUploadTest {
     // =========================================================================
     @Test
     fun `afterUpload runs observability then subdomain then deployment despite failures`() = runTest {
-        // observability fails, subdomain OK, promote OK
-        coEvery { mockApi.updateWorkerSettings(any(), any(), any(), any(), any(), any()) } returns cfError(500, "settings broken")
+        // observability fails (now on /script-settings endpoint), subdomain OK, promote OK
+        coEvery { mockApi.updateWorkerScriptSettings(any(), any(), any(), any(), any(), any()) } returns cfError(500, "script-settings broken")
         coEvery { mockApi.enableWorkerSubdomain(any(), any(), any(), any(), any(), any()) } returns cfOk(mapOf("enabled" to true))
         // promotePercentageDeployment with versionId=null: no-op success (no HTTP)
 
@@ -288,8 +308,9 @@ class WorkerPostUploadTest {
         assertTrue("stage1=${result.stages[1]}", result.stages[1] is WorkerPostActionStage.Success)
         assertTrue("stage2=${result.stages[2]}", result.stages[2] is WorkerPostActionStage.Success)
 
-        // Network calls: observability PATCH, subdomain POST, deploy POST is skipped (no-ops for legacy)
-        coVerify(exactly = 1) { mockApi.updateWorkerSettings(any(), any(), any(), any(), any(), any()) }
+        // Network calls: observability PATCH /script-settings, subdomain POST, deploy POST is skipped (no-ops for legacy)
+        coVerify(exactly = 1) { mockApi.updateWorkerScriptSettings(any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { mockApi.updateWorkerSettings(any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 1) { mockApi.enableWorkerSubdomain(any(), any(), any(), any(), any(), any()) }
         coVerify(exactly = 0) { mockApi.createWorkerDeployment(any(), any(), any(), any(), any(), any()) }
 
@@ -402,6 +423,19 @@ class WorkerPostUploadTest {
         // --- Regression assertions (these should PASS both before and after) ---
         assertTrue("exports canary must be preserved to guard against 10021 regressions, raw=$raw",
             json.has("exports"))
+
+        // --- Script-level fields MUST be STRIPPED from versioned settings PATCH body ---
+        // These 4 keys only belong to the separate PATCH /script-settings (application/json)
+        // endpoint. Any presence in the versioned multipart body is a bug; on Workers with
+        // Versions enabled it triggers error 10214 "use the script-level settings API".
+        assertFalse("logpush MUST be stripped from versioned body, raw=$raw",
+            json.has("logpush"))
+        assertFalse("tail_consumers MUST be stripped from versioned body, raw=$raw",
+            json.has("tail_consumers"))
+        assertFalse("observability MUST be stripped from versioned body, raw=$raw",
+            json.has("observability"))
+        assertFalse("tags MUST be stripped from versioned body, raw=$raw",
+            json.has("tags"))
 
         val bindingsArr = json.getAsJsonArray("bindings")
         // 2 new KV + 1 kept D1 = 3 bindings total

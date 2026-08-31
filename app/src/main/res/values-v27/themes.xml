@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <!-- 仅在 API 27+ 生效的主题增量：补充 Material3 边缘到边缘所需的 3 个新 attrs，
+       避免在 minSdk=26 的 values/themes.xml 中声明而触发 NewApi lint 错误。 -->
+  <style name="Base.AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+    <item name="android:navigationBarDividerColor">@android:color/transparent</item>
+    <item name="android:windowLightNavigationBar">true</item>
+    <item name="android:windowLayoutInDisplayCutoutMode">default</item>
+  </style>
+</resources>

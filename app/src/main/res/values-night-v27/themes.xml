@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <!-- 夜间模式 + API 27+：windowLightNavigationBar=false（白色导航图标）-->
+  <style name="Base.AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+    <item name="android:navigationBarDividerColor">@android:color/transparent</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowLayoutInDisplayCutoutMode">default</item>
+  </style>
+</resources>
