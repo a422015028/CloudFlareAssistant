@@ -3,6 +3,24 @@
   <style name="Base.AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
     <!-- Customize your theme here. -->
     <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+    <!-- 全局文本/按钮样式：英文下文字更长，统一兜底避免溢出卡片/隐藏文字 -->
+    <item name="android:textViewStyle">@style/AppTextView</item>
+    <item name="android:buttonStyle">@style/AppButton</item>
+    <item name="materialButtonStyle">@style/AppMaterialButton</item>
+    <item name="chipStyle">@style/AppChip</item>
+
+    <!-- 全局对话框主题：统一使用 Material You (Material3) AlertDialog 样式 -->
+    <item name="materialAlertDialogTheme">@style/AppMaterialAlertDialog</item>
+    <item name="alertDialogTheme">@style/AppMaterialAlertDialog</item>
+  </style>
+
+  <!-- ====================================================================== -->
+  <!-- Material You AlertDialog 全局样式：继承 Material3 MaterialAlertDialog，
+       确保所有对话框统一圆角、颜色、排版，跟随动态取色。 -->
+  <!-- ====================================================================== -->
+  <style name="AppMaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+    <item name="android:windowIsFloating">true</item>
   </style>
 
   <style name="AppTheme" parent="Base.AppTheme" />

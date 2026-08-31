@@ -1,6 +1,7 @@
 package com.muort.upworker.feature.zone
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,6 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import android.app.AlertDialog
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.DnsRecord
@@ -586,7 +586,7 @@ class SnippetRuleDialog : DialogFragment() {
             .setNegativeButton(R.string.cancel, null)
             .show()
         dismiss()
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener { btn ->
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE)?.setOnClickListener { btn ->
             if (!dBinding.radioCreate.isChecked) { dialog.dismiss(); return@setOnClickListener }
             val type = dBinding.recordTypeInput.text.toString().trim().uppercase()
             val name = dBinding.recordNameInput.text?.toString()?.trim() ?: ""

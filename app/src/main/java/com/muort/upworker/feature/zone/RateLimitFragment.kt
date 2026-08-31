@@ -1,5 +1,6 @@
 package com.muort.upworker.feature.zone
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -269,7 +270,7 @@ class RateLimitFragment : BaseZoneFeatureFragment() {
         dialog.show()
 
         // 保存时禁用按钮防止重复提交
-        val saveButton = dialog.getButton(android.app.Dialog.BUTTON_POSITIVE)
+        val saveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
                 saveButton.isEnabled = !state.isSaving

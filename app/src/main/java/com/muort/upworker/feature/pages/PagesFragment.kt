@@ -1,6 +1,7 @@
 package com.muort.upworker.feature.pages
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
@@ -120,7 +121,7 @@ class PagesFragment : Fragment() {
     private val selectedProjects = mutableSetOf<String>()
     
     // 部署记录对话框引用
-    private var deploymentsDialog: android.app.Dialog? = null
+    private var deploymentsDialog: Dialog? = null
     
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {

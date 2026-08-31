@@ -1,6 +1,7 @@
 package com.muort.upworker.feature.worker
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.provider.OpenableColumns
@@ -134,7 +135,7 @@ class WorkerFragment : Fragment() {
     private val selectedScripts = mutableSetOf<String>()
     
     // 版本历史对话框引用
-    private var historyDialog: android.app.Dialog? = null
+    private var historyDialog: Dialog? = null
     
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -2098,7 +2099,7 @@ class WorkerFragment : Fragment() {
             .show()
     }
 
-    private var triggersDialog: android.app.Dialog? = null
+    private var triggersDialog: Dialog? = null
 
     private fun showWorkerLogs(script: WorkerScript) {
         val account = accountViewModel.defaultAccount.value

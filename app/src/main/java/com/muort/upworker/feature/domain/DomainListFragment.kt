@@ -3,6 +3,7 @@ package com.muort.upworker.feature.domain
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AlertDialog
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.util.AnimationHelper
@@ -102,7 +104,7 @@ class DomainListFragment : Fragment() {
     }
 
     private var addDialogBinding: DialogAddDomainBinding? = null
-    private var addDialog: androidx.appcompat.app.AlertDialog? = null
+    private var addDialog: AlertDialog? = null
 
     private fun showAddDomainDialog() {
         domainListViewModel.resetAddState()
@@ -115,7 +117,7 @@ class DomainListFragment : Fragment() {
             .create()
 
         addDialog!!.setOnShowListener {
-            addDialog!!.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+            addDialog!!.getButton(DialogInterface.BUTTON_POSITIVE)
                 .setOnClickListener {
                     val domain = addDialogBinding!!.domainInput.text.toString().trim().lowercase()
                     if (isValidDomain(domain)) {
@@ -177,7 +179,7 @@ class DomainListFragment : Fragment() {
         }
 
         // 切换确定按钮文本
-        addDialog?.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.let { btn ->
+        addDialog?.getButton(DialogInterface.BUTTON_POSITIVE)?.let { btn ->
             btn.text = getString(R.string.done)
             btn.setOnClickListener {
                 addDialog?.dismiss()

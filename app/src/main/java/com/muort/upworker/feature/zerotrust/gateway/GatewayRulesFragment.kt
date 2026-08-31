@@ -380,7 +380,7 @@ class GatewayRulesFragment : Fragment() {
         ) {
             val items = lists.map { it.name }.toTypedArray()
             val checkedItems = BooleanArray(lists.size) { i -> selectedIds.contains(lists[i].id) }
-            android.app.AlertDialog.Builder(requireContext())
+            MaterialAlertDialogBuilder(requireContext())
                 .setTitle(title)
                 .setMultiChoiceItems(items, checkedItems) { _, which, isChecked ->
                     if (isChecked) selectedIds.add(lists[which].id)

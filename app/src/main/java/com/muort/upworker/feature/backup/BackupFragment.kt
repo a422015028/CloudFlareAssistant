@@ -1,5 +1,6 @@
 package com.muort.upworker.feature.backup
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -549,7 +550,7 @@ class BackupFragment : Fragment() {
 
         dialog.show()
 
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE)?.setOnClickListener {
             val password = editText.text?.toString() ?: ""
             if (password.isEmpty() && !allowEmpty) {
                 editText.error = getString(R.string.backup_password_required_hint)
