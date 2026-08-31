@@ -614,6 +614,7 @@
     <string name="dialog_loading_ellipsis">Loading…</string>
     <string name="dialog_preparing">Preparing…</string>
     <string name="dialog_updating">Updating…</string>
+    <string name="dialog_error_title">Operation failed</string>
     <string name="dialog_close">Close</string>
     <string name="dialog_back">Back</string>
     <string name="dialog_more">More</string>
@@ -805,6 +806,49 @@
     <string name="worker_custom_domain_delete_failed">Failed to delete custom domain: %1$s</string>
     <string name="worker_custom_domain_updated">Custom domain updated</string>
     <string name="worker_custom_domain_update_failed">Failed to update custom domain: %1$s</string>
+    <string name="worker_add_custom_domain_title_template">Add custom domain for %1$s</string>
+    <string name="worker_adding_custom_domain">Adding custom domain…</string>
+    <string name="worker_custom_domain_add_failed_title">Failed to add custom domain</string>
+    <string name="worker_domain_list_title_template">%1$s - Domains</string>
+    <string name="worker_domain_subdomain_label">Subdomain</string>
+    <string name="worker_domain_custom_label">Custom domain</string>
+    <string name="worker_domain_service_target">Bound script: %1$s</string>
+    <string name="worker_domain_subdomain_copied">Subdomain copied to clipboard</string>
+    <string name="worker_domain_custom_copied">Custom domain copied to clipboard</string>
+    <string name="worker_domain_no_custom">No custom domains bound to this script yet</string>
+    <!-- Worker routes (Row 3 buttons) -->
+    <string name="worker_view_routes_title">View Routes</string>
+    <string name="worker_add_route_title_template">Add route for %1$s</string>
+    <string name="worker_route_select_zone">Select Zone</string>
+    <string name="worker_route_zone_loading">Loading…</string>
+    <string name="worker_route_zone_empty">No zones available</string>
+    <string name="worker_route_zone_required">Please select a Zone first</string>
+    <string name="worker_route_pattern_required">Please enter the route pattern</string>
+    <string name="worker_route_zone_load_failed">Failed to load zones: %1$s</string>
+    <string name="worker_adding_route">Adding route…</string>
+    <string name="worker_route_create_failed_title">Failed to add route</string>
+    <string name="worker_route_list_title_template">%1$s - Routes</string>
+    <string name="worker_route_item_label">Route</string>
+    <string name="worker_route_zone_info">Zone: %1$s</string>
+    <string name="worker_route_copied">Route pattern copied to clipboard</string>
+    <string name="worker_route_delete_missing_zone">Cannot locate the zone this route belongs to; deletion failed.</string>
+    <string name="worker_route_no_custom">No routes configured for this script yet.</string>
+    <!-- Worker script card row 3 "Feature Toggles" dialog: subdomain / observability / logs persistence -->
+    <string name="worker_feature_toggles_title">Feature Toggles</string>
+    <string name="worker_feature_toggles_dialog_title_template">%1$s · Feature Toggles</string>
+    <string name="worker_feature_subdomain_enable_title">Enable Custom Subdomain</string>
+    <string name="worker_feature_subdomain_enable_summary">Expose your Worker on a *.workers.dev subdomain</string>
+    <string name="worker_feature_observability_title">Observability</string>
+    <string name="worker_feature_observability_summary">When enabled, shows live requests, errors, latency distribution, traces and more.</string>
+    <string name="worker_feature_logs_persist_title">Logs Persistence</string>
+    <string name="worker_feature_logs_persist_summary">Persist Worker logs on the Observability page (30-day retention by default, extendable on Enterprise).</string>
+    <string name="worker_feature_saving">Saving settings…</string>
+    <string name="worker_feature_save_success">Feature toggles updated</string>
+    <string name="worker_feature_save_failed">Update failed: %1$s</string>
+    <string name="worker_settings_fetch_failed_format">Failed to fetch script settings: %1$s</string>
+    <string name="worker_settings_update_failed_format">Failed to update script settings: %1$s</string>
+    <string name="worker_subdomain_status_fetch_failed_format">Failed to fetch subdomain state: %1$s</string>
+    <string name="worker_subdomain_update_failed_format">Failed to update subdomain toggle: %1$s</string>
     <string name="worker_versions_load_failed">Failed to get version history: %1$s</string>
     <string name="worker_rollback_success">Rollback successful</string>
     <string name="worker_rollback_failed">Rollback failed: %1$s</string>
@@ -902,8 +946,6 @@
     <string name="r2_custom_domain_bucket">Custom Domains - %1$s</string>
     <string name="r2_no_custom_domains">No custom domains yet</string>
     <string name="r2_add_custom_domain_title">Add Custom Domain</string>
-    <string name="r2_add_custom_domain_message">Enter the domain to bind:</string>
-    <string name="r2_please_enter_domain">Please enter domain</string>
     <string name="r2_delete_custom_domain_title">Delete Custom Domain</string>
     <string name="r2_delete_custom_domain_message">Delete domain \"%1$s\"?</string>
 

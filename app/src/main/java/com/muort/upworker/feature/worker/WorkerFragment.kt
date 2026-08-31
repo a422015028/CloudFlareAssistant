@@ -56,6 +56,7 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.WorkerVersion
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
@@ -123,6 +124,12 @@ class WorkerFragment : Fragment() {
     
     @Inject
     lateinit var accountRepository: AccountRepository
+
+    @Inject
+    lateinit var dnsRepository: com.muort.upworker.core.repository.DnsRepository
+
+    @Inject
+    lateinit var zoneRepository: com.muort.upworker.core.repository.ZoneRepository
     
     private var selectedFile: File? = null
     private lateinit var scriptsAdapter: WorkerScriptsAdapter
@@ -237,6 +244,31 @@ class WorkerFragment : Fragment() {
             },
             onRuntimeSettingsClick = { script ->
                 showWorkerRuntimeSettingsDialog(script)
+            },
+            onAddCustomDomainClick = { script ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showAddWorkerCustomDomainDialog(account, script)
+                }
+            },
+            onViewDomainsClick = { script ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showWorkerDomainsDialog(account, script)
+                }
+            },
+            onAddRouteClick = { script ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showAddWorkerRouteDialog(account, script)
+                }
+            },
+            onViewRoutesClick = { script ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showWorkerRoutesDialog(account, script)
+                }
+            },
+            onToggleFeaturesClick = { script ->
+                accountViewModel.defaultAccount.value?.let { account ->
+                    showWorkerFeatureTogglesDialog(account, script)
+                }
             },
             onSelectionModeClick = { script, isSelected ->
                 if (isSelected) {
@@ -2839,7 +2871,921 @@ class WorkerFragment : Fragment() {
             .setPositiveButton(R.string.dialog_close, null)
             .show()
     }
-    
+
+    // ==================== Worker 自定义域 ====================
+
+    private fun showAddWorkerCustomDomainDialog(account: Account, script: WorkerScript) {
+        val context = requireContext()
+        val container = android.widget.LinearLayout(context).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(
+                (context.resources.displayMetrics.density * 24).toInt(),
+                (context.resources.displayMetrics.density * 16).toInt(),
+                (context.resources.displayMetrics.density * 24).toInt(),
+                (context.resources.displayMetrics.density * 8).toInt()
+            )
+        }
+        val density = context.resources.displayMetrics.density
+
+        // ==================== Zone Exposed Dropdown Menu（与 Worker 添加路由保持同一套样式） ====================
+        val zoneLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
+            hint = getString(R.string.worker_route_select_zone)
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            endIconMode = com.google.android.material.textfield.TextInputLayout.END_ICON_DROPDOWN_MENU
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = (density * 8).toInt() }
+        }
+        val zoneAuto = com.google.android.material.textfield.MaterialAutoCompleteTextView(zoneLayout.context).apply {
+            keyListener = null
+            isCursorVisible = false
+            val padStart = (density * 16).toInt()
+            val padTop   = (density * 14).toInt()
+            val padEnd   = (density * 56).toInt()
+            val padBottom = (density * 14).toInt()
+            setPaddingRelative(padStart, padTop, padEnd, padBottom)
+            minHeight = (density * 52).toInt()
+        }
+        zoneLayout.addView(zoneAuto)
+        container.addView(zoneLayout)
+
+        val inputLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
+            hint = getString(R.string.pages_domain_input_hint)
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+        }
+        val editText = com.google.android.material.textfield.TextInputEditText(inputLayout.context).apply {
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI
+            val padStart = (density * 16).toInt()
+            val padTop   = (density * 14).toInt()
+            val padEnd   = (density * 16).toInt()
+            val padBottom = (density * 14).toInt()
+            setPaddingRelative(padStart, padTop, padEnd, padBottom)
+            minHeight = (density * 52).toInt()
+        }
+        inputLayout.addView(editText)
+        container.addView(inputLayout)
+
+        val zones = mutableListOf<com.muort.upworker.core.model.Zone>()
+
+        val dialog = MaterialAlertDialogBuilder(context)
+            .setTitle(getString(R.string.worker_add_custom_domain_title_template, script.id))
+            .setView(container)
+            .setPositiveButton(R.string.add, null)
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+
+        dialog.setOnShowListener { iface ->
+            val dlg = iface as androidx.appcompat.app.AlertDialog
+
+            // 打开即加载 zones
+            viewLifecycleOwner.lifecycleScope.launch {
+                val loadingAdapter = ArrayAdapter<String>(
+                    context,
+                    android.R.layout.simple_dropdown_item_1line,
+                    listOf(getString(R.string.worker_route_zone_loading))
+                )
+                zoneAuto.setAdapter(loadingAdapter)
+                when (val res = zoneRepository.fetchAndSaveZones(account)) {
+                    is com.muort.upworker.core.model.Resource.Success -> {
+                        zones.clear()
+                        val sorted = res.data.sortedBy { it.name }
+                        zones.addAll(sorted)
+                        if (zones.isEmpty()) {
+                            val emptyAdapter = ArrayAdapter<String>(
+                                context,
+                                android.R.layout.simple_dropdown_item_1line,
+                                listOf(getString(R.string.worker_route_zone_empty))
+                            )
+                            zoneAuto.setAdapter(emptyAdapter)
+                        } else {
+                            val adapter = ArrayAdapter<String>(
+                                context,
+                                android.R.layout.simple_spinner_dropdown_item,
+                                zones.map { it.name }
+                            )
+                            zoneAuto.setAdapter(adapter)
+                            zoneAuto.setOnItemClickListener { _, _, position, _ ->
+                                if (position in zones.indices) {
+                                    zoneLayout.error = null
+                                    // 添加域名 → 自动填入「.+域名」格式
+                                    val hostname = "*.${zones[position].name}"
+                                    editText.setText(hostname)
+                                    editText.requestFocus()
+                                    editText.setSelection(hostname.length)
+                                }
+                            }
+                        }
+                    }
+                    is com.muort.upworker.core.model.Resource.Error -> {
+                        requireContext().showToast(
+                            getString(R.string.worker_route_zone_load_failed, res.message)
+                        )
+                    }
+                    else -> {}
+                }
+            }
+
+            dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val hostname = editText.text?.toString()?.trim()?.lowercase().orEmpty()
+                if (hostname.isEmpty()) {
+                    inputLayout.error = getString(R.string.pages_domain_cannot_be_empty)
+                    editText.requestFocus()
+                    return@setOnClickListener
+                }
+                inputLayout.error = null
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.dialog_loading_ellipsis)
+                        .setMessage(R.string.worker_adding_custom_domain)
+                        .setCancelable(false)
+                        .create()
+                    loadingDialog.show()
+
+                    when (val addResult = workerRepository.addCustomDomain(account, hostname, script.id)) {
+                        is com.muort.upworker.core.model.Resource.Success -> {
+                            loadingDialog.dismiss()
+                            requireContext().showToast(getString(R.string.worker_custom_domain_added_success))
+                            dlg.dismiss()
+                        }
+                        is com.muort.upworker.core.model.Resource.Error -> {
+                            loadingDialog.dismiss()
+                            MaterialAlertDialogBuilder(requireContext())
+                                .setTitle(R.string.worker_custom_domain_add_failed_title)
+                                .setMessage(addResult.message)
+                                .setPositiveButton(R.string.confirm, null)
+                                .show()
+                        }
+                        else -> {
+                            loadingDialog.dismiss()
+                        }
+                    }
+                }
+            }
+        }
+        dialog.show()
+    }
+
+    // ==================== Worker 卡片功能开关：workers.dev 子域名 / 可观测性 / Logs 持久化 ====================
+
+    /**
+     * 动态构造一个三行开关对话框（截图样式）：
+     *   标题：{scriptId} · 功能开关
+     *   每行：[大标题 TextView] + [说明文字 TextView] + [MaterialSwitch 靠右]
+     *   底部：取消 + 保存
+     * 打开时并行调用 getScriptSettings + getSubdomainStatus 读取当前开关，
+     * 用户点保存时，把三个开关中改动的项逐条调 API 写回。
+     */
+    private fun showWorkerFeatureTogglesDialog(account: Account, script: WorkerScript) {
+        val context = requireContext()
+        val density = context.resources.displayMetrics.density
+        val dp16 = (density * 16).toInt()
+        val dp8  = (density * 8).toInt()
+        val dp4  = (density * 4).toInt()
+
+        // 顶层 ScrollView 包裹，以防小屏装不下 3 行说明
+        val scroll = android.widget.ScrollView(context).apply {
+            setPadding(dp16, dp8, dp16, dp4)
+            isFillViewport = true
+        }
+        val container = android.widget.LinearLayout(context).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            layoutParams = android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        scroll.addView(container)
+
+        fun buildRow(
+            titleId: Int,
+            summaryId: Int
+        ): Triple<android.widget.LinearLayout, com.google.android.material.materialswitch.MaterialSwitch, android.widget.TextView> {
+            val row = android.widget.LinearLayout(context).apply {
+                orientation = android.widget.LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                setPadding(dp4, dp8, dp4, dp8)
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { bottomMargin = dp4 }
+            }
+            val textCol = android.widget.LinearLayout(context).apply {
+                orientation = android.widget.LinearLayout.VERTICAL
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    0,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
+            }
+            val titleTv = android.widget.TextView(context).apply {
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyLarge)
+                setText(titleId)
+            }
+            val summaryTv = android.widget.TextView(context).apply {
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
+                val tv = android.util.TypedValue()
+                context.theme.resolveAttribute(android.R.attr.textColorSecondary, tv, true)
+                setTextColor(if (tv.resourceId != 0) androidx.core.content.ContextCompat.getColor(context, tv.resourceId) else tv.data)
+                setText(summaryId)
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp4 }
+            }
+            textCol.addView(titleTv)
+            textCol.addView(summaryTv)
+            val switch = com.google.android.material.materialswitch.MaterialSwitch(context).apply {
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = dp8 }
+                isEnabled = false   // 加载完再启用
+            }
+            row.addView(textCol)
+            row.addView(switch)
+            container.addView(row)
+            return Triple(row, switch, titleTv)
+        }
+
+        val (_, subdomainSwitch, _)    = buildRow(
+            R.string.worker_feature_subdomain_enable_title,
+            R.string.worker_feature_subdomain_enable_summary
+        )
+        val (_, observabilitySwitch, _) = buildRow(
+            R.string.worker_feature_observability_title,
+            R.string.worker_feature_observability_summary
+        )
+        val (_, logsPersistSwitch, _)   = buildRow(
+            R.string.worker_feature_logs_persist_title,
+            R.string.worker_feature_logs_persist_summary
+        )
+
+        // 记录初始值用来判断是否变动
+        var initialSubdomainEnabled = false
+        var initialObservability    = false
+        var initialLogsPersist      = false
+        // 脚本设置原始 JSON（写回时需要把 baseline 的 destinations / invocation_logs 等完整带上）
+        var settingsRaw: Map<String, Any> = emptyMap()
+
+        val dialog = MaterialAlertDialogBuilder(context)
+            .setTitle(getString(R.string.worker_feature_toggles_dialog_title_template, script.id))
+            .setView(scroll)
+            .setPositiveButton(R.string.save, null)
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+
+        // 打开即加载
+        dialog.setOnShowListener { iface ->
+            val dlg = iface as androidx.appcompat.app.AlertDialog
+            val saveBtn = dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+            saveBtn.isEnabled = false
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                // 并行发起两次 GET
+                val settingsDeferred = async { workerRepository.getScriptSettings(account, script.id) }
+                val subdomainDeferred = async { workerRepository.getSubdomainStatus(account, script.id) }
+
+                val settingsResult = settingsDeferred.await()
+                val subdomainResult = subdomainDeferred.await()
+
+                var hasError = false
+
+                when (settingsResult) {
+                    is com.muort.upworker.core.model.Resource.Success -> {
+                        initialObservability = settingsResult.data.observabilityEnabled
+                        initialLogsPersist   = settingsResult.data.logsPersist
+                        observabilitySwitch.isChecked = initialObservability
+                        logsPersistSwitch.isChecked     = initialLogsPersist
+                        settingsRaw = settingsResult.data.raw
+                    }
+                    is com.muort.upworker.core.model.Resource.Error -> {
+                        hasError = true
+                        MaterialAlertDialogBuilder(context)
+                            .setTitle(R.string.dialog_error_title)
+                            .setMessage(settingsResult.message)
+                            .setPositiveButton(R.string.confirm) { _, _ -> dlg.dismiss() }
+                            .setOnDismissListener { dlg.dismiss() }
+                            .show()
+                    }
+                    else -> {}
+                }
+
+                if (!hasError) {
+                    when (subdomainResult) {
+                        is com.muort.upworker.core.model.Resource.Success -> {
+                            initialSubdomainEnabled = subdomainResult.data.enabled
+                            subdomainSwitch.isChecked = initialSubdomainEnabled
+                        }
+                        is com.muort.upworker.core.model.Resource.Error -> {
+                            hasError = true
+                            MaterialAlertDialogBuilder(context)
+                                .setTitle(R.string.dialog_error_title)
+                                .setMessage(subdomainResult.message)
+                                .setPositiveButton(R.string.confirm) { _, _ -> dlg.dismiss() }
+                                .setOnDismissListener { dlg.dismiss() }
+                                .show()
+                        }
+                        else -> {}
+                    }
+                }
+
+                if (!hasError) {
+                    subdomainSwitch.isEnabled     = true
+                    observabilitySwitch.isEnabled = true
+                    logsPersistSwitch.isEnabled   = true
+                    saveBtn.isEnabled             = true
+                }
+            }
+
+            saveBtn.setOnClickListener {
+                val newSubdomainEnabled = subdomainSwitch.isChecked
+                val newObservability    = observabilitySwitch.isChecked
+                val newLogsPersist      = logsPersistSwitch.isChecked
+
+                val anyChanged = (newSubdomainEnabled != initialSubdomainEnabled)
+                    .or(newObservability != initialObservability)
+                    .or(newLogsPersist      != initialLogsPersist)
+
+                if (!anyChanged) {
+                    dlg.dismiss()
+                    return@setOnClickListener
+                }
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val loading = MaterialAlertDialogBuilder(context)
+                        .setTitle(R.string.dialog_loading_ellipsis)
+                        .setMessage(R.string.worker_feature_saving)
+                        .setCancelable(false)
+                        .create()
+                    loading.show()
+
+                    // 任何一项改了就发对应的 API，先脚本设置（observability+logs persist），再子域名
+                    var scriptSettingsSucceeded = true
+                    var subdomainSucceeded = true
+                    var errorMessage: String? = null
+
+                    if (newObservability != initialObservability || newLogsPersist != initialLogsPersist) {
+                        when (val r = workerRepository.patchScriptSettings(
+                            account = account,
+                            scriptName = script.id,
+                            observabilityEnabled = newObservability,
+                            logsPersist = newLogsPersist,
+                            baselineRaw = settingsRaw
+                        )) {
+                            is com.muort.upworker.core.model.Resource.Success -> {
+                                scriptSettingsSucceeded = true
+                            }
+                            is com.muort.upworker.core.model.Resource.Error -> {
+                                scriptSettingsSucceeded = false
+                                errorMessage = r.message
+                            }
+                            else -> {}
+                        }
+                    }
+
+                    if (scriptSettingsSucceeded && newSubdomainEnabled != initialSubdomainEnabled) {
+                        when (val r = workerRepository.updateSubdomainStatus(
+                            account = account,
+                            scriptName = script.id,
+                            enabled = newSubdomainEnabled
+                        )) {
+                            is com.muort.upworker.core.model.Resource.Success -> {
+                                subdomainSucceeded = true
+                            }
+                            is com.muort.upworker.core.model.Resource.Error -> {
+                                subdomainSucceeded = false
+                                errorMessage = r.message
+                            }
+                            else -> {}
+                        }
+                    }
+
+                    loading.dismiss()
+                    if (scriptSettingsSucceeded && subdomainSucceeded) {
+                        requireContext().showToast(getString(R.string.worker_feature_save_success))
+                        dlg.dismiss()
+                    } else {
+                        MaterialAlertDialogBuilder(context)
+                            .setTitle(R.string.dialog_error_title)
+                            .setMessage(getString(R.string.worker_feature_save_failed, errorMessage.orEmpty()))
+                            .setPositiveButton(R.string.confirm, null)
+                            .show()
+                    }
+                }
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun showWorkerDomainsDialog(account: Account, script: WorkerScript) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_pages_domains, null)
+        val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
+        val loadingProgress = dialogView.findViewById<android.widget.ProgressBar>(R.id.loadingProgress)
+        val emptyText = dialogView.findViewById<android.widget.TextView>(R.id.emptyText)
+        val domainsRecyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.domainsRecyclerView)
+        val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
+
+        titleText.text = getString(R.string.worker_domain_list_title_template, script.id)
+        emptyText.text = getString(R.string.worker_domain_no_custom)
+        loadingProgress.visibility = android.view.View.VISIBLE
+        domainsRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        closeBtn.setOnClickListener { dialog.dismiss() }
+
+        fun loadDomains() {
+            loadingProgress.visibility = android.view.View.VISIBLE
+            emptyText.visibility = android.view.View.GONE
+            viewLifecycleOwner.lifecycleScope.launch {
+                // 加载所有 Worker 自定义域，再按当前脚本名过滤
+                val allResult = workerRepository.listCustomDomains(account)
+                loadingProgress.visibility = android.view.View.GONE
+                val scriptDomains = when (allResult) {
+                    is com.muort.upworker.core.model.Resource.Success -> {
+                        allResult.data.filter { it.service.equals(script.id, ignoreCase = true) }
+                    }
+                    else -> emptyList()
+                }
+                // 子域名 URL（workers.dev 内置访问）
+                val accountInfoResult = accountRepository.fetchAccountsFromApi(account)
+                val accountName = when (accountInfoResult) {
+                    is com.muort.upworker.core.model.Resource.Success ->
+                        accountInfoResult.data.firstOrNull { it.id == account.accountId }?.name ?: account.name
+                    else -> account.name
+                }
+                val emailMatch = Regex("([^@]+)@").find(accountName)
+                val emailPrefix = (emailMatch?.groupValues?.get(1) ?: accountName).lowercase()
+                val subdomainUrl = "${script.id}.$emailPrefix.workers.dev"
+
+                if (scriptDomains.isEmpty()) {
+                    emptyText.visibility = android.view.View.VISIBLE
+                } else {
+                    emptyText.visibility = android.view.View.GONE
+                }
+                domainsRecyclerView.adapter = WorkerDomainListAdapter(
+                    subdomainUrl,
+                    scriptDomains
+                ) { domain ->
+                    // 删除确认
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.route_delete_custom_domain)
+                        .setMessage(getString(R.string.route_delete_custom_domain_confirm, domain.hostname))
+                        .setPositiveButton(R.string.delete) { _, _ ->
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                when (val del = workerRepository.deleteCustomDomain(account, domain.id)) {
+                                    is com.muort.upworker.core.model.Resource.Success -> {
+                                        requireContext().showToast(getString(R.string.worker_custom_domain_deleted_success))
+                                        loadDomains()
+                                    }
+                                    is com.muort.upworker.core.model.Resource.Error -> {
+                                        requireContext().showToast(
+                                            getString(R.string.worker_custom_domain_delete_failed, del.message)
+                                        )
+                                    }
+                                    else -> {}
+                                }
+                            }
+                        }
+                        .setNegativeButton(R.string.cancel, null)
+                        .show()
+                }
+            }
+        }
+
+        loadDomains()
+        dialog.show()
+    }
+
+    /**
+     * Worker 自定义域列表 Adapter：第一项显示内置 workers.dev 子域名，
+     * 后续项显示该脚本绑定的自定义域名，支持删除。
+     */
+    private class WorkerDomainListAdapter(
+        private val subdomainUrl: String,
+        private val customDomains: List<com.muort.upworker.core.model.CustomDomain>,
+        private val onDeleteClick: (com.muort.upworker.core.model.CustomDomain) -> Unit
+    ) : RecyclerView.Adapter<WorkerDomainListAdapter.ViewHolder>() {
+
+        private val SUBDOMAIN_TYPE = 0
+        private val CUSTOM_TYPE = 1
+
+        override fun getItemViewType(position: Int): Int =
+            if (position == 0) SUBDOMAIN_TYPE else CUSTOM_TYPE
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = android.view.LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_pages_domain, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            if (position == 0) {
+                holder.bindSubdomain(subdomainUrl)
+            } else {
+                holder.bindCustom(customDomains[position - 1], onDeleteClick)
+            }
+        }
+
+        override fun getItemCount() = 1 + customDomains.size
+
+        inner class ViewHolder(itemView: android.view.View) : RecyclerView.ViewHolder(itemView) {
+            private val nameText = itemView.findViewById<android.widget.TextView>(R.id.domainNameText)
+            private val statusText = itemView.findViewById<android.widget.TextView>(R.id.domainStatusText)
+            private val infoText = itemView.findViewById<android.widget.TextView>(R.id.domainInfoText)
+            private val errorText = itemView.findViewById<android.widget.TextView>(R.id.domainErrorText)
+            private val deleteBtn = itemView.findViewById<android.widget.ImageButton>(R.id.deleteDomainBtn)
+
+            fun bindSubdomain(url: String) {
+                nameText.text = url
+                statusText.text = itemView.context.getString(R.string.worker_domain_subdomain_label)
+                statusText.setBackgroundColor(
+                    androidx.core.content.ContextCompat.getColor(itemView.context, R.color.blue)
+                )
+                statusText.setTextColor(
+                    androidx.core.content.ContextCompat.getColor(itemView.context, R.color.white)
+                )
+                infoText.visibility = android.view.View.GONE
+                errorText.visibility = android.view.View.GONE
+                deleteBtn.visibility = android.view.View.GONE
+                // 只在点击「域名」文字时才复制到剪贴板（URL 带 https）
+                nameText.setOnClickListener {
+                    copyToClipboard(
+                        "https://$url",
+                        itemView.context.getString(R.string.worker_domain_subdomain_copied)
+                    )
+                }
+                // 其他区域不响应复制
+                itemView.setOnClickListener(null)
+            }
+
+            fun bindCustom(
+                domain: com.muort.upworker.core.model.CustomDomain,
+                onDelete: (com.muort.upworker.core.model.CustomDomain) -> Unit
+            ) {
+                nameText.text = domain.hostname
+                statusText.text = itemView.context.getString(R.string.worker_domain_custom_label)
+                statusText.setBackgroundColor(
+                    androidx.core.content.ContextCompat.getColor(itemView.context, R.color.status_success)
+                )
+                statusText.setTextColor(
+                    androidx.core.content.ContextCompat.getColor(itemView.context, R.color.white)
+                )
+                infoText.text = itemView.context.getString(R.string.worker_domain_service_target, domain.service ?: "")
+                infoText.visibility = android.view.View.VISIBLE
+                errorText.visibility = android.view.View.GONE
+                deleteBtn.visibility = android.view.View.VISIBLE
+                // 只在点击「域名」文字时才复制到剪贴板（URL 带 https）
+                nameText.setOnClickListener {
+                    copyToClipboard(
+                        "https://${domain.hostname}",
+                        itemView.context.getString(R.string.worker_domain_custom_copied)
+                    )
+                }
+                itemView.setOnClickListener(null)
+                deleteBtn.setOnClickListener {
+                    onDelete(domain)
+                }
+            }
+
+            private fun copyToClipboard(text: String, message: String) {
+                val clipboard = itemView.context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                val clip = android.content.ClipData.newPlainText("url", text)
+                clipboard.setPrimaryClip(clip)
+                android.widget.Toast.makeText(itemView.context, message, android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ==================== Worker 路由 ====================
+
+    private fun showAddWorkerRouteDialog(account: Account, script: WorkerScript) {
+        val context = requireContext()
+        val container = android.widget.LinearLayout(context).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(
+                (context.resources.displayMetrics.density * 24).toInt(),
+                (context.resources.displayMetrics.density * 16).toInt(),
+                (context.resources.displayMetrics.density * 24).toInt(),
+                (context.resources.displayMetrics.density * 8).toInt()
+            )
+        }
+        // ==================== Zone 选择：使用 MaterialAutoCompleteTextView（Exposed Dropdown Menu） ====================
+        val zoneLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
+            hint = getString(R.string.worker_route_select_zone)
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            endIconMode = com.google.android.material.textfield.TextInputLayout.END_ICON_DROPDOWN_MENU
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = (context.resources.displayMetrics.density * 8).toInt() }
+        }
+        val zoneAuto = com.google.android.material.textfield.MaterialAutoCompleteTextView(zoneLayout.context).apply {
+            // 禁用用户手动输入，只允许选择（配合 endIconMode = END_ICON_DROPDOWN_MENU 即 Exposed Dropdown Menu）
+            keyListener = null
+            isCursorVisible = false
+            // 代码 new 出来的 EditText 默认不会继承 XML Material 主题的左右 padding，
+            // 这里显式补齐，防止 hint 贴左框、选中后文字与 box 外框重叠；
+            // end 留出 56dp 供右侧下拉箭头图标（END_ICON_DROPDOWN_MENU）占位
+            val density = resources.displayMetrics.density
+            val padStart = (density * 16).toInt()
+            val padTop   = (density * 14).toInt()
+            val padEnd   = (density * 56).toInt()
+            val padBottom = (density * 14).toInt()
+            setPaddingRelative(padStart, padTop, padEnd, padBottom)
+            // Material floating label 的最小高度建议与同项目其他 TextInputEditText 对齐
+            minHeight = (density * 52).toInt()
+        }
+        zoneLayout.addView(zoneAuto)
+        container.addView(zoneLayout)
+
+        val patternLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
+            hint = getString(R.string.xml_dialog_route_input_hint)
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+        }
+        val patternEdit = com.google.android.material.textfield.TextInputEditText(patternLayout.context).apply {
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI
+            val density = resources.displayMetrics.density
+            val padStart = (density * 16).toInt()
+            val padTop   = (density * 14).toInt()
+            val padEnd   = (density * 16).toInt()
+            val padBottom = (density * 14).toInt()
+            setPaddingRelative(padStart, padTop, padEnd, padBottom)
+            minHeight = (density * 52).toInt()
+        }
+        patternLayout.addView(patternEdit)
+        container.addView(patternLayout)
+
+        val zones = mutableListOf<com.muort.upworker.core.model.Zone>()
+        var selectedZone: com.muort.upworker.core.model.Zone? = null
+
+        val dialog = MaterialAlertDialogBuilder(context)
+            .setTitle(getString(R.string.worker_add_route_title_template, script.id))
+            .setView(container)
+            .setPositiveButton(R.string.add, null)
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+
+        dialog.setOnShowListener { iface ->
+            val dlg = iface as androidx.appcompat.app.AlertDialog
+            // 对话框显示后立即加载 Zone 列表，不再等用户点击
+            viewLifecycleOwner.lifecycleScope.launch {
+                // 下拉列表显示"加载中…"
+                val loadingAdapter = ArrayAdapter<String>(
+                    context,
+                    android.R.layout.simple_dropdown_item_1line,
+                    listOf(getString(R.string.worker_route_zone_loading))
+                )
+                zoneAuto.setAdapter(loadingAdapter)
+
+                when (val res = zoneRepository.fetchAndSaveZones(account)) {
+                    is com.muort.upworker.core.model.Resource.Success -> {
+                        zones.clear()
+                        val sorted = res.data.sortedBy { it.name }
+                        zones.addAll(sorted)
+                        if (zones.isEmpty()) {
+                            val emptyAdapter = ArrayAdapter<String>(
+                                context,
+                                android.R.layout.simple_dropdown_item_1line,
+                                listOf(getString(R.string.worker_route_zone_empty))
+                            )
+                            zoneAuto.setAdapter(emptyAdapter)
+                        } else {
+                            val adapter = ArrayAdapter<String>(
+                                context,
+                                android.R.layout.simple_spinner_dropdown_item,
+                                zones.map { it.name }
+                            )
+                            zoneAuto.setAdapter(adapter)
+                            zoneAuto.setOnItemClickListener { _, _, position, _ ->
+                                if (position in zones.indices) {
+                                    selectedZone = zones[position]
+                                    zoneLayout.error = null
+                                    // 选好域名后自动填入「域名/*」格式到路由模式输入框，并把光标移到末尾
+                                    val pattern = "${selectedZone!!.name}/*"
+                                    patternEdit.setText(pattern)
+                                    patternEdit.requestFocus()
+                                    patternEdit.setSelection(pattern.length)
+                                }
+                            }
+                        }
+                    }
+                    is com.muort.upworker.core.model.Resource.Error -> {
+                        requireContext().showToast(
+                            getString(R.string.worker_route_zone_load_failed, res.message)
+                        )
+                        val errAdapter = ArrayAdapter<String>(
+                            context,
+                            android.R.layout.simple_dropdown_item_1line,
+                            listOf(getString(R.string.worker_route_zone_empty))
+                        )
+                        zoneAuto.setAdapter(errAdapter)
+                    }
+                    else -> {}
+                }
+            }
+
+            // "添加"按钮点击校验 + 提交
+            dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val pattern = patternEdit.text?.toString()?.trim()?.lowercase().orEmpty()
+
+                if (selectedZone == null) {
+                    zoneLayout.error = getString(R.string.worker_route_zone_required)
+                    zoneAuto.requestFocus()
+                    return@setOnClickListener
+                }
+                if (pattern.isEmpty()) {
+                    patternLayout.error = getString(R.string.worker_route_pattern_required)
+                    patternEdit.requestFocus()
+                    zoneLayout.error = null
+                    return@setOnClickListener
+                }
+                zoneLayout.error = null
+                patternLayout.error = null
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.dialog_loading_ellipsis)
+                        .setMessage(R.string.worker_adding_route)
+                        .setCancelable(false)
+                        .create()
+                    loadingDialog.show()
+                    val zoneId = selectedZone!!.id
+                    when (val res = workerRepository.createRoute(account, zoneId, pattern, script.id)) {
+                        is com.muort.upworker.core.model.Resource.Success -> {
+                            loadingDialog.dismiss()
+                            requireContext().showToast(getString(R.string.worker_route_created_success))
+                            dlg.dismiss()
+                        }
+                        is com.muort.upworker.core.model.Resource.Error -> {
+                            loadingDialog.dismiss()
+                            MaterialAlertDialogBuilder(requireContext())
+                                .setTitle(R.string.worker_route_create_failed_title)
+                                .setMessage(res.message)
+                                .setPositiveButton(R.string.confirm, null)
+                                .show()
+                        }
+                        else -> {
+                            loadingDialog.dismiss()
+                        }
+                    }
+                }
+            }
+        }
+        dialog.show()
+    }
+
+    private fun showWorkerRoutesDialog(account: Account, script: WorkerScript) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_pages_domains, null)
+        val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
+        val loadingProgress = dialogView.findViewById<android.widget.ProgressBar>(R.id.loadingProgress)
+        val emptyText = dialogView.findViewById<android.widget.TextView>(R.id.emptyText)
+        val recyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.domainsRecyclerView)
+        val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
+
+        titleText.text = getString(R.string.worker_route_list_title_template, script.id)
+        emptyText.text = getString(R.string.worker_route_no_custom)
+        loadingProgress.visibility = android.view.View.VISIBLE
+        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .create()
+        closeBtn.setOnClickListener { dialog.dismiss() }
+
+        fun loadRoutes() {
+            loadingProgress.visibility = android.view.View.VISIBLE
+            emptyText.visibility = android.view.View.GONE
+            viewLifecycleOwner.lifecycleScope.launch {
+                // 1) 先获取账号所有 zones
+                val zonesResult = zoneRepository.fetchAndSaveZones(account)
+                val zones: List<com.muort.upworker.core.model.Zone> = when (zonesResult) {
+                    is com.muort.upworker.core.model.Resource.Success -> zonesResult.data
+                    else -> emptyList()
+                }
+                // 2) 对每个 zone 调 listRoutes，再过滤当前脚本
+                val scriptRoutes = mutableListOf<Pair<com.muort.upworker.core.model.Route, String /*zoneName*/>>()
+                for (z in zones) {
+                    when (val rr = workerRepository.listRoutes(account, z.id)) {
+                        is com.muort.upworker.core.model.Resource.Success -> {
+                            rr.data
+                                .filter { it.script.equals(script.id, ignoreCase = true) }
+                                .forEach { scriptRoutes.add(it to z.name) }
+                        }
+                        else -> {}
+                    }
+                }
+                loadingProgress.visibility = android.view.View.GONE
+                if (scriptRoutes.isEmpty()) {
+                    emptyText.visibility = android.view.View.VISIBLE
+                } else {
+                    emptyText.visibility = android.view.View.GONE
+                }
+                recyclerView.adapter = WorkerRouteListAdapter(scriptRoutes) { route, zoneName ->
+                    // 删除 route
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.route_delete_route)
+                        .setMessage(getString(R.string.route_delete_route_confirm, route.pattern))
+                        .setPositiveButton(R.string.delete) { _, _ ->
+                            viewLifecycleOwner.lifecycleScope.launch deleteScope@{
+                                val zId = zones.firstOrNull { it.name == zoneName }?.id
+                                    ?: route.zoneId
+                                if (zId.isNullOrBlank()) {
+                                    requireContext().showToast(getString(R.string.worker_route_delete_missing_zone))
+                                    return@deleteScope
+                                }
+                                when (val del = workerRepository.deleteRoute(account, zId, route.id)) {
+                                    is com.muort.upworker.core.model.Resource.Success -> {
+                                        requireContext().showToast(getString(R.string.worker_route_deleted_success))
+                                        loadRoutes()
+                                    }
+                                    is com.muort.upworker.core.model.Resource.Error -> {
+                                        requireContext().showToast(
+                                            getString(R.string.worker_route_delete_failed, del.message)
+                                        )
+                                    }
+                                    else -> {}
+                                }
+                            }
+                        }
+                        .setNegativeButton(R.string.cancel, null)
+                        .show()
+                }
+            }
+        }
+
+        loadRoutes()
+        dialog.show()
+    }
+
+    /**
+     * Worker 路由列表 Adapter：展示绑定到当前脚本的路由 pattern，
+     * 每条显示路由模式 + 所属 Zone 名称，点击模式复制到剪贴板，右侧 deleteBtn 删除。
+     */
+    private class WorkerRouteListAdapter(
+        private val routes: List<Pair<com.muort.upworker.core.model.Route, String>>,
+        private val onDeleteClick: (com.muort.upworker.core.model.Route, String) -> Unit
+    ) : RecyclerView.Adapter<WorkerRouteListAdapter.ViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = android.view.LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_pages_domain, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val (route, zoneName) = routes[position]
+            holder.bind(route, zoneName)
+        }
+
+        override fun getItemCount() = routes.size
+
+        inner class ViewHolder(itemView: android.view.View) : RecyclerView.ViewHolder(itemView) {
+            private val nameText = itemView.findViewById<android.widget.TextView>(R.id.domainNameText)
+            private val statusText = itemView.findViewById<android.widget.TextView>(R.id.domainStatusText)
+            private val infoText = itemView.findViewById<android.widget.TextView>(R.id.domainInfoText)
+            private val errorText = itemView.findViewById<android.widget.TextView>(R.id.domainErrorText)
+            private val deleteBtn = itemView.findViewById<android.widget.ImageButton>(R.id.deleteDomainBtn)
+
+            fun bind(route: com.muort.upworker.core.model.Route, zoneName: String) {
+                nameText.text = route.pattern
+                statusText.text = itemView.context.getString(R.string.worker_route_item_label)
+                statusText.setBackgroundColor(
+                    androidx.core.content.ContextCompat.getColor(itemView.context, R.color.status_warning)
+                )
+                statusText.setTextColor(
+                    androidx.core.content.ContextCompat.getColor(itemView.context, R.color.white)
+                )
+                infoText.text = itemView.context.getString(R.string.worker_route_zone_info, zoneName)
+                infoText.visibility = android.view.View.VISIBLE
+                errorText.visibility = android.view.View.GONE
+                deleteBtn.visibility = android.view.View.VISIBLE
+                // 只点击「路由模式」才复制到剪贴板（Pattern 不需要前缀 https）
+                nameText.setOnClickListener {
+                    copyToClipboard(
+                        route.pattern,
+                        itemView.context.getString(R.string.worker_route_copied)
+                    )
+                }
+                itemView.setOnClickListener(null)
+                deleteBtn.setOnClickListener {
+                    onDeleteClick(route, zoneName)
+                }
+            }
+
+            private fun copyToClipboard(text: String, message: String) {
+                val clipboard = itemView.context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                val clip = android.content.ClipData.newPlainText("route_pattern", text)
+                clipboard.setPrimaryClip(clip)
+                android.widget.Toast.makeText(itemView.context, message, android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -2860,6 +3806,11 @@ class WorkerScriptsAdapter(
     private val onConfigVariablesClick: (WorkerScript) -> Unit,
     private val onConfigSecretsClick: (WorkerScript) -> Unit,
     private val onRuntimeSettingsClick: (WorkerScript) -> Unit = {},
+    private val onAddCustomDomainClick: (WorkerScript) -> Unit = {},
+    private val onViewDomainsClick: (WorkerScript) -> Unit = {},
+    private val onAddRouteClick: (WorkerScript) -> Unit = {},
+    private val onViewRoutesClick: (WorkerScript) -> Unit = {},
+    private val onToggleFeaturesClick: (WorkerScript) -> Unit = {},
     private val onSelectionModeClick: (WorkerScript, Boolean) -> Unit = { _, _ -> }
 ) : RecyclerView.Adapter<WorkerScriptsAdapter.ScriptViewHolder>() {
     
@@ -2922,6 +3873,11 @@ class WorkerScriptsAdapter(
                 binding.triggerBtn.visibility = android.view.View.GONE
                 binding.runtimeSettingsBtn.visibility = android.view.View.GONE
                 binding.logsBtn.visibility = android.view.View.GONE
+                binding.addCustomDomainBtn.visibility = android.view.View.GONE
+                binding.viewDomainsBtn.visibility = android.view.View.GONE
+                binding.addRouteBtn.visibility = android.view.View.GONE
+                binding.viewRoutesBtn.visibility = android.view.View.GONE
+                binding.toggleFeaturesBtn.visibility = android.view.View.GONE
                 
                 val isSelected = selectedItems.contains(script.id)
                 updateSelectionUI(binding.root, isSelected)
@@ -2943,6 +3899,11 @@ class WorkerScriptsAdapter(
                 binding.triggerBtn.visibility = android.view.View.VISIBLE
                 binding.runtimeSettingsBtn.visibility = android.view.View.VISIBLE
                 binding.logsBtn.visibility = android.view.View.VISIBLE
+                binding.addCustomDomainBtn.visibility = android.view.View.VISIBLE
+                binding.viewDomainsBtn.visibility = android.view.View.VISIBLE
+                binding.addRouteBtn.visibility = android.view.View.VISIBLE
+                binding.viewRoutesBtn.visibility = android.view.View.VISIBLE
+                binding.toggleFeaturesBtn.visibility = android.view.View.VISIBLE
                 updateSelectionUI(binding.root, false)
                 binding.root.setOnClickListener(null)
             }
@@ -2993,6 +3954,26 @@ class WorkerScriptsAdapter(
             
             binding.deleteBtn.setOnClickListener {
                 onDeleteClick(script)
+            }
+            
+            binding.addCustomDomainBtn.setOnClickListener {
+                onAddCustomDomainClick(script)
+            }
+            
+            binding.viewDomainsBtn.setOnClickListener {
+                onViewDomainsClick(script)
+            }
+
+            binding.addRouteBtn.setOnClickListener {
+                onAddRouteClick(script)
+            }
+
+            binding.viewRoutesBtn.setOnClickListener {
+                onViewRoutesClick(script)
+            }
+
+            binding.toggleFeaturesBtn.setOnClickListener {
+                onToggleFeaturesClick(script)
             }
         }
         

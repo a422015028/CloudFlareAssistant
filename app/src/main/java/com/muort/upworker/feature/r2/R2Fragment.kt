@@ -24,6 +24,7 @@ import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.R2CustomDomain
 import com.muort.upworker.core.model.R2Object
+import com.muort.upworker.core.repository.ZoneRepository
 import com.muort.upworker.databinding.DialogR2InputBinding
 import com.muort.upworker.databinding.DialogR2UploadBinding
 import com.muort.upworker.databinding.FragmentR2Binding
@@ -32,6 +33,7 @@ import com.muort.upworker.feature.account.AccountViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import java.io.File
 
 @AndroidEntryPoint
@@ -88,6 +90,9 @@ class R2Fragment : Fragment() {
     
     private val accountViewModel: AccountViewModel by activityViewModels()
     private val r2ViewModel: R2ViewModel by viewModels()
+
+    @Inject
+    lateinit var zoneRepository: ZoneRepository
     
     private var currentBucket: R2Bucket? = null
     private var currentDownloadObject: Pair<R2Bucket, R2Object>? = null  // 存储待下载的对象
@@ -704,41 +709,138 @@ class R2Fragment : Fragment() {
     }
     
     private fun showAddCustomDomainDialog(account: Account, bucket: R2Bucket) {
-        val input = android.widget.EditText(requireContext()).apply {
-            hint = "example.com"
-            inputType = android.text.InputType.TYPE_TEXT_VARIATION_URI
-        }
-        
-        val container = android.widget.FrameLayout(requireContext()).apply {
-            val params = android.widget.FrameLayout.LayoutParams(
-                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
-                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+        val context = requireContext()
+        val container = android.widget.LinearLayout(context).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            val density = context.resources.displayMetrics.density
+            setPadding(
+                (density * 24).toInt(),
+                (density * 16).toInt(),
+                (density * 24).toInt(),
+                (density * 8).toInt()
             )
-            params.leftMargin = resources.getDimensionPixelSize(com.google.android.material.R.dimen.design_bottom_sheet_peek_height_min) / 2
-            params.rightMargin = params.leftMargin
-            addView(input, params)
         }
-        
-        MaterialAlertDialogBuilder(requireContext())
+        val density = context.resources.displayMetrics.density
+
+        // ==================== Zone Exposed Dropdown Menu（与 Worker / Pages / Route 添加域名同套样式） ====================
+        val zoneLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
+            hint = getString(R.string.worker_route_select_zone)
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            endIconMode = com.google.android.material.textfield.TextInputLayout.END_ICON_DROPDOWN_MENU
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = (density * 8).toInt() }
+        }
+        val zoneAuto = com.google.android.material.textfield.MaterialAutoCompleteTextView(zoneLayout.context).apply {
+            keyListener = null
+            isCursorVisible = false
+            val padStart  = (density * 16).toInt()
+            val padTop    = (density * 14).toInt()
+            val padEnd    = (density * 56).toInt()
+            val padBottom = (density * 14).toInt()
+            setPaddingRelative(padStart, padTop, padEnd, padBottom)
+            minHeight = (density * 52).toInt()
+        }
+        zoneLayout.addView(zoneAuto)
+        container.addView(zoneLayout)
+
+        val inputLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
+            hint = getString(R.string.pages_domain_input_hint)
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+        }
+        val editText = com.google.android.material.textfield.TextInputEditText(inputLayout.context).apply {
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI
+            val padStart  = (density * 16).toInt()
+            val padTop    = (density * 14).toInt()
+            val padEnd    = (density * 16).toInt()
+            val padBottom = (density * 14).toInt()
+            setPaddingRelative(padStart, padTop, padEnd, padBottom)
+            minHeight = (density * 52).toInt()
+        }
+        inputLayout.addView(editText)
+        container.addView(inputLayout)
+
+        val zones = mutableListOf<com.muort.upworker.core.model.Zone>()
+
+        val dialog = MaterialAlertDialogBuilder(context)
             .setTitle(R.string.r2_add_custom_domain_title)
-            .setMessage(R.string.r2_add_custom_domain_message)
             .setView(container)
-            .setPositiveButton(R.string.add) { _, _ ->
-                val domain = input.text.toString().trim()
-                if (domain.isNotEmpty()) {
-                    r2ViewModel.createCustomDomain(account, bucket.name, domain)
-                    showCustomDomainsDialog(bucket)
-                } else {
-                    showToast(getString(R.string.r2_please_enter_domain))
-                    showCustomDomainsDialog(bucket)
+            .setPositiveButton(R.string.add, null)
+            .setNegativeButton(R.string.dialog_back, null)
+            .create()
+
+        dialog.setOnShowListener { iface ->
+            val dlg = iface as androidx.appcompat.app.AlertDialog
+
+            // 打开即加载 Zone 列表
+            viewLifecycleOwner.lifecycleScope.launch {
+                val loadingAdapter = android.widget.ArrayAdapter<String>(
+                    context,
+                    android.R.layout.simple_dropdown_item_1line,
+                    listOf(getString(R.string.worker_route_zone_loading))
+                )
+                zoneAuto.setAdapter(loadingAdapter)
+                when (val res = zoneRepository.fetchAndSaveZones(account)) {
+                    is com.muort.upworker.core.model.Resource.Success -> {
+                        zones.clear()
+                        val sorted = res.data.sortedBy { it.name }
+                        zones.addAll(sorted)
+                        if (zones.isEmpty()) {
+                            val emptyAdapter = android.widget.ArrayAdapter<String>(
+                                context,
+                                android.R.layout.simple_dropdown_item_1line,
+                                listOf(getString(R.string.worker_route_zone_empty))
+                            )
+                            zoneAuto.setAdapter(emptyAdapter)
+                        } else {
+                            val adapter = android.widget.ArrayAdapter<String>(
+                                context,
+                                android.R.layout.simple_spinner_dropdown_item,
+                                zones.map { it.name }
+                            )
+                            zoneAuto.setAdapter(adapter)
+                            zoneAuto.setOnItemClickListener { _, _, position, _ ->
+                                if (position in zones.indices) {
+                                    zoneLayout.error = null
+                                    // 添加域名 → 自动填入通配子域名 *.zone.name
+                                    val hostname = "*.${zones[position].name}"
+                                    editText.setText(hostname)
+                                    editText.requestFocus()
+                                    editText.setSelection(hostname.length)
+                                }
+                            }
+                        }
+                    }
+                    is com.muort.upworker.core.model.Resource.Error -> {
+                        showToast(
+                            getString(R.string.worker_route_zone_load_failed, res.message)
+                        )
+                    }
+                    else -> {}
                 }
             }
-            .setNegativeButton(R.string.dialog_back) { _, _ ->
+
+            dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val domain = editText.text?.toString()?.trim()?.lowercase().orEmpty()
+                if (domain.isEmpty()) {
+                    inputLayout.error = getString(R.string.pages_domain_cannot_be_empty)
+                    editText.requestFocus()
+                    return@setOnClickListener
+                }
+                inputLayout.error = null
+                r2ViewModel.createCustomDomain(account, bucket.name, domain)
                 showCustomDomainsDialog(bucket)
+                dlg.dismiss()
             }
-            .show()
+            dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+                showCustomDomainsDialog(bucket)
+                dlg.dismiss()
+            }
+        }
+        dialog.show()
     }
-    
+
     private fun showDeleteCustomDomainDialog(account: Account, bucket: R2Bucket, domain: R2CustomDomain) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.r2_delete_custom_domain_title)

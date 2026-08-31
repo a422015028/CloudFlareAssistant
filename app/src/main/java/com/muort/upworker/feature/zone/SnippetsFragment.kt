@@ -53,28 +53,78 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
     override fun onAddClicked() = showAddNameDialog()
 
     private fun showAddNameDialog() {
-        val nameEdit = EditText(requireContext()).apply {
-            setHint(R.string.snippet_name_hint)
-            setSingleLine()
-            setPadding(48, 32, 48, 32)
+        val context = requireContext()
+        val density = context.resources.displayMetrics.density
+        val container = android.widget.LinearLayout(context).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(
+                (density * 24).toInt(),
+                (density * 16).toInt(),
+                (density * 24).toInt(),
+                (density * 8).toInt()
+            )
         }
-        MaterialAlertDialogBuilder(requireContext())
+
+        // ===== Material 3 OutlinedBox 样式：TextInputLayout(Outlined) + TextInputEditText =====
+        val inputLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
+            hint = getString(R.string.snippet_name_hint)
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            helperText = getString(R.string.msg_name_invalid)
+            isHelperTextEnabled = true
+        }
+        val nameEdit = com.google.android.material.textfield.TextInputEditText(inputLayout.context).apply {
+            setSingleLine()
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_VARIATION_NORMAL or
+                android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            val padStart  = (density * 16).toInt()
+            val padTop    = (density * 14).toInt()
+            val padEnd    = (density * 16).toInt()
+            val padBottom = (density * 14).toInt()
+            setPaddingRelative(padStart, padTop, padEnd, padBottom)
+            minHeight = (density * 52).toInt()
+        }
+        inputLayout.addView(nameEdit)
+        container.addView(inputLayout)
+
+        val dialog = MaterialAlertDialogBuilder(context)
             .setTitle(R.string.snippet_new_title)
-            .setView(nameEdit)
-            .setPositiveButton(R.string.confirm) { _, _ ->
-                val name = nameEdit.text.toString().trim()
-                if (name.isEmpty()) {
-                    toast(getString(R.string.msg_name_empty))
-                    return@setPositiveButton
-                }
-                if (!name.matches(Regex("^[a-z0-9_]+$"))) {
-                    toast(getString(R.string.msg_name_invalid))
-                    return@setPositiveButton
-                }
-                navigateToEditor(name, isNew = true)
-            }
+            .setView(container)
+            .setPositiveButton(R.string.confirm, null)
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .create()
+
+        dialog.setOnShowListener { iface ->
+            val dlg = iface as androidx.appcompat.app.AlertDialog
+            // 弹起后立刻聚焦输入框并显示键盘
+            nameEdit.requestFocus()
+            (context.getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager)
+                ?.showSoftInput(nameEdit, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+
+            dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val name = nameEdit.text?.toString()?.trim().orEmpty()
+                when {
+                    name.isEmpty() -> {
+                        inputLayout.error = getString(R.string.msg_name_empty)
+                        inputLayout.requestFocus()
+                    }
+                    !name.matches(Regex("^[a-z0-9_]+$")) -> {
+                        inputLayout.error = getString(R.string.msg_name_invalid)
+                        inputLayout.requestFocus()
+                    }
+                    else -> {
+                        inputLayout.error = null
+                        navigateToEditor(name, isNew = true)
+                        dlg.dismiss()
+                    }
+                }
+            }
+        }
+        dialog.show()
     }
 
     private fun navigateToEditor(snippetName: String, isNew: Boolean) {

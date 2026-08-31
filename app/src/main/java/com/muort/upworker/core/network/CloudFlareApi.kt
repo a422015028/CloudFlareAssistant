@@ -205,6 +205,21 @@ interface CloudFlareApi {
     ): Response<CloudFlareResponse<WorkerScript>>
 
     /**
+     * Get Worker SCRIPT-LEVEL shared settings (cross-version).
+     * Returns logpush + observability (with logs.enabled / logs.persist / traces.enabled / ...).
+     * https://developers.cloudflare.com/api/operations/worker-script-get-script-settings
+     */
+    @Headers("Accept: application/json")
+    @GET("accounts/{account_id}/workers/scripts/{script_name}/script-settings")
+    suspend fun getWorkerScriptSettings(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String
+    ): Response<CloudFlareResponse<Map<String, @JvmSuppressWildcards Any>>>
+
+    /**
      * Bulk update secrets (create/update/delete in a single request)
      * https://developers.cloudflare.com/api/resources/workers/subresources/scripts/subresources/secrets/methods/bulk_update/
      * - Set secret object to create/update
@@ -322,6 +337,21 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String,
         @Path("script_name") scriptName: String,
         @Body request: WorkerSubdomainEnableRequest
+    ): Response<CloudFlareResponse<Map<String, @JvmSuppressWildcards Any>>>
+
+    /**
+     * Get if Worker subdomain (workers.dev) is enabled for this script.
+     * GET /accounts/{account_id}/workers/scripts/{script_name}/subdomain
+     * Returns body like { enabled: true, previews_enabled: false, subdomain: "...", ... }
+     */
+    @Headers("Accept: application/json")
+    @GET("accounts/{account_id}/workers/scripts/{script_name}/subdomain")
+    suspend fun getWorkerSubdomainStatus(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String
     ): Response<CloudFlareResponse<Map<String, @JvmSuppressWildcards Any>>>
 
     /**

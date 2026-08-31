@@ -227,6 +227,81 @@
 
         </LinearLayout>
 
+        <!-- Buttons Row 3 - Domains & Routes & Features：添加域名 / 查看域名 / 添加路由 / 查看路由 / 功能开关。
+             与 Row1 / Row2 完全一致的「均分 + 居中垂直对齐」结构：
+               layout_width=0dp + layout_weight=1 → 宽度等分，英文下按钮不会被挤出屏幕；
+               baselineAligned=false + gravity=center_vertical → 无论 1 行/2 行文字，图标始终同一水平线；
+               AppButton.Text.Icon 自带 maxLines=2 + ellipsize + hyphenationFrequency，长文本在自身
+               平分的区域内自动两行/断字/省略号。 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/addCustomDomainBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/domain_add_title"
+                android:layout_marginEnd="4dp"
+                style="@style/AppButton.Text.Icon"
+                app:icon="@android:drawable/ic_menu_add"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewDomainsBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/xml_item_pages_project_2"
+                android:layout_marginEnd="4dp"
+                style="@style/AppButton.Text.Icon"
+                app:icon="@android:drawable/ic_menu_myplaces"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/addRouteBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/route_add_route"
+                android:layout_marginEnd="4dp"
+                style="@style/AppButton.Text.Icon"
+                app:icon="@android:drawable/ic_menu_add"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewRoutesBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/worker_view_routes_title"
+                android:layout_marginEnd="4dp"
+                style="@style/AppButton.Text.Icon"
+                app:icon="@android:drawable/ic_menu_directions"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/toggleFeaturesBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/worker_feature_toggles_title"
+                style="@style/AppButton.Text.Icon"
+                app:icon="@android:drawable/ic_menu_preferences"
+                app:iconSize="16dp"
+                app:iconPadding="2dp" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

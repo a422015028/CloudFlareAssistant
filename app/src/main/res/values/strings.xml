@@ -593,6 +593,7 @@
     <string name="dialog_loading_ellipsis">加载中...</string>
     <string name="dialog_preparing">正在准备...</string>
     <string name="dialog_updating">正在更新...</string>
+    <string name="dialog_error_title">操作失败</string>
     <string name="dialog_close">关闭</string>
     <string name="dialog_back">返回</string>
     <string name="dialog_more">更多</string>
@@ -787,6 +788,49 @@
     <string name="worker_custom_domain_delete_failed">删除自定义域名失败: %1$s</string>
     <string name="worker_custom_domain_updated">自定义域名已更新</string>
     <string name="worker_custom_domain_update_failed">更新自定义域名失败: %1$s</string>
+    <string name="worker_add_custom_domain_title_template">为 %1$s 添加自定义域</string>
+    <string name="worker_adding_custom_domain">正在添加自定义域…</string>
+    <string name="worker_custom_domain_add_failed_title">添加自定义域失败</string>
+    <string name="worker_domain_list_title_template">%1$s - 域名列表</string>
+    <string name="worker_domain_subdomain_label">子域名</string>
+    <string name="worker_domain_custom_label">自定义域</string>
+    <string name="worker_domain_service_target">绑定脚本：%1$s</string>
+    <string name="worker_domain_subdomain_copied">子域名已复制到剪贴板</string>
+    <string name="worker_domain_custom_copied">自定义域已复制到剪贴板</string>
+    <string name="worker_domain_no_custom">该脚本尚未绑定自定义域名</string>
+    <!-- Worker 路由（卡片 Row 3 新增按钮） -->
+    <string name="worker_view_routes_title">查看路由</string>
+    <string name="worker_add_route_title_template">为 %1$s 添加路由</string>
+    <string name="worker_route_select_zone">请选择域名（Zone）</string>
+    <string name="worker_route_zone_loading">加载中…</string>
+    <string name="worker_route_zone_empty">暂无可选的域名</string>
+    <string name="worker_route_zone_required">请先选择域名（Zone）</string>
+    <string name="worker_route_pattern_required">请填写路由规则</string>
+    <string name="worker_route_zone_load_failed">加载域名列表失败: %1$s</string>
+    <string name="worker_adding_route">正在添加路由…</string>
+    <string name="worker_route_create_failed_title">添加路由失败</string>
+    <string name="worker_route_list_title_template">%1$s - 路由列表</string>
+    <string name="worker_route_item_label">路由</string>
+    <string name="worker_route_zone_info">所属域名：%1$s</string>
+    <string name="worker_route_copied">路由规则已复制到剪贴板</string>
+    <string name="worker_route_delete_missing_zone">无法定位路由所属的 Zone，删除失败</string>
+    <string name="worker_route_no_custom">该脚本尚未配置路由规则</string>
+    <!-- Worker 卡片 Row 3 「功能开关」对话框：workers.dev 子域名 / 可观测性 / Logs 持久化 -->
+    <string name="worker_feature_toggles_title">功能开关</string>
+    <string name="worker_feature_toggles_dialog_title_template">%1$s · 功能开关</string>
+    <string name="worker_feature_subdomain_enable_title">启用自定义子域名</string>
+    <string name="worker_feature_subdomain_enable_summary">为脚本开启 *.workers.dev 子域名访问</string>
+    <string name="worker_feature_observability_title">可观测性</string>
+    <string name="worker_feature_observability_summary">启用后可查看实时请求、错误、延迟分布、Traces 等数据。</string>
+    <string name="worker_feature_logs_persist_title">Logs 持久化</string>
+    <string name="worker_feature_logs_persist_summary">在 Observability 页面中持久保留 Worker 的日志（默认保留 30 天，Enterprise 可延长）。</string>
+    <string name="worker_feature_saving">正在保存设置…</string>
+    <string name="worker_feature_save_success">功能开关已更新</string>
+    <string name="worker_feature_save_failed">更新失败：%1$s</string>
+    <string name="worker_settings_fetch_failed_format">读取脚本设置失败: %1$s</string>
+    <string name="worker_settings_update_failed_format">更新脚本设置失败: %1$s</string>
+    <string name="worker_subdomain_status_fetch_failed_format">读取子域名开关失败: %1$s</string>
+    <string name="worker_subdomain_update_failed_format">更新子域名开关失败: %1$s</string>
     <string name="worker_versions_load_failed">获取版本历史失败: %1$s</string>
     <string name="worker_rollback_success">回滚成功</string>
     <string name="worker_rollback_failed">回滚失败: %1$s</string>
@@ -884,8 +928,6 @@
     <string name="r2_custom_domain_bucket">自定义域 - %1$s</string>
     <string name="r2_no_custom_domains">暂无自定义域</string>
     <string name="r2_add_custom_domain_title">添加自定义域</string>
-    <string name="r2_add_custom_domain_message">输入要绑定的域名：</string>
-    <string name="r2_please_enter_domain">请输入域名</string>
     <string name="r2_delete_custom_domain_title">删除自定义域</string>
     <string name="r2_delete_custom_domain_message">确定要删除域名 \"%1$s\" 吗？</string>
 

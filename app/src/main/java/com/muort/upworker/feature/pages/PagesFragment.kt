@@ -2886,35 +2886,128 @@ class PagesFragment : Fragment() {
                 (context.resources.displayMetrics.density * 8).toInt()
             )
         }
+        val density = context.resources.displayMetrics.density
+
+        // ==================== Zone Exposed Dropdown Menu（与 Worker 保持同一套） ====================
+        val zoneLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
+            hint = getString(R.string.worker_route_select_zone)
+            boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
+            endIconMode = com.google.android.material.textfield.TextInputLayout.END_ICON_DROPDOWN_MENU
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = (density * 8).toInt() }
+        }
+        val zoneAuto = com.google.android.material.textfield.MaterialAutoCompleteTextView(zoneLayout.context).apply {
+            keyListener = null
+            isCursorVisible = false
+            val padStart = (density * 16).toInt()
+            val padTop   = (density * 14).toInt()
+            val padEnd   = (density * 56).toInt()
+            val padBottom = (density * 14).toInt()
+            setPaddingRelative(padStart, padTop, padEnd, padBottom)
+            minHeight = (density * 52).toInt()
+        }
+        zoneLayout.addView(zoneAuto)
+        container.addView(zoneLayout)
+
         val inputLayout = com.google.android.material.textfield.TextInputLayout(context).apply {
             hint = getString(R.string.pages_domain_input_hint)
             boxBackgroundMode = com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE
         }
         val editText = com.google.android.material.textfield.TextInputEditText(inputLayout.context).apply {
             inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI
+            val padStart = (density * 16).toInt()
+            val padTop   = (density * 14).toInt()
+            val padEnd   = (density * 16).toInt()
+            val padBottom = (density * 14).toInt()
+            setPaddingRelative(padStart, padTop, padEnd, padBottom)
+            minHeight = (density * 52).toInt()
         }
         inputLayout.addView(editText)
         container.addView(inputLayout)
 
-        MaterialAlertDialogBuilder(context)
+        val zones = mutableListOf<com.muort.upworker.core.model.Zone>()
+
+        val dialog = MaterialAlertDialogBuilder(context)
             .setTitle(getString(R.string.pages_domain_add_title_template, project.name))
             .setView(container)
-            .setPositiveButton(R.string.add) { _, _ ->
+            .setPositiveButton(R.string.add, null)
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+
+        dialog.setOnShowListener { iface ->
+            val dlg = iface as androidx.appcompat.app.AlertDialog
+
+            lifecycleScope.launch {
+                val loadingAdapter = ArrayAdapter<String>(
+                    context,
+                    android.R.layout.simple_dropdown_item_1line,
+                    listOf(getString(R.string.worker_route_zone_loading))
+                )
+                zoneAuto.setAdapter(loadingAdapter)
+                when (val res = zoneRepository.fetchAndSaveZones(account)) {
+                    is Resource.Success -> {
+                        zones.clear()
+                        val sorted = res.data.sortedBy { it.name }
+                        zones.addAll(sorted)
+                        if (zones.isEmpty()) {
+                            zoneAuto.setAdapter(
+                                ArrayAdapter(
+                                    context,
+                                    android.R.layout.simple_dropdown_item_1line,
+                                    listOf(getString(R.string.worker_route_zone_empty))
+                                )
+                            )
+                        } else {
+                            val adapter = ArrayAdapter<String>(
+                                context,
+                                android.R.layout.simple_spinner_dropdown_item,
+                                zones.map { it.name }
+                            )
+                            zoneAuto.setAdapter(adapter)
+                            zoneAuto.setOnItemClickListener { _, _, position, _ ->
+                                if (position in zones.indices) {
+                                    zoneLayout.error = null
+                                    // 添加 Pages 自定义域 → 自动填入「.+域名」格式
+                                    val hostname = "*.${zones[position].name}"
+                                    editText.setText(hostname)
+                                    editText.requestFocus()
+                                    editText.setSelection(hostname.length)
+                                }
+                            }
+                        }
+                    }
+                    is Resource.Error -> {
+                        Snackbar.make(
+                            binding.root,
+                            getString(R.string.worker_route_zone_load_failed, res.message),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {}
+                }
+            }
+
+            dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val hostname = editText.text?.toString()?.trim().orEmpty()
                 if (hostname.isEmpty()) {
-                    Snackbar.make(binding.root, getString(R.string.pages_domain_cannot_be_empty), Snackbar.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                    inputLayout.error = getString(R.string.pages_domain_cannot_be_empty)
+                    editText.requestFocus()
+                    return@setOnClickListener
                 }
+                inputLayout.error = null
                 val subdomain = "${project.name}.pages.dev"
                 pagesViewModel.addCustomDomain(account, project.name, hostname) { result ->
                     if (result is Resource.Success) {
                         // 添加成功后直接自动配置 DNS，不弹窗询问
                         autoConfigureDnsForDomain(account, result.data, subdomain)
+                        dlg.dismiss()
                     }
                 }
             }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
+        }
+        dialog.show()
     }
 
     private fun autoConfigureDnsForDomain(account: Account, domain: PagesDomain, subdomain: String) {
@@ -2970,6 +3063,7 @@ class PagesFragment : Fragment() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_pages_domains, null)
         val titleText = dialogView.findViewById<android.widget.TextView>(R.id.titleText)
         val loadingProgress = dialogView.findViewById<android.widget.ProgressBar>(R.id.loadingProgress)
+        val emptyText = dialogView.findViewById<android.widget.TextView>(R.id.emptyText)
         val domainsRecyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.domainsRecyclerView)
         val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
 
@@ -2989,18 +3083,22 @@ class PagesFragment : Fragment() {
 
         fun loadDomains() {
             loadingProgress.visibility = android.view.View.VISIBLE
+            emptyText.visibility = android.view.View.GONE
             lifecycleScope.launch {
                 val result = pagesViewModel.listDomainsSuspend(account, project.name)
                 loadingProgress.visibility = android.view.View.GONE
                 if (result is Resource.Success<*>) {
                     @Suppress("UNCHECKED_CAST")
                     val domains = result.data as List<PagesDomain>
+                    // 只有内置 pages.dev 子域名，没有自定义域名时显示 emptyText
+                    emptyText.visibility = if (domains.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
                     domainsRecyclerView.adapter = DomainAdapter(previewDomain, domains) { domain ->
                         confirmDeleteDomain(account, project, domain) {
                             loadDomains()
                         }
                     }
                 } else {
+                    emptyText.visibility = android.view.View.VISIBLE
                     domainsRecyclerView.adapter = DomainAdapter(previewDomain, emptyList()) { domain ->
                         confirmDeleteDomain(account, project, domain) {
                             loadDomains()

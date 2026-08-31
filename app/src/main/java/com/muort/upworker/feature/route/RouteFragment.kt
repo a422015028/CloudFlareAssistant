@@ -351,6 +351,19 @@ class RouteFragment : Fragment() {
         val scriptNames = workerViewModel.scripts.value.map { it.id }
         val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, scriptNames)
         dialogBinding.routeScript.setAdapter(adapter)
+
+        // Zone 模式下，自动把「当前 Zone 名/*」填到路由模式输入框，光标移末尾
+        if (zoneId.isNotBlank()) {
+            lifecycleScope.launch {
+                val zone = zoneRepository.getZone(zoneId)
+                if (zone != null) {
+                    val pattern = "${zone.name}/*"
+                    dialogBinding.routePattern.setText(pattern)
+                    dialogBinding.routePattern.requestFocus()
+                    dialogBinding.routePattern.setSelection(pattern.length)
+                }
+            }
+        }
         
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.route_add_route)
@@ -409,6 +422,54 @@ class RouteFragment : Fragment() {
     
     private fun showAddDomainDialog() {
         val dialogBinding = DialogDomainInputBinding.inflate(layoutInflater)
+        val account = accountViewModel.defaultAccount.value ?: run {
+            Snackbar.make(binding.root, getString(R.string.app_no_account_selected), Snackbar.LENGTH_SHORT).show()
+            return
+        }
+
+        // ========== Zone Exposed Dropdown Menu：加载 zones，选中自动填入「.+域名」到 hostname ==========
+        val zones = mutableListOf<com.muort.upworker.core.model.Zone>()
+        val zoneAdapter = ArrayAdapter<String>(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            mutableListOf(getString(R.string.worker_route_zone_loading))
+        )
+        dialogBinding.domainZone.setAdapter(zoneAdapter)
+        dialogBinding.domainZone.keyListener = null
+        lifecycleScope.launch {
+            when (val res = zoneRepository.fetchAndSaveZones(account)) {
+                is Resource.Success -> {
+                    zones.clear()
+                    val sorted = res.data.sortedBy { it.name }
+                    zones.addAll(sorted)
+                    if (zones.isEmpty()) {
+                        zoneAdapter.clear()
+                        zoneAdapter.add(getString(R.string.worker_route_zone_empty))
+                        zoneAdapter.notifyDataSetChanged()
+                    } else {
+                        zoneAdapter.clear()
+                        zoneAdapter.addAll(zones.map { it.name })
+                        zoneAdapter.notifyDataSetChanged()
+                    }
+                }
+                is Resource.Error -> {
+                    Snackbar.make(
+                        binding.root,
+                        getString(R.string.worker_route_zone_load_failed, res.message),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
+                else -> {}
+            }
+        }
+        dialogBinding.domainZone.onItemClickListener = android.widget.AdapterView.OnItemClickListener { _, _, position, _ ->
+            if (position in zones.indices) {
+                val hostname = "*.${zones[position].name}"
+                dialogBinding.domainHostname.setText(hostname)
+                dialogBinding.domainHostname.requestFocus()
+                dialogBinding.domainHostname.setSelection(hostname.length)
+            }
+        }
 
         // 设置 Worker 脚本下拉列表
         val scriptNames = workerViewModel.scripts.value.map { it.id }

@@ -6,6 +6,25 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Zone 选择：Exposed Dropdown Menu，配合 Worker/Pages 添加域名的相同体验，
+         选中后自动填入「.+域名」到域名输入框。 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/domainZoneLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/worker_route_select_zone"
+        android:layout_marginBottom="8dp"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+        <AutoCompleteTextView
+            android:id="@+id/domainZone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/worker_route_select_zone"
+            android:inputType="none" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -70,6 +89,7 @@
             android:id="@+id/domainScript"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/domain_worker_script"
             android:inputType="none" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -87,6 +107,7 @@
             android:id="@+id/domainProject"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/pages_project"
             android:inputType="none" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -105,6 +126,7 @@
             android:id="@+id/domainR2Bucket"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/domain_r2_bucket"
             android:inputType="none" />
 
     </com.google.android.material.textfield.TextInputLayout>

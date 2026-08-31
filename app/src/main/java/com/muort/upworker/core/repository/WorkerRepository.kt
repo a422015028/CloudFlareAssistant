@@ -1462,6 +1462,238 @@ class WorkerRepository @Inject constructor(
         }
     }
 
+    // ================= Worker Script-Level Feature Toggles =================
+    // 对应 Cloudflare Worker Settings 页面的三个开关：
+    //   1. 启用自定义子域名（workers.dev 子域名）→ subdomain.enabled
+    //   2. 可观测性（Observability）          → script-settings.observability.enabled
+    //   3. Logs 持久化（Logs Persist）         → script-settings.observability.logs.persist
+
+    data class WorkerScriptSettings(
+        val observabilityEnabled: Boolean = false,
+        val logsPersist: Boolean = false,
+        val logpushLegacy: Boolean = false,
+        val raw: Map<String, Any> = emptyMap()
+    )
+
+    data class WorkerSubdomainStatus(
+        val enabled: Boolean = false,
+        val previewsEnabled: Boolean = false,
+        val subdomain: String? = null,
+        val raw: Map<String, Any> = emptyMap()
+    )
+
+    /**
+     * GET /accounts/{id}/workers/scripts/{name}/script-settings
+     * 读取 observability + logs.persist 等脚本级开关。
+     */
+    suspend fun getScriptSettings(account: Account, scriptName: String): Resource<WorkerScriptSettings> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.getWorkerScriptSettings(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    scriptName = scriptName
+                )
+                val body = response.body()
+                if (response.isSuccessful && body?.success == true && body.result != null) {
+                    val result = body.result
+                    val observabilityMap = (result["observability"] as? Map<*, *>)
+                        ?.mapKeys { it.key.toString() }.orEmpty()
+                    val observabilityEnabled = observabilityMap["enabled"] as? Boolean ?: false
+                    val logsMap = (observabilityMap["logs"] as? Map<*, *>)
+                        ?.mapKeys { it.key.toString() }.orEmpty()
+                    val logsPersist = logsMap["persist"] as? Boolean
+                        ?: (result["logpush"] as? Boolean)
+                        ?: false
+                    val logpushLegacy = result["logpush"] as? Boolean ?: false
+                    Resource.Success(
+                        WorkerScriptSettings(
+                            observabilityEnabled = observabilityEnabled,
+                            logsPersist = logsPersist,
+                            logpushLegacy = logpushLegacy,
+                            raw = result.mapKeys { it.key.toString() }
+                        )
+                    )
+                } else {
+                    val errorMsg = body?.errors?.firstOrNull()?.message ?: response.message()
+                    Resource.Error(appContext.getString(R.string.worker_settings_fetch_failed_format, errorMsg))
+                }
+            }
+        }
+
+    /**
+     * PATCH /accounts/{id}/workers/scripts/{name}/script-settings
+     * 写入可观测性开关 + Logs 持久化开关。
+     * observability 对象必须完整给出（observability.logs.enabled / invocation_logs 必填），
+     * 所以我们先 GET 回来的 raw 作为基线，再覆盖 observability.enabled / logs.persist。
+     */
+    suspend fun patchScriptSettings(
+        account: Account,
+        scriptName: String,
+        observabilityEnabled: Boolean,
+        logsPersist: Boolean,
+        baselineRaw: Map<String, Any> = emptyMap()
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val baseObservability = ((baselineRaw["observability"] as? Map<*, *>)
+                ?.mapKeys { it.key.toString() }.orEmpty()).toMutableMap()
+            // observability.enabled 必填
+            baseObservability["enabled"] = observabilityEnabled
+            // logs 子对象必填：enabled + invocation_logs，persist 是我们要写的持久化开关
+            val baseLogs = ((baseObservability["logs"] as? Map<*, *>)
+                ?.mapKeys { it.key.toString() }.orEmpty()).toMutableMap()
+            baseLogs["enabled"] = baseLogs["enabled"] as? Boolean ?: true
+            baseLogs["invocation_logs"] = baseLogs["invocation_logs"] as? Boolean ?: true
+            baseLogs["persist"] = logsPersist
+            baseObservability["logs"] = baseLogs
+            // traces 对象不是必填，没有就不写
+
+            // 用 Gson 构造 JsonObject / JsonArray（项目统一使用 Gson，不引入 kotlinx.serialization JSON DSL）
+            val gson = Gson()
+            val json = com.google.gson.JsonObject()
+
+            val obs = com.google.gson.JsonObject()
+            obs.addProperty("enabled", observabilityEnabled)
+            (baseObservability["head_sampling_rate"] as? Number)?.let {
+                obs.addProperty("head_sampling_rate", it.toDouble())
+            }
+            (baseObservability["redact_query_string"] as? Boolean)?.let {
+                obs.addProperty("redact_query_string", it)
+            }
+
+            val logsJson = com.google.gson.JsonObject()
+            logsJson.addProperty("enabled", baseLogs["enabled"] as Boolean)
+            logsJson.addProperty("invocation_logs", baseLogs["invocation_logs"] as Boolean)
+            logsJson.addProperty("persist", logsPersist)
+            (baseLogs["head_sampling_rate"] as? Number)?.let {
+                logsJson.addProperty("head_sampling_rate", it.toDouble())
+            }
+            (baseLogs["destinations"] as? List<*>)?.let { dests ->
+                val arr = com.google.gson.JsonArray()
+                dests.mapNotNull { d -> d as? String }.forEach { arr.add(it) }
+                logsJson.add("destinations", arr)
+            }
+            obs.add("logs", logsJson)
+
+            (baseObservability["traces"] as? Map<*, *>)?.let { traces ->
+                val t = traces.mapKeys { it.key.toString() }
+                val tracesJson = com.google.gson.JsonObject()
+                (t["enabled"] as? Boolean)?.let { tracesJson.addProperty("enabled", it) }
+                (t["persist"] as? Boolean)?.let { tracesJson.addProperty("persist", it) }
+                (t["head_sampling_rate"] as? Number)?.let { tracesJson.addProperty("head_sampling_rate", it.toDouble()) }
+                (t["propagation_policy"] as? String)?.let { tracesJson.addProperty("propagation_policy", it) }
+                (t["destinations"] as? List<*>)?.let { dests ->
+                    val arr = com.google.gson.JsonArray()
+                    dests.mapNotNull { d -> d as? String }.forEach { arr.add(it) }
+                    tracesJson.add("destinations", arr)
+                }
+                obs.add("traces", tracesJson)
+            }
+
+            json.add("observability", obs)
+            // logpush 是老版本保留字段（Legacy Workers，非 Versions），同步写一下
+            (baselineRaw["logpush"] as? Boolean)?.let {
+                json.addProperty("logpush", logsPersist || it)
+            }
+            // tags（如有保留，一般是字符串数组）
+            (baselineRaw["tags"] as? List<*>)?.let { tags ->
+                val arr = com.google.gson.JsonArray()
+                tags.mapNotNull { t -> t as? String }.forEach { arr.add(it) }
+                json.add("tags", arr)
+            }
+            // tail_consumers（如有保留，是任意元素数组，直接序列化成 JsonElement）
+            (baselineRaw["tail_consumers"] as? List<*>)?.let { tcs ->
+                json.add("tail_consumers", gson.toJsonTree(tcs))
+            }
+
+            val body = gson.toJson(json).toRequestBody("application/json".toMediaType())
+            val response = api.updateWorkerScriptSettings(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName,
+                body = body
+            )
+            if (response.isSuccessful && response.body()?.success == true) {
+                Resource.Success(Unit)
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                Resource.Error(appContext.getString(R.string.worker_settings_update_failed_format, errorMsg))
+            }
+        }
+    }
+
+    /**
+     * GET /accounts/{id}/workers/scripts/{name}/subdomain
+     * 读取脚本的 workers.dev 自定义子域名是否已启用。
+     */
+    suspend fun getSubdomainStatus(account: Account, scriptName: String): Resource<WorkerSubdomainStatus> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.getWorkerSubdomainStatus(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    scriptName = scriptName
+                )
+                val body = response.body()
+                if (response.isSuccessful && body?.success == true && body.result != null) {
+                    val result = body.result.mapKeys { it.key.toString() }
+                    Resource.Success(
+                        WorkerSubdomainStatus(
+                            enabled = result["enabled"] as? Boolean ?: false,
+                            previewsEnabled = result["previews_enabled"] as? Boolean ?: false,
+                            subdomain = result["subdomain"] as? String,
+                            raw = result
+                        )
+                    )
+                } else {
+                    val errorMsg = body?.errors?.firstOrNull()?.message ?: response.message()
+                    Resource.Error(appContext.getString(R.string.worker_subdomain_status_fetch_failed_format, errorMsg))
+                }
+            }
+        }
+
+    /**
+     * POST /accounts/{id}/workers/scripts/{name}/subdomain
+     * 写入 workers.dev 自定义子域名开关（Cloudflare 文档 endpoint 必填 enabled）。
+     */
+    suspend fun updateSubdomainStatus(
+        account: Account,
+        scriptName: String,
+        enabled: Boolean,
+        previewsEnabled: Boolean? = null
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val request = if (previewsEnabled == null) {
+                com.muort.upworker.core.model.WorkerSubdomainEnableRequest(enabled = enabled)
+            } else {
+                com.muort.upworker.core.model.WorkerSubdomainEnableRequest(
+                    enabled = enabled,
+                    previewsEnabled = previewsEnabled
+                )
+            }
+            val response = api.enableWorkerSubdomain(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName,
+                request = request
+            )
+            if (response.isSuccessful && response.body()?.success == true) {
+                Resource.Success(Unit)
+            } else {
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                Resource.Error(appContext.getString(R.string.worker_subdomain_update_failed_format, errorMsg))
+            }
+        }
+    }
+
     suspend fun listTails(account: Account, scriptName: String): Resource<List<TailResult>> =
         withContext(Dispatchers.IO) {
             safeApiCall {
