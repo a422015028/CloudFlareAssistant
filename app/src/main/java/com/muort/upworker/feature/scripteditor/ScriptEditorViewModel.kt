@@ -165,33 +165,50 @@ class ScriptEditorViewModel @Inject constructor(
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
                 
                 try {
-                    // 获取原有配置以保留bindings和compatibilityDate（新脚本可能没有配置，失败时使用空配置继续上传）
-                    val (originalBindings, originalCompatibilityDate) = when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
-                        is Resource.Success -> {
-                            Pair(settings.data.bindings, settings.data.compatibilityDate)
+                    // 获取原有配置以保留bindings、兼容性配置及 PATCH 保留元数据
+                    // （新脚本可能没有配置，失败时使用空配置继续上传）
+                    val existingSettings: com.muort.upworker.core.model.WorkerScript? =
+                        when (val s = workerRepository.getWorkerSettings(account, scriptName)) {
+                            is Resource.Success -> s.data
+                            is Resource.Error -> {
+                                Timber.w("No existing settings found for script '$scriptName' (new script?), proceeding with empty bindings")
+                                null
+                            }
+                            else -> null
                         }
-                        is Resource.Error -> {
-                            Timber.w("No existing settings found for script '$scriptName' (new script?), proceeding with empty bindings")
-                            Pair(null, null)
-                        }
-                        else -> Pair(null, null)
-                    }
-                    
+
                     // 直接使用原始内容，不做任何转换
                     tempFile.writeText(content, Charsets.UTF_8)
-                    
+
                     Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
-                    
+
                     // 过滤掉 secret_text bindings（无法获取值）
-                    val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
-                    
-                    // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
-                    // 更新脚本时保留原有日期，新脚本使用默认值
+                    val cleanedBindings = existingSettings?.bindings
+                        ?.filterNot { it.type == "secret_text" }
+
+                    @Suppress("UNCHECKED_CAST")
+                    val tailConsumers = existingSettings?.tailConsumers
+                        as? List<com.muort.upworker.core.model.TailConsumer>
+
+                    // 创建metadata并保留清理后的bindings + 兼容性配置 + PATCH 保留字段
+                    // （脚本格式由Repository自动检测；保留 exports 等字段避免后续 PATCH
+                    //  omit = clear 清空 ES Module 声明 → SyntaxError 10021）
                     val metadata = com.muort.upworker.core.model.WorkerMetadata(
-                        compatibilityDate = originalCompatibilityDate,
-                        bindings = cleanedBindings
+                        compatibilityDate = existingSettings?.compatibilityDate,
+                        compatibilityFlags = existingSettings?.compatibilityFlags,
+                        usageModel = existingSettings?.usageModel,
+                        logpush = existingSettings?.logpush,
+                        tailConsumers = tailConsumers,
+                        bindings = cleanedBindings,
+                        exports = existingSettings?.exports,
+                        exportsReconciliation = existingSettings?.exportsReconciliation,
+                        migrations = existingSettings?.migrations,
+                        limits = existingSettings?.limits,
+                        tags = existingSettings?.tags,
+                        cacheOptions = existingSettings?.cacheOptions,
+                        observability = existingSettings?.observability
                     )
-                    
+
                     when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
                         is Resource.Success -> {
                             _uploadState.value = UploadState.Success
@@ -284,29 +301,46 @@ class ScriptEditorViewModel @Inject constructor(
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
                 
                 try {
-                    // 获取原有配置以保留bindings和compatibilityDate（脚本不存在时使用空配置继续回滚）
-                    val (originalBindings, originalCompatibilityDate) = when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
-                        is Resource.Success -> {
-                            Pair(settings.data.bindings, settings.data.compatibilityDate)
+                    // 获取原有配置以保留bindings、兼容性配置及 PATCH 保留元数据
+                    // （脚本不存在时使用空配置继续回滚）
+                    val existingSettings: com.muort.upworker.core.model.WorkerScript? =
+                        when (val s = workerRepository.getWorkerSettings(account, scriptName)) {
+                            is Resource.Success -> s.data
+                            is Resource.Error -> {
+                                Timber.w("No existing settings found for script '$scriptName', proceeding with empty bindings")
+                                null
+                            }
+                            else -> null
                         }
-                        is Resource.Error -> {
-                            Timber.w("No existing settings found for script '$scriptName', proceeding with empty bindings")
-                            Pair(null, null)
-                        }
-                        else -> Pair(null, null)
-                    }
-                    
+
                     tempFile.writeText(version.content, Charsets.UTF_8)
-                    
-                    val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
-                    
-                    // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
-                    // 更新脚本时保留原有日期，新脚本使用默认值
+
+                    val cleanedBindings = existingSettings?.bindings
+                        ?.filterNot { it.type == "secret_text" }
+
+                    @Suppress("UNCHECKED_CAST")
+                    val tailConsumers = existingSettings?.tailConsumers
+                        as? List<com.muort.upworker.core.model.TailConsumer>
+
+                    // 创建metadata并保留清理后的bindings + 兼容性配置 + PATCH 保留字段
+                    // （脚本格式由Repository自动检测；保留 exports 等字段避免后续 PATCH
+                    //  omit = clear 清空 ES Module 声明 → SyntaxError 10021）
                     val metadata = com.muort.upworker.core.model.WorkerMetadata(
-                        compatibilityDate = originalCompatibilityDate,
-                        bindings = cleanedBindings
+                        compatibilityDate = existingSettings?.compatibilityDate,
+                        compatibilityFlags = existingSettings?.compatibilityFlags,
+                        usageModel = existingSettings?.usageModel,
+                        logpush = existingSettings?.logpush,
+                        tailConsumers = tailConsumers,
+                        bindings = cleanedBindings,
+                        exports = existingSettings?.exports,
+                        exportsReconciliation = existingSettings?.exportsReconciliation,
+                        migrations = existingSettings?.migrations,
+                        limits = existingSettings?.limits,
+                        tags = existingSettings?.tags,
+                        cacheOptions = existingSettings?.cacheOptions,
+                        observability = existingSettings?.observability
                     )
-                    
+
                     when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
                         is Resource.Success -> {
                             _uploadState.value = UploadState.Success

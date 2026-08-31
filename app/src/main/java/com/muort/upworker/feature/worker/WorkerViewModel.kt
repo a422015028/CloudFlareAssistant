@@ -50,39 +50,56 @@ class WorkerViewModel @Inject constructor(
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
                 
                 try {
-                    // 获取原有配置以保留bindings和兼容性配置
-                    val (originalBindings, originalCompatibilityDate, originalCompatibilityFlags) = when (val settings = workerRepository.getWorkerSettings(account, scriptName)) {
-                        is Resource.Success -> {
-                            Triple(settings.data.bindings, settings.data.compatibilityDate, settings.data.compatibilityFlags)
+                    // 获取原有配置以保留bindings、兼容性配置及 PATCH 保留元数据
+                    // （新脚本可能没有配置，失败时使用空配置继续上传）
+                    val existingSettings: com.muort.upworker.core.model.WorkerScript? =
+                        when (val s = workerRepository.getWorkerSettings(account, scriptName)) {
+                            is Resource.Success -> s.data
+                            is Resource.Error -> {
+                                Timber.w("No existing settings found for script '$scriptName' (new script?), proceeding with empty bindings")
+                                null
+                            }
+                            else -> null
                         }
-                        is Resource.Error -> {
-                            Timber.w("No existing settings found for script '$scriptName' (new script?), proceeding with empty bindings")
-                            Triple(null, null, null)
-                        }
-                        else -> Triple(null, null, null)
-                    }
-                    
+
                     // 直接使用原始内容，不做任何转换
                     tempFile.writeText(content, Charsets.UTF_8)
-                    
+
                     Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
-                    
+
                     // 过滤掉 secret_text bindings（无法获取值）
-                    val cleanedBindings = originalBindings?.filterNot { it.type == "secret_text" }
-                    
+                    val cleanedBindings = existingSettings?.bindings
+                        ?.filterNot { it.type == "secret_text" }
+
                     // 用户自定义日期 > 原有日期 > 默认值
-                    val finalCompatibilityDate = customCompatibilityDate?.takeIf { it.isNotBlank() } 
-                        ?: originalCompatibilityDate
-                    
+                    val finalCompatibilityDate = customCompatibilityDate?.takeIf { it.isNotBlank() }
+                        ?: existingSettings?.compatibilityDate
+
                     // 用户自定义标志（非空）> 原有标志 > null
                     val finalCompatibilityFlags = customCompatibilityFlags?.takeIf { it.isNotEmpty() }
-                        ?: originalCompatibilityFlags
-                    
-                    // 创建metadata并保留清理后的bindings（脚本类型由Repository自动检测）
+                        ?: existingSettings?.compatibilityFlags
+
+                    @Suppress("UNCHECKED_CAST")
+                    val tailConsumers = existingSettings?.tailConsumers
+                        as? List<com.muort.upworker.core.model.TailConsumer>
+
+                    // 创建metadata并保留清理后的bindings + 兼容性配置 + PATCH 保留字段
+                    // （脚本格式由Repository自动检测；保留 exports 等字段避免后续 PATCH
+                    //  omit = clear 清空 ES Module 声明 → SyntaxError 10021）
                     val metadata = com.muort.upworker.core.model.WorkerMetadata(
                         compatibilityDate = finalCompatibilityDate,
                         compatibilityFlags = finalCompatibilityFlags,
-                        bindings = cleanedBindings
+                        usageModel = existingSettings?.usageModel,
+                        logpush = existingSettings?.logpush,
+                        tailConsumers = tailConsumers,
+                        bindings = cleanedBindings,
+                        exports = existingSettings?.exports,
+                        exportsReconciliation = existingSettings?.exportsReconciliation,
+                        migrations = existingSettings?.migrations,
+                        limits = existingSettings?.limits,
+                        tags = existingSettings?.tags,
+                        cacheOptions = existingSettings?.cacheOptions,
+                        observability = existingSettings?.observability
                     )
                     
                     when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
@@ -705,17 +722,28 @@ class WorkerViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                // 先获取当前设置，保留已有 bindings
                 val currentSettings = workerRepository.getWorkerSettings(account, scriptName)
+                val existing = (currentSettings as? Resource.Success)?.data
 
                 val settingsRequest = com.muort.upworker.core.model.WorkerSettingsRequest(
-                    bindings = (currentSettings as? Resource.Success)?.data?.bindings,
+                    bindings = existing?.bindings,
                     compatibilityDate = compatibilityDate,
                     compatibilityFlags = compatibilityFlags,
-                    placement = placement
+                    placement = placement,
+                    // 显式从现有设置透传 ES Module 关键保留元数据
+                    usageModel = existing?.usageModel,
+                    logpush = existing?.logpush,
+                    tailConsumers = existing?.tailConsumers,
+                    exports = existing?.exports,
+                    exportsReconciliation = existing?.exportsReconciliation,
+                    migrations = existing?.migrations,
+                    limits = existing?.limits,
+                    tags = existing?.tags,
+                    cacheOptions = existing?.cacheOptions,
+                    observability = existing?.observability
                 )
 
-                val result = workerRepository.updateWorkerSettings(account, scriptName, settingsRequest)
+                val result = workerRepository.updateWorkerSettings(account, scriptName, settingsRequest, existing)
 
                 when (result) {
                     is Resource.Success -> onResult(Resource.Success(Unit))

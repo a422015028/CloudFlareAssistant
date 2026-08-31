@@ -31,6 +31,9 @@
     <!-- 拼写检查（依赖外部字典，误报多，先忽略） -->
     <issue id="Typos" severity="ignore" />
 
+    <!-- KTX 扩展建议（非正确性规则，项目约束显式忽略，避免老代码 childCount > 0 / Collections 等警告拦 CI） -->
+    <issue id="UseKtx" severity="ignore" />
+
     <!-- 新版本 Gradle/依赖提示（CI 环境不稳定，忽略） -->
     <issue id="GradleDependency" severity="ignore" />
     <issue id="NewerVersionAvailable" severity="ignore" />

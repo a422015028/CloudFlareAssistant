@@ -25,6 +25,79 @@ class WorkerRepository @Inject constructor(
     private val api: CloudFlareApi,
     private val gson: Gson
 ) {
+    /**
+     * 对 D1 binding 字段执行"统一只保留 `database_id`"的规范化：
+     *   - 若对象里只有旧字段 `"id"`（遗留 @SerializedName 或旧响应）：复制值到 `"database_id"` 并移除 `"id"`
+     *   - 若对象里同时有两个字段：保留 `"database_id"`（Cloudflare 规范要求），移除已弃用的 `"id"` 以免 API 校验冲突
+     *   - 若对象里只有 `"database_id"`：已是最佳状态，保持不变
+     *
+     * 参考 Cloudflare OpenAPI spec /workers/scripts/{script_name}/settings patch:
+     *   D1 binding required = [name, type, database_id]，字段 id 已 deprecated。
+     */
+    private fun fixD1BindingFields(settingsJson: String): String {
+        try {
+            val tree = com.google.gson.JsonParser.parseString(settingsJson).asJsonObject
+            val bindings = tree.getAsJsonArray("bindings") ?: return settingsJson
+            bindings.forEach { el ->
+                val obj = el.asJsonObject
+                if (obj.get("type")?.asString == "d1") {
+                    val idEl = obj.get("id")
+                    val dbIdEl = obj.get("database_id")
+                    when {
+                        // 只有旧字段 id → 迁移到 database_id，移除 id
+                        idEl != null && dbIdEl == null -> {
+                            obj.add("database_id", idEl)
+                            obj.remove("id")
+                        }
+                        // 两个都有 → 保留规范的 database_id，移除已弃用的 id
+                        idEl != null && dbIdEl != null -> {
+                            obj.remove("id")
+                        }
+                        // 只有 database_id → 符合规范，无需处理
+                    }
+                }
+            }
+            return gson.toJson(tree)
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to normalize D1 `database_id` fields, using original JSON")
+            return settingsJson
+        }
+    }
+
+    /**
+     * 构造 Worker settings PATCH 请求体 JSON 的统一入口：
+     *   1) 将 typed request 序列化为 JSON
+     *   2) 若提供了 existingSettings（来自 getWorkerSettings），将 request 未显式设置的保留字段
+     *      （exports、migrations、limits、tags、cache_options、tail_consumers、observability、
+     *       usage_model、logpush）从现有设置中回填，避免 Cloudflare PATCH "omit = clear" 语义
+     *      意外清除关键元数据（最典型的是 ES Module 的 exports 被清空 → 脚本被降级为 Service Worker
+     *      解析 → `export` 关键字 SyntaxError 10021）。
+     *   3) 最后再执行 fixD1BindingFields 双字段兼容。
+     */
+    private fun buildPatchSettingsJson(
+        request: WorkerSettingsRequest,
+        existingSettings: WorkerScript? = null
+    ): String {
+        val reqTree = gson.toJsonTree(request).asJsonObject
+        if (existingSettings != null) {
+            val existing = gson.toJsonTree(existingSettings).asJsonObject
+            // settings 字段（如 exports）在 data class 中默认 null 时，gson.toJsonTree 会产生 JsonNull，
+            // 所以这里判断 isJsonNull 而非单纯 has(key) 来识别"调用方未显式提供"
+            listOf(
+                "exports", "exports_reconciliation", "migrations", "limits", "tags",
+                "cache_options", "tail_consumers", "observability",
+                "usage_model", "logpush"
+            ).forEach { key ->
+                val reqVal = reqTree.get(key)
+                if ((reqVal == null || reqVal.isJsonNull) && existing.has(key) && !existing.get(key).isJsonNull) {
+                    reqTree.add(key, existing.get(key))
+                }
+            }
+        }
+        val mergedJson = gson.toJson(reqTree)
+        return fixD1BindingFields(mergedJson)
+    }
+
     suspend fun updateCustomDomain(
         account: Account,
         domainId: String,
@@ -75,7 +148,15 @@ class WorkerRepository @Inject constructor(
                 compatibilityFlags = metadata?.compatibilityFlags,
                 vars = metadata?.vars,
                 logpush = metadata?.logpush,
-                tailConsumers = metadata?.tailConsumers
+                tailConsumers = metadata?.tailConsumers,
+                // 保留字段从调用方 metadata 原样透传，避免后续 PATCH omit=clear 被清空
+                exports = metadata?.exports,
+                exportsReconciliation = metadata?.exportsReconciliation,
+                migrations = metadata?.migrations,
+                limits = metadata?.limits,
+                tags = metadata?.tags,
+                cacheOptions = metadata?.cacheOptions,
+                observability = metadata?.observability
             )
             
             val metadataJson = gson.toJson(finalMetadata)
@@ -358,7 +439,8 @@ class WorkerRepository @Inject constructor(
                 compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
             )
             
-            val settingsJson = gson.toJson(settingsRequest)
+            val existingSettings = (settingsResult as? Resource.Success)?.data
+            val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
             Timber.d("KV Settings request: $settingsRequest")
             
             // Convert to RequestBody for multipart
@@ -438,7 +520,8 @@ class WorkerRepository @Inject constructor(
                 compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
             )
             
-            val settingsJson = gson.toJson(settingsRequest)
+            val existingSettings = (settingsResult as? Resource.Success)?.data
+            val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
             Timber.d("R2 Settings request: $settingsRequest")
             
             // Convert to RequestBody for multipart
@@ -521,7 +604,8 @@ class WorkerRepository @Inject constructor(
             
             Timber.d("D1 Settings request: $settingsRequest")
             
-            val settingsJson = gson.toJson(settingsRequest)
+            val existingSettings = (settingsResult as? Resource.Success)?.data
+            val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
             
             // Convert to RequestBody for multipart
             val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
@@ -603,7 +687,8 @@ class WorkerRepository @Inject constructor(
 
             Timber.d("Service Settings request: $settingsRequest")
 
-            val settingsJson = gson.toJson(settingsRequest)
+            val existingSettings = (settingsResult as? Resource.Success)?.data
+            val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
 
             // Convert to RequestBody for multipart
             val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
@@ -702,7 +787,8 @@ class WorkerRepository @Inject constructor(
                 compatibilityDate = existingCompatibilityDate ?: DEFAULT_COMPATIBILITY_DATE
             )
             
-            val settingsJson = gson.toJson(settingsRequest)
+            val existingSettings = (settingsResult as? Resource.Success)?.data
+            val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
             Timber.d("Settings request: $settingsJson")
             
             // Convert to RequestBody for multipart
@@ -861,14 +947,19 @@ class WorkerRepository @Inject constructor(
     
     /**
      * 更新 Worker 运行时设置（兼容日期、兼容性标志、放置），不重新上传脚本代码。
+     *
+     * @param existingSettings 可选：来自 getWorkerSettings 的现有设置。当提供时，会自动保留
+     * 调用方未显式设置的字段（exports、migrations、limits、tags、usage_model 等），
+     * 避免 ES Module 脚本因 exports 被清空导致的 SyntaxError 10021。
      */
     suspend fun updateWorkerSettings(
         account: Account,
         scriptName: String,
-        settingsRequest: WorkerSettingsRequest
+        settingsRequest: WorkerSettingsRequest,
+        existingSettings: WorkerScript? = null
     ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
         safeApiCall {
-            val settingsJson = gson.toJson(settingsRequest)
+            val settingsJson = buildPatchSettingsJson(settingsRequest, existingSettings)
             val settingsBody = settingsJson.toRequestBody("application/json".toMediaType())
 
             val response = api.updateWorkerSettings(
@@ -1480,12 +1571,41 @@ class WorkerRepository @Inject constructor(
         WorkerAfterUploadResult(uploadResult, stages.toList())
     }
 
-    /** Stage 1: Enable Observability — PATCH script settings with traces+logs enabled. */
+    /** Stage 1: Enable Observability — PATCH script settings with traces+logs enabled.
+     *
+     * 必须通过 buildPatchSettingsJson 统一入口构造 PATCH body：
+     *   - 先 GET /settings 拿到 existingSettings
+     *   - 使用 WorkerSettingsRequest 只显式设置 observability + 从 existingSettings 透传
+     *     bindings / compatibilityDate / usageModel / logpush 等当前值
+     *   - buildPatchSettingsJson 进一步自动回填 exports、migrations、limits、tags 等
+     *     保留字段，避免 Cloudflare PATCH "omit = clear" 语义清空 ES Module 的
+     *     exports → 脚本被降级为 SW 解析 → SyntaxError 10021。
+     */
     suspend fun applyObservability(account: Account, scriptName: String): WorkerPostActionStage =
         withContext(Dispatchers.IO) {
             try {
-                val patch = WorkerScriptSettingsPatch(observability = WorkerObservability())
-                val bodyJson = gson.toJson(patch)
+                val existing = when (val s = getWorkerSettings(account, scriptName)) {
+                    is Resource.Success -> s.data
+                    else -> null
+                }
+                val request = WorkerSettingsRequest(
+                    // 只显式设置 observability（开启 traces + logs）
+                    observability = WorkerObservability(),
+                    // 从现有 settings 透传当前值，防止只改 observability 时其他字段被意外回退
+                    bindings = existing?.bindings,
+                    compatibilityDate = existing?.compatibilityDate,
+                    compatibilityFlags = existing?.compatibilityFlags,
+                    usageModel = existing?.usageModel,
+                    logpush = existing?.logpush,
+                    tailConsumers = existing?.tailConsumers,
+                    exports = existing?.exports,
+                    exportsReconciliation = existing?.exportsReconciliation,
+                    migrations = existing?.migrations,
+                    limits = existing?.limits,
+                    tags = existing?.tags,
+                    cacheOptions = existing?.cacheOptions
+                )
+                val bodyJson = buildPatchSettingsJson(request, existing)
                 val requestBody = bodyJson.toRequestBody("application/json".toMediaType())
                 val response = api.updateWorkerSettings(
                     token = AuthHelper.getBearerToken(account),

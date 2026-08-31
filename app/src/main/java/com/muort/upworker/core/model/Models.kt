@@ -185,7 +185,18 @@ data class WorkerScript(
     @SerializedName("bindings") val bindings: List<WorkerBinding>? = null,
     @SerializedName("compatibility_date") val compatibilityDate: String? = null,
     @SerializedName("compatibility_flags") val compatibilityFlags: List<String>? = null,
-    @SerializedName("placement") val placement: Placement? = null
+    @SerializedName("placement") val placement: Placement? = null,
+    // ===== PATCH settings 保留字段（原样回传以避免被隐式清除） =====
+    @SerializedName("usage_model") val usageModel: String? = null,
+    @SerializedName("logpush") val logpush: Boolean? = null,
+    @SerializedName("tail_consumers") val tailConsumers: Any? = null,
+    @SerializedName("exports") val exports: Any? = null,
+    @SerializedName("exports_reconciliation") val exportsReconciliation: Any? = null,
+    @SerializedName("migrations") val migrations: Any? = null,
+    @SerializedName("limits") val limits: Any? = null,
+    @SerializedName("tags") val tags: Any? = null,
+    @SerializedName("cache_options") val cacheOptions: Any? = null,
+    @SerializedName("observability") val observability: Any? = null
 )
 
 data class WorkerVersion(
@@ -237,6 +248,14 @@ data class ResultInfo(
 /**
  * Metadata for Worker Script multipart upload
  * https://developers.cloudflare.com/workers/configuration/multipart-upload-metadata/
+ *
+ * "保留字段"说明：
+ *   exports / exports_reconciliation / migrations / limits / tags / cache_options /
+ *   observability 等字段在 PUT multipart metadata 中不是 Cloudflare 的"必填原生参数"，
+ *   但这里保留它们以实现"幂等更新"：
+ *     1) 编辑脚本时从 GET /settings 取回这些值，原样放进 metadata JSON
+ *     2) 避免后续任何独立的 PATCH /settings 调用因省略这些字段而触发
+ *        "omit = clear" 语义（特别是 ES Module 的 exports 被清空会导致 10021）。
  */
 data class WorkerMetadata(
     @SerializedName("main_module") val mainModule: String? = null,
@@ -247,7 +266,15 @@ data class WorkerMetadata(
     @SerializedName("bindings") val bindings: List<WorkerBinding>? = null,
     @SerializedName("vars") val vars: Map<String, String>? = null,
     @SerializedName("logpush") val logpush: Boolean? = null,
-    @SerializedName("tail_consumers") val tailConsumers: List<TailConsumer>? = null
+    @SerializedName("tail_consumers") val tailConsumers: List<TailConsumer>? = null,
+    // ===== 保留字段：从现有 settings 原样回传，避免后续 PATCH omit=clear 清空 =====
+    @SerializedName("exports") val exports: Any? = null,
+    @SerializedName("exports_reconciliation") val exportsReconciliation: Any? = null,
+    @SerializedName("migrations") val migrations: Any? = null,
+    @SerializedName("limits") val limits: Any? = null,
+    @SerializedName("tags") val tags: Any? = null,
+    @SerializedName("cache_options") val cacheOptions: Any? = null,
+    @SerializedName("observability") val observability: Any? = null
 )
 
 /**
@@ -258,12 +285,18 @@ data class WorkerBinding(
     @SerializedName("name") val name: String, // Variable name in worker
     @SerializedName("namespace_id") val namespaceId: String? = null, // For KV
     @SerializedName("bucket_name") val bucketName: String? = null, // For R2
-    @SerializedName("id") val databaseId: String? = null, // For D1 - Cloudflare expects "id" not "database_id"
+    @SerializedName("database_id") val databaseId: String? = null, // For D1 — required field per Cloudflare OpenAPI spec (WRITE always uses this)
     @SerializedName("service") val service: String? = null, // For service bindings
     @SerializedName("environment") val environment: String? = null,
     @SerializedName("text") val text: String? = null, // For plain_text and secret_text bindings
-    @SerializedName("json") val json: Any? = null // For json type bindings
+    @SerializedName("json") val json: Any? = null, // For json type bindings
+    /** READ-side legacy fallback: Cloudflare 旧版本 GET settings 可能返回已弃用的 `id`（被 database_id 重命名的字段）。
+     *  WRITE side 永远不会序列化输出此字段，因为 constructor 默认 null，且 fixD1BindingFields 在最终 JSON 中强制去除 id。*/
+    @SerializedName("id") val databaseIdLegacy: String? = null
 ) {
+    /** D1 绑定的 UUID：优先读规范字段 database_id，失败再回退到旧 API 遗留的 id（仅读取时使用）。 */
+    val d1Uuid: String? get() = databaseId ?: databaseIdLegacy
+
     // Helper to get the value regardless of whether it's in text or json field
     fun getValue(): String? {
         return when {
@@ -342,7 +375,16 @@ data class WorkerSettingsRequest(
     @SerializedName("compatibility_flags") val compatibilityFlags: List<String>? = null,
     @SerializedName("usage_model") val usageModel: String? = null,
     @SerializedName("logpush") val logpush: Boolean? = null,
-    @SerializedName("placement") val placement: Placement? = null
+    @SerializedName("placement") val placement: Placement? = null,
+    // ===== 保留字段：若非 null 则直接写入 PATCH body；为 null 时由 Repository 合并 existingSettings 中的值 =====
+    @SerializedName("tail_consumers") val tailConsumers: Any? = null,
+    @SerializedName("exports") val exports: Any? = null,
+    @SerializedName("exports_reconciliation") val exportsReconciliation: Any? = null,
+    @SerializedName("migrations") val migrations: Any? = null,
+    @SerializedName("limits") val limits: Any? = null,
+    @SerializedName("tags") val tags: Any? = null,
+    @SerializedName("cache_options") val cacheOptions: Any? = null,
+    @SerializedName("observability") val observability: Any? = null
 )
 
 data class CustomDomainRequest(

@@ -25,6 +25,7 @@ import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.R2CustomDomain
 import com.muort.upworker.core.model.R2Object
 import com.muort.upworker.databinding.DialogR2InputBinding
+import com.muort.upworker.databinding.DialogR2UploadBinding
 import com.muort.upworker.databinding.FragmentR2Binding
 import com.muort.upworker.databinding.ItemR2BucketBinding
 import com.muort.upworker.feature.account.AccountViewModel
@@ -91,13 +92,17 @@ class R2Fragment : Fragment() {
     private var currentBucket: R2Bucket? = null
     private var currentDownloadObject: Pair<R2Bucket, R2Object>? = null  // 存储待下载的对象
     private var isLoadingCustomDomains = false
+    private var pendingUploadUri: Uri? = null
+    private var uploadDialogBinding: DialogR2UploadBinding? = null
     
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-                uploadFile(uri)
+                pendingUploadUri = uri
+                // 更新对话框中的文件名显示
+                updateSelectedFileName(uri)
             }
         }
     }
@@ -190,7 +195,7 @@ class R2Fragment : Fragment() {
             // 仅允许在选中存储桶时上传
             val bucket = r2ViewModel.selectedBucket.value
             if (bucket != null) {
-                selectFileToUpload(bucket)
+                showUploadDialog(bucket)
             } else {
                 Snackbar.make(binding.root, getString(R.string.msg_please_select_bucket_first), Snackbar.LENGTH_SHORT).show()
             }
@@ -332,13 +337,13 @@ class R2Fragment : Fragment() {
             .setItems(items) { _, which ->
                 if (objects.isEmpty()) {
                     if (which == 1) {
-                        selectFileToUpload(bucket)
+                        showUploadDialog(bucket)
                     }
                 } else {
                     if (which < objects.size) {
                         showObjectDetailsDialog(account, bucket, objects[which], customDomains)
                     } else {
-                        selectFileToUpload(bucket)
+                        showUploadDialog(bucket)
                     }
                 }
             }
@@ -458,13 +463,86 @@ class R2Fragment : Fragment() {
         }
     }
     
-    private fun selectFileToUpload(bucket: R2Bucket) {
+    private fun selectFileToUpload() {
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "*/*"
             addCategory(Intent.CATEGORY_OPENABLE)
         }
-        currentBucket = bucket
         filePickerLauncher.launch(intent)
+    }
+
+    /**
+     * 从 URI 提取用于显示的简短文件名
+     */
+    private fun extractDisplayFileName(uri: Uri): String {
+        val originalName = uri.lastPathSegment ?: "upload"
+        val fileName = originalName.substringAfterLast('/').substringAfterLast('\\')
+        return shortenFileName(fileName, 40)
+    }
+
+    /**
+     * 更新对话框中已选择文件的显示文本
+     */
+    private fun updateSelectedFileName(uri: Uri) {
+        val db = uploadDialogBinding ?: return
+        db.tvSelectedFile.setTextColor(com.google.android.material.R.attr.colorOnSurface)
+        try {
+            val typedValue = android.util.TypedValue()
+            requireContext().theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, typedValue, true)
+            db.tvSelectedFile.setTextColor(typedValue.data)
+        } catch (_: Exception) {
+            // fall back to default text color
+        }
+        db.tvSelectedFile.text = extractDisplayFileName(uri)
+    }
+
+    /**
+     * 显示上传文件对话框（路径前缀输入 + 选择文件 + 取消/上传）
+     */
+    private fun showUploadDialog(bucket: R2Bucket) {
+        currentBucket = bucket
+        pendingUploadUri = null
+
+        val dialogBinding = DialogR2UploadBinding.inflate(layoutInflater)
+        uploadDialogBinding = dialogBinding
+        // 默认路径前缀为 /
+        dialogBinding.pathPrefixEditText.setText("/")
+
+        val builder = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .setCancelable(true)
+
+        val dialog = builder.create()
+
+        // 关闭按钮
+        dialogBinding.btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+        // 取消按钮
+        dialogBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+        // 选择文件按钮
+        dialogBinding.btnSelectFile.setOnClickListener {
+            selectFileToUpload()
+        }
+        // 上传按钮
+        dialogBinding.btnUpload.setOnClickListener {
+            val uri = pendingUploadUri
+            if (uri == null) {
+                Snackbar.make(binding.root, R.string.r2_msg_please_select_file, Snackbar.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val prefix = dialogBinding.pathPrefixEditText.text?.toString()?.trim() ?: "/"
+            dialog.dismiss()
+            uploadFile(uri, prefix)
+        }
+
+        dialog.setOnDismissListener {
+            uploadDialogBinding = null
+            pendingUploadUri = null
+        }
+        dialog.show()
     }
     
     private fun downloadObject(bucket: R2Bucket, obj: R2Object) {
@@ -491,7 +569,7 @@ class R2Fragment : Fragment() {
     }
 
     
-    private fun uploadFile(uri: Uri) {
+    private fun uploadFile(uri: Uri, pathPrefix: String = "/") {
         val bucket = currentBucket ?: return
         val account = accountViewModel.defaultAccount.value ?: return
 
@@ -515,6 +593,13 @@ class R2Fragment : Fragment() {
                 .replace(">", "_")
                 .replace("|", "_")
                 .takeIf { it.isNotBlank() } ?: "upload"
+
+            // 归一化路径前缀：去掉开头的 "/"，若不为空且不以 "/" 结尾则追加 "/"
+            var normalizedPrefix = pathPrefix.trimStart('/')
+            if (normalizedPrefix.isNotEmpty() && !normalizedPrefix.endsWith("/")) {
+                normalizedPrefix += "/"
+            }
+            val objectKey = normalizedPrefix + safeFileName
             
             val file = java.io.File(requireContext().cacheDir, "upload_${System.currentTimeMillis()}_$safeFileName")
             inputStream.use { input ->
@@ -523,7 +608,7 @@ class R2Fragment : Fragment() {
                 }
             }
             
-            r2ViewModel.uploadObject(account, bucket.name, safeFileName, file) { _ ->
+            r2ViewModel.uploadObject(account, bucket.name, objectKey, file) { _ ->
                 // 上传完成后立即删除临时文件
                 if (file.exists()) {
                     file.delete()
@@ -671,6 +756,7 @@ class R2Fragment : Fragment() {
 
     
     override fun onDestroyView() {
+        uploadDialogBinding = null
         super.onDestroyView()
         _binding = null
     }

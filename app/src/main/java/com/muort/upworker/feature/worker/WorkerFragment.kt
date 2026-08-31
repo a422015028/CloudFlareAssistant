@@ -79,6 +79,26 @@ data class ServiceBindingItem(
     val serviceEnvironment: String
 )
 
+/**
+ * 将任意字符串（通常是 JS 绑定名）转换为合法的 R2 bucket name。
+ * 规则：3–63 字符、只允许小写字母/数字/连字符、首尾必须是字母或数字、不能像 IP 地址。
+ */
+private fun sanitizeR2BucketName(input: String): String {
+    var s = input.lowercase()
+        .replace(Regex("[^a-z0-9-]"), "-")
+        .trim('-')
+    if (s.isEmpty()) s = "cf-bucket"
+    while (s.length < 3) s += "a"
+    if (s.length > 63) {
+        s = s.take(63).trimEnd('-')
+        while (s.length < 3) s += "a"
+    }
+    if (s.matches(Regex("^\\d{1,3}-\\d{1,3}-\\d{1,3}-\\d{1,3}$"))) {
+        s = "bucket-$s"
+    }
+    return s
+}
+
 @AndroidEntryPoint
 class WorkerFragment : Fragment() {
     
@@ -612,46 +632,110 @@ class WorkerFragment : Fragment() {
             showToast(getString(R.string.msg_please_select_account_first))
             return
         }
-        
+
         viewLifecycleOwner.lifecycleScope.launch {
             val result = kvRepository.listNamespaces(account)
-            
+
             if (result is com.muort.upworker.core.model.Resource.Success) {
-                val namespaces = result.data
-                
-                if (namespaces.isEmpty()) {
-                    showToast(getString(R.string.worker_no_kv_namespace))
-                    return@launch
-                }
-                
+                val namespaces = result.data.toMutableList()
+
                 val dialogBinding = DialogKvBindingBinding.inflate(layoutInflater)
-                
-                // Setup spinner
-                val namespaceNames = namespaces.map { it.title }
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, namespaceNames)
+
+                // Setup spinner: prepend "Auto Create / Reuse" option (index 0)
+                val autoOption = getString(R.string.binding_spinner_auto_create_reuse)
+                val spinnerItems = mutableListOf(autoOption)
+                namespaces.forEach { spinnerItems.add(it.title) }
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerItems)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 dialogBinding.namespaceSpinner.adapter = adapter
-                
-                MaterialAlertDialogBuilder(requireContext())
-                    .setView(dialogBinding.root)
-                    .setPositiveButton(R.string.add) { _, _ ->
-                        val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
-                        val selectedIndex = dialogBinding.namespaceSpinner.selectedItemPosition
-                        
-                        if (bindingName.isEmpty()) {
-                            showToast(getString(R.string.worker_please_enter_binding_name))
-                            return@setPositiveButton
-                        }
-                        
-                        if (selectedIndex >= 0 && selectedIndex < namespaces.size) {
-                            val namespace = namespaces[selectedIndex]
-                            tempBindings.add(Pair(bindingName, namespace.id))
-                            onAdded()
-                            showToast(getString(R.string.worker_binding_added))
-                        }
+
+                // Update hint (the last TextView inside the root LinearLayout)
+                val rootLayout = dialogBinding.root as? android.widget.LinearLayout
+                if (rootLayout != null && rootLayout.childCount > 0) {
+                    val hintView = rootLayout.getChildAt(rootLayout.childCount - 1) as? android.widget.TextView
+                    if (hintView != null && hintView.id == View.NO_ID) {
+                        hintView.text = getString(R.string.binding_auto_create_hint)
                     }
+                }
+
+                val dialog = MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton(R.string.add, null)
                     .setNegativeButton(R.string.cancel, null)
                     .show()
+
+                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                    val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
+                    val selectedIndex = dialogBinding.namespaceSpinner.selectedItemPosition
+
+                    if (bindingName.isEmpty()) {
+                        showToast(getString(R.string.worker_please_enter_binding_name))
+                        return@setOnClickListener
+                    }
+
+                    if (tempBindings.any { it.first == bindingName }) {
+                        showToast(getString(R.string.worker_binding_name_already_exists_template, bindingName))
+                        return@setOnClickListener
+                    }
+
+                    if (selectedIndex == 0) {
+                        // ── Auto Create / Reuse path ──
+                        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+                            .setMessage(R.string.binding_auto_create_creating)
+                            .setCancelable(false)
+                            .create()
+                        loadingDialog.show()
+                        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).isEnabled = false
+                        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).isEnabled = false
+
+                        viewLifecycleOwner.lifecycleScope.launch kvInner@{
+                            try {
+                                val existing = namespaces.find { it.title == bindingName }
+                                val targetNsId: String
+                                val isNew: Boolean
+
+                                if (existing != null) {
+                                    targetNsId = existing.id
+                                    isNew = false
+                                } else {
+                                    val createResult = kvRepository.createNamespace(account, bindingName)
+                                    if (createResult is com.muort.upworker.core.model.Resource.Success) {
+                                        targetNsId = createResult.data.id
+                                        isNew = true
+                                    } else {
+                                        val errorMsg = (createResult as? com.muort.upworker.core.model.Resource.Error)?.message ?: "Unknown error"
+                                        loadingDialog.dismiss()
+                                        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).isEnabled = true
+                                        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).isEnabled = true
+                                        showToast(getString(R.string.binding_auto_create_failed_template, errorMsg))
+                                        return@kvInner
+                                    }
+                                }
+
+                                tempBindings.add(Pair(bindingName, targetNsId))
+                                onAdded()
+                                showToast(
+                                    if (isNew) getString(R.string.binding_auto_create_resource_created_template, bindingName)
+                                    else getString(R.string.binding_auto_create_resource_reused_template, bindingName)
+                                )
+                                loadingDialog.dismiss()
+                                dialog.dismiss()
+                            } catch (e: Exception) {
+                                loadingDialog.dismiss()
+                                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).isEnabled = true
+                                dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).isEnabled = true
+                                showToast(getString(R.string.binding_auto_create_failed_template, e.message ?: "Unknown"))
+                            }
+                        }
+                    } else if (selectedIndex > 0 && (selectedIndex - 1) < namespaces.size) {
+                        // ── Normal selection path ──
+                        val namespace = namespaces[selectedIndex - 1]
+                        tempBindings.add(Pair(bindingName, namespace.id))
+                        onAdded()
+                        showToast(getString(R.string.worker_binding_added))
+                        dialog.dismiss()
+                    }
+                }
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
                 showToast(getString(R.string.worker_kv_load_namespaces_failed_template, result.message))
             }
@@ -785,49 +869,111 @@ class WorkerFragment : Fragment() {
             showToast(getString(R.string.msg_please_select_account_first))
             return
         }
-        
+
         viewLifecycleOwner.lifecycleScope.launch {
             val result = r2Repository.listBuckets(account)
-            
+
             if (result is com.muort.upworker.core.model.Resource.Success) {
-                val buckets = result.data
-                
-                if (buckets.isEmpty()) {
-                    showToast(getString(R.string.worker_no_r2_bucket))
-                    return@launch
-                }
-                
+                val buckets = result.data.toMutableList()
+
                 val dialogBinding = DialogR2BindingBinding.inflate(layoutInflater)
-                
-                // Setup spinner
-                val bucketNames = buckets.map { 
-                    val location = it.location?.uppercase() ?: getString(R.string.worker_location_auto)
-                    "${it.name} ($location)"
-                }
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, bucketNames)
+
+                // Setup spinner: prepend "Auto Create / Reuse" option (index 0)
+                val autoOption = getString(R.string.binding_spinner_auto_create_reuse)
+                val spinnerItems = mutableListOf(autoOption)
+                buckets.forEach { spinnerItems.add(it.name) }
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerItems)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 dialogBinding.bucketSpinner.adapter = adapter
-                
-                MaterialAlertDialogBuilder(requireContext())
-                    .setView(dialogBinding.root)
-                    .setPositiveButton(R.string.add) { _, _ ->
-                        val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
-                        val selectedIndex = dialogBinding.bucketSpinner.selectedItemPosition
-                        
-                        if (bindingName.isEmpty()) {
-                            showToast(getString(R.string.worker_please_enter_binding_name))
-                            return@setPositiveButton
-                        }
-                        
-                        if (selectedIndex >= 0 && selectedIndex < buckets.size) {
-                            val bucket = buckets[selectedIndex]
-                            tempBindings.add(Pair(bindingName, bucket.name))
-                            onAdded()
-                            showToast(getString(R.string.worker_binding_added))
-                        }
+
+                // Update hint (the last TextView inside the root LinearLayout)
+                val rootLayout = dialogBinding.root as? android.widget.LinearLayout
+                if (rootLayout != null && rootLayout.childCount > 0) {
+                    val hintView = rootLayout.getChildAt(rootLayout.childCount - 1) as? android.widget.TextView
+                    if (hintView != null && hintView.id == View.NO_ID) {
+                        hintView.text = getString(R.string.binding_auto_create_hint)
                     }
+                }
+
+                val dialog = MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton(R.string.add, null)
                     .setNegativeButton(R.string.cancel, null)
                     .show()
+
+                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                    val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
+                    val selectedIndex = dialogBinding.bucketSpinner.selectedItemPosition
+
+                    if (bindingName.isEmpty()) {
+                        showToast(getString(R.string.worker_please_enter_binding_name))
+                        return@setOnClickListener
+                    }
+
+                    if (tempBindings.any { it.first == bindingName }) {
+                        showToast(getString(R.string.worker_binding_name_already_exists_template, bindingName))
+                        return@setOnClickListener
+                    }
+
+                    if (selectedIndex == 0) {
+                        // ── Auto Create / Reuse path ──
+                        val resourceName = sanitizeR2BucketName(bindingName)
+                        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+                            .setMessage(R.string.binding_auto_create_creating)
+                            .setCancelable(false)
+                            .create()
+                        loadingDialog.show()
+                        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).isEnabled = false
+                        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).isEnabled = false
+
+                        viewLifecycleOwner.lifecycleScope.launch r2Inner@{
+                            try {
+                                val existing = buckets.find { it.name == resourceName }
+                                val targetBucketName: String
+                                val isNew: Boolean
+
+                                if (existing != null) {
+                                    targetBucketName = existing.name
+                                    isNew = false
+                                } else {
+                                    val createResult = r2Repository.createBucket(account, resourceName, null)
+                                    if (createResult is com.muort.upworker.core.model.Resource.Success) {
+                                        targetBucketName = createResult.data.name
+                                        isNew = true
+                                    } else {
+                                        val errorMsg = (createResult as? com.muort.upworker.core.model.Resource.Error)?.message ?: "Unknown error"
+                                        loadingDialog.dismiss()
+                                        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).isEnabled = true
+                                        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).isEnabled = true
+                                        showToast(getString(R.string.binding_auto_create_failed_template, errorMsg))
+                                        return@r2Inner
+                                    }
+                                }
+
+                                tempBindings.add(Pair(bindingName, targetBucketName))
+                                onAdded()
+                                showToast(
+                                    if (isNew) getString(R.string.binding_auto_create_resource_created_template, targetBucketName)
+                                    else getString(R.string.binding_auto_create_resource_reused_template, targetBucketName)
+                                )
+                                loadingDialog.dismiss()
+                                dialog.dismiss()
+                            } catch (e: Exception) {
+                                loadingDialog.dismiss()
+                                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).isEnabled = true
+                                dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).isEnabled = true
+                                showToast(getString(R.string.binding_auto_create_failed_template, e.message ?: "Unknown"))
+                            }
+                        }
+                    } else if (selectedIndex > 0 && (selectedIndex - 1) < buckets.size) {
+                        // ── Normal selection path ──
+                        val bucket = buckets[selectedIndex - 1]
+                        tempBindings.add(Pair(bindingName, bucket.name))
+                        onAdded()
+                        showToast(getString(R.string.worker_binding_added))
+                        dialog.dismiss()
+                    }
+                }
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
                 showToast(getString(R.string.worker_r2_load_failed, result.message))
             }
@@ -903,10 +1049,11 @@ class WorkerFragment : Fragment() {
                 // Load existing D1 bindings from settings
                 if (settingsResult is com.muort.upworker.core.model.Resource.Success) {
                     settingsResult.data.bindings?.forEach { binding ->
-                        if (binding.type == "d1" && binding.databaseId != null) {
-                            val databaseName = databaseIdToName[binding.databaseId] ?: binding.databaseId
-                            tempD1Bindings.add(D1BindingItem(binding.name, binding.databaseId, databaseName))
-                            Timber.d("Loaded existing D1 binding: ${binding.name} -> ${databaseName} (${binding.databaseId})")
+                        val dbId = binding.d1Uuid
+                        if (binding.type == "d1" && dbId != null) {
+                            val databaseName = databaseIdToName[dbId] ?: dbId
+                            tempD1Bindings.add(D1BindingItem(binding.name, dbId, databaseName))
+                            Timber.d("Loaded existing D1 binding: ${binding.name} -> ${databaseName} (${dbId})")
                         }
                     }
                 }
@@ -970,49 +1117,115 @@ class WorkerFragment : Fragment() {
             showToast(getString(R.string.msg_please_select_account_first))
             return
         }
-        
+
         viewLifecycleOwner.lifecycleScope.launch {
             val result = d1Repository.listDatabases(account)
-            
+
             if (result is com.muort.upworker.core.model.Resource.Success<List<com.muort.upworker.core.model.D1Database>>) {
-                val databases = result.data
-                
-                if (databases.isEmpty()) {
-                    showToast(getString(R.string.worker_d1_no_databases))
-                    return@launch
-                }
-                
+                val databases = result.data.toMutableList()
+
                 val dialogBinding = com.muort.upworker.databinding.DialogD1BindingBinding.inflate(layoutInflater)
-                
-                // Setup spinner
-                val databaseNames = mutableListOf<String>()
-                databases.forEach { database: com.muort.upworker.core.model.D1Database ->
-                    databaseNames.add("${database.name} (${database.uuid})")
+
+                // Setup spinner: prepend "Auto Create / Reuse" option (index 0)
+                val autoOption = getString(R.string.binding_spinner_auto_create_reuse)
+                val spinnerItems = mutableListOf(autoOption)
+                databases.forEach { db: com.muort.upworker.core.model.D1Database ->
+                    spinnerItems.add(db.name)
                 }
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, databaseNames)
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerItems)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 dialogBinding.databaseSpinner.adapter = adapter
-                
-                MaterialAlertDialogBuilder(requireContext())
-                    .setView(dialogBinding.root)
-                    .setPositiveButton(R.string.add) { _, _ ->
-                        val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
-                        val selectedIndex = dialogBinding.databaseSpinner.selectedItemPosition
-                        
-                        if (bindingName.isEmpty()) {
-                            showToast(getString(R.string.worker_please_enter_binding_name))
-                            return@setPositiveButton
-                        }
-                        
-                        if (selectedIndex >= 0 && selectedIndex < databases.size) {
-                            val database = databases[selectedIndex]
-                            tempBindings.add(D1BindingItem(bindingName, database.uuid, database.name))
-                            onAdded()
-                            showToast(getString(R.string.worker_binding_added))
-                        }
+
+                // Update hint (the last TextView inside the root LinearLayout)
+                val rootLayout = dialogBinding.root as? android.widget.LinearLayout
+                if (rootLayout != null && rootLayout.childCount > 0) {
+                    val hintView = rootLayout.getChildAt(rootLayout.childCount - 1) as? android.widget.TextView
+                    if (hintView != null && hintView.id == View.NO_ID) {
+                        hintView.text = getString(R.string.binding_auto_create_hint)
                     }
+                }
+
+                val dialog = MaterialAlertDialogBuilder(requireContext())
+                    .setView(dialogBinding.root)
+                    .setPositiveButton(R.string.add, null)
                     .setNegativeButton(R.string.cancel, null)
                     .show()
+
+                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                    val bindingName = dialogBinding.bindingNameEdit.text.toString().trim()
+                    val selectedIndex = dialogBinding.databaseSpinner.selectedItemPosition
+
+                    if (bindingName.isEmpty()) {
+                        showToast(getString(R.string.worker_please_enter_binding_name))
+                        return@setOnClickListener
+                    }
+
+                    if (tempBindings.any { it.bindingName == bindingName }) {
+                        showToast(getString(R.string.worker_binding_name_already_exists_template, bindingName))
+                        return@setOnClickListener
+                    }
+
+                    if (selectedIndex == 0) {
+                        // ── Auto Create / Reuse path ──
+                        val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+                            .setMessage(R.string.binding_auto_create_creating)
+                            .setCancelable(false)
+                            .create()
+                        loadingDialog.show()
+                        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).isEnabled = false
+                        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).isEnabled = false
+
+                        viewLifecycleOwner.lifecycleScope.launch d1Inner@{
+                            try {
+                                val existing = databases.find { it.name == bindingName }
+                                val targetDbId: String
+                                val targetDbName: String
+                                val isNew: Boolean
+
+                                if (existing != null) {
+                                    targetDbId = existing.uuid
+                                    targetDbName = existing.name
+                                    isNew = false
+                                } else {
+                                    val createResult = d1Repository.createDatabase(account, bindingName)
+                                    if (createResult is com.muort.upworker.core.model.Resource.Success) {
+                                        targetDbId = createResult.data.uuid
+                                        targetDbName = createResult.data.name
+                                        isNew = true
+                                    } else {
+                                        val errorMsg = (createResult as? com.muort.upworker.core.model.Resource.Error)?.message ?: "Unknown error"
+                                        loadingDialog.dismiss()
+                                        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).isEnabled = true
+                                        dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).isEnabled = true
+                                        showToast(getString(R.string.binding_auto_create_failed_template, errorMsg))
+                                        return@d1Inner
+                                    }
+                                }
+
+                                tempBindings.add(D1BindingItem(bindingName, targetDbId, targetDbName))
+                                onAdded()
+                                showToast(
+                                    if (isNew) getString(R.string.binding_auto_create_resource_created_template, bindingName)
+                                    else getString(R.string.binding_auto_create_resource_reused_template, bindingName)
+                                )
+                                loadingDialog.dismiss()
+                                dialog.dismiss()
+                            } catch (e: Exception) {
+                                loadingDialog.dismiss()
+                                dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).isEnabled = true
+                                dialog.getButton(android.content.DialogInterface.BUTTON_NEGATIVE).isEnabled = true
+                                showToast(getString(R.string.binding_auto_create_failed_template, e.message ?: "Unknown"))
+                            }
+                        }
+                    } else if (selectedIndex > 0 && (selectedIndex - 1) < databases.size) {
+                        // ── Normal selection path ──
+                        val database = databases[selectedIndex - 1]
+                        tempBindings.add(D1BindingItem(bindingName, database.uuid, database.name))
+                        onAdded()
+                        showToast(getString(R.string.worker_binding_added))
+                        dialog.dismiss()
+                    }
+                }
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
                 showToast(getString(R.string.worker_d1_load_databases_failed_template, result.message))
             }
@@ -1173,6 +1386,11 @@ class WorkerFragment : Fragment() {
 
                         if (bindingName.isEmpty()) {
                             showToast(getString(R.string.worker_please_enter_binding_name))
+                            return@setPositiveButton
+                        }
+
+                        if (tempBindings.any { it.bindingName == bindingName }) {
+                            showToast(getString(R.string.worker_binding_name_already_exists_template, bindingName))
                             return@setPositiveButton
                         }
 
@@ -2896,7 +3114,7 @@ class R2BindingsAdapter(
         
         fun bind(r2Binding: Pair<String, String>, position: Int) {
             binding.bindingNameText.text = r2Binding.first
-            binding.bucketNameText.text = binding.root.context.getString(R.string.worker_binding_bucket_label_template, r2Binding.second)
+            binding.bucketNameText.text = r2Binding.second
             
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(position)
@@ -3074,7 +3292,7 @@ class ServiceBindingsAdapter(
 
         fun bind(serviceBinding: ServiceBindingItem, position: Int) {
             binding.bindingNameText.text = serviceBinding.bindingName
-            binding.serviceNameText.text = "Service: ${serviceBinding.serviceName}"
+            binding.serviceNameText.text = serviceBinding.serviceName
 
             binding.deleteBindingBtn.setOnClickListener {
                 onDeleteClick(position)

@@ -819,15 +819,13 @@
     <string name="worker_checking_status">Checking Worker status</string>
     <string name="worker_fetching_kv_bindings">Fetching current KV binding configuration</string>
     <string name="worker_script_name_label">Script name: %1$s</string>
-    <string name="worker_no_kv_namespace">No KV namespaces yet, please create one first</string>
     <string name="worker_please_enter_binding_name">Please enter binding name</string>
+    <string name="worker_binding_name_already_exists_template">Binding name %1$s already exists, please choose a different one</string>
     <string name="worker_binding_added">Binding added</string>
     <string name="worker_kv_load_failed">Failed to load KV namespaces: %1$s</string>
     <string name="worker_updating_kv_bindings">Updating KV binding configuration (script code not re-uploaded)</string>
     <string name="worker_kv_bindings_config_updated">KV binding configuration updated</string>
     <string name="worker_fetching_r2_bindings">Fetching current R2 binding configuration</string>
-    <string name="worker_no_r2_bucket">No R2 buckets yet, please create one first</string>
-    <string name="worker_location_auto">Auto select</string>
     <string name="worker_r2_load_failed">Failed to load R2 buckets: %1$s</string>
     <string name="worker_revision_source">Source: %1$s</string>
     <string name="worker_runtime_settings">Runtime Settings</string>
@@ -880,6 +878,14 @@
     <string name="r2_object_title_bucket">Objects (%1$s)</string>
     <string name="r2_no_objects">No objects</string>
     <string name="r2_upload_file">Upload File</string>
+    <string name="r2_upload_dialog_title">Upload File</string>
+    <string name="r2_path_prefix_hint">Path Prefix</string>
+    <string name="r2_path_prefix_default">/</string>
+    <string name="r2_file_label">File</string>
+    <string name="r2_select_file">Select File</string>
+    <string name="r2_no_file_selected">No file selected</string>
+    <string name="r2_upload_btn">Upload</string>
+    <string name="r2_msg_please_select_file">Please select a file to upload first</string>
     <string name="r2_bucket_objects_list">%1$s - Object List</string>
     <string name="r2_copy_custom_url">Copy Custom Domain URL</string>
     <string name="r2_copy_default_url">Copy Default URL</string>
@@ -2862,8 +2868,8 @@
 
     <!-- ===== Pages KV Bindings ===== -->
     <string name="pages_kv_fetching_bindings">Fetching current KV binding configuration</string>
-    <string name="pages_kv_no_namespaces">No KV namespaces yet, please create one first</string>
     <string name="pages_generic_please_enter_binding_name">Please enter binding name</string>
+    <string name="pages_generic_binding_name_already_exists_template">Binding name %1$s already exists, please choose a different one</string>
     <string name="pages_kv_binding_added">KV binding added</string>
     <string name="pages_kv_load_namespaces_failed_template">Failed to load KV namespaces: %1$s</string>
     <string name="pages_kv_updating_bindings">Updating KV binding configuration</string>
@@ -2871,7 +2877,6 @@
 
     <!-- ===== Pages R2 Bindings ===== -->
     <string name="pages_r2_fetching_bindings">Fetching current R2 binding configuration</string>
-    <string name="pages_r2_no_buckets">No R2 buckets yet, please create one first</string>
     <string name="pages_r2_binding_added">R2 binding added</string>
     <string name="pages_r2_load_buckets_failed_template">Failed to load R2 buckets: %1$s</string>
     <string name="pages_r2_updating_bindings">Updating R2 binding configuration</string>
@@ -2879,7 +2884,6 @@
 
     <!-- ===== Pages D1 Bindings ===== -->
     <string name="pages_d1_fetching_bindings">Fetching current D1 binding configuration</string>
-    <string name="pages_d1_no_databases">No D1 databases yet, please create one first</string>
     <string name="pages_d1_binding_added">D1 binding added</string>
     <string name="pages_d1_load_databases_failed_template">Failed to load D1 databases: %1$s</string>
     <string name="pages_d1_updating_bindings">Updating D1 binding configuration</string>
@@ -3012,7 +3016,6 @@
     <string name="worker_r2_updating_bindings_no_script">Updating R2 binding configuration (script code will not be re-uploaded)</string>
     <string name="worker_r2_bindings_updated">R2 binding configuration updated</string>
     <string name="worker_d1_fetching_bindings">Fetching current D1 binding configuration</string>
-    <string name="worker_d1_no_databases">No D1 databases yet, please create one first</string>
     <string name="worker_d1_load_databases_failed_template">Failed to load D1 databases: %1$s</string>
     <string name="worker_d1_updating_bindings_no_script">Updating D1 binding configuration (script code will not be re-uploaded)</string>
     <string name="worker_d1_bindings_updated">D1 binding configuration updated</string>
@@ -3123,13 +3126,7 @@
     <string name="pages_cleanup_result_total_template">\nTotal: processed %1$d project(s), successfully cleaned %2$d old deployment(s)</string>
 
     <!-- ===== Pages binding adapter prefixes ===== -->
-    <string name="pages_binding_bucket_label_template">Bucket: %1$s</string>
-    <string name="pages_binding_database_label_template">Database: %1$s</string>
-    <string name="pages_binding_service_label_template">Service: %1$s</string>
     <string name="pages_var_encrypted_hidden">🔒 Encrypted, cannot view</string>
-
-    <!-- ===== Worker R2 binding adapter prefix ===== -->
-    <string name="worker_binding_bucket_label_template">Bucket: %1$s</string>
 
     <!-- ===== P0-1: Pages Blake3 asset hashing ===== -->
     <string name="repo_pages_hash_fallback_log">⚠ Pages asset hashing falling back to legacy algorithm (deploy may be slower)</string>
@@ -3246,5 +3243,13 @@
     <string name="pages_formdata_compat_date_auto_format">Detected %1$s; auto-injected compatibility_date=%2$s into deployment_configs.</string>
 
     <!-- ============ END P1 ============ -->
+
+    <!-- ===== Binding Auto Create / Reuse ===== -->
+    <string name="binding_spinner_auto_create_reuse">Auto Create / Reuse (same name as binding)</string>
+    <string name="binding_auto_create_creating">Auto-creating or locating resource…</string>
+    <string name="binding_auto_create_resource_created_template">Resource created: %1$s</string>
+    <string name="binding_auto_create_resource_reused_template">Reused existing resource: %1$s</string>
+    <string name="binding_auto_create_failed_template">Auto create / lookup failed: %1$s</string>
+    <string name="binding_auto_create_hint">When you select \'Auto Create / Reuse\', the app uses the binding name as the resource name, reuses an existing match, or creates a new one.</string>
 
 </resources>
