@@ -71,17 +71,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp" />
 
-        <!-- 更多操作按钮 -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/moreBtn"
-            style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            app:iconSize="20dp"
-            app:icon="@drawable/ic_more_vert_24"
-            app:iconTint="?android:attr/textColorSecondary"
-            android:contentDescription="@string/store_source_options" />
-
     </LinearLayout>
 
     <!-- 状态信息 -->

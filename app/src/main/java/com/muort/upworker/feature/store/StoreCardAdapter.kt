@@ -79,8 +79,13 @@ class StoreCardAdapter(
                 authorText.text = context.getString(R.string.store_by_author, authorName)
             }
 
-            // 来源数量
-            sourceCountText.text = context.getString(R.string.store_source_count, item.sourceCount)
+            // 来源名称
+            val sourceName = item.template.sourceName
+            sourceCountText.text = if (item.sourceCount > 1) {
+                context.getString(R.string.store_source_count_multi, sourceName, item.sourceCount)
+            } else {
+                context.getString(R.string.store_source_count, sourceName)
+            }
 
             // 收藏状态
             if (item.isFavorite) {

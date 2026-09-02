@@ -2,11 +2,11 @@ package com.muort.upworker.feature.store
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -16,12 +16,11 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import com.muort.upworker.R
 import com.muort.upworker.core.model.CatalogSource
 import com.muort.upworker.core.repository.CatalogRepository
 import com.muort.upworker.core.util.showToast
+import com.muort.upworker.databinding.DialogAddSourceBinding
 import com.muort.upworker.databinding.DialogSourcesManagerBinding
 import com.muort.upworker.databinding.ItemSourceRowBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,13 +43,10 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
     lateinit var catalogRepository: CatalogRepository
 
     private lateinit var adapter: SourceListAdapter
-    private var onSourcesChanged: (() -> Unit)? = null
 
     companion object {
-        fun newInstance(onSourcesChanged: (() -> Unit)? = null): SourcesManagerDialog {
-            return SourcesManagerDialog().apply {
-                this.onSourcesChanged = onSourcesChanged
-            }
+        fun newInstance(): SourcesManagerDialog {
+            return SourcesManagerDialog()
         }
     }
 
@@ -90,11 +86,8 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
             onToggleEnabled = { source, enabled ->
                 toggleSourceEnabled(source, enabled)
             },
-            onRefresh = { source ->
-                refreshSource(source)
-            },
-            onDelete = { source ->
-                deleteSource(source)
+            onItemClick = { source ->
+                showEditSourceDialog(source)
             }
         )
 
@@ -125,156 +118,122 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
     // ========== 操作 ==========
 
     private fun toggleSourceEnabled(source: CatalogSource, enabled: Boolean) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            catalogRepository.updateSourceEnabled(source.id, enabled)
-            onSourcesChanged?.invoke()
-        }
-    }
-
-    private fun refreshSource(source: CatalogSource) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    catalogRepository.refreshSource(source)
-                }
-            }
-            result.onSuccess {
-                showToast(getString(R.string.store_refresh))
-                onSourcesChanged?.invoke()
-            }.onFailure {
-                showToast("${getString(R.string.store_source_error)}: ${it.message}")
-            }
-        }
-    }
-
-    private fun deleteSource(source: CatalogSource) {
-        if (source.isDefault) {
-            showToast("默认源不可删除")
-            return
-        }
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.store_delete_source))
-            .setMessage(getString(R.string.store_delete_source_confirm, source.name))
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    catalogRepository.deleteSource(source.id)
-                    onSourcesChanged?.invoke()
-                    showToast(getString(R.string.store_source_deleted))
-                }
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        catalogRepository.updateSourceEnabled(source.id, enabled)
     }
 
     private fun showAddSourceDialog() {
-        val context = requireContext()
-        val container = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 24, 48, 0)
-        }
-
-        val nameInputLayout = TextInputLayout(
-            context,
-            null,
-            com.google.android.material.R.attr.textInputOutlinedStyle
-        ).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            hint = getString(R.string.store_source_name)
-            isHintEnabled = true
-        }
-
-        val nameEditText = TextInputEditText(context).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            inputType = android.text.InputType.TYPE_CLASS_TEXT
-            maxLines = 1
-        }
-
-        val urlInputLayout = TextInputLayout(
-            context,
-            null,
-            com.google.android.material.R.attr.textInputOutlinedStyle
-        ).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).also { it.topMargin = 16 }
-            hint = getString(R.string.store_source_url)
-            isHintEnabled = true
-        }
-
-        val urlEditText = TextInputEditText(context).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            inputType = android.text.InputType.TYPE_TEXT_VARIATION_URI
-            maxLines = 1
-        }
-
-        nameInputLayout.addView(nameEditText)
-        urlInputLayout.addView(urlEditText)
-        container.addView(nameInputLayout)
-        container.addView(urlInputLayout)
-
-        MaterialAlertDialogBuilder(context)
-            .setTitle(getString(R.string.store_add_source))
-            .setView(container)
-            .setPositiveButton(getString(R.string.store_add_source)) { _, _ ->
-                val name = nameEditText.text?.toString()?.trim()
-                val url = urlEditText.text?.toString()?.trim()
-
-                if (name.isNullOrBlank()) {
-                    showToast("请输入源名称")
-                    return@setPositiveButton
-                }
-                if (url.isNullOrBlank() || !url.startsWith("https://")) {
-                    showToast("请输入有效的 HTTPS URL")
-                    return@setPositiveButton
-                }
-
-                addSource(name, url)
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        showSourceEditorDialog(null)
     }
 
-    private fun addSource(name: String, url: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    catalogRepository.addSource(url, name)
-                }
-            }
-            result.onSuccess { source ->
-                if (source != null) {
-                    showToast(getString(R.string.store_source_added))
-                    onSourcesChanged?.invoke()
-                    // 刷新新添加的源
-                    launch {
-                        catalogRepository.refreshSource(source)
-                    }
-                } else {
-                    showToast("添加失败")
-                }
-            }.onFailure {
-                showToast("添加失败: ${it.message}")
+    private fun showEditSourceDialog(source: CatalogSource) {
+        showSourceEditorDialog(source)
+    }
+
+    private fun showSourceEditorDialog(editingSource: CatalogSource?) {
+        val dialogBinding = DialogAddSourceBinding.inflate(layoutInflater)
+        val isEditing = editingSource != null
+
+        if (isEditing) {
+            dialogBinding.titleText.text = getString(R.string.store_edit_source)
+            dialogBinding.nameEditText.setText(editingSource!!.name)
+            dialogBinding.urlEditText.setText(editingSource.url)
+            dialogBinding.saveBtn.setText(R.string.store_save)
+            // 非默认源显示删除按钮
+            if (!editingSource.isDefault) {
+                dialogBinding.deleteBtn.visibility = View.VISIBLE
             }
         }
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogBinding.root)
+            .create()
+
+        fun setButtonsEnabled(enabled: Boolean) {
+            dialogBinding.saveBtn.isEnabled = enabled
+            dialogBinding.cancelBtn.isEnabled = enabled
+            dialogBinding.deleteBtn.isEnabled = enabled
+        }
+
+        // 保存/添加按钮
+        dialogBinding.saveBtn.setOnClickListener {
+            val name = dialogBinding.nameEditText.text?.toString()?.trim()
+            val url = dialogBinding.urlEditText.text?.toString()?.trim()
+
+            dialogBinding.errorText.visibility = View.GONE
+
+            if (name.isNullOrBlank()) {
+                dialogBinding.errorText.text = getString(R.string.store_source_name_hint)
+                dialogBinding.errorText.visibility = View.VISIBLE
+                return@setOnClickListener
+            }
+            if (url.isNullOrBlank() || !url.startsWith("https://")) {
+                dialogBinding.errorText.text = getString(R.string.store_source_url_invalid)
+                dialogBinding.errorText.visibility = View.VISIBLE
+                return@setOnClickListener
+            }
+
+            dialogBinding.savingProgress.visibility = View.VISIBLE
+            setButtonsEnabled(false)
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                val result = withContext(Dispatchers.IO) {
+                    runCatching {
+                        if (isEditing && editingSource != null) {
+                            catalogRepository.updateSource(editingSource.id, name, url)
+                            true
+                        } else {
+                            val newSource = catalogRepository.addSource(url, name)
+                            newSource?.let { catalogRepository.refreshSource(it) }
+                            newSource != null
+                        }
+                    }
+                }
+                result.onSuccess { success ->
+                    if (success) {
+                        showToast(
+                            if (isEditing) getString(R.string.store_source_updated)
+                            else getString(R.string.store_source_added)
+                        )
+                        dialog.dismiss()
+                    } else {
+                        dialogBinding.savingProgress.visibility = View.GONE
+                        setButtonsEnabled(true)
+                        dialogBinding.errorText.text = getString(R.string.store_source_operation_failed)
+                        dialogBinding.errorText.visibility = View.VISIBLE
+                    }
+                }.onFailure {
+                    dialogBinding.savingProgress.visibility = View.GONE
+                    setButtonsEnabled(true)
+                    dialogBinding.errorText.text = getString(R.string.store_source_operation_failed_with_msg, it.message ?: "unknown")
+                    dialogBinding.errorText.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        // 取消按钮
+        dialogBinding.cancelBtn.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // 删除按钮（编辑非默认源时）
+        if (isEditing && editingSource != null && !editingSource.isDefault) {
+            dialogBinding.deleteBtn.setOnClickListener {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    catalogRepository.deleteSource(editingSource.id)
+                    showToast(getString(R.string.store_source_deleted))
+                    dialog.dismiss()
+                }
+            }
+        }
+
+        dialog.show()
     }
 
     // ==================== Adapter ====================
 
     inner class SourceListAdapter(
         private val onToggleEnabled: (CatalogSource, Boolean) -> Unit,
-        private val onRefresh: (CatalogSource) -> Unit,
-        private val onDelete: (CatalogSource) -> Unit
+        private val onItemClick: (CatalogSource) -> Unit
     ) : RecyclerView.Adapter<SourceListAdapter.SourceViewHolder>() {
 
         private var items: List<CatalogSource> = emptyList()
@@ -319,37 +278,18 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
             val statusRes = when (source.lastStatus) {
                 "ok" -> R.string.store_source_ok
                 "error" -> R.string.store_source_error
-                else -> R.string.store_source_loading
+                "loading" -> R.string.store_source_loading
+                else -> R.string.store_source_idle
             }
             binding.statusText.text = binding.root.context.getString(statusRes)
 
             // 模板数量 - 隐藏（数据源不直接存储模板数量）
             binding.templateCountText.visibility = View.GONE
 
-            // 更多操作
-            binding.moreBtn.setOnClickListener {
-                showSourceMenu(source)
+            // 点击整行弹出编辑对话框
+            binding.root.setOnClickListener {
+                onItemClick(source)
             }
-        }
-
-        private fun showSourceMenu(source: CatalogSource) {
-            val context = binding.root.context
-            val options = mutableListOf<String>()
-            options.add(context.getString(R.string.store_refresh))
-
-            if (!source.isDefault) {
-                options.add(context.getString(R.string.store_delete_source))
-            }
-
-            MaterialAlertDialogBuilder(context)
-                .setTitle(source.name)
-                .setItems(options.toTypedArray()) { _, which ->
-                    when (options[which]) {
-                        context.getString(R.string.store_refresh) -> onRefresh(source)
-                        context.getString(R.string.store_delete_source) -> onDelete(source)
-                    }
-                }
-                .show()
         }
 
         override fun getItemCount(): Int = items.size

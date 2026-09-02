@@ -129,7 +129,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
                 android:textColor="?android:attr/textColorTertiary"
-                tools:text="2 源" />
+                tools:text="官方源" />
 
         </LinearLayout>
 

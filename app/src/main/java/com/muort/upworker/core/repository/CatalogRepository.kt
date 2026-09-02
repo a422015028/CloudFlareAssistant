@@ -3,6 +3,7 @@ package com.muort.upworker.core.repository
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.muort.upworker.R
 import com.muort.upworker.core.database.CatalogDao
 import com.muort.upworker.core.model.CatalogBinding
 import com.muort.upworker.core.model.CatalogFavorite
@@ -10,10 +11,13 @@ import com.muort.upworker.core.model.CatalogSource
 import com.muort.upworker.core.model.CatalogTemplate
 import com.muort.upworker.core.model.TemplateItem
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -51,8 +55,7 @@ class CatalogRepository @Inject constructor(
 
     companion object {
         // 默认官方源（与 cf-manager 兼容）
-        const val DEFAULT_CATALOG_URL = "https://cf-store.surge.sh/catalog.json"
-        const val DEFAULT_CATALOG_NAME = "官方源"
+        const val DEFAULT_CATALOG_URL = "https://cf.muort.com/cf-store.json"
 
         // 兜底地址（按优先级排列）
         private val FALLBACK_URLS = listOf(
@@ -76,6 +79,9 @@ class CatalogRepository @Inject constructor(
             .build()
     }
 
+    // 后台刷新专用 scope（与 UI 生命周期无关，确保刷新操作能完整执行）
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     // ========== 数据源管理 ==========
 
     /**
@@ -89,7 +95,7 @@ class CatalogRepository @Inject constructor(
             catalogDao.insertSource(
                 CatalogSource(
                     url = DEFAULT_CATALOG_URL,
-                    name = DEFAULT_CATALOG_NAME,
+                    name = appContext.getString(R.string.store_default_source_name),
                     isDefault = true,
                     createdAt = System.currentTimeMillis(),
                     updatedAt = System.currentTimeMillis()
@@ -174,10 +180,57 @@ class CatalogRepository @Inject constructor(
 
     /**
      * 更新数据源启用状态
+     * 启用时先设置 loading 状态，然后在后台刷新（不依赖 UI 生命周期）
+     * 禁用时清除该源的模板数据并重置状态为未同步
      */
-    suspend fun updateSourceEnabled(id: Long, enabled: Boolean) {
-        val source = catalogDao.getSourceById(id) ?: return
-        catalogDao.updateSource(source.copy(enabled = enabled))
+    fun updateSourceEnabled(id: Long, enabled: Boolean) {
+        applicationScope.launch {
+            val source = catalogDao.getSourceById(id) ?: return@launch
+
+            if (enabled) {
+                // 先设置 loading 状态
+                val loadingSource = source.copy(
+                    enabled = true,
+                    lastStatus = "loading",
+                    updatedAt = System.currentTimeMillis()
+                )
+                catalogDao.updateSource(loadingSource)
+
+                // 后台刷新，结果通过数据库 Flow 自动通知 UI
+                try {
+                    refreshSource(loadingSource)
+                } catch (e: Exception) {
+                    Timber.e(e, "[Catalog] 启用源时刷新失败: ${source.name}")
+                    val errorSource = loadingSource.copy(
+                        lastStatus = "error",
+                        lastError = e.message,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    catalogDao.updateSource(errorSource)
+                }
+            } else {
+                // 禁用时清除该源的模板数据，并重置状态为未同步
+                catalogDao.updateSource(source.copy(enabled = false))
+                catalogDao.deleteTemplatesBySource(id)
+                val resetSource = source.copy(
+                    enabled = false,
+                    lastStatus = "idle",
+                    lastError = null,
+                    updatedAt = System.currentTimeMillis()
+                )
+                catalogDao.updateSource(resetSource)
+            }
+        }
+    }
+
+    /**
+     * 更新自定义数据源的名称和 URL
+     */
+    suspend fun updateSource(id: Long, name: String, url: String): Boolean {
+        val source = catalogDao.getSourceById(id) ?: return false
+        if (source.isDefault) return false
+        catalogDao.updateSource(source.copy(name = name, url = url))
+        return true
     }
 
     // ========== 模板数据 ==========

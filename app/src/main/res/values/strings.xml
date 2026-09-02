@@ -3280,14 +3280,17 @@
     <string name="store_empty_icon">📦</string>
     <string name="store_loading">加载中…</string>
     <string name="store_refresh">刷新</string>
+    <string name="store_refresh_success">刷新成功</string>
+    <string name="store_refresh_failed">刷新失败</string>
+    <string name="store_refresh_partial">刷新完成：%1$d 个成功，%2$d 个失败</string>
     <string name="store_all">全部</string>
-    <string name="store_all_with_count">全部（%1$d）</string>
+    <string name="store_all_with_count">全部(%1$d)</string>
     <string name="store_worker">Worker</string>
-    <string name="store_worker_with_count">Worker（%1$d）</string>
+    <string name="store_worker_with_count">Worker(%1$d)</string>
     <string name="store_pages">Pages</string>
-    <string name="store_pages_with_count">Pages（%1$d）</string>
+    <string name="store_pages_with_count">Pages(%1$d)</string>
     <string name="store_hybrid">Hybrid</string>
-    <string name="store_hybrid_with_count">Hybrid（%1$d）</string>
+    <string name="store_hybrid_with_count">Hybrid(%1$d)</string>
     <string name="store_version_prefix">v%1$s</string>
     <string name="store_name_with_version">%1$s  v%2$s</string>
     <string name="store_favorites">收藏</string>
@@ -3295,7 +3298,9 @@
     <string name="store_sort_version">按版本</string>
     <string name="store_deploy">部署</string>
     <string name="store_by_author">by %1$s</string>
-    <string name="store_source_count">%1$d 源</string>
+    <string name="store_source_count">%1$s</string>
+    <string name="store_source_count_multi">%1$s 等 %2$d</string>
+    <string name="store_default_source_name">官方源</string>
     <string name="store_bindings">绑定</string>
     <string name="store_env_vars">环境变量</string>
     <string name="store_deploy_template">部署模板</string>
@@ -3315,6 +3320,7 @@
     <string name="store_source_ok">已同步</string>
     <string name="store_source_error">同步失败</string>
     <string name="store_source_loading">同步中</string>
+    <string name="store_source_idle">未同步</string>
     <string name="store_pull_to_refresh">下拉刷新获取模板列表</string>
     <string name="store_no_search_results">没有找到匹配的模板</string>
     <string name="store_no_filter_results">没有符合筛选条件的模板</string>
@@ -3330,14 +3336,20 @@
     <string name="store_pages_project_name">Pages 项目名称</string>
     <string name="store_pages_name_hint">请输入 Pages 项目名称</string>
     <string name="store_sources">数据源</string>
+    <string name="store_source_status">%1$d 个源已更新</string>
     <string name="store_add_source">添加数据源</string>
     <string name="store_source_name">源名称</string>
     <string name="store_source_url">源地址 (URL)</string>
     <string name="store_delete_source">删除数据源</string>
-    <string name="store_delete_source_confirm">确定要删除数据源「%1$s」吗？</string>
     <string name="store_source_deleted">数据源已删除</string>
     <string name="store_source_added">数据源已添加</string>
-    <string name="store_source_options">更多操作</string>
+    <string name="store_source_updated">数据源已更新</string>
+    <string name="store_edit_source">编辑数据源</string>
+    <string name="store_save">保存</string>
+    <string name="store_source_name_hint">请输入源名称</string>
+    <string name="store_source_url_invalid">请输入有效的 HTTPS 地址</string>
+    <string name="store_source_operation_failed">操作失败</string>
+    <string name="store_source_operation_failed_with_msg">操作失败：%1$s</string>
     <string name="store_no_sources">暂无数据源</string>
 
     <!-- 模板商店 plurals -->

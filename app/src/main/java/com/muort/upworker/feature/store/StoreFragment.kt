@@ -47,7 +47,6 @@ class StoreFragment : Fragment() {
         setupRecyclerView()
         setupSearch()
         setupTypeFilter()
-        setupTagCloud()
         setupToolbar()
         setupSwipeRefresh()
         observeData()
@@ -85,40 +84,23 @@ class StoreFragment : Fragment() {
     }
 
     private fun setupSearch() {
-        binding.searchBar.setOnClickListener {
-            binding.searchView.show()
-        }
-
-        // 菜单项点击
-        binding.searchBar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.action_sources -> {
-                    showSourcesManager()
-                    true
-                }
-                R.id.action_refresh -> {
-                    viewModel.refreshTemplates()
-                    true
-                }
-                else -> false
+        // 文本变化实时搜索
+        binding.searchEditText.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                viewModel.setSearchQuery(s?.toString() ?: "")
             }
+        })
+
+        // 刷新按钮
+        binding.refreshBtn.setOnClickListener {
+            viewModel.refreshTemplates()
         }
 
-        binding.searchView.editText.setOnEditorActionListener { _, _, _ ->
-            val query = binding.searchView.text.toString()
-            viewModel.setSearchQuery(query)
-            binding.searchBar.setText(query)
-            binding.searchView.hide()
-            true
-        }
-
-        // 搜索视图关闭时，如果文本为空则清空搜索
-        binding.searchView.addTransitionListener { _, _, newState ->
-            if (newState == com.google.android.material.search.SearchView.TransitionState.HIDDEN) {
-                if (binding.searchView.text.isNullOrBlank() && !binding.searchBar.text.isNullOrBlank()) {
-                    // 保持搜索栏文本
-                }
-            }
+        // 数据源按钮
+        binding.sourcesBtn.setOnClickListener {
+            showSourcesManager()
         }
     }
 
@@ -131,60 +113,6 @@ class StoreFragment : Fragment() {
                 else -> null // all
             }
             viewModel.setSelectedType(type)
-        }
-    }
-
-    private fun setupTagCloud() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.allTags.collect { tags ->
-                    updateTagCloud(tags)
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.selectedTags.collect { selectedTags ->
-                    // 更新已有 Chip 的选中状态
-                    for (i in 0 until binding.tagsChipGroup.childCount) {
-                        val chip = binding.tagsChipGroup.getChildAt(i) as? com.google.android.material.chip.Chip
-                        val tag = chip?.text?.toString()
-                        if (tag != null && chip.isChecked != selectedTags.contains(tag)) {
-                            chip.isChecked = selectedTags.contains(tag)
-                        }
-                    }
-                    // 控制标签区域可见性
-                    binding.tagsScrollView.visibility =
-                        if (binding.tagsChipGroup.childCount == 0) View.GONE else View.VISIBLE
-                }
-            }
-        }
-    }
-
-    private fun updateTagCloud(tags: List<String>) {
-        val context = requireContext()
-        val selectedTags = viewModel.selectedTags.value
-
-        binding.tagsChipGroup.removeAllViews()
-
-        if (tags.isEmpty()) {
-            binding.tagsScrollView.visibility = View.GONE
-            return
-        }
-
-        binding.tagsScrollView.visibility = View.VISIBLE
-
-        for (tag in tags.take(20)) { // 限制最多显示 20 个标签
-            val chip = com.google.android.material.chip.Chip(
-                android.view.ContextThemeWrapper(context, com.google.android.material.R.style.Widget_Material3_Chip_Filter)
-            )
-            chip.text = tag
-            chip.isChecked = selectedTags.contains(tag)
-            chip.setOnClickListener {
-                viewModel.toggleTag(tag)
-            }
-            binding.tagsChipGroup.addView(chip)
         }
     }
 
@@ -235,11 +163,41 @@ class StoreFragment : Fragment() {
                         updateTypeChipCounts(counts)
                     }
                 }
+
+                launch {
+                    viewModel.sources.collect { sources ->
+                        updateSourceStatus(sources)
+                    }
+                }
+
+                launch {
+                    viewModel.refreshEvent.collect { result ->
+                        if (result.success) {
+                            if (result.failedCount > 0) {
+                                showToast(getString(R.string.store_refresh_partial, result.successCount, result.failedCount))
+                            } else {
+                                showToast(getString(R.string.store_refresh_success))
+                            }
+                        } else {
+                            val msg = result.message
+                            if (msg != null) {
+                                showToast("${getString(R.string.store_refresh_failed)}: $msg")
+                            } else {
+                                showToast(getString(R.string.store_refresh_failed))
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
     // ========== UI 更新 ==========
+
+    private fun updateSourceStatus(sources: List<com.muort.upworker.core.model.CatalogSource>) {
+        val updated = sources.count { it.lastStatus == "ok" }
+        binding.sourceStatusText.text = getString(R.string.store_source_status, updated)
+    }
 
     private fun updateResultCount(count: Int) {
         binding.resultCountText.text = resources.getQuantityString(
@@ -331,11 +289,7 @@ class StoreFragment : Fragment() {
     // ========== 数据源管理对话框 ==========
 
     private fun showSourcesManager() {
-        val dialog = SourcesManagerDialog.newInstance(
-            onSourcesChanged = {
-                viewModel.refreshTemplates()
-            }
-        )
+        val dialog = SourcesManagerDialog.newInstance()
         dialog.show(childFragmentManager, "SourcesManagerDialog")
     }
 

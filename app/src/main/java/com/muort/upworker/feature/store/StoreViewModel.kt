@@ -96,13 +96,21 @@ class StoreViewModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val _refreshEvent = MutableSharedFlow<RefreshResult>()
+    val refreshEvent: SharedFlow<RefreshResult> = _refreshEvent.asSharedFlow()
+
+    data class RefreshResult(
+        val success: Boolean,
+        val successCount: Int = 0,
+        val failedCount: Int = 0,
+        val message: String? = null
+    )
+
     // ========== 初始化 ==========
 
     init {
         viewModelScope.launch {
             catalogRepository.ensureDefaultSource()
-            // 初始化后自动刷新一次
-            refreshTemplates()
         }
     }
 
@@ -150,11 +158,25 @@ class StoreViewModel @Inject constructor(
             try {
                 val results = catalogRepository.refreshAllSources()
                 val failed = results.count { it.lastStatus == "error" }
+                val success = results.size - failed
                 if (failed > 0) {
                     Timber.w("[Store] 刷新完成，$failed 个源失败")
                 }
+                _refreshEvent.emit(
+                    RefreshResult(
+                        success = failed == 0,
+                        successCount = success,
+                        failedCount = failed
+                    )
+                )
             } catch (e: Exception) {
                 Timber.e(e, "[Store] 刷新失败")
+                _refreshEvent.emit(
+                    RefreshResult(
+                        success = false,
+                        message = e.message
+                    )
+                )
             } finally {
                 _isRefreshing.value = false
             }

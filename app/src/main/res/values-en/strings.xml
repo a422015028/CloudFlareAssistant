@@ -3302,6 +3302,9 @@
     <string name="store_empty_icon">📦</string>
     <string name="store_loading">Loading…</string>
     <string name="store_refresh">Refresh</string>
+    <string name="store_refresh_success">Refresh successful</string>
+    <string name="store_refresh_failed">Refresh failed</string>
+    <string name="store_refresh_partial">Refresh complete: %1$d success, %2$d failed</string>
     <string name="store_all">All</string>
     <string name="store_all_with_count">All (%1$d)</string>
     <string name="store_worker">Worker</string>
@@ -3317,7 +3320,9 @@
     <string name="store_sort_version">By version</string>
     <string name="store_deploy">Deploy</string>
     <string name="store_by_author">by %1$s</string>
-    <string name="store_source_count">%1$d sources</string>
+    <string name="store_source_count">%1$s</string>
+    <string name="store_source_count_multi">%1$s + %2$d</string>
+    <string name="store_default_source_name">Official</string>
     <string name="store_bindings">Bindings</string>
     <string name="store_env_vars">Environment Variables</string>
     <string name="store_deploy_template">Deploy Template</string>
@@ -3337,6 +3342,7 @@
     <string name="store_source_ok">Synced</string>
     <string name="store_source_error">Sync failed</string>
     <string name="store_source_loading">Syncing…</string>
+    <string name="store_source_idle">Not synced</string>
     <string name="store_pull_to_refresh">Pull down to refresh template list</string>
     <string name="store_no_search_results">No matching templates found</string>
     <string name="store_no_filter_results">No templates match the filters</string>
@@ -3352,14 +3358,20 @@
     <string name="store_pages_project_name">Pages Project Name</string>
     <string name="store_pages_name_hint">Enter Pages project name</string>
     <string name="store_sources">Sources</string>
+    <string name="store_source_status">%1$d sources updated</string>
     <string name="store_add_source">Add Source</string>
     <string name="store_source_name">Source Name</string>
     <string name="store_source_url">Source URL</string>
     <string name="store_delete_source">Delete Source</string>
-    <string name="store_delete_source_confirm">Delete source 「%1$s」?</string>
     <string name="store_source_deleted">Source deleted</string>
     <string name="store_source_added">Source added</string>
-    <string name="store_source_options">More options</string>
+    <string name="store_source_updated">Source updated</string>
+    <string name="store_edit_source">Edit Source</string>
+    <string name="store_save">Save</string>
+    <string name="store_source_name_hint">Please enter source name</string>
+    <string name="store_source_url_invalid">Please enter a valid HTTPS URL</string>
+    <string name="store_source_operation_failed">Operation failed</string>
+    <string name="store_source_operation_failed_with_msg">Operation failed: %1$s</string>
     <string name="store_no_sources">No sources</string>
 
     <!-- Template Store plurals -->
