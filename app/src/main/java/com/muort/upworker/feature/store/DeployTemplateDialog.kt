@@ -120,17 +120,19 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
     private fun setupTemplateType() {
         when (template.type) {
             "worker" -> {
-                // Worker 模板：显示绑定配置，隐藏 Hybrid 相关
+                // Worker 模板：显示绑定配置和可观测性，隐藏 Hybrid 相关
                 binding.hybridSection.visibility = View.GONE
                 binding.pagesNameSection.visibility = View.GONE
                 binding.bindingsSection.visibility = View.VISIBLE
+                binding.observabilitySection.visibility = View.VISIBLE
                 binding.nameLabel.text = getString(R.string.store_template_name)
             }
             "pages" -> {
-                // Pages 模板：隐藏绑定配置
+                // Pages 模板：隐藏绑定配置和可观测性
                 binding.hybridSection.visibility = View.GONE
                 binding.pagesNameSection.visibility = View.GONE
                 binding.bindingsSection.visibility = View.GONE
+                binding.observabilitySection.visibility = View.GONE
                 binding.nameLabel.text = getString(R.string.store_pages_project_name)
             }
             "hybrid" -> {
@@ -138,6 +140,7 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
                 binding.hybridSection.visibility = View.VISIBLE
                 binding.pagesNameSection.visibility = View.VISIBLE
                 binding.bindingsSection.visibility = View.VISIBLE
+                binding.observabilitySection.visibility = View.VISIBLE
                 binding.nameLabel.text = getString(R.string.store_template_name)
 
                 // 默认 Pages 名称和 Worker 名称相同
@@ -151,6 +154,8 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
                     // 根据选择显示/隐藏相关区域
                     binding.bindingsSection.visibility = if (deployWorker) View.VISIBLE else View.GONE
                     binding.pagesNameSection.visibility = if (deployPages) View.VISIBLE else View.GONE
+                    // 可观测性仅在部署 Worker 时显示
+                    binding.observabilitySection.visibility = if (deployWorker) View.VISIBLE else View.GONE
 
                     runPreflight()
                 }
@@ -240,7 +245,7 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 ).also { it.topMargin = 8 }
-                hint = "资源名称"
+                hint = getString(R.string.store_resource_name)
                 isHintEnabled = true
             }
 
@@ -391,29 +396,84 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
 
         lifecycleScope.launch {
             binding.preflightSection.visibility = View.GONE
-
-            val result = deployRepository.preflightDeploy(account, template, scriptName)
-            if (result !is Resource.Success) return@launch
-
-            val info = result.data
             val messages = mutableListOf<String>()
 
-            if (info.exists) {
-                messages.add("⚠️ Worker「$scriptName」已存在，部署将覆盖现有配置")
-            } else {
-                messages.add("✅ 将创建新的 Worker「$scriptName」")
+            when (template.type) {
+                "hybrid" -> {
+                    // Hybrid 模板：根据选择分别预检 Worker 和 Pages
+                    val pagesName = binding.pagesNameEditText.text?.toString()?.trim()
+
+                    // Worker 预检
+                    if (deployWorker) {
+                        val workerResult = deployRepository.preflightDeploy(account, template, scriptName)
+                        if (workerResult is Resource.Success) {
+                            val info = workerResult.data
+                            if (info.exists) {
+                                messages.add(getString(R.string.store_preflight_exists_worker, scriptName))
+                            } else {
+                                messages.add(getString(R.string.store_preflight_create_worker, scriptName))
+                            }
+                            if (info.newBindings.isNotEmpty()) {
+                                messages.add(getString(R.string.store_preflight_new_bindings, info.newBindings.size))
+                            }
+                            if (info.secretsToOverride.isNotEmpty()) {
+                                messages.add(getString(R.string.store_preflight_override_secrets, info.secretsToOverride.size))
+                            }
+                        }
+                    }
+
+                    // Pages 预检
+                    if (deployPages && !pagesName.isNullOrBlank()) {
+                        val pagesResult = deployRepository.preflightPagesDeploy(account, template, pagesName)
+                        if (pagesResult is Resource.Success) {
+                            val info = pagesResult.data
+                            if (info.exists) {
+                                messages.add(getString(R.string.store_preflight_exists_pages, pagesName))
+                            } else {
+                                messages.add(getString(R.string.store_preflight_create_pages, pagesName))
+                            }
+                        }
+                    }
+                }
+                "pages" -> {
+                    val result = deployRepository.preflightPagesDeploy(account, template, scriptName)
+                    if (result !is Resource.Success) return@launch
+                    val info = result.data
+                    if (info.exists) {
+                        messages.add(getString(R.string.store_preflight_exists_pages, scriptName))
+                    } else {
+                        messages.add(getString(R.string.store_preflight_create_pages, scriptName))
+                    }
+                    if (info.newBindings.isNotEmpty()) {
+                        messages.add(getString(R.string.store_preflight_new_bindings, info.newBindings.size))
+                    }
+                    if (info.secretsToOverride.isNotEmpty()) {
+                        messages.add(getString(R.string.store_preflight_override_secrets, info.secretsToOverride.size))
+                    }
+                }
+                else -> {
+                    // Worker 模板（默认）
+                    val result = deployRepository.preflightDeploy(account, template, scriptName)
+                    if (result !is Resource.Success) return@launch
+                    val info = result.data
+                    if (info.exists) {
+                        messages.add(getString(R.string.store_preflight_exists_worker, scriptName))
+                    } else {
+                        messages.add(getString(R.string.store_preflight_create_worker, scriptName))
+                    }
+                    if (info.newBindings.isNotEmpty()) {
+                        messages.add(getString(R.string.store_preflight_new_bindings, info.newBindings.size))
+                    }
+                    if (info.secretsToOverride.isNotEmpty()) {
+                        messages.add(getString(R.string.store_preflight_override_secrets, info.secretsToOverride.size))
+                    }
+                }
             }
 
-            if (info.newBindings.isNotEmpty()) {
-                messages.add("📦 将创建 ${info.newBindings.size} 个绑定资源")
+            if (messages.isNotEmpty()) {
+                binding.preflightSection.visibility = View.VISIBLE
+                binding.preflightText.text = messages.joinToString("\n")
             }
-
-            if (info.secretsToOverride.isNotEmpty()) {
-                messages.add("🔐 将覆盖 ${info.secretsToOverride.size} 个现有密钥")
-            }
-
-            binding.preflightSection.visibility = View.VISIBLE
-            binding.preflightText.text = messages.joinToString("\n")
         }
     }
 
@@ -421,13 +481,13 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
 
     private fun performDeploy() {
         val account = selectedAccount ?: run {
-            showToast("请选择目标账户")
+            showToast(getString(R.string.store_please_select_account))
             return
         }
 
         val name = binding.nameEditText.text?.toString()?.trim()
         if (name.isNullOrBlank()) {
-            binding.nameInputLayout.error = "请输入部署名称"
+            binding.nameInputLayout.error = getString(R.string.store_name_hint)
             return
         }
 
@@ -441,9 +501,9 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
             if (!pagesName.isNullOrBlank() &&
                 !pagesName.matches(Regex("^[a-z0-9][a-z0-9-]*[a-z0-9]$"))) {
                 if (template.type == "hybrid") {
-                    binding.pagesNameInputLayout.error = "名称只能包含小写字母、数字和短横线"
+                    binding.pagesNameInputLayout.error = getString(R.string.store_name_invalid_hint)
                 } else {
-                    binding.nameInputLayout.error = "名称只能包含小写字母、数字和短横线"
+                    binding.nameInputLayout.error = getString(R.string.store_name_invalid_hint)
                 }
                 return
             }
@@ -452,7 +512,7 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
         // Worker 名称验证
         if (template.type == "worker" || (template.type == "hybrid" && deployWorker)) {
             if (!name.matches(Regex("^[a-z0-9][a-z0-9-]*[a-z0-9]$"))) {
-                binding.nameInputLayout.error = "名称只能包含小写字母、数字和短横线"
+                binding.nameInputLayout.error = getString(R.string.store_name_invalid_hint)
                 return
             }
         }
@@ -487,7 +547,9 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
                                 envValues = envValues,
                                 secretValues = secretValues,
                                 deployWorker = deployWorker,
-                                deployPages = deployPages
+                                deployPages = deployPages,
+                                enableObservability = enableLogs,
+                                enableTracing = enableTracing
                             )
                         }
                         else -> {
@@ -555,7 +617,7 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
             "d1" -> "D1"
             "r2" -> "R2"
             "ai" -> "AI"
-            "var" -> "变量"
+            "var" -> getString(R.string.store_binding_type_var)
             "durable_object" -> "DO"
             "service" -> "Service"
             "queue" -> "Queue"

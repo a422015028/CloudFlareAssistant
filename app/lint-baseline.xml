@@ -6203,7 +6203,7 @@
             message="Duplicates value in `failed`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3354"
+            line="3371"
             column="5"
             message="Duplicates value in `failed`"/>
     </issue>
@@ -6251,7 +6251,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3373"
+            line="3390"
             column="5"
             message="Duplicates value in `save`"/>
     </issue>
@@ -6267,7 +6267,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3351"
+            line="3368"
             column="5"
             message="Duplicates value in `save`"/>
     </issue>
@@ -6755,6 +6755,38 @@
 
     <issue
         id="DuplicateStrings"
+        message="Duplicate string value `KV Namespace`, used in `card_kv` and `store_binding_type_kv`"
+        errorLine1="    &lt;string name=&quot;card_kv&quot;>KV Namespace&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="124"
+            column="5"/>
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3330"
+            column="5"
+            message="Duplicates value in `card_kv`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `D1 Database`, used in `card_d1` and `store_binding_type_d1`"
+        errorLine1="    &lt;string name=&quot;card_d1&quot;>D1 Database&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="126"
+            column="5"/>
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3331"
+            column="5"
+            message="Duplicates value in `card_d1`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
         message="Duplicate string value `跟随系统`, used in `language_follow_system` and `theme_follow_system`"
         errorLine1="    &lt;string name=&quot;theme_follow_system&quot;>跟随系统&lt;/string>"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
@@ -7121,6 +7153,22 @@
 
     <issue
         id="DuplicateStrings"
+        message="Duplicate string value `R2 存储桶`, used in `domain_r2_bucket` and `store_binding_type_r2`"
+        errorLine1="    &lt;string name=&quot;domain_r2_bucket&quot;>R2 存储桶&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="231"
+            column="5"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3310"
+            column="5"
+            message="Duplicates value in `domain_r2_bucket`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
         message="Duplicate string value `Pending`, used in `domain_pending`, `r2_status_pending` and `status_pending`"
         errorLine1="    &lt;string name=&quot;domain_pending&quot;>Pending&lt;/string>"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
@@ -7154,6 +7202,22 @@
             line="605"
             column="5"
             message="Duplicates value in `domain_retry`"/>
+    </issue>
+
+    <issue
+        id="DuplicateStrings"
+        message="Duplicate string value `R2 Bucket`, used in `domain_r2_bucket` and `store_binding_type_r2`"
+        errorLine1="    &lt;string name=&quot;domain_r2_bucket&quot;>R2 Bucket&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="234"
+            column="5"/>
+        <location
+            file="src/main/res/values-en/strings.xml"
+            line="3332"
+            column="5"
+            message="Duplicates value in `domain_r2_bucket`"/>
     </issue>
 
     <issue
@@ -9233,7 +9297,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3376"
+            line="3393"
             column="5"
             message="Duplicates value in `dialog_error_title`"/>
     </issue>
@@ -11114,7 +11178,7 @@
             message="Duplicates value in `worker_feature_observability_title`"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3334"
+            line="3351"
             column="5"
             message="Duplicates value in `worker_feature_observability_title`"/>
     </issue>
@@ -11302,7 +11366,7 @@
             message="Duplicates value in `worker_feature_observability_title`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3356"
+            line="3373"
             column="5"
             message="Duplicates value in `worker_feature_observability_title`"/>
     </issue>
@@ -11905,7 +11969,7 @@
             message="Duplicates value in `worker_revision_source`"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3353"
+            line="3370"
             column="5"
             message="Duplicates value in `worker_revision_source`"/>
     </issue>
@@ -14605,7 +14669,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3377"
+            line="3394"
             column="5"
             message="Duplicates value in `msg_operation_failed`"/>
     </issue>
@@ -16352,7 +16416,7 @@
 
     <issue
         id="DuplicateStrings"
-        message="Duplicate string value `环境变量`, used in `store_env_vars` and `xml_dialog_pages_deployment_detail_44`"
+        message="Duplicate string value `环境变量`, used in `store_binding_type_var`, `store_env_vars` and `xml_dialog_pages_deployment_detail_44`"
         errorLine1="    &lt;string name=&quot;xml_dialog_pages_deployment_detail_44&quot;>环境变量&lt;/string>"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
@@ -16361,7 +16425,12 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3308"
+            line="3312"
+            column="5"
+            message="Duplicates value in `xml_dialog_pages_deployment_detail_44`"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3316"
             column="5"
             message="Duplicates value in `xml_dialog_pages_deployment_detail_44`"/>
     </issue>
@@ -16493,7 +16562,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3330"
+            line="3338"
             column="5"
             message="Duplicates value in `xml_dialog_pages_deployment_detail_44`"/>
     </issue>
@@ -17317,7 +17386,7 @@
             column="5"/>
         <location
             file="src/main/res/values-en/strings.xml"
-            line="3345"
+            line="3362"
             column="5"
             message="Duplicates value in `se_ver_type_sync`"/>
     </issue>
@@ -18328,7 +18397,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3311"
+            line="3319"
             column="5"
             message="Duplicates value in `pages_deploy_status_success`"/>
     </issue>
@@ -18360,7 +18429,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3312"
+            line="3320"
             column="5"
             message="Duplicates value in `pages_deploy_status_failed`"/>
     </issue>
@@ -18616,7 +18685,7 @@
             column="5"/>
         <location
             file="src/main/res/values/strings.xml"
-            line="3321"
+            line="3338"
             column="5"
             message="Duplicates value in `store_favorites`"/>
     </issue>

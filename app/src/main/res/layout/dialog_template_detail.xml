@@ -155,15 +155,22 @@
 
             <!-- README 内容 (WebView) -->
             <FrameLayout
+                android:id="@+id/readmeContainer"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_marginTop="8dp">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="?attr/colorSurfaceVariant"
+                android:foreground="?attr/selectableItemBackground"
+                tools:ignore="WebViewLayout">
 
                 <WebView
                     android:id="@+id/readmeWebView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="?attr/colorSurface" />
+                    android:background="?attr/colorSurfaceVariant"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="true"
+                    android:scrollbarStyle="insideOverlay" />
 
                 <TextView
                     android:id="@+id/readmeLoadingText"

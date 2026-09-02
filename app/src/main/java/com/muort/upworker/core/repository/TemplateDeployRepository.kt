@@ -617,7 +617,9 @@ class TemplateDeployRepository @Inject constructor(
         envValues: Map<String, String>,
         secretValues: Map<String, String>,
         deployWorker: Boolean = true,
-        deployPages: Boolean = true
+        deployPages: Boolean = true,
+        enableObservability: Boolean = false,
+        enableTracing: Boolean = false
     ): Resource<DeployResultInfo> = withContext(Dispatchers.IO) {
         val warnings = mutableListOf<String>()
         var workerUrl: String? = null
@@ -632,7 +634,9 @@ class TemplateDeployRepository @Inject constructor(
                     scriptName = workerName,
                     bindings = bindings,
                     envValues = envValues,
-                    secretValues = secretValues
+                    secretValues = secretValues,
+                    enableObservability = enableObservability,
+                    enableTracing = enableTracing
                 )
                 when (workerResult) {
                     is Resource.Success -> {

@@ -1,10 +1,17 @@
 package com.muort.upworker.feature.store
 
+import android.annotation.SuppressLint
 import android.app.Dialog
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -210,19 +217,22 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
 
     private fun getBindingTypeInfo(type: String): Pair<String, String> {
         return when (type) {
-            "kv" -> "🗄️" to "KV 命名空间"
-            "d1" -> "🗃️" to "D1 数据库"
-            "r2" -> "📦" to "R2 存储桶"
-            "ai" -> "🤖" to "AI 绑定"
-            "var" -> "🔑" to "环境变量"
-            "durable_object" -> "📌" to "Durable Object"
-            "service" -> "🔗" to "Service 绑定"
-            "queue" -> "📬" to "队列"
+            "kv" -> "🗄️" to getString(R.string.store_binding_type_kv)
+            "d1" -> "🗃️" to getString(R.string.store_binding_type_d1)
+            "r2" -> "📦" to getString(R.string.store_binding_type_r2)
+            "ai" -> "🤖" to getString(R.string.store_binding_type_ai)
+            "var" -> "🔑" to getString(R.string.store_binding_type_var)
+            "durable_object" -> "📌" to getString(R.string.store_binding_type_durable_object)
+            "service" -> "🔗" to getString(R.string.store_binding_type_service)
+            "queue" -> "📬" to getString(R.string.store_binding_type_queue)
             else -> "📎" to type
         }
     }
 
     private fun setupReadme() {
+        // 配置 WebView
+        setupWebView()
+
         val readmeUrl = templateItem.template.readmeUrl
         if (readmeUrl.isNullOrBlank()) {
             // 没有 README，显示模板描述
@@ -232,14 +242,113 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
             return
         }
 
-        // 设置 WebView
-        binding.readmeWebView.settings.javaScriptEnabled = false
-        binding.readmeWebView.settings.loadWithOverviewMode = true
-        binding.readmeWebView.settings.useWideViewPort = true
-
         // 加载 README
         binding.readmeLoadingText.visibility = View.VISIBLE
         loadReadme(readmeUrl)
+    }
+
+    /**
+     * 配置 WebView：智能高度 + 独立滚动 + 滑动冲突处理
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupWebView() {
+        val webView = binding.readmeWebView
+        val container = binding.readmeContainer
+
+        // 基础设置
+        webView.settings.javaScriptEnabled = false
+        webView.settings.loadWithOverviewMode = true
+        webView.settings.useWideViewPort = true
+        webView.settings.setSupportZoom(false)
+        webView.isVerticalScrollBarEnabled = true
+        webView.isHorizontalScrollBarEnabled = false
+        webView.overScrollMode = WebView.OVER_SCROLL_IF_CONTENT_SCROLLS
+
+        // 背景透明，让 WebView 跟随外层容器的主题色
+        webView.setBackgroundColor(Color.TRANSPARENT)
+        webView.setLayerType(WebView.LAYER_TYPE_HARDWARE, null)
+
+        // 设置 WebView 客户端，监听页面加载完成
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                binding.readmeLoadingText.visibility = View.GONE
+                // 页面加载完成后调整高度
+                adjustWebViewHeight()
+            }
+        }
+
+        // 滑动冲突处理：当在 WebView 内垂直滑动时，禁止父容器拦截触摸事件
+        webView.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // 按下时，先禁止父容器拦截
+                    v.parent.requestDisallowInterceptTouchEvent(true)
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    // 移动时判断是否需要父容器拦截
+                    val wv = v as WebView
+                    val scrollY = wv.scrollY
+                    val density = wv.resources.displayMetrics.density
+                    val contentHeight = (wv.contentHeight * density).toInt()
+                    val webViewHeight = wv.height
+
+                    // 检查是否在顶部且继续下拉，或在底部且继续上拉
+                    val isAtTop = scrollY <= 0
+                    val isAtBottom = scrollY + webViewHeight >= contentHeight - 1
+
+                    if (isAtTop || isAtBottom) {
+                        // 到顶或到底了，让父容器处理
+                        v.parent.requestDisallowInterceptTouchEvent(false)
+                    } else {
+                        // 还在 WebView 内部滚动，禁止父容器拦截
+                        v.parent.requestDisallowInterceptTouchEvent(true)
+                    }
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    // 抬起或取消时，恢复父容器拦截
+                    v.parent.requestDisallowInterceptTouchEvent(false)
+                }
+            }
+            false
+        }
+
+        // 监听容器布局变化，计算最大高度
+        container.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                container.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                adjustWebViewHeight()
+            }
+        })
+    }
+
+    /**
+     * 智能调整 WebView 高度：
+     * - 内容少：wrap_content 自适应
+     * - 内容多：限制最大高度为屏幕的 60%，内部可滚动
+     */
+    private fun adjustWebViewHeight() {
+        val webView = binding.readmeWebView
+
+        // 获取屏幕可用高度的 60% 作为最大高度
+        val displayMetrics = resources.displayMetrics
+        val maxHeight = (displayMetrics.heightPixels * 0.6f).toInt()
+
+        // 获取 WebView 内容高度（contentHeight 返回的是 CSS 像素，乘以 density 转换为实际像素）
+        val contentHeight = (webView.contentHeight * displayMetrics.density).toInt()
+
+        val layoutParams = webView.layoutParams
+        if (contentHeight <= 0) {
+            // 内容高度未知，先设为 wrap_content
+            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        } else if (contentHeight < maxHeight) {
+            // 内容较少，自适应高度
+            layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        } else {
+            // 内容较多，限制最大高度，内部滚动
+            layoutParams.height = maxHeight
+        }
+        webView.layoutParams = layoutParams
     }
 
     private fun loadReadme(url: String) {
