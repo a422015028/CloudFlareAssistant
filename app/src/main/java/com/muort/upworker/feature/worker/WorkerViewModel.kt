@@ -40,15 +40,21 @@ class WorkerViewModel @Inject constructor(
     fun uploadWorkerScriptWithBindings(account: Account, scriptName: String, scriptFile: File, customCompatibilityDate: String? = null, customCompatibilityFlags: List<String>? = null, enableObservability: Boolean = true, enableSubdomain: Boolean = true, enableDeployment: Boolean = true) {
         viewModelScope.launch {
             _uploadState.value = UploadState.Uploading
-            
+
+            val isZipFile = scriptFile.extension.equals("zip", ignoreCase = true)
+
             try {
-                // 读取文件内容
-                val content = scriptFile.readText(Charsets.UTF_8)
-                
-                // 创建临时文件
+                // 读取文件内容（ZIP 模式下用入口文件内容做 Node.js 检测，非 ZIP 模式用全部内容）
+                val content = if (isZipFile) {
+                    ""  // ZIP 模式下跳过内容检测，用 metadata 中的配置
+                } else {
+                    scriptFile.readText(Charsets.UTF_8)
+                }
+
+                // 创建临时文件（仅单文件模式使用）
                 val tempDir = java.io.File(System.getProperty("java.io.tmpdir") ?: System.getenv("TEMP") ?: "/tmp")
                 val tempFile = java.io.File(tempDir, "$scriptName.js")
-                
+
                 try {
                     // 获取原有配置以保留bindings、兼容性配置及 PATCH 保留元数据
                     // （新脚本可能没有配置，失败时使用空配置继续上传）
@@ -62,10 +68,11 @@ class WorkerViewModel @Inject constructor(
                             else -> null
                         }
 
-                    // 直接使用原始内容，不做任何转换
-                    tempFile.writeText(content, Charsets.UTF_8)
-
-                    Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
+                    if (!isZipFile) {
+                        // 直接使用原始内容，不做任何转换
+                        tempFile.writeText(content, Charsets.UTF_8)
+                        Timber.d("Script written to temp file: ${tempFile.absolutePath}, size: ${tempFile.length()} bytes")
+                    }
 
                     // 过滤掉 secret_text bindings（无法获取值）
                     val cleanedBindings = existingSettings?.bindings
@@ -101,45 +108,68 @@ class WorkerViewModel @Inject constructor(
                         cacheOptions = existingSettings?.cacheOptions,
                         observability = existingSettings?.observability
                     )
-                    
-                    when (val result = workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)) {
+
+                    // ZIP 模式 vs 单文件模式
+                    val uploadResult = if (isZipFile) {
+                        Timber.d("Uploading ZIP archive: ${scriptFile.name}")
+                        workerRepository.uploadWorkerScriptFromZip(
+                            account = account,
+                            scriptName = scriptName,
+                            zipFile = scriptFile,
+                            metadata = metadata,
+                            tempDir = tempDir
+                        )
+                    } else {
+                        workerRepository.uploadWorkerScriptMultipart(account, scriptName, tempFile, metadata)
+                    }
+
+                    when (uploadResult) {
                         is Resource.Success -> {
                             _uploadState.value = UploadState.Success
                             _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_with_bindings_success))
                             Timber.d("Script uploaded with preserved bindings: $scriptName")
 
                             // ====== P2 Worker post-upload three-stage flow ======
-                            val contentForDetect = content
-                            val detectFlagsBase: List<String> = finalCompatibilityFlags.orEmpty()
-                            val detectResult: WorkerNodejsDetectResult =
-                                workerRepository.detectAndAppendNodejsCompat(contentForDetect, detectFlagsBase)
-                            // Forward detect log events as UiMessage
-                            _message.emit(UiMessage.of(detectResult.logResId, *detectResult.logFormatArgs))
+                            // ZIP 模式：跳过 Node.js 检测和重新上传，直接使用用户配置的 flags
+                            // 单文件模式：检测 Node.js 兼容标志并可能二次上传
+                            val effectiveResult: Resource<com.muort.upworker.core.model.WorkerScript>
 
-                            val flagsChanged = detectResult.finalFlags != detectFlagsBase
-                            val finalMetadataForUpload = if (flagsChanged) {
-                                metadata.copy(compatibilityFlags = detectResult.finalFlags)
+                            if (isZipFile) {
+                                effectiveResult = uploadResult
                             } else {
-                                metadata
-                            }
-                            val effectiveResult = if (flagsChanged) {
-                                // Re-run uploadMultipart second time if flags changed
-                                val reupload = workerRepository.uploadWorkerScriptMultipart(
-                                    account, scriptName, tempFile, finalMetadataForUpload
-                                )
-                                if (reupload is Resource.Error) {
-                                    _uploadState.value = UploadState.Error(UiMessage.RawString(reupload.message))
-                                    _message.emit(
-                                        UiMessage.of(
-                                            R.string.worker_nodejs_flag_append_fail_format,
-                                            reupload.message
-                                        )
-                                    )
-                                    return@launch
+                                val finalMetadataForUpload: com.muort.upworker.core.model.WorkerMetadata
+                                val contentForDetect = content
+                                val detectFlagsBase: List<String> = finalCompatibilityFlags.orEmpty()
+                                val detectResult: WorkerNodejsDetectResult =
+                                    workerRepository.detectAndAppendNodejsCompat(contentForDetect, detectFlagsBase)
+                                // Forward detect log events as UiMessage
+                                _message.emit(UiMessage.of(detectResult.logResId, *detectResult.logFormatArgs))
+
+                                val flagsChanged = detectResult.finalFlags != detectFlagsBase
+                                finalMetadataForUpload = if (flagsChanged) {
+                                    metadata.copy(compatibilityFlags = detectResult.finalFlags)
+                                } else {
+                                    metadata
                                 }
-                                reupload
-                            } else {
-                                result
+                                effectiveResult = if (flagsChanged) {
+                                    // Re-run uploadMultipart second time if flags changed
+                                    val reupload = workerRepository.uploadWorkerScriptMultipart(
+                                        account, scriptName, tempFile, finalMetadataForUpload
+                                    )
+                                    if (reupload is Resource.Error) {
+                                        _uploadState.value = UploadState.Error(UiMessage.RawString(reupload.message))
+                                        _message.emit(
+                                            UiMessage.of(
+                                                R.string.worker_nodejs_flag_append_fail_format,
+                                                reupload.message
+                                            )
+                                        )
+                                        return@launch
+                                    }
+                                    reupload
+                                } else {
+                                    uploadResult
+                                }
                             }
 
                             // uploadWorkerScriptMultipart returns Resource<WorkerScript>. WorkerScript has
@@ -175,9 +205,9 @@ class WorkerViewModel @Inject constructor(
                             loadWorkerScripts(account)
                         }
                         is Resource.Error -> {
-                            _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
-                            _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_failed, result.message))
-                            Timber.e("Failed to upload script: ${result.message}")
+                            _uploadState.value = UploadState.Error(UiMessage.RawString(uploadResult.message))
+                            _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_failed, uploadResult.message))
+                            Timber.e("Failed to upload script: ${uploadResult.message}")
                         }
                         is Resource.Loading -> {
                             _uploadState.value = UploadState.Uploading

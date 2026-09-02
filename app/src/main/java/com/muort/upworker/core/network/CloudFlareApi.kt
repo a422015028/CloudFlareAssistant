@@ -91,6 +91,21 @@ interface CloudFlareApi {
         @Part("metadata") metadata: RequestBody,
         @Part script: MultipartBody.Part
     ): Response<CloudFlareResponse<WorkerScript>>
+
+    /**
+     * Upload Worker Script with multiple module files (multipart/form-data)
+     * Used for release-type templates with multiple JS files
+     * https://developers.cloudflare.com/api/operations/worker-script-upload-worker-module
+     */
+    @PUT("accounts/{account_id}/workers/scripts/{script_name}")
+    suspend fun uploadWorkerScriptMultiFile(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("script_name") scriptName: String,
+        @Body body: MultipartBody
+    ): Response<CloudFlareResponse<WorkerScript>>
     
     /**
      * Upload Worker Script content only (without touching config/metadata)

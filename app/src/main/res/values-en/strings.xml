@@ -1723,7 +1723,7 @@
     <string name="xml_fragment_pages_8">No projects yet</string>
     <string name="xml_fragment_worker">Deploy Worker Script</string>
     <string name="xml_fragment_worker_hint">Worker Name</string>
-    <string name="xml_fragment_worker_hint_2">Script file path or URL (supported: .js only)</string>
+    <string name="xml_fragment_worker_hint_2">Script file path or URL (supported: .js .zip)</string>
     <string name="xml_fragment_worker_hint_3">Default compatibility date 2026-06-16</string>
     <string name="xml_fragment_worker_2">Deploy Script</string>
     <string name="xml_fragment_worker_3">Script</string>

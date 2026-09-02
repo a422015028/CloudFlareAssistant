@@ -1701,7 +1701,7 @@
     <string name="xml_fragment_pages_8">暂无项目</string>
     <string name="xml_fragment_worker">部署 Worker 脚本</string>
     <string name="xml_fragment_worker_hint">Worker 名称</string>
-    <string name="xml_fragment_worker_hint_2">脚本文件路径/URL(仅支持：.js)</string>
+    <string name="xml_fragment_worker_hint_2">脚本文件路径/URL(仅支持：.js .zip)</string>
     <string name="xml_fragment_worker_hint_3">默认兼容日期 2026-06-16</string>
     <string name="xml_fragment_worker_2">部署脚本</string>
     <string name="xml_fragment_worker_3">脚本</string>

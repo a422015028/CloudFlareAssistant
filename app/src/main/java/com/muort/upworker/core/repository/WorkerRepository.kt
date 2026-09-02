@@ -16,6 +16,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
 import java.io.File
+import java.util.zip.ZipInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -260,7 +261,221 @@ class WorkerRepository @Inject constructor(
             Resource.Error("Upload failed (tried ${contentTypesToTry.size} content types): $lastError")
         }
     }
-    
+
+    /**
+     * 多文件上传 Worker Script（支持 release 类型的多模块 ZIP 模板）
+     *
+     * @param account 账户
+     * @param scriptName Worker 名称
+     * @param moduleFiles 模块文件映射（相对路径 → 文件对象），如 "src/index.js" -> File
+     * @param metadata 元数据（bindings、compatibilityDate、mainModule 等）
+     */
+    suspend fun uploadWorkerScriptMultiFile(
+        account: Account,
+        scriptName: String,
+        moduleFiles: Map<String, File>,
+        metadata: WorkerMetadata
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val metadataJson = gson.toJson(metadata)
+            Timber.d("Multi-file upload metadata: $metadataJson")
+            Timber.d("Module files: ${moduleFiles.keys.joinToString(", ")}")
+
+            // 构建 multipart body
+            val builder = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+
+            // 1. 添加 metadata part
+            val metadataBody = metadataJson.toRequestBody("application/json".toMediaType())
+            builder.addFormDataPart("metadata", null, metadataBody)
+
+            // 2. 添加每个模块文件
+            for ((modulePath, file) in moduleFiles) {
+                val ext = file.extension.lowercase()
+                val contentType = when (ext) {
+                    "js", "mjs", "cjs" -> "application/javascript+module".toMediaType()
+                    "wasm" -> "application/wasm".toMediaType()
+                    "py" -> "text/x-python".toMediaType()
+                    "json" -> "application/json".toMediaType()
+                    "txt", "html", "css" -> "text/plain".toMediaType()
+                    else -> "application/octet-stream".toMediaType()
+                }
+                builder.addFormDataPart(
+                    name = modulePath,
+                    filename = modulePath,
+                    body = file.asRequestBody(contentType)
+                )
+            }
+
+            val requestBody = builder.build()
+
+            val response = api.uploadWorkerScriptMultiFile(
+                token = AuthHelper.getBearerToken(account),
+                email = AuthHelper.getEmail(account),
+                apiKey = AuthHelper.getGlobalApiKey(account),
+                accountId = account.accountId,
+                scriptName = scriptName,
+                body = requestBody
+            )
+
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.result?.let {
+                    Timber.d("Multi-file upload successful for '$scriptName'")
+                    Resource.Success(it)
+                } ?: Resource.Error("Upload successful but no result returned")
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    ?: response.message()
+                Timber.e("Multi-file upload failed: $errorMsg\nError body: $errorBody")
+                Resource.Error("Upload failed: $errorMsg")
+            }
+        }
+    }
+
+    /**
+     * 从 ZIP 归档上传 Worker（多文件模块）
+     * 自动解压 ZIP → 收集模块文件 → 多文件上传
+     *
+     * @param account 账户
+     * @param scriptName Worker 名称
+     * @param zipFile ZIP 归档文件
+     * @param metadata 元数据（mainModule 为空时自动检测）
+     * @param tempDir 临时解压目录（默认系统临时目录）
+     */
+    suspend fun uploadWorkerScriptFromZip(
+        account: Account,
+        scriptName: String,
+        zipFile: File,
+        metadata: WorkerMetadata,
+        tempDir: File? = null
+    ): Resource<WorkerScript> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val extractDir = File(
+                tempDir ?: File(System.getProperty("java.io.tmpdir") ?: "/tmp"),
+                "worker_zip_${scriptName}_${System.currentTimeMillis()}"
+            )
+            extractDir.mkdirs()
+
+            try {
+                // 1. 解压 ZIP
+                unzip(zipFile, extractDir)
+                Timber.d("ZIP 解压完成: ${extractDir.absolutePath}")
+
+                // 2. 智能穿透嵌套目录
+                var baseDir = extractDir
+                while (true) {
+                    val validFiles = baseDir.listFiles()?.filter {
+                        it.name != ".DS_Store" && it.name != "__MACOSX" && !it.name.startsWith(".")
+                    }
+                    if (validFiles != null && validFiles.size == 1 && validFiles[0].isDirectory) {
+                        baseDir = validFiles[0]
+                    } else {
+                        break
+                    }
+                }
+
+                // 3. 收集模块文件
+                val moduleFiles = collectModuleFiles(baseDir)
+                if (moduleFiles.isEmpty()) {
+                    return@safeApiCall Resource.Error("ZIP 中未找到可上传的模块文件")
+                }
+                Timber.d("收集到 ${moduleFiles.size} 个模块文件: ${moduleFiles.keys.joinToString(", ")}")
+
+                // 4. 确定 mainModule（如果 metadata 中没指定）
+                val finalMainModule = metadata.mainModule ?: findMainModule(moduleFiles.keys)
+                val finalMetadata = if (finalMainModule != null && metadata.mainModule == null) {
+                    metadata.copy(mainModule = finalMainModule)
+                } else {
+                    metadata
+                }
+                Timber.d("使用 mainModule: ${finalMetadata.mainModule}")
+
+                // 5. 多文件上传
+                when (val result = uploadWorkerScriptMultiFile(
+                    account = account,
+                    scriptName = scriptName,
+                    moduleFiles = moduleFiles,
+                    metadata = finalMetadata
+                )) {
+                    is Resource.Success -> Resource.Success(result.data)
+                    is Resource.Error -> Resource.Error(result.message)
+                    is Resource.Loading -> Resource.Error("Unexpected loading state")
+                }
+            } finally {
+                // 清理临时目录
+                try {
+                    extractDir.deleteRecursively()
+                } catch (_: Exception) {}
+            }
+        }
+    }
+
+    /**
+     * 解压 ZIP 文件
+     */
+    private fun unzip(zipFile: File, targetDir: File) {
+        ZipInputStream(zipFile.inputStream()).use { zis ->
+            var entry = zis.nextEntry
+            while (entry != null) {
+                val entryName = entry.name.replace("\\", "/")
+                val newFile = File(targetDir, entryName)
+                if (entry.isDirectory) {
+                    newFile.mkdirs()
+                } else {
+                    newFile.parentFile?.mkdirs()
+                    newFile.outputStream().use { fos ->
+                        zis.copyTo(fos)
+                    }
+                }
+                zis.closeEntry()
+                entry = zis.nextEntry
+            }
+        }
+    }
+
+    /**
+     * 收集目录中的所有模块文件
+     */
+    private fun collectModuleFiles(baseDir: File): Map<String, File> {
+        val result = mutableMapOf<String, File>()
+        val supportedExt = setOf("js", "mjs", "cjs", "wasm", "py", "json")
+
+        fun collect(dir: File, relativePath: String) {
+            dir.listFiles()?.forEach { file ->
+                val newPath = if (relativePath.isEmpty()) file.name else "$relativePath/${file.name}"
+                if (file.isDirectory) {
+                    if (!file.name.startsWith(".") && file.name != "node_modules") {
+                        collect(file, newPath)
+                    }
+                } else {
+                    val ext = file.extension.lowercase()
+                    if (ext in supportedExt) {
+                        result[newPath] = file
+                    }
+                }
+            }
+        }
+
+        collect(baseDir, "")
+        return result
+    }
+
+    /**
+     * 自动查找多文件模块的入口文件
+     */
+    private fun findMainModule(filePaths: Set<String>): String? {
+        return when {
+            filePaths.contains("index.js") -> "index.js"
+            filePaths.contains("main.js") -> "main.js"
+            filePaths.contains("worker.js") -> "worker.js"
+            filePaths.contains("src/index.js") -> "src/index.js"
+            filePaths.contains("_worker.js") -> "_worker.js"
+            else -> filePaths.firstOrNull { !it.contains("/") && it.endsWith(".js") }
+                ?: filePaths.firstOrNull { it.endsWith(".js") }
+        }
+    }
+
     /**
      * Upload Worker Script content only (without metadata)
      * Faster method when you only need to update the script code
@@ -973,9 +1188,17 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error("No settings returned")
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
-                    ?: response.message()
-                Timber.e("Failed to fetch settings: $errorMsg")
+                val errors = response.body()?.errors
+                val firstError = errors?.firstOrNull()
+                val errorCode = firstError?.code
+                val errorMsg = firstError?.message ?: response.message()
+
+                // 10007 = Worker script not found，属于预期内的正常情况（如新部署）
+                if (errorCode == 10007) {
+                    Timber.d("Worker '$scriptName' not found (code 10007) — 正常情况，Worker 尚未创建")
+                } else {
+                    Timber.e("Failed to fetch settings: $errorMsg (code: $errorCode)")
+                }
                 Resource.Error("Failed to fetch settings: $errorMsg")
             }
         }

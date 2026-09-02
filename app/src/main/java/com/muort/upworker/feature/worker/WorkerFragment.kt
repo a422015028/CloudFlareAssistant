@@ -330,7 +330,9 @@ class WorkerFragment : Fragment() {
                 putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
                     "application/javascript",
                     "text/javascript",
-                    "text/plain"
+                    "text/plain",
+                    "application/zip",
+                    "application/x-zip-compressed"
                 ))
                 addCategory(Intent.CATEGORY_OPENABLE)
             }

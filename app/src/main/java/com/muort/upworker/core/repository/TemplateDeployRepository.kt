@@ -1,4 +1,4 @@
-package com.muort.upworker.core.repository
+﻿package com.muort.upworker.core.repository
 
 import android.content.Context
 import com.google.gson.Gson
@@ -10,6 +10,7 @@ import com.muort.upworker.core.model.DeployBindingConfig
 import com.muort.upworker.core.model.DeployPreflightInfo
 import com.muort.upworker.core.model.DeployResultInfo
 import com.muort.upworker.core.model.KvNamespace
+import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.WorkerBinding
 import com.muort.upworker.core.model.WorkerMetadata
@@ -21,6 +22,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
 import java.io.File
+import java.util.zip.ZipInputStream
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,6 +52,7 @@ class TemplateDeployRepository @Inject constructor(
     private val pagesRepository: PagesRepository,
     private val kvRepository: KvRepository,
     private val d1Repository: D1Repository,
+    private val r2Repository: R2Repository,
     private val catalogRepository: CatalogRepository,
     private val gson: Gson
 ) {
@@ -146,13 +149,45 @@ class TemplateDeployRepository @Inject constructor(
         val rollbackSteps = mutableListOf<suspend () -> Unit>()
         val warnings = mutableListOf<String>()
         val createdResources = mutableListOf<String>()
+        // 需要在部署结束后清理的临时文件/目录（无论成功失败）
+        val tempFilesToClean = mutableListOf<File>()
 
         try {
             Timber.d("[TemplateDeploy] 开始部署模板: ${template.name} -> $scriptName")
 
+            val sourceKind = template.sourceKind ?: "raw"
+            val isMultiFile = sourceKind == "release"
+
             // Step 1: 下载模板源码
-            val scriptFile = downloadTemplateScript(template)
-                ?: return@withContext Resource.Error("Failed to download template script")
+            val moduleFiles = if (isMultiFile) {
+                // release 类型：下载 ZIP → 解压 → 收集所有模块文件
+                val zipFile = downloadTemplateArchive(template)
+                    ?: return@withContext Resource.Error("Failed to download template archive")
+                tempFilesToClean.add(zipFile)
+                val tempDir = File(appContext.cacheDir, "template_${template.templateId}_unzipped_${System.currentTimeMillis()}")
+                tempDir.mkdirs()
+                tempFilesToClean.add(tempDir)
+                unzip(zipFile, tempDir)
+                // 智能穿透嵌套目录
+                var baseDir = tempDir
+                while (true) {
+                    val validFiles = baseDir.listFiles()?.filter {
+                        it.name != ".DS_Store" && it.name != "__MACOSX" && !it.name.startsWith(".")
+                    }
+                    if (validFiles != null && validFiles.size == 1 && validFiles[0].isDirectory) {
+                        baseDir = validFiles[0]
+                    } else {
+                        break
+                    }
+                }
+                collectModuleFiles(baseDir)
+            } else {
+                // raw 类型：单文件
+                val scriptFile = downloadTemplateScript(template)
+                    ?: return@withContext Resource.Error("Failed to download template script")
+                tempFilesToClean.add(scriptFile)
+                mapOf(scriptFile.name to scriptFile)
+            }
 
             // Step 2: 创建/查找绑定资源
             val workerBindings = resolveBindings(account, bindings, rollbackSteps, createdResources, warnings)
@@ -161,9 +196,24 @@ class TemplateDeployRepository @Inject constructor(
             val compatibilityFlags = template.compatibilityFlags?.split(",")?.filter { it.isNotBlank() }
 
             // 智能确定 mainModule：
-            // 1. 如果模板显式指定了 mainModule，优先使用
-            // 2. 否则由 WorkerRepository 自动检测（基于脚本内容）
-            val explicitMainModule = template.mainModule
+            // 1. 如果模板显式指定了 mainModule 且文件存在，优先使用
+            // 2. 否则根据文件名自动检测（兼容模板配置错误的情况）
+            val autoMainModule = if (isMultiFile) findMainModule(moduleFiles.keys) else null
+            val explicitMainModule = template.mainModule?.takeIf { moduleFiles.containsKey(it) }
+                ?: template.mainModule?.let { configured ->
+                    // 尝试兼容：去掉 src/ 前缀后再检查
+                    val withoutSrc = configured.removePrefix("src/")
+                    if (moduleFiles.containsKey(withoutSrc)) {
+                        Timber.w("[TemplateDeploy] 模板配置的 mainModule='$configured' 不存在，自动修正为 '$withoutSrc'")
+                        warnings.add("模板入口文件路径已自动修正")
+                        withoutSrc
+                    } else {
+                        Timber.w("[TemplateDeploy] 模板配置的 mainModule='$configured' 不存在，回退到自动检测: $autoMainModule")
+                        warnings.add("模板入口配置有误，已自动检测入口文件")
+                        autoMainModule
+                    }
+                }
+                ?: autoMainModule
 
             val metadata = WorkerMetadata(
                 mainModule = explicitMainModule,
@@ -172,12 +222,24 @@ class TemplateDeployRepository @Inject constructor(
                 bindings = workerBindings
             )
 
-            val uploadResult = workerRepository.uploadWorkerScriptMultipart(
-                account = account,
-                scriptName = scriptName,
-                scriptFile = scriptFile,
-                metadata = metadata
-            )
+            val uploadResult = if (isMultiFile && moduleFiles.size > 1) {
+                // 多文件上传
+                workerRepository.uploadWorkerScriptMultiFile(
+                    account = account,
+                    scriptName = scriptName,
+                    moduleFiles = moduleFiles,
+                    metadata = metadata
+                )
+            } else {
+                // 单文件上传（raw 类型 或 release 但只有一个文件）
+                val singleFile = moduleFiles.values.first()
+                workerRepository.uploadWorkerScriptMultipart(
+                    account = account,
+                    scriptName = scriptName,
+                    scriptFile = singleFile,
+                    metadata = metadata
+                )
+            }
 
             if (uploadResult !is Resource.Success) {
                 val errorMsg = (uploadResult as? Resource.Error)?.message ?: "Upload failed"
@@ -249,6 +311,20 @@ class TemplateDeployRepository @Inject constructor(
             Timber.e(e, "[TemplateDeploy] 部署异常")
             rollbackResources(account, rollbackSteps, createdResources)
             Resource.Error("部署失败: ${e.message}")
+        } finally {
+            // 清理所有临时文件/目录（无论成功失败）
+            for (file in tempFilesToClean) {
+                try {
+                    if (file.isDirectory) {
+                        file.deleteRecursively()
+                    } else {
+                        file.delete()
+                    }
+                    Timber.d("[TemplateDeploy] 已清理临时文件: ${file.name}")
+                } catch (e: Exception) {
+                    Timber.w(e, "[TemplateDeploy] 清理临时文件失败: ${file.name}")
+                }
+            }
         }
     }
 
@@ -272,7 +348,7 @@ class TemplateDeployRepository @Inject constructor(
                 val workerBinding = when (binding.type) {
                     "kv" -> resolveKvBinding(account, binding, rollbackSteps, createdResources)
                     "d1" -> resolveD1Binding(account, binding, rollbackSteps, createdResources)
-                    "r2" -> resolveR2Binding(account, binding, warnings)
+                    "r2" -> resolveR2Binding(account, binding, rollbackSteps, createdResources, warnings)
                     "ai" -> WorkerBinding(type = "ai", name = binding.name)
                     "var" -> {
                         // 变量在上传后单独设置（plain_text 和 secret_text）
@@ -363,10 +439,8 @@ class TemplateDeployRepository @Inject constructor(
         val resourceName = binding.resourceName
 
         if (binding.mode == "existing" && binding.existingId != null) {
-            // 现有数据库也执行 initSql（如果启用且存在）
-            if (binding.runInitSql) {
-                executeD1InitSql(account, binding.existingId, binding)
-            }
+            // 用户手动选择的现有数据库：跳过 initSql，避免重复执行
+            Timber.d("[TemplateDeploy] 使用现有 D1 数据库，跳过 initSql: ${binding.existingId}")
             return WorkerBinding(
                 type = "d1",
                 name = binding.name,
@@ -379,10 +453,9 @@ class TemplateDeployRepository @Inject constructor(
         val existing = (databases as? Resource.Success)?.data?.find { it.name == resourceName }
 
         if (existing != null) {
-            // 已有数据库也执行 initSql（如果启用）
-            if (binding.runInitSql) {
-                executeD1InitSql(account, existing.uuid, binding)
-            }
+            // 已有数据库：跳过 initSql，避免重复执行建表语句导致报错
+            // initSql 仅在首次创建数据库时执行
+            Timber.d("[TemplateDeploy] D1 数据库已存在，跳过 initSql: $resourceName")
             return WorkerBinding(
                 type = "d1",
                 name = binding.name,
@@ -473,16 +546,16 @@ class TemplateDeployRepository @Inject constructor(
     }
 
     private suspend fun resolveR2Binding(
-        @Suppress("UNUSED_PARAMETER") account: Account,
+        account: Account,
         binding: DeployBindingConfig,
+        rollbackSteps: MutableList<suspend () -> Unit>,
+        createdResources: MutableList<String>,
         warnings: MutableList<String>
     ): WorkerBinding {
-        // R2 存储桶绑定通过 settings PATCH 设置，multipart 上传也支持
         val resourceName = binding.resourceName
 
-        // R2 需要 S3 凭证才能创建，这里只支持选择现有存储桶
-        // 自动创建需要 R2 权限和 S3 兼容 API 配置
         if (binding.mode == "existing" && binding.existingId != null) {
+            // 使用现有 R2 存储桶
             return WorkerBinding(
                 type = "r2_bucket",
                 name = binding.name,
@@ -490,24 +563,47 @@ class TemplateDeployRepository @Inject constructor(
             )
         }
 
-        // 自动模式：仅尝试查找
-        warnings.add("R2 存储桶「$resourceName」请确认已存在，自动创建需要 S3 凭证")
+        // 自动模式：先查找是否已有同名存储桶，没有则创建
+        val buckets = r2Repository.listBuckets(account)
+        val existing = (buckets as? Resource.Success)?.data?.find { it.name == resourceName }
+
+        if (existing != null) {
+            return WorkerBinding(
+                type = "r2_bucket",
+                name = binding.name,
+                bucketName = existing.name
+            )
+        }
+
+        // 创建新的 R2 存储桶
+        val createResult = r2Repository.createBucket(account, resourceName)
+        val created = (createResult as? Resource.Success)?.data
+            ?: throw Exception("创建 R2 存储桶失败: ${(createResult as? Resource.Error)?.message}")
+
+        createdResources.add("R2: $resourceName")
+        rollbackSteps.add {
+            try {
+                r2Repository.deleteBucket(account, created.name)
+            } catch (_: Exception) {
+                // R2 存储桶可能有内容，删除可能失败，忽略即可
+                warnings.add("回滚时 R2 存储桶「$resourceName」删除失败，需手动清理")
+            }
+        }
+
         return WorkerBinding(
             type = "r2_bucket",
             name = binding.name,
-            bucketName = resourceName
+            bucketName = created.name
         )
     }
 
     // ==================== 源码下载 ====================
 
     /**
-     * 下载模板脚本到临时文件
-     * 支持 raw / release 两种源码类型
+     * 下载模板脚本到临时文件（单文件 raw 类型）
      */
     private suspend fun downloadTemplateScript(template: CatalogTemplate): File? {
         val sourceUrl = template.sourceUrl ?: return null
-        val sourceKind = template.sourceKind ?: "raw"
 
         return try {
             val request = Request.Builder().url(sourceUrl).build()
@@ -520,12 +616,7 @@ class TemplateDeployRepository @Inject constructor(
 
             val body = response.body?.bytes() ?: return null
 
-            // 创建临时文件
-            val fileName = when (sourceKind) {
-                "release" -> "template_${template.templateId}.js"
-                else -> "index.js"
-            }
-            val tempFile = File(appContext.cacheDir, "template_${template.templateId}_$fileName")
+            val tempFile = File(appContext.cacheDir, "template_${template.templateId}_index.js")
             tempFile.writeBytes(body)
 
             Timber.d("[TemplateDeploy] 脚本下载成功: ${tempFile.length()} bytes")
@@ -533,6 +624,102 @@ class TemplateDeployRepository @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e, "[TemplateDeploy] 下载脚本异常")
             null
+        }
+    }
+
+    /**
+     * 下载模板 ZIP 归档到临时文件（release 类型）
+     */
+    private suspend fun downloadTemplateArchive(template: CatalogTemplate): File? {
+        val sourceUrl = template.sourceUrl ?: return null
+
+        return try {
+            val request = Request.Builder().url(sourceUrl).build()
+            val response = okHttpClient.newCall(request).execute()
+
+            if (!response.isSuccessful) {
+                Timber.e("[TemplateDeploy] 下载归档失败: HTTP ${response.code}")
+                return null
+            }
+
+            val body = response.body?.bytes() ?: return null
+
+            val tempFile = File(appContext.cacheDir, "template_${template.templateId}.zip")
+            tempFile.writeBytes(body)
+
+            Timber.d("[TemplateDeploy] 归档下载成功: ${tempFile.length()} bytes")
+            tempFile
+        } catch (e: Exception) {
+            Timber.e(e, "[TemplateDeploy] 下载归档异常")
+            null
+        }
+    }
+
+    /**
+     * 解压 ZIP 文件到目标目录
+     */
+    private fun unzip(zipFile: File, targetDir: File) {
+        ZipInputStream(zipFile.inputStream()).use { zis ->
+            var entry = zis.nextEntry
+            while (entry != null) {
+                val entryName = entry.name.replace("\\", "/")
+                val newFile = File(targetDir, entryName)
+                if (entry.isDirectory) {
+                    newFile.mkdirs()
+                } else {
+                    newFile.parentFile?.mkdirs()
+                    newFile.outputStream().use { fos ->
+                        zis.copyTo(fos)
+                    }
+                }
+                zis.closeEntry()
+                entry = zis.nextEntry
+            }
+        }
+        Timber.d("[TemplateDeploy] ZIP 解压完成: ${targetDir.absolutePath}")
+    }
+
+    /**
+     * 递归收集目录中的所有模块文件（JS、WASM、Python 等）
+     * 返回 相对路径 → 文件 的映射
+     */
+    private fun collectModuleFiles(baseDir: File): Map<String, File> {
+        val result = mutableMapOf<String, File>()
+        val supportedExt = setOf("js", "mjs", "cjs", "wasm", "py", "json")
+
+        fun collect(dir: File, relativePath: String) {
+            dir.listFiles()?.forEach { file ->
+                val newPath = if (relativePath.isEmpty()) file.name else "$relativePath/${file.name}"
+                if (file.isDirectory) {
+                    // 跳过隐藏目录和 node_modules
+                    if (!file.name.startsWith(".") && file.name != "node_modules") {
+                        collect(file, newPath)
+                    }
+                } else {
+                    val ext = file.extension.lowercase()
+                    if (ext in supportedExt) {
+                        result[newPath] = file
+                    }
+                }
+            }
+        }
+
+        collect(baseDir, "")
+        Timber.d("[TemplateDeploy] 收集到 ${result.size} 个模块文件: ${result.keys.joinToString(", ")}")
+        return result
+    }
+
+    /**
+     * 自动查找多文件模块的入口文件
+     */
+    private fun findMainModule(filePaths: Set<String>): String? {
+        // 优先级：index.js > main.js > 第一个找到的根目录 JS 文件
+        return when {
+            filePaths.contains("index.js") -> "index.js"
+            filePaths.contains("main.js") -> "main.js"
+            filePaths.contains("src/index.js") -> "src/index.js"
+            else -> filePaths.firstOrNull { !it.contains("/") && it.endsWith(".js") }
+                ?: filePaths.firstOrNull { it.endsWith(".js") }
         }
     }
 
@@ -590,6 +777,13 @@ class TemplateDeployRepository @Inject constructor(
     }
 
     /**
+     * 获取账户的 R2 存储桶列表（供部署对话框选择使用）
+     */
+    suspend fun listR2Buckets(account: Account): Resource<List<R2Bucket>> {
+        return r2Repository.listBuckets(account)
+    }
+
+    /**
      * 将 CatalogBinding 列表转换为 DeployBindingConfig 列表（带默认值）
      */
     fun buildBindingConfigs(bindings: List<CatalogBinding>): List<DeployBindingConfig> {
@@ -627,6 +821,7 @@ class TemplateDeployRepository @Inject constructor(
         envValues: Map<String, String> = emptyMap(),
         branch: String = "main"
     ): Resource<DeployResultInfo> = withContext(Dispatchers.IO) {
+        var zipFile: java.io.File? = null
         try {
             Timber.d("[TemplateDeploy] 开始部署 Pages 模板: ${template.name} -> $projectName")
 
@@ -634,7 +829,7 @@ class TemplateDeployRepository @Inject constructor(
             val sourceUrl = template.pagesSourceUrl ?: template.sourceUrl
                 ?: return@withContext Resource.Error("模板缺少 Pages 源码地址")
 
-            val zipFile = downloadPagesArchive(template, sourceUrl)
+            zipFile = downloadPagesArchive(template, sourceUrl)
                 ?: return@withContext Resource.Error("下载 Pages 模板失败")
 
             // 调用 PagesRepository 部署
@@ -673,6 +868,16 @@ class TemplateDeployRepository @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e, "[TemplateDeploy] Pages 部署异常")
             Resource.Error("部署失败: ${e.message}")
+        } finally {
+            // 清理临时 ZIP 文件（无论成功失败）
+            zipFile?.let {
+                try {
+                    it.delete()
+                    Timber.d("[TemplateDeploy] 已清理 Pages 临时文件: ${it.name}")
+                } catch (e: Exception) {
+                    Timber.w(e, "[TemplateDeploy] 清理 Pages 临时文件失败: ${it.name}")
+                }
+            }
         }
     }
 

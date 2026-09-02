@@ -45,3 +45,4 @@ CloudflareAPI/.taixu/
 .taixu/
 docs/
 TEMPLATE_STORE_INTEGRATION_PLAN.md
+cf-store.js
