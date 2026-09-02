@@ -52,7 +52,16 @@
         <action
             android:id="@+id/action_home_to_zerotrust"
             app:destination="@id/zeroTrustFragment" />
+        <action
+            android:id="@+id/action_home_to_store"
+            app:destination="@id/storeFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/storeFragment"
+        android:name="com.muort.upworker.feature.store.StoreFragment"
+        android:label="@string/store_title"
+        tools:layout="@layout/fragment_store" />
 
     <fragment
         android:id="@+id/accountListFragment"

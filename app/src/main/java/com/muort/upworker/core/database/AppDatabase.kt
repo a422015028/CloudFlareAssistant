@@ -10,10 +10,13 @@ import com.muort.upworker.core.model.R2BackupConfig
 import com.muort.upworker.core.model.LocalBackupConfig
 import com.muort.upworker.core.model.Zone
 import com.muort.upworker.core.model.ScriptVersion
+import com.muort.upworker.core.model.CatalogSource
+import com.muort.upworker.core.model.CatalogTemplate
+import com.muort.upworker.core.model.CatalogFavorite
 
 @Database(
-    entities = [Account::class, WebDavConfig::class, R2BackupConfig::class, LocalBackupConfig::class, Zone::class, ScriptVersion::class],
-    version = 9,
+    entities = [Account::class, WebDavConfig::class, R2BackupConfig::class, LocalBackupConfig::class, Zone::class, ScriptVersion::class, CatalogSource::class, CatalogTemplate::class, CatalogFavorite::class],
+    version = 10,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -23,6 +26,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun localBackupConfigDao(): LocalBackupConfigDao
     abstract fun zoneDao(): ZoneDao
     abstract fun scriptVersionDao(): ScriptVersionDao
+    abstract fun catalogDao(): CatalogDao
     
     companion object {
         const val DATABASE_NAME = "cloudflare_assistant_db"
@@ -153,6 +157,74 @@ abstract class AppDatabase : RoomDatabase() {
                         updatedAt INTEGER NOT NULL
                     )
                 """.trimIndent())
+            }
+        }
+
+        val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Catalog 数据源表
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS catalog_sources (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        url TEXT NOT NULL,
+                        name TEXT NOT NULL,
+                        isDefault INTEGER NOT NULL DEFAULT 0,
+                        enabled INTEGER NOT NULL DEFAULT 1,
+                        lastSynced INTEGER,
+                        lastStatus TEXT NOT NULL DEFAULT 'idle',
+                        lastError TEXT,
+                        etag TEXT,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )
+                """.trimIndent())
+
+                // 模板表
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS catalog_templates (
+                        localId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        templateId TEXT NOT NULL,
+                        sourceId INTEGER NOT NULL,
+                        sourceName TEXT NOT NULL,
+                        name TEXT NOT NULL,
+                        description TEXT,
+                        version TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        authorName TEXT,
+                        authorUrl TEXT,
+                        tags TEXT,
+                        icon TEXT,
+                        homepage TEXT,
+                        readmeUrl TEXT,
+                        sourceKind TEXT,
+                        sourceUrl TEXT,
+                        workerSourceKind TEXT,
+                        workerSourceUrl TEXT,
+                        pagesSourceKind TEXT,
+                        pagesSourceUrl TEXT,
+                        bindingsJson TEXT,
+                        envJson TEXT,
+                        routes TEXT,
+                        crons TEXT,
+                        compatibilityDate TEXT,
+                        compatibilityFlags TEXT,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_catalog_templates_sourceId ON catalog_templates(sourceId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_catalog_templates_type ON catalog_templates(type)")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_catalog_templates_templateId ON catalog_templates(templateId)")
+
+                // 收藏表
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS catalog_favorites (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        templateId TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_catalog_favorites_templateId ON catalog_favorites(templateId)")
             }
         }
     }

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- 源图标/状态 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="?attr/colorOutlineVariant">
+
+            <TextView
+                android:id="@+id/sourceIconText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="18sp"
+                android:gravity="center"
+                tools:text="📦" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 源名称 + URL -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/sourceNameText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="官方源" />
+
+            <TextView
+                android:id="@+id/sourceUrlText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorTertiary"
+                android:maxLines="1"
+                android:ellipsize="middle"
+                tools:text="https://example.com/catalog.json" />
+
+        </LinearLayout>
+
+        <!-- 启用开关 -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/enableSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp" />
+
+        <!-- 更多操作按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/moreBtn"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            app:iconSize="20dp"
+            app:icon="@drawable/ic_more_vert_24"
+            app:iconTint="?android:attr/textColorSecondary"
+            android:contentDescription="@string/store_source_options" />
+
+    </LinearLayout>
+
+    <!-- 状态信息 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginStart="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <View
+            android:id="@+id/statusDot"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:background="@drawable/bg_circle_icon"
+            android:backgroundTint="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorTertiary"
+            tools:text="已同步" />
+
+        <TextView
+            android:id="@+id/templateCountText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorTertiary"
+            tools:text="12 个模板" />
+
+    </LinearLayout>
+
+</LinearLayout>

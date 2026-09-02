@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- 头部：图标 + 名称 + 收藏按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/iconText"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:textSize="24sp"
+                android:gravity="center"
+                android:background="@drawable/bg_circle_icon"
+                tools:text="🚀" />
+
+            <TextView
+                android:id="@+id/nameText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="8dp"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="Template Name" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/favoriteBtn"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                app:iconSize="20dp"
+                app:icon="@drawable/ic_favorite_border_24"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="@string/store_add_favorite" />
+
+        </LinearLayout>
+
+        <!-- 描述 -->
+        <TextView
+            android:id="@+id/descriptionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textSize="13sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:maxLines="2"
+            android:ellipsize="end"
+            tools:text="这是一个模板描述" />
+
+        <!-- 类型标签 + 版本 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/typeChip"
+                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:minHeight="24dp"
+                app:chipMinHeight="24dp"
+                tools:text="Worker" />
+
+            <TextView
+                android:id="@+id/versionText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary"
+                tools:text="v1.0.0" />
+
+        </LinearLayout>
+
+        <!-- 作者 + 来源 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/authorText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:drawablePadding="4dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="by author" />
+
+            <TextView
+                android:id="@+id/sourceCountText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="?android:attr/textColorTertiary"
+                tools:text="2 源" />
+
+        </LinearLayout>
+
+        <!-- 部署按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/deployBtn"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginTop="10dp"
+            android:textSize="13sp"
+            android:text="@string/store_deploy"
+            app:cornerRadius="8dp"
+            app:icon="@drawable/ic_cloud_upload"
+            app:iconSize="16dp"
+            app:iconGravity="textStart"
+            app:iconPadding="6dp" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -31,7 +31,8 @@ object DatabaseModule {
                 AppDatabase.MIGRATION_5_6,
                 AppDatabase.MIGRATION_6_7,
                 AppDatabase.MIGRATION_7_8,
-                AppDatabase.MIGRATION_8_9
+                AppDatabase.MIGRATION_8_9,
+                AppDatabase.MIGRATION_9_10
             )
             // 移除fallbackToDestructiveMigration以保护用户数据
             // 如果迁移失败会抛出异常而不是删除数据
@@ -72,5 +73,11 @@ object DatabaseModule {
     @Singleton
     fun provideScriptVersionDao(database: AppDatabase): ScriptVersionDao {
         return database.scriptVersionDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCatalogDao(database: AppDatabase): CatalogDao {
+        return database.catalogDao()
     }
 }

@@ -349,6 +349,13 @@ class HomeFragment : Fragment() {
                 findNavController().safeNavigate(R.id.action_home_to_zerotrust)
             }, 150)
         }
+
+        binding.storeCard.setOnClickListener {
+            AnimationHelper.scaleDown(it)
+            it.postDelayed({
+                findNavController().safeNavigate(R.id.action_home_to_store)
+            }, 150)
+        }
         
         binding.aboutCard.setOnClickListener {
             AnimationHelper.scaleDown(it)

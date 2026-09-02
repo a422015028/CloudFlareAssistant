@@ -3272,4 +3272,77 @@
     <string name="binding_auto_create_failed_template">自动创建/查找失败: %1$s</string>
     <string name="binding_auto_create_hint">选择「自动创建/复用」时，系统将以绑定名作为资源名，查找已有资源或创建新资源。</string>
 
+    <!-- ===== 模板商店 ===== -->
+    <string name="card_template_store">模板商店</string>
+    <string name="store_title">模板商店</string>
+    <string name="store_search_hint">搜索模板…</string>
+    <string name="store_no_templates">暂无模板</string>
+    <string name="store_loading">加载中…</string>
+    <string name="store_refresh">刷新</string>
+    <string name="store_all">全部</string>
+    <string name="store_worker">Worker</string>
+    <string name="store_pages">Pages</string>
+    <string name="store_hybrid">Hybrid</string>
+    <string name="store_favorites">收藏</string>
+    <string name="store_sort_name">按名称</string>
+    <string name="store_sort_version">按版本</string>
+    <string name="store_deploy">部署</string>
+    <string name="store_detail">详情</string>
+    <string name="store_author">作者</string>
+    <string name="store_by_author">by %1$s</string>
+    <string name="store_source">来源</string>
+    <string name="store_source_count">%1$d 源</string>
+    <string name="store_version">版本</string>
+    <string name="store_type">类型</string>
+    <string name="store_bindings">绑定</string>
+    <string name="store_env_vars">环境变量</string>
+    <string name="store_deploy_template">部署模板</string>
+    <string name="store_deploying">部署中…</string>
+    <string name="store_deploy_success">部署成功</string>
+    <string name="store_deploy_failed">部署失败</string>
+    <string name="store_target_account">目标账户</string>
+    <string name="store_template_name">模板名称</string>
+    <string name="store_name_hint">请输入部署名称</string>
+    <string name="store_preflighting">预检中…</string>
+    <string name="store_confirm_deploy">确认部署</string>
+    <string name="store_readme_loading">加载 README…</string>
+    <string name="store_no_readme">暂无 README</string>
+    <string name="store_add_favorite">收藏</string>
+    <string name="store_remove_favorite">取消收藏</string>
+    <string name="store_source_ok">已同步</string>
+    <string name="store_source_error">同步失败</string>
+    <string name="store_source_loading">同步中</string>
+    <string name="store_pull_to_refresh">下拉刷新获取模板列表</string>
+    <string name="store_no_search_results">没有找到匹配的模板</string>
+    <string name="store_no_filter_results">没有符合筛选条件的模板</string>
+    <string name="store_clear_filters">清除筛选</string>
+    <string name="store_result_count">共 %1$d 个模板</string>
+    <string name="store_source_single">来源：%1$s</string>
+    <string name="store_source_multi">来源：%1$s 等 %2$d 个源</string>
+    <string name="store_readme_failed">加载失败：%1$s</string>
+    <string name="store_observability">可观测性</string>
+    <string name="store_observability_logs">启用日志</string>
+    <string name="store_observability_tracing">启用追踪</string>
+    <string name="store_deploy_mode">部署方式</string>
+    <string name="store_deploy_both">全部部署</string>
+    <string name="store_pages_project_name">Pages 项目名称</string>
+    <string name="store_pages_name_hint">请输入 Pages 项目名称</string>
+    <string name="store_sources">数据源</string>
+    <string name="store_add_source">添加数据源</string>
+    <string name="store_source_name">源名称</string>
+    <string name="store_source_url">源地址 (URL)</string>
+    <string name="store_delete_source">删除数据源</string>
+    <string name="store_delete_source_confirm">确定要删除数据源「%1$s」吗？</string>
+    <string name="store_source_deleted">数据源已删除</string>
+    <string name="store_source_added">数据源已添加</string>
+    <string name="store_source_options">更多操作</string>
+    <string name="store_no_sources">暂无数据源</string>
+
+    <!-- 模板商店 plurals -->
+    <plurals name="store_template_count">
+        <item quantity="zero">0 个模板</item>
+        <item quantity="one">1 个模板</item>
+        <item quantity="other">共 %d 个模板</item>
+    </plurals>
+
 </resources>
