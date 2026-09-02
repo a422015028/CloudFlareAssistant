@@ -478,15 +478,18 @@ class CatalogRepository @Inject constructor(
                 // 源码信息（普通类型）
                 var sourceKind: String? = null
                 var sourceUrl: String? = null
+                var mainModule: String? = null
                 if (t.has("source") && !t.isNull("source")) {
                     val src = t.getJSONObject("source")
                     sourceKind = src.optString("kind")
                     sourceUrl = src.optString("url")
+                    mainModule = src.optStringOrNull("mainModule")
                 }
 
                 // hybrid 双源码
                 var workerSourceKind: String? = null
                 var workerSourceUrl: String? = null
+                var workerMainModule: String? = null
                 var pagesSourceKind: String? = null
                 var pagesSourceUrl: String? = null
                 if (t.has("sources") && !t.isNull("sources")) {
@@ -495,6 +498,7 @@ class CatalogRepository @Inject constructor(
                         val ws = sources.getJSONObject("worker")
                         workerSourceKind = ws.optString("kind")
                         workerSourceUrl = ws.optString("url")
+                        workerMainModule = ws.optStringOrNull("mainModule")
                     }
                     if (sources.has("pages") && !sources.isNull("pages")) {
                         val ps = sources.getJSONObject("pages")
@@ -502,6 +506,11 @@ class CatalogRepository @Inject constructor(
                         pagesSourceUrl = ps.optString("url")
                     }
                 }
+
+                // 静态资源配置（序列化为 JSON 字符串存储）
+                val assetsJson = if (t.has("assets") && !t.isNull("assets")) {
+                    t.getJSONObject("assets").toString()
+                } else null
 
                 // 绑定配置（序列化为 JSON 字符串存储）
                 val bindingsJson = if (t.has("bindings") && !t.isNull("bindings")) {
@@ -560,10 +569,13 @@ class CatalogRepository @Inject constructor(
                         readmeUrl = t.optStringOrNull("readmeUrl"),
                         sourceKind = sourceKind,
                         sourceUrl = sourceUrl,
+                        mainModule = mainModule,
                         workerSourceKind = workerSourceKind,
                         workerSourceUrl = workerSourceUrl,
+                        workerMainModule = workerMainModule,
                         pagesSourceKind = pagesSourceKind,
                         pagesSourceUrl = pagesSourceUrl,
+                        assetsJson = assetsJson,
                         bindingsJson = bindingsJson,
                         envJson = envJson,
                         routes = routes,

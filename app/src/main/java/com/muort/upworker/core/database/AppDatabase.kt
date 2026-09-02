@@ -16,7 +16,7 @@ import com.muort.upworker.core.model.CatalogFavorite
 
 @Database(
     entities = [Account::class, WebDavConfig::class, R2BackupConfig::class, LocalBackupConfig::class, Zone::class, ScriptVersion::class, CatalogSource::class, CatalogTemplate::class, CatalogFavorite::class],
-    version = 10,
+    version = 11,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -225,6 +225,15 @@ abstract class AppDatabase : RoomDatabase() {
                     )
                 """.trimIndent())
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_catalog_favorites_templateId ON catalog_favorites(templateId)")
+            }
+        }
+
+        val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // 为 catalog_templates 表新增字段：mainModule、workerMainModule、assetsJson
+                db.execSQL("ALTER TABLE catalog_templates ADD COLUMN mainModule TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE catalog_templates ADD COLUMN workerMainModule TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE catalog_templates ADD COLUMN assetsJson TEXT DEFAULT NULL")
             }
         }
     }

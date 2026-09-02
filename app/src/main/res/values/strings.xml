@@ -3372,6 +3372,81 @@
     <string name="store_source_operation_failed_with_msg">操作失败：%1$s</string>
     <string name="store_no_sources">暂无数据源</string>
 
+    <!-- 模板商店卡片徽标 -->
+    <string name="store_badge_kv">KV</string>
+    <string name="store_badge_d1">D1</string>
+    <string name="store_badge_r2">R2</string>
+    <string name="store_badge_ai">AI</string>
+    <string name="store_badge_var">变量</string>
+    <string name="store_badge_none">无绑定</string>
+    <string name="store_github_link">仓库</string>
+
+    <!-- 模板商店智能图标匹配关键词（中文） -->
+    <string-array name="store_icon_keywords_ai">
+        <item>ai</item>
+        <item>llm</item>
+        <item>推理</item>
+    </string-array>
+    <string-array name="store_icon_keywords_proxy">
+        <item>代理</item>
+        <item>隧道</item>
+        <item>vless</item>
+        <item>trojan</item>
+        <item>shadowsocks</item>
+        <item>ss</item>
+    </string-array>
+    <string-array name="store_icon_keywords_image">
+        <item>图床</item>
+        <item>image</item>
+        <item>img</item>
+        <item>telegraph</item>
+    </string-array>
+    <string-array name="store_icon_keywords_mail">
+        <item>邮箱</item>
+        <item>mail</item>
+        <item>email</item>
+        <item>smail</item>
+        <item>moemail</item>
+    </string-array>
+    <string-array name="store_icon_keywords_shorturl">
+        <item>短链</item>
+        <item>short</item>
+        <item>url</item>
+        <item>urlshort</item>
+    </string-array>
+    <string-array name="store_icon_keywords_database">
+        <item>数据库</item>
+        <item>d1</item>
+        <item>crud</item>
+    </string-array>
+    <string-array name="store_icon_keywords_storage">
+        <item>kv</item>
+        <item>存储</item>
+    </string-array>
+    <string-array name="store_icon_keywords_subscribe">
+        <item>订阅</item>
+        <item>sub</item>
+        <item>sublink</item>
+    </string-array>
+    <string-array name="store_icon_keywords_mcp">
+        <item>mcp</item>
+    </string-array>
+    <string-array name="store_icon_keywords_accelerate">
+        <item>加速</item>
+        <item>proxy</item>
+    </string-array>
+    <string-array name="store_icon_keywords_monitor">
+        <item>监控</item>
+        <item>monitor</item>
+        <item>deploy</item>
+        <item>badge</item>
+    </string-array>
+
+    <!-- 绑定类型缩写（技术术语，中英文一致，无需翻译） -->
+    <string name="store_binding_abbr_durable_object" translatable="false">DO</string>
+    <string name="store_binding_abbr_service" translatable="false">Service</string>
+    <string name="store_binding_abbr_queue" translatable="false">Queue</string>
+
     <!-- 模板商店 plurals -->
     <plurals name="store_template_count">
         <item quantity="zero">0 个模板</item>

@@ -73,7 +73,7 @@
             android:ellipsize="end"
             tools:text="这是一个模板描述" />
 
-        <!-- 类型标签 + 版本 -->
+        <!-- 类型标签 + 版本 + GitHub -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -101,7 +101,113 @@
                 android:textColor="?android:attr/textColorSecondary"
                 tools:text="v1.0.0" />
 
+            <ImageView
+                android:id="@+id/githubBtn"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_github_24"
+                app:tint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="@string/store_github_link"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
         </LinearLayout>
+
+        <!-- 绑定类型徽标 -->
+        <HorizontalScrollView
+            android:id="@+id/badgesScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:scrollbars="none"
+            android:overScrollMode="never"
+            android:visibility="gone">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/badgesContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleLine="true"
+                app:chipSpacingHorizontal="4dp">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/badgeKv"
+                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:minHeight="24dp"
+                app:chipMinHeight="24dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="KV" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/badgeD1"
+                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:minHeight="24dp"
+                app:chipMinHeight="24dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="D1" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/badgeR2"
+                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:minHeight="24dp"
+                app:chipMinHeight="24dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="R2" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/badgeAi"
+                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:minHeight="24dp"
+                app:chipMinHeight="24dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="AI" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/badgeVar"
+                style="@style/Widget.Material3.Chip.Assist.Elevated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:minHeight="24dp"
+                app:chipMinHeight="24dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="Var" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/badgeNone"
+                style="@style/Widget.Material3.Chip.Assist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:minHeight="24dp"
+                app:chipMinHeight="24dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="@string/store_badge_none" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+        </HorizontalScrollView>
 
         <!-- 作者 + 来源 -->
         <LinearLayout

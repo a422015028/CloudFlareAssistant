@@ -3394,6 +3394,15 @@
     <string name="store_source_operation_failed_with_msg">Operation failed: %1$s</string>
     <string name="store_no_sources">No sources</string>
 
+    <!-- Template Store card badges -->
+    <string name="store_badge_kv">KV</string>
+    <string name="store_badge_d1">D1</string>
+    <string name="store_badge_r2">R2</string>
+    <string name="store_badge_ai">AI</string>
+    <string name="store_badge_var">Var</string>
+    <string name="store_badge_none">No bindings</string>
+    <string name="store_github_link">Repository</string>
+
     <!-- Template Store plurals -->
     <plurals name="store_template_count">
         <item quantity="one">1 template</item>

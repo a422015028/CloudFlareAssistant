@@ -24,6 +24,7 @@ import com.muort.upworker.core.model.CatalogBinding
 import com.muort.upworker.core.model.TemplateItem
 import com.muort.upworker.core.repository.CatalogRepository
 import com.muort.upworker.core.util.MarkdownRenderer
+import com.muort.upworker.core.util.TemplateIconResolver
 import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.DialogTemplateDetailBinding
 import com.muort.upworker.databinding.ItemBindingRowBinding
@@ -113,13 +114,8 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
     private fun setupTemplateInfo() {
         val template = templateItem.template
 
-        // 图标
-        val icon = template.icon
-        if (!icon.isNullOrBlank() && icon.length <= 4) {
-            binding.iconText.text = icon
-        } else {
-            binding.iconText.text = "📦"
-        }
+        // 图标：智能匹配
+        binding.iconText.text = TemplateIconResolver.getIcon(requireContext(), template)
 
         // 名称
         binding.nameText.text = template.name
@@ -238,13 +234,26 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
             // 没有 README，显示模板描述
             binding.readmeLoadingText.visibility = View.GONE
             val desc = templateItem.template.description ?: getString(R.string.store_no_readme)
-            MarkdownRenderer.renderToWebView(binding.readmeWebView, "# ${templateItem.template.name}\n\n$desc")
+            MarkdownRenderer.renderToWebView(
+                binding.readmeWebView,
+                "# ${templateItem.template.name}\n\n$desc",
+                onComplete = { onMarkdownRendered() }
+            )
             return
         }
 
         // 加载 README
         binding.readmeLoadingText.visibility = View.VISIBLE
         loadReadme(readmeUrl)
+    }
+
+    /**
+     * Markdown 渲染完成回调
+     */
+    private fun onMarkdownRendered() {
+        if (_binding == null || !isAdded) return
+        binding.readmeLoadingText.visibility = View.GONE
+        adjustWebViewHeight()
     }
 
     /**
@@ -257,9 +266,11 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
 
         // 基础设置
         webView.settings.javaScriptEnabled = false
-        webView.settings.loadWithOverviewMode = true
-        webView.settings.useWideViewPort = true
+        // 本地渲染的 HTML 已适配移动端，禁用 overview 避免缩放异常
+        webView.settings.loadWithOverviewMode = false
+        webView.settings.useWideViewPort = false
         webView.settings.setSupportZoom(false)
+        webView.settings.layoutAlgorithm = android.webkit.WebSettings.LayoutAlgorithm.NORMAL
         webView.isVerticalScrollBarEnabled = true
         webView.isHorizontalScrollBarEnabled = false
         webView.overScrollMode = WebView.OVER_SCROLL_IF_CONTENT_SCROLLS
@@ -267,16 +278,6 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
         // 背景透明，让 WebView 跟随外层容器的主题色
         webView.setBackgroundColor(Color.TRANSPARENT)
         webView.setLayerType(WebView.LAYER_TYPE_HARDWARE, null)
-
-        // 设置 WebView 客户端，监听页面加载完成
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                binding.readmeLoadingText.visibility = View.GONE
-                // 页面加载完成后调整高度
-                adjustWebViewHeight()
-            }
-        }
 
         // 滑动冲突处理：当在 WebView 内垂直滑动时，禁止父容器拦截触摸事件
         webView.setOnTouchListener { v, event ->
@@ -378,8 +379,10 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
 
                 withContext(Dispatchers.Main) {
                     if (isAdded && _binding != null) {
-                        binding.readmeLoadingText.visibility = View.GONE
-                        MarkdownRenderer.renderToWebView(binding.readmeWebView, content, url)
+                        MarkdownRenderer.renderToWebView(
+                            binding.readmeWebView, content, url,
+                            onComplete = { onMarkdownRendered() }
+                        )
                     }
                 }
             } catch (e: Exception) {

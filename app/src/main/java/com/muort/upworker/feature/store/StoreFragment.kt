@@ -13,9 +13,11 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.chip.Chip
 import com.muort.upworker.R
 import com.muort.upworker.core.model.TemplateItem
+import com.muort.upworker.core.repository.CatalogRepository
 import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.FragmentStoreBinding
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 /**
@@ -29,6 +31,9 @@ class StoreFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: StoreViewModel by viewModels()
+
+    @Inject
+    lateinit var catalogRepository: CatalogRepository
 
     private lateinit var adapter: StoreCardAdapter
 
@@ -69,7 +74,8 @@ class StoreFragment : Fragment() {
             },
             onFavoriteClick = { item ->
                 viewModel.toggleFavorite(item.template.templateId)
-            }
+            },
+            catalogRepository = catalogRepository
         )
 
         // 网格布局：根据屏幕宽度自动调整列数

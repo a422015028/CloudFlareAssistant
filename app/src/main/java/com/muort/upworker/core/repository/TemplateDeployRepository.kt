@@ -160,7 +160,13 @@ class TemplateDeployRepository @Inject constructor(
             // Step 3: 构建 WorkerMetadata 并上传
             val compatibilityFlags = template.compatibilityFlags?.split(",")?.filter { it.isNotBlank() }
 
+            // 智能确定 mainModule：
+            // 1. 如果模板显式指定了 mainModule，优先使用
+            // 2. 否则由 WorkerRepository 自动检测（基于脚本内容）
+            val explicitMainModule = template.mainModule
+
             val metadata = WorkerMetadata(
+                mainModule = explicitMainModule,
                 compatibilityDate = template.compatibilityDate,
                 compatibilityFlags = compatibilityFlags,
                 bindings = workerBindings
@@ -357,6 +363,10 @@ class TemplateDeployRepository @Inject constructor(
         val resourceName = binding.resourceName
 
         if (binding.mode == "existing" && binding.existingId != null) {
+            // 现有数据库也执行 initSql（如果启用且存在）
+            if (binding.runInitSql) {
+                executeD1InitSql(account, binding.existingId, binding)
+            }
             return WorkerBinding(
                 type = "d1",
                 name = binding.name,
@@ -369,6 +379,10 @@ class TemplateDeployRepository @Inject constructor(
         val existing = (databases as? Resource.Success)?.data?.find { it.name == resourceName }
 
         if (existing != null) {
+            // 已有数据库也执行 initSql（如果启用）
+            if (binding.runInitSql) {
+                executeD1InitSql(account, existing.uuid, binding)
+            }
             return WorkerBinding(
                 type = "d1",
                 name = binding.name,
@@ -388,10 +402,15 @@ class TemplateDeployRepository @Inject constructor(
             } catch (_: Exception) {}
         }
 
-        // TODO: 执行 initSql（如果有）
-        if (binding.initSqlUrl != null || binding.initSql != null) {
-            // D1 初始化 SQL 暂不在 MVP 中实现
-            // 后续可通过 d1Repository.executeQuery 执行
+        // 执行初始化 SQL
+        if (binding.runInitSql && (binding.initSql != null || binding.initSqlUrl != null)) {
+            try {
+                executeD1InitSql(account, created.uuid, binding)
+                Timber.d("[TemplateDeploy] D1 初始化 SQL 执行成功: $resourceName")
+            } catch (e: Exception) {
+                Timber.w(e, "[TemplateDeploy] D1 初始化 SQL 执行失败: $resourceName")
+                throw Exception("D1 初始化失败: ${e.message}")
+            }
         }
 
         return WorkerBinding(
@@ -399,6 +418,58 @@ class TemplateDeployRepository @Inject constructor(
             name = binding.name,
             databaseId = created.uuid
         )
+    }
+
+    /**
+     * 执行 D1 初始化 SQL
+     * 支持内联 SQL 和 URL 两种方式
+     */
+    private suspend fun executeD1InitSql(
+        account: Account,
+        databaseId: String,
+        binding: DeployBindingConfig
+    ) {
+        val sqlContent = if (!binding.initSql.isNullOrBlank()) {
+            binding.initSql
+        } else if (!binding.initSqlUrl.isNullOrBlank()) {
+            downloadInitSql(binding.initSqlUrl)
+                ?: throw Exception("下载初始化 SQL 失败")
+        } else {
+            return  // 没有 SQL 需要执行
+        }
+
+        // 按分号分割 SQL 语句（简单处理，支持基本的多语句）
+        val statements = sqlContent
+            .split(";")
+            .map { it.trim() }
+            .filter { it.isNotBlank() && !it.startsWith("--") }
+
+        for (sql in statements) {
+            val result = d1Repository.executeQuery(account, databaseId, sql)
+            if (result !is Resource.Success) {
+                throw Exception("SQL 执行失败: ${(result as? Resource.Error)?.message}")
+            }
+        }
+
+        Timber.d("[TemplateDeploy] D1 初始化 SQL 完成，共 ${statements.size} 条语句")
+    }
+
+    /**
+     * 下载初始化 SQL 文件
+     */
+    private suspend fun downloadInitSql(url: String): String? {
+        return try {
+            val request = Request.Builder().url(url).build()
+            val response = okHttpClient.newCall(request).execute()
+            if (!response.isSuccessful) {
+                Timber.e("[TemplateDeploy] 下载 init.sql 失败: HTTP ${response.code}")
+                return null
+            }
+            response.body?.string()
+        } catch (e: Exception) {
+            Timber.e(e, "[TemplateDeploy] 下载 init.sql 异常")
+            null
+        }
     }
 
     private suspend fun resolveR2Binding(

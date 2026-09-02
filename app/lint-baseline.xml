@@ -13782,7 +13782,7 @@
 
     <issue
         id="DuplicateStrings"
-        message="Duplicate string value `变量`, used in `pages_generic_env_label` and `pages_label_variable`"
+        message="Duplicate string value `变量`, used in `pages_generic_env_label`, `pages_label_variable` and `store_badge_var`"
         errorLine1="    &lt;string name=&quot;pages_label_variable&quot;>变量&lt;/string>"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
@@ -13792,6 +13792,11 @@
         <location
             file="src/main/res/values/strings.xml"
             line="2873"
+            column="5"
+            message="Duplicates value in `pages_label_variable`"/>
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3380"
             column="5"
             message="Duplicates value in `pages_label_variable`"/>
     </issue>

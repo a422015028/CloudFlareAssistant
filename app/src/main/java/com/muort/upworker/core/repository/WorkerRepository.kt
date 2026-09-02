@@ -155,7 +155,8 @@ class WorkerRepository @Inject constructor(
             val isServiceWorker = !isESModule && scriptContent.contains("addEventListener")
             
             val finalMetadata = WorkerMetadata(
-                mainModule = if (isESModule) scriptFile.name else null,
+                // 优先使用调用方指定的 mainModule（如模板配置的），未指定则自动检测
+                mainModule = metadata?.mainModule ?: if (isESModule) scriptFile.name else null,
                 bodyPart = if (isServiceWorker || !isESModule) scriptFile.name else null,
                 compatibilityDate = metadata?.compatibilityDate ?: DEFAULT_COMPATIBILITY_DATE,
                 bindings = metadata?.bindings,

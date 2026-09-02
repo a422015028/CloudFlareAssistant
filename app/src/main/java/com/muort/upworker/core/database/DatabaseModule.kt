@@ -32,7 +32,8 @@ object DatabaseModule {
                 AppDatabase.MIGRATION_6_7,
                 AppDatabase.MIGRATION_7_8,
                 AppDatabase.MIGRATION_8_9,
-                AppDatabase.MIGRATION_9_10
+                AppDatabase.MIGRATION_9_10,
+                AppDatabase.MIGRATION_10_11
             )
             // 移除fallbackToDestructiveMigration以保护用户数据
             // 如果迁移失败会抛出异常而不是删除数据

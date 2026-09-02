@@ -76,12 +76,17 @@ data class CatalogTemplate(
     // 源码信息（普通 worker/pages 类型使用）
     val sourceKind: String? = null,   // raw / release / repo-archive
     val sourceUrl: String? = null,    // 源码拉取地址
+    val mainModule: String? = null,   // release 类型的主模块入口文件
 
     // hybrid 模式的双源码
     val workerSourceKind: String? = null,
     val workerSourceUrl: String? = null,
+    val workerMainModule: String? = null,
     val pagesSourceKind: String? = null,
     val pagesSourceUrl: String? = null,
+
+    // 静态资源配置（JSON 字符串存储）
+    val assetsJson: String? = null,
 
     // 绑定配置（JSON 数组字符串存储）
     val bindingsJson: String? = null,
