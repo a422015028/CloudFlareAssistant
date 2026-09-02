@@ -123,7 +123,6 @@
     <string name="card_d1">D1数据库</string>
     <string name="card_zero_trust">ZeroTrust管理</string>
     <string name="card_backup">备份恢复</string>
-    <string name="card_http_log">HTTP日志</string>
     <string name="card_settings">设置</string>
     <string name="card_about">关于</string>
     
@@ -3277,23 +3276,26 @@
     <string name="store_title">模板商店</string>
     <string name="store_search_hint">搜索模板…</string>
     <string name="store_no_templates">暂无模板</string>
+    <string name="store_required">必填</string>
+    <string name="store_empty_icon">📦</string>
     <string name="store_loading">加载中…</string>
     <string name="store_refresh">刷新</string>
     <string name="store_all">全部</string>
+    <string name="store_all_with_count">全部（%1$d）</string>
     <string name="store_worker">Worker</string>
+    <string name="store_worker_with_count">Worker（%1$d）</string>
     <string name="store_pages">Pages</string>
+    <string name="store_pages_with_count">Pages（%1$d）</string>
     <string name="store_hybrid">Hybrid</string>
+    <string name="store_hybrid_with_count">Hybrid（%1$d）</string>
+    <string name="store_version_prefix">v%1$s</string>
+    <string name="store_name_with_version">%1$s  v%2$s</string>
     <string name="store_favorites">收藏</string>
     <string name="store_sort_name">按名称</string>
     <string name="store_sort_version">按版本</string>
     <string name="store_deploy">部署</string>
-    <string name="store_detail">详情</string>
-    <string name="store_author">作者</string>
     <string name="store_by_author">by %1$s</string>
-    <string name="store_source">来源</string>
     <string name="store_source_count">%1$d 源</string>
-    <string name="store_version">版本</string>
-    <string name="store_type">类型</string>
     <string name="store_bindings">绑定</string>
     <string name="store_env_vars">环境变量</string>
     <string name="store_deploy_template">部署模板</string>
@@ -3306,7 +3308,8 @@
     <string name="store_preflighting">预检中…</string>
     <string name="store_confirm_deploy">确认部署</string>
     <string name="store_readme_loading">加载 README…</string>
-    <string name="store_no_readme">暂无 README</string>
+    <string name="store_readme_title">自述文件</string>
+    <string name="store_no_readme">暂无自述文件</string>
     <string name="store_add_favorite">收藏</string>
     <string name="store_remove_favorite">取消收藏</string>
     <string name="store_source_ok">已同步</string>
@@ -3316,7 +3319,6 @@
     <string name="store_no_search_results">没有找到匹配的模板</string>
     <string name="store_no_filter_results">没有符合筛选条件的模板</string>
     <string name="store_clear_filters">清除筛选</string>
-    <string name="store_result_count">共 %1$d 个模板</string>
     <string name="store_source_single">来源：%1$s</string>
     <string name="store_source_multi">来源：%1$s 等 %2$d 个源</string>
     <string name="store_readme_failed">加载失败：%1$s</string>

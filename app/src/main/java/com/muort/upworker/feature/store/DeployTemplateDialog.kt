@@ -114,7 +114,7 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
     // ========== 初始化 ==========
 
     private fun setupHeader() {
-        binding.templateNameText.text = "${template.name}  v${template.version}"
+        binding.templateNameText.text = getString(R.string.store_name_with_version, template.name, template.version)
     }
 
     private fun setupTemplateType() {

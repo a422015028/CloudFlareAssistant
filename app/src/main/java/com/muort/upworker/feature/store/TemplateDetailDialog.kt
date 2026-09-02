@@ -118,7 +118,7 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
         binding.nameText.text = template.name
 
         // 版本
-        binding.versionText.text = "v${template.version}"
+        binding.versionText.text = getString(R.string.store_version_prefix, template.version)
 
         // 类型
         val typeText = when (template.type) {

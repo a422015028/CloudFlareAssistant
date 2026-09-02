@@ -1,5 +1,6 @@
 package com.muort.upworker.feature.store
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -278,6 +279,7 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
 
         private var items: List<CatalogSource> = emptyList()
 
+        @SuppressLint("NotifyDataSetChanged")
         fun submitList(list: List<CatalogSource>) {
             items = list
             notifyDataSetChanged()

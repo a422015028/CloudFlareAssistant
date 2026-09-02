@@ -68,7 +68,7 @@ class StoreCardAdapter(
             typeChip.text = typeText
 
             // 版本
-            versionText.text = "v${template.version}"
+            versionText.text = context.getString(R.string.store_version_prefix, template.version)
 
             // 作者
             val authorName = template.authorName

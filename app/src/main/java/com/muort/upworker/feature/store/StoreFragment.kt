@@ -315,13 +315,13 @@ class StoreFragment : Fragment() {
     private fun updateTypeChipCounts(counts: Map<String, Int>) {
         val total = counts.values.sum()
         (binding.typeChipGroup.getChildAt(0) as? Chip)?.text =
-            getString(R.string.store_all) + " ($total)"
+            getString(R.string.store_all_with_count, total)
         (binding.typeChipGroup.getChildAt(1) as? Chip)?.text =
-            getString(R.string.store_worker) + " (${counts["worker"] ?: 0})"
+            getString(R.string.store_worker_with_count, counts["worker"] ?: 0)
         (binding.typeChipGroup.getChildAt(2) as? Chip)?.text =
-            getString(R.string.store_pages) + " (${counts["pages"] ?: 0})"
+            getString(R.string.store_pages_with_count, counts["pages"] ?: 0)
         (binding.typeChipGroup.getChildAt(3) as? Chip)?.text =
-            getString(R.string.store_hybrid) + " (${counts["hybrid"] ?: 0})"
+            getString(R.string.store_hybrid_with_count, counts["hybrid"] ?: 0)
     }
 
     private fun resetTypeFilter() {

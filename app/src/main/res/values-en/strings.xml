@@ -126,7 +126,6 @@
     <string name="card_d1">D1 Database</string>
     <string name="card_zero_trust">Zero Trust</string>
     <string name="card_backup">Backup &amp; Restore</string>
-    <string name="card_http_log">HTTP Logs</string>
     <string name="card_settings">Settings</string>
     <string name="card_about">About</string>
     
@@ -3299,23 +3298,26 @@
     <string name="store_title">Template Store</string>
     <string name="store_search_hint">Search templates…</string>
     <string name="store_no_templates">No templates</string>
+    <string name="store_required">Required</string>
+    <string name="store_empty_icon">📦</string>
     <string name="store_loading">Loading…</string>
     <string name="store_refresh">Refresh</string>
     <string name="store_all">All</string>
+    <string name="store_all_with_count">All (%1$d)</string>
     <string name="store_worker">Worker</string>
+    <string name="store_worker_with_count">Worker (%1$d)</string>
     <string name="store_pages">Pages</string>
+    <string name="store_pages_with_count">Pages (%1$d)</string>
     <string name="store_hybrid">Hybrid</string>
+    <string name="store_hybrid_with_count">Hybrid (%1$d)</string>
+    <string name="store_version_prefix">v%1$s</string>
+    <string name="store_name_with_version">%1$s  v%2$s</string>
     <string name="store_favorites">Favorites</string>
     <string name="store_sort_name">By name</string>
     <string name="store_sort_version">By version</string>
     <string name="store_deploy">Deploy</string>
-    <string name="store_detail">Details</string>
-    <string name="store_author">Author</string>
     <string name="store_by_author">by %1$s</string>
-    <string name="store_source">Source</string>
     <string name="store_source_count">%1$d sources</string>
-    <string name="store_version">Version</string>
-    <string name="store_type">Type</string>
     <string name="store_bindings">Bindings</string>
     <string name="store_env_vars">Environment Variables</string>
     <string name="store_deploy_template">Deploy Template</string>
@@ -3328,6 +3330,7 @@
     <string name="store_preflighting">Preflighting…</string>
     <string name="store_confirm_deploy">Confirm Deploy</string>
     <string name="store_readme_loading">Loading README…</string>
+    <string name="store_readme_title">README</string>
     <string name="store_no_readme">No README</string>
     <string name="store_add_favorite">Add to favorites</string>
     <string name="store_remove_favorite">Remove from favorites</string>
@@ -3338,7 +3341,6 @@
     <string name="store_no_search_results">No matching templates found</string>
     <string name="store_no_filter_results">No templates match the filters</string>
     <string name="store_clear_filters">Clear filters</string>
-    <string name="store_result_count">%1$d templates</string>
     <string name="store_source_single">Source: %1$s</string>
     <string name="store_source_multi">Source: %1$s and %2$d more</string>
     <string name="store_readme_failed">Failed to load: %1$s</string>
@@ -3362,7 +3364,6 @@
 
     <!-- Template Store plurals -->
     <plurals name="store_template_count">
-        <item quantity="zero">0 templates</item>
         <item quantity="one">1 template</item>
         <item quantity="other">%d templates</item>
     </plurals>

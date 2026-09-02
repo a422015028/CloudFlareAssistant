@@ -68,10 +68,10 @@
             style="@style/Widget.Material3.Chip.Assist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:minHeight="20dp"
             app:chipMinHeight="20dp"
-            android:text="必填"
+            android:text="@string/store_required"
             android:visibility="gone" />
 
     </LinearLayout>
