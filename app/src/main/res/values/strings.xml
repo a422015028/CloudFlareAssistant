@@ -323,10 +323,11 @@
     <string name="access_session_duration_optional">会话时长（可选）</string>
     <string name="access_skip_interstitial">跳过过渡页面</string>
     <string name="backup_auto">自动备份</string>
-    <string name="backup_choose_dir">选择其他目录</string>
+    <string name="backup_choose_dir">设置目录</string>
     <string name="backup_current_dir">当前目录: 应用私有目录（默认）</string>
     <string name="backup_file_list">备份文件列表</string>
     <string name="backup_import">导入备份</string>
+    <string name="backup_export">导出备份</string>
     <string name="backup_load_buckets">加载Bucket</string>
     <string name="backup_local">本地</string>
     <string name="backup_local_backup">本地备份</string>
@@ -2404,6 +2405,8 @@
     <string name="vm_msg_backup_import_success_count">导入成功，导入了 %1$d 个账号</string>
     <string name="vm_msg_backup_import_success_but_save_failed">导入成功（已导入 %1$d 个账号），但保存到本地目录失败: %2$s</string>
     <string name="vm_msg_backup_import_failed">导入失败: %1$s</string>
+    <string name="vm_msg_backup_export_success">导出成功</string>
+    <string name="vm_msg_backup_export_failed">导出失败: %1$s</string>
     <string name="vm_msg_backup_directory_set_success">备份目录已设置</string>
     <string name="vm_msg_backup_directory_set_failed">设置目录失败: %1$s</string>
     <string name="vm_msg_backup_local_load_failed">加载失败: %1$s</string>

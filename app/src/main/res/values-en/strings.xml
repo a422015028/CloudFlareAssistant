@@ -328,10 +328,11 @@
 
     <!-- Backup -->
     <string name="backup_auto">Auto Backup</string>
-    <string name="backup_choose_dir">Choose Another Directory</string>
+    <string name="backup_choose_dir">Set Directory</string>
     <string name="backup_current_dir">Current Directory: App Private Directory (Default)</string>
     <string name="backup_file_list">Backup File List</string>
     <string name="backup_import">Import Backup</string>
+    <string name="backup_export">Export Backup</string>
     <string name="backup_load_buckets">Load Buckets</string>
     <string name="backup_local">Local</string>
     <string name="backup_local_backup">Local Backup</string>
@@ -2426,6 +2427,8 @@
     <string name="vm_msg_backup_import_success_count">Import succeeded, imported %1$d accounts</string>
     <string name="vm_msg_backup_import_success_but_save_failed">Import succeeded (%1$d accounts imported) but failed to save to local directory: %2$s</string>
     <string name="vm_msg_backup_import_failed">Import failed: %1$s</string>
+    <string name="vm_msg_backup_export_success">Export successful</string>
+    <string name="vm_msg_backup_export_failed">Export failed: %1$s</string>
     <string name="vm_msg_backup_directory_set_success">Backup directory set</string>
     <string name="vm_msg_backup_directory_set_failed">Failed to set directory: %1$s</string>
     <string name="vm_msg_backup_local_load_failed">Load failed: %1$s</string>

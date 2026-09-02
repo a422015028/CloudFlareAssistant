@@ -353,22 +353,35 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/chooseDirButton"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:text="@string/backup_choose_dir"
+                            android:maxLines="1"
+                            android:ellipsize="end"
                             style="@style/Widget.Material3.Button.OutlinedButton" />
 
-                        <Space
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/exportBackupButton"
                             android:layout_width="0dp"
-                            android:layout_height="0dp"
-                            android:layout_weight="1" />
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/backup_export"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_marginStart="8dp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/importBackupButton"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:text="@string/backup_import"
-                            style="@style/Widget.Material3.Button.OutlinedButton" />
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_marginStart="8dp" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

@@ -585,6 +585,24 @@ class BackupRepository @Inject constructor(
     }
 
     /**
+     * 生成备份内容（用于导出到用户选择的位置）
+     * @param password 密码，为 null 则不加密
+     * @return Pair(文件内容, 建议的文件名)
+     */
+    suspend fun buildBackupContent(password: String?): Result<Pair<String, String>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val json = buildBackupJson()
+                val content = if (password.isNullOrBlank()) json else BackupCrypto.encrypt(json, password)
+                val fileName = generateFileName(!password.isNullOrBlank())
+                Result.success(Pair(content, fileName))
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    /**
      * 备份到本地
      * @param password 密码，为 null 则不加密
      */

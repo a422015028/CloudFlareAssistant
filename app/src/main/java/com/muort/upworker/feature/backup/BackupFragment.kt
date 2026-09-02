@@ -64,6 +64,7 @@ class BackupFragment : Fragment() {
 
     private lateinit var localDirText: TextView
     private lateinit var chooseDirButton: MaterialButton
+    private lateinit var exportBackupButton: MaterialButton
     private lateinit var importBackupButton: MaterialButton
     private lateinit var localBackupPasswordInput: TextInputEditText
     private lateinit var localAutoBackupSwitch: SwitchMaterial
@@ -100,6 +101,21 @@ class BackupFragment : Fragment() {
             importBackupFromUri(uri)
         }
     }
+
+    private val exportFileCreatorLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri: Uri? ->
+        if (uri != null) {
+            pendingExportContent?.let { content ->
+                writeExportToUri(uri, content)
+                pendingExportContent = null
+            }
+        } else {
+            pendingExportContent = null
+        }
+    }
+
+    private var pendingExportContent: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -146,6 +162,7 @@ class BackupFragment : Fragment() {
 
         localDirText = view.findViewById(R.id.localDirText)
         chooseDirButton = view.findViewById(R.id.chooseDirButton)
+        exportBackupButton = view.findViewById(R.id.exportBackupButton)
         importBackupButton = view.findViewById(R.id.importBackupButton)
         localBackupPasswordInput = view.findViewById(R.id.localBackupPasswordInput)
         localAutoBackupSwitch = view.findViewById(R.id.localAutoBackupSwitch)
@@ -289,6 +306,11 @@ class BackupFragment : Fragment() {
             openDirectoryPicker()
         }
 
+        // 本地备份 - 导出备份
+        exportBackupButton.setOnClickListener {
+            exportBackup()
+        }
+
         importBackupButton.setOnClickListener {
             importFilePickerLauncher.launch(
                 arrayOf("application/json", "application/octet-stream", "*/*")
@@ -331,6 +353,34 @@ class BackupFragment : Fragment() {
             directoryPickerLauncher.launch(intent)
         } catch (e: Exception) {
             Toast.makeText(requireContext(), getString(R.string.backup_cannot_open_dir_picker), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun exportBackup() {
+        val password = localBackupPasswordInput.text?.toString()?.takeIf { it.isNotBlank() }
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = viewModel.buildBackupForExport(password)
+            if (result != null) {
+                val (content, fileName) = result
+                pendingExportContent = content
+                try {
+                    exportFileCreatorLauncher.launch(fileName)
+                } catch (e: Exception) {
+                    pendingExportContent = null
+                    Toast.makeText(requireContext(), getString(R.string.backup_cannot_open_dir_picker), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun writeExportToUri(uri: Uri, content: String) {
+        try {
+            requireContext().contentResolver.openOutputStream(uri)?.use { output ->
+                output.write(content.toByteArray(Charsets.UTF_8))
+            }
+            viewModel.notifyExportSuccess()
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), getString(R.string.vm_msg_backup_export_failed, e.message), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -495,6 +545,8 @@ class BackupFragment : Fragment() {
                 saveR2ConfigButton.isEnabled = !isLoading
                 saveLocalConfigButton.isEnabled = !isLoading
                 chooseDirButton.isEnabled = !isLoading
+                exportBackupButton.isEnabled = !isLoading
+                importBackupButton.isEnabled = !isLoading
                 backupButton.isEnabled = !isLoading
                 loadFilesButton.isEnabled = !isLoading
             }

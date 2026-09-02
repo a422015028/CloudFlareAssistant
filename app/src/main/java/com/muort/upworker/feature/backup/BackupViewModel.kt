@@ -444,6 +444,32 @@ class BackupViewModel @Inject constructor(
     }
 
     /**
+     * 生成备份内容（用于导出到用户选择的文件）
+     * @return Pair(文件内容, 建议的文件名)，失败时返回 null
+     */
+    suspend fun buildBackupForExport(password: String?): Pair<String, String>? {
+        return try {
+            _loadingState.value = true
+            val result = backupRepository.buildBackupContent(password)
+            if (result.isSuccess) {
+                result.getOrNull()
+            } else {
+                _message.value = UiMessage.of(R.string.vm_msg_backup_export_failed, result.exceptionOrNull()?.message ?: "")
+                null
+            }
+        } catch (e: Exception) {
+            _message.value = UiMessage.of(R.string.vm_msg_backup_export_failed, e.message ?: "")
+            null
+        } finally {
+            _loadingState.value = false
+        }
+    }
+
+    fun notifyExportSuccess() {
+        _message.value = UiMessage.of(R.string.vm_msg_backup_export_success)
+    }
+
+    /**
      * 设置本地备份目录并持久化权限
      */
     fun setLocalBackupDirectory(uri: Uri) {
