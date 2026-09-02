@@ -11,12 +11,12 @@ object LogRepository {
     private const val KEY_ENABLE = "log_enable"
     private lateinit var prefs: SharedPreferences
     private val _logFlow = MutableStateFlow("")
-    private val _enableFlow = MutableStateFlow(true)
+    private val _enableFlow = MutableStateFlow(false)
 
     fun init(context: Context) {
         prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         _logFlow.value = prefs.getString(KEY_LOG, "") ?: ""
-        _enableFlow.value = prefs.getBoolean(KEY_ENABLE, true)
+        _enableFlow.value = prefs.getBoolean(KEY_ENABLE, false)
     }
 
     fun appendLog(log: String) {

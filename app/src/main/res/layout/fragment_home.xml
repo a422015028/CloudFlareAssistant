@@ -430,49 +430,8 @@
                         android:textStyle="bold"
                         android:layout_marginTop="8dp"
                         android:gravity="center"
-                        android:maxLines="2"
-                        android:ellipsize="end" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/logCard"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginEnd="6dp"
-                android:layout_marginBottom="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="8dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:src="@android:drawable/ic_menu_recent_history"
-                        app:tint="?attr/colorPrimary" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/card_http_log"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp" android:gravity="center"
-
                         android:maxLines="1"
-                        android:ellipsize="end"
-                        />
+                        android:ellipsize="end" />
 
                 </LinearLayout>
 
@@ -483,7 +442,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
-                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
                 android:layout_marginBottom="12dp"
                 android:clickable="true"
                 android:focusable="true"

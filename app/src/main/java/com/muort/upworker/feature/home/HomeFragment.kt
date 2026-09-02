@@ -84,12 +84,6 @@ class HomeFragment : Fragment() {
             updateCardLayoutByAvailableHeight()
         }
         binding.featureGrid.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
-
-        // 日志卡片点击跳转新页面
-        binding.logCard.setOnClickListener {
-            startActivity(android.content.Intent(requireContext(), com.muort.upworker.feature.log.LogActivity::class.java))
-        }
-        // 日志开关已移至日志页面
     }
     
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
@@ -508,6 +502,11 @@ class HomeFragment : Fragment() {
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
             .create()
+        
+        // App 图标点击打开 HTTP 日志
+        dialogBinding.appIcon.setOnClickListener {
+            startActivity(android.content.Intent(requireContext(), com.muort.upworker.feature.log.LogActivity::class.java))
+        }
         
         // Telegram 链接点击
         dialogBinding.layoutTelegram.setOnClickListener {

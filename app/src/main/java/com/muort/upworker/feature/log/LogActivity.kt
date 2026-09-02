@@ -148,7 +148,7 @@ class LogActivity : AppCompatActivity() {
             android.widget.Toast.makeText(this, getString(R.string.msg_logs_copied), android.widget.Toast.LENGTH_SHORT).show()
         }
         val logSwitch = findViewById<com.google.android.material.button.MaterialButton>(R.id.logSwitch)
-        var isLoggingEnabled = true
+        var isLoggingEnabled = false
         logSwitch.text = getString(if (isLoggingEnabled) R.string.app_log_switch_on else R.string.app_log_switch_off)
         // 同步开关状态
         scope.launch {

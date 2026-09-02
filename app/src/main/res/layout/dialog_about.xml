@@ -12,12 +12,15 @@
 
     <!-- App Icon -->
     <ImageView
+        android:id="@+id/appIcon"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/app_name"
-        android:src="@drawable/ic_launcher" />
+        android:src="@drawable/ic_launcher"
+        android:clickable="true"
+        android:focusable="true" />
 
     <!-- App Name -->
     <TextView
