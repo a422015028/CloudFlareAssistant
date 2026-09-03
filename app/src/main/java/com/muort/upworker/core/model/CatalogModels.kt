@@ -205,6 +205,7 @@ data class DeployBindingConfig(
     val type: String,               // kv / d1 / r2 / var / ai / ...
     val title: String? = null,      // 显示名
     val resourceName: String,       // Cloudflare 资源名（KV title / D1 name / R2 bucket name）
+    val value: String? = null,      // var 类型的默认值/当前值
     val required: Boolean = false,
     val secret: Boolean = true,     // 仅 var 类型有效
     val mode: String = "auto",      // auto / existing

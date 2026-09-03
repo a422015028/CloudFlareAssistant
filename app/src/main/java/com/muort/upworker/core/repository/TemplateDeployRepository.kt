@@ -155,6 +155,18 @@ class TemplateDeployRepository @Inject constructor(
         try {
             Timber.d("[TemplateDeploy] 开始部署模板: ${template.name} -> $scriptName")
 
+            // Step 0: 必填项校验
+            val missingRequired = bindings.filter {
+                it.type == "var" && it.required
+            }.filter {
+                val varValue = if (it.secret) secretValues[it.name] else envValues[it.name]
+                varValue.isNullOrBlank() && it.value.isNullOrBlank()
+            }
+            if (missingRequired.isNotEmpty()) {
+                val names = missingRequired.joinToString(", ") { it.title ?: it.name }
+                return@withContext Resource.Error("以下必填项不能为空: $names")
+            }
+
             val sourceKind = template.sourceKind ?: "raw"
             val isMultiFile = sourceKind == "release"
 
@@ -793,6 +805,7 @@ class TemplateDeployRepository @Inject constructor(
                 type = b.type,
                 title = b.title,
                 resourceName = b.resourceName ?: b.name,
+                value = b.value,
                 required = b.required,
                 secret = b.secret,
                 mode = "auto",
