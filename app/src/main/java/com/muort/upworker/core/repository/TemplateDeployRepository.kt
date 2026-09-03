@@ -523,11 +523,9 @@ class TemplateDeployRepository @Inject constructor(
             return  // 没有 SQL 需要执行
         }
 
-        // 按分号分割 SQL 语句（简单处理，支持基本的多语句）
-        val statements = sqlContent
-            .split(";")
-            .map { it.trim() }
-            .filter { it.isNotBlank() && !it.startsWith("--") }
+        // 分割 SQL 语句
+        // 优先检测 Drizzle 格式的 --> statement-breakpoint 分隔符，否则按分号分割
+        val statements = splitSqlStatements(sqlContent)
 
         for (sql in statements) {
             val result = d1Repository.executeQuery(account, databaseId, sql)
@@ -537,6 +535,26 @@ class TemplateDeployRepository @Inject constructor(
         }
 
         Timber.d("[TemplateDeploy] D1 初始化 SQL 完成，共 ${statements.size} 条语句")
+    }
+
+    /**
+     * 智能分割 SQL 语句
+     * 优先使用 Drizzle 风格的 `--> statement-breakpoint` 分隔符（更精确），
+     * 否则回退到按 `;` 分割（简单模式）
+     */
+    private fun splitSqlStatements(sql: String): List<String> {
+        val drizzleSeparator = "--> statement-breakpoint"
+        return if (sql.contains(drizzleSeparator)) {
+            // Drizzle 迁移格式：用 --> statement-breakpoint 分割
+            sql.split(drizzleSeparator)
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+        } else {
+            // 传统格式：按分号分割（基本处理）
+            sql.split(";")
+                .map { it.trim() }
+                .filter { it.isNotBlank() && !it.startsWith("--") }
+        }
     }
 
     /**
