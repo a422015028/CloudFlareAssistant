@@ -9,6 +9,10 @@ import com.muort.upworker.core.model.D1Database
 import com.muort.upworker.core.model.DeployBindingConfig
 import com.muort.upworker.core.model.DeployPreflightInfo
 import com.muort.upworker.core.model.DeployResultInfo
+import com.muort.upworker.core.model.EnvVarUpdate
+import com.muort.upworker.core.model.KvBindingUpdate
+import com.muort.upworker.core.model.D1BindingUpdate
+import com.muort.upworker.core.model.R2BindingUpdate
 import com.muort.upworker.core.model.KvNamespace
 import com.muort.upworker.core.model.R2Bucket
 import com.muort.upworker.core.model.Resource
@@ -842,29 +846,93 @@ class TemplateDeployRepository @Inject constructor(
      * @param account 目标账户
      * @param template 模板
      * @param projectName Pages 项目名称
-     * @param envValues 环境变量
+     * @param bindings 绑定配置列表
+     * @param envValues 普通环境变量
+     * @param secretValues Secret 环境变量
      * @param branch 生产分支
      */
     suspend fun deployPagesTemplate(
         account: Account,
         template: CatalogTemplate,
         projectName: String,
+        bindings: List<DeployBindingConfig> = emptyList(),
         envValues: Map<String, String> = emptyMap(),
+        secretValues: Map<String, String> = emptyMap(),
         branch: String = "main"
     ): Resource<DeployResultInfo> = withContext(Dispatchers.IO) {
-        var zipFile: java.io.File? = null
+        val tempFilesToClean = mutableListOf<java.io.File>()
+        val rollbackSteps = mutableListOf<suspend () -> Unit>()
+        val createdResources = mutableListOf<String>()
+        val warnings = mutableListOf<String>()
+        var deploymentSucceeded = false
         try {
             Timber.d("[TemplateDeploy] 开始部署 Pages 模板: ${template.name} -> $projectName")
 
-            // 下载 Pages 源码（ZIP 归档）
+            // ====== Step 0: required 变量校验 ======
+            val requiredMissing = bindings.filter { it.type == "var" && it.required == true }
+                .filter {
+                    val userValue = if (it.secret == true) secretValues[it.name] else envValues[it.name]
+                    userValue.isNullOrBlank() && it.value.isNullOrBlank()
+                }
+            if (requiredMissing.isNotEmpty()) {
+                val names = requiredMissing.joinToString("、") { it.title ?: it.name }
+                return@withContext Resource.Error("以下必填变量未填写：$names")
+            }
+
+            // ====== Step 1: 下载 Pages 源码（ZIP 归档） ======
             val sourceUrl = template.pagesSourceUrl ?: template.sourceUrl
                 ?: return@withContext Resource.Error("模板缺少 Pages 源码地址")
 
-            zipFile = downloadPagesArchive(template, sourceUrl)
+            val zipFile = downloadPagesArchive(template, sourceUrl)
                 ?: return@withContext Resource.Error("下载 Pages 模板失败")
+            tempFilesToClean.add(zipFile)
 
-            // 调用 PagesRepository 部署
-            val result = pagesRepository.createDeployment(
+            // ====== Step 2: 资源解析（KV / D1 / R2） ======
+            val kvBindings = mutableMapOf<String, String>()   // bindingName -> namespaceId
+            val d1Bindings = mutableMapOf<String, String>()   // bindingName -> databaseId
+            val r2Bindings = mutableMapOf<String, String>()   // bindingName -> bucketName
+            val plainEnvVars = mutableMapOf<String, String>()
+            val secretEnvVars = mutableMapOf<String, String>()
+
+            for (b in bindings) {
+                try {
+                    when (b.type) {
+                        "kv" -> {
+                            val wb = resolveKvBinding(account, b, rollbackSteps, createdResources)
+                            kvBindings[b.name] = wb.namespaceId ?: throw Exception("KV 命名空间 ID 为空")
+                        }
+                        "d1" -> {
+                            val wb = resolveD1Binding(account, b, rollbackSteps, createdResources)
+                            d1Bindings[b.name] = wb.databaseId ?: throw Exception("D1 数据库 ID 为空")
+                        }
+                        "r2" -> {
+                            val wb = resolveR2Binding(account, b, rollbackSteps, createdResources, warnings)
+                            r2Bindings[b.name] = wb.bucketName ?: throw Exception("R2 存储桶名称为空")
+                        }
+                        "var" -> {
+                            val userValue = if (b.secret == true) secretValues[b.name] else envValues[b.name]
+                            val finalValue = userValue ?: b.value ?: ""
+                            if (b.secret == true) {
+                                secretEnvVars[b.name] = finalValue
+                            } else {
+                                plainEnvVars[b.name] = finalValue
+                            }
+                        }
+                        "ai" -> {
+                            warnings.add("AI 绑定在 Pages 模板中暂不支持：${b.name}")
+                        }
+                        else -> {
+                            warnings.add("跳过不支持的绑定类型: ${b.type} (${b.name})")
+                        }
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e, "[TemplateDeploy] 解析绑定失败: ${b.name}")
+                    return@withContext Resource.Error("解析绑定 ${b.title ?: b.name} 失败: ${e.message}")
+                }
+            }
+
+            // ====== Step 3: 调用 PagesRepository 部署 ======
+            val deployResult = pagesRepository.createDeployment(
                 account = account,
                 projectName = projectName,
                 branch = branch,
@@ -874,23 +942,60 @@ class TemplateDeployRepository @Inject constructor(
                 extraEnvVars = envValues.ifEmpty { null }
             )
 
-            when (result) {
+            when (deployResult) {
                 is Resource.Success -> {
-                    val deployment = result.data
-                    val url = deployment.url ?: "https://$projectName.pages.dev"
-                    Timber.d("[TemplateDeploy] Pages 部署成功: $url")
+                    deploymentSucceeded = true
+                    val deployment = deployResult.data
+
+                    // 获取真实的 Pages subdomain（可能与项目名不同，如被占用时会加随机后缀）
+                    val actualUrl = runCatching {
+                        val projectResult = pagesRepository.getProject(account, projectName)
+                        if (projectResult is Resource.Success) {
+                            val subdomain = projectResult.data.subdomain
+                            if (!subdomain.isNullOrBlank()) {
+                                "https://$subdomain.pages.dev"
+                            } else null
+                        } else null
+                    }.getOrNull() ?: deployment.url?.takeIf { it.startsWith("http") }
+                        ?: "https://$projectName.pages.dev"
+
+                    Timber.d("[TemplateDeploy] Pages 部署成功: $actualUrl")
+
+                    // ====== Step 4: 配置生产环境绑定 ======
+                    if (bindings.isNotEmpty()) {
+                        val bindingResult = pagesRepository.updateProductionBindings(
+                            account = account,
+                            projectName = projectName,
+                            envVars = buildPagesEnvVars(plainEnvVars, secretEnvVars),
+                            kvNamespaces = kvBindings.mapValues { KvBindingUpdate(it.value) }.ifEmpty { null },
+                            d1Databases = d1Bindings.mapValues { D1BindingUpdate(it.value) }.ifEmpty { null },
+                            r2Buckets = r2Bindings.mapValues { R2BindingUpdate(it.value) }.ifEmpty { null },
+                            compatibilityDate = template.compatibilityDate,
+                            compatibilityFlags = template.compatibilityFlags?.split(",")?.filter { it.isNotBlank() }
+                        )
+                        when (bindingResult) {
+                            is Resource.Success -> {
+                                Timber.d("[TemplateDeploy] Pages 绑定配置成功")
+                            }
+                            is Resource.Error -> {
+                                warnings.add("绑定配置失败: ${bindingResult.message}（项目已部署，请到控制台手动配置）")
+                            }
+                            is Resource.Loading -> {}
+                        }
+                    }
+
                     Resource.Success(
                         DeployResultInfo(
                             success = true,
-                            url = url,
+                            url = actualUrl,
                             scriptName = projectName,
-                            warnings = emptyList(),
+                            warnings = warnings,
                             subdomainEnabled = true
                         )
                     )
                 }
                 is Resource.Error -> {
-                    Resource.Error("Pages 部署失败: ${result.message}")
+                    Resource.Error("Pages 部署失败: ${deployResult.message}")
                 }
                 is Resource.Loading -> {
                     Resource.Error("Pages 部署状态异常")
@@ -900,16 +1005,41 @@ class TemplateDeployRepository @Inject constructor(
             Timber.e(e, "[TemplateDeploy] Pages 部署异常")
             Resource.Error("部署失败: ${e.message}")
         } finally {
-            // 清理临时 ZIP 文件（无论成功失败）
-            zipFile?.let {
+            // ====== 回滚：部署失败时执行回滚步骤 ======
+            if (!deploymentSucceeded && rollbackSteps.isNotEmpty()) {
+                Timber.d("[TemplateDeploy] 部署失败，开始回滚资源 (${rollbackSteps.size} 个)")
+                for (step in rollbackSteps.reversed()) {
+                    try {
+                        step()
+                    } catch (e: Exception) {
+                        Timber.w(e, "[TemplateDeploy] 回滚步骤执行失败")
+                    }
+                }
+            }
+            // ====== 清理临时文件（无论成功失败） ======
+            for (file in tempFilesToClean) {
                 try {
-                    it.delete()
-                    Timber.d("[TemplateDeploy] 已清理 Pages 临时文件: ${it.name}")
+                    if (file.isDirectory) file.deleteRecursively() else file.delete()
+                    Timber.d("[TemplateDeploy] 已清理 Pages 临时文件: ${file.name}")
                 } catch (e: Exception) {
-                    Timber.w(e, "[TemplateDeploy] 清理 Pages 临时文件失败: ${it.name}")
+                    Timber.w(e, "[TemplateDeploy] 清理 Pages 临时文件失败: ${file.name}")
                 }
             }
         }
+    }
+
+    /**
+     * 构建 Pages 环境变量 map（区分 plain_text 和 secret_text）
+     */
+    private fun buildPagesEnvVars(
+        plainVars: Map<String, String>,
+        secretVars: Map<String, String>
+    ): Map<String, EnvVarUpdate>? {
+        if (plainVars.isEmpty() && secretVars.isEmpty()) return null
+        val result = mutableMapOf<String, EnvVarUpdate>()
+        plainVars.forEach { (k, v) -> result[k] = EnvVarUpdate(type = "plain_text", value = v) }
+        secretVars.forEach { (k, v) -> result[k] = EnvVarUpdate(type = "secret_text", value = v) }
+        return result
     }
 
     /**
@@ -963,7 +1093,9 @@ class TemplateDeployRepository @Inject constructor(
                     account = account,
                     template = template,
                     projectName = pagesName,
-                    envValues = envValues
+                    bindings = bindings,
+                    envValues = envValues,
+                    secretValues = secretValues
                 )
                 when (pagesResult) {
                     is Resource.Success -> {

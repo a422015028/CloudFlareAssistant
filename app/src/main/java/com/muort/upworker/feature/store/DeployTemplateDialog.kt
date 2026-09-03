@@ -533,7 +533,9 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
                                 account = account,
                                 template = template,
                                 projectName = name,
-                                envValues = envValues
+                                bindings = bindingConfigs,
+                                envValues = envValues,
+                                secretValues = secretValues
                             )
                         }
                         "hybrid" -> {

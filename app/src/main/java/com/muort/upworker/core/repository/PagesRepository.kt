@@ -2119,9 +2119,10 @@ class PagesRepository @Inject constructor(
     /**
      * 生成 _routes.json 内容
      * 将所有 Function 路由和中间件挂载路径转换为 include 模式
+     * 自动去重重叠规则，避免 Cloudflare 报错 8000057
      */
     private fun buildRoutesConfig(functionFiles: List<FunctionFile>): String {
-        val includePatterns = functionFiles.filter { it.isMiddleware || it.moduleExport.isNotEmpty() }.map { func ->
+        val rawPatterns = functionFiles.filter { it.isMiddleware || it.moduleExport.isNotEmpty() }.map { func ->
             if (func.isMiddleware) {
                 // 中间件的挂载路径
                 func.mountPath
@@ -2135,6 +2136,9 @@ class PagesRepository @Inject constructor(
             }
         }.distinct()
 
+        // 去重重叠规则：如果 A 被 B 完全覆盖，则移除 A
+        val includePatterns = removeOverlappingPatterns(rawPatterns)
+
         return """
         {
           "version": 1,
@@ -2143,6 +2147,50 @@ class PagesRepository @Inject constructor(
           "exclude": []
         }
         """.trimIndent()
+    }
+
+    /**
+     * 移除被其他规则覆盖的重叠路径
+     * 规则：
+     *   - 根通配符路径覆盖所有路径，直接返回单元素列表
+     *   - 如 /foo/ 前缀通配符覆盖 /foo/bar、/foo/bar/baz 等所有子路径
+     *   - 精确路径（不含通配符）只匹配自身
+     */
+    private fun removeOverlappingPatterns(patterns: List<String>): List<String> {
+        if (patterns.isEmpty()) return patterns
+
+        // 快速路径：如果有 /* 直接覆盖一切
+        if (patterns.any { it == "/*" }) {
+            return listOf("/*")
+        }
+
+        // 按通配符优先、路径长度从长到短排序，方便后面判断覆盖关系
+        val wildcardPatterns = patterns.filter { it.endsWith("/*") }.sortedBy { it.length }
+        val exactPatterns = patterns.filter { !it.endsWith("/*") }.toMutableSet()
+
+        // 对于每个通配符规则（如 /api/*），移除所有被它覆盖的精确路径
+        for (wildcard in wildcardPatterns) {
+            val prefix = wildcard.removeSuffix("*") // 如 "/api/"
+            val exactIterator = exactPatterns.iterator()
+            while (exactIterator.hasNext()) {
+                val exact = exactIterator.next()
+                if (exact.startsWith(prefix)) {
+                    exactIterator.remove()
+                }
+            }
+        }
+
+        // 再处理通配符之间的覆盖：短通配符覆盖长通配符
+        // 例如 /api/* 和 /api/v2/* 不互相覆盖，但 /* 已在上面处理过
+        // 这里只保留互不包含前缀的通配符
+        val remainingWildcards = wildcardPatterns.filter { wc ->
+            val wcPrefix = wc.removeSuffix("*")
+            wildcardPatterns.none { other ->
+                other != wc && other.endsWith("/*") && wcPrefix.startsWith(other.removeSuffix("*"))
+            }
+        }
+
+        return (exactPatterns + remainingWildcards).sorted()
     }
 
     /**
@@ -3133,6 +3181,59 @@ class PagesRepository @Inject constructor(
             if (!firstMsg.isNullOrBlank()) return "CF API error: $firstMsg"
         }
         return null
+    }
+
+    // ========================================================================
+    // Template deploy: production-only binding PATCH
+    // ========================================================================
+
+    /**
+     * Update production deployment bindings for a Pages project.
+     * Used by template store deployment after a successful Pages deployment.
+     *
+     * Only sets the provided maps; existing bindings not mentioned in the maps
+     * are left untouched (PATCH semantics).
+     */
+    suspend fun updateProductionBindings(
+        account: Account,
+        projectName: String,
+        envVars: Map<String, EnvVarUpdate>? = null,
+        kvNamespaces: Map<String, KvBindingUpdate>? = null,
+        d1Databases: Map<String, D1BindingUpdate>? = null,
+        r2Buckets: Map<String, R2BindingUpdate>? = null,
+        compatibilityDate: String? = null,
+        compatibilityFlags: List<String>? = null
+    ): Resource<Unit> = withContext(Dispatchers.IO) {
+        val token = AuthHelper.getBearerToken(account)
+        val email = AuthHelper.getEmail(account)
+        val apiKey = AuthHelper.getGlobalApiKey(account)
+
+        val configUpdate = EnvironmentConfigUpdate(
+            envVars = envVars,
+            kvNamespaces = kvNamespaces,
+            d1Databases = d1Databases,
+            r2Buckets = r2Buckets,
+            compatibilityDate = compatibilityDate,
+            compatibilityFlags = compatibilityFlags
+        )
+
+        val resp = api.updatePagesProject(
+            token = token,
+            email = email,
+            apiKey = apiKey,
+            accountId = account.accountId,
+            projectName = projectName,
+            updateRequest = PagesProjectUpdateRequest(
+                deploymentConfigs = DeploymentConfigsUpdate(production = configUpdate)
+            )
+        )
+
+        val error = extractPatchError(resp)
+        if (error != null) {
+            Resource.Error(error)
+        } else {
+            Resource.Success(Unit)
+        }
     }
 
     companion object {
