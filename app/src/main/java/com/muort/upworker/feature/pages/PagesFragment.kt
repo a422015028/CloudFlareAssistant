@@ -2997,7 +2997,7 @@ class PagesFragment : Fragment() {
                     return@setOnClickListener
                 }
                 inputLayout.error = null
-                val subdomain = "${project.subdomain ?: project.name}.pages.dev"
+                val subdomain = project.subdomain ?: "${project.name}.pages.dev"
                 pagesViewModel.addCustomDomain(account, project.name, hostname) { result ->
                     if (result is Resource.Success) {
                         // 添加成功后直接自动配置 DNS，不弹窗询问
@@ -3079,7 +3079,7 @@ class PagesFragment : Fragment() {
             dialog.dismiss()
         }
 
-        val previewDomain = "${project.subdomain ?: project.name}.pages.dev"
+        val previewDomain = project.subdomain ?: "${project.name}.pages.dev"
 
         fun loadDomains() {
             loadingProgress.visibility = android.view.View.VISIBLE

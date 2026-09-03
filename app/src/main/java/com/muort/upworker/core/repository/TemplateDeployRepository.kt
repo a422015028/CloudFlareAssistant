@@ -953,7 +953,7 @@ class TemplateDeployRepository @Inject constructor(
                         if (projectResult is Resource.Success) {
                             val subdomain = projectResult.data.subdomain
                             if (!subdomain.isNullOrBlank()) {
-                                "https://$subdomain.pages.dev"
+                                "https://$subdomain"
                             } else null
                         } else null
                     }.getOrNull() ?: deployment.url?.takeIf { it.startsWith("http") }

@@ -530,7 +530,7 @@ class RouteFragment : Fragment() {
                             if (project.isNotEmpty()) {
                                 // 从项目列表中查找项目的subdomain
                                 val pagesProject = pagesViewModel.projects.value.find { it.name == project }
-                                val subdomain = "${pagesProject?.subdomain ?: project}.pages.dev"
+                                val subdomain = pagesProject?.subdomain ?: "$project.pages.dev"
 
                                 pagesViewModel.addCustomDomain(account, project, hostname) { result: Resource<PagesDomain> ->
                                     if (result is Resource.Success) {
