@@ -833,15 +833,15 @@
     <string name="worker_route_copied">Route pattern copied to clipboard</string>
     <string name="worker_route_delete_missing_zone">Cannot locate the zone this route belongs to; deletion failed.</string>
     <string name="worker_route_no_custom">No routes configured for this script yet.</string>
-    <!-- Worker script card row 3 "Feature Toggles" dialog: subdomain / observability / logs persistence -->
+    <!-- Worker script card row 3 "Feature Toggles" dialog: subdomain / logs / traces -->
     <string name="worker_feature_toggles_title">Feature Toggles</string>
     <string name="worker_feature_toggles_dialog_title_template">%1$s · Feature Toggles</string>
     <string name="worker_feature_subdomain_enable_title">Enable Custom Subdomain</string>
     <string name="worker_feature_subdomain_enable_summary">Expose your Worker on a *.workers.dev subdomain</string>
-    <string name="worker_feature_observability_title">Observability</string>
-    <string name="worker_feature_observability_summary">When enabled, shows live requests, errors, latency distribution, traces and more.</string>
-    <string name="worker_feature_logs_persist_title">Logs Persistence</string>
-    <string name="worker_feature_logs_persist_summary">Persist Worker logs on the Observability page (30-day retention by default, extendable on Enterprise).</string>
+    <string name="worker_feature_logs_title">Logs</string>
+    <string name="worker_feature_logs_summary">When enabled, shows live logs and request data for your Worker.</string>
+    <string name="worker_feature_traces_title">Workers Trace</string>
+    <string name="worker_feature_traces_summary">When enabled, shows live requests, errors, latency distribution, distributed traces and more.</string>
     <string name="worker_feature_saving">Saving settings…</string>
     <string name="worker_feature_save_success">Feature toggles updated</string>
     <string name="worker_feature_save_failed">Update failed: %1$s</string>
@@ -1939,7 +1939,6 @@
     <string name="xml_dialog_pages_deployment_detail_42">Excluded Branches:</string>
     <string name="xml_dialog_pages_deployment_detail_43">Included Branches:</string>
     <string name="xml_dialog_pages_deployment_detail_44">Environment Variables</string>
-    <string name="xml_dialog_pages_deployment_detail_45">Logs</string>
     <string name="xml_dialog_pages_deployment_detail_46">Visit</string>
     <string name="xml_dialog_pages_d1_binding">💡 Tip: The binding name is used as an environment variable in Pages Functions</string>
     <string name="xml_dialog_pages_d1_bindings">Configure Pages D1 Bindings</string>
@@ -2064,7 +2063,6 @@
     <string name="xml_item_ingress_rule_edit_hint_3">Service Address (required)</string>
     <string name="xml_item_ingress_rule_edit_helper">e.g. http://localhost:8080 or http_status:404</string>
     <string name="xml_item_pages_deployment">Running</string>
-    <string name="xml_item_pages_project">Logs</string>
     <string name="xml_item_pages_project_2">View Domains</string>
     <string name="xml_item_pages_project_3">Deployment History</string>
     <string name="xml_item_route">Route Pattern</string>
@@ -2079,7 +2077,6 @@
     <string name="xml_item_variable_desc">Edit Variable</string>
     <string name="xml_item_variable_desc_2">Delete Variable</string>
     <string name="xml_item_worker_history">Running</string>
-    <string name="xml_item_worker_script">Logs</string>
     <string name="xml_item_worker_script_2">Triggers</string>
     <string name="xml_item_worker_script_3">Deployment History</string>
     <string name="xml_item_worker_script_4">Edit Script</string>
@@ -3370,7 +3367,6 @@
     <string name="store_source_single">Source: %1$s</string>
     <string name="store_source_multi">Source: %1$s and %2$d more</string>
     <string name="store_readme_failed">Failed to load: %1$s</string>
-    <string name="store_observability">Observability</string>
     <string name="store_observability_logs">Enable logs</string>
     <string name="store_observability_tracing">Enable tracing</string>
     <string name="store_deploy_mode">Deploy Mode</string>

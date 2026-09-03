@@ -120,11 +120,16 @@ class WorkerPostUploadTest {
     // =========================================================================
     @Test
     fun `applyObservability sends PATCH script-settings with observability body`() = runTest {
+        // GET script-settings: 返回空的 observability 配置（新脚本）
+        coEvery {
+            mockApi.getWorkerScriptSettings(any(), any(), any(), any(), any())
+        } returns cfOk(mapOf<String, Any>())
+        // PATCH script-settings: 成功
         coEvery {
             mockApi.updateWorkerScriptSettings(any(), any(), any(), any(), any(), any())
         } returns cfOk(fakeScript.copy(size = 2048L))
 
-        val result = repository.applyObservability(testAccount, scriptName)
+        val result = repository.applyObservability(testAccount, scriptName, logsEnabled = true, tracesEnabled = true)
 
         assertTrue("result=$result", result is WorkerPostActionStage.Success)
         coVerify(exactly = 1) {
@@ -154,21 +159,23 @@ class WorkerPostUploadTest {
         assertTrue("traces sub-tree must exist", obs.has("traces"))
         assertTrue("logs sub-tree must exist", obs.has("logs"))
         val traces = obs.getAsJsonObject("traces")
-        assertTrue("traces.enabled should default to true", traces.get("enabled").asBoolean)
-        assertEquals("traces.head_sampling_rate should default to 1.0",
-            1.0, traces.get("head_sampling_rate").asDouble, 1e-9)
-        assertTrue("traces.persist should default to true", traces.get("persist").asBoolean)
+        assertTrue("traces.enabled should be true", traces.get("enabled").asBoolean)
         val logs = obs.getAsJsonObject("logs")
-        assertTrue("logs.enabled should default to true", logs.get("enabled").asBoolean)
-        assertTrue("logs.persist should default to true", logs.get("persist").asBoolean)
-        assertEquals("logs.head_sampling_rate should default to 1.0",
-            1.0, logs.get("head_sampling_rate").asDouble, 1e-9)
+        assertTrue("logs.enabled should be true", logs.get("enabled").asBoolean)
         assertTrue("logs.invocation_logs should default to true",
             logs.get("invocation_logs").asBoolean)
+        // 总开关应为 true（打开 logs 或 traces 时自动启用）
+        assertTrue("observability.enabled should be true when logs or traces enabled",
+            obs.get("enabled").asBoolean)
     }
 
     @Test
     fun `applyObservability returns Failure with user-visible message on script-settings API error`() = runTest {
+        // GET 成功（空基线）
+        coEvery {
+            mockApi.getWorkerScriptSettings(any(), any(), any(), any(), any())
+        } returns cfOk(mapOf<String, Any>())
+        // PATCH 失败
         coEvery {
             mockApi.updateWorkerScriptSettings(any(), any(), any(), any(), any(), any())
         } returns cfError(400, "bad script-settings body")

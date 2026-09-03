@@ -815,15 +815,15 @@
     <string name="worker_route_copied">路由规则已复制到剪贴板</string>
     <string name="worker_route_delete_missing_zone">无法定位路由所属的 Zone，删除失败</string>
     <string name="worker_route_no_custom">该脚本尚未配置路由规则</string>
-    <!-- Worker 卡片 Row 3 「功能开关」对话框：workers.dev 子域名 / 可观测性 / Logs 持久化 -->
+    <!-- Worker 卡片 Row 3 「功能开关」对话框：子域名 / 日志 / Workers 跟踪 -->
     <string name="worker_feature_toggles_title">功能开关</string>
     <string name="worker_feature_toggles_dialog_title_template">%1$s · 功能开关</string>
     <string name="worker_feature_subdomain_enable_title">启用自定义子域名</string>
     <string name="worker_feature_subdomain_enable_summary">为脚本开启 *.workers.dev 子域名访问</string>
-    <string name="worker_feature_observability_title">可观测性</string>
-    <string name="worker_feature_observability_summary">启用后可查看实时请求、错误、延迟分布、Traces 等数据。</string>
-    <string name="worker_feature_logs_persist_title">Logs 持久化</string>
-    <string name="worker_feature_logs_persist_summary">在 Observability 页面中持久保留 Worker 的日志（默认保留 30 天，Enterprise 可延长）。</string>
+    <string name="worker_feature_logs_title">日志</string>
+    <string name="worker_feature_logs_summary">启用后可查看 Worker 的实时日志与请求数据。</string>
+    <string name="worker_feature_traces_title">Workers 跟踪</string>
+    <string name="worker_feature_traces_summary">启用后可查看实时请求、错误、延迟分布、Traces 分布式追踪等数据。</string>
     <string name="worker_feature_saving">正在保存设置…</string>
     <string name="worker_feature_save_success">功能开关已更新</string>
     <string name="worker_feature_save_failed">更新失败：%1$s</string>
@@ -1917,7 +1917,6 @@
     <string name="xml_dialog_pages_deployment_detail_42">排除分支:</string>
     <string name="xml_dialog_pages_deployment_detail_43">包含分支:</string>
     <string name="xml_dialog_pages_deployment_detail_44">环境变量</string>
-    <string name="xml_dialog_pages_deployment_detail_45">日志</string>
     <string name="xml_dialog_pages_deployment_detail_46">访问</string>
     <string name="xml_dialog_pages_d1_binding">💡 提示：绑定名称将作为环境变量在 Pages 函数中使用</string>
     <string name="xml_dialog_pages_d1_bindings">配置 Pages 的 D1 绑定</string>
@@ -2042,7 +2041,6 @@
     <string name="xml_item_ingress_rule_edit_hint_3">服务地址 (必填)</string>
     <string name="xml_item_ingress_rule_edit_helper">例如: http://localhost:8080 或 http_status:404</string>
     <string name="xml_item_pages_deployment">运行中</string>
-    <string name="xml_item_pages_project">日志</string>
     <string name="xml_item_pages_project_2">查看域名</string>
     <string name="xml_item_pages_project_3">部署记录</string>
     <string name="xml_item_route">路由模式</string>
@@ -2057,7 +2055,6 @@
     <string name="xml_item_variable_desc">编辑变量</string>
     <string name="xml_item_variable_desc_2">删除变量</string>
     <string name="xml_item_worker_history">运行中</string>
-    <string name="xml_item_worker_script">日志</string>
     <string name="xml_item_worker_script_2">触发器</string>
     <string name="xml_item_worker_script_3">部署记录</string>
     <string name="xml_item_worker_script_4">编辑脚本</string>
@@ -3348,7 +3345,6 @@
     <string name="store_source_single">来源：%1$s</string>
     <string name="store_source_multi">来源：%1$s 等 %2$d 个源</string>
     <string name="store_readme_failed">加载失败：%1$s</string>
-    <string name="store_observability">可观测性</string>
     <string name="store_observability_logs">启用日志</string>
     <string name="store_observability_tracing">启用追踪</string>
     <string name="store_deploy_mode">部署方式</string>

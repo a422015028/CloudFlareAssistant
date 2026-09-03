@@ -899,7 +899,7 @@
             android:layout_weight="1"
             android:layout_marginHorizontal="4dp"
             style="@style/AppButton"
-            android:text="@string/xml_dialog_pages_deployment_detail_45"/>
+            android:text="@string/worker_feature_logs_title"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/deleteBtn"

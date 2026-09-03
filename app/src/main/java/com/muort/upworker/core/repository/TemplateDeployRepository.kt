@@ -19,6 +19,7 @@ import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.model.WorkerBinding
 import com.muort.upworker.core.model.WorkerMetadata
 import com.muort.upworker.core.model.WorkerScript
+import com.muort.upworker.core.model.TailConsumer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -150,8 +151,8 @@ class TemplateDeployRepository @Inject constructor(
         bindings: List<DeployBindingConfig>,
         envValues: Map<String, String>,
         secretValues: Map<String, String>,
-        @Suppress("UNUSED_PARAMETER") enableObservability: Boolean = false,
-        @Suppress("UNUSED_PARAMETER") enableTracing: Boolean = false,
+        enableObservability: Boolean = false,
+        enableTracing: Boolean = false,
         overrideSourceUrl: String? = null,
         overrideSourceKind: String? = null,
         overrideMainModule: String? = null
@@ -218,6 +219,19 @@ class TemplateDeployRepository @Inject constructor(
             // Step 2: 创建/查找绑定资源
             val workerBindings = resolveBindings(account, bindings, rollbackSteps, createdResources, warnings)
 
+            // Step 2.5: 获取现有配置（用于重新部署时保留用户手动添加的设置）
+            val existingSettings = when (val s = workerRepository.getWorkerSettings(account, scriptName)) {
+                is Resource.Success -> {
+                    Timber.d("[TemplateDeploy] 检测到现有 Worker，将合并保留已有配置")
+                    s.data
+                }
+                is Resource.Error -> {
+                    Timber.d("[TemplateDeploy] 未检测到现有 Worker（首次部署或查询失败），使用全新配置")
+                    null
+                }
+                else -> null
+            }
+
             // Step 3: 构建 WorkerMetadata 并上传
             val compatibilityFlags = template.compatibilityFlags?.split(",")?.filter { it.isNotBlank() }
 
@@ -241,11 +255,42 @@ class TemplateDeployRepository @Inject constructor(
                 }
                 ?: autoMainModule
 
+            // 构建 plain_text 变量绑定（模板定义的环境变量）
+            val templatePlainTextBindings = envValues.filter { (key, _) ->
+                val binding = bindings.find { it.name == key }
+                binding?.type == "var" && binding.secret != true
+            }.map { (name, value) ->
+                WorkerBinding(type = "plain_text", name = name, text = value)
+            }
+
+            // 合并 bindings：模板资源绑定 + 模板 plain_text 变量 + 现有非模板、非 secret 的绑定
+            val templateBindingNames = (workerBindings.map { it.name } + templatePlainTextBindings.map { it.name }).toSet()
+            val preservedExistingBindings = existingSettings?.bindings
+                ?.filter { it.type != "secret_text" }
+                ?.filter { it.name !in templateBindingNames }
+                ?: emptyList()
+
+            val mergedBindings = workerBindings + templatePlainTextBindings + preservedExistingBindings
+
+            Timber.d("[TemplateDeploy] Bindings 合并: 模板资源绑定=${workerBindings.size}, " +
+                "模板变量=${templatePlainTextBindings.size}, 保留已有=${preservedExistingBindings.size}")
+
             val metadata = WorkerMetadata(
                 mainModule = explicitMainModule,
                 compatibilityDate = template.compatibilityDate,
                 compatibilityFlags = compatibilityFlags,
-                bindings = workerBindings
+                bindings = mergedBindings,
+                // 以下字段从现有配置保留，避免重新部署时被清除
+                usageModel = existingSettings?.usageModel,
+                logpush = existingSettings?.logpush,
+                tailConsumers = (existingSettings?.tailConsumers as? List<*>)?.filterIsInstance(TailConsumer::class.java),
+                exports = existingSettings?.exports,
+                exportsReconciliation = existingSettings?.exportsReconciliation,
+                migrations = existingSettings?.migrations,
+                limits = existingSettings?.limits,
+                tags = existingSettings?.tags,
+                cacheOptions = existingSettings?.cacheOptions,
+                observability = existingSettings?.observability
             )
 
             val uploadResult = if (isMultiFile && moduleFiles.size > 1) {
@@ -273,26 +318,9 @@ class TemplateDeployRepository @Inject constructor(
                 return@withContext Resource.Error("上传失败: $errorMsg")
             }
 
-            Timber.d("[TemplateDeploy] 脚本上传成功")
+            Timber.d("[TemplateDeploy] 脚本上传成功，环境变量已随 metadata 一并设置")
 
-            // Step 4: 设置环境变量（plain_text）
-            val plainVarBindings = envValues.filter { (key, _) ->
-                val binding = bindings.find { it.name == key }
-                binding?.type == "var" && binding.secret != true
-            }.map { (name, value) -> Triple(name, value, "plain_text") }
-
-            if (plainVarBindings.isNotEmpty()) {
-                val varsResult = workerRepository.updateWorkerVariables(
-                    account = account,
-                    scriptName = scriptName,
-                    variables = plainVarBindings
-                )
-                if (varsResult !is Resource.Success) {
-                    warnings.add("环境变量设置可能不完整: ${(varsResult as? Resource.Error)?.message}")
-                }
-            }
-
-            // Step 5: 设置 Secrets
+            // Step 4: 设置 Secrets
             val secretList = secretValues.toList()
             if (secretList.isNotEmpty()) {
                 val secretsResult = workerRepository.updateWorkerSecrets(
@@ -305,11 +333,13 @@ class TemplateDeployRepository @Inject constructor(
                 }
             }
 
-            // Step 6: 后处理（可观测性、子域名、部署）
+            // Step 5: 后处理（可观测性、子域名、部署）
             val afterUploadResult = workerRepository.afterUpload(
                 account = account,
                 uploadResult = uploadResult,
-                scriptName = scriptName
+                scriptName = scriptName,
+                observabilityLogsEnabled = enableObservability,
+                observabilityTracesEnabled = enableTracing
             )
 
             // 检查子域名是否启用
@@ -945,14 +975,46 @@ class TemplateDeployRepository @Inject constructor(
                 }
             }
 
+            // ====== Step 2.5: 检查项目是否已存在，已有项目保留用户的兼容性设置 ======
+            // 对于已存在的项目，模板部署不应覆盖用户手动调整过的兼容性日期/标志
+            val existingProject = pagesRepository.getProject(account, projectName).let {
+                (it as? Resource.Success)?.data
+            }
+            val projectExists = existingProject != null
+            val existingCompatDate = existingProject?.deploymentConfigs?.production?.compatibilityDate
+            val existingCompatFlags = existingProject?.deploymentConfigs?.production?.compatibilityFlags
+
+            val templateCompatDate = template.compatibilityDate
+            val templateCompatFlags = template.compatibilityFlags?.split(",")?.filter { it.isNotBlank() }
+
+            // 决定最终使用的兼容性设置：
+            // - 新项目：使用模板值（模板为空则用默认值，由 createDeployment 内部处理）
+            // - 已有项目：用户已有设置则保留用户值；用户没有设置则用模板值
+            val finalCompatDate = if (projectExists) {
+                existingCompatDate ?: templateCompatDate
+            } else {
+                templateCompatDate
+            }
+            val finalCompatFlags = if (projectExists) {
+                existingCompatFlags ?: templateCompatFlags
+            } else {
+                templateCompatFlags
+            }
+
+            if (projectExists) {
+                Timber.d("[TemplateDeploy] Pages 项目已存在，兼容性设置保留用户值: " +
+                    "date=${existingCompatDate ?: "(使用模板值)"} " +
+                    "flags=${existingCompatFlags?.size ?: "(使用模板值)"} 个")
+            }
+
             // ====== Step 3: 调用 PagesRepository 部署 ======
             val deployResult = pagesRepository.createDeployment(
                 account = account,
                 projectName = projectName,
                 branch = branch,
                 file = sourceFile,
-                customCompatibilityDate = template.compatibilityDate,
-                customCompatibilityFlags = template.compatibilityFlags?.split(",")?.filter { it.isNotBlank() },
+                customCompatibilityDate = finalCompatDate,
+                customCompatibilityFlags = finalCompatFlags,
                 extraEnvVars = envValues.ifEmpty { null }
             )
 
@@ -983,9 +1045,9 @@ class TemplateDeployRepository @Inject constructor(
                             envVars = buildPagesEnvVars(plainEnvVars, secretEnvVars),
                             kvNamespaces = kvBindings.mapValues { KvBindingUpdate(it.value) }.ifEmpty { null },
                             d1Databases = d1Bindings.mapValues { D1BindingUpdate(it.value) }.ifEmpty { null },
-                            r2Buckets = r2Bindings.mapValues { R2BindingUpdate(it.value) }.ifEmpty { null },
-                            compatibilityDate = template.compatibilityDate,
-                            compatibilityFlags = template.compatibilityFlags?.split(",")?.filter { it.isNotBlank() }
+                            r2Buckets = r2Bindings.mapValues { R2BindingUpdate(it.value) }.ifEmpty { null }
+                            // 兼容性设置已在 createDeployment 阶段处理（已有项目保留用户值）
+                            // 这里不再重复设置，避免覆盖用户配置
                         )
                         when (bindingResult) {
                             is Resource.Success -> {

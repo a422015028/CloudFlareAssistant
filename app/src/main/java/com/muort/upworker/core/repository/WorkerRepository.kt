@@ -1693,7 +1693,8 @@ class WorkerRepository @Inject constructor(
     //   3. Logs 持久化（Logs Persist）         → script-settings.observability.logs.persist
 
     data class WorkerScriptSettings(
-        val observabilityEnabled: Boolean = false,
+        val tracesEnabled: Boolean = false,
+        val logsEnabled: Boolean = false,
         val logsPersist: Boolean = false,
         val logpushLegacy: Boolean = false,
         val raw: Map<String, Any> = emptyMap()
@@ -1725,16 +1726,21 @@ class WorkerRepository @Inject constructor(
                     val result = body.result
                     val observabilityMap = (result["observability"] as? Map<*, *>)
                         ?.mapKeys { it.key.toString() }.orEmpty()
-                    val observabilityEnabled = observabilityMap["enabled"] as? Boolean ?: false
+                    // Workers 跟踪（Traces）开关状态
+                    val tracesMap = (observabilityMap["traces"] as? Map<*, *>)
+                        ?.mapKeys { it.key.toString() }.orEmpty()
+                    val tracesEnabled = tracesMap["enabled"] as? Boolean ?: false
                     val logsMap = (observabilityMap["logs"] as? Map<*, *>)
                         ?.mapKeys { it.key.toString() }.orEmpty()
+                    val logsEnabled = logsMap["enabled"] as? Boolean ?: false
                     val logsPersist = logsMap["persist"] as? Boolean
                         ?: (result["logpush"] as? Boolean)
                         ?: false
                     val logpushLegacy = result["logpush"] as? Boolean ?: false
                     Resource.Success(
                         WorkerScriptSettings(
-                            observabilityEnabled = observabilityEnabled,
+                            tracesEnabled = tracesEnabled,
+                            logsEnabled = logsEnabled,
                             logsPersist = logsPersist,
                             logpushLegacy = logpushLegacy,
                             raw = result.mapKeys { it.key.toString() }
@@ -1749,37 +1755,42 @@ class WorkerRepository @Inject constructor(
 
     /**
      * PATCH /accounts/{id}/workers/scripts/{name}/script-settings
-     * 写入可观测性开关 + Logs 持久化开关。
+     * 写入 Workers 跟踪（Traces）开关 + Logs 开关。
      * observability 对象必须完整给出（observability.logs.enabled / invocation_logs 必填），
-     * 所以我们先 GET 回来的 raw 作为基线，再覆盖 observability.enabled / logs.persist。
+     * 所以我们先 GET 回来的 raw 作为基线，再覆盖 traces.enabled / logs.enabled。
+     * 打开 Traces 或 Logs 时会同时确保 observability.enabled = true（总开关）。
      */
     suspend fun patchScriptSettings(
         account: Account,
         scriptName: String,
-        observabilityEnabled: Boolean,
-        logsPersist: Boolean,
+        tracesEnabled: Boolean,
+        logsEnabled: Boolean,
         baselineRaw: Map<String, Any> = emptyMap()
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         safeApiCall {
             val baseObservability = ((baselineRaw["observability"] as? Map<*, *>)
                 ?.mapKeys { it.key.toString() }.orEmpty()).toMutableMap()
-            // observability.enabled 必填
-            baseObservability["enabled"] = observabilityEnabled
-            // logs 子对象必填：enabled + invocation_logs，persist 是我们要写的持久化开关
+            // observability.enabled（总开关）：打开 Traces 或 Logs 时必须确保总开关也打开；都关闭时不主动关总开关
+            val currentObsEnabled = baseObservability["enabled"] as? Boolean ?: false
+            val finalObsEnabled = if (tracesEnabled || logsEnabled) true else currentObsEnabled
+            baseObservability["enabled"] = finalObsEnabled
+            // logs 子对象必填：enabled + invocation_logs，persist 从基线保留
             val baseLogs = ((baseObservability["logs"] as? Map<*, *>)
                 ?.mapKeys { it.key.toString() }.orEmpty()).toMutableMap()
-            baseLogs["enabled"] = baseLogs["enabled"] as? Boolean ?: true
+            baseLogs["enabled"] = logsEnabled
             baseLogs["invocation_logs"] = baseLogs["invocation_logs"] as? Boolean ?: true
-            baseLogs["persist"] = logsPersist
+            // persist 保留原有值，不由这个开关控制
             baseObservability["logs"] = baseLogs
-            // traces 对象不是必填，没有就不写
+            // traces 子对象：用户控制的 Workers 跟踪开关
+            val baseTraces = ((baseObservability["traces"] as? Map<*, *>)
+                ?.mapKeys { it.key.toString() }.orEmpty()).toMutableMap()
 
             // 用 Gson 构造 JsonObject / JsonArray（项目统一使用 Gson，不引入 kotlinx.serialization JSON DSL）
             val gson = Gson()
             val json = com.google.gson.JsonObject()
 
             val obs = com.google.gson.JsonObject()
-            obs.addProperty("enabled", observabilityEnabled)
+            obs.addProperty("enabled", finalObsEnabled)
             (baseObservability["head_sampling_rate"] as? Number)?.let {
                 obs.addProperty("head_sampling_rate", it.toDouble())
             }
@@ -1788,9 +1799,10 @@ class WorkerRepository @Inject constructor(
             }
 
             val logsJson = com.google.gson.JsonObject()
-            logsJson.addProperty("enabled", baseLogs["enabled"] as Boolean)
+            logsJson.addProperty("enabled", logsEnabled)
             logsJson.addProperty("invocation_logs", baseLogs["invocation_logs"] as Boolean)
-            logsJson.addProperty("persist", logsPersist)
+            // persist 保留原有值
+            (baseLogs["persist"] as? Boolean)?.let { logsJson.addProperty("persist", it) }
             (baseLogs["head_sampling_rate"] as? Number)?.let {
                 logsJson.addProperty("head_sampling_rate", it.toDouble())
             }
@@ -1801,25 +1813,23 @@ class WorkerRepository @Inject constructor(
             }
             obs.add("logs", logsJson)
 
-            (baseObservability["traces"] as? Map<*, *>)?.let { traces ->
-                val t = traces.mapKeys { it.key.toString() }
-                val tracesJson = com.google.gson.JsonObject()
-                (t["enabled"] as? Boolean)?.let { tracesJson.addProperty("enabled", it) }
-                (t["persist"] as? Boolean)?.let { tracesJson.addProperty("persist", it) }
-                (t["head_sampling_rate"] as? Number)?.let { tracesJson.addProperty("head_sampling_rate", it.toDouble()) }
-                (t["propagation_policy"] as? String)?.let { tracesJson.addProperty("propagation_policy", it) }
-                (t["destinations"] as? List<*>)?.let { dests ->
-                    val arr = com.google.gson.JsonArray()
-                    dests.mapNotNull { d -> d as? String }.forEach { arr.add(it) }
-                    tracesJson.add("destinations", arr)
-                }
-                obs.add("traces", tracesJson)
+            // traces 对象：写入用户设置的 enabled 状态，保留其他配置（persist、采样率等）
+            val tracesJson = com.google.gson.JsonObject()
+            tracesJson.addProperty("enabled", tracesEnabled)
+            (baseTraces["persist"] as? Boolean)?.let { tracesJson.addProperty("persist", it) }
+            (baseTraces["head_sampling_rate"] as? Number)?.let { tracesJson.addProperty("head_sampling_rate", it.toDouble()) }
+            (baseTraces["propagation_policy"] as? String)?.let { tracesJson.addProperty("propagation_policy", it) }
+            (baseTraces["destinations"] as? List<*>)?.let { dests ->
+                val arr = com.google.gson.JsonArray()
+                dests.mapNotNull { d -> d as? String }.forEach { arr.add(it) }
+                tracesJson.add("destinations", arr)
             }
+            obs.add("traces", tracesJson)
 
             json.add("observability", obs)
-            // logpush 是老版本保留字段（Legacy Workers，非 Versions），同步写一下
+            // logpush 是老版本保留字段（Legacy Workers，非 Versions），原样保留
             (baselineRaw["logpush"] as? Boolean)?.let {
-                json.addProperty("logpush", logsPersist || it)
+                json.addProperty("logpush", it)
             }
             // tags（如有保留，一般是字符串数组）
             (baselineRaw["tags"] as? List<*>)?.let { tags ->
@@ -2083,7 +2093,9 @@ class WorkerRepository @Inject constructor(
         scriptName: String,
         versionId: String? = null,
         percentage: Int = 100,
-        enabledStages: Set<WorkerPostStageKind> = WorkerPostStageKind.values().toSet()
+        enabledStages: Set<WorkerPostStageKind> = WorkerPostStageKind.values().toSet(),
+        observabilityLogsEnabled: Boolean = true,
+        observabilityTracesEnabled: Boolean = true
     ): WorkerAfterUploadResult = withContext(Dispatchers.IO) {
         val stages = mutableListOf<WorkerPostActionStage>()
         if (uploadResult !is Resource.Success) {
@@ -2091,7 +2103,14 @@ class WorkerRepository @Inject constructor(
         }
         if (WorkerPostStageKind.Observability in enabledStages) {
             runCatching {
-                stages.add(applyObservability(account, scriptName))
+                stages.add(
+                    applyObservability(
+                        account,
+                        scriptName,
+                        logsEnabled = observabilityLogsEnabled,
+                        tracesEnabled = observabilityTracesEnabled
+                    )
+                )
             }.getOrElse { t: Throwable ->
                 stages.add(
                     WorkerPostActionStage.Failure(
@@ -2131,8 +2150,8 @@ class WorkerRepository @Inject constructor(
         WorkerAfterUploadResult(uploadResult, stages.toList())
     }
 
-    /** Stage 1: Enable Observability — PATCH SCRIPT-LEVEL shared settings with
-     *  traces+logs enabled.
+    /** Stage 1: Apply Observability — PATCH SCRIPT-LEVEL shared settings with
+     *  the specified logs / traces enabled state.
      *
      *  Observability is a script-level field (cross-version, shared by all versions),
      *  so it MUST be modified through the dedicated PATCH /script-settings JSON endpoint
@@ -2140,21 +2159,27 @@ class WorkerRepository @Inject constructor(
      *  Versions enabled, the versioned endpoint returns error 10214 whenever latest
      *  version is not currently deployed (and the endpoint has no effect on script-level
      *  fields anyway). The /script-settings PATCH semantics are: omitted fields = keep,
-     *  supplied fields = overwrite. So by sending only the "observability" key we
-     *  preserve the user's existing logpush/tail_consumers/tags untouched AND we
-     *  never touch any versioned settings (bindings, exports, compatibility flags,
-     *  placement, ...) — this completely avoids both 10214 and any omit=clear risk
-     *  on the versioned settings side.
+     *  supplied fields = overwrite. We use patchScriptSettings which builds the full
+     *  observability tree from baseline + only overwrites logs.enabled / traces.enabled.
      */
-    suspend fun applyObservability(account: Account, scriptName: String): WorkerPostActionStage =
+    suspend fun applyObservability(
+        account: Account,
+        scriptName: String,
+        logsEnabled: Boolean = true,
+        tracesEnabled: Boolean = true
+    ): WorkerPostActionStage =
         withContext(Dispatchers.IO) {
             try {
-                // Only set the observability sub-tree (all defaults = enabled head/traces/logs)
-                val bodyObj = mapOf<String, Any?>(
-                    "observability" to WorkerObservability()
+                // 先获取现有配置作为基线（新脚本可能为空，失败也没关系，用空基线）
+                val baselineRaw = (getScriptSettings(account, scriptName) as? Resource.Success)
+                    ?.data?.raw ?: emptyMap()
+                val result = patchScriptSettings(
+                    account = account,
+                    scriptName = scriptName,
+                    tracesEnabled = tracesEnabled,
+                    logsEnabled = logsEnabled,
+                    baselineRaw = baselineRaw
                 )
-                val bodyJson = gson.toJson(bodyObj)
-                val result = updateWorkerScriptSettings(account, scriptName, bodyJson)
                 if (result is Resource.Success) {
                     WorkerPostActionStage.Success(
                         kind = WorkerPostStageKind.Observability,

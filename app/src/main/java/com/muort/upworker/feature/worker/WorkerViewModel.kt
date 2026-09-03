@@ -177,8 +177,10 @@ class WorkerViewModel @Inject constructor(
                             // listWorkerVersions path, not multipart response — pass null.
                             val versionId: String? = null
 
+                            // 总开关：打开时同时启用 logs 和 traces，关闭时同时关闭
+                            // Observability 阶段始终执行（只是传入的值不同）
                             val enabledStages: Set<WorkerPostStageKind> = buildSet {
-                                if (enableObservability) add(WorkerPostStageKind.Observability)
+                                add(WorkerPostStageKind.Observability)
                                 if (enableSubdomain) add(WorkerPostStageKind.Subdomain)
                                 if (enableDeployment) add(WorkerPostStageKind.Deployment)
                             }
@@ -188,7 +190,9 @@ class WorkerViewModel @Inject constructor(
                                 scriptName = scriptName,
                                 versionId = versionId,
                                 percentage = 100,
-                                enabledStages = enabledStages
+                                enabledStages = enabledStages,
+                                observabilityLogsEnabled = enableObservability,
+                                observabilityTracesEnabled = enableObservability
                             )
                             postResult.stages.forEach { stage ->
                                 when (stage) {

@@ -246,7 +246,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:text="@string/store_observability" />
+                    android:text="@string/worker_post_stage_observability" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/logsSwitch"

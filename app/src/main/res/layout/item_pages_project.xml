@@ -51,7 +51,7 @@
                 android:id="@+id/logsBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/xml_item_pages_project"
+                android:text="@string/worker_feature_logs_title"
                 android:textSize="11sp"
                 android:minWidth="48dp"
                 android:paddingStart="8dp"

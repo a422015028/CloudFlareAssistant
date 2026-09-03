@@ -3124,19 +3124,19 @@ class WorkerFragment : Fragment() {
             R.string.worker_feature_subdomain_enable_title,
             R.string.worker_feature_subdomain_enable_summary
         )
-        val (_, observabilitySwitch, _) = buildRow(
-            R.string.worker_feature_observability_title,
-            R.string.worker_feature_observability_summary
+        val (_, logsSwitch, _) = buildRow(
+            R.string.worker_feature_logs_title,
+            R.string.worker_feature_logs_summary
         )
-        val (_, logsPersistSwitch, _)   = buildRow(
-            R.string.worker_feature_logs_persist_title,
-            R.string.worker_feature_logs_persist_summary
+        val (_, tracesSwitch, _) = buildRow(
+            R.string.worker_feature_traces_title,
+            R.string.worker_feature_traces_summary
         )
 
         // 记录初始值用来判断是否变动
         var initialSubdomainEnabled = false
-        var initialObservability    = false
-        var initialLogsPersist      = false
+        var initialLogsEnabled         = false
+        var initialTracesEnabled       = false
         // 脚本设置原始 JSON（写回时需要把 baseline 的 destinations / invocation_logs 等完整带上）
         var settingsRaw: Map<String, Any> = emptyMap()
 
@@ -3165,10 +3165,10 @@ class WorkerFragment : Fragment() {
 
                 when (settingsResult) {
                     is com.muort.upworker.core.model.Resource.Success -> {
-                        initialObservability = settingsResult.data.observabilityEnabled
-                        initialLogsPersist   = settingsResult.data.logsPersist
-                        observabilitySwitch.isChecked = initialObservability
-                        logsPersistSwitch.isChecked     = initialLogsPersist
+                        initialLogsEnabled    = settingsResult.data.logsEnabled
+                        initialTracesEnabled  = settingsResult.data.tracesEnabled
+                        logsSwitch.isChecked   = initialLogsEnabled
+                        tracesSwitch.isChecked = initialTracesEnabled
                         settingsRaw = settingsResult.data.raw
                     }
                     is com.muort.upworker.core.model.Resource.Error -> {
@@ -3204,20 +3204,20 @@ class WorkerFragment : Fragment() {
 
                 if (!hasError) {
                     subdomainSwitch.isEnabled     = true
-                    observabilitySwitch.isEnabled = true
-                    logsPersistSwitch.isEnabled   = true
+                    logsSwitch.isEnabled          = true
+                    tracesSwitch.isEnabled        = true
                     saveBtn.isEnabled             = true
                 }
             }
 
             saveBtn.setOnClickListener {
                 val newSubdomainEnabled = subdomainSwitch.isChecked
-                val newObservability    = observabilitySwitch.isChecked
-                val newLogsPersist      = logsPersistSwitch.isChecked
+                val newLogsEnabled      = logsSwitch.isChecked
+                val newTracesEnabled    = tracesSwitch.isChecked
 
                 val anyChanged = (newSubdomainEnabled != initialSubdomainEnabled)
-                    .or(newObservability != initialObservability)
-                    .or(newLogsPersist      != initialLogsPersist)
+                    .or(newLogsEnabled   != initialLogsEnabled)
+                    .or(newTracesEnabled != initialTracesEnabled)
 
                 if (!anyChanged) {
                     dlg.dismiss()
@@ -3232,17 +3232,17 @@ class WorkerFragment : Fragment() {
                         .create()
                     loading.show()
 
-                    // 任何一项改了就发对应的 API，先脚本设置（observability+logs persist），再子域名
+                    // 任何一项改了就发对应的 API，先脚本设置（logs+traces），再子域名
                     var scriptSettingsSucceeded = true
                     var subdomainSucceeded = true
                     var errorMessage: String? = null
 
-                    if (newObservability != initialObservability || newLogsPersist != initialLogsPersist) {
+                    if (newLogsEnabled != initialLogsEnabled || newTracesEnabled != initialTracesEnabled) {
                         when (val r = workerRepository.patchScriptSettings(
                             account = account,
                             scriptName = script.id,
-                            observabilityEnabled = newObservability,
-                            logsPersist = newLogsPersist,
+                            tracesEnabled = newTracesEnabled,
+                            logsEnabled = newLogsEnabled,
                             baselineRaw = settingsRaw
                         )) {
                             is com.muort.upworker.core.model.Resource.Success -> {

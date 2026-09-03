@@ -1,4 +1,4 @@
-package com.muort.upworker.feature.store
+﻿package com.muort.upworker.feature.store
 
 import android.app.Dialog
 import android.os.Bundle
@@ -363,7 +363,7 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
     // ========== 账户加载 ==========
 
     private fun loadAccounts() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             val result = accountRepository.getAllAccounts().first()
             if (result is Resource.Success && result.data.isNotEmpty()) {
                 accounts = result.data
@@ -394,7 +394,7 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
         val scriptName = binding.nameEditText.text?.toString()?.trim()
         if (scriptName.isNullOrBlank()) return
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             binding.preflightSection.visibility = View.GONE
             val messages = mutableListOf<String>()
 
@@ -524,7 +524,7 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
         val enableLogs = binding.logsSwitch.isChecked
         val enableTracing = binding.tracingSwitch.isChecked
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
                     when (template.type) {
@@ -590,8 +590,11 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
                 }
             } catch (e: Exception) {
                 Timber.e(e, "[DeployDialog] 部署异常")
-                binding.progressSection.visibility = View.GONE
-                binding.deployBtn.isEnabled = true
+                // 视图可能已销毁（用户手动关闭等），安全检查
+                _binding?.let { b ->
+                    b.progressSection.visibility = View.GONE
+                    b.deployBtn.isEnabled = true
+                }
                 showToast("${getString(R.string.store_deploy_failed)}: ${e.message}")
             }
         }
