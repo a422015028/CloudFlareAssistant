@@ -229,20 +229,6 @@
                 android:background="?attr/colorOutlineVariant"
                 android:alpha="0.3" />
 
-            <!-- 部署按钮 -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/deployBtn"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="16dp"
-                android:textSize="15sp"
-                android:text="@string/store_deploy"
-                app:cornerRadius="12dp"
-                app:icon="@drawable/ic_cloud_upload"
-                app:iconSize="20dp"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp" />
-
         </LinearLayout>
 
     </ScrollView>

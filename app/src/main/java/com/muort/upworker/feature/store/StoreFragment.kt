@@ -304,9 +304,6 @@ class StoreFragment : Fragment() {
     private fun showTemplateDetail(item: TemplateItem) {
         val dialog = TemplateDetailDialog.newInstance(
             templateItem = item,
-            onDeployClick = {
-                showDeployDialog(item)
-            },
             onFavoriteChanged = { _ ->
                 // 收藏状态变化后刷新列表（通过 Flow 自动更新）
             }

@@ -139,6 +139,9 @@ class TemplateDeployRepository @Inject constructor(
      * @param secretValues 用户填写的 Secret 值（变量名 → 值）
      * @param enableObservability 是否启用可观测性
      * @param enableTracing 是否启用追踪
+     * @param overrideSourceUrl 覆盖源码地址（用于 Hybrid 模板的 Worker 端源码，默认使用 template.sourceUrl）
+     * @param overrideSourceKind 覆盖源码类型（用于 Hybrid 模板的 Worker 端类型，默认使用 template.sourceKind）
+     * @param overrideMainModule 覆盖主模块入口（用于 Hybrid 模板，默认使用 template.mainModule）
      */
     suspend fun deployWorkerTemplate(
         account: Account,
@@ -148,7 +151,10 @@ class TemplateDeployRepository @Inject constructor(
         envValues: Map<String, String>,
         secretValues: Map<String, String>,
         @Suppress("UNUSED_PARAMETER") enableObservability: Boolean = false,
-        @Suppress("UNUSED_PARAMETER") enableTracing: Boolean = false
+        @Suppress("UNUSED_PARAMETER") enableTracing: Boolean = false,
+        overrideSourceUrl: String? = null,
+        overrideSourceKind: String? = null,
+        overrideMainModule: String? = null
     ): Resource<DeployResultInfo> = withContext(Dispatchers.IO) {
         val rollbackSteps = mutableListOf<suspend () -> Unit>()
         val warnings = mutableListOf<String>()
@@ -171,13 +177,17 @@ class TemplateDeployRepository @Inject constructor(
                 return@withContext Resource.Error("以下必填项不能为空: $names")
             }
 
-            val sourceKind = template.sourceKind ?: "raw"
-            val isMultiFile = sourceKind == "release"
+            val sourceKind = overrideSourceKind ?: template.sourceKind ?: "raw"
+            val sourceUrl = overrideSourceUrl ?: template.sourceUrl
+                ?: return@withContext Resource.Error("模板缺少源码地址")
+            val mainModule = overrideMainModule ?: template.mainModule
+            // release 和 repo-archive 都是 ZIP 多文件格式，需要解压后收集模块
+            val isMultiFile = sourceKind == "release" || sourceKind == "repo-archive"
 
             // Step 1: 下载模板源码
             val moduleFiles = if (isMultiFile) {
                 // release 类型：下载 ZIP → 解压 → 收集所有模块文件
-                val zipFile = downloadTemplateArchive(template)
+                val zipFile = downloadTemplateArchive(template, sourceUrl)
                     ?: return@withContext Resource.Error("Failed to download template archive")
                 tempFilesToClean.add(zipFile)
                 val tempDir = File(appContext.cacheDir, "template_${template.templateId}_unzipped_${System.currentTimeMillis()}")
@@ -199,7 +209,7 @@ class TemplateDeployRepository @Inject constructor(
                 collectModuleFiles(baseDir)
             } else {
                 // raw 类型：单文件
-                val scriptFile = downloadTemplateScript(template)
+                val scriptFile = downloadTemplateScript(template, sourceUrl)
                     ?: return@withContext Resource.Error("Failed to download template script")
                 tempFilesToClean.add(scriptFile)
                 mapOf(scriptFile.name to scriptFile)
@@ -215,8 +225,8 @@ class TemplateDeployRepository @Inject constructor(
             // 1. 如果模板显式指定了 mainModule 且文件存在，优先使用
             // 2. 否则根据文件名自动检测（兼容模板配置错误的情况）
             val autoMainModule = if (isMultiFile) findMainModule(moduleFiles.keys) else null
-            val explicitMainModule = template.mainModule?.takeIf { moduleFiles.containsKey(it) }
-                ?: template.mainModule?.let { configured ->
+            val explicitMainModule = mainModule?.takeIf { moduleFiles.containsKey(it) }
+                ?: mainModule?.let { configured ->
                     // 尝试兼容：去掉 src/ 前缀后再检查
                     val withoutSrc = configured.removePrefix("src/")
                     if (moduleFiles.containsKey(withoutSrc)) {
@@ -636,11 +646,9 @@ class TemplateDeployRepository @Inject constructor(
     /**
      * 下载模板脚本到临时文件（单文件 raw 类型）
      */
-    private suspend fun downloadTemplateScript(template: CatalogTemplate): File? {
-        val sourceUrl = template.sourceUrl ?: return null
-
+    private suspend fun downloadTemplateScript(template: CatalogTemplate, url: String): File? {
         return try {
-            val request = Request.Builder().url(sourceUrl).build()
+            val request = Request.Builder().url(url).build()
             val response = okHttpClient.newCall(request).execute()
 
             if (!response.isSuccessful) {
@@ -664,11 +672,9 @@ class TemplateDeployRepository @Inject constructor(
     /**
      * 下载模板 ZIP 归档到临时文件（release 类型）
      */
-    private suspend fun downloadTemplateArchive(template: CatalogTemplate): File? {
-        val sourceUrl = template.sourceUrl ?: return null
-
+    private suspend fun downloadTemplateArchive(template: CatalogTemplate, url: String): File? {
         return try {
-            val request = Request.Builder().url(sourceUrl).build()
+            val request = Request.Builder().url(url).build()
             val response = okHttpClient.newCall(request).execute()
 
             if (!response.isSuccessful) {
@@ -886,13 +892,14 @@ class TemplateDeployRepository @Inject constructor(
                 return@withContext Resource.Error("以下必填变量未填写：$names")
             }
 
-            // ====== Step 1: 下载 Pages 源码（ZIP 归档） ======
+            // ====== Step 1: 下载 Pages 源码 ======
             val sourceUrl = template.pagesSourceUrl ?: template.sourceUrl
                 ?: return@withContext Resource.Error("模板缺少 Pages 源码地址")
+            val sourceKind = template.pagesSourceKind ?: template.sourceKind
 
-            val zipFile = downloadPagesArchive(template, sourceUrl)
+            val sourceFile = downloadPagesArchive(template, sourceUrl, sourceKind)
                 ?: return@withContext Resource.Error("下载 Pages 模板失败")
-            tempFilesToClean.add(zipFile)
+            tempFilesToClean.add(sourceFile)
 
             // ====== Step 2: 资源解析（KV / D1 / R2） ======
             val kvBindings = mutableMapOf<String, String>()   // bindingName -> namespaceId
@@ -943,7 +950,7 @@ class TemplateDeployRepository @Inject constructor(
                 account = account,
                 projectName = projectName,
                 branch = branch,
-                file = zipFile,
+                file = sourceFile,
                 customCompatibilityDate = template.compatibilityDate,
                 customCompatibilityFlags = template.compatibilityFlags?.split(",")?.filter { it.isNotBlank() },
                 extraEnvVars = envValues.ifEmpty { null }
@@ -1070,7 +1077,7 @@ class TemplateDeployRepository @Inject constructor(
         var pagesUrl: String? = null
 
         try {
-            // 部署 Worker
+            // 部署 Worker（使用 Hybrid 模板的 Worker 端源码配置）
             if (deployWorker) {
                 val workerResult = deployWorkerTemplate(
                     account = account,
@@ -1080,7 +1087,10 @@ class TemplateDeployRepository @Inject constructor(
                     envValues = envValues,
                     secretValues = secretValues,
                     enableObservability = enableObservability,
-                    enableTracing = enableTracing
+                    enableTracing = enableTracing,
+                    overrideSourceUrl = template.workerSourceUrl ?: template.sourceUrl,
+                    overrideSourceKind = template.workerSourceKind ?: template.sourceKind,
+                    overrideMainModule = template.workerMainModule ?: template.mainModule
                 )
                 when (workerResult) {
                     is Resource.Success -> {
@@ -1139,11 +1149,16 @@ class TemplateDeployRepository @Inject constructor(
     }
 
     /**
-     * 下载 Pages 模板 ZIP 归档
+     * 下载 Pages 模板源码
+     * @param template 模板
+     * @param url 源码地址
+     * @param sourceKind 源码类型 (raw/release/repo-archive)，决定文件扩展名
+     * @return 下载后的文件。raw 类型为单 JS 文件（_worker.js 模式）；其他类型为 zip 归档
      */
     private suspend fun downloadPagesArchive(
         template: CatalogTemplate,
-        url: String
+        url: String,
+        sourceKind: String?
     ): File? {
         return try {
             val request = Request.Builder().url(url).build()
@@ -1156,10 +1171,18 @@ class TemplateDeployRepository @Inject constructor(
 
             val body = response.body?.bytes() ?: return null
 
-            val tempFile = File(appContext.cacheDir, "template_${template.templateId}_pages.zip")
+            // raw 类型是单 JS 文件（_worker.js 高级模式），保存为 .js 后缀
+            // 以便 PagesRepository.createDeployment() 识别为单文件 Worker 模式
+            // 注意：buildWorkerBundle() 内部会将内容包装为 _worker.js，磁盘文件名不影响最终部署
+            val fileName = if (sourceKind == "raw") {
+                "template_${template.templateId}_pages_worker.js"
+            } else {
+                "template_${template.templateId}_pages.zip"
+            }
+            val tempFile = File(appContext.cacheDir, fileName)
             tempFile.writeBytes(body)
 
-            Timber.d("[TemplateDeploy] Pages 模板下载成功: ${tempFile.length()} bytes")
+            Timber.d("[TemplateDeploy] Pages 模板下载成功: ${tempFile.length()} bytes, kind=$sourceKind, file=$fileName")
             tempFile
         } catch (e: Exception) {
             Timber.e(e, "[TemplateDeploy] 下载 Pages 模板异常")

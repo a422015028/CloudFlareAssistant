@@ -53,7 +53,6 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
     lateinit var catalogRepository: CatalogRepository
 
     private lateinit var templateItem: TemplateItem
-    private var onDeployClick: (() -> Unit)? = null
     private var onFavoriteChanged: ((Boolean) -> Unit)? = null
 
     private val okHttpClient: OkHttpClient by lazy {
@@ -68,12 +67,10 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
 
         fun newInstance(
             templateItem: TemplateItem,
-            onDeployClick: (() -> Unit)? = null,
             onFavoriteChanged: ((Boolean) -> Unit)? = null
         ): TemplateDetailDialog {
             return TemplateDetailDialog().apply {
                 this.templateItem = templateItem
-                this.onDeployClick = onDeployClick
                 this.onFavoriteChanged = onFavoriteChanged
             }
         }
@@ -415,12 +412,6 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
                     }
                 }
             }
-        }
-
-        // 部署按钮
-        binding.deployBtn.setOnClickListener {
-            onDeployClick?.invoke()
-            dismiss()
         }
     }
 
