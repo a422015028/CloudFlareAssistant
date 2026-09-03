@@ -2355,17 +2355,8 @@ class WorkerFragment : Fragment() {
         loadingDialog.show()
 
         lifecycleScope.launch {
-            val accountInfoResult = accountRepository.fetchAccountsFromApi(account)
-
-            val accountName = when (accountInfoResult) {
-                is Resource.Success -> {
-                    accountInfoResult.data.firstOrNull { it.id == account.accountId }?.name ?: account.name
-                }
-                else -> account.name
-            }
-
-            val emailMatch = Regex("([^@]+)@").find(accountName)
-            val emailPrefix = (emailMatch?.groupValues?.get(1) ?: account.name).lowercase()
+            // 获取真实的 Workers subdomain 前缀（优先 API，失败兜底）
+            val subdomainPrefix = getWorkerSubdomain(account)
 
             // 并行获取部署记录
             val deploymentsResult = viewModel.listWorkerDeployments(account, script.id)
@@ -2401,7 +2392,7 @@ class WorkerFragment : Fragment() {
             versionIdText.text = version.id
             createTimeText.text = formatDate(version.metadata?.createdOn)
             sourceText.text = version.metadata?.source ?: getString(R.string.status_unknown)
-            urlText.text = "https://${script.id}.${emailPrefix}.workers.dev"
+            urlText.text = "https://${script.id}.${subdomainPrefix}.workers.dev"
             authorText.text = version.metadata?.authorEmail ?: getString(R.string.status_unknown)
             authorIdText.text = version.metadata?.authorId ?: getString(R.string.status_unknown)
             hasPreviewText.text = version.metadata?.hasPreview?.let { if (it) getString(R.string.pages_detail_yes) else getString(R.string.pages_detail_no) } ?: getString(R.string.status_unknown)
@@ -2471,7 +2462,7 @@ class WorkerFragment : Fragment() {
             deleteBtn.visibility = android.view.View.VISIBLE
 
             accessBtn.setOnClickListener {
-                val url = "https://${script.id}.${emailPrefix}.workers.dev"
+                val url = "https://${script.id}.${subdomainPrefix}.workers.dev"
                 val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
                 requireContext().startActivity(intent)
             }
@@ -2524,7 +2515,26 @@ class WorkerFragment : Fragment() {
         )
         findNavController().navigate(action)
     }
-    
+
+    /**
+     * 获取账户级 Workers subdomain 前缀（带缓存）
+     * 优先从 API 获取真实值，失败则用邮箱前缀兜底
+     */
+    private var cachedAccountSubdomain: String? = null
+    private suspend fun getWorkerSubdomain(account: Account): String {
+        cachedAccountSubdomain?.let { return it }
+        val result = workerRepository.getAccountSubdomain(account)
+        val subdomain = if (result is Resource.Success) {
+            result.data
+        } else {
+            // 兜底：用账户名/邮箱前缀猜
+            val emailMatch = Regex("([^@]+)@").find(account.name)
+            (emailMatch?.groupValues?.get(1) ?: account.name).lowercase()
+        }
+        cachedAccountSubdomain = subdomain
+        return subdomain
+    }
+
     private fun formatDate(dateString: String?): String {
         if (dateString == null) return getString(R.string.worker_detail_unknown_date)
         
@@ -3314,15 +3324,8 @@ class WorkerFragment : Fragment() {
                     else -> emptyList()
                 }
                 // 子域名 URL（workers.dev 内置访问）
-                val accountInfoResult = accountRepository.fetchAccountsFromApi(account)
-                val accountName = when (accountInfoResult) {
-                    is com.muort.upworker.core.model.Resource.Success ->
-                        accountInfoResult.data.firstOrNull { it.id == account.accountId }?.name ?: account.name
-                    else -> account.name
-                }
-                val emailMatch = Regex("([^@]+)@").find(accountName)
-                val emailPrefix = (emailMatch?.groupValues?.get(1) ?: accountName).lowercase()
-                val subdomainUrl = "${script.id}.$emailPrefix.workers.dev"
+                val subdomainPrefix = getWorkerSubdomain(account)
+                val subdomainUrl = "${script.id}.$subdomainPrefix.workers.dev"
 
                 if (scriptDomains.isEmpty()) {
                     emptyText.visibility = android.view.View.VISIBLE

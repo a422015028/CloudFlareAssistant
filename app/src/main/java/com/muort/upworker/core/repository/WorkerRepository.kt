@@ -1851,6 +1851,29 @@ class WorkerRepository @Inject constructor(
     }
 
     /**
+     * GET /accounts/{id}/workers/subdomain
+     * 获取账户级 Workers subdomain 前缀（workers.dev 的子域名部分）。
+     */
+    suspend fun getAccountSubdomain(account: Account): Resource<String> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.getWorkerAccountSubdomain(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId
+                )
+                val body = response.body()
+                if (response.isSuccessful && body?.success == true && body.result != null) {
+                    Resource.Success(body.result.subdomain)
+                } else {
+                    val errorMsg = body?.errors?.firstOrNull()?.message ?: response.message()
+                    Resource.Error("Failed to get account subdomain: $errorMsg")
+                }
+            }
+        }
+
+    /**
      * GET /accounts/{id}/workers/scripts/{name}/subdomain
      * 读取脚本的 workers.dev 自定义子域名是否已启用。
      */

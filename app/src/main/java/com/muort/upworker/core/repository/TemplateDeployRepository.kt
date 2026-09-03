@@ -782,18 +782,25 @@ class TemplateDeployRepository @Inject constructor(
 
     // ==================== 辅助方法 ====================
 
-    private fun buildWorkerUrl(
+    /**
+     * 构建 Worker 访问 URL
+     * 优先通过 API 获取真实的账户级 Workers subdomain，失败则用账户名兜底
+     */
+    private suspend fun buildWorkerUrl(
         account: Account,
         scriptName: String,
         subdomainEnabled: Boolean
     ): String? {
-        // 优先使用 subdomain
-        if (subdomainEnabled) {
-            // subdomain 格式: {script_name}.{account_subdomain}.workers.dev
-            // 这里简化处理，返回预估的 URL
-            return "$scriptName.${account.name.lowercase().replace(" ", "-")}.workers.dev"
-        }
-        return null
+        if (!subdomainEnabled) return null
+
+        // 优先通过 API 获取真实的账户级 subdomain
+        val realSubdomain = runCatching {
+            val result = workerRepository.getAccountSubdomain(account)
+            if (result is Resource.Success) result.data else null
+        }.getOrNull()
+
+        val subdomain = realSubdomain ?: account.name.lowercase().replace(" ", "-")
+        return "$scriptName.$subdomain.workers.dev"
     }
 
     /**

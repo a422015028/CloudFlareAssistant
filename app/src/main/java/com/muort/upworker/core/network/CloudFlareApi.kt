@@ -355,6 +355,19 @@ interface CloudFlareApi {
     ): Response<CloudFlareResponse<Map<String, @JvmSuppressWildcards Any>>>
 
     /**
+     * Get account-level Workers subdomain (workers.dev prefix)
+     * GET /accounts/{account_id}/workers/subdomain
+     */
+    @Headers("Accept: application/json")
+    @GET("accounts/{account_id}/workers/subdomain")
+    suspend fun getWorkerAccountSubdomain(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<WorkerAccountSubdomain>>
+
+    /**
      * Get if Worker subdomain (workers.dev) is enabled for this script.
      * GET /accounts/{account_id}/workers/scripts/{script_name}/subdomain
      * Returns body like { enabled: true, previews_enabled: false, subdomain: "...", ... }

@@ -1640,6 +1640,13 @@ data class WorkerScriptSettingsPatch(
 )
 
 /**
+ * 账户级 Workers subdomain 信息 (GET /accounts/{id}/workers/subdomain)
+ */
+data class WorkerAccountSubdomain(
+    @SerializedName("subdomain") val subdomain: String
+)
+
+/**
  * Subdomain enable/disable request body for POST /scripts/{name}/subdomain.
  */
 data class WorkerSubdomainEnableRequest(
