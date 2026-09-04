@@ -194,11 +194,17 @@ class WorkerViewModel @Inject constructor(
                                 observabilityLogsEnabled = enableObservability,
                                 observabilityTracesEnabled = enableObservability
                             )
+                            // 部署后阶段：只保留失败提示和最终部署成功提示，不弹中间阶段（可观测性/子域名）的成功消息
                             postResult.stages.forEach { stage ->
                                 when (stage) {
-                                    is WorkerPostActionStage.Success -> _message.emit(
-                                        UiMessage.of(stage.messageResId, *stage.formatArgs)
-                                    )
+                                    is WorkerPostActionStage.Success -> {
+                                        // 仅 Deployment 阶段弹成功提示；Observability / Subdomain 静默成功
+                                        if (stage.kind == WorkerPostStageKind.Deployment) {
+                                            _message.emit(
+                                                UiMessage.of(stage.messageResId, *stage.formatArgs)
+                                            )
+                                        }
+                                    }
                                     is WorkerPostActionStage.Failure -> _message.emit(
                                         UiMessage.of(stage.messageResId, *stage.formatArgs)
                                     )

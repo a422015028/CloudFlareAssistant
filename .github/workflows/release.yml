@@ -1,13 +1,10 @@
 name: Build and Release APK
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
       version_tag:
-        description: '版本标签 (例如: v5.9)'
+        description: '版本标签 (例如: v7.7.8)'
         required: true
         type: string
 
@@ -69,6 +66,11 @@ jobs:
           -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
           -Pandroid.injected.signing.key.password=$KEY_PASSWORD
 
+    - name: Rename APK
+      run: |
+        mv app/build/outputs/apk/release/app-release.apk \
+           app/build/outputs/apk/release/CloudFlareAssistant-${{ inputs.version_tag }}.apk
+
     - name: Get version info
       id: version
       run: |
@@ -76,16 +78,16 @@ jobs:
         VERSION_CODE=$(grep "versionCode" app/build.gradle.kts | awk -F'=' '{print $2}' | tr -d ' ')
         echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
         echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
-        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-          echo "tag_name=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
-        else
-          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-        fi
+        echo "tag_name=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
 
-    - name: Rename APK
+    - name: Create and push Git tag
       run: |
-        mv app/build/outputs/apk/release/app-release.apk \
-           app/build/outputs/apk/release/CloudFlareAssistant-v${{ steps.version.outputs.version_name }}.apk
+        TAG_NAME="${{ inputs.version_tag }}"
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+        git push origin "$TAG_NAME"
+        echo "✅ Tag $TAG_NAME 创建并推送成功"
 
     - name: Prepare Release Notes
       id: release_notes
@@ -129,7 +131,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.version.outputs.tag_name }}
-        files: app/build/outputs/apk/release/CloudFlareAssistant-v${{ steps.version.outputs.version_name }}.apk
+        files: app/build/outputs/apk/release/CloudFlareAssistant-${{ steps.version.outputs.tag_name }}.apk
         body_path: release_notes.md
         draft: false
         prerelease: false
@@ -147,7 +149,7 @@ jobs:
         TAG_NAME="${{ steps.version.outputs.tag_name }}"
         VERSION_NAME="${{ steps.version.outputs.version_name }}"
         VERSION_CODE="${{ steps.version.outputs.version_code }}"
-        APK_FILE="app/build/outputs/apk/release/CloudFlareAssistant-v${VERSION_NAME}.apk"
+        APK_FILE="app/build/outputs/apk/release/CloudFlareAssistant-${TAG_NAME}.apk"
 
         # 详细更新说明链接（直接指向 GitHub 仓库中的 RELEASE_NOTES 文件）
         RELEASE_NOTES_URL="https://github.com/a422015028/CloudFlareAssistant/blob/main/RELEASE_NOTES_${TAG_NAME}.md"
