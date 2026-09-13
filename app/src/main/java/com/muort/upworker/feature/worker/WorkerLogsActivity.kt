@@ -2,33 +2,48 @@ package com.muort.upworker.feature.worker
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowInsets
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.button.MaterialButton
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
 import com.muort.upworker.R
-import com.muort.upworker.core.model.TailException
-import com.muort.upworker.core.model.TailLog
 import com.muort.upworker.core.model.TailTraceItem
 import com.muort.upworker.core.util.DisplaySizeHelper
 import com.muort.upworker.core.util.LocaleHelper
 import com.muort.upworker.core.util.ThemeHelper
-import okhttp3.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
+/**
+ * Worker 脚本实时日志（console.log / exceptions）
+ * 与 Cloudflare 官网 Logs 一致的展示方式：
+ * 每个请求一张卡片（状态圆点 / 触发器方法+URL / 时间），点击查看完整 trace JSON 详情
+ */
 class WorkerLogsActivity : AppCompatActivity() {
 
     override fun attachBaseContext(newBase: Context) {
@@ -41,17 +56,17 @@ class WorkerLogsActivity : AppCompatActivity() {
     private lateinit var pauseBtn: MaterialButton
     private lateinit var clearBtn: MaterialButton
     private lateinit var refreshBtn: MaterialButton
-    private lateinit var selectAllBtn: MaterialButton
-    private lateinit var copyBtn: MaterialButton
-    private lateinit var closeBtn: MaterialButton
     private lateinit var waitingText: TextView
-    private lateinit var logsText: TextView
+    private lateinit var logsContainer: LinearLayout
+    private lateinit var logsScrollView: ScrollView
 
+    private val eventCards = mutableListOf<Pair<View, String>>()
     private var webSocket: WebSocket? = null
     private var isPaused = false
     private var isConnected = false
     private var currentWssUrl: String = ""
     private var reconnectHandler: Handler? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(0, TimeUnit.MILLISECONDS)
@@ -61,6 +76,7 @@ class WorkerLogsActivity : AppCompatActivity() {
     companion object {
         private const val EXTRA_SCRIPT_NAME = "script_name"
         private const val EXTRA_WSS_URL = "wss_url"
+        private const val MAX_EVENTS = 200
 
         fun start(context: Context, scriptName: String, wssUrl: String) {
             val intent = Intent(context, WorkerLogsActivity::class.java).apply {
@@ -82,18 +98,32 @@ class WorkerLogsActivity : AppCompatActivity() {
         pauseBtn = findViewById<MaterialButton>(R.id.pauseBtn)
         clearBtn = findViewById<MaterialButton>(R.id.clearBtn)
         refreshBtn = findViewById<MaterialButton>(R.id.refreshBtn)
-        selectAllBtn = findViewById<MaterialButton>(R.id.selectAllBtn)
-        copyBtn = findViewById<MaterialButton>(R.id.copyBtn)
-        closeBtn = findViewById<MaterialButton>(R.id.closeBtn)
         waitingText = findViewById<TextView>(R.id.waitingText)
-        logsText = findViewById<TextView>(R.id.logsText)
+        logsContainer = findViewById<LinearLayout>(R.id.logsContainer)
+        logsScrollView = findViewById<ScrollView>(R.id.logsScrollView)
 
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = intent.getStringExtra(EXTRA_SCRIPT_NAME)
 
-        val isDarkMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        applyStatusBarStyle()
 
+        pauseBtn.setOnClickListener { togglePause() }
+        clearBtn.setOnClickListener { clearLogs() }
+        refreshBtn.setOnClickListener { refreshConnection() }
+
+        val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
+        if (wssUrl.isNullOrEmpty()) {
+            Log.e("WorkerLogs", "WSS URL is empty")
+            showToast(getString(R.string.status_wss_url_empty))
+            return
+        }
+        currentWssUrl = wssUrl
+        connectWebSocket(currentWssUrl)
+    }
+
+    private fun applyStatusBarStyle() {
+        val isDarkMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
         if (isDarkMode) {
             @Suppress("DEPRECATION")
             window.statusBarColor = resources.getColor(R.color.black, theme)
@@ -120,23 +150,6 @@ class WorkerLogsActivity : AppCompatActivity() {
                 }
             }
         }
-
-        pauseBtn.setOnClickListener { togglePause() }
-        clearBtn.setOnClickListener { clearLogs() }
-        refreshBtn.setOnClickListener { refreshConnection() }
-        selectAllBtn.setOnClickListener { selectAllLogs() }
-        copyBtn.setOnClickListener { copyLogs() }
-        closeBtn.setOnClickListener { finish() }
-
-        val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
-        if (wssUrl.isNullOrEmpty()) {
-            Log.e("WorkerLogs", "WSS URL is empty")
-            showToast(getString(R.string.status_wss_url_empty))
-            return
-        }
-        currentWssUrl = wssUrl
-        Log.d("WorkerLogs", "Connecting to WSS URL: $currentWssUrl")
-        connectWebSocket(currentWssUrl)
     }
 
     private fun connectWebSocket(url: String) {
@@ -150,12 +163,10 @@ class WorkerLogsActivity : AppCompatActivity() {
             .url(url)
             .header("Sec-WebSocket-Protocol", "trace-v1")
             .build()
-        
-        Log.d("WorkerLogs", "WebSocket request URL: $url")
+
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.d("WorkerLogs", "WebSocket opened, response code: ${response.code}")
-                Log.d("WorkerLogs", "Sending filters: {\"filters\":[],\"debug\":false}")
                 webSocket.send("{\"filters\":[],\"debug\":false}")
                 runOnUiThread {
                     isConnected = true
@@ -165,12 +176,10 @@ class WorkerLogsActivity : AppCompatActivity() {
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                Log.d("WorkerLogs", "Received text message: $text")
                 processMessage(text)
             }
 
             override fun onMessage(webSocket: WebSocket, bytes: okio.ByteString) {
-                Log.d("WorkerLogs", "Received binary message (${bytes.size} bytes)")
                 processMessage(bytes.utf8())
             }
 
@@ -178,26 +187,9 @@ class WorkerLogsActivity : AppCompatActivity() {
                 if (!isPaused) {
                     try {
                         val traceItem = Gson().fromJson(text, TailTraceItem::class.java)
-                        Log.d("WorkerLogs", "Parsed outcome: ${traceItem.outcome}")
-                        Log.d("WorkerLogs", "Parsed logs count: ${traceItem.logs?.size ?: 0}")
-                        Log.d("WorkerLogs", "Parsed exceptions count: ${traceItem.exceptions?.size ?: 0}")
-                        Log.d("WorkerLogs", "Parsed event type: ${traceItem.event?.cron ?: traceItem.event?.request?.method}")
-                        val logLines = formatTraceItem(traceItem)
-                        Log.d("WorkerLogs", "Formatted ${logLines.size} lines")
-                        runOnUiThread {
-                            waitingText.visibility = View.GONE
-                            logsText.visibility = View.VISIBLE
-                            logLines.forEach { logsText.append(it + "\n") }
-                            scrollToBottom()
-                        }
+                        mainHandler.post { appendEventCard(traceItem, text) }
                     } catch (e: Exception) {
                         Log.e("WorkerLogs", "Failed to parse log message: ${e.message}")
-                        runOnUiThread {
-                            waitingText.visibility = View.GONE
-                            logsText.visibility = View.VISIBLE
-                            logsText.append("[ERROR] Failed to parse: $text\n")
-                            scrollToBottom()
-                        }
                     }
                 }
             }
@@ -219,17 +211,238 @@ class WorkerLogsActivity : AppCompatActivity() {
                     connectionStatusText.text = getString(R.string.status_connection_failed, t.message ?: "null")
                 }
                 Log.e("WorkerLogs", "WebSocket failure: ${t.message}", t)
-                Log.e("WorkerLogs", "WebSocket failure URL: $url")
-                if (response != null) {
-                    Log.e("WorkerLogs", "Response code: ${response.code}")
-                    Log.e("WorkerLogs", "Response message: ${response.message}")
-                    Log.e("WorkerLogs", "Response headers: ${response.headers}")
-                }
                 scheduleReconnect()
             }
-
-            })
+        })
     }
+
+    // ==================== 事件卡片（官网风格） ====================
+
+    private fun appendEventCard(item: TailTraceItem, rawJson: String) {
+        waitingText.visibility = View.GONE
+
+        val card = buildEventCard(item, rawJson)
+        eventCards.add(card)
+        if (eventCards.size > MAX_EVENTS) {
+            val oldest = eventCards.removeAt(0)
+            logsContainer.removeView(oldest.first)
+        }
+        logsContainer.addView(card.first)
+        scrollToBottom()
+    }
+
+    /**
+     * 构建单张事件卡片：第一行 [状态圆点][Ok][方法]，第二行 URL，第三行时间；下方面板展示日志内容
+     */
+    private fun buildEventCard(item: TailTraceItem, rawJson: String): Pair<View, String> {
+        val density = resources.displayMetrics.density
+        fun dp(v: Int) = (v * density).toInt()
+
+        val outcome = item.outcome ?: "unknown"
+        val isOk = outcome == "ok"
+        val statusColor = when {
+            isOk -> Color.parseColor("#22c55e")   // 绿
+            outcome == "canceled" || outcome == "exceededCpu" -> Color.parseColor("#f59e0b") // 黄
+            else -> Color.parseColor("#ef4444")   // 红
+        }
+
+        val request = item.event?.request
+        val method = request?.method ?: item.event?.cron?.let { "CRON" } ?: ""
+        val url = request?.url ?: item.event?.cron ?: ""
+
+        val sdf = SimpleDateFormat("yyyy/M/d HH:mm:ss", Locale.getDefault())
+        val timeStr = sdf.format(Date(item.eventTimestamp ?: System.currentTimeMillis()))
+
+        val card = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundResource(R.drawable.bg_list_item_border)
+            setPadding(dp(12), dp(10), dp(12), dp(10))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = dp(8) }
+        }
+
+        // 第一行：状态圆点 + Ok + 方法 + （右侧复制按钮，仅展开时显示）
+        val headerRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+
+        val dot = View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(9), dp(9)).apply { marginEnd = dp(6) }
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(statusColor)
+            }
+        }
+        headerRow.addView(dot)
+
+        val outcomeTv = TextView(this).apply {
+            text = outcome
+            textSize = 13f
+            setTextColor(statusColor)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { marginEnd = dp(10) }
+        }
+        headerRow.addView(outcomeTv)
+
+        if (method.isNotEmpty()) {
+            val methodTv = TextView(this).apply {
+                text = method
+                textSize = 13f
+                setTypeface(typeface, Typeface.BOLD)
+                setTextColor(Color.parseColor("#3b82f6"))
+            }
+            headerRow.addView(methodTv)
+        }
+
+        // 弹性占位：把复制按钮推到卡片最右侧
+        headerRow.addView(View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(0, 1, 1f)
+        })
+
+        // 复制按钮：ImageButton 渲染 colorControlNormal 深色图标，与顶部工具栏一致；复制本卡片全部内容
+        val copyCardBtn = android.widget.ImageButton(this).apply {
+            setImageResource(R.drawable.ic_content_copy)
+            background = null
+            val pad = dp(6)
+            setPadding(pad, pad, pad, pad)
+            layoutParams = LinearLayout.LayoutParams(dp(28), dp(28))
+            visibility = View.GONE
+        }
+        headerRow.addView(copyCardBtn)
+
+        card.addView(headerRow)
+
+        // 第二行：URL（不可选中，避免拦截点击）
+        if (url.isNotEmpty()) {
+            val urlTv = TextView(this).apply {
+                text = url
+                textSize = 13f
+                setTextColor(Color.parseColor("#2563eb"))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(4) }
+            }
+            card.addView(urlTv)
+        }
+
+        // 第三行：时间
+        val timeTv = TextView(this).apply {
+            text = timeStr
+            textSize = 11f
+            setTextColor(Color.parseColor("#9ca3af"))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(2) }
+        }
+        card.addView(timeTv)
+
+        // 日志内容预览（console.log 等，最多显示前几条）
+        val contentLines = buildContentLines(item)
+        if (contentLines.isNotEmpty()) {
+            val contentTv = TextView(this).apply {
+                val preview = contentLines.joinToString("\n")
+                text = preview
+                textSize = 12f
+                setTypeface(Typeface.MONOSPACE)
+                setTextColor(Color.parseColor("#6b7280"))
+                maxLines = 3
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(6) }
+            }
+            card.addView(contentTv)
+        }
+
+        // 点击卡片展开/收起详情（内联显示格式化 JSON），复制按钮仅在展开时显示
+        card.isClickable = true
+        card.isFocusable = true
+        card.setOnClickListener {
+            val detail = card.getTag(R.id.logsContainer) as? TextView
+            if (detail == null) return@setOnClickListener
+            val expanding = detail.visibility != View.VISIBLE
+            detail.visibility = if (expanding) View.VISIBLE else View.GONE
+            copyCardBtn.visibility = if (expanding) View.VISIBLE else View.GONE
+            if (expanding && detail.text.isNullOrEmpty()) {
+                fillDetailText(detail, rawJson)
+            }
+        }
+        copyCardBtn.setOnClickListener {
+            val detail = card.getTag(R.id.logsContainer) as? TextView
+            val json = detail?.text?.toString()?.takeIf { it.isNotEmpty() } ?: rawJson
+            copyCardContent(outcome, method, url, timeStr, json)
+        }
+
+        // 内联详情区：格式化 JSON，默认隐藏
+        val detailTv = TextView(this).apply {
+            textSize = 11f
+            setTypeface(Typeface.MONOSPACE)
+            setTextColor(Color.parseColor("#374151"))
+            visibility = View.GONE
+            setPadding(0, dp(8), 0, 0)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        card.setTag(R.id.logsContainer, detailTv)
+        card.addView(detailTv)
+
+        return Pair(card, rawJson)
+    }
+
+    /**
+     * 从 trace 中提取内容行：logs / exceptions
+     */
+    private fun buildContentLines(item: TailTraceItem): List<String> {
+        val lines = mutableListOf<String>()
+        item.exceptions?.forEach { ex ->
+            lines.add("[EXCEPTION] ${ex.name ?: ""}: ${ex.message ?: ""}".trim())
+        }
+        item.logs?.forEach { log ->
+            val msg = log.message?.joinToString(" ") { it.toString() } ?: ""
+            lines.add(msg)
+        }
+        return lines
+    }
+
+    /**
+     * 首次展开时填充格式化 JSON 到内联详情区
+     */
+    private fun fillDetailText(detailTv: TextView, rawJson: String) {
+        val prettyJson = try {
+            GsonBuilder().setPrettyPrinting().create()
+                .toJson(JsonParser.parseString(rawJson))
+        } catch (e: Exception) {
+            rawJson
+        }
+        detailTv.text = prettyJson
+    }
+
+    /**
+     * 复制单张卡片全部内容：摘要（状态/方法/URL/时间）+ 格式化 JSON
+     */
+    private fun copyCardContent(outcome: String, method: String, url: String, timeStr: String, json: String) {
+        val text = buildString {
+            append(outcome)
+            if (method.isNotEmpty()) append("  $method")
+            if (url.isNotEmpty()) append("\n$url")
+            append("\n$timeStr\n\n")
+            append(json)
+        }
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Worker log event", text))
+        showToast(getString(R.string.pages_card_content_copied))
+    }
+
+    // ==================== 连接管理 ====================
 
     private fun scheduleReconnect() {
         reconnectHandler = Handler(Looper.getMainLooper())
@@ -257,37 +470,10 @@ class WorkerLogsActivity : AppCompatActivity() {
     }
 
     private fun clearLogs() {
-        logsText.text = ""
+        eventCards.clear()
+        logsContainer.removeAllViews()
         waitingText.visibility = View.VISIBLE
-        logsText.visibility = View.GONE
-    }
-
-    private fun selectAllLogs() {
-        if (logsText.text != null) {
-            val editable = logsText.editableText
-            if (editable != null) {
-                android.text.Selection.setSelection(editable, 0, editable.length)
-            }
-        }
-    }
-
-    private fun copyLogs() {
-        val text = logsText.text.toString()
-        if (text.isNotEmpty()) {
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-            clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Worker logs", text))
-            showToast(getString(R.string.msg_logs_copied))
-        } else {
-            showToast(getString(R.string.msg_no_logs_to_copy))
-        }
-    }
-
-    private fun isColorLight(color: Int): Boolean {
-        val r = android.graphics.Color.red(color)
-        val g = android.graphics.Color.green(color)
-        val b = android.graphics.Color.blue(color)
-        val luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0
-        return luminance > 0.5
+        logsContainer.addView(waitingText)
     }
 
     private fun showToast(message: String) {
@@ -305,43 +491,9 @@ class WorkerLogsActivity : AppCompatActivity() {
     }
 
     private fun scrollToBottom() {
-        val scrollView = logsText.parent.parent as? android.widget.ScrollView
-        scrollView?.post {
-            scrollView.fullScroll(android.view.View.FOCUS_DOWN)
+        logsScrollView.post {
+            logsScrollView.fullScroll(View.FOCUS_DOWN)
         }
-    }
-
-    private fun formatTraceItem(item: TailTraceItem): List<String> {
-        val lines = mutableListOf<String>()
-        val sdf = SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault())
-        
-        val timestamp = item.eventTimestamp ?: System.currentTimeMillis()
-        val timeStr = sdf.format(Date(timestamp))
-        
-        if (item.event?.cron != null) {
-            lines.add("$timeStr [CRON] ${item.event.cron}")
-        }
-        
-        if (item.event?.request != null) {
-            val req = item.event.request
-            lines.add("$timeStr [REQUEST] ${req.method ?: "GET"} ${req.url ?: ""}")
-        }
-        
-        item.logs?.forEach { log ->
-            val level = log.level.uppercase()
-            val msg = log.message?.joinToString(" ") { it.toString() } ?: ""
-            lines.add("$timeStr [$level] $msg")
-        }
-        
-        item.exceptions?.forEach { ex ->
-            lines.add("$timeStr [EXCEPTION] ${ex.name ?: ""}: ${ex.message ?: ""}")
-        }
-        
-        if (item.outcome != null) {
-            lines.add("$timeStr [OUTCOME] ${item.outcome}")
-        }
-        
-        return lines
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

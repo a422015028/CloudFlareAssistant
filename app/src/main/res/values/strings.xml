@@ -570,7 +570,7 @@
 
     <!-- 通用操作结果 -->
     <string name="msg_copied_to_clipboard">已复制到剪贴板</string>
-    <string name="msg_no_logs_to_copy">没有日志可复制</string>
+
     <string name="msg_logs_copied">日志已复制</string>
     <string name="msg_nameservers_copied">已复制名称服务器</string>
     <string name="msg_no_account_available">暂无可用账号</string>

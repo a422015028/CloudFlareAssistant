@@ -91,99 +91,35 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/logsScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:paddingTop="0dp"
-        android:paddingBottom="0dp"
-        android:orientation="vertical">
+        android:fillViewport="true">
 
-        <FrameLayout
+        <LinearLayout
+            android:id="@+id/logsContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_logs_container"
-            android:clipChildren="true">
-
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fillViewport="true"
-                android:clipToPadding="false"
-                android:padding="8dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <TextView
-                        android:id="@+id/waitingText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/xml_activity_worker_logs"
-                        android:textSize="14sp"
-                        android:textColor="@color/grey_500"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:id="@+id/logsText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="13sp"
-                        android:textColor="@color/green_500"
-                        android:padding="12dp"
-                        android:fontFamily="monospace"
-                        android:linksClickable="false"
-                        android:autoLink="none"
-                        android:textIsSelectable="true"
-                        android:scrollbars="vertical" />
-
-                </LinearLayout>
-
-            </ScrollView>
-
-        </FrameLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:background="?attr/colorSurface"
-        android:weightSum="3">
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/selectAllBtn"
-            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/snippet_select_all"
-            android:textSize="14sp"
-            android:layout_marginEnd="8dp" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/copyBtn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/snippet_copy"
-            android:textSize="14sp"
-            android:layout_marginEnd="8dp" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/closeBtn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/ssl_mode_off"
-            android:textSize="14sp" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/waitingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="24dp"
+                android:text="@string/xml_activity_worker_logs"
+                android:textSize="13sp"
+                android:textColor="@color/grey_500" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>

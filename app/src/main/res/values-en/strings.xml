@@ -591,7 +591,7 @@
 
     <!-- Generic operation results -->
     <string name="msg_copied_to_clipboard">Copied to clipboard</string>
-    <string name="msg_no_logs_to_copy">No logs to copy</string>
+
     <string name="msg_logs_copied">Logs copied</string>
     <string name="msg_nameservers_copied">Nameservers copied</string>
     <string name="msg_no_account_available">No available account</string>
