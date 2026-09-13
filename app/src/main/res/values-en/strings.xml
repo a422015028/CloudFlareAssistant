@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
 
     <string name="app_name">Cloudflare Assistant</string>
 
@@ -2613,7 +2613,7 @@
 
     <string name="zt_gateway_rule_type_http">HTTP</string>
 
-    <string name="zt_gateway_rule_type_l4">Network</string>
+    <string name="zt_gateway_rule_type_l4">@string/settings_network</string>
 
     <string name="zt_gateway_action_allow">Allow</string>
 

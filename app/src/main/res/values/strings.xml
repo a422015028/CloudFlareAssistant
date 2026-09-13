@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
 
     <string name="app_name">CloudFlare助手</string>
 
@@ -2571,7 +2571,7 @@
 
     <string name="zt_gateway_rule_type_http">HTTP</string>
 
-    <string name="zt_gateway_rule_type_l4">网络</string>
+    <string name="zt_gateway_rule_type_l4">@string/settings_network</string>
 
     <string name="zt_gateway_action_allow">允许</string>
 

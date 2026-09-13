@@ -1,4 +1,4 @@
-﻿package com.muort.upworker.feature.worker
+package com.muort.upworker.feature.worker
 
 import android.content.Context
 import android.content.Intent
@@ -52,22 +52,37 @@ class WorkerLogsActivity : AppCompatActivity() {
     }
 
     private lateinit var toolbar: MaterialToolbar
+
     private lateinit var connectionStatusDot: View
+
     private lateinit var connectionStatusText: TextView
+
     private lateinit var pauseBtn: MaterialButton
+
     private lateinit var clearBtn: MaterialButton
+
     private lateinit var refreshBtn: MaterialButton
+
     private lateinit var waitingText: TextView
+
     private lateinit var logsContainer: LinearLayout
+
     private lateinit var logsScrollView: ScrollView
 
     private val eventCards = mutableListOf<Pair<View, String>>()
+
     private var webSocket: WebSocket? = null
+
     private var isPaused = false
+
     private var isConnected = false
+
     private var currentWssUrl: String = ""
+
     private var reconnectHandler: Handler? = null
+
     private val mainHandler = Handler(Looper.getMainLooper())
+
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(0, TimeUnit.MILLISECONDS)
@@ -75,8 +90,11 @@ class WorkerLogsActivity : AppCompatActivity() {
         .build()
 
     companion object {
+
         private const val EXTRA_SCRIPT_NAME = "script_name"
+
         private const val EXTRA_WSS_URL = "wss_url"
+
         private const val MAX_EVENTS = 200
 
         fun start(context: Context, scriptName: String, wssUrl: String) {
@@ -92,7 +110,6 @@ class WorkerLogsActivity : AppCompatActivity() {
         ThemeHelper.applyDynamicColorIfEnabled(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_worker_logs)
-
         toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         connectionStatusDot = findViewById<View>(R.id.connectionStatusDot)
         connectionStatusText = findViewById<TextView>(R.id.connectionStatusText)
@@ -102,17 +119,13 @@ class WorkerLogsActivity : AppCompatActivity() {
         waitingText = findViewById<TextView>(R.id.waitingText)
         logsContainer = findViewById<LinearLayout>(R.id.logsContainer)
         logsScrollView = findViewById<ScrollView>(R.id.logsScrollView)
-
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = intent.getStringExtra(EXTRA_SCRIPT_NAME)
-
         applyStatusBarStyle()
-
         pauseBtn.setOnClickListener { togglePause() }
         clearBtn.setOnClickListener { clearLogs() }
         refreshBtn.setOnClickListener { refreshConnection() }
-
         val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
         if (wssUrl.isNullOrEmpty()) {
             Log.e("WorkerLogs", "WSS URL is empty")
@@ -159,13 +172,12 @@ class WorkerLogsActivity : AppCompatActivity() {
             connectionStatusDot.background = getDrawable(R.drawable.circle_yellow)
             connectionStatusText.text = getString(R.string.status_connecting)
         }
-
         val request = Request.Builder()
             .url(url)
             .header("Sec-WebSocket-Protocol", "trace-v1")
             .build()
-
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
+
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.d("WorkerLogs", "WebSocket opened, response code: ${response.code}")
                 webSocket.send("{\"filters\":[],\"debug\":false}")
@@ -221,7 +233,6 @@ class WorkerLogsActivity : AppCompatActivity() {
 
     private fun appendEventCard(item: TailTraceItem, rawJson: String) {
         waitingText.visibility = View.GONE
-
         val card = buildEventCard(item, rawJson)
         eventCards.add(card)
         if (eventCards.size > MAX_EVENTS) {
@@ -238,7 +249,6 @@ class WorkerLogsActivity : AppCompatActivity() {
     private fun buildEventCard(item: TailTraceItem, rawJson: String): Pair<View, String> {
         val density = resources.displayMetrics.density
         fun dp(v: Int) = (v * density).toInt()
-
         val outcome = item.outcome ?: "unknown"
         val isOk = outcome == "ok"
         val statusColor = when {
@@ -246,30 +256,25 @@ class WorkerLogsActivity : AppCompatActivity() {
             outcome == "canceled" || outcome == "exceededCpu" -> Color.parseColor("#f59e0b") // 黄
             else -> Color.parseColor("#ef4444")   // 红
         }
-
         val request = item.event?.request
         val method = request?.method ?: item.event?.cron?.let { "CRON" } ?: ""
         val url = request?.url ?: item.event?.cron ?: ""
-
         val sdf = SimpleDateFormat("yyyy/M/d HH:mm:ss", Locale.getDefault())
         val timeStr = sdf.format(Date(item.eventTimestamp ?: System.currentTimeMillis()))
-
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundResource(R.drawable.bg_list_item_border)
+            setBackgroundResource(R.drawable.bg_log_card)
             setPadding(dp(12), dp(10), dp(12), dp(10))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { bottomMargin = dp(8) }
         }
-
         // 第一行：状态圆点 + Ok + 方法 + （右侧复制按钮，仅展开时显示）
         val headerRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-
         val dot = View(this).apply {
             layoutParams = LinearLayout.LayoutParams(dp(9), dp(9)).apply { marginEnd = dp(6) }
             background = GradientDrawable().apply {
@@ -278,7 +283,6 @@ class WorkerLogsActivity : AppCompatActivity() {
             }
         }
         headerRow.addView(dot)
-
         val outcomeTv = TextView(this).apply {
             text = outcome
             textSize = 13f
@@ -289,7 +293,6 @@ class WorkerLogsActivity : AppCompatActivity() {
             ).apply { marginEnd = dp(10) }
         }
         headerRow.addView(outcomeTv)
-
         if (method.isNotEmpty()) {
             val methodTv = TextView(this).apply {
                 text = method
@@ -299,12 +302,10 @@ class WorkerLogsActivity : AppCompatActivity() {
             }
             headerRow.addView(methodTv)
         }
-
         // 弹性占位：把复制按钮推到卡片最右侧
         headerRow.addView(View(this).apply {
             layoutParams = LinearLayout.LayoutParams(0, 1, 1f)
         })
-
         // 复制按钮：ImageButton 渲染 colorControlNormal 深色图标，与顶部工具栏一致；复制本卡片全部内容
         val copyCardBtn = android.widget.ImageButton(this).apply {
             setImageResource(R.drawable.ic_content_copy)
@@ -315,9 +316,7 @@ class WorkerLogsActivity : AppCompatActivity() {
             visibility = View.GONE
         }
         headerRow.addView(copyCardBtn)
-
         card.addView(headerRow)
-
         // 第二行：URL（不可选中，避免拦截点击）
         if (url.isNotEmpty()) {
             val urlTv = TextView(this).apply {
@@ -331,7 +330,6 @@ class WorkerLogsActivity : AppCompatActivity() {
             }
             card.addView(urlTv)
         }
-
         // 第三行：时间
         val timeTv = TextView(this).apply {
             text = timeStr
@@ -343,7 +341,6 @@ class WorkerLogsActivity : AppCompatActivity() {
             ).apply { topMargin = dp(2) }
         }
         card.addView(timeTv)
-
         // 日志内容预览（console.log 等，最多显示前几条）
         val contentLines = buildContentLines(item)
         if (contentLines.isNotEmpty()) {
@@ -361,7 +358,6 @@ class WorkerLogsActivity : AppCompatActivity() {
             }
             card.addView(contentTv)
         }
-
         // 点击卡片展开/收起详情（内联显示格式化 JSON），复制按钮仅在展开时显示
         card.isClickable = true
         card.isFocusable = true
@@ -380,7 +376,6 @@ class WorkerLogsActivity : AppCompatActivity() {
             val json = detail?.text?.toString()?.takeIf { it.isNotEmpty() } ?: rawJson
             copyCardContent(outcome, method, url, timeStr, json)
         }
-
         // 内联详情区：格式化 JSON，默认隐藏
         val detailTv = TextView(this).apply {
             textSize = 11f
@@ -395,7 +390,6 @@ class WorkerLogsActivity : AppCompatActivity() {
         }
         card.setTag(R.id.logsContainer, detailTv)
         card.addView(detailTv)
-
         return Pair(card, rawJson)
     }
 
