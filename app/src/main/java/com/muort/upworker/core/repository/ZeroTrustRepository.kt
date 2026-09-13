@@ -866,33 +866,53 @@ class ZeroTrustRepository @Inject constructor(
      */
     suspend fun getGatewayDnsAnalytics(
         account: Account,
-        timeRange: TimeRange = TimeRange.SEVEN_DAYS
+        timeRange: TimeRange = TimeRange.SEVEN_DAYS,
+        limit: Int = 5
     ): Resource<GatewayDnsAnalytics> = withContext(Dispatchers.IO) {
         safeApiCall {
             val query = """
-                query GatewayDnsAnalytics(${'$'}accountTag: string!, ${'$'}since: Time!, ${'$'}until: Time!) {
+                query GatewayDnsAnalytics(${'$'}accountTag: string!, ${'$'}since: Time!, ${'$'}until: Time!, ${'$'}limit: Int!) {
                   viewer {
                     accounts(filter: { accountTag: ${'$'}accountTag }) {
                       ops: gatewayResolverQueriesAdaptiveGroups(
                         filter: { datetime_geq: ${'$'}since, datetime_leq: ${'$'}until }
-                        limit: 100
+                        limit: ${'$'}limit
+                        orderBy: [count_DESC]
                       ) {
                         count
                         dimensions { resolverDecision }
                       }
                       countries: gatewayResolverQueriesAdaptiveGroups(
                         filter: { datetime_geq: ${'$'}since, datetime_leq: ${'$'}until }
-                        limit: 10
+                        limit: ${'$'}limit
+                        orderBy: [count_DESC]
                       ) {
                         count
                         dimensions { srcIpCountry }
                       }
                       locations: gatewayResolverQueriesAdaptiveGroups(
                         filter: { datetime_geq: ${'$'}since, datetime_leq: ${'$'}until }
-                        limit: 10
+                        limit: ${'$'}limit
+                        orderBy: [count_DESC]
                       ) {
                         count
                         dimensions { locationName }
+                      }
+                      domains: gatewayResolverQueriesAdaptiveGroups(
+                        filter: { datetime_geq: ${'$'}since, datetime_leq: ${'$'}until }
+                        limit: ${'$'}limit
+                        orderBy: [count_DESC]
+                      ) {
+                        count
+                        dimensions { queryName }
+                      }
+                      policies: gatewayResolverQueriesAdaptiveGroups(
+                        filter: { datetime_geq: ${'$'}since, datetime_leq: ${'$'}until }
+                        limit: ${'$'}limit
+                        orderBy: [count_DESC]
+                      ) {
+                        count
+                        dimensions { policyName }
                       }
                     }
                   }
@@ -902,7 +922,8 @@ class ZeroTrustRepository @Inject constructor(
             val variables = mapOf(
                 "accountTag" to account.accountId,
                 "since" to timeRange.getStartDateTime(),
-                "until" to timeRange.getEndDateTime()
+                "until" to timeRange.getEndDateTime(),
+                "limit" to limit
             )
 
             val response = api.queryGatewayDnsAnalytics(
@@ -935,13 +956,30 @@ class ZeroTrustRepository @Inject constructor(
                             ?: emptyList(),
                         locations = accountNode?.locations
                             ?.mapNotNull { g ->
-                                g.dimensions?.locationName?.let { DnsLocationItem(it, g.count) }
+                                g.dimensions?.locationName?.takeIf { it.isNotBlank() }
+                                    ?.let { DnsLocationItem(it, g.count) }
+                            }
+                            ?.sortedByDescending { it.count }
+                            ?: emptyList(),
+                        domains = accountNode?.domains
+                            ?.mapNotNull { g ->
+                                g.dimensions?.queryName?.takeIf { it.isNotBlank() }
+                                    ?.let { DnsDomainItem(it, g.count) }
+                            }
+                            ?.sortedByDescending { it.count }
+                            ?: emptyList(),
+                        // 空策略名（未命中任何策略）的分组不展示
+                        policies = accountNode?.policies
+                            ?.mapNotNull { g ->
+                                g.dimensions?.policyName?.takeIf { it.isNotBlank() }
+                                    ?.let { DnsPolicyItem(it, g.count) }
                             }
                             ?.sortedByDescending { it.count }
                             ?: emptyList()
                     )
                     Timber.d("Gateway DNS analytics loaded: ops=${analytics.operations.size}, " +
-                            "countries=${analytics.countries.size}, locations=${analytics.locations.size}")
+                            "countries=${analytics.countries.size}, locations=${analytics.locations.size}, " +
+                            "domains=${analytics.domains.size}, policies=${analytics.policies.size}")
                     Resource.Success(analytics)
                 }
             } else {

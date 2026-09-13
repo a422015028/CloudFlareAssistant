@@ -15,7 +15,7 @@
         android:textSize="14sp"
         android:textColor="?attr/colorOnSurfaceVariant"
         android:ellipsize="middle"
-        android:singleLine="true"
+        android:maxLines="1"
         tools:text="无策略匹配时允许" />
 
     <TextView

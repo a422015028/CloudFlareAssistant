@@ -640,7 +640,9 @@ data class GatewayDnsViewer(
 data class GatewayDnsAccountNode(
     @SerializedName("ops") val ops: List<GatewayDnsGroup>?,
     @SerializedName("countries") val countries: List<GatewayDnsGroup>?,
-    @SerializedName("locations") val locations: List<GatewayDnsGroup>?
+    @SerializedName("locations") val locations: List<GatewayDnsGroup>?,
+    @SerializedName("domains") val domains: List<GatewayDnsGroup>?,
+    @SerializedName("policies") val policies: List<GatewayDnsGroup>?
 )
 
 data class GatewayDnsGroup(
@@ -651,7 +653,9 @@ data class GatewayDnsGroup(
 data class GatewayDnsDimensions(
     @SerializedName("resolverDecision") val resolverDecision: String? = null,
     @SerializedName("srcIpCountry") val srcIpCountry: String? = null,
-    @SerializedName("locationName") val locationName: String? = null
+    @SerializedName("locationName") val locationName: String? = null,
+    @SerializedName("queryName") val queryName: String? = null,
+    @SerializedName("policyName") val policyName: String? = null
 )
 
 /**
@@ -679,10 +683,28 @@ data class DnsLocationItem(
 )
 
 /**
+ * 热门域名条目（按 queryName 分组）
+ */
+data class DnsDomainItem(
+    val queryName: String,
+    val count: Long
+)
+
+/**
+ * 命中策略条目（按 policyName 分组；空名称表示未匹配任何策略）
+ */
+data class DnsPolicyItem(
+    val policyName: String,
+    val count: Long
+)
+
+/**
  * Gateway DNS 查询分析聚合结果（UI 层使用）
  */
 data class GatewayDnsAnalytics(
     val operations: List<DnsOperationItem> = emptyList(),
     val countries: List<DnsCountryItem> = emptyList(),
-    val locations: List<DnsLocationItem> = emptyList()
+    val locations: List<DnsLocationItem> = emptyList(),
+    val domains: List<DnsDomainItem> = emptyList(),
+    val policies: List<DnsPolicyItem> = emptyList()
 )

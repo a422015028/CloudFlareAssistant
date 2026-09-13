@@ -247,13 +247,28 @@ class GatewayViewModel @Inject constructor(
     private val _dnsAnalyticsError = MutableStateFlow<String?>(null)
     val dnsAnalyticsError: StateFlow<String?> = _dnsAnalyticsError.asStateFlow()
 
+    // 请求代次：仅接受最新一次请求的结果，避免旧响应覆盖新数据
+    private var dnsAnalyticsLoadGeneration = 0
+
     /**
-     * Load Gateway DNS query analytics
+     * Load Gateway DNS query analytics.
+     * 不使用缓存：每次调用都实时请求云端，并先清空上一次的结果。
+     * @param topN 各分组（操作/国家/位置）返回的最大条数
      */
-    suspend fun loadDnsAnalytics(account: Account, timeRange: TimeRange = TimeRange.SEVEN_DAYS) {
+    suspend fun loadDnsAnalytics(
+        account: Account,
+        timeRange: TimeRange = TimeRange.SEVEN_DAYS,
+        topN: Int = 5
+    ) {
+        val generation = ++dnsAnalyticsLoadGeneration
         _dnsAnalyticsLoading.value = true
         _dnsAnalyticsError.value = null
-        val result = zeroTrustRepository.getGatewayDnsAnalytics(account, timeRange)
+        _dnsAnalytics.value = null
+        val result = zeroTrustRepository.getGatewayDnsAnalytics(account, timeRange, topN)
+        if (generation != dnsAnalyticsLoadGeneration) {
+            // 已有更新的请求发出，丢弃本次过期结果
+            return
+        }
         when (result) {
             is Resource.Success -> {
                 _dnsAnalytics.value = result.data

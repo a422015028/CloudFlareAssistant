@@ -1,10 +1,13 @@
 package com.muort.upworker.feature.zerotrust.gateway
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.ListPopupWindow
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -32,6 +35,10 @@ class GatewayAnalyticsFragment : Fragment() {
     private val viewModel: GatewayViewModel by activityViewModels()
     private val accountViewModel: AccountViewModel by activityViewModels()
 
+    // 热门域名 / 命中策略分组适配器
+    private lateinit var domainsAdapter: DnsAnalyticsAdapter
+    private lateinit var policiesAdapter: DnsAnalyticsAdapter
+
     private lateinit var opsAdapter: DnsAnalyticsAdapter
     private lateinit var countriesAdapter: DnsAnalyticsAdapter
     private lateinit var locationsAdapter: DnsAnalyticsAdapter
@@ -40,10 +47,17 @@ class GatewayAnalyticsFragment : Fragment() {
 
     // 每个区块显示的条目数（Top N），默认 5
     private var topN: Int = 5
-    // 缓存当前分析数据，切换 Top N 时无需重新请求
-    private var currentData: GatewayDnsAnalytics? = null
+    // 当前查询时间范围，默认 24 小时
+    private var currentTimeRange: TimeRange = TimeRange.ONE_DAY
 
-    private val topNOptions = listOf(5, 10, 20, 50)
+    private val topNOptions = listOf(5, 10, 15, 25)
+
+    // 时间范围与 Top N 的跨打开持久化
+    private val prefs: SharedPreferences by lazy {
+        requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+
+    private var topNPopup: ListPopupWindow? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,21 +70,48 @@ class GatewayAnalyticsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        restorePreferences()
         setupRecyclerViews()
+        setupTimeRangeChips()
         observeViewModel()
+    }
+
+    /**
+     * 恢复上次选择的时间范围与 Top N；非法/缺失值回退到默认
+     */
+    private fun restorePreferences() {
+        currentTimeRange = runCatching {
+            TimeRange.valueOf(prefs.getString(KEY_TIME_RANGE, null) ?: TimeRange.ONE_DAY.name)
+        }.getOrDefault(TimeRange.ONE_DAY)
+
+        topN = prefs.getInt(KEY_TOP_N, topN).takeIf { it in topNOptions } ?: 5
+
+        // XML 默认选中 24 小时，这里按记忆值显式勾选
+        binding.gatewayDnsTimeRangeChipGroup.check(chipIdFor(currentTimeRange))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 每次进入页面/切回该标签都实时拉取云端数据，不使用缓存
         loadData()
     }
 
     private fun setupRecyclerViews() {
         opsAdapter = DnsAnalyticsAdapter()
+        domainsAdapter = DnsAnalyticsAdapter()
         countriesAdapter = DnsAnalyticsAdapter()
         locationsAdapter = DnsAnalyticsAdapter()
+        policiesAdapter = DnsAnalyticsAdapter()
         blockedUsersAdapter = DnsAnalyticsAdapter()
         allowedUsersAdapter = DnsAnalyticsAdapter()
 
         binding.opsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = opsAdapter
+        }
+        binding.domainsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = domainsAdapter
         }
         binding.countriesRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -79,6 +120,10 @@ class GatewayAnalyticsFragment : Fragment() {
         binding.locationsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = locationsAdapter
+        }
+        binding.policiesRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = policiesAdapter
         }
         binding.blockedUsersRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -96,15 +141,69 @@ class GatewayAnalyticsFragment : Fragment() {
 
     private fun setupTopNDropdown() {
         val optionLabels = topNOptions.map { getString(R.string.zt_gateway_dns_top_count, it) }
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, optionLabels)
-        binding.itemsDropdown.setAdapter(adapter)
-        binding.itemsDropdown.setText(optionLabels[topNOptions.indexOf(topN)], false)
-        binding.itemsDropdown.threshold = 0
-        binding.itemsDropdown.setOnClickListener { binding.itemsDropdown.showDropDown() }
-        binding.itemsDropdown.setOnItemClickListener { _, _, position, _ ->
-            topN = topNOptions[position]
-            currentData?.let { renderAnalytics(it) }
+        updateTopNLabel()
+
+        // 使用 ListPopupWindow 而非 AutoCompleteTextView：
+        // 后者自带文本过滤/焦点处理，选项点击在部分场景下不回调，导致切换无反应
+        binding.itemsDropdown.setOnClickListener { anchor ->
+            topNPopup?.dismiss()
+            val minWidthPx = (96 * resources.displayMetrics.density).toInt()
+            val popup = ListPopupWindow(requireContext()).apply {
+                setAdapter(
+                    ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_list_item_1,
+                        optionLabels
+                    )
+                )
+                anchorView = anchor
+                isModal = true
+                width = anchor.width.coerceAtLeast(minWidthPx)
+                setOnItemClickListener { _, _, position, _ ->
+                    val newTopN = topNOptions[position]
+                    dismiss()
+                    if (newTopN != topN) {
+                        topN = newTopN
+                        updateTopNLabel()
+                        prefs.edit().putInt(KEY_TOP_N, topN).apply()
+                        // 与时间范围切换一致：带新的 limit 重新请求云端
+                        loadData()
+                    }
+                }
+                setOnDismissListener { topNPopup = null }
+            }
+            topNPopup = popup
+            popup.show()
         }
+    }
+
+    private fun updateTopNLabel() {
+        binding.itemsDropdownText.text = getString(R.string.zt_gateway_dns_top_count, topN)
+    }
+
+    private fun setupTimeRangeChips() {
+        binding.gatewayDnsTimeRangeChipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.isEmpty()) return@setOnCheckedStateChangeListener
+
+            val timeRange = when (checkedIds[0]) {
+                R.id.gatewayDnsChip1Day -> TimeRange.ONE_DAY
+                R.id.gatewayDnsChip7Days -> TimeRange.SEVEN_DAYS
+                R.id.gatewayDnsChip30Days -> TimeRange.THIRTY_DAYS
+                else -> TimeRange.ONE_DAY
+            }
+
+            if (timeRange != currentTimeRange) {
+                currentTimeRange = timeRange
+                prefs.edit().putString(KEY_TIME_RANGE, timeRange.name).apply()
+                loadData()
+            }
+        }
+    }
+
+    private fun chipIdFor(timeRange: TimeRange): Int = when (timeRange) {
+        TimeRange.ONE_DAY -> R.id.gatewayDnsChip1Day
+        TimeRange.SEVEN_DAYS -> R.id.gatewayDnsChip7Days
+        TimeRange.THIRTY_DAYS -> R.id.gatewayDnsChip30Days
     }
 
     private fun observeViewModel() {
@@ -114,6 +213,10 @@ class GatewayAnalyticsFragment : Fragment() {
                     viewModel.dnsAnalyticsLoading.collect { loading ->
                         binding.loadingContainer.visibility =
                             if (loading) View.VISIBLE else View.GONE
+                        // 实时拉取期间隐藏上一次的数据，避免把旧数据当作当前结果展示
+                        if (loading) {
+                            binding.contentContainer.visibility = View.GONE
+                        }
                     }
                 }
                 launch {
@@ -138,10 +241,8 @@ class GatewayAnalyticsFragment : Fragment() {
     }
 
     private fun renderAnalytics(data: GatewayDnsAnalytics) {
-        currentData = data
-
-        val isEmpty = data.operations.isEmpty() && data.countries.isEmpty() &&
-                data.locations.isEmpty()
+        val isEmpty = data.operations.isEmpty() && data.domains.isEmpty() &&
+                data.countries.isEmpty() && data.locations.isEmpty() && data.policies.isEmpty()
 
         binding.contentContainer.visibility = View.VISIBLE
         binding.emptyText.visibility = if (isEmpty) View.VISIBLE else View.GONE
@@ -167,6 +268,11 @@ class GatewayAnalyticsFragment : Fragment() {
                 .map { DnsAnalyticsAdapter.Item(mapResolverDecision(it.resolverDecision), it.count) }
                 .toMutableList()
         )
+        domainsAdapter.submitList(
+            data.domains.take(topN)
+                .map { DnsAnalyticsAdapter.Item(it.queryName, it.count) }
+                .toMutableList()
+        )
         countriesAdapter.submitList(
             data.countries.take(topN)
                 .map { DnsAnalyticsAdapter.Item(it.countryCode, it.count) }
@@ -175,6 +281,11 @@ class GatewayAnalyticsFragment : Fragment() {
         locationsAdapter.submitList(
             data.locations.take(topN)
                 .map { DnsAnalyticsAdapter.Item(it.locationName, it.count) }
+                .toMutableList()
+        )
+        policiesAdapter.submitList(
+            data.policies.take(topN)
+                .map { DnsAnalyticsAdapter.Item(it.policyName, it.count) }
                 .toMutableList()
         )
         blockedUsersAdapter.submitList(
@@ -224,12 +335,20 @@ class GatewayAnalyticsFragment : Fragment() {
         }
         binding.errorContainer.visibility = View.GONE
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadDnsAnalytics(account, TimeRange.SEVEN_DAYS)
+            viewModel.loadDnsAnalytics(account, currentTimeRange, topN)
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        topNPopup?.dismiss()
+        topNPopup = null
         _binding = null
+    }
+
+    companion object {
+        private const val PREFS_NAME = "gateway_dns_analytics_prefs"
+        private const val KEY_TIME_RANGE = "time_range"
+        private const val KEY_TOP_N = "top_n"
     }
 }

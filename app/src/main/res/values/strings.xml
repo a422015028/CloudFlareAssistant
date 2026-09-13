@@ -1181,8 +1181,10 @@
     <!-- Gateway DNS Analytics -->
     <string name="zt_gateway_dns_analytics_title">网关 DNS 查询见解</string>
     <string name="zt_gateway_dns_operations">DNS 操作</string>
+    <string name="zt_gateway_dns_top_domains">热门域名</string>
     <string name="zt_gateway_dns_countries">DNS 国家/地区</string>
     <string name="zt_gateway_dns_locations">排名靠前的 DNS 位置</string>
+    <string name="zt_gateway_dns_policies">命中策略</string>
     <string name="zt_gateway_dns_blocked_users">阻止次数最多的用户</string>
     <string name="zt_gateway_dns_allowed_users">允许次数最多的用户</string>
     <string name="zt_gateway_dns_no_identity">未捕获标识信息</string>

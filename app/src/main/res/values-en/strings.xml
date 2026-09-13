@@ -1200,8 +1200,10 @@
     <!-- Gateway DNS Analytics -->
     <string name="zt_gateway_dns_analytics_title">Gateway DNS Query Insights</string>
     <string name="zt_gateway_dns_operations">DNS Operations</string>
+    <string name="zt_gateway_dns_top_domains">Top Domains</string>
     <string name="zt_gateway_dns_countries">DNS Country/Region</string>
     <string name="zt_gateway_dns_locations">Top DNS Locations</string>
+    <string name="zt_gateway_dns_policies">Matched Policies</string>
     <string name="zt_gateway_dns_blocked_users">Top Blocked Users</string>
     <string name="zt_gateway_dns_allowed_users">Top Allowed Users</string>
     <string name="zt_gateway_dns_no_identity">No identity captured</string>
