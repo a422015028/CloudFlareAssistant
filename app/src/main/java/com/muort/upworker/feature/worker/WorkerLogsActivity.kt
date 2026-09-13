@@ -1,4 +1,4 @@
-package com.muort.upworker.feature.worker
+﻿package com.muort.upworker.feature.worker
 
 import android.content.Context
 import android.content.Intent
@@ -28,6 +28,7 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.TailTraceItem
 import com.muort.upworker.core.util.DisplaySizeHelper
 import com.muort.upworker.core.util.LocaleHelper
+import com.muort.upworker.core.util.LogProxyHelper
 import com.muort.upworker.core.util.ThemeHelper
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -118,7 +119,7 @@ class WorkerLogsActivity : AppCompatActivity() {
             showToast(getString(R.string.status_wss_url_empty))
             return
         }
-        currentWssUrl = wssUrl
+        currentWssUrl = LogProxyHelper.applyProxy(this, wssUrl)
         connectWebSocket(currentWssUrl)
     }
 

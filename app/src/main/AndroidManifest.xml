@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     
     <!-- 查看网络连接 -->
@@ -41,6 +41,9 @@
 
         <!-- 注册 Pages 实时日志页面 -->
         <activity android:name="com.muort.upworker.feature.pages.PagesLogsActivity" android:exported="false" />
+
+        <!-- 注册设置页面 -->
+        <activity android:name="com.muort.upworker.feature.settings.SettingsActivity" android:exported="false" />
 
         <!-- 注册账户 API 令牌管理页面 -->
         <activity android:name="com.muort.upworker.feature.account.TokenManagerActivity" android:exported="false" />
