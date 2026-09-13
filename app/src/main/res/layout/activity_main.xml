@@ -16,7 +16,6 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
             app:strokeColor="@android:color/transparent"
-            app:cardBackgroundColor="?attr/colorSurface"
             app:layout_scrollFlags="">
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"

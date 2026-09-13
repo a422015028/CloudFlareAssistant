@@ -31,7 +31,6 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setupToolbar()
         applyStatusBarStyle()
         setupThemeMode()
@@ -45,6 +44,10 @@ class SettingsActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(true)
+        // 让 Toolbar 背景色和卡片默认背景色完全一致（跟随动态配色）
+        val tempCard = com.google.android.material.card.MaterialCardView(this)
+        val cardBgColor = tempCard.cardBackgroundColor.defaultColor
+        binding.toolbar.setBackgroundColor(cardBgColor)
     }
 
     private fun applyStatusBarStyle() {
@@ -87,7 +90,6 @@ class SettingsActivity : AppCompatActivity() {
             else -> R.id.themeFollowSystemBtn
         }
         binding.themeModeToggleGroup.check(themeButtonId)
-
         binding.themeModeToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 val mode = when (checkedId) {
@@ -121,7 +123,6 @@ class SettingsActivity : AppCompatActivity() {
     private fun setupDisplaySize() {
         val sizeOptions = DisplaySizeHelper.getOptions(this)
         val selectedIdx = DisplaySizeHelper.getSelectedIndex(this)
-
         val idToIndex = mapOf(
             R.id.displaySizeExtraSmallBtn to 0,
             R.id.displaySizeSmallerBtn to 1,
@@ -131,12 +132,10 @@ class SettingsActivity : AppCompatActivity() {
             R.id.displaySizeExtraLargeBtn to 5,
         )
         val indexToId = idToIndex.entries.associate { (k, v) -> v to k }
-
         indexToId[selectedIdx]?.let { id ->
             if (idToIndex[id]!! < 3) binding.displaySizeRow1.check(id)
             else binding.displaySizeRow2.check(id)
         }
-
         fun onSizeChecked(checkedId: Int, whichRow: Int) {
             if (checkedId == View.NO_ID) return
             val idx = idToIndex[checkedId] ?: return
@@ -148,7 +147,6 @@ class SettingsActivity : AppCompatActivity() {
                 recreate()
             }
         }
-
         binding.displaySizeRow1.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) onSizeChecked(checkedId, 1)
         }
@@ -167,7 +165,6 @@ class SettingsActivity : AppCompatActivity() {
             else -> R.id.langFollowSystemBtn
         }
         binding.languageToggleGroup.check(langButtonId)
-
         binding.languageToggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 val lang = when (checkedId) {
