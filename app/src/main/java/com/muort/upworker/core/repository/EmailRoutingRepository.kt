@@ -18,7 +18,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class EmailRoutingRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
 ) {
     // —— 设置 ——

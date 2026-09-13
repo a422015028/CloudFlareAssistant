@@ -17,7 +17,7 @@ import javax.inject.Singleton
 
 @Singleton
 class WebDavClient @Inject constructor(
-    @ApplicationContext private val appContext: Context
+    @param:ApplicationContext private val appContext: Context
 ) {
     
     companion object {

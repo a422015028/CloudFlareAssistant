@@ -196,7 +196,7 @@ class RateLimitFragment : BaseZoneFeatureFragment() {
 
         // 请求数
         b.requestsInput.setText(
-            (editingRule?.ratelimit?.requestsPerPeriod ?: 100).toString()
+            String.format(java.util.Locale.US, "%d", editingRule?.ratelimit?.requestsPerPeriod ?: 100)
         )
 
         // 周期下拉

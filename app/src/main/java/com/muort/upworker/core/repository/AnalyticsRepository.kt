@@ -17,7 +17,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AnalyticsRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi
 ) {
     

@@ -19,7 +19,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class TokenRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi
 ) {
 

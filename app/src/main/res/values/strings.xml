@@ -6435,8 +6435,6 @@
 
     <string name="worker_post_observability_summary">激活 Workers Trace + Logs 持久化（head 采样率=1），异常诊断可用。</string>
 
-    <string name="worker_post_observability_applying">正在应用可观测性设置…</string>
-
     <string name="worker_post_observability_ok">可观测性已启用（Traces + Logs 持久化）</string>
 
     <string name="worker_post_observability_fail_format">启用可观测性失败：%1$s</string>
@@ -6453,8 +6451,6 @@
 
     <string name="worker_post_subdomain_ok_format">子域名已启用：%1$s.workers.dev</string>
 
-    <string name="worker_post_subdomain_already">子域名已启用，无需重复操作</string>
-
     <string name="worker_post_subdomain_fail_format">启用子域名失败：%1$s</string>
 
     <string name="worker_post_subdomain_403_dashboard_hint">提示：请先到 Cloudflare Dashboard → Workers &amp; Pages 完成 workers.dev 账号级子域名注册（一次性设置）。</string>
@@ -6468,8 +6464,6 @@
     <string name="worker_post_deploy_summary">将最新版本 100% 切到生产环境（deployment percentage 策略）。</string>
 
     <string name="worker_post_deployment_summary">将最新版本 100% 切到生产环境（deployment percentage 策略）。</string>
-
-    <string name="worker_post_deploy_deploying">正在执行生产流量切换（%1$d%%）…</string>
 
     <string name="worker_post_deploy_ok_format">已部署版本 #%1$d，流量 %2$d%%</string>
 

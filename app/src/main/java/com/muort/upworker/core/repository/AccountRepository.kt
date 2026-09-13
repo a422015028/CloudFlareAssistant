@@ -22,7 +22,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AccountRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val accountDao: AccountDao,
     private val backupRepositoryLazy: Lazy<BackupRepository>,
     private val api: CloudFlareApi

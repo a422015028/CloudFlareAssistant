@@ -21,7 +21,7 @@ import javax.inject.Singleton
 
 @Singleton
 class R2Repository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
     private val r2S3Client: R2S3Client
 ) {

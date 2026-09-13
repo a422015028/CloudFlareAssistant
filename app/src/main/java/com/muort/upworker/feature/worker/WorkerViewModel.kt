@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WorkerViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val workerRepository: WorkerRepository
 ) : ViewModel() {
 

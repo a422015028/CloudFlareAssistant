@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AccountViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val accountRepository: AccountRepository,
     private val zoneRepository: ZoneRepository
 ) : ViewModel() {

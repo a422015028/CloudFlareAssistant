@@ -48,7 +48,7 @@ private fun JSONObject.optStringOrNull(name: String): String? {
  */
 @Singleton
 class CatalogRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val catalogDao: CatalogDao,
     private val gson: Gson
 ) {

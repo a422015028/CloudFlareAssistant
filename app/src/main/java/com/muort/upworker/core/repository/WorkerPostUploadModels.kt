@@ -29,7 +29,7 @@ sealed class WorkerPostActionStage {
      */
     data class Success(
         override val kind: WorkerPostStageKind,
-        @StringRes val messageResId: Int,
+        @param:StringRes val messageResId: Int,
         val formatArgs: Array<out Any?> = emptyArray()
     ) : WorkerPostActionStage()
 
@@ -41,7 +41,7 @@ sealed class WorkerPostActionStage {
      */
     data class Failure(
         override val kind: WorkerPostStageKind,
-        @StringRes val messageResId: Int,
+        @param:StringRes val messageResId: Int,
         val formatArgs: Array<out Any?> = emptyArray()
     ) : WorkerPostActionStage()
 }
@@ -83,6 +83,6 @@ data class WorkerAfterUploadResult(
 data class WorkerNodejsDetectResult(
     val finalFlags: List<String>,
     val hitPatterns: List<String>,
-    @StringRes val logResId: Int,
+    @param:StringRes val logResId: Int,
     val logFormatArgs: Array<out Any?>
 )

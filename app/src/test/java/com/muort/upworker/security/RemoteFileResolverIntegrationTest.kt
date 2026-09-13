@@ -38,6 +38,7 @@ class RemoteFileResolverIntegrationTest {
     private lateinit var context: Context
 
     @Before fun setUp() {
+        demoteConscryptForJceVerification()
         server = MockWebServer()
         // MockWebServer 明文 HTTP（https 校验只在 production 严格执行，
         // test 下通过 RemoteFileResolver.allowInsecureProtocolForTests 放行，
@@ -63,7 +64,28 @@ class RemoteFileResolverIntegrationTest {
         RemoteFileResolver.messageResolverForTests = null
         RemoteFileResolver.ssrfBypassHostsForTests = null
         RemoteFileResolver.allowInsecureProtocolForTests = false
+        restoreConscryptProvider()
         server.shutdown()
+    }
+
+    // Robolectric 4.17 内置的 Conscrypt 2.6.2（conscrypt-openjdk-uber）会在沙箱中注册为最高优先级
+    // JCA Provider。JCE 首次使用（如本测试构造 PKCS12 KeyManager）时要校验 SunJCE 框架签名，
+    // 其内置测试证书经 Conscrypt 的 X509 实现验签时会抛
+    // DIGEST_AND_KEY_TYPE_NOT_SUPPORTED，导致 javax.crypto.JarVerifier 初始化失败。
+    // 测试期间临时移除 Conscrypt，强制回退到 JDK 原生 SUN/SunRsaSign，用例结束后恢复。
+    private var removedConscryptProviders: MutableList<java.security.Provider>? = null
+
+    private fun demoteConscryptForJceVerification() {
+        val conscrypt = java.security.Security.getProviders()
+            .filter { it.javaClass.name.startsWith("org.conscrypt.") }
+        if (conscrypt.isNotEmpty()) {
+            removedConscryptProviders = conscrypt.onEach { java.security.Security.removeProvider(it.name) }.toMutableList()
+        }
+    }
+
+    private fun restoreConscryptProvider() {
+        removedConscryptProviders?.forEach { java.security.Security.insertProviderAt(it, 1) }
+        removedConscryptProviders = null
     }
 
     // ======================================================================

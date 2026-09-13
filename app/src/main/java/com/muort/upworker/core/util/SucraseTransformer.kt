@@ -53,7 +53,7 @@ data class SucraseResult(
  */
 @Singleton
 class SucraseTransformer @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     @Volatile
     private var webView: WebView? = null

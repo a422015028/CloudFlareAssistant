@@ -22,7 +22,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class SnippetRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
     private val dnsRepository: DnsRepository,
 ) {

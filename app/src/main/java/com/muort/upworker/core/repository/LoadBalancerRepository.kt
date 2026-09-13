@@ -18,7 +18,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class LoadBalancerRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
 ) {
     suspend fun listLoadBalancers(account: Account, zoneId: String): Resource<List<LoadBalancer>> =

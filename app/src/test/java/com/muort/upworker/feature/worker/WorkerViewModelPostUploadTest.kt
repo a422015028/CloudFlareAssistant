@@ -89,17 +89,17 @@ class WorkerViewModelPostUploadTest {
             stages = listOf(
                 WorkerPostActionStage.Success(
                     kind = WorkerPostStageKind.Observability,
-                    messageResId = R.string.worker_post_observability_applying,
+                    messageResId = R.string.worker_post_observability_ok,
                     formatArgs = emptyArray()
                 ),
                 WorkerPostActionStage.Success(
                     kind = WorkerPostStageKind.Subdomain,
-                    messageResId = R.string.worker_post_subdomain_already,
+                    messageResId = R.string.worker_post_subdomain_ok_format,
                     formatArgs = emptyArray()
                 ),
                 WorkerPostActionStage.Success(
                     kind = WorkerPostStageKind.Deployment,
-                    messageResId = R.string.worker_post_deploy_deploying,
+                    messageResId = R.string.worker_post_deploy_ok_format,
                     formatArgs = arrayOf(100)
                 )
             )
@@ -114,17 +114,17 @@ class WorkerViewModelPostUploadTest {
         // Observability success is SILENCED (intermediate stage success → no toast)
         assertTrue(
             "observability success must be silenced",
-            resStrings.none { it.resId == R.string.worker_post_observability_applying }
+            resStrings.none { it.resId == R.string.worker_post_observability_ok }
         )
         // Subdomain success is SILENCED (intermediate stage success → no toast)
         assertTrue(
             "subdomain success must be silenced",
-            resStrings.none { it.resId == R.string.worker_post_subdomain_already }
+            resStrings.none { it.resId == R.string.worker_post_subdomain_ok_format }
         )
         // Deployment success IS emitted (final stage success → toast)
         assertTrue(
             "deployment success emitted",
-            resStrings.any { it.resId == R.string.worker_post_deploy_deploying }
+            resStrings.any { it.resId == R.string.worker_post_deploy_ok_format }
         )
     }
 
@@ -163,7 +163,7 @@ class WorkerViewModelPostUploadTest {
                 ),
                 WorkerPostActionStage.Success(
                     kind = WorkerPostStageKind.Deployment,
-                    messageResId = R.string.worker_post_deploy_deploying,
+                    messageResId = R.string.worker_post_deploy_ok_format,
                     formatArgs = arrayOf(100)
                 )
             )
@@ -193,7 +193,7 @@ class WorkerViewModelPostUploadTest {
         assertTrue(
             "deployment stage still emitted after subdomain failure",
             emitted.any {
-                it is UiMessage.ResourceString && it.resId == R.string.worker_post_deploy_deploying
+                it is UiMessage.ResourceString && it.resId == R.string.worker_post_deploy_ok_format
             }
         )
     }
@@ -233,12 +233,12 @@ class WorkerViewModelPostUploadTest {
                 ),
                 WorkerPostActionStage.Success(
                     kind = WorkerPostStageKind.Subdomain,
-                    messageResId = R.string.worker_post_subdomain_already,
+                    messageResId = R.string.worker_post_subdomain_ok_format,
                     formatArgs = emptyArray()
                 ),
                 WorkerPostActionStage.Success(
                     kind = WorkerPostStageKind.Deployment,
-                    messageResId = R.string.worker_post_deploy_deploying,
+                    messageResId = R.string.worker_post_deploy_ok_format,
                     formatArgs = arrayOf(100)
                 )
             )
@@ -308,7 +308,7 @@ class WorkerViewModelPostUploadTest {
                 ),
                 WorkerPostActionStage.Success(
                     kind = WorkerPostStageKind.Subdomain,
-                    messageResId = R.string.worker_post_subdomain_already,
+                    messageResId = R.string.worker_post_subdomain_ok_format,
                     formatArgs = emptyArray()
                 ),
                 WorkerPostActionStage.Success(
@@ -334,7 +334,7 @@ class WorkerViewModelPostUploadTest {
         // but the stage still ran (loop did not abort on stage1 failure — proven by stage3 below).
         assertTrue(
             "stage2 subdomain success silenced after stage1 failure",
-            resStrings.none { it.resId == R.string.worker_post_subdomain_already }
+            resStrings.none { it.resId == R.string.worker_post_subdomain_ok_format }
         )
         // Stage 3 deployment still emitted (not aborted by stage1 failure)
         assertTrue(

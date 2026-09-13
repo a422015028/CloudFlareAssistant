@@ -36,7 +36,7 @@ data class CleanupResult(
 
 @HiltViewModel
 class PagesViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val pagesRepository: PagesRepository
 ) : ViewModel() {
     

@@ -22,7 +22,7 @@ import javax.inject.Singleton
 
 @Singleton
 class WorkerRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
     private val gson: Gson
 ) {

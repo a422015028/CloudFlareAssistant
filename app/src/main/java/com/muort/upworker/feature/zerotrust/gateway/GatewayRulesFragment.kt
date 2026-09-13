@@ -167,9 +167,9 @@ class GatewayRulesFragment : Fragment() {
     }
     
     private fun updateStats(rules: List<GatewayRule>) {
-        binding.totalCountText.text = rules.size.toString()
-        binding.enabledCountText.text = rules.count { it.enabled }.toString()
-        binding.disabledCountText.text = rules.count { !it.enabled }.toString()
+        binding.totalCountText.text = String.format(java.util.Locale.US, "%d", rules.size)
+        binding.enabledCountText.text = String.format(java.util.Locale.US, "%d", rules.count { it.enabled })
+        binding.disabledCountText.text = String.format(java.util.Locale.US, "%d", rules.count { !it.enabled })
     }
 
     private fun loadRules() {
@@ -653,7 +653,7 @@ class GatewayRulesFragment : Fragment() {
                     l4OverrideIpLayout.visibility = View.VISIBLE
                     l4OverridePortLayout.visibility = View.VISIBLE
                     l4.ip?.let { l4OverrideIpInput.setText(it) }
-                    l4.port?.let { l4OverridePortInput.setText(it.toString()) }
+                    l4.port?.let { l4OverridePortInput.setText(String.format(java.util.Locale.US, "%d", it)) }
                 }
             }
             

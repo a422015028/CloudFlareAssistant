@@ -52,7 +52,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class TemplateDeployRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val workerRepository: WorkerRepository,
     private val pagesRepository: PagesRepository,
     private val kvRepository: KvRepository,

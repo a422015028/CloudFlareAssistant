@@ -189,7 +189,7 @@ class DnsFragment : Fragment() {
         if (existingRecord != null) {
             dialogBinding.dnsType.setText(existingRecord.type, false)
             dialogBinding.dnsName.setText(existingRecord.name)
-            dialogBinding.dnsTtl.setText(existingRecord.ttl.toString())
+            dialogBinding.dnsTtl.setText(String.format(java.util.Locale.US, "%d", existingRecord.ttl))
             dialogBinding.dnsProxied.isChecked = existingRecord.proxied
             generateFields(existingRecord.type)
             val supportProxied = existingRecord.type == "A" || existingRecord.type == "AAAA" || existingRecord.type == "CNAME"

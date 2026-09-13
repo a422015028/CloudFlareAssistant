@@ -28,7 +28,7 @@ private data class LegacyAccount(
  */
 @Singleton
 class DataMigrationHelper @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val accountDao: AccountDao,
     private val gson: Gson
 ) {

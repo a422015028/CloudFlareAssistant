@@ -129,7 +129,7 @@ class WafFragment : BaseZoneRulesetFragment() {
 
                 val rule = WafRuleCreate(action = action, expression = expression, description = name, enabled = enabled)
                 account?.let { acct ->
-                    if (isEdit && editingRule != null) {
+                    if (editingRule != null) {
                         rulesetViewModel.updateRule(acct, zoneId, editingRule.id, rule) { ok, err ->
                             toast(if (ok) getString(R.string.msg_saved) else getString(R.string.msg_save_failed, err?.asString(requireContext()).orEmpty()))
                         }

@@ -6479,8 +6479,6 @@
 
     <string name="worker_post_observability_summary">Enable Workers Trace + persistent Logs (head sampling rate = 1) for diagnostics.</string>
 
-    <string name="worker_post_observability_applying">Applying observability settings…</string>
-
     <string name="worker_post_observability_ok">Observability enabled (Traces + persistent Logs)</string>
 
     <string name="worker_post_observability_fail_format">Failed to enable observability: %1$s</string>
@@ -6497,8 +6495,6 @@
 
     <string name="worker_post_subdomain_ok_format">Subdomain enabled: %1$s.workers.dev</string>
 
-    <string name="worker_post_subdomain_already">Subdomain already enabled, skipping</string>
-
     <string name="worker_post_subdomain_fail_format">Failed to enable subdomain: %1$s</string>
 
     <string name="worker_post_subdomain_403_dashboard_hint">Hint: Please first register your account-level workers.dev subdomain at Cloudflare Dashboard → Workers &amp; Pages (one-time setup).</string>
@@ -6512,8 +6508,6 @@
     <string name="worker_post_deploy_summary">Route 100%% production traffic to the latest version (percentage deployment strategy).</string>
 
     <string name="worker_post_deployment_summary">Route 100%% production traffic to the latest version (percentage deployment strategy).</string>
-
-    <string name="worker_post_deploy_deploying">Promoting production traffic (%1$d%%)…</string>
 
     <string name="worker_post_deploy_ok_format">Version #%1$d deployed with %2$d%% traffic</string>
 

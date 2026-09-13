@@ -178,7 +178,7 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 val result = withContext(Dispatchers.IO) {
                     runCatching {
-                        if (isEditing && editingSource != null) {
+                        if (editingSource != null) {
                             catalogRepository.updateSource(editingSource.id, name, url)
                             true
                         } else {
@@ -216,7 +216,7 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
         }
 
         // 删除按钮（编辑非默认源时）
-        if (isEditing && editingSource != null && !editingSource.isDefault) {
+        if (editingSource != null && !editingSource.isDefault) {
             dialogBinding.deleteBtn.setOnClickListener {
                 viewLifecycleOwner.lifecycleScope.launch {
                     catalogRepository.deleteSource(editingSource.id)

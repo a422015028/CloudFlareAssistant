@@ -15,7 +15,7 @@ import javax.inject.Singleton
 /** IP 访问规则仓库（account 级 legacy firewall access rules）。对应 orange-cloud FirewallRepository。 */
 @Singleton
 class AccessRuleRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
 ) {
     suspend fun listRules(account: Account): Resource<List<FirewallAccessRule>> =

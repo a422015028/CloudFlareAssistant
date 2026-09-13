@@ -103,7 +103,7 @@ class SnippetsFragment : BaseZoneFeatureFragment() {
             // 弹起后立刻聚焦输入框并显示键盘
             nameEdit.requestFocus()
             (context.getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager)
-                ?.showSoftInput(nameEdit, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+                ?.showSoftInput(nameEdit, 0)
 
             dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val name = nameEdit.text?.toString()?.trim().orEmpty()

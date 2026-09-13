@@ -26,7 +26,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class ZoneRulesetRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
 ) {
     /** 取某 phase 的 entrypoint ruleset；phase 还没规则集时返回 null。 */

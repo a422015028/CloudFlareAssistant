@@ -1,4 +1,4 @@
-﻿# Built application files
+# Built application files
 *.apk
 *.ap_
 *.aab
@@ -46,3 +46,4 @@ CloudflareAPI/.taixu/
 docs/
 TEMPLATE_STORE_INTEGRATION_PLAN.md
 cf-store.js
+.kotlin

@@ -34,7 +34,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PagesRepository @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val api: CloudFlareApi,
     private val sucraseTransformer: SucraseTransformer,
     private val esbuildBundler: EsbuildBundler

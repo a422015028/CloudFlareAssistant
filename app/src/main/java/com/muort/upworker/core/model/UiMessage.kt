@@ -6,7 +6,7 @@ import androidx.annotation.StringRes
 sealed class UiMessage {
     /** Static string resource, optionally with format args (Any? array — Context.getString will handle). */
     data class ResourceString(
-        @StringRes val resId: Int,
+        @param:StringRes val resId: Int,
         val args: Array<out Any?> = emptyArray(),
     ) : UiMessage() {
         override fun equals(other: Any?): Boolean =

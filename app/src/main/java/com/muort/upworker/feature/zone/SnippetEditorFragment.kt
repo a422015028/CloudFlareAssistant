@@ -234,7 +234,7 @@ class SnippetEditorFragment : Fragment() {
         binding.searchBar.visibility = View.VISIBLE
         binding.searchInput.requestFocus()
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-        imm.showSoftInput(binding.searchInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+        imm.showSoftInput(binding.searchInput, 0)
     }
 
     private fun hideSearchBar() {
@@ -505,7 +505,7 @@ class SnippetEditorFragment : Fragment() {
     private fun showKeyboard() {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         binding.webView.requestFocus()
-        imm.showSoftInput(binding.webView, InputMethodManager.SHOW_IMPLICIT)
+        imm.showSoftInput(binding.webView, 0)
         executeJavaScript("focusEditor()")
     }
 
