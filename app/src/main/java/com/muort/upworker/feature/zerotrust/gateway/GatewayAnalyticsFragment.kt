@@ -275,7 +275,7 @@ class GatewayAnalyticsFragment : Fragment() {
         )
         countriesAdapter.submitList(
             data.countries.take(topN)
-                .map { DnsAnalyticsAdapter.Item(it.countryCode, it.count) }
+                .map { DnsAnalyticsAdapter.Item(countryDisplayName(it.countryCode), it.count) }
                 .toMutableList()
         )
         locationsAdapter.submitList(
@@ -325,6 +325,32 @@ class GatewayAnalyticsFragment : Fragment() {
         return getString(resId)
     }
 
+    /**
+     * ISO 3166-1 alpha-2 国家码转本地化显示名；Cloudflare 特殊码单独映射
+     * 与账号分析概览地区分布保持一致的显示逻辑
+     */
+    private fun countryDisplayName(code: String): String {
+        if (code.isBlank()) return code
+        if (specialRegionCodes.contains(code)) return specialRegionName(code)
+        return try {
+            val name = java.util.Locale.Builder()
+                .setRegion(code)
+                .build()
+                .getDisplayCountry(java.util.Locale.getDefault())
+            if (name.isBlank() || name == code) code else name
+        } catch (e: Exception) {
+            code
+        }
+    }
+
+    private fun specialRegionName(code: String): String {
+        return when (code) {
+            "T1" -> getString(R.string.analytics_region_tor)
+            "XX" -> getString(R.string.analytics_region_unknown)
+            else -> code
+        }
+    }
+
     private fun loadData() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
@@ -350,5 +376,8 @@ class GatewayAnalyticsFragment : Fragment() {
         private const val PREFS_NAME = "gateway_dns_analytics_prefs"
         private const val KEY_TIME_RANGE = "time_range"
         private const val KEY_TOP_N = "top_n"
+
+        // Cloudflare 分析中的非 ISO 国家码
+        private val specialRegionCodes = setOf("T1", "XX")
     }
 }
