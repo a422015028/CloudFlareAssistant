@@ -5423,6 +5423,12 @@
 
     <string name="repo_pages_project_created_log">  └─ 项目创建完成</string>
 
+    <string name="repo_pages_project_create_failed_log">✗ 项目创建失败</string>
+
+    <string name="repo_pages_project_ready_log">  └─ 项目就绪（等待 %1$d 次轮询）</string>
+
+    <string name="repo_pages_project_not_ready_warn_log">  └─ 项目暂未完全就绪，继续尝试部署...</string>
+
     <string name="repo_pages_project_exists_log">◇ 项目已存在</string>
 
     <string name="repo_pages_compat_date_updated_log">  └─ 已更新兼容性日期</string>
@@ -6343,7 +6349,7 @@
 
     <string name="pages_cleanup_single_message_template">将清理项目 "%1$s" 的旧部署，保留最新 %2$d 个部署记录。\n\n此操作不可撤销，确定继续吗？</string>
 
-    <string name="pages_cleaning_deployments_message">正在清理旧部署，请稍候...</string>
+    <string name="pages_cleaning_deployments_message">正在清理旧部署，请稍候…</string>
 
     <string name="pages_cleanup_result_cleaned_template">成功清理 %1$d 个旧部署</string>
 

@@ -5467,6 +5467,12 @@
 
     <string name="repo_pages_project_created_log">  └─ Project created</string>
 
+    <string name="repo_pages_project_create_failed_log">✗ Project creation failed</string>
+
+    <string name="repo_pages_project_ready_log">  └─ Project ready (waited %1$d polls)</string>
+
+    <string name="repo_pages_project_not_ready_warn_log">  └─ Project not fully ready, continuing deployment...</string>
+
     <string name="repo_pages_project_exists_log">◇ Project already exists</string>
 
     <string name="repo_pages_compat_date_updated_log">  └─ Compatibility date updated</string>
@@ -6387,7 +6393,7 @@
 
     <string name="pages_cleanup_single_message_template">Will cleanup old deployments for "%1$s", keeping the latest %2$d deployment(s).\n\nThis cannot be undone. Continue?</string>
 
-    <string name="pages_cleaning_deployments_message">Cleaning up old deployments, please wait...</string>
+    <string name="pages_cleaning_deployments_message">Cleaning up old deployments, please wait…</string>
 
     <string name="pages_cleanup_result_cleaned_template">Successfully cleaned %1$d old deployment(s)</string>
 

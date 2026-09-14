@@ -603,8 +603,15 @@ class PagesRepository @Inject constructor(
             if (!projectExists) {
                 onLog?.invoke(appContext.getString(R.string.repo_pages_creating_project_log))
                 // 新项目：用户自定义日期 > 默认兼容日期
-                createProject(account, projectName, branch, finalCompatibilityDate)
+                val createResult = createProject(account, projectName, branch, finalCompatibilityDate)
+                if (createResult is Resource.Error) {
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_project_create_failed_log))
+                    return@safeApiCall Resource.Error(createResult.message)
+                }
                 onLog?.invoke(appContext.getString(R.string.repo_pages_project_created_log))
+                // Cloudflare Pages 项目创建采用最终一致性，upload-token 端点需数秒传播。
+                // 新建项目后轮询确认就绪，避免后续获取上传 Token 失败。
+                waitForProjectReady(account, projectName, onLog)
             } else {
                 onLog?.invoke(appContext.getString(R.string.repo_pages_project_exists_log))
                 // 已有项目：只有用户自定义日期时才更新，没有自定义则不修改
@@ -933,7 +940,54 @@ class PagesRepository @Inject constructor(
             Timber.e(e, "Error checking if project exists")  
             false  
         }  
-    }  
+    }
+
+    /**
+     * Cloudflare Pages 项目创建采用最终一致性模型：createPagesProject 返回成功后，
+     * upload-token 端点（用于签发资产上传 JWT）可能仍需数秒才能就绪。
+     * 新建项目后立即请求 upload-token 会偶发失败（已有项目则无此问题，因为状态已传播完成）。
+     *
+     * 此函数在项目创建后轮询 upload-token 端点，确认其就绪后再继续部署流程。
+     * 轮询超时不中断部署——交由后续 [JwtRefreshSession] 的重试逻辑兜底，避免改变现有失败行为。
+     *
+     * @param maxWaitMs 最长等待时间（默认 15s），覆盖 Cloudflare 传播延迟
+     * @param intervalMs 轮询间隔（默认 500ms）
+     */
+    private suspend fun waitForProjectReady(
+        account: Account,
+        projectName: String,
+        onLog: ((String) -> Unit)?,
+        maxWaitMs: Long = 15_000L,
+        intervalMs: Long = 500L,
+    ) {
+        val start = System.currentTimeMillis()
+        var attempt = 0
+        while (System.currentTimeMillis() - start < maxWaitMs) {
+            attempt++
+            val ready = try {
+                val resp = api.getPagesUploadToken(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    projectName = projectName
+                )
+                resp.isSuccessful && resp.body()?.result?.jwt != null
+            } catch (e: Exception) {
+                Timber.d("waitForProjectReady: upload-token 端点暂不可用 (尝试 $attempt): ${e.message}")
+                false
+            }
+            if (ready) {
+                if (attempt > 1) {
+                    onLog?.invoke(appContext.getString(R.string.repo_pages_project_ready_log, attempt))
+                }
+                return
+            }
+            delay(intervalMs)
+        }
+        Timber.w("waitForProjectReady: 项目 $projectName 在 ${maxWaitMs}ms 内 upload-token 未就绪，继续尝试部署")
+        onLog?.invoke(appContext.getString(R.string.repo_pages_project_not_ready_warn_log))
+    }
       
     /**
      * 单文件 .htm/.html 部署：走原有 manifest-only 流程（作为静态资产上传）

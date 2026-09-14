@@ -82,8 +82,8 @@ android {
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
-            // 资源压缩默认关闭（依赖 minify，二者保持默认即可；显式写 false 会触发 NotShrinkingResources）
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -145,9 +145,24 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/DEPENDENCIES"
             excludes += "/META-INF/LICENSE.md"
+            excludes += "/META-INF/LICENSE.txt"
             excludes += "/META-INF/NOTICE.md"
+            excludes += "/META-INF/NOTICE.txt"
             excludes += "/META-INF/INDEX.LIST"
             excludes += "/META-INF/io.netty.versions.properties"
+            excludes += "/META-INF/*.version"
+            excludes += "/META-INF/androidx/**"
+            excludes += "/META-INF/com/android/**"
+            excludes += "/META-INF/version-control-info.textproto"
+            // BouncyCastle PQC 后量子密码资源文件（应用仅用 Blake 等摘要算法，不需要 PQC）
+            excludes += "org/bouncycastle/pqc/**"
+            excludes += "org/bouncycastle/pqc/**/*.properties"
+            // BouncyCastle X.509 证书路径审核消息文件（不需要证书审核功能）
+            excludes += "org/bouncycastle/x509/CertPathReviewerMessages*"
+            // Kotlin Coroutines 调试探针（release 不需要）
+            excludes += "/DebugProbesKt.bin"
+            // AWS SDK fabric 配置文件（无用）
+            excludes += "/fabric/**"
         }
     }
 }

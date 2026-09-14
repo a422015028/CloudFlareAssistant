@@ -12,26 +12,42 @@
 -keep class javax.inject.** { *; }
 -keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
 
-# Gson
--keepattributes Signature
--keepattributes *Annotation*
+# Gson - 泛型签名、内部类、注解必须保留，否则 TypeToken 会 ClassCastException
+-keepattributes Signature, InnerClasses, EnclosingMethod, *Annotation*
+-keepattributes SourceFile, LineNumberTable
 -dontwarn sun.misc.**
 -keep class com.google.gson.** { *; }
 -keep class * implements com.google.gson.TypeAdapter
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
+# Gson TypeToken 子类（匿名类）需要保留泛型父类信息
+-keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
+-keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
 
-# Retrofit
+# Retrofit - 官方完整规则（R8 full mode 必需）
+-keepattributes Signature, InnerClasses, EnclosingMethod
 -keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-keepattributes AnnotationDefault
+# Retain service method parameters when optimizing.
 -keepclassmembers,allowshrinking,allowobfuscation interface * {
     @retrofit2.http.* <methods>;
 }
+# Ignore annotation used for build tooling.
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+# Ignore JSR 305 annotations for embedding nullability information.
 -dontwarn javax.annotation.**
+# Guarded by a NoClassDefFoundError try/catch and only used when on the classpath.
 -dontwarn kotlin.Unit
+# Top-level functions that can only be used by Kotlin.
 -dontwarn retrofit2.KotlinExtensions
 -dontwarn retrofit2.KotlinExtensions$*
+# With R8 full mode, keep interfaces with Retrofit annotations
+-if interface * { @retrofit2.http.* <methods>; }
+-keep,allowobfuscation,allowshrinking interface <1>
+# Keep Retrofit Response/Call generic info
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
+-keep,allowobfuscation,allowshrinking interface retrofit2.Call
 
 # OkHttp
 -dontwarn okhttp3.**
@@ -78,3 +94,17 @@
 -keep class * implements android.os.Parcelable {
     public static final android.os.Parcelable$Creator *;
 }
+
+# Keep all data class members (Gson reflection on fields)
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Keep all fields in model/repository/util data classes
+-keep class com.muort.upworker.core.model.** { *; }
+-keep class com.muort.upworker.core.repository.** { *; }
+-keep class com.muort.upworker.core.util.** { *; }
+
+# Retrofit - keep generic signatures for Call<T>
+-keep,allowobfuscation,allowshrinking interface retrofit2.Call
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
