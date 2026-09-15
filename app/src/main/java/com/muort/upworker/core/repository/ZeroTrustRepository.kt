@@ -850,7 +850,8 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted Gateway location: $locationId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = response.errorBody()?.string()?.take(200)
+                        ?: response.message()
                         ?: "Failed to delete location"
                     Resource.Error(errorMsg)
                 }

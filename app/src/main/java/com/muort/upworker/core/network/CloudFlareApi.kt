@@ -1615,6 +1615,8 @@ interface CloudFlareApi {
     
     /**
      * Delete Gateway Location
+     * 注意：使用 Void 而非 CloudFlareResponse<Unit>，因为该端点可能返回空 body，
+     * 导致 Gson 抛出 "Expected BEGIN_OBJECT" 解析异常（实际删除已成功）。
      */
     @DELETE("accounts/{account_id}/gateway/locations/{location_id}")
     suspend fun deleteGatewayLocation(
@@ -1623,7 +1625,7 @@ interface CloudFlareApi {
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
         @Path("location_id") locationId: String
-    ): Response<CloudFlareResponse<Unit>>
+    ): Response<Void>
     
     // ==================== Zero Trust - Devices ====================
     
