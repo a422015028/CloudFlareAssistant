@@ -19,6 +19,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "UpWorker"
+rootProject.name = "CloudFlareAssistant"
 
 include(":app")

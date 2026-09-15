@@ -21,11 +21,16 @@ build/
 
 # Local configuration file (sdk path, etc)
 local.properties
-
+.trae/
 # Android Studio files
 .idea/
 *.iml
 .DS_Store
+
+# Eclipse files
+.project
+.classpath
+.settings/
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild
