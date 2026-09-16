@@ -8,7 +8,7 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
+import timber.log.Timber
 import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
@@ -128,7 +128,7 @@ class WorkerLogsActivity : AppCompatActivity() {
         refreshBtn.setOnClickListener { refreshConnection() }
         val wssUrl = intent.getStringExtra(EXTRA_WSS_URL)
         if (wssUrl.isNullOrEmpty()) {
-            Log.e("WorkerLogs", "WSS URL is empty")
+            Timber.e("WSS URL is empty")
             showToast(getString(R.string.status_wss_url_empty))
             return
         }
@@ -179,7 +179,7 @@ class WorkerLogsActivity : AppCompatActivity() {
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
 
             override fun onOpen(webSocket: WebSocket, response: Response) {
-                Log.d("WorkerLogs", "WebSocket opened, response code: ${response.code}")
+                Timber.d("WebSocket opened, response code: ${response.code}")
                 webSocket.send("{\"filters\":[],\"debug\":false}")
                 runOnUiThread {
                     isConnected = true
@@ -202,7 +202,7 @@ class WorkerLogsActivity : AppCompatActivity() {
                         val traceItem = Gson().fromJson(text, TailTraceItem::class.java)
                         mainHandler.post { appendEventCard(traceItem, text) }
                     } catch (e: Exception) {
-                        Log.e("WorkerLogs", "Failed to parse log message: ${e.message}")
+                        Timber.e("Failed to parse log message: ${e.message}")
                     }
                 }
             }
@@ -223,7 +223,7 @@ class WorkerLogsActivity : AppCompatActivity() {
                     connectionStatusDot.background = getDrawable(R.drawable.circle_red)
                     connectionStatusText.text = getString(R.string.status_connection_failed, t.message ?: "null")
                 }
-                Log.e("WorkerLogs", "WebSocket failure: ${t.message}", t)
+                Timber.e(t, "WebSocket failure: ${t.message}")
                 scheduleReconnect()
             }
         })

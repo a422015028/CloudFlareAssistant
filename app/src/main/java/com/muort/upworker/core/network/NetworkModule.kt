@@ -1,7 +1,9 @@
 
 package com.muort.upworker.core.network
 import com.muort.upworker.core.network.LogOkHttpInterceptor
+import com.muort.upworker.core.log.LogRepository
 
+import android.util.Log
 import com.google.gson.GsonBuilder
 import com.google.gson.ToNumberPolicy
 import dagger.Module
@@ -24,7 +26,13 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor().apply {
+        // 自定义 Logger：仅当应用内 HTTP 日志开关开启时才输出到 logcat
+        val customLogger = HttpLoggingInterceptor.Logger { message ->
+            if (LogRepository.isEnabled) {
+                Log.println(Log.DEBUG, "OkHttp", message)
+            }
+        }
+        return HttpLoggingInterceptor(customLogger).apply {
             level = HttpLoggingInterceptor.Level.BODY
             // 脱敏敏感请求头，防止凭证泄露到 logcat
             arrayOf(

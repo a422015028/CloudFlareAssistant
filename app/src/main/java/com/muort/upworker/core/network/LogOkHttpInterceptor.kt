@@ -24,6 +24,11 @@ class LogOkHttpInterceptor @Inject constructor() : Interceptor {
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {
+        // 开关关闭时直接放行，避免不必要的 body 读取与字符串拼接开销
+        if (!LogRepository.isEnabled) {
+            return chain.proceed(chain.request())
+        }
+
         val request = chain.request()
         val time = java.time.ZonedDateTime.now(java.time.ZoneId.of("Asia/Shanghai"))
         val timeStr = time.format(java.time.format.DateTimeFormatter.ofPattern("yyyy HH:mm:ss z"))

@@ -108,3 +108,21 @@
 # Retrofit - keep generic signatures for Call<T>
 -keep,allowobfuscation,allowshrinking interface retrofit2.Call
 -keep,allowobfuscation,allowshrinking class retrofit2.Response
+
+# Release 版本移除非错误级别日志（保留 Log.e/Log.wtf 用于线上错误排查）
+# 仅在使用 proguard-android-optimize.txt 时生效
+-assumenosideeffects class android.util.Log {
+    public static int v(...);
+    public static int d(...);
+    public static int i(...);
+    public static int w(...);
+}
+
+# Release 版本移除非错误级别 Timber 日志调用
+-assumenosideeffects class timber.log.Timber {
+    public static void v(...);
+    public static void d(...);
+    public static void i(...);
+    public static void w(...);
+    public static void tag(java.lang.String);
+}

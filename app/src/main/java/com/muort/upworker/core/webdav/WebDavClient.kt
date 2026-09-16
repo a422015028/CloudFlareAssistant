@@ -1,8 +1,8 @@
 package com.muort.upworker.core.webdav
 
 import android.content.Context
-import android.util.Log
 import com.muort.upworker.R
+import timber.log.Timber
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,7 +21,6 @@ class WebDavClient @Inject constructor(
 ) {
     
     companion object {
-        private const val TAG = "WebDavClient"
     }
     
     private val client = OkHttpClient.Builder()
@@ -174,24 +173,24 @@ class WebDavClient @Inject constructor(
                     .build()
                 
                 val response = client.newCall(request).execute()
-                Log.d(TAG, "listFiles response: ${response.code} ${response.message}")
+                Timber.d("listFiles response: ${response.code} ${response.message}")
                 
                 if (response.isSuccessful) {
                     val responseBody = response.body?.string() ?: ""
-                    Log.d(TAG, "listFiles response body length: ${responseBody.length}")
-                    Log.d(TAG, "listFiles response body preview: ${responseBody.take(500)}")
+                    Timber.d("listFiles response body length: ${responseBody.length}")
+                    Timber.d("listFiles response body preview: ${responseBody.take(500)}")
                     
                     val fileNames = parseFileNames(responseBody)
-                    Log.d(TAG, "listFiles parsed ${fileNames.size} files: $fileNames")
+                    Timber.d("listFiles parsed ${fileNames.size} files: $fileNames")
                     
                     Result.success(fileNames)
                 } else {
                     val errorBody = response.body?.string()
-                    Log.e(TAG, "listFiles failed: HTTP ${response.code} - ${response.message}, body: $errorBody")
+                    Timber.e("listFiles failed: HTTP ${response.code} - ${response.message}, body: $errorBody")
                     Result.failure(Exception(appContext.getString(R.string.repo_webdav_list_failed_format, response.code, response.message)))
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "listFiles exception", e)
+                Timber.e(e, "listFiles exception")
                 Result.failure(e)
             }
         }
@@ -262,25 +261,25 @@ class WebDavClient @Inject constructor(
             
             for (pattern in hrefPatterns) {
                 val matches = pattern.findAll(xml)
-                Log.d(TAG, "parseFileNames pattern: $pattern, matches count: ${matches.count()}")
+                Timber.d("parseFileNames pattern: $pattern, matches count: ${matches.count()}")
                 
                 for (match in matches) {
                     var href = match.groupValues[1]
-                    Log.d(TAG, "parseFileNames found href: $href")
+                    Timber.d("parseFileNames found href: $href")
                     
                     // URL解码
                     href = java.net.URLDecoder.decode(href, "UTF-8")
-                    Log.d(TAG, "parseFileNames decoded href: $href")
+                    Timber.d("parseFileNames decoded href: $href")
                     
                     // 提取文件名（最后一个/后的内容）
                     val fileName = href.trimEnd('/').substringAfterLast('/')
-                    Log.d(TAG, "parseFileNames extracted fileName: $fileName")
+                    Timber.d("parseFileNames extracted fileName: $fileName")
                     
                     // 检查是否是备份文件（支持 .json 和 .enc）
                     if (fileName.isNotEmpty() && 
                         fileName.startsWith("cloudflare_backup_") && 
                         (fileName.endsWith(".json") || fileName.endsWith(".enc"))) {
-                        Log.d(TAG, "parseFileNames matched backup file: $fileName")
+                        Timber.d("parseFileNames matched backup file: $fileName")
                         fileNames.add(fileName)
                     }
                 }
@@ -292,10 +291,9 @@ class WebDavClient @Inject constructor(
             }
         } catch (e: Exception) {
             // 解析失败，记录但返回空列表
-            Log.e(TAG, "parseFileNames exception", e)
-            e.printStackTrace()
+            Timber.e(e, "parseFileNames exception")
         }
-        Log.d(TAG, "parseFileNames final result: $fileNames")
+        Timber.d("parseFileNames final result: $fileNames")
         return fileNames.distinct()
     }
 }
