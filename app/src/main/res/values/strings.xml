@@ -345,7 +345,7 @@
     <string name="d1_delete_table">删除表</string>
     <string name="d1_enter_sql_hint">输入 SQL 语句</string>
     <string name="d1_execute_sql">执行 SQL</string>
-    <string name="d1_field_count">字段数</string>
+    <string name="d1_field_count">字段数: %1$d</string>
     <string name="d1_no_binding_config">暂无 D1 绑定配置</string>
     <string name="d1_no_databases">暂无数据库\n点击 + 创建</string>
     <string name="d1_please_select_database">请先选择数据库</string>

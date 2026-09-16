@@ -138,7 +138,8 @@
                 android:layout_weight="1"
                 android:orientation="horizontal"
                 android:gravity="end"
-                android:paddingStart="6dp">
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp">
 
                 <Button
                     android:id="@+id/filterAllBtn"

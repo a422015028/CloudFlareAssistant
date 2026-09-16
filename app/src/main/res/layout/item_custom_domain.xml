@@ -11,13 +11,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:padding="12dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -55,7 +50,5 @@
                 android:src="@android:drawable/ic_menu_more" />
 
         </LinearLayout>
-
-    </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

@@ -41,6 +41,7 @@
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:paddingStart="40dp"
+                android:paddingEnd="40dp"
                 android:layout_marginBottom="4dp" />
 
             <RadioButton
@@ -58,7 +59,8 @@
                 android:text="@string/snippet_custom_expression_desc"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
-                android:paddingStart="40dp" />
+                android:paddingStart="40dp"
+                android:paddingEnd="40dp" />
         </RadioGroup>
 
         <!-- ============ 表达式构建器 ============ -->

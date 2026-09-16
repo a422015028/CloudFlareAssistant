@@ -56,7 +56,7 @@ abstract class BaseZoneFeatureFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.emptyStateText.setText(emptyTextResId)
+        binding.emptyStateLayout.setText(emptyTextResId)
         binding.addFab.visibility = if (showAddFab) View.VISIBLE else View.GONE
         binding.retryButton.setOnClickListener { onRetry() }
         binding.addFab.setOnClickListener { onAddClicked() }

@@ -112,8 +112,11 @@ class ScriptEditorFragment : Fragment() {
                 false
             }
             
-            setOnTouchListener { _, event ->
+            setOnTouchListener { v, event ->
                 handleTouchEvent(event)
+                if (event.action == android.view.MotionEvent.ACTION_UP) {
+                    v.performClick()
+                }
                 false
             }
             

@@ -2,17 +2,6 @@
 <issues format="6" by="lint 9.2.1" type="baseline" client="gradle" dependencies="true" name="AGP (9.2.1)" variant="all" version="9.2.1">
 
     <issue
-        id="ScopedStorage"
-        message="The Google Play store has a policy that limits usage of MANAGE_EXTERNAL_STORAGE"
-        errorLine1="    &lt;uses-permission android:name=&quot;android.permission.MANAGE_EXTERNAL_STORAGE&quot; />"
-        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/AndroidManifest.xml"
-            line="11"
-            column="36"/>
-    </issue>
-
-    <issue
         id="DiscouragedApi"
         message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(&quot;bar&quot;, &quot;foo&quot;, null)`)."
         errorLine1="            resources.getIdentifier(&quot;pagesSelectionActionsLayout&quot;, &quot;id&quot;, requireContext().packageName)"
@@ -219,38 +208,6 @@
             file="src/main/java/com/muort/upworker/feature/worker/WorkerFragment.kt"
             line="2609"
             column="23"/>
-    </issue>
-
-    <issue
-        id="StringFormatInvalid"
-        message="Format string &apos;`d1_field_count`&apos; is not a valid format string so it should not be passed to `String.format`"
-        errorLine1="                columnsText.text = itemView.context.getString(R.string.d1_field_count, table.columns?.size ?: 0)"
-        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/muort/upworker/feature/d1/D1ManagerFragment.kt"
-            line="485"
-            column="36"/>
-        <location
-            file="src/main/res/values/strings.xml"
-            line="348"
-            column="5"
-            message="This definition does not require arguments"/>
-    </issue>
-
-    <issue
-        id="StringFormatInvalid"
-        message="Format string &apos;`d1_field_count`&apos; is not a valid format string so it should not be passed to `String.format`"
-        errorLine1="                columnsText.text = itemView.context.getString(R.string.d1_field_count, table.columns?.size ?: 0)"
-        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/com/muort/upworker/feature/d1/D1ManagerFragment.kt"
-            line="485"
-            column="36"/>
-        <location
-            file="src/main/res/values/strings.xml"
-            line="348"
-            column="5"
-            message="This definition does not require arguments"/>
     </issue>
 
     <issue
@@ -843,7 +800,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="84"
+            line="85"
             column="18"/>
     </issue>
 
@@ -854,7 +811,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="125"
+            line="127"
             column="18"/>
     </issue>
 
@@ -865,7 +822,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="166"
+            line="169"
             column="18"/>
     </issue>
 
@@ -876,7 +833,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="207"
+            line="211"
             column="18"/>
     </issue>
 
@@ -887,7 +844,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="248"
+            line="253"
             column="18"/>
     </issue>
 
@@ -898,7 +855,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="289"
+            line="295"
             column="18"/>
     </issue>
 
@@ -909,7 +866,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="330"
+            line="337"
             column="18"/>
     </issue>
 
@@ -920,7 +877,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="371"
+            line="379"
             column="18"/>
     </issue>
 
@@ -931,7 +888,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="412"
+            line="421"
             column="18"/>
     </issue>
 
@@ -942,7 +899,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="452"
+            line="463"
             column="18"/>
     </issue>
 
@@ -953,19 +910,8 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_home.xml"
-            line="493"
+            line="505"
             column="18"/>
-    </issue>
-
-    <issue
-        id="UseCompoundDrawables"
-        message="This tag and its children can be replaced by one `&lt;TextView/>` and a compound drawable"
-        errorLine1="    &lt;LinearLayout"
-        errorLine2="     ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/fragment_zone_feature.xml"
-            line="9"
-            column="6"/>
     </issue>
 
     <issue
@@ -1080,52 +1026,8 @@
 
     <issue
         id="Overdraw"
-        message="Possible overdraw: Root element paints background `?android:attr/colorBackground` with a theme that also paints a background (inferred theme is `@style/AppTheme`)"
-        errorLine1="    android:background=&quot;?android:attr/colorBackground&quot;>"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/activity_log.xml"
-            line="5"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="Overdraw"
-        message="Possible overdraw: Root element paints background `?android:attr/colorBackground` with a theme that also paints a background (inferred theme is `@style/AppTheme`)"
-        errorLine1="    android:background=&quot;?android:attr/colorBackground&quot;"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/activity_pages_logs.xml"
-            line="7"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="Overdraw"
-        message="Possible overdraw: Root element paints background `?android:attr/colorBackground` with a theme that also paints a background (inferred theme is `@style/AppTheme`)"
-        errorLine1="    android:background=&quot;?android:attr/colorBackground&quot;"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/activity_token_manager.xml"
-            line="7"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="Overdraw"
-        message="Possible overdraw: Root element paints background `?android:attr/colorBackground` with a theme that also paints a background (inferred theme is `@style/AppTheme`)"
-        errorLine1="    android:background=&quot;?android:attr/colorBackground&quot;"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/activity_worker_logs.xml"
-            line="7"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="Overdraw"
         message="Possible overdraw: Root element paints background `?attr/colorSurface` with a theme that also paints a background (inferred theme is `@style/AppTheme`)"
-        errorLine1="    android:background=&quot;?attr/colorSurface&quot;>"
+        errorLine1="    android:background=&quot;?attr/colorSurface&quot;"
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_zone_analytics.xml"
@@ -1184,19 +1086,8 @@
         errorLine2="         ~~~~~~~~~~">
         <location
             file="src/main/res/layout/activity_pages_logs.xml"
-            line="104"
+            line="103"
             column="10"/>
-    </issue>
-
-    <issue
-        id="UselessParent"
-        message="This `ScrollView` layout or its `FrameLayout` parent is unnecessary; transfer the `background` attribute to the other view"
-        errorLine1="    &lt;ScrollView"
-        errorLine2="     ~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/fragment_zone_analytics.xml"
-            line="7"
-            column="6"/>
     </issue>
 
     <issue
@@ -1208,72 +1099,6 @@
             file="src/main/res/layout/item_account.xml"
             line="16"
             column="10"/>
-    </issue>
-
-    <issue
-        id="UselessParent"
-        message="This `LinearLayout` layout or its `LinearLayout` parent is unnecessary; transfer the `background` attribute to the other view"
-        errorLine1="    &lt;LinearLayout"
-        errorLine2="     ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_build_trigger.xml"
-            line="11"
-            column="6"/>
-    </issue>
-
-    <issue
-        id="UselessParent"
-        message="This `LinearLayout` layout or its `LinearLayout` parent is unnecessary"
-        errorLine1="        &lt;LinearLayout"
-        errorLine2="         ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_custom_domain.xml"
-            line="17"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="UselessParent"
-        message="This `LinearLayout` layout or its `LinearLayout` parent is unnecessary"
-        errorLine1="            &lt;LinearLayout"
-        errorLine2="             ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_gateway_list.xml"
-            line="25"
-            column="14"/>
-    </issue>
-
-    <issue
-        id="UselessParent"
-        message="This `LinearLayout` layout or its `LinearLayout` parent is unnecessary; transfer the `background` attribute to the other view"
-        errorLine1="    &lt;LinearLayout"
-        errorLine2="     ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_pages_deployment.xml"
-            line="11"
-            column="6"/>
-    </issue>
-
-    <issue
-        id="UselessParent"
-        message="This `LinearLayout` layout or its `LinearLayout` parent is unnecessary"
-        errorLine1="        &lt;LinearLayout"
-        errorLine2="         ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_route.xml"
-            line="17"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="UselessParent"
-        message="This `LinearLayout` layout or its `LinearLayout` parent is unnecessary; transfer the `background` attribute to the other view"
-        errorLine1="    &lt;LinearLayout"
-        errorLine2="     ~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_worker_history.xml"
-            line="11"
-            column="6"/>
     </issue>
 
     <issue
@@ -11110,28 +10935,6 @@
     </issue>
 
     <issue
-        id="ClickableViewAccessibility"
-        message="`onTouch` lambda should call `View#performClick` when a click is detected"
-        errorLine1="            setOnTouchListener { _, event ->"
-        errorLine2="                               ^">
-        <location
-            file="src/main/java/com/muort/upworker/feature/scripteditor/ScriptEditorFragment.kt"
-            line="115"
-            column="32"/>
-    </issue>
-
-    <issue
-        id="ClickableViewAccessibility"
-        message="`onTouch` lambda should call `View#performClick` when a click is detected"
-        errorLine1="            setOnTouchListener { _, event ->"
-        errorLine2="                               ^">
-        <location
-            file="src/main/java/com/muort/upworker/feature/zone/SnippetEditorFragment.kt"
-            line="125"
-            column="32"/>
-    </issue>
-
-    <issue
         id="SetTextI18n"
         message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
         errorLine1="            b.targetReadonly.text = &quot;$targetLabel · $value&quot;"
@@ -12040,7 +11843,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_gateway_rules.xml"
-            line="156"
+            line="157"
             column="21"/>
     </issue>
 
@@ -12051,7 +11854,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_gateway_rules.xml"
-            line="165"
+            line="166"
             column="21"/>
     </issue>
 
@@ -12062,7 +11865,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_gateway_rules.xml"
-            line="174"
+            line="175"
             column="21"/>
     </issue>
 
@@ -12128,7 +11931,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/item_custom_domain.xml"
-            line="32"
+            line="27"
             column="21"/>
     </issue>
 
@@ -12139,7 +11942,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/item_custom_domain.xml"
-            line="42"
+            line="37"
             column="21"/>
     </issue>
 
@@ -12271,7 +12074,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/item_gateway_list.xml"
-            line="49"
+            line="43"
             column="21"/>
     </issue>
 
@@ -12282,7 +12085,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/item_gateway_list.xml"
-            line="84"
+            line="76"
             column="13"/>
     </issue>
 
@@ -12403,7 +12206,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/item_pages_deployment.xml"
-            line="51"
+            line="46"
             column="21"/>
     </issue>
 
@@ -12603,138 +12406,6 @@
             file="src/main/res/layout/item_worker_script.xml"
             line="115"
             column="17"/>
-    </issue>
-
-    <issue
-        id="RtlSymmetry"
-        message="When you define `paddingStart` you should probably also define `paddingEnd` for right-to-left symmetry"
-        errorLine1="                        android:paddingStart=&quot;8dp&quot;>"
-        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/activity_main.xml"
-            line="54"
-            column="25"/>
-    </issue>
-
-    <issue
-        id="RtlSymmetry"
-        message="When you define `paddingEnd` you should probably also define `paddingStart` for right-to-left symmetry"
-        errorLine1="                    android:paddingEnd=&quot;8dp&quot;>"
-        errorLine2="                    ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/card_dashboard.xml"
-            line="631"
-            column="21"/>
-    </issue>
-
-    <issue
-        id="RtlSymmetry"
-        message="When you define `paddingStart` you should probably also define `paddingEnd` for right-to-left symmetry"
-        errorLine1="                    android:paddingStart=&quot;8dp&quot;>"
-        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/card_dashboard.xml"
-            line="655"
-            column="21"/>
-    </issue>
-
-    <issue
-        id="RtlSymmetry"
-        message="When you define `paddingStart` you should probably also define `paddingEnd` for right-to-left symmetry"
-        errorLine1="                android:paddingStart=&quot;40dp&quot;"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/dialog_snippet_rule.xml"
-            line="43"
-            column="17"/>
-    </issue>
-
-    <issue
-        id="RtlSymmetry"
-        message="When you define `paddingStart` you should probably also define `paddingEnd` for right-to-left symmetry"
-        errorLine1="                android:paddingStart=&quot;40dp&quot; />"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/dialog_snippet_rule.xml"
-            line="61"
-            column="17"/>
-    </issue>
-
-    <issue
-        id="RtlSymmetry"
-        message="When you define `paddingStart` you should probably also define `paddingEnd` for right-to-left symmetry"
-        errorLine1="                android:paddingStart=&quot;6dp&quot;>"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/fragment_gateway_rules.xml"
-            line="141"
-            column="17"/>
-    </issue>
-
-    <issue
-        id="RtlSymmetry"
-        message="When you define `paddingRight` you should probably also define `paddingLeft` for right-to-left symmetry"
-        errorLine1="    android:paddingRight=&quot;4dp&quot;"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/spinner_item.xml"
-            line="9"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="RtlHardcoded"
-        message="Use &quot;`end`&quot; instead of &quot;`right`&quot; to ensure correct behavior in right-to-left locales"
-        errorLine1="    android:gravity=&quot;right&quot;"
-        errorLine2="                     ~~~~~">
-        <location
-            file="src/main/res/layout/spinner_item.xml"
-            line="8"
-            column="22"/>
-    </issue>
-
-    <issue
-        id="RtlHardcoded"
-        message="Consider replacing `android:paddingRight` with `android:paddingEnd=&quot;4dp&quot;` to better support right-to-left layouts"
-        errorLine1="    android:paddingRight=&quot;4dp&quot;"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/spinner_item.xml"
-            line="9"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="RtlHardcoded"
-        message="Use &quot;`start`&quot; instead of &quot;`left`&quot; to ensure correct behavior in right-to-left locales"
-        errorLine1="    android:gravity=&quot;left|center_vertical&quot;"
-        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/spinner_item_left.xml"
-            line="8"
-            column="22"/>
-    </issue>
-
-    <issue
-        id="RtlHardcoded"
-        message="Consider replacing `android:paddingLeft` with `android:paddingStart=&quot;12dp&quot;` to better support right-to-left layouts"
-        errorLine1="    android:paddingLeft=&quot;12dp&quot;"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/spinner_item_left.xml"
-            line="9"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="RtlHardcoded"
-        message="Consider replacing `android:paddingRight` with `android:paddingEnd=&quot;4dp&quot;` to better support right-to-left layouts"
-        errorLine1="    android:paddingRight=&quot;4dp&quot;"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/spinner_item_left.xml"
-            line="10"
-            column="5"/>
     </issue>
 
 </issues>

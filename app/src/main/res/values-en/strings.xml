@@ -354,7 +354,7 @@
     <string name="d1_delete_table">Delete Table</string>
     <string name="d1_enter_sql_hint">Enter SQL statement</string>
     <string name="d1_execute_sql">Execute SQL</string>
-    <string name="d1_field_count">Field Count</string>
+    <string name="d1_field_count">Fields: %1$d</string>
     <string name="d1_no_binding_config">No D1 binding configured yet</string>
     <string name="d1_no_databases">No databases yet\nTap + to create</string>
     <string name="d1_please_select_database">Please select a database first</string>

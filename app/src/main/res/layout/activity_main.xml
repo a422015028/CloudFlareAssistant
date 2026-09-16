@@ -51,7 +51,8 @@
                         android:layout_weight="1"
                         android:orientation="vertical"
                         android:gravity="start"
-                        android:paddingStart="8dp">
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp">
 
                         <TextView
                             android:id="@+id/currentAccountText"
