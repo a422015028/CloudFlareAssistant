@@ -55,7 +55,7 @@ class PagesRepository @Inject constructor(
                 } else {  
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                         ?: response.message()  
-                    Resource.Error("Failed to list projects: $errorMsg")  
+                    Resource.Error(appContext.getString(R.string.repo_pages_project_list_failed_format, errorMsg ?: ""))  
                 }  
             }  
         }  
@@ -186,10 +186,10 @@ class PagesRepository @Inject constructor(
             )
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let { Resource.Success(it) }
-                    ?: Resource.Error("Asset config updated but no result returned")
+                    ?: Resource.Error(appContext.getString(R.string.repo_pages_asset_config_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
-                Resource.Error("Failed to update asset config: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_pages_asset_config_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -226,10 +226,10 @@ class PagesRepository @Inject constructor(
             )
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let { Resource.Success(it) }
-                    ?: Resource.Error("Durable Objects bindings updated but no result returned")
+                    ?: Resource.Error(appContext.getString(R.string.repo_pages_durable_objects_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
-                Resource.Error("Failed to update Durable Objects bindings: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_pages_durable_objects_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -266,10 +266,10 @@ class PagesRepository @Inject constructor(
             )
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let { Resource.Success(it) }
-                    ?: Resource.Error("Service bindings updated but no result returned")
+                    ?: Resource.Error(appContext.getString(R.string.repo_pages_service_bindings_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
-                Resource.Error("Failed to update service bindings: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_pages_update_service_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -324,11 +324,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 response.body()?.result?.let {  
                     Resource.Success(it)  
-                } ?: Resource.Error("Project created but no result returned")  
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_project_create_no_result))  
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to create project: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_project_create_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -351,7 +351,7 @@ class PagesRepository @Inject constructor(
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to delete project: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_project_delete_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -372,11 +372,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 response.body()?.result?.let {  
                     Resource.Success(it)  
-                } ?: Resource.Error("Project not found")  
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_project_not_found))  
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to get project: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_project_detail_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -399,7 +399,7 @@ class PagesRepository @Inject constructor(
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to list deployments: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_deployments_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -422,11 +422,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 response.body()?.result?.let {  
                     Resource.Success(it)  
-                } ?: Resource.Error("Deployment retried but no result returned")  
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_retry_deployment_no_result))  
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to retry deployment: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_redeploy_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -451,7 +451,7 @@ class PagesRepository @Inject constructor(
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to delete deployment: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_delete_deployment_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -474,11 +474,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 response.body()?.result?.let {  
                     Resource.Success(it)  
-                } ?: Resource.Error("Deployment rolled back but no result returned")  
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_rollback_no_result))  
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to rollback deployment: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_rollback_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -501,11 +501,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 response.body()?.result?.let {  
                     Resource.Success(it)  
-                } ?: Resource.Error("Logs fetched but no result returned")  
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_logs_no_result))  
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to get deployment logs: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_pages_logs_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -2387,11 +2387,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 response.body()?.result?.let {  
                     Resource.Success(it)  
-                } ?: Resource.Error("Variables updated but no result returned")  
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_variables_no_result))  
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to update variables: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_update_env_vars_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -2429,11 +2429,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 response.body()?.result?.let {  
                     Resource.Success(it)  
-                } ?: Resource.Error("KV bindings updated but no result returned")  
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_kv_bindings_no_result))  
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to update KV bindings: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_update_kv_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -2471,11 +2471,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 response.body()?.result?.let {  
                     Resource.Success(it)  
-                } ?: Resource.Error("R2 bindings updated but no result returned")  
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_r2_bindings_no_result))  
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to update R2 bindings: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_update_r2_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -2513,11 +2513,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 response.body()?.result?.let {  
                     Resource.Success(it)  
-                } ?: Resource.Error("D1 bindings updated but no result returned")  
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_d1_bindings_no_result))  
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to update D1 bindings: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_update_d1_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -2542,7 +2542,7 @@ class PagesRepository @Inject constructor(
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to list domains: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_domains_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -2565,11 +2565,11 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 response.body()?.result?.let {  
                     Resource.Success(it)  
-                } ?: Resource.Error("Domain added but no result returned")  
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_add_domain_no_result))  
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to add domain: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_custom_domain_failed_format, errorMsg ?: ""))  
             }  
         }  
     }  
@@ -2594,7 +2594,7 @@ class PagesRepository @Inject constructor(
             } else {  
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message   
                     ?: response.message()  
-                Resource.Error("Failed to delete domain: $errorMsg")  
+                Resource.Error(appContext.getString(R.string.repo_pages_custom_domain_failed_format, errorMsg ?: ""))  
             }  
         }  
     }

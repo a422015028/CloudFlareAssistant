@@ -46,7 +46,7 @@ class R2Repository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error("Failed to list buckets: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_r2_list_buckets_failed_format, errorMsg ?: ""))
                 }
             }
         }
@@ -71,11 +71,11 @@ class R2Repository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Bucket created but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_r2_create_bucket_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to create bucket: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_r2_create_bucket_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -98,7 +98,7 @@ class R2Repository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to delete bucket: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_r2_delete_bucket_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -237,7 +237,7 @@ class R2Repository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to list custom domains: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_r2_list_custom_domains_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -274,7 +274,7 @@ class R2Repository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to create custom domain: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_r2_create_custom_domain_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -299,7 +299,7 @@ class R2Repository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to delete custom domain: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_r2_delete_custom_domain_failed_format, errorMsg ?: ""))
             }
         }
     }

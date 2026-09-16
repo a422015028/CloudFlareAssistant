@@ -3,6 +3,7 @@ package com.muort.upworker
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.muort.upworker.core.AppContextHolder
 import com.muort.upworker.core.log.LogRepository
 import com.muort.upworker.core.util.LocaleHelper
 import com.muort.upworker.core.util.ThemeHelper
@@ -19,6 +20,9 @@ class CloudFlareApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // 初始化全局 Context 持有者（供 ApiUtils 等无注入的工具函数使用）
+        AppContextHolder.init(this)
 
         // 初始化 HTTP 日志仓库（加载应用内日志开关状态）
         LogRepository.init(this)

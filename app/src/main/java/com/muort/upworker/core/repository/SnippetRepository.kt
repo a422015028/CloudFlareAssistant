@@ -84,7 +84,7 @@ class SnippetRepository @Inject constructor(
                         Resource.Success(body.string())
                     }
                 } else {
-                    Resource.Error("HTTP ${resp.code()}: ${resp.message()}")
+                    Resource.Error(appContext.getString(R.string.repo_generic_http_error_format, resp.code(), resp.message()))
                 }
             }
         }

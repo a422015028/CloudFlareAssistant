@@ -73,7 +73,7 @@ class AnalyticsRepository @Inject constructor(
                     if (analyticsResponse?.errors?.isNotEmpty() == true) {
                         val errorMsg = analyticsResponse.errors.joinToString(", ") { it.message }
                         Timber.e("GraphQL errors: $errorMsg")
-                        return@safeApiCall Resource.Error("Analytics query failed: $errorMsg")
+                        return@safeApiCall Resource.Error(appContext.getString(R.string.repo_analytics_query_failed_format, errorMsg))
                     }
                     
                     val metrics = parseAnalyticsData(analyticsResponse?.data)
@@ -82,7 +82,7 @@ class AnalyticsRepository @Inject constructor(
                 } else {
                     val errorMsg = response.message()
                     Timber.e("Failed to fetch analytics: $errorMsg")
-                    Resource.Error("Failed to fetch analytics: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_analytics_fetch_failed_format, errorMsg))
                 }
             }
         }

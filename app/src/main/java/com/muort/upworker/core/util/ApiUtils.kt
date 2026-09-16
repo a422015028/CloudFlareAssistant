@@ -1,5 +1,7 @@
 package com.muort.upworker.core.util
 
+import com.muort.upworker.R
+import com.muort.upworker.core.AppContextHolder
 import com.muort.upworker.core.model.Resource
 import timber.log.Timber
 import java.io.IOException
@@ -13,13 +15,19 @@ suspend fun <T> safeApiCall(apiCall: suspend () -> Resource<T>): Resource<T> {
         apiCall()
     } catch (e: SocketTimeoutException) {
         Timber.e(e, "Network timeout")
-        Resource.Error("Network timeout. Please check your connection.", e)
+        Resource.Error(AppContextHolder.get().getString(R.string.repo_generic_timeout), e)
     } catch (e: IOException) {
         Timber.e(e, "Network error")
-        Resource.Error("Network error. Please check your connection.", e)
+        Resource.Error(AppContextHolder.get().getString(R.string.repo_generic_network_error), e)
     } catch (e: Exception) {
         Timber.e(e, "Unexpected error")
-        Resource.Error("An unexpected error occurred: ${e.message}", e)
+        Resource.Error(
+            AppContextHolder.get().getString(
+                R.string.repo_generic_unexpected_error_format,
+                e.message ?: ""
+            ),
+            e
+        )
     }
 }
 

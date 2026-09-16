@@ -1,6 +1,7 @@
 package com.muort.upworker.core.repository
 
 import android.content.Context
+import com.muort.upworker.R
 import com.google.gson.Gson
 import com.muort.upworker.core.model.Account
 import com.muort.upworker.core.model.CatalogBinding
@@ -175,12 +176,12 @@ class TemplateDeployRepository @Inject constructor(
             }
             if (missingRequired.isNotEmpty()) {
                 val names = missingRequired.joinToString(", ") { it.title ?: it.name }
-                return@withContext Resource.Error("以下必填项不能为空: $names")
+                return@withContext Resource.Error(appContext.getString(R.string.repo_template_required_fields_empty_format, names))
             }
 
             val sourceKind = overrideSourceKind ?: template.sourceKind ?: "raw"
             val sourceUrl = overrideSourceUrl ?: template.sourceUrl
-                ?: return@withContext Resource.Error("模板缺少源码地址")
+                ?: return@withContext Resource.Error(appContext.getString(R.string.repo_template_missing_source_url))
             val mainModule = overrideMainModule ?: template.mainModule
             // release 和 repo-archive 都是 ZIP 多文件格式，需要解压后收集模块
             val isMultiFile = sourceKind == "release" || sourceKind == "repo-archive"
@@ -189,7 +190,7 @@ class TemplateDeployRepository @Inject constructor(
             val moduleFiles = if (isMultiFile) {
                 // release 类型：下载 ZIP → 解压 → 收集所有模块文件
                 val zipFile = downloadTemplateArchive(template, sourceUrl)
-                    ?: return@withContext Resource.Error("Failed to download template archive")
+                    ?: return@withContext Resource.Error(appContext.getString(R.string.repo_template_download_archive_failed))
                 tempFilesToClean.add(zipFile)
                 val tempDir = File(appContext.cacheDir, "template_${template.templateId}_unzipped_${System.currentTimeMillis()}")
                 tempDir.mkdirs()
@@ -211,7 +212,7 @@ class TemplateDeployRepository @Inject constructor(
             } else {
                 // raw 类型：单文件
                 val scriptFile = downloadTemplateScript(template, sourceUrl)
-                    ?: return@withContext Resource.Error("Failed to download template script")
+                    ?: return@withContext Resource.Error(appContext.getString(R.string.repo_template_download_script_failed))
                 tempFilesToClean.add(scriptFile)
                 mapOf(scriptFile.name to scriptFile)
             }
@@ -315,7 +316,7 @@ class TemplateDeployRepository @Inject constructor(
             if (uploadResult !is Resource.Success) {
                 val errorMsg = (uploadResult as? Resource.Error)?.message ?: "Upload failed"
                 rollbackResources(account, rollbackSteps, createdResources)
-                return@withContext Resource.Error("上传失败: $errorMsg")
+                return@withContext Resource.Error(appContext.getString(R.string.repo_template_upload_failed_format, errorMsg))
             }
 
             Timber.d("[TemplateDeploy] 脚本上传成功，环境变量已随 metadata 一并设置")
@@ -366,7 +367,7 @@ class TemplateDeployRepository @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e, "[TemplateDeploy] 部署异常")
             rollbackResources(account, rollbackSteps, createdResources)
-            Resource.Error("部署失败: ${e.message}")
+            Resource.Error(appContext.getString(R.string.repo_template_deploy_failed_format, e.message ?: ""))
         } finally {
             // 清理所有临时文件/目录（无论成功失败）
             for (file in tempFilesToClean) {
@@ -919,16 +920,16 @@ class TemplateDeployRepository @Inject constructor(
                 }
             if (requiredMissing.isNotEmpty()) {
                 val names = requiredMissing.joinToString("、") { it.title ?: it.name }
-                return@withContext Resource.Error("以下必填变量未填写：$names")
+                return@withContext Resource.Error(appContext.getString(R.string.repo_template_required_vars_empty_format, names))
             }
 
             // ====== Step 1: 下载 Pages 源码 ======
             val sourceUrl = template.pagesSourceUrl ?: template.sourceUrl
-                ?: return@withContext Resource.Error("模板缺少 Pages 源码地址")
+                ?: return@withContext Resource.Error(appContext.getString(R.string.repo_template_missing_pages_source_url))
             val sourceKind = template.pagesSourceKind ?: template.sourceKind
 
             val sourceFile = downloadPagesArchive(template, sourceUrl, sourceKind)
-                ?: return@withContext Resource.Error("下载 Pages 模板失败")
+                ?: return@withContext Resource.Error(appContext.getString(R.string.repo_template_download_pages_failed))
             tempFilesToClean.add(sourceFile)
 
             // ====== Step 2: 资源解析（KV / D1 / R2） ======
@@ -971,7 +972,7 @@ class TemplateDeployRepository @Inject constructor(
                     }
                 } catch (e: Exception) {
                     Timber.e(e, "[TemplateDeploy] 解析绑定失败: ${b.name}")
-                    return@withContext Resource.Error("解析绑定 ${b.title ?: b.name} 失败: ${e.message}")
+                    return@withContext Resource.Error(appContext.getString(R.string.repo_template_parse_binding_failed_format, b.title ?: b.name, e.message ?: ""))
                 }
             }
 
@@ -1097,15 +1098,15 @@ class TemplateDeployRepository @Inject constructor(
                     )
                 }
                 is Resource.Error -> {
-                    Resource.Error("Pages 部署失败: ${deployResult.message}")
+                    Resource.Error(appContext.getString(R.string.repo_template_pages_deploy_failed_format, deployResult.message ?: ""))
                 }
                 is Resource.Loading -> {
-                    Resource.Error("Pages 部署状态异常")
+                    Resource.Error(appContext.getString(R.string.repo_template_pages_deploy_abnormal))
                 }
             }
         } catch (e: Exception) {
             Timber.e(e, "[TemplateDeploy] Pages 部署异常")
-            Resource.Error("部署失败: ${e.message}")
+            Resource.Error(appContext.getString(R.string.repo_template_deploy_failed_format, e.message ?: ""))
         } finally {
             // ====== 回滚：部署失败时执行回滚步骤 ======
             if (!deploymentSucceeded && rollbackSteps.isNotEmpty()) {
@@ -1228,11 +1229,11 @@ class TemplateDeployRepository @Inject constructor(
                     )
                 )
             } else {
-                Resource.Error("Hybrid 部署全部失败: ${warnings.joinToString("; ")}")
+                Resource.Error(appContext.getString(R.string.repo_template_hybrid_deploy_all_failed_format, warnings.joinToString("; ")))
             }
         } catch (e: Exception) {
             Timber.e(e, "[TemplateDeploy] Hybrid 部署异常")
-            Resource.Error("部署失败: ${e.message}")
+            Resource.Error(appContext.getString(R.string.repo_template_deploy_failed_format, e.message ?: ""))
         }
     }
 

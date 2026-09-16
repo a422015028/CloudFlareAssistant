@@ -1,5 +1,7 @@
 package com.muort.upworker.core.repository
 
+import com.muort.upworker.R
+import com.muort.upworker.core.AppContextHolder
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
@@ -45,7 +47,7 @@ class D1Repository @Inject constructor(
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message
                         ?: response.message()
                     Timber.e("D1Repository: HTTP error. Code: ${response.code()}, Message: $errorMsg")
-                    Resource.Error("HTTP ${response.code()}: $errorMsg")
+                    Resource.Error(AppContextHolder.get().getString(R.string.repo_generic_http_error_format, response.code(), errorMsg ?: ""))
                 }
             }
         }
@@ -67,11 +69,11 @@ class D1Repository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Database created but no result returned")
+                } ?: Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_create_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error("Failed to create D1 database: $errorMsg")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_create_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -94,7 +96,7 @@ class D1Repository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error("Failed to delete D1 database: $errorMsg")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_delete_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -149,10 +151,10 @@ class D1Repository @Inject constructor(
                     Resource.Success(d1Tables)
                 } else {
                     val errorMsg = firstResult?.get("error") as? String ?: response.message()
-                    Resource.Error("Failed to list tables: $errorMsg")
+                    Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_list_tables_failed_format, errorMsg ?: ""))
                 }
             } else {
-                Resource.Error("Failed to list tables: ${response.message()}")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_list_tables_failed_format, response.message()))
             }
         }
     }
@@ -189,10 +191,10 @@ class D1Repository @Inject constructor(
                     Resource.Success(d1Result)
                 } else {
                     val errorMsg = body["error"] as? String ?: response.message()
-                    Resource.Error("Failed to execute query: $errorMsg")
+                    Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_execute_query_failed_format, errorMsg ?: ""))
                 }
             } else {
-                Resource.Error("Failed to execute query: ${response.message()}")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_execute_query_failed_format, response.message()))
             }
         }
     }
@@ -221,7 +223,7 @@ class D1Repository @Inject constructor(
                 Resource.Success(Unit)
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
-                Resource.Error("Failed to import D1 database: $errorMsg")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_import_failed_format, errorMsg ?: ""))
             }
         }
     }

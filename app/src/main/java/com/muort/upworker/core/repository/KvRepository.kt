@@ -1,5 +1,7 @@
 package com.muort.upworker.core.repository
 
+import com.muort.upworker.R
+import com.muort.upworker.core.AppContextHolder
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
@@ -32,7 +34,7 @@ class KvRepository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error("Failed to list namespaces: $errorMsg")
+                    Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_list_namespaces_failed_format, errorMsg ?: ""))
                 }
             }
         }
@@ -53,11 +55,11 @@ class KvRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Namespace created but no result returned")
+                } ?: Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_create_namespace_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to create namespace: $errorMsg")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_create_namespace_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -80,7 +82,7 @@ class KvRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to delete namespace: $errorMsg")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_delete_namespace_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -103,7 +105,7 @@ class KvRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to list keys: $errorMsg")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_list_keys_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -132,7 +134,7 @@ class KvRepository @Inject constructor(
                 }
             } else {
                 val errorMsg = response.errorBody()?.string() ?: response.message()
-                Resource.Error("Failed to get value: $errorMsg")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_get_value_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -160,7 +162,7 @@ class KvRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to put value: $errorMsg")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_put_value_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -185,7 +187,7 @@ class KvRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to delete value: $errorMsg")
+                Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_delete_value_failed_format, errorMsg ?: ""))
             }
         }
     }

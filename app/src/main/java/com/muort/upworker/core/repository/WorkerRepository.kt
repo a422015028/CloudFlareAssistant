@@ -240,7 +240,7 @@ class WorkerRepository @Inject constructor(
                     response.body()?.result?.let {
                         Timber.d("Upload successful with content type: $contentType")
                         return@safeApiCall Resource.Success(it)
-                    } ?: return@safeApiCall Resource.Error("Upload successful but no result returned")
+                    } ?: return@safeApiCall Resource.Error(appContext.getString(R.string.repo_worker_upload_no_result))
                 } else {
                     lastErrorBody = response.errorBody()?.string()
                     lastError = response.body()?.errors?.firstOrNull()?.message 
@@ -258,7 +258,7 @@ class WorkerRepository @Inject constructor(
             
             // 所有尝试都失败
             Timber.e("All upload attempts failed. Last error: $lastError, Error body: $lastErrorBody")
-            Resource.Error("Upload failed (tried ${contentTypesToTry.size} content types): $lastError")
+            Resource.Error(appContext.getString(R.string.repo_worker_upload_failed_multi_format, contentTypesToTry.size, lastError))
         }
     }
 
@@ -322,13 +322,13 @@ class WorkerRepository @Inject constructor(
                 response.body()?.result?.let {
                     Timber.d("Multi-file upload successful for '$scriptName'")
                     Resource.Success(it)
-                } ?: Resource.Error("Upload successful but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_upload_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Multi-file upload failed: $errorMsg\nError body: $errorBody")
-                Resource.Error("Upload failed: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_upload_failed_format, errorMsg))
             }
         }
     }
@@ -378,7 +378,7 @@ class WorkerRepository @Inject constructor(
                 // 3. 收集模块文件
                 val moduleFiles = collectModuleFiles(baseDir)
                 if (moduleFiles.isEmpty()) {
-                    return@safeApiCall Resource.Error("ZIP 中未找到可上传的模块文件")
+                    return@safeApiCall Resource.Error(appContext.getString(R.string.repo_worker_zip_no_module_files))
                 }
                 Timber.d("收集到 ${moduleFiles.size} 个模块文件: ${moduleFiles.keys.joinToString(", ")}")
 
@@ -400,7 +400,7 @@ class WorkerRepository @Inject constructor(
                 )) {
                     is Resource.Success -> Resource.Success(result.data)
                     is Resource.Error -> Resource.Error(result.message)
-                    is Resource.Loading -> Resource.Error("Unexpected loading state")
+                    is Resource.Loading -> Resource.Error(appContext.getString(R.string.repo_worker_unexpected_loading_state))
                 }
             } finally {
                 // 清理临时目录
@@ -505,12 +505,12 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Upload successful but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_upload_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message() 
                     ?: "Unknown error"
-                Resource.Error("Upload failed: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_upload_failed_format, errorMsg))
             }
         }
     }
@@ -556,12 +556,12 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Upload successful but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_upload_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message() 
                     ?: "Unknown error"
-                Resource.Error("All upload methods failed. Last error: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_upload_methods_failed_format, errorMsg))
             }
         }
     }
@@ -581,7 +581,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error("Failed to list scripts: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_worker_list_scripts_failed_format, errorMsg))
                 }
             }
         }
@@ -614,7 +614,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(body.trim())
                 }
             } else {
-                Resource.Error("Failed to get script: ${response.message()}")
+                Resource.Error(appContext.getString(R.string.repo_worker_get_script_failed_format, response.message()))
             }
         }
     }
@@ -695,13 +695,13 @@ class WorkerRepository @Inject constructor(
                 Timber.d("Successfully updated KV bindings for '$scriptName'")
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Update successful but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
                 Timber.e("Failed to update bindings: Response code: ${response.code()}, Error body: $errorBody")
-                Resource.Error("Failed to update bindings: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_update_bindings_failed_format, errorMsg))
             }
         }
     }
@@ -780,13 +780,13 @@ class WorkerRepository @Inject constructor(
                 Timber.d("Successfully updated R2 bindings for '$scriptName'")
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Update successful but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
                 Timber.e("Failed to update bindings: Response code: ${response.code()}, Error body: $errorBody")
-                Resource.Error("Failed to update bindings: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_update_bindings_failed_format, errorMsg))
             }
         }
     }
@@ -867,13 +867,13 @@ class WorkerRepository @Inject constructor(
                 Timber.d("Successfully updated D1 bindings for '$scriptName'")
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Update successful but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
                 Timber.e("Failed to update D1 bindings: Response code: ${response.code()}, Error body: $errorBody")
-                Resource.Error("Failed to update D1 bindings: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_update_d1_bindings_failed_format, errorMsg))
             }
         }
     }
@@ -954,13 +954,13 @@ class WorkerRepository @Inject constructor(
                 Timber.d("Successfully updated service bindings for '$scriptName'")
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Update successful but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Failed to update service bindings: Response code: ${response.code()}, Error body: $errorBody")
-                Resource.Error("Failed to update service bindings: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_update_service_bindings_failed_format, errorMsg))
             }
         }
     }
@@ -1059,13 +1059,13 @@ class WorkerRepository @Inject constructor(
                 Timber.d("Successfully updated variables for '$scriptName'")
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Update successful but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
                 Timber.e("Failed to update variables: Response code: ${response.code()}, Error body: $errorBody")
-                Resource.Error("Failed to update variables: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_update_variables_failed_format, errorMsg))
             }
         }
     }
@@ -1186,7 +1186,7 @@ class WorkerRepository @Inject constructor(
                 Timber.d("Successfully fetched settings for '$scriptName'")
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("No settings returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_no_settings))
             } else {
                 val errors = response.body()?.errors
                 val firstError = errors?.firstOrNull()
@@ -1199,7 +1199,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     Timber.e("Failed to fetch settings: $errorMsg (code: $errorCode)")
                 }
-                Resource.Error("Failed to fetch settings: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_fetch_settings_failed_format, errorMsg))
             }
         }
     }
@@ -1307,7 +1307,7 @@ class WorkerRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to delete script: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_delete_script_failed_format, errorMsg))
             }
         }
     }
@@ -1362,11 +1362,11 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("No version returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_no_version))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to get version: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_get_version_failed_format, errorMsg))
             }
         }
     }
@@ -1389,11 +1389,11 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("No version returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_no_version))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to deploy version: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_deploy_version_failed_format, errorMsg))
             }
         }
     }
@@ -1495,7 +1495,7 @@ class WorkerRepository @Inject constructor(
     suspend fun listRoutes(account: Account, zoneId: String): Resource<List<Route>> = 
         withContext(Dispatchers.IO) {
             if (zoneId.isBlank()) {
-                return@withContext Resource.Error("Zone ID is required for route operations")
+                return@withContext Resource.Error(appContext.getString(R.string.repo_worker_route_zone_id_required))
             }
             
             safeApiCall {
@@ -1511,7 +1511,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error("Failed to list routes: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_worker_list_routes_failed_format, errorMsg))
                 }
             }
         }
@@ -1523,7 +1523,7 @@ class WorkerRepository @Inject constructor(
         scriptName: String
     ): Resource<Route> = withContext(Dispatchers.IO) {
         if (zoneId.isBlank()) {
-            return@withContext Resource.Error("Zone ID is required for route operations")
+            return@withContext Resource.Error(appContext.getString(R.string.repo_worker_route_zone_id_required))
         }
         
         safeApiCall {
@@ -1538,11 +1538,11 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Route created but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_route_create_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to create route: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_create_route_failed_format, errorMsg))
             }
         }
     }
@@ -1555,7 +1555,7 @@ class WorkerRepository @Inject constructor(
         scriptName: String
     ): Resource<Route> = withContext(Dispatchers.IO) {
         if (zoneId.isBlank()) {
-            return@withContext Resource.Error("Zone ID is required for route operations")
+            return@withContext Resource.Error(appContext.getString(R.string.repo_worker_route_zone_id_required))
         }
         
         safeApiCall {
@@ -1571,11 +1571,11 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Route updated but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_route_update_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to update route: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_update_route_failed_format, errorMsg))
             }
         }
     }
@@ -1595,7 +1595,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error("Failed to list custom domains: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_worker_list_custom_domains_failed_format, errorMsg))
                 }
             }
         }
@@ -1620,11 +1620,11 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("Domain added but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_worker_add_domain_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to add custom domain: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_add_custom_domain_failed_format, errorMsg))
             }
         }
     }
@@ -1650,11 +1650,11 @@ class WorkerRepository @Inject constructor(
             } else {
                 val errorMsg = response.message() ?: "HTTP ${response.code()}"
                 Timber.e("Delete custom domain failed: $errorMsg")
-                Resource.Error("Failed to delete custom domain: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_delete_custom_domain_failed_format, errorMsg))
             }
         } catch (e: Exception) {
             Timber.e(e, "Exception in deleteCustomDomain")
-            Resource.Error("Failed to delete custom domain: ${e.message}")
+            Resource.Error(appContext.getString(R.string.repo_worker_delete_custom_domain_failed_format, e.message ?: ""))
         }
     }
     
@@ -1664,7 +1664,7 @@ class WorkerRepository @Inject constructor(
         routeId: String
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         if (zoneId.isBlank()) {
-            return@withContext Resource.Error("Zone ID is required for route operations")
+            return@withContext Resource.Error(appContext.getString(R.string.repo_worker_route_zone_id_required))
         }
         
         safeApiCall {
@@ -1681,7 +1681,7 @@ class WorkerRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
-                Resource.Error("Failed to delete route: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_worker_delete_route_failed_format, errorMsg))
             }
         }
     }
@@ -1878,7 +1878,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(body.result.subdomain)
                 } else {
                     val errorMsg = body?.errors?.firstOrNull()?.message ?: response.message()
-                    Resource.Error("Failed to get account subdomain: $errorMsg")
+                    Resource.Error(appContext.getString(R.string.repo_worker_get_subdomain_failed_format, errorMsg))
                 }
             }
         }

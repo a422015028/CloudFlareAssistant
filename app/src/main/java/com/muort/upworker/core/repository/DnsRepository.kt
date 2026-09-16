@@ -29,7 +29,7 @@ class DnsRepository @Inject constructor(
 
         if (zoneId.isBlank()) {
             Timber.e("Zone ID is missing for account: ${account.name}")
-            return@withContext Resource.Error("Zone ID is required for DNS operations")
+            return@withContext Resource.Error(appContext.getString(R.string.repo_dns_zone_id_required))
         }
 
         safeApiCall {
@@ -70,7 +70,7 @@ class DnsRepository @Inject constructor(
                     else -> errorMsg
                 }
                 
-                Resource.Error("Failed to list DNS records: $friendlyMsg")
+                Resource.Error(appContext.getString(R.string.repo_dns_list_failed_format, friendlyMsg))
             }
         }
     }
@@ -81,7 +81,7 @@ class DnsRepository @Inject constructor(
         record: DnsRecordRequest
     ): Resource<DnsRecord> = withContext(Dispatchers.IO) {
         if (zoneId.isBlank()) {
-            return@withContext Resource.Error("Zone ID is required for DNS operations")
+            return@withContext Resource.Error(appContext.getString(R.string.repo_dns_zone_id_required))
         }
 
         safeApiCall {
@@ -96,11 +96,11 @@ class DnsRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("DNS record created but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_dns_create_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error("Failed to create DNS record: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_dns_create_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -112,7 +112,7 @@ class DnsRepository @Inject constructor(
         record: DnsRecordRequest
     ): Resource<DnsRecord> = withContext(Dispatchers.IO) {
         if (zoneId.isBlank()) {
-            return@withContext Resource.Error("Zone ID is required for DNS operations")
+            return@withContext Resource.Error(appContext.getString(R.string.repo_dns_zone_id_required))
         }
 
         safeApiCall {
@@ -128,11 +128,11 @@ class DnsRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error("DNS record updated but no result returned")
+                } ?: Resource.Error(appContext.getString(R.string.repo_dns_update_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error("Failed to update DNS record: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_dns_update_failed_format, errorMsg ?: ""))
             }
         }
     }
@@ -143,7 +143,7 @@ class DnsRepository @Inject constructor(
         recordId: String
     ): Resource<Unit> = withContext(Dispatchers.IO) {
         if (zoneId.isBlank()) {
-            return@withContext Resource.Error("Zone ID is required for DNS operations")
+            return@withContext Resource.Error(appContext.getString(R.string.repo_dns_zone_id_required))
         }
 
         safeApiCall {
@@ -160,7 +160,7 @@ class DnsRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error("Failed to delete DNS record: $errorMsg")
+                Resource.Error(appContext.getString(R.string.repo_dns_delete_failed_format, errorMsg ?: ""))
             }
         }
     }

@@ -87,7 +87,7 @@ class AccountRepository @Inject constructor(
             .map<List<Account>, Resource<List<Account>>> { Resource.Success(it) }
             .catch { e ->
                 Timber.e(e, "Error loading accounts")
-                emit(Resource.Error("Failed to load accounts: ${e.message}", e))
+                emit(Resource.Error(appContext.getString(R.string.repo_account_load_failed_format, e.message ?: ""), e))
             }
     }
     
@@ -104,7 +104,7 @@ class AccountRepository @Inject constructor(
             }
             .catch { e ->
                 Timber.e(e, "Error loading default account")
-                emit(Resource.Error("Failed to load default account: ${e.message}", e))
+                emit(Resource.Error(appContext.getString(R.string.repo_account_load_default_failed_format, e.message ?: ""), e))
             }
     }
     
@@ -124,7 +124,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(id)
         } catch (e: Exception) {
             Timber.e(e, "Error inserting account")
-            Resource.Error("Failed to insert account: ${e.message}", e)
+            Resource.Error(appContext.getString(R.string.repo_account_insert_failed_format, e.message ?: ""), e)
         }
     }
     
@@ -135,7 +135,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Error updating account")
-            Resource.Error("Failed to update account: ${e.message}", e)
+            Resource.Error(appContext.getString(R.string.repo_account_update_failed_format, e.message ?: ""), e)
         }
     }
     
@@ -146,7 +146,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Error deleting account")
-            Resource.Error("Failed to delete account: ${e.message}", e)
+            Resource.Error(appContext.getString(R.string.repo_account_delete_failed_format, e.message ?: ""), e)
         }
     }
     
@@ -156,7 +156,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Error setting default account")
-            Resource.Error("Failed to set default account: ${e.message}", e)
+            Resource.Error(appContext.getString(R.string.repo_account_set_default_failed_format, e.message ?: ""), e)
         }
     }
     
@@ -167,7 +167,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Error importing accounts")
-            Resource.Error("Failed to import accounts: ${e.message}", e)
+            Resource.Error(appContext.getString(R.string.repo_account_import_failed_format, e.message ?: ""), e)
         }
     }
     
@@ -178,7 +178,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(accounts)
         } catch (e: Exception) {
             Timber.e(e, "Error exporting accounts")
-            Resource.Error("Failed to export accounts: ${e.message}", e)
+            Resource.Error(appContext.getString(R.string.repo_account_export_failed_format, e.message ?: ""), e)
         }
     }
     
@@ -212,7 +212,7 @@ class AccountRepository @Inject constructor(
                     Resource.Error(errorMsg)
                 }
             } else {
-                Resource.Error("HTTP ${response.code()}: ${response.message()}")
+                Resource.Error(appContext.getString(R.string.repo_generic_http_error_format, response.code(), response.message()))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: appContext.getString(R.string.repo_generic_network_error))
