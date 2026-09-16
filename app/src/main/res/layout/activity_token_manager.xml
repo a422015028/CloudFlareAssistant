@@ -123,6 +123,7 @@
                 android:layout_height="96dp"
                 android:src="@drawable/ic_key"
                 android:alpha="0.3"
+                android:contentDescription="@null"
                 app:tint="?attr/colorPrimary" />
 
             <TextView
@@ -166,7 +167,7 @@
                 android:layout_height="72dp"
                 android:src="@drawable/ic_refresh"
                 android:alpha="0.3"
-                app:tint="?attr/colorPrimary" />
+                app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
             <TextView
                 android:id="@+id/errorText"

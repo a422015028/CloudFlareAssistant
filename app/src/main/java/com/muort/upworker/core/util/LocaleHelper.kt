@@ -3,7 +3,6 @@ package com.muort.upworker.core.util
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
-import android.os.Build
 import android.os.LocaleList
 import java.util.Locale
 
@@ -78,12 +77,8 @@ object LocaleHelper {
      * - 其他语言 → 默认走 SIMPLIFIED_CHINESE（values 默认即为中文）
      */
     private fun pickFromSystem(config: Configuration): Locale {
-        val systemLocale: Locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            config.locales[0]
-        } else {
-            @Suppress("DEPRECATION")
-            config.locale
-        }
+        // minSdk = 26 > N (24)，config.locales 始终可用
+        val systemLocale: Locale = config.locales[0]
         return when (systemLocale.language) {
             "zh" -> Locale.SIMPLIFIED_CHINESE
             "en" -> Locale.ENGLISH

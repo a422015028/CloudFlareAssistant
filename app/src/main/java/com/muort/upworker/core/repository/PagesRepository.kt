@@ -1,5 +1,7 @@
 package com.muort.upworker.core.repository
 
+
+import java.util.Locale
 import android.content.Context
 import com.muort.upworker.R
 import com.muort.upworker.core.crypto.PagesBlake3Hasher
@@ -2642,8 +2644,8 @@ class PagesRepository @Inject constructor(
         val mb = kb * 1024
         return when {
             bytes < kb -> "${bytes}B"
-            bytes < mb -> String.format("%.1fKB", bytes / kb)
-            else -> String.format("%.1fMB", bytes / mb)
+            bytes < mb -> String.format(Locale.US, "%.1fKB", bytes / kb)
+            else -> String.format(Locale.US, "%.1fMB", bytes / mb)
         }
     }
 

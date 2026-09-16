@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:baselineAligned="false"
         android:padding="16dp"
         android:gravity="center_vertical">
 
@@ -48,7 +49,7 @@
                 android:paddingEnd="8dp"
                 android:paddingBottom="2dp"
                 android:text="@string/access_default_group"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:layout_marginTop="4dp"
                 android:visibility="gone"
                 tools:visibility="visible" />

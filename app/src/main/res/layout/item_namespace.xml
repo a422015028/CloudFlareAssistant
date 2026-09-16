@@ -29,8 +29,7 @@
                 android:textColor="?attr/colorOnSurface"
                 android:text="@string/kv_namespace"
                 android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.01"
-                android:lineHeight="20sp" />
+                android:letterSpacing="0.01" />
 
             <TextView
                 android:id="@+id/namespaceIdText"
@@ -41,8 +40,7 @@
                 android:layout_marginTop="2dp"
                 android:text="ID"
                 android:fontFamily="sans-serif"
-                android:letterSpacing="0.01"
-                android:lineHeight="15sp" />
+                android:letterSpacing="0.01" />
 
         </LinearLayout>
 

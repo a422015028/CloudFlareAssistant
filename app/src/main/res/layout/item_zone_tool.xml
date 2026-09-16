@@ -22,7 +22,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@android:drawable/ic_menu_manage"
-            app:tint="?attr/colorPrimary" />
+            app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
         <TextView
             android:id="@+id/toolLabel"
@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_media_next"
-            app:tint="?android:textColorSecondary" />
+            app:tint="?android:textColorSecondary" android:contentDescription="@null" />
 
     </LinearLayout>
 

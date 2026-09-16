@@ -20,7 +20,7 @@
             android:src="@android:drawable/ic_menu_myplaces"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="?attr/colorPrimary" />
+            app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
         <!-- Device Name -->
         <TextView
@@ -46,7 +46,7 @@
             android:layout_marginStart="12dp"
             android:layout_marginTop="4dp"
             android:text="Windows"
-            android:textSize="10sp"
+            android:textSize="11sp"
             app:chipMinHeight="24dp"
             app:layout_constraintStart_toEndOf="@id/deviceIcon"
             app:layout_constraintTop_toBottomOf="@id/deviceNameText" />
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:text="@string/tunnel_active"
-            android:textSize="10sp"
+            android:textSize="11sp"
             app:chipMinHeight="24dp"
             app:layout_constraintStart_toEndOf="@id/deviceTypeChip"
             app:layout_constraintTop_toTopOf="@id/deviceTypeChip" />

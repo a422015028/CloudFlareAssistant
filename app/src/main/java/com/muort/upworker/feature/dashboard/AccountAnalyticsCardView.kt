@@ -1,5 +1,7 @@
 package com.muort.upworker.feature.dashboard
 
+
+import java.util.Locale
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
@@ -274,7 +276,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         }
 
         val absValue = kotlin.math.abs(delta)
-        val valueText = String.format("%.2f", absValue)
+        val valueText = String.format(Locale.US, "%.2f", absValue)
 
         deltaView.visibility = View.VISIBLE
         deltaView.text = "$arrow ${if (delta < 0) "-" else "+"}$valueText%"
@@ -584,19 +586,19 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
 
     private fun formatNumber(value: Long): String {
         return when {
-            value >= 1_000_000_000 -> String.format("%.1fB", value / 1_000_000_000.0)
-            value >= 1_000_000 -> String.format("%.1fM", value / 1_000_000.0)
-            value >= 1_000 -> String.format("%.1fK", value / 1_000.0)
+            value >= 1_000_000_000 -> String.format(Locale.US, "%.1fB", value / 1_000_000_000.0)
+            value >= 1_000_000 -> String.format(Locale.US, "%.1fM", value / 1_000_000.0)
+            value >= 1_000 -> String.format(Locale.US, "%.1fK", value / 1_000.0)
             else -> value.toString()
         }
     }
 
     private fun formatBytes(bytes: Long): String {
         return when {
-            bytes >= 1_099_511_627_776L -> String.format("%.2f TB", bytes / 1_099_511_627_776.0)
-            bytes >= 1_073_741_824L -> String.format("%.2f GB", bytes / 1_073_741_824.0)
-            bytes >= 1_048_576L -> String.format("%.2f MB", bytes / 1_048_576.0)
-            bytes >= 1024L -> String.format("%.2f KB", bytes / 1024.0)
+            bytes >= 1_099_511_627_776L -> String.format(Locale.US, "%.2f TB", bytes / 1_099_511_627_776.0)
+            bytes >= 1_073_741_824L -> String.format(Locale.US, "%.2f GB", bytes / 1_073_741_824.0)
+            bytes >= 1_048_576L -> String.format(Locale.US, "%.2f MB", bytes / 1_048_576.0)
+            bytes >= 1024L -> String.format(Locale.US, "%.2f KB", bytes / 1024.0)
             else -> "$bytes B"
         }
     }
@@ -604,7 +606,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
     private fun formatPercentage(value: Double): String {
         return when {
             value >= 99.995 -> "100"
-            else -> String.format("%.2f", value)
+            else -> String.format(Locale.US, "%.2f", value)
         }
     }
 }

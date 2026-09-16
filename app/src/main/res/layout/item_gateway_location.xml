@@ -36,7 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/account_default"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:visibility="gone" />
 
         </LinearLayout>
@@ -52,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="EDNS"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:visibility="gone" />
 
             <TextView
@@ -62,7 +62,7 @@
                 android:layout_marginStart="5dp"
                 android:text="@string/gateway_clients_count"
                 android:textColor="?android:attr/textColorSecondary"
-                android:textSize="10sp" />
+                android:textSize="11sp" />
 
         </LinearLayout>
 
@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="IPv4: 162.159.36.1"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:fontFamily="monospace"
             android:textColor="?attr/colorPrimary"
             android:clickable="true"
@@ -101,7 +101,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="IPv6: 2606:4700:4700::1111"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:fontFamily="monospace"
             android:textColor="?attr/colorPrimary"
             android:clickable="true"
@@ -113,7 +113,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="DoT: xxx.cloudflaregateway.com:853"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:fontFamily="monospace"
             android:textColor="?attr/colorPrimary"
             android:clickable="true"
@@ -125,7 +125,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="DoH: https://xxx.cloudflare-gateway.com/dns-query"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:fontFamily="monospace"
             android:textColor="?attr/colorPrimary"
             android:clickable="true"

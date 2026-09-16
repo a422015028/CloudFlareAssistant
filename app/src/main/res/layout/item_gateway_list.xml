@@ -19,7 +19,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -47,7 +48,7 @@
                     android:paddingBottom="1dp"
                     android:text="Domain"
                     android:textColor="?attr/colorOnSecondary"
-                    android:textSize="10sp" />
+                    android:textSize="11sp" />
 
             </LinearLayout>
 
@@ -83,7 +84,7 @@
             android:text="ID"
             android:textColor="?attr/colorPrimary"
             android:textIsSelectable="true"
-            android:textSize="10sp" />
+            android:textSize="11sp" />
 
         <LinearLayout
             android:layout_width="match_parent"

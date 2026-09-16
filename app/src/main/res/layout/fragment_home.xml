@@ -51,7 +51,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_upload"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -92,7 +92,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_gallery"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -133,7 +133,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_myplaces"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -174,7 +174,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_directions"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -215,7 +215,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_sort_alphabetically"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -256,7 +256,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_send"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -297,7 +297,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_agenda"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -338,7 +338,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_compass"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -379,7 +379,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_save"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -420,7 +420,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_view"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -460,7 +460,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_preferences"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -501,7 +501,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:src="@android:drawable/ic_menu_info_details"
-                        app:tint="?attr/colorPrimary" />
+                        app:tint="?attr/colorPrimary" android:contentDescription="@null" />
 
                     <TextView
                         android:layout_width="match_parent"

@@ -5,14 +5,9 @@
 	<!-- 状态色（不随动态主题变化，保持功能语义一致性） -->
 	<!-- ============================================ -->
 	<color name="status_success">#22C55E</color>
-	<color name="status_success_container">#DCFCE7</color>
 	<color name="status_warning">#F59E0B</color>
-	<color name="status_warning_container">#FEF3C7</color>
 	<color name="status_error">#EF4444</color>
-	<color name="status_error_container">#FEE2E2</color>
 	<color name="status_neutral">#9CA3AF</color>
-	<color name="status_info">#3B82F6</color>
-	<color name="status_info_container">#DBEAFE</color>
 
 	<!-- ============================================ -->
 	<!-- Dashboard 健康状态色（兼容旧代码） -->

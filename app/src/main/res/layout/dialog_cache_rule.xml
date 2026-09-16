@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:maxHeight="600dp">
@@ -85,7 +86,7 @@
                     android:id="@+id/edgeTtlModeInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none" />
+                    android:inputType="none" tools:ignore="LabelFor" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- 边缘 TTL 秒数（覆盖为固定值时显示） -->
@@ -117,7 +118,7 @@
                     android:id="@+id/browserTtlModeInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none" />
+                    android:inputType="none" tools:ignore="LabelFor" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- 浏览器 TTL 秒数（覆盖为固定值时显示） -->

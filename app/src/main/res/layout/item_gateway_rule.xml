@@ -52,7 +52,7 @@
                         android:paddingBottom="1dp"
                         android:text="DNS"
                         android:textColor="?attr/colorOnSecondary"
-                        android:textSize="10sp" />
+                        android:textSize="11sp" />
 
                     <TextView
                         android:id="@+id/ruleActionChip"
@@ -66,7 +66,7 @@
                         android:paddingBottom="1dp"
                         android:text="@string/gateway_block"
                         android:textColor="?attr/colorOnSecondary"
-                        android:textSize="10sp" />
+                        android:textSize="11sp" />
 
                 </LinearLayout>
 
@@ -85,7 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:text="@string/gateway_match_conditions"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:textColor="?android:attr/textColorSecondary" />
 
         <TextView
@@ -94,7 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="dns.fqdn == &quot;example.com&quot;"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:fontFamily="monospace"
             android:textColor="?attr/colorPrimary"
             android:background="?attr/selectableItemBackground"
@@ -108,7 +108,7 @@
             android:layout_marginTop="4dp"
             android:text="@string/common_priority_zero"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="10sp" />
+            android:textSize="11sp" />
 
         <LinearLayout
             android:layout_width="match_parent"

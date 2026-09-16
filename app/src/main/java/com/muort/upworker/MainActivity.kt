@@ -1,5 +1,7 @@
 package com.muort.upworker
 
+
+import androidx.core.content.ContextCompat
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.PorterDuff
@@ -150,7 +152,7 @@ class MainActivity : AppCompatActivity() {
         val contentColorFilter = PorterDuffColorFilter(colorOnSecondaryContainer, PorterDuff.Mode.SRC_IN)
         (binding.selectAccountButton as? android.widget.TextView)?.let { textView ->
             textView.text = ""
-            val icon = getDrawable(android.R.drawable.ic_menu_more)
+            val icon = ContextCompat.getDrawable(this, android.R.drawable.ic_menu_more)
             textView.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, icon, null)
             textView.setTextColor(colorOnSecondaryContainer)
             textView.compoundDrawables.forEach { it?.mutate()?.colorFilter = contentColorFilter }

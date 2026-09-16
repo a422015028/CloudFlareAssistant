@@ -17,6 +17,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -86,20 +87,15 @@ class TokenManagerActivity : AppCompatActivity() {
 
     private fun applySystemBarStyle() {
         val isDarkMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
         if (isDarkMode) {
             @Suppress("DEPRECATION")
             window.statusBarColor = resources.getColor(R.color.black, theme)
-            window.insetsController?.setSystemBarsAppearance(
-                0,
-                android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-            )
+            controller.isAppearanceLightStatusBars = false
         } else {
             @Suppress("DEPRECATION")
             window.statusBarColor = resources.getColor(R.color.white, theme)
-            window.insetsController?.setSystemBarsAppearance(
-                android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-            )
+            controller.isAppearanceLightStatusBars = true
         }
     }
 

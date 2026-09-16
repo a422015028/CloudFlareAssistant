@@ -1,5 +1,7 @@
 package com.muort.upworker.feature.worker
 
+
+import androidx.core.content.ContextCompat
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -169,7 +171,7 @@ class WorkerLogsActivity : AppCompatActivity() {
     private fun connectWebSocket(url: String) {
         runOnUiThread {
             isConnected = false
-            connectionStatusDot.background = getDrawable(R.drawable.circle_yellow)
+            connectionStatusDot.background = ContextCompat.getDrawable(this@WorkerLogsActivity, R.drawable.circle_yellow)
             connectionStatusText.text = getString(R.string.status_connecting)
         }
         val request = Request.Builder()
@@ -183,7 +185,7 @@ class WorkerLogsActivity : AppCompatActivity() {
                 webSocket.send("{\"filters\":[],\"debug\":false}")
                 runOnUiThread {
                     isConnected = true
-                    connectionStatusDot.background = getDrawable(R.drawable.circle_green)
+                    connectionStatusDot.background = ContextCompat.getDrawable(this@WorkerLogsActivity, R.drawable.circle_green)
                     connectionStatusText.text = getString(R.string.status_connected)
                 }
             }
@@ -210,7 +212,7 @@ class WorkerLogsActivity : AppCompatActivity() {
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                 runOnUiThread {
                     isConnected = false
-                    connectionStatusDot.background = getDrawable(R.drawable.circle_red)
+                    connectionStatusDot.background = ContextCompat.getDrawable(this@WorkerLogsActivity, R.drawable.circle_red)
                     connectionStatusText.text = getString(R.string.status_disconnected)
                 }
                 webSocket.close(code, reason)
@@ -220,7 +222,7 @@ class WorkerLogsActivity : AppCompatActivity() {
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 runOnUiThread {
                     isConnected = false
-                    connectionStatusDot.background = getDrawable(R.drawable.circle_red)
+                    connectionStatusDot.background = ContextCompat.getDrawable(this@WorkerLogsActivity, R.drawable.circle_red)
                     connectionStatusText.text = getString(R.string.status_connection_failed, t.message ?: "null")
                 }
                 Timber.e(t, "WebSocket failure: ${t.message}")
@@ -480,7 +482,7 @@ class WorkerLogsActivity : AppCompatActivity() {
         webSocket?.close(1000, "Manual refresh")
         webSocket = null
         isConnected = false
-        connectionStatusDot.background = getDrawable(R.drawable.circle_yellow)
+        connectionStatusDot.background = ContextCompat.getDrawable(this@WorkerLogsActivity, R.drawable.circle_yellow)
         connectionStatusText.text = getString(R.string.status_connecting)
         connectWebSocket(currentWssUrl)
     }

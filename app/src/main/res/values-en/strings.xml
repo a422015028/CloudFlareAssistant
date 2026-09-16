@@ -2,11 +2,7 @@
     <string name="app_name">Cloudflare Assistant</string>
 
     <!-- Common strings -->
-    <string name="loading">Loading…</string>
     <string name="empty_list">No data</string>
-    <string name="error_network">Network error, please check your connection</string>
-    <string name="success">Success</string>
-    <string name="failed">Failed</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
@@ -14,8 +10,6 @@
     <string name="save">Save</string>
     <string name="add">Add</string>
     <string name="done">Done</string>
-    <string name="settings">Settings</string>
-    <string name="about">About</string>
     <string name="checking">Checking…</string>
     <string name="check_update">Check Update</string>
     <string name="check_update_failed">Failed to check for updates</string>
@@ -85,34 +79,23 @@
     <string name="account_fetch_accounts_failed">Failed to fetch account list: %1$s</string>
 
     <!-- Worker -->
-    <string name="worker_upload">Upload Worker</string>
     <string name="worker_select_file">Select File</string>
-    <string name="worker_uploading">Uploading…</string>
-    <string name="worker_upload_success">Upload successful</string>
-    <string name="worker_upload_failed">Upload failed</string>
 
     <!-- DNS -->
     <string name="dns_record">DNS Records</string>
-    <string name="dns_add_record">Add Record</string>
-    <string name="dns_edit_record">Edit Record</string>
     <string name="dns_delete_confirm">Delete this DNS record?</string>
 
     <!-- KV -->
     <string name="kv_namespace">Namespaces</string>
     <string name="kv_create_namespace">Create Namespace</string>
-    <string name="kv_delete_namespace_confirm">Delete this namespace?</string>
     <string name="kv_key_value">Key-Value Pairs</string>
     <string name="kv_add_key">Add Key-Value</string>
-    <string name="kv_edit_key">Edit Key-Value</string>
-    <string name="kv_delete_key_confirm">Delete this key-value pair?</string>
 
     <!-- Pages -->
     <string name="pages_project">Pages Projects</string>
     <string name="pages_create_project">Create Project</string>
-    <string name="pages_delete_project_confirm">Delete this project?</string>
 
     <!-- R2 -->
-    <string name="r2_bucket">Buckets</string>
     <string name="r2_create_bucket">Create Bucket</string>
     <string name="r2_delete_bucket_confirm">Delete bucket "%1$s"?</string>
 
@@ -151,18 +134,14 @@
 
     <!-- Account Analytics card -->
     <string name="account_analytics">Account Analytics Overview</string>
-    <string name="analytics_enable">Enable Analytics</string>
     <string name="analytics_time_range_24h">24h</string>
     <string name="analytics_time_range_7d">7d</string>
     <string name="analytics_time_range_30d">30d</string>
     <string name="analytics_total_requests">Total Requests</string>
     <string name="analytics_bandwidth">Bandwidth</string>
     <string name="analytics_unique_visitors">Unique Visitors</string>
-    <string name="analytics_threats">Threats</string>
     <string name="analytics_loading">Loading…</string>
     <string name="analytics_error">Failed to load</string>
-    <string name="analytics_retry">Tap to retry</string>
-    <string name="analytics_disabled_hint">Enable to view account-level analytics</string>
     <string name="analytics_status_normal">Normal</string>
     <string name="analytics_status_warning">Warning</string>
     <string name="analytics_status_critical">Critical</string>
@@ -275,7 +254,6 @@
     <string name="snippet_all_requests">All incoming requests</string>
     <string name="snippet_all_requests_desc">Apply rule to all requests</string>
     <string name="snippet_copy">Copy</string>
-    <string name="snippet_created_time">Created</string>
     <string name="snippet_custom_expression">Custom expression</string>
     <string name="snippet_custom_expression_desc">Only evaluate the rule for requests matching the custom filter expression</string>
     <string name="snippet_edit_expression">Edit Expression</string>
@@ -286,12 +264,9 @@
     <string name="snippet_field">Field</string>
     <string name="snippet_header_name_hint">Header name (e.g. x-custom-header)</string>
     <string name="snippet_import">Import</string>
-    <string name="snippet_js_code">JS Code</string>
     <string name="snippet_logic_and">AND (All match)</string>
     <string name="snippet_logic_connection">Condition logic</string>
     <string name="snippet_logic_or">OR (Any matches)</string>
-    <string name="snippet_modified_time">Modified</string>
-    <string name="snippet_name_label">Name</string>
     <string name="snippet_next">Next</string>
     <string name="snippet_operator">Operator</string>
     <string name="snippet_please_add_condition">(Please add conditions)</string>
@@ -443,7 +418,7 @@
     <string name="device_service_mode">Service Mode</string>
     <string name="device_split_tunnel">Split Tunnel</string>
     <string name="device_tunnel_protocol">Device Tunnel Protocol</string>
-    <string name="device_updated_preview">Updated: 2024-01-01</string>
+    <string name="device_updated_preview">Updated: 2024–01–01</string>
     <string name="device_user_preview">User: user@example.com</string>
 
     <!-- Gateway -->
@@ -561,7 +536,7 @@
     <string name="tunnel_copy_command">Copy Command</string>
     <string name="tunnel_create">Create Tunnel</string>
     <string name="tunnel_create_note">Note: After creating a tunnel, you need to run cloudflared on the server to connect</string>
-    <string name="tunnel_created_preview">Created: 2024-01-01</string>
+    <string name="tunnel_created_preview">Created: 2024–01–01</string>
     <string name="tunnel_delete">Delete Tunnel</string>
     <string name="tunnel_enable_warp_routing">Enable WARP Routing</string>
     <string name="tunnel_hide_token">Hide Token</string>
@@ -586,7 +561,6 @@
     <string name="zt_gateway_card_title">🛡️ Secure Gateway</string>
     <string name="zt_groups_card_desc">Create and manage Access user groups and group rules</string>
     <string name="zt_groups_card_title">👥 Access Groups</string>
-    <string name="zt_tunnel_card_title">🌐 Cloudflare Tunnel</string>
     <string name="zt_tunnel_card_desc">Manage Cloudflare Tunnel connections and configurations</string>
 
     <!-- Missing WAF example -->
@@ -628,7 +602,6 @@
     <string name="dialog_rollback">Rollback</string>
     <string name="dialog_replace">Replace</string>
     <string name="dialog_retry">Retry</string>
-    <string name="dialog_verify">Verify</string>
 
     <!-- Connection status -->
     <string name="status_connecting">Connecting…</string>
@@ -647,17 +620,12 @@
     <string name="status_none">None</string>
     <string name="status_unnamed">Unnamed</string>
     <string name="status_never_expires">Never expires</string>
-    <string name="status_pending">Pending</string>
     <string name="status_paused_short">Paused</string>
     <string name="status_activated">Activated</string>
     <string name="status_success">Success</string>
     <string name="status_failed">Failed</string>
-    <string name="status_deleted">Deleted</string>
-    <string name="status_default">Default</string>
 
     <!-- Read/Write labels -->
-    <string name="perm_read">Read</string>
-    <string name="perm_write">Write</string>
 
     <!-- Token Manager -->
     <string name="token_create_user_level">Create User-level Token</string>
@@ -665,7 +633,6 @@
     <string name="token_edit_user_level">Edit User-level Token</string>
     <string name="token_edit_account_level">Edit Account-level Token</string>
     <string name="token_created_success">Token created successfully</string>
-    <string name="token_account_created_success">Account-level token created successfully</string>
     <string name="token_updated_success">Token updated successfully</string>
     <string name="token_deleted_success">Token deleted successfully</string>
     <string name="token_rolled_success">Token replaced, old value immediately revoked</string>
@@ -706,7 +673,6 @@
     <string name="token_pg_none">Permission groups: None</string>
     <string name="token_pg_list">Permission groups: %1$s</string>
     <string name="token_pg_more">Permission groups: %1$s and %2$d more</string>
-    <string name="token_list_policies_needed">Policies to be split</string>
 
     <!-- Zone tool items (DomainDetail) -->
     <string name="zone_tool_analytics">Analytics</string>
@@ -768,48 +734,17 @@
     <string name="dns_field_target">Target</string>
     <string name="dns_proxied">🟠 Proxied</string>
     <string name="dns_dns_only">⚪ DNS Only</string>
-    <string name="dns_zone_id_not_set">Zone ID not set</string>
-    <string name="dns_load_failed">Failed to load DNS records: %1$s</string>
-    <string name="dns_create_success">DNS record created successfully</string>
-    <string name="dns_create_failed">Failed to create DNS record: %1$s</string>
-    <string name="dns_update_success">DNS record updated successfully</string>
-    <string name="dns_update_failed">Failed to update DNS record: %1$s</string>
-    <string name="dns_delete_success">DNS record deleted successfully</string>
-    <string name="dns_delete_failed">Failed to delete DNS record: %1$s</string>
     <string name="dns_invalid_format">Invalid domain format (e.g. example.com)</string>
 
     <!-- Worker module -->
-    <string name="worker_upload_with_bindings_success">Worker script uploaded successfully (existing bindings preserved)</string>
-    <string name="worker_script_upload_failed">Upload failed: %1$s</string>
-    <string name="worker_kv_bindings_updated">KV bindings updated successfully (\'%1$s\')</string>
-    <string name="worker_bindings_update_failed">Failed to update bindings: %1$s</string>
-    <string name="worker_d1_bindings_update_failed">Failed to update D1 bindings: %1$s</string>
-    <string name="worker_service_bindings_update_failed">Failed to update service bindings: %1$s</string>
-    <string name="worker_env_vars_update_failed">Failed to update environment variables: %1$s</string>
     <string name="worker_secrets_updated">Secrets updated successfully (\'%1$s\')</string>
-    <string name="worker_secrets_update_failed">Failed to update secrets: %1$s</string>
-    <string name="worker_scripts_load_failed">Failed to load Worker script list: %1$s</string>
-    <string name="worker_script_load_failed">Failed to load script: %1$s</string>
-    <string name="worker_out_of_memory">Out of memory, unable to load script</string>
-    <string name="worker_script_load_exception">Error loading script: %1$s</string>
     <string name="worker_settings_load_failed">Failed to load script settings: %1$s</string>
-    <string name="worker_script_deleted_success">Script deleted successfully</string>
-    <string name="worker_script_delete_failed">Failed to delete script: %1$s</string>
-    <string name="worker_routes_load_failed">Failed to load route list: %1$s</string>
-    <string name="worker_route_fields_required">Please fill in both route rule and script name</string>
     <string name="worker_route_created_success">Route created successfully</string>
-    <string name="worker_route_create_failed">Failed to create route: %1$s</string>
-    <string name="worker_route_updated_success">Route updated successfully</string>
-    <string name="worker_route_update_failed">Failed to update route: %1$s</string>
     <string name="worker_route_deleted_success">Route deleted successfully</string>
     <string name="worker_route_delete_failed">Failed to delete route: %1$s</string>
-    <string name="worker_custom_domain_load_failed">Failed to load custom domains: %1$s</string>
     <string name="worker_custom_domain_added_success">Custom domain added successfully</string>
-    <string name="worker_custom_domain_add_failed">Failed to add custom domain: %1$s</string>
     <string name="worker_custom_domain_deleted_success">Custom domain deleted successfully</string>
     <string name="worker_custom_domain_delete_failed">Failed to delete custom domain: %1$s</string>
-    <string name="worker_custom_domain_updated">Custom domain updated</string>
-    <string name="worker_custom_domain_update_failed">Failed to update custom domain: %1$s</string>
     <string name="worker_add_custom_domain_title_template">Add custom domain for %1$s</string>
     <string name="worker_adding_custom_domain">Adding custom domain…</string>
     <string name="worker_custom_domain_add_failed_title">Failed to add custom domain</string>
@@ -855,12 +790,6 @@
     <string name="worker_settings_update_failed_format">Failed to update script settings: %1$s</string>
     <string name="worker_subdomain_status_fetch_failed_format">Failed to fetch subdomain state: %1$s</string>
     <string name="worker_subdomain_update_failed_format">Failed to update subdomain toggle: %1$s</string>
-    <string name="worker_versions_load_failed">Failed to get version history: %1$s</string>
-    <string name="worker_rollback_success">Rollback successful</string>
-    <string name="worker_rollback_failed">Rollback failed: %1$s</string>
-    <string name="worker_cleanup_result_success">Script %1$s cleanup complete! %2$d old versions removed</string>
-    <string name="worker_cleanup_failed">Cleanup failed: %1$s</string>
-    <string name="worker_cleanup_loading">Loading version list</string>
     <string name="worker_manage_scripts">Manage Scripts</string>
     <string name="worker_please_enter_name">Please enter Worker name</string>
     <string name="worker_please_select_file">Please select a script file</string>
@@ -870,7 +799,6 @@
     <string name="worker_please_enter_binding_name">Please enter binding name</string>
     <string name="worker_binding_name_already_exists_template">Binding name %1$s already exists, please choose a different one</string>
     <string name="worker_binding_added">Binding added</string>
-    <string name="worker_kv_load_failed">Failed to load KV namespaces: %1$s</string>
     <string name="worker_updating_kv_bindings">Updating KV binding configuration (script code not re-uploaded)</string>
     <string name="worker_kv_bindings_config_updated">KV binding configuration updated</string>
     <string name="worker_fetching_r2_bindings">Fetching current R2 binding configuration</string>
@@ -879,19 +807,6 @@
     <string name="worker_runtime_settings">Runtime Settings</string>
 
     <!-- KV module messages -->
-    <string name="kv_namespace_load_failed">Failed to load namespaces: %1$s</string>
-    <string name="kv_please_enter_namespace_name">Please enter namespace name</string>
-    <string name="kv_namespace_created_success">Namespace created successfully</string>
-    <string name="kv_namespace_create_failed">Failed to create namespace: %1$s</string>
-    <string name="kv_namespace_deleted_success">Namespace deleted successfully</string>
-    <string name="kv_namespace_delete_failed">Failed to delete namespace: %1$s</string>
-    <string name="kv_key_list_load_failed">Failed to load Key list: %1$s</string>
-    <string name="kv_value_get_failed">Failed to get Value: %1$s</string>
-    <string name="kv_please_enter_key_name">Please enter Key name</string>
-    <string name="kv_value_saved_success">Value saved successfully</string>
-    <string name="kv_value_save_failed">Failed to save Value: %1$s</string>
-    <string name="kv_value_deleted_success">Value deleted successfully</string>
-    <string name="kv_value_delete_failed">Failed to delete Value: %1$s</string>
     <string name="kv_delete_namespace_title">Delete Namespace</string>
     <string name="kv_delete_namespace_message">Delete namespace \"%1$s\"?</string>
     <string name="kv_edit_key_title">Edit Key-Value Pair</string>
@@ -904,25 +819,7 @@
     <string name="kv_value_label">Value: %1$s</string>
 
     <!-- R2 module messages -->
-    <string name="r2_bucket_load_failed">Failed to load buckets: %1$s</string>
-    <string name="r2_please_enter_bucket_name">Please enter bucket name</string>
-    <string name="r2_bucket_created_success">Bucket created successfully</string>
-    <string name="r2_bucket_create_failed">Failed to create bucket: %1$s</string>
-    <string name="r2_bucket_deleted_success">Bucket deleted successfully</string>
-    <string name="r2_bucket_delete_failed">Failed to delete bucket: %1$s</string>
-    <string name="r2_object_list_load_failed">Failed to load object list: %1$s</string>
-    <string name="r2_object_upload_success">Object uploaded successfully</string>
-    <string name="r2_object_upload_failed">Failed to upload object: %1$s</string>
-    <string name="r2_object_download_failed">Failed to download object: %1$s</string>
-    <string name="r2_file_download_success">File downloaded successfully</string>
-    <string name="r2_object_deleted_success">Object deleted successfully</string>
-    <string name="r2_object_delete_failed">Failed to delete object: %1$s</string>
-    <string name="r2_custom_domain_load_failed">Failed to load custom domains: %1$s</string>
     <string name="r2_custom_domain_zone_not_found">Add failed: corresponding Cloudflare domain (Zone) not found. Please add the domain to your account first.</string>
-    <string name="r2_custom_domain_added_success">Custom domain added successfully</string>
-    <string name="r2_custom_domain_add_failed">Failed to add custom domain: %1$s</string>
-    <string name="r2_custom_domain_deleted_success">Custom domain deleted successfully</string>
-    <string name="r2_custom_domain_delete_failed">Failed to delete custom domain: %1$s</string>
     <string name="r2_object_title_bucket">Objects (%1$s)</string>
     <string name="r2_no_objects">No objects</string>
     <string name="r2_upload_file">Upload File</string>
@@ -954,39 +851,7 @@
     <string name="r2_delete_custom_domain_message">Delete domain \"%1$s\"?</string>
 
     <!-- Pages module messages -->
-    <string name="pages_project_load_failed">Failed to load projects: %1$s</string>
-    <string name="pages_please_enter_project_name">Please enter project name</string>
-    <string name="pages_project_created_success">Project created successfully</string>
-    <string name="pages_project_create_failed">Failed to create project: %1$s</string>
-    <string name="pages_project_deleted_success">Project deleted successfully</string>
-    <string name="pages_project_delete_failed">Failed to delete project: %1$s</string>
-    <string name="pages_project_detail_load_failed">Failed to load project details: %1$s</string>
-    <string name="pages_deployments_load_failed">Failed to load deployment list: %1$s</string>
-    <string name="pages_redeploy_initiated">Redeployment initiated</string>
-    <string name="pages_redeploy_failed">Redeployment failed: %1$s</string>
-    <string name="pages_deployment_deleted_success">Deployment deleted successfully</string>
-    <string name="pages_deployment_delete_failed">Failed to delete deployment: %1$s</string>
-    <string name="pages_deployment_rollback_success">Rolled back to this deployment</string>
-    <string name="pages_deployment_rollback_failed">Rollback failed: %1$s</string>
-    <string name="pages_deployment_created_success">Deployment created successfully</string>
-    <string name="pages_deployment_create_failed">Deployment failed: %1$s</string>
-    <string name="pages_env_vars_updated_success">Environment variables updated successfully</string>
-    <string name="pages_env_vars_update_failed">Failed to update environment variables: %1$s</string>
-    <string name="pages_kv_bindings_updated_success">KV bindings updated successfully</string>
-    <string name="pages_kv_bindings_update_failed">Failed to update KV bindings: %1$s</string>
-    <string name="pages_r2_bindings_updated_success">R2 bindings updated successfully</string>
-    <string name="pages_r2_bindings_update_failed">Failed to update R2 bindings: %1$s</string>
-    <string name="pages_d1_bindings_updated_success">D1 bindings updated successfully</string>
-    <string name="pages_d1_bindings_update_failed">Failed to update D1 bindings: %1$s</string>
-    <string name="pages_service_bindings_updated_success">Service bindings updated successfully</string>
-    <string name="pages_service_bindings_update_failed">Failed to update service bindings: %1$s</string>
     <string name="pages_runtime_settings_updated">Runtime settings updated</string>
-    <string name="pages_custom_domain_added_success">Custom domain added successfully</string>
-    <string name="pages_custom_domain_add_failed">Failed to add custom domain: %1$s</string>
-    <string name="pages_cleanup_result_success">Project %1$s cleanup complete! %2$d old deployments removed</string>
-    <string name="pages_cleanup_failed">Cleanup failed: %1$s</string>
-    <string name="pages_cleanup_loading">Loading deployment list</string>
-    <string name="pages_refreshing_projects">◇ Refreshing project list...</string>
     <string name="pages_manage_projects">Manage Projects</string>
     <string name="pages_fetching_runtime_settings">Fetching current runtime settings…</string>
     <string name="pages_get_settings_failed">Failed to get settings: %1$s</string>
@@ -1003,13 +868,11 @@
     <string name="pages_menu_service_bindings">Service Bindings</string>
     <string name="pages_menu_runtime_settings">Runtime Settings</string>
     <string name="pages_project_management">%1$s - Project Management</string>
-    <string name="pages_fetching_env_vars">Fetching current environment variable configuration</string>
     <string name="pages_configure_env_vars">Configure Pages Project Environment Variables</string>
     <string name="pages_project_name_with_env">Project: %1$s (%2$s environment)</string>
     <string name="pages_variables_list_title">Environment Variable List</string>
     <string name="pages_no_variables">No environment variables yet</string>
     <string name="pages_add_variable">+ Add Variable</string>
-    <string name="pages_fetching_secrets">Fetching current secrets configuration</string>
     <string name="pages_configure_secrets">Configure Pages Project Secrets</string>
     <string name="pages_secrets_list_title">Secrets List</string>
     <string name="pages_no_secrets">No secrets yet</string>
@@ -1026,19 +889,9 @@
     <string name="pages_source_other">Source: %1$s</string>
 
     <!-- D1 module messages -->
-    <string name="d1_sql_executed">SQL executed successfully</string>
-    <string name="d1_sql_execute_failed">SQL execution failed: %1$s</string>
     <string name="d1_please_enter_sql">Please enter SQL statement</string>
-    <string name="d1_table_created_success">Table created successfully</string>
-    <string name="d1_table_create_failed">Failed to create table: %1$s</string>
     <string name="d1_databases_load_failed">Failed to load database list: %1$s</string>
     <string name="d1_data_load_failed">Failed to load data: %1$s</string>
-    <string name="d1_row_insert_success">Row inserted successfully</string>
-    <string name="d1_row_insert_failed">Failed to insert row: %1$s</string>
-    <string name="d1_row_update_success">Row updated successfully</string>
-    <string name="d1_row_update_failed">Failed to update row: %1$s</string>
-    <string name="d1_row_delete_success">Row deleted successfully</string>
-    <string name="d1_row_delete_failed">Failed to delete row: %1$s</string>
 
     <!-- Environment -->
     <string name="env_production">Production</string>
@@ -1236,7 +1089,7 @@
     <string name="zt_list_edit_title">Edit List</string>
     <string name="zt_list_delete_title">Delete List</string>
     <string name="zt_list_delete_confirm">Delete list \"%1$s\"?</string>
-    <string name="zt_list_loading_hint">Loading...</string>
+    <string name="zt_list_loading_hint">Loading…</string>
     <string name="zt_list_items_hint">List item content</string>
     <string name="msg_list_name_empty">List name cannot be empty</string>
     <string name="msg_list_items_empty">List items cannot be empty</string>
@@ -1276,7 +1129,7 @@
     <string name="zt_validate_cidr_prefix_range">Prefix must be between 8 and 32</string>
     <string name="zt_validate_cidr_network_too_large">Network is too large, the maximum supported is /24 (e.g. /24, /28, /32)</string>
     <string name="zt_validate_ip_format_error">Invalid IP address format</string>
-    <string name="zt_validate_ip_private_not_supported">Please enter a public IP; private addresses (10.x.x.x, 172.16-31.x.x, 192.168.x.x) are not supported</string>
+    <string name="zt_validate_ip_private_not_supported">Please enter a public IP; private addresses (10.x.x.x, 172.16–31.x.x, 192.168.x.x) are not supported</string>
     <string name="zt_validate_ip_reserved_not_supported">Reserved addresses are not supported, please use a public IP address</string>
     <string name="zt_validate_ip_multicast_not_supported">Multicast/special addresses are not supported, please use a public IP address</string>
 
@@ -1334,7 +1187,6 @@
     <string name="zt_gateway_rule_create_success">Rule created successfully: %1$s</string>
     <string name="zt_gateway_rule_create_failed">Failed to create rule: %1$s</string>
     <string name="zt_gateway_rule_update_success">Rule updated successfully: %1$s</string>
-    <string name="zt_gateway_rule_update_success_toast">Rule updated successfully: %1$s</string>
     <string name="zt_gateway_rule_delete_success">Rule deleted successfully</string>
     <string name="zt_gateway_rule_delete_failed">Failed to delete rule: %1$s</string>
     <string name="zt_gateway_load_rules_failed">Failed to load rules: %1$s</string>
@@ -1405,20 +1257,13 @@
     <string name="msg_name_empty">Name cannot be empty</string>
     <string name="msg_name_invalid">Name only supports lowercase letters, numbers, and underscores</string>
     <string name="msg_email_empty">Email cannot be empty</string>
-    <string name="msg_email_match_empty">Match address and forward address cannot be empty</string>
-    <string name="msg_saving">Saving...</string>
+    <string name="msg_saving">Saving…</string>
     <string name="msg_saving_ellipsis">Saving…</string>
     <string name="msg_rule_saved">Rule saved</string>
     <string name="msg_rule_removed">Rule removed</string>
-    <string name="msg_rule_name_invalid">Please fill in at least one complete condition</string>
     <string name="msg_account_not_ready">Account not ready</string>
     <string name="msg_expr_too_long">Expression length %1$d exceeds maximum %2$d characters</string>
-    <string name="msg_no_snippets">No snippets yet</string>
     <string name="msg_deleted_with_rules">Deleted (including rules and DNS)</string>
-    <string name="msg_delete_batch_progress">Deleted %1$d/%2$d snippets</string>
-    <string name="msg_snippet_syntax_error">Syntax error in code, not saved. %1$s</string>
-    <string name="msg_snippet_saved">Saved successfully</string>
-    <string name="msg_paste_snippet_first">Please paste snippet content first</string>
     <string name="msg_snippet_imported">Imported %1$d characters</string>
     <string name="msg_import_failed">Import failed: %1$s</string>
     <string name="msg_read_failed">Read failed: %1$s</string>
@@ -1432,7 +1277,6 @@
     <!-- ===== WAF ===== -->
     <string name="waf_add_rule_dialog_title">Add WAF Rule</string>
     <string name="waf_edit_rule_title">Edit WAF Rule</string>
-    <string name="waf_empty_rules">No WAF rules</string>
     <string name="waf_action_block">Block</string>
     <string name="waf_action_challenge">Challenge</string>
     <string name="waf_action_managed_challenge">Managed Challenge</string>
@@ -1506,7 +1350,6 @@
     <string name="ar_delete_rule_title">Delete rule</string>
     <string name="ar_action_block">Block</string>
     <string name="ar_action_managed_challenge">Managed Challenge</string>
-    <string name="ar_action_js_challenge">JS Challenge</string>
     <string name="ar_action_challenge">Challenge</string>
     <string name="ar_action_whitelist">Allow</string>
     <string name="ar_target_ip">IP Address</string>
@@ -1599,7 +1442,6 @@
 
     <!-- ===== SSL / TLS ===== -->
     <string name="ssl_empty_loading">Loading…</string>
-    <string name="ssl_min_tls_title">Minimum TLS Version</string>
     <string name="ssl_mode_off">Off</string>
     <string name="ssl_mode_flexible">Flexible</string>
     <string name="ssl_mode_full">Full</string>
@@ -1726,8 +1568,8 @@
     <string name="xml_activity_token_manager_6">Create Token</string>
     <string name="xml_activity_token_manager_7">No API Tokens</string>
     <string name="xml_activity_token_manager_8">Tap \"Create Token\" above to create</string>
-    <string name="xml_activity_pages_logs">Waiting for logs... will display live after this Pages project is triggered</string>
-    <string name="xml_activity_worker_logs">Waiting for logs... will display live after this Worker is triggered</string>
+    <string name="xml_activity_pages_logs">Waiting for logs… will display live after this Pages project is triggered</string>
+    <string name="xml_activity_worker_logs">Waiting for logs… will display live after this Worker is triggered</string>
 
     <!-- ===== Fragments ===== -->
     <string name="xml_fragment_group_list">No Access groups yet\nTap the button below to create</string>
@@ -1735,7 +1577,7 @@
     <string name="xml_fragment_pages">Deploy Pages Project</string>
     <string name="xml_fragment_pages_hint">Project Name</string>
     <string name="xml_fragment_pages_hint_2">Production Branch</string>
-    <string name="xml_fragment_pages_hint_3">Default compatibility date 2026-06-16</string>
+    <string name="xml_fragment_pages_hint_3">Default compatibility date 2026–06–16</string>
     <string name="xml_fragment_pages_hint_4">Compatibility flags (comma or newline separated)</string>
     <string name="compatibility_flags_placeholder">e.g. nodejs_compat</string>
     <string name="xml_fragment_pages_hint_5">Project file path or URL (supported: .zip .js .htm .html)</string>
@@ -1749,7 +1591,7 @@
     <string name="xml_fragment_worker">Deploy Worker Script</string>
     <string name="xml_fragment_worker_hint">Worker Name</string>
     <string name="xml_fragment_worker_hint_2">Script file path or URL (supported: .js .zip)</string>
-    <string name="xml_fragment_worker_hint_3">Default compatibility date 2026-06-16</string>
+    <string name="xml_fragment_worker_hint_3">Default compatibility date 2026–06–16</string>
     <string name="xml_fragment_worker_2">Deploy Script</string>
     <string name="xml_fragment_worker_3">Script</string>
     <string name="xml_fragment_worker_4">Manage Versions</string>
@@ -1837,7 +1679,7 @@
     <string name="xml_dialog_add_policy_rule_hint">IP Address / Range</string>
     <string name="xml_dialog_add_policy_rule_helper_3">e.g. 192.168.1.1 or 192.168.1.0/24</string>
     <string name="xml_dialog_add_policy_rule_2">Select Access Group</string>
-    <string name="xml_dialog_add_policy_rule_helper_4">ISO 3166-1 alpha-2 code, e.g. CN, US, JP</string>
+    <string name="xml_dialog_add_policy_rule_helper_4">ISO 3166–1 alpha–2 code, e.g. CN, US, JP</string>
     <string name="xml_dialog_add_policy_rule_3">This rule will apply to everyone</string>
     <string name="xml_dialog_add_policy_rule_helper_5">CN field of the client certificate</string>
     <string name="xml_dialog_add_trigger_hint">Cron Expression</string>
@@ -1983,7 +1825,7 @@
     <string name="xml_dialog_pages_runtime_settings">Project Name</string>
     <string name="xml_dialog_pages_runtime_settings_2">Environment</string>
     <string name="xml_dialog_pages_runtime_settings_hint">Compatibility Date</string>
-    <string name="xml_dialog_pages_runtime_settings_helper">Format: YYYY-MM-DD (e.g. 2024-01-01), tap the calendar icon to pick</string>
+    <string name="xml_dialog_pages_runtime_settings_helper">Format: YYYY–MM–DD (e.g. 2024–01–01), tap the calendar icon to pick</string>
     <string name="xml_dialog_pages_runtime_settings_3">Compatibility Flags</string>
     <string name="xml_dialog_pages_runtime_settings_hint_3">Compatibility flags (you may type manually)</string>
     <string name="xml_dialog_pages_runtime_settings_helper_3">One flag per line, or use dropdown on the right to quick-add</string>
@@ -2051,7 +1893,7 @@
     <string name="xml_dialog_transform_rule_2">Add Header</string>
     <string name="xml_dialog_worker_runtime_settings">Script Name</string>
     <string name="xml_dialog_worker_runtime_settings_hint">Compatibility Date</string>
-    <string name="xml_dialog_worker_runtime_settings_helper">Format: YYYY-MM-DD (e.g. 2024-01-01), tap the calendar icon to pick</string>
+    <string name="xml_dialog_worker_runtime_settings_helper">Format: YYYY–MM–DD (e.g. 2024–01–01), tap the calendar icon to pick</string>
     <string name="xml_dialog_worker_runtime_settings_2">Compatibility Flags</string>
     <string name="xml_dialog_worker_runtime_settings_hint_3">Compatibility flags (you may type manually)</string>
     <string name="xml_dialog_worker_runtime_settings_helper_3">One flag per line, or use dropdown on the right to quick-add</string>
@@ -2141,8 +1983,6 @@
     <string name="dash_region_page_info">%1$d to %2$d of %3$d</string>
 
     <!-- ===== datetime fallbacks ===== -->
-    <string name="datetime_format_loading">Loading time…</string>
-    <string name="datetime_never">Never</string>
     <string name="datetime_unknown">Unknown time</string>
 
     <!-- ===== Route ===== -->
@@ -2330,17 +2170,9 @@
         <item quantity="one">Connections: %1$d</item>
         <item quantity="other">Connections: %1$d</item>
     </plurals>
-    <plurals name="worker_cleanup_old_versions">
-        <item quantity="one">Cleanup complete! Removed %1$d old version</item>
-        <item quantity="other">Cleanup complete! Removed %1$d old versions</item>
-    </plurals>
     <plurals name="worker_selected_scripts">
         <item quantity="one">Selected %1$d script</item>
         <item quantity="other">Selected %1$d scripts</item>
-    </plurals>
-    <plurals name="pages_cleanup_old_deployments">
-        <item quantity="one">Cleanup complete! Removed %1$d old deployment</item>
-        <item quantity="other">Cleanup complete! Removed %1$d old deployments</item>
     </plurals>
     <plurals name="pages_selected_projects">
         <item quantity="one">Selected %1$d project</item>
@@ -2377,10 +2209,7 @@
     <string name="vm_msg_worker_script_load_exception">Error while loading script: %1$s</string>
     <string name="vm_msg_worker_custom_domains_load_failed">Failed to load custom domains: %1$s</string>
     <string name="vm_msg_worker_route_pattern_and_script_required">Please fill in route pattern and script name</string>
-    <string name="vm_msg_worker_runtime_settings_update_failed">Update failed: %1$s</string>
     <string name="vm_msg_worker_cleanup_single_script_success">Script %1$s cleanup complete! Removed %2$d old versions</string>
-    <string name="vm_msg_worker_cleanup_state_loading">Loading version list</string>
-    <string name="vm_msg_worker_cleanup_state_unknown_error">Unknown error</string>
     <string name="vm_msg_worker_update_failed_template">Update failed: %1$s</string>
     <string name="vm_msg_worker_cleanup_finished_total">Cleanup finished! %1$d old versions deleted</string>
     <string name="vm_msg_worker_cleanup_loading_versions">Loading version list</string>
@@ -2413,106 +2242,54 @@
     <string name="vm_msg_pages_projects_load_failed">Failed to load projects: %1$s</string>
     <string name="vm_msg_pages_deployment_retry_success">Redeployment initiated</string>
     <string name="vm_msg_pages_deployment_retry_failed">Redeployment failed: %1$s</string>
-    <string name="vm_msg_pages_deploy_create_success">Deployment created successfully</string>
-    <string name="vm_msg_pages_deploy_create_failed">Deployment failed: %1$s</string>
-    <string name="vm_msg_pages_envvar_update_success">Environment variables updated successfully</string>
-    <string name="vm_msg_pages_envvar_update_failed">Failed to update environment variables: %1$s</string>
-    <string name="vm_msg_pages_kv_binding_update_success">KV bindings updated successfully</string>
-    <string name="vm_msg_pages_kv_binding_update_failed">Failed to update KV bindings: %1$s</string>
-    <string name="vm_msg_pages_r2_binding_update_success">R2 bindings updated successfully</string>
-    <string name="vm_msg_pages_r2_binding_update_failed">Failed to update R2 bindings: %1$s</string>
-    <string name="vm_msg_pages_d1_binding_update_success">D1 bindings updated successfully</string>
-    <string name="vm_msg_pages_d1_binding_update_failed">Failed to update D1 bindings: %1$s</string>
-    <string name="vm_msg_pages_service_binding_update_success">Service bindings updated successfully</string>
-    <string name="vm_msg_pages_service_binding_update_failed">Failed to update service bindings: %1$s</string>
-    <string name="vm_msg_pages_runtime_updated_success">Runtime settings updated</string>
-    <string name="vm_msg_pages_runtime_updated_failed">Update failed: %1$s</string>
     <string name="vm_msg_pages_custom_domain_add_failed">Failed to add custom domain: %1$s</string>
-    <string name="vm_msg_pages_cleanup_single_project_success">Project %1$s cleanup complete! Removed %2$d old deployments</string>
-    <string name="vm_msg_pages_cleanup_state_loading">Loading deployment list</string>
 
     <!-- ===== Backup ===== -->
-    <string name="vm_msg_backup_config_save_success">Configuration saved</string>
     <string name="vm_msg_backup_config_save_failed">Failed to save configuration: %1$s</string>
-    <string name="vm_msg_backup_webdav_test_success">Connection successful</string>
-    <string name="vm_msg_backup_webdav_test_failed">Connection failed: %1$s</string>
     <string name="vm_msg_backup_success_filename">Backup succeeded: %1$s</string>
-    <string name="vm_msg_backup_failed_prefix">Backup failed: %1$s</string>
     <string name="vm_msg_backup_restore_success_count">Restore succeeded, imported %1$d accounts</string>
-    <string name="vm_msg_backup_restore_failed_prefix">Restore failed: %1$s</string>
-    <string name="vm_msg_backup_file_not_found">No backup files found</string>
-    <string name="vm_msg_backup_file_found_count">Found %1$d backup files</string>
-    <string name="vm_msg_backup_list_load_failed">Failed to load file list: %1$s</string>
     <string name="vm_msg_backup_delete_success">Deleted successfully</string>
     <string name="vm_msg_backup_delete_failed">Delete failed: %1$s</string>
     <string name="vm_msg_backup_import_success_count">Import succeeded, imported %1$d accounts</string>
-    <string name="vm_msg_backup_import_success_but_save_failed">Import succeeded (%1$d accounts imported) but failed to save to local directory: %2$s</string>
     <string name="vm_msg_backup_import_failed">Import failed: %1$s</string>
     <string name="vm_msg_backup_export_success">Export successful</string>
     <string name="vm_msg_backup_export_failed">Export failed: %1$s</string>
     <string name="vm_msg_backup_directory_set_success">Backup directory set</string>
     <string name="vm_msg_backup_directory_set_failed">Failed to set directory: %1$s</string>
-    <string name="vm_msg_backup_local_load_failed">Load failed: %1$s</string>
     <string name="vm_msg_backup_account_not_found">Account does not exist</string>
-    <string name="vm_msg_backup_account_bucket_empty">No buckets available for this account</string>
-    <string name="vm_msg_backup_account_bucket_found_count">Found %1$d buckets</string>
-    <string name="vm_msg_backup_account_bucket_list_failed">Failed to load bucket list: %1$s</string>
 
     <!-- ===== Zero Trust ===== -->
 
     <!-- Access Applications -->
     <string name="vm_msg_zt_access_apps_load_failed">Failed to load applications: %1$s</string>
-    <string name="vm_msg_zt_access_app_create_success">Application created: %1$s</string>
-    <string name="vm_msg_zt_access_app_update_success">Application updated: %1$s</string>
     <string name="vm_msg_zt_access_app_create_failed">Failed to create application: %1$s</string>
     <string name="vm_msg_zt_access_app_update_failed">Failed to update application: %1$s</string>
-    <string name="vm_msg_zt_access_app_deleted_success">Application deleted</string>
     <string name="vm_msg_zt_access_app_delete_failed">Failed to delete application: %1$s</string>
     <string name="vm_msg_zt_access_app_detail_load_failed">Failed to load application details: %1$s</string>
 
     <!-- Access Groups -->
     <string name="vm_msg_zt_access_groups_load_failed">Failed to load groups: %1$s</string>
-    <string name="vm_msg_zt_access_group_create_success">Group created: %1$s</string>
-    <string name="vm_msg_zt_access_group_update_success">Group updated: %1$s</string>
     <string name="vm_msg_zt_access_group_create_failed">Failed to create group: %1$s</string>
     <string name="vm_msg_zt_access_group_update_failed">Failed to update group: %1$s</string>
-    <string name="vm_msg_zt_access_group_deleted_success">Group deleted</string>
     <string name="vm_msg_zt_access_group_delete_failed">Failed to delete group: %1$s</string>
 
     <!-- Access Policies -->
     <string name="vm_msg_zt_access_policies_load_failed">Failed to load policies: %1$s</string>
-    <string name="vm_msg_zt_access_policy_create_success">Policy created: %1$s</string>
-    <string name="vm_msg_zt_access_policy_update_success">Policy updated: %1$s</string>
     <string name="vm_msg_zt_access_policy_create_failed">Failed to create policy: %1$s</string>
     <string name="vm_msg_zt_access_policy_update_failed">Failed to update policy: %1$s</string>
-    <string name="vm_msg_zt_access_policy_deleted_success">Policy deleted</string>
     <string name="vm_msg_zt_access_policy_delete_failed">Failed to delete policy: %1$s</string>
 
     <!-- Devices -->
-    <string name="vm_msg_zt_devices_load_failed">Failed to load devices: %1$s</string>
-    <string name="vm_msg_zt_device_revoked_success">Device revoked</string>
     <string name="vm_msg_zt_device_revoke_failed">Failed to revoke device: %1$s</string>
-    <string name="vm_msg_zt_device_deleted_success">Device deleted</string>
     <string name="vm_msg_zt_device_delete_failed">Failed to delete device: %1$s</string>
     <string name="vm_msg_zt_device_policies_load_failed">Failed to load profiles: %1$s</string>
-    <string name="vm_msg_zt_device_policy_created_success">Profile created</string>
     <string name="vm_msg_zt_device_policy_create_failed">Failed to create profile: %1$s</string>
-    <string name="vm_msg_zt_device_policy_updated_success">Profile updated</string>
     <string name="vm_msg_zt_device_policy_update_failed">Failed to update profile: %1$s</string>
-    <string name="vm_msg_zt_device_policy_deleted_success">Profile deleted</string>
     <string name="vm_msg_zt_device_policy_delete_failed">Failed to delete profile: %1$s</string>
-    <string name="vm_msg_zt_default_device_policy_updated_success">Default profile updated</string>
-    <string name="vm_msg_zt_default_device_policy_update_failed">Failed to update default profile: %1$s</string>
-    <string name="vm_msg_zt_split_tunnel_exclude_update_failed">Failed to update split tunnel exclude list: %1$s</string>
-    <string name="vm_msg_zt_split_tunnel_include_update_failed">Failed to update split tunnel include list: %1$s</string>
 
     <!-- Tunnels -->
-    <string name="vm_msg_zt_tunnels_load_failed">Failed to load tunnels: %1$s</string>
-    <string name="vm_msg_zt_tunnel_config_updated_success">Tunnel configuration updated</string>
     <string name="vm_msg_zt_tunnel_config_update_failed">Failed to update configuration: %1$s</string>
-    <string name="vm_msg_zt_tunnel_create_success">Tunnel created: %1$s</string>
     <string name="vm_msg_zt_tunnel_create_failed">Failed to create tunnel: %1$s</string>
-    <string name="vm_msg_zt_tunnel_deleted_success">Tunnel deleted</string>
     <string name="vm_msg_zt_tunnel_delete_failed">Failed to delete tunnel: %1$s</string>
     <string name="vm_msg_zt_tunnel_detail_load_failed">Failed to load tunnel details: %1$s</string>
     <string name="vm_msg_zt_tunnel_token_load_failed">Failed to load tunnel token: %1$s</string>
@@ -2657,7 +2434,6 @@
     <string name="repo_generic_update_no_result">Update failed: no response data</string>
     <string name="repo_generic_add_no_result">Add failed: no response data</string>
     <string name="repo_generic_toggle_no_result">Toggle failed: no response data</string>
-    <string name="repo_generic_delete_no_result">Delete failed: no response data</string>
     <string name="repo_generic_operation_no_result_format">%1$s failed: no response data</string>
     <string name="repo_generic_network_error">Network error</string>
     <string name="repo_generic_upload_failed">Upload failed</string>
@@ -2726,47 +2502,38 @@
     <string name="repo_pages_deploy_file_info_log">  ├─ File: %1$s (%2$s)</string>
     <string name="repo_pages_deploy_branch_log">  ├─ Branch: %1$s</string>
     <string name="repo_pages_deploy_compat_date_log">  └─ Compatibility date: %1$s</string>
-    <string name="repo_pages_creating_project_log">◇ Project does not exist, creating new project...</string>
+    <string name="repo_pages_creating_project_log">◇ Project does not exist, creating new project…</string>
     <string name="repo_pages_project_created_log">  └─ Project created</string>
     <string name="repo_pages_project_create_failed_log">✗ Project creation failed</string>
     <string name="repo_pages_project_ready_log">  └─ Project ready (waited %1$d polls)</string>
-    <string name="repo_pages_project_not_ready_warn_log">  └─ Project not fully ready, continuing deployment...</string>
+    <string name="repo_pages_project_not_ready_warn_log">  └─ Project not fully ready, continuing deployment…</string>
     <string name="repo_pages_project_exists_log">◇ Project already exists</string>
     <string name="repo_pages_compat_date_updated_log">  └─ Compatibility date updated</string>
     <string name="repo_pages_sync_compat_flags_log">◇ Syncing compatibility flags: %1$s</string>
     <string name="repo_pages_worker_mode_log">◇ .js file detected, deploying in Worker script mode</string>
     <string name="repo_pages_html_mode_log">◇ HTML file detected, deploying in static asset mode</string>
-    <string name="repo_pages_unzipping_log">◇ Extracting ZIP file...</string>
+    <string name="repo_pages_unzipping_log">◇ Extracting ZIP file…</string>
     <string name="repo_pages_unzip_done_log">  └─ Extraction complete</string>
     <string name="repo_pages_collect_done_log">◇ File collection complete: %1$d static assets%2$s</string>
     <string name="repo_pages_collect_functions_suffix"> + functions directory</string>
-    <string name="repo_pages_building_worker_bundle_log">◇ Building _worker.js bundle...</string>
+    <string name="repo_pages_building_worker_bundle_log">◇ Building _worker.js bundle…</string>
     <string name="repo_pages_zip_empty_error">No valid files in the archive</string>
     <string name="repo_pages_zip_empty_error_log">✗ No valid files in the archive</string>
-    <string name="repo_pages_requesting_token_log">◇ Requesting asset upload Token...</string>
     <string name="repo_pages_token_failed_log">✗ Failed to obtain asset upload Token</string>
     <string name="repo_pages_token_failed_error">Failed to obtain asset upload Token</string>
-    <string name="repo_pages_token_success_log">  └─ Token obtained successfully</string>
-    <string name="repo_pages_uploading_assets_log">◇ Uploading %1$d static assets...</string>
+    <string name="repo_pages_uploading_assets_log">◇ Uploading %1$d static assets…</string>
     <string name="repo_pages_assets_upload_failed_log">✗ Asset upload failed, HTTP %1$d</string>
     <string name="repo_pages_assets_sync_failed_format">Asset atomic layer sync failed, HTTP Code: %1$d</string>
     <string name="repo_pages_assets_upload_done_log">  └─ Asset upload complete</string>
-    <string name="repo_pages_updating_hash_log">◇ Updating asset hash list...</string>
+    <string name="repo_pages_updating_hash_log">◇ Updating asset hash list…</string>
     <string name="repo_pages_hash_updated_warn_log">  └─ Hash update returned HTTP %1$d (continuing deployment)</string>
     <string name="repo_pages_hash_updated_log">  └─ Hash list updated</string>
-    <string name="repo_pages_creating_deployment_worker_log">◇ Creating deployment (Worker Bundle mode)...</string>
-    <string name="repo_pages_creating_deployment_direct_log">◇ Creating deployment (Direct Upload mode)...</string>
+    <string name="repo_pages_creating_deployment_worker_log">◇ Creating deployment (Worker Bundle mode)…</string>
+    <string name="repo_pages_creating_deployment_direct_log">◇ Creating deployment (Direct Upload mode)…</string>
     <string name="repo_pages_deploy_done_log">✔ Deployment complete</string>
     <string name="repo_pages_deploy_failed_format">Deployment failed: %1$s</string>
     <string name="repo_pages_deploy_failed_log">✗ Deployment failed: %1$s</string>
-    <string name="repo_pages_env_vars_failed_format">Failed to fetch environment variables: %1$s</string>
-    <string name="repo_pages_secrets_failed_format">Failed to fetch secrets: %1$s</string>
-    <string name="repo_pages_kv_bindings_failed_format">Failed to fetch KV bindings: %1$s</string>
-    <string name="repo_pages_r2_bindings_failed_format">Failed to fetch R2 bindings: %1$s</string>
-    <string name="repo_pages_d1_bindings_failed_format">Failed to fetch D1 bindings: %1$s</string>
-    <string name="repo_pages_service_bindings_failed_format">Failed to fetch service bindings: %1$s</string>
     <string name="repo_pages_update_env_vars_failed_format">Failed to update environment variables: %1$s</string>
-    <string name="repo_pages_update_secrets_failed_format">Failed to update secrets: %1$s</string>
     <string name="repo_pages_update_kv_failed_format">Failed to update KV bindings: %1$s</string>
     <string name="repo_pages_update_r2_failed_format">Failed to update R2 bindings: %1$s</string>
     <string name="repo_pages_update_d1_failed_format">Failed to update D1 bindings: %1$s</string>
@@ -2774,36 +2541,31 @@
     <string name="repo_pages_rollback_failed_format">Rollback failed: %1$s</string>
     <string name="repo_pages_rollback_no_result">Rollback failed: no response result</string>
     <string name="repo_pages_delete_deployment_failed_format">Failed to delete deployment: %1$s</string>
-    <string name="repo_pages_delete_deployment_no_result">Delete failed: no response result</string>
     <string name="repo_pages_deployments_failed_format">Failed to load deployment list: %1$s</string>
     <string name="repo_pages_redeploy_failed_format">Redeploy failed: %1$s</string>
-    <string name="repo_pages_redeploy_no_result">Redeploy failed: no response result</string>
-    <string name="repo_pages_custom_domain_no_result">Operation successful but no response result</string>
     <string name="repo_pages_custom_domain_failed_format">Custom domain operation failed: %1$s</string>
     <string name="repo_pages_project_detail_failed_format">Failed to load project details: %1$s</string>
     <string name="repo_pages_project_create_failed_format">Failed to create project: %1$s</string>
     <string name="repo_pages_project_delete_failed_format">Failed to delete project: %1$s</string>
     <string name="repo_pages_project_list_failed_format">Failed to load project list: %1$s</string>
-    <string name="repo_pages_deployment_create_failed_format">Failed to create deployment: %1$s</string>
     <string name="repo_pages_bundle_log">◇ Bundle: %1$s</string>
     <string name="repo_pages_bundle_built">Built</string>
-    <string name="repo_pages_runtime_settings_failed_format">Failed to get runtime settings: %1$s</string>
     <string name="repo_pages_deploy_success_no_result_log">△ Deployment succeeded, but no result returned</string>
-    <string name="repo_pages_upload_html_assets_log">◇ Uploading HTML assets...</string>
+    <string name="repo_pages_upload_html_assets_log">◇ Uploading HTML assets…</string>
     <string name="repo_pages_file_empty_log">✗ File content is empty (0 bytes)</string>
     <string name="repo_pages_worker_file_empty_log">✗ Worker script file content is empty (0 bytes)</string>
-    <string name="repo_pages_creating_deployment_html_log">◇ Creating deployment (HTML mode)...</string>
-    <string name="repo_pages_creating_deployment_worker_script_log">◇ Creating deployment (Worker script mode)...</string>
-    <string name="repo_pages_creating_deployment_functions_log">◇ Creating deployment (Pages Functions standard mode)...</string>
-    <string name="repo_pages_init_session_log">◇ Initializing deployment session...</string>
+    <string name="repo_pages_creating_deployment_html_log">◇ Creating deployment (HTML mode)…</string>
+    <string name="repo_pages_creating_deployment_worker_script_log">◇ Creating deployment (Worker script mode)…</string>
+    <string name="repo_pages_creating_deployment_functions_log">◇ Creating deployment (Pages Functions standard mode)…</string>
+    <string name="repo_pages_init_session_log">◇ Initializing deployment session…</string>
     <string name="repo_pages_init_session_done_log">  └─ Session initialized</string>
     <string name="repo_pages_collect_functions_log">◇ Collected %1$d Function files</string>
-    <string name="repo_pages_transform_ts_log">◇ Transpiling TypeScript/JSX...</string>
+    <string name="repo_pages_transform_ts_log">◇ Transpiling TypeScript/JSX…</string>
     <string name="repo_pages_transform_done_log">  └─ Transpilation complete</string>
-    <string name="repo_pages_build_functions_bundle_log">◇ Building Functions bundle...</string>
-    <string name="repo_pages_build_routes_log">◇ Building route configuration...</string>
+    <string name="repo_pages_build_functions_bundle_log">◇ Building Functions bundle…</string>
+    <string name="repo_pages_build_routes_log">◇ Building route configuration…</string>
     <string name="repo_pages_build_routes_done_log">  └─ Route configuration ready</string>
-    <string name="repo_pages_sending_deploy_request_log">◇ Sending deployment request...</string>
+    <string name="repo_pages_sending_deploy_request_log">◇ Sending deployment request…</string>
     <string name="repo_pages_deploy_success_no_result">Deployment created successfully, but no result returned</string>
     <string name="repo_pages_assets_upload_http_failed_format">Asset upload failed, HTTP Code: %1$d</string>
     <string name="repo_pages_no_functions_dir">functions directory not found or empty</string>
@@ -2894,7 +2656,7 @@
     <!-- ===== DialogUtils Defaults ===== -->
     <string name="dialog_utils_positive_confirm">OK</string>
     <string name="dialog_utils_negative_cancel">Cancel</string>
-    <string name="dialog_utils_loading_message">Loading...</string>
+    <string name="dialog_utils_loading_message">Loading…</string>
 
     <!-- ===== BackupCrypto ===== -->
     <string name="repo_crypto_invalid_format">Invalid encrypted data format</string>
@@ -2907,14 +2669,12 @@
     <string name="model_scope_zone">Zone</string>
     <string name="model_scope_account">Account</string>
     <string name="model_scope_user">User</string>
-    <string name="model_ssl_mode_unknown">Unknown</string>
     <string name="model_range_24h">24 Hours</string>
     <string name="model_range_7d">7 Days</string>
     <string name="model_range_30d">30 Days</string>
     <string name="model_ssl_ownership_format">SSL: %1$s, Ownership: %2$s</string>
 
     <!-- ===== CloudFlareApi errorBody fallback ===== -->
-    <string name="repo_api_empty_error_body">(empty error response)</string>
 
     <!-- ===== LogOkHttpInterceptor: if any IOException thrown to UI ===== -->
 
@@ -2923,12 +2683,7 @@
     <!-- ========= Hardcoded cleanup: Pages / R2 / D1 / Backup / Worker append ========= -->
 
     <!-- ===== Pages Common ===== -->
-    <string name="pages_generic_env_label">Variable</string>
-    <string name="pages_generic_secret_label">Secret</string>
     <string name="pages_generic_edit_template">Edit %1$s</string>
-    <string name="pages_generic_please_enter_label_name">Please enter %1$s name</string>
-    <string name="pages_generic_please_enter_label_value">Please enter %1$s value</string>
-    <string name="pages_generic_please_enter_value">Please enter value</string>
     <string name="pages_generic_env_added">Environment variable added</string>
     <string name="pages_generic_env_updated">Environment variable updated</string>
     <string name="pages_generic_secret_added">Secret added</string>
@@ -2985,8 +2740,6 @@
     <string name="remote_download_unsupported_type">Unsupported remote file type, only .js/.zip/.html/.htm are allowed</string>
     <string name="pages_deploy_title_logs">Deployment Logs</string>
     <string name="pages_deploy_project_label_template">Project: %1$s</string>
-    <string name="pages_deploy_no_logs_to_copy">No logs to copy</string>
-    <string name="pages_deploy_logs_copied_to_clipboard">Logs copied to clipboard</string>
     <string name="pages_deploy_status_success">Deployment succeeded</string>
     <string name="pages_deploy_status_failed">Deployment failed</string>
     <string name="pages_deploy_error_detail_template">✗ Error details: %1$s</string>
@@ -3006,7 +2759,6 @@
 
     <!-- ===== Pages Deployments / Detail / Logs ===== -->
     <string name="pages_deployments_title_template">%1$s - Deployments</string>
-    <string name="pages_deployments_loading_message">Loading…</string>
     <string name="pages_deploy_no_records">No deployment records yet</string>
     <string name="pages_deploy_detail_title_template">%1$s - Deployment Details</string>
     <string name="pages_build_logs_title_template">%1$s - Build Logs</string>
@@ -3065,7 +2817,6 @@
     <string name="vm_msg_pages_project_cleanup_finished">Project %1$s cleanup finished! %2$d old deployments deleted</string>
     <string name="vm_msg_backup_load_files_failed">Failed to load file list: %1$s</string>
     <string name="vm_msg_backup_imported_save_failed">Import success (%1$d accounts imported), but failed to save to local dir: %2$s</string>
-    <string name="vm_msg_generic_unknown_error">Unknown error</string>
 
     <!-- ===== R2 Fragment ===== -->
     <string name="r2_bucket_location_template">Location: %1$s</string>
@@ -3089,7 +2840,6 @@
 
     <!-- ===== Worker Bindings & Settings ===== -->
     <string name="worker_kv_load_namespaces_failed_template">Failed to load KV namespaces: %1$s</string>
-    <string name="worker_r2_load_buckets_failed_template">Failed to load R2 buckets: %1$s</string>
     <string name="worker_r2_updating_bindings_no_script">Updating R2 binding configuration (script code will not be re-uploaded)</string>
     <string name="worker_r2_bindings_updated">R2 binding configuration updated</string>
     <string name="worker_d1_fetching_bindings">Fetching current D1 binding configuration</string>
@@ -3117,9 +2867,7 @@
     <string name="worker_secret_edit_title">Edit Secret Variable</string>
     <string name="worker_secret_updated">Secret variable updated</string>
     <string name="worker_secret_updating_vars">Updating secret variable configuration</string>
-    <string name="worker_secret_vars_updated">Secret variable configuration updated</string>
     <string name="worker_runtime_fetching_settings">Fetching current runtime settings</string>
-    <string name="worker_runtime_get_settings_failed_template">Failed to fetch settings: %1$s</string>
     <string name="worker_runtime_saving_title">Saving…</string>
     <string name="worker_runtime_updating_settings">Updating runtime settings</string>
     <string name="worker_runtime_updated">Runtime settings updated</string>
@@ -3128,25 +2876,19 @@
     <!-- ===== Worker Versions / Logs / Triggers ===== -->
     <string name="worker_version_fetching_history">Fetching version history</string>
     <string name="worker_version_no_history">No version history yet</string>
-    <string name="worker_version_delete_title">Delete Version</string>
     <string name="worker_version_delete_confirm_template">Delete version #%1$d?</string>
     <string name="worker_generic_delete_success">Deleted successfully</string>
     <string name="worker_logs_creating_channel">Creating log channel</string>
     <string name="worker_triggers_fetching_list">Fetching trigger list</string>
     <string name="worker_trigger_please_enter_cron">Please enter a Cron expression</string>
     <string name="worker_trigger_create_success">Created successfully</string>
-    <string name="worker_trigger_delete_title">Delete Trigger</string>
     <string name="worker_trigger_delete_confirm_template">Delete trigger "%1$s"?</string>
     <string name="worker_triggers_load_failed">Failed to fetch trigger list</string>
     <string name="worker_detail_fetching_info">Fetching details</string>
     <string name="worker_version_detail_title_template">%1$s - Version Details</string>
-    <string name="worker_detail_yes">Yes</string>
-    <string name="worker_detail_no">No</string>
-    <string name="worker_detail_running">Running</string>
     <string name="worker_detail_unknown_date">Unknown date</string>
 
     <!-- ===== Worker Script Delete / Batch Operations ===== -->
-    <string name="worker_script_delete_title">Delete Script</string>
     <string name="worker_script_delete_confirm_template">Delete Worker script "%1$s"? This action cannot be undone.</string>
     <string name="worker_batch_delete_confirm_single_template">Delete 1 script?\n\n%1$s\n\nThis action cannot be undone.</string>
     <string name="worker_batch_delete_confirm_multi_template">Delete %1$d scripts? This action cannot be undone.</string>
@@ -3207,7 +2949,6 @@
 
     <!-- ===== P0-1: Pages Blake3 asset hashing ===== -->
     <string name="repo_pages_hash_fallback_log">⚠ Pages asset hashing falling back to legacy algorithm (deploy may be slower)</string>
-    <string name="repo_pages_blake3_provider_missing_error">Pages asset hash algorithm init failed (BouncyCastle unavailable); fell back to legacy algorithm for this deployment</string>
 
     <!-- ===== P0-2: Remote URL download security (RemoteFileResolver / Wn pipeline) ===== -->
     <string name="remote_url_security_invalid_url_format">Invalid remote URL format</string>
@@ -3365,28 +3106,19 @@
     <string name="worker_post_observability_summary">Enable Workers Trace + persistent Logs (head sampling rate = 1) for diagnostics.</string>
     <string name="worker_post_observability_ok">Observability enabled (Traces + persistent Logs)</string>
     <string name="worker_post_observability_fail_format">Failed to enable observability: %1$s</string>
-    <string name="worker_post_subdomain_enable_title">Enable Custom Subdomain</string>
     <string name="worker_post_subdomain_title">Enable Custom Subdomain</string>
     <string name="worker_post_subdomain_summary">Enable *.workers.dev subdomain access (auto-runs after the first upload).</string>
-    <string name="worker_post_subdomain_enabling">Activating subdomain…</string>
     <string name="worker_post_subdomain_ok_format">Subdomain enabled: %1$s.workers.dev</string>
     <string name="worker_post_subdomain_fail_format">Failed to enable subdomain: %1$s</string>
     <string name="worker_post_subdomain_403_dashboard_hint">Hint: Please first register your account-level workers.dev subdomain at Cloudflare Dashboard → Workers &amp; Pages (one-time setup).</string>
-    <string name="worker_post_deploy_title">Promote to Production</string>
     <string name="worker_post_deployment_title">Promote to Production</string>
-    <string name="worker_post_deploy_summary">Route 100%% production traffic to the latest version (percentage deployment strategy).</string>
     <string name="worker_post_deployment_summary">Route 100%% production traffic to the latest version (percentage deployment strategy).</string>
     <string name="worker_post_deploy_ok_format">Version #%1$d deployed with %2$d%% traffic</string>
     <string name="worker_post_deploy_warn_format">Upload OK but traffic promotion failed (script still usable): %1$s</string>
     <string name="worker_post_deploy_fail_format">Production deployment failed: %1$s</string>
-    <string name="worker_post_sequence_summary_format">Post-upload pipeline: %1$s → %2$s → %3$s</string>
     <string name="worker_post_stage_observability">Observability</string>
-    <string name="worker_post_stage_subdomain">Subdomain</string>
-    <string name="worker_post_stage_deployment">Deployment</string>
 
     <!-- ===== P1-1B Pages Ko-style polling of latest_stage + exponential backoff ===== -->
-    <string name="pages_poll_title">Deployment Stages</string>
-    <string name="pages_poll_summary">Poll Cloudflare Pages latest_stage up to 30 times (backoff 2s→10s). Finished = success.</string>
     <string name="pages_poll_stage_queued">① Queued</string>
     <string name="pages_poll_stage_initializing">② Initializing build runner</string>
     <string name="pages_poll_stage_building">③ Building assets</string>
@@ -3401,32 +3133,22 @@
     <string name="pages_poll_aborted_format">Polling aborted: %1$s</string>
     <string name="pages_poll_success_format">Pages project %1$s deployed (Aliases: %2$s)</string>
     <string name="pages_poll_failed_format">Deployment failed. Latest stage: %1$s\nError: %2$s</string>
-    <string name="pages_poll_open_logs">View deployment logs</string>
 
     <!-- ===== P1-3 nodejs_compat auto-detect &amp; auto-append compatibility_flags ===== -->
-    <string name="worker_nodejs_detect_title">Node.js Compat Auto-Detect</string>
-    <string name="worker_nodejs_detect_summary">Scan entry script keywords (require / process / Buffer / node:*). On hit, auto-append the nodejs_compat flag.</string>
     <string name="worker_nodejs_detect_hit_hint_format">ℹ Node.js compat keywords detected (%1$s); auto-appended compatibility_flag: nodejs_compat</string>
-    <string name="worker_nodejs_detect_hit_patterns_format">Matched keywords: %1$s</string>
     <string name="worker_nodejs_detect_no_hit">No Node.js keywords found; keeping original compatibility_flags.</string>
     <string name="worker_nodejs_flag_dup_skip_format">compatibility_flags already contains %1$s; skipping duplicate append.</string>
     <string name="worker_nodejs_flag_append_fail_format">Failed to append nodejs_compat flag: %1$s</string>
 
     <!-- ===== P1-4 Dual-env deployment_configs (production + preview) sync ===== -->
     <string name="pages_env_sync_title">Production / Preview Env Sync</string>
-    <string name="pages_env_sync_summary">Write env vars, KV, D1, R2, and Service bindings into BOTH deployment_configs (production + preview).</string>
     <string name="pages_env_sync_in_progress">Syncing production + preview deployment_configs…</string>
-    <string name="pages_env_sync_production_ok">✅ Production environment config written</string>
-    <string name="pages_env_sync_preview_ok">✅ Preview environment config written</string>
     <string name="pages_env_sync_ok_format">Dual-envs synced: %1$d vars + %2$d KV + %3$d D1 + %4$d R2 + %5$d Service bindings</string>
     <string name="pages_env_sync_preview_fail_format">Preview env write failed: %1$s\nProduction config is active; please fill in preview manually.</string>
     <string name="pages_env_sync_production_fail_format">Production env write failed: %1$s\nPlease check account permissions, then retry.</string>
 
     <!-- ===== P1-2 _worker.js/_worker.bundle/special files FormData handling ===== -->
-    <string name="pages_formdata_workerjs_title">Advanced Functions (_worker.js) nested encoding</string>
-    <string name="pages_formdata_workerjs_summary">_worker.js MUST be wrapped in metadata + an inner multipart FormData; otherwise Advanced Functions stay inactive.</string>
     <string name="pages_formdata_workerjs_nested_building">Building _worker.js nested FormData…</string>
-    <string name="pages_formdata_workerjs_nested_fail_format">Failed to build _worker.js nested FormData: %1$s\nAdvanced Functions may not work. Please retry with a ZIP upload.</string>
     <string name="pages_formdata_bundle_applied">Applied _worker.bundle (application/octet-stream); skipped _worker.js branch.</string>
     <string name="pages_formdata_special_skipped_format">Special-file conflict ignored: both %1$s and %2$s present; preferring %2$s.</string>
     <string name="pages_formdata_headers_applied">Attached _headers (static route header overrides)</string>

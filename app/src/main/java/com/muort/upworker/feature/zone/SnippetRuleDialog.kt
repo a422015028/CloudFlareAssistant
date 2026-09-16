@@ -3,7 +3,6 @@ package com.muort.upworker.feature.zone
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -63,7 +62,7 @@ class SnippetRuleDialog : DialogFragment() {
     private var saving = false
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        _binding = DialogSnippetRuleBinding.inflate(LayoutInflater.from(requireContext()))
+        _binding = DialogSnippetRuleBinding.inflate(layoutInflater)
         setupViews()
         return MaterialAlertDialogBuilder(requireContext())
             .setView(binding.root)
@@ -166,7 +165,7 @@ class SnippetRuleDialog : DialogFragment() {
 
     private fun inflateConditionView(index: Int): View {
         val ctx = requireContext()
-        val inflater = LayoutInflater.from(ctx)
+        val inflater = layoutInflater
         val row = ItemSnippetConditionBinding.inflate(inflater, binding.conditionsContainer, false)
         val cond = conditions[index]
 

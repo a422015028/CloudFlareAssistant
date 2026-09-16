@@ -2555,9 +2555,9 @@ class WorkerFragment : Fragment() {
     private fun formatSize(size: Long): String {
         return when {
             size < 1024 -> "${size}B"
-            size < 1024 * 1024 -> String.format("%.2f KB", size / 1024.0)
-            size < 1024 * 1024 * 1024 -> String.format("%.2f MB", size / (1024.0 * 1024))
-            else -> String.format("%.2f GB", size / (1024.0 * 1024 * 1024))
+            size < 1024 * 1024 -> String.format(Locale.US, "%.2f KB", size / 1024.0)
+            size < 1024 * 1024 * 1024 -> String.format(Locale.US, "%.2f MB", size / (1024.0 * 1024))
+            else -> String.format(Locale.US, "%.2f GB", size / (1024.0 * 1024 * 1024))
         }
     }
     
@@ -3998,9 +3998,9 @@ class WorkerScriptsAdapter(
             
             return when {
                 size < 1024 -> "${size}B"
-                size < 1024 * 1024 -> String.format("%.2f KB", size / 1024.0)
-                size < 1024 * 1024 * 1024 -> String.format("%.2f MB", size / (1024.0 * 1024))
-                else -> String.format("%.2f GB", size / (1024.0 * 1024 * 1024))
+                size < 1024 * 1024 -> String.format(Locale.US, "%.2f KB", size / 1024.0)
+                size < 1024 * 1024 * 1024 -> String.format(Locale.US, "%.2f MB", size / (1024.0 * 1024))
+                else -> String.format(Locale.US, "%.2f GB", size / (1024.0 * 1024 * 1024))
             }
         }
         

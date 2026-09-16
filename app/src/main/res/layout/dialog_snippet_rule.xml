@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -143,7 +144,7 @@
                 android:id="@+id/builderCharCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0 / 4000"
+                tools:text="0 / 4000"
                 android:textSize="11sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:layout_gravity="end"
@@ -189,7 +190,7 @@
                 android:id="@+id/editorCharCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0 / 4000"
+                tools:text="0 / 4000"
                 android:textSize="11sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:layout_gravity="end"

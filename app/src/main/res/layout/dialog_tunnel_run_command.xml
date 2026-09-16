@@ -33,6 +33,7 @@
 
         <Button
             android:id="@+id/hideTokenButton"
+            style="?attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -41,6 +42,7 @@
 
         <Button
             android:id="@+id/copyCommandButton"
+            style="?attr/buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

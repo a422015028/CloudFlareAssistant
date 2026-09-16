@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:baselineAligned="false"
         android:gravity="center_vertical">
 
         <LinearLayout
@@ -78,7 +79,7 @@
                     android:id="@+id/runningIcon"
                     android:layout_width="14dp"
                     android:layout_height="14dp"
-                    android:src="@drawable/ic_running" />
+                    android:src="@drawable/ic_running" android:contentDescription="@null" />
 
                 <TextView
                     android:id="@+id/runningText"

@@ -1,5 +1,7 @@
 package com.muort.upworker.feature.dashboard
 
+
+import java.util.Locale
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -479,7 +481,7 @@ class DashboardCardView @JvmOverloads constructor(
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
                     // 显示对数值
-                    return String.format("%.1f", value)
+                    return String.format(Locale.US, "%.1f", value)
                 }
             }
         }
@@ -625,9 +627,9 @@ class DashboardCardView @JvmOverloads constructor(
      */
     private fun formatNumber(value: Long): String {
         return when {
-            value >= 1_000_000_000 -> String.format("%.1fB", value / 1_000_000_000.0)
-            value >= 1_000_000 -> String.format("%.1fM", value / 1_000_000.0)
-            value >= 1_000 -> String.format("%.1fK", value / 1_000.0)
+            value >= 1_000_000_000 -> String.format(Locale.US, "%.1fB", value / 1_000_000_000.0)
+            value >= 1_000_000 -> String.format(Locale.US, "%.1fM", value / 1_000_000.0)
+            value >= 1_000 -> String.format(Locale.US, "%.1fK", value / 1_000.0)
             else -> value.toString()
         }
     }
@@ -637,10 +639,10 @@ class DashboardCardView @JvmOverloads constructor(
      */
     private fun formatBytes(bytes: Long): String {
         return when {
-            bytes >= 1_099_511_627_776L -> String.format("%.2f TB", bytes / 1_099_511_627_776.0)
-            bytes >= 1_073_741_824L -> String.format("%.2f GB", bytes / 1_073_741_824.0)
-            bytes >= 1_048_576L -> String.format("%.2f MB", bytes / 1_048_576.0)
-            bytes >= 1024L -> String.format("%.2f KB", bytes / 1024.0)
+            bytes >= 1_099_511_627_776L -> String.format(Locale.US, "%.2f TB", bytes / 1_099_511_627_776.0)
+            bytes >= 1_073_741_824L -> String.format(Locale.US, "%.2f GB", bytes / 1_073_741_824.0)
+            bytes >= 1_048_576L -> String.format(Locale.US, "%.2f MB", bytes / 1_048_576.0)
+            bytes >= 1024L -> String.format(Locale.US, "%.2f KB", bytes / 1024.0)
             else -> "$bytes B"
         }
     }
@@ -650,10 +652,10 @@ class DashboardCardView @JvmOverloads constructor(
      */
     private fun formatByteMonths(byteMonths: Long): String {
         return when {
-            byteMonths >= 1_099_511_627_776L -> String.format("%.2f TB-mo", byteMonths / 1_099_511_627_776.0)
-            byteMonths >= 1_073_741_824L -> String.format("%.2f GB-mo", byteMonths / 1_073_741_824.0)
-            byteMonths >= 1_048_576L -> String.format("%.2f MB-mo", byteMonths / 1_048_576.0)
-            byteMonths >= 1024L -> String.format("%.2f KB-mo", byteMonths / 1024.0)
+            byteMonths >= 1_099_511_627_776L -> String.format(Locale.US, "%.2f TB-mo", byteMonths / 1_099_511_627_776.0)
+            byteMonths >= 1_073_741_824L -> String.format(Locale.US, "%.2f GB-mo", byteMonths / 1_073_741_824.0)
+            byteMonths >= 1_048_576L -> String.format(Locale.US, "%.2f MB-mo", byteMonths / 1_048_576.0)
+            byteMonths >= 1024L -> String.format(Locale.US, "%.2f KB-mo", byteMonths / 1024.0)
             else -> "$byteMonths B-mo"
         }
     }
@@ -665,8 +667,8 @@ class DashboardCardView @JvmOverloads constructor(
         return when {
             value >= 100.0 -> "100"
             value >= 10.0 -> value.roundToInt().toString()
-            value >= 1.0 -> String.format("%.1f", value)
-            else -> String.format("%.2f", value)
+            value >= 1.0 -> String.format(Locale.US, "%.1f", value)
+            else -> String.format(Locale.US, "%.2f", value)
         }
     }
 
@@ -675,10 +677,10 @@ class DashboardCardView @JvmOverloads constructor(
      */
     private fun formatDecimal(value: Double): String {
         return when {
-            value >= 1000.0 -> String.format("%.0f", value)
-            value >= 100.0 -> String.format("%.1f", value)
-            value >= 10.0 -> String.format("%.2f", value)
-            else -> String.format("%.3f", value)
+            value >= 1000.0 -> String.format(Locale.US, "%.0f", value)
+            value >= 100.0 -> String.format(Locale.US, "%.1f", value)
+            value >= 10.0 -> String.format(Locale.US, "%.2f", value)
+            else -> String.format(Locale.US, "%.3f", value)
         }
     }
 }

@@ -44,7 +44,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/account_default"
-                        android:textSize="10sp"
+                        android:textSize="11sp"
                         android:layout_marginStart="8dp"
                         android:visibility="gone"
                         style="@style/Widget.Material3.Chip.Assist.Elevated" />

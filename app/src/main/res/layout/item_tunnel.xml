@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="@string/tunnel_active"
-            android:textSize="10sp"
+            android:textSize="11sp"
             app:chipMinHeight="24dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tunnelNameText" />
@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:text="cloudflared"
-            android:textSize="10sp"
+            android:textSize="11sp"
             app:chipMinHeight="24dp"
             app:layout_constraintStart_toEndOf="@id/statusChip"
             app:layout_constraintTop_toTopOf="@id/statusChip" />

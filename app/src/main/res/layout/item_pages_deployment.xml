@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:baselineAligned="false"
         android:gravity="center_vertical">
 
         <LinearLayout
@@ -48,7 +49,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Functions"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:textColor="?attr/colorPrimary"
                     android:background="@drawable/bg_chip"
                     android:paddingStart="6dp"
@@ -93,7 +94,7 @@
                 <ImageView
                     android:layout_width="14dp"
                     android:layout_height="14dp"
-                    android:src="@drawable/ic_running" />
+                    android:src="@drawable/ic_running" android:contentDescription="@null" />
 
                 <TextView
                     android:id="@+id/runningText"

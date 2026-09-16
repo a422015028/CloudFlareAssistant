@@ -1,5 +1,7 @@
 package com.muort.upworker.feature.r2
 
+
+import java.util.Locale
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -64,9 +66,9 @@ class ObjectAdapter : RecyclerView.Adapter<ObjectAdapter.ViewHolder>() {
         private fun formatFileSizeCompat(size: Long): String {
             return when {
                 size < 1024 -> "$size B"
-                size < 1024 * 1024 -> String.format("%.1f KB", size / 1024.0)
-                size < 1024 * 1024 * 1024 -> String.format("%.2f MB", size / 1024.0 / 1024.0)
-                else -> String.format("%.2f GB", size / 1024.0 / 1024.0 / 1024.0)
+                size < 1024 * 1024 -> String.format(Locale.US, "%.1f KB", size / 1024.0)
+                size < 1024 * 1024 * 1024 -> String.format(Locale.US, "%.2f MB", size / 1024.0 / 1024.0)
+                else -> String.format(Locale.US, "%.2f GB", size / 1024.0 / 1024.0 / 1024.0)
             }
         }
     }

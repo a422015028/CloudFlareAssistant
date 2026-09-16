@@ -261,7 +261,7 @@ class SnippetEditorFragment : Fragment() {
     private fun loadSnippetContent() {
         binding.progressBar.visibility = View.VISIBLE
 
-                if (account == null) {
+        if (account == null) {
             android.widget.Toast.makeText(requireContext(), getString(R.string.msg_account_not_ready), android.widget.Toast.LENGTH_LONG).show()
             binding.progressBar.visibility = View.GONE
             return
