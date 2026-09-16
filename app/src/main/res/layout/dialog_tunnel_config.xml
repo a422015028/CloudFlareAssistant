@@ -40,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="@string/tunnel_add_rule"
+            android:text="@string/email_add_routing_rule"
             style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <!-- Divider -->

@@ -162,8 +162,8 @@ class AccessDetailFragment : Fragment() {
         binding.appNameText.text = app.name
         binding.domainText.text = app.domain ?: getString(R.string.zt_access_detail_not_set)
         binding.typeChip.text = getTypeLabel(app.type)
-        binding.sessionDurationText.text = app.sessionDuration ?: getString(R.string.zt_access_detail_default)
-        binding.createdAtText.text = app.createdAt ?: getString(R.string.zt_device_status_unknown)
+        binding.sessionDurationText.text = app.sessionDuration ?: getString(R.string.account_default)
+        binding.createdAtText.text = app.createdAt ?: getString(R.string.status_unknown)
 
         // Advanced config - 先移除listener防止程序设置触发更新
         binding.appLauncherSwitch.setOnCheckedChangeListener(null)
@@ -244,7 +244,7 @@ class AccessDetailFragment : Fragment() {
         val app = viewModel.selectedApp.value ?: return
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.zt_access_delete_app_title)
+            .setTitle(R.string.access_delete_app)
             .setMessage(getString(R.string.zt_access_delete_app_confirm_detail, app.name))
             .setPositiveButton(R.string.delete) { _, _ ->
                 deleteApplication()
@@ -348,7 +348,7 @@ class AccessDetailFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.zt_access_edit_app_title)
+            .setTitle(R.string.access_edit_app)
             .setView(dialogView)
             .setPositiveButton(R.string.save) { _, _ ->
                 val name = nameInput?.text?.toString()

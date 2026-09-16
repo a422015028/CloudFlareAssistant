@@ -65,7 +65,7 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/dns_type">
+                    android:hint="@string/dns_field_type">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/recordTypeInput"

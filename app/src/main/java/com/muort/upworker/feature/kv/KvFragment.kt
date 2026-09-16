@@ -351,7 +351,7 @@ class KvFragment : Fragment() {
             fun bind(key: KvKey) {
                 binding.keyNameText.text = key.name
                 val ctx = binding.root.context
-                binding.keyMetadataText.text = key.value?.let { ctx.getString(R.string.kv_value_label, it) } ?: ctx.getString(R.string.kv_value_loading)
+                binding.keyMetadataText.text = key.value?.let { ctx.getString(R.string.kv_value_label, it) } ?: ctx.getString(R.string.dialog_utils_loading_message)
                 
                 binding.root.setOnClickListener {
                     onKeyClick(key)

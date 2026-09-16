@@ -123,7 +123,7 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
         // 类型
         val typeText = when (template.type) {
             "worker" -> getString(R.string.store_worker)
-            "pages" -> getString(R.string.store_pages)
+            "pages" -> getString(R.string.card_pages)
             "hybrid" -> getString(R.string.store_hybrid)
             else -> template.type
         }
@@ -212,7 +212,7 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
         return when (type) {
             "kv" -> "🗄️" to getString(R.string.store_binding_type_kv)
             "d1" -> "🗃️" to getString(R.string.store_binding_type_d1)
-            "r2" -> "📦" to getString(R.string.store_binding_type_r2)
+            "r2" -> "📦" to getString(R.string.domain_r2_bucket)
             "ai" -> "🤖" to getString(R.string.store_binding_type_ai)
             "var" -> "🔑" to getString(R.string.store_binding_type_var)
             "durable_object" -> "📌" to getString(R.string.store_binding_type_durable_object)

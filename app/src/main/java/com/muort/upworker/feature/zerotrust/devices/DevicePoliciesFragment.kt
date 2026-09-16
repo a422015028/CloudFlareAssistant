@@ -297,7 +297,7 @@ ff05::/16"""
             } else {
                 matchBuilderLayout.visibility = View.VISIBLE
                 matchInputLayout.visibility = View.GONE
-                matchAdvancedToggle.text = getString(R.string.zt_device_advanced_mode)
+                matchAdvancedToggle.text = getString(R.string.device_advanced_expression)
                 parseMatchExpressionToBuilder(matchInput.text?.toString())?.let { (selectorIdx, operatorIdx, value) ->
                     matchSelectorSpinner.setSelection(selectorIdx)
                     matchOperatorSpinner.setSelection(operatorIdx)
@@ -444,7 +444,7 @@ ff05::/16"""
         }
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(if (existingPolicy == null) R.string.zt_policy_create_profile else R.string.zt_policy_edit_profile)
+            .setTitle(if (existingPolicy == null) R.string.device_create_profile else R.string.zt_policy_edit_profile)
             .setView(dialogView)
             .setPositiveButton(if (existingPolicy == null) R.string.dialog_create else R.string.save) { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton

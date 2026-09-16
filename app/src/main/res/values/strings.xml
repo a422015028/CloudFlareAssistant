@@ -18,7 +18,6 @@
     <string name="update">更新</string>
     <string name="invalid_download_url">下载地址无效</string>
     <string name="cannot_open_url">无法打开链接</string>
-    <string name="version_format">版本 %1$s</string>
     <string name="version_with_build_format">版本 %1$s (Build %2$d)</string>
     <string name="new_version_available">%1$s 可用，是否立即更新？</string>
 
@@ -76,8 +75,6 @@
     <string name="account_fetch_accounts_failed">获取账号列表失败: %1$s</string>
 
     <!-- Worker 相关 -->
-    <string name="worker_select_file">选择文件</string>
-
     <!-- DNS 相关 -->
     <string name="dns_record">DNS 记录</string>
     <string name="dns_delete_confirm">确定要删除此 DNS 记录吗？</string>
@@ -109,15 +106,11 @@
     <string name="card_settings">设置</string>
     <string name="card_about">关于</string>
 
-    <!-- 设置页面 -->
-    <string name="settings_title">设置</string>
-    <string name="settings_appearance">外观</string>
+    <!-- 设置页面 -->    <string name="settings_appearance">外观</string>
     <string name="settings_display">显示</string>
     <string name="settings_language">语言</string>
     <string name="settings_network">网络</string>
-    <string name="theme_mode">主题模式</string>
-    <string name="theme_follow_system">跟随系统</string>
-    <string name="theme_light">浅色</string>
+    <string name="theme_mode">主题模式</string>    <string name="theme_light">浅色</string>
     <string name="theme_dark">深色</string>
     <string name="dynamic_color">动态配色</string>
     <string name="dynamic_color_desc">跟随系统自动调整主题色（Android 12+）</string>
@@ -136,9 +129,7 @@
     <string name="analytics_time_range_30d">30天</string>
     <string name="analytics_total_requests">总请求数</string>
     <string name="analytics_bandwidth">带宽</string>
-    <string name="analytics_unique_visitors">独立访客</string>
-    <string name="analytics_loading">加载中…</string>
-    <string name="analytics_error">加载失败</string>
+    <string name="analytics_unique_visitors">独立访客</string>    <string name="analytics_error">加载失败</string>
     <string name="analytics_status_normal">正常</string>
     <string name="analytics_status_warning">警告</string>
     <string name="analytics_status_critical">严重</string>
@@ -195,26 +186,18 @@
     <string name="dns_record_type">记录类型</string>
     <string name="dns_status">状态</string>
     <string name="dns_ttl_seconds">TTL (秒)</string>
-    <string name="dns_type">类型</string>
-
     <!-- 域名相关 -->
-    <string name="domain_add_title">添加域名</string>
-    <string name="domain_close">关闭</string>
-    <string name="domain_cloudflare_nameservers">Cloudflare 名称服务器</string>
+    <string name="domain_add_title">添加域名</string>    <string name="domain_cloudflare_nameservers">Cloudflare 名称服务器</string>
     <string name="domain_copy_nameservers">复制名称服务器</string>
     <string name="domain_delete">删除域名</string>
     <string name="domain_empty">暂无域名</string>
     <string name="domain_empty_hint">点击右下角按钮添加域名</string>
-    <string name="domain_enter">进入</string>
-    <string name="domain_hint">域名</string>
-    <string name="domain_menu">菜单</string>
+    <string name="domain_enter">进入</string>    <string name="domain_menu">菜单</string>
     <string name="domain_nameservers_label">名称服务器</string>
     <string name="domain_pages_no_custom">该项目尚未绑定自定义域名</string>
     <string name="domain_pending">待激活</string>
     <string name="domain_pending_activation">待激活：请在域名注册商处更换名称服务器</string>
-    <string name="domain_r2_bucket">R2 存储桶</string>
-    <string name="domain_retry">重试</string>
-    <string name="domain_root_hint">输入根域名（如 example.com），Cloudflare 将作为权威 DNS。</string>
+    <string name="domain_r2_bucket">R2 存储桶</string>    <string name="domain_root_hint">输入根域名（如 example.com），Cloudflare 将作为权威 DNS。</string>
     <string name="domain_service_type">服务类型</string>
     <string name="domain_setup_steps">操作步骤</string>
     <string name="domain_step1_login_registrar">1. 登录你的域名注册商后台</string>
@@ -223,14 +206,9 @@
     <string name="domain_step4_save_wait">4. 保存并等待生效（最长 24 小时）</string>
     <string name="domain_worker_script">Worker 脚本</string>
 
-    <!-- WAF 相关 -->
-    <string name="waf_add_rule_title">添加 WAF 规则</string>
-    <string name="waf_enable_rule">启用此规则</string>
+    <!-- WAF 相关 -->    <string name="waf_enable_rule">启用此规则</string>
     <string name="waf_expression_builder_title">可视化表达式构建器</string>
     <string name="waf_expression_hint">表达式（Wirefilter 语法）</string>
-    <string name="waf_preview">预览</string>
-    <string name="waf_rule_name">规则名称</string>
-
     <!-- 邮件路由相关 -->
     <string name="email_routing_destination_email">目的邮箱地址</string>
     <string name="email_routing_forward_to">转发到（外部邮箱）</string>
@@ -247,9 +225,7 @@
     <string name="access_rule_target_hint">目标</string>
 
     <!-- 代码片段相关 -->
-    <string name="snippet_add_condition">+ 添加条件</string>
-    <string name="snippet_all_requests">所有格式化请求</string>
-    <string name="snippet_all_requests_desc">对所有请求应用规则</string>
+    <string name="snippet_add_condition">+ 添加条件</string>    <string name="snippet_all_requests_desc">对所有请求应用规则</string>
     <string name="snippet_copy">复制</string>
     <string name="snippet_custom_expression">自定义表达式</string>
     <string name="snippet_custom_expression_desc">仅将规则评估与自定义筛选表达式匹配的请求</string>
@@ -259,15 +235,11 @@
     <string name="snippet_expression_hint">表达式</string>
     <string name="snippet_expression_preview">表达式预览</string>
     <string name="snippet_field">字段</string>
-    <string name="snippet_header_name_hint">请求头名称（如 x-custom-header）</string>
-    <string name="snippet_import">导入</string>
-    <string name="snippet_logic_and">AND (全部满足)</string>
+    <string name="snippet_header_name_hint">请求头名称（如 x-custom-header）</string>    <string name="snippet_logic_and">AND (全部满足)</string>
     <string name="snippet_logic_connection">条件之间的连接方式</string>
     <string name="snippet_logic_or">OR (任一满足)</string>
     <string name="snippet_next">下一个</string>
-    <string name="snippet_operator">运算符</string>
-    <string name="snippet_please_add_condition">（请添加条件）</string>
-    <string name="snippet_previous">上一个</string>
+    <string name="snippet_operator">运算符</string>    <string name="snippet_previous">上一个</string>
     <string name="snippet_remove_rule">移除此规则</string>
     <string name="snippet_rule_description">规则描述（可选）</string>
     <string name="snippet_rule_label">规则</string>
@@ -275,8 +247,6 @@
     <string name="snippet_search">搜索</string>
     <string name="snippet_select_all">全选</string>
     <string name="snippet_use_builder">使用构建器</string>
-    <string name="snippet_value">值</string>
-
     <!-- 补全缺失的字符串资源 -->
     <string name="access_add_policy">添加策略</string>
     <string name="access_advanced_config">高级配置</string>
@@ -305,9 +275,7 @@
     <string name="backup_auto">自动备份</string>
     <string name="backup_choose_dir">设置目录</string>
     <string name="backup_current_dir">当前目录: 应用私有目录（默认）</string>
-    <string name="backup_file_list">备份文件列表</string>
-    <string name="backup_import">导入备份</string>
-    <string name="backup_export">导出备份</string>
+    <string name="backup_file_list">备份文件列表</string>    <string name="backup_export">导出备份</string>
     <string name="backup_load_buckets">加载Bucket</string>
     <string name="backup_local">本地</string>
     <string name="backup_local_backup">本地备份</string>
@@ -328,9 +296,7 @@
     <string name="backup_webdav_config">WebDAV 配置</string>
     <string name="backup_webdav_url">WebDAV 地址</string>
     <string name="binding_add">+ 添加绑定</string>
-    <string name="binding_script_name_preview">脚本名称: my-worker</string>
-    <string name="common_action">动作</string>
-    <string name="common_domain">域名</string>
+    <string name="binding_script_name_preview">脚本名称: my-worker</string>    <string name="common_domain">域名</string>
     <string name="common_priority_zero">优先级: 0</string>
     <string name="common_time_info">时间信息</string>
     <string name="d1_add_binding">添加 D1 绑定</string>
@@ -340,10 +306,7 @@
     <string name="d1_create_table">新建表</string>
     <string name="d1_database">数据库</string>
     <string name="d1_database_name">数据库名</string>
-    <string name="d1_database_name_hint">数据库名称</string>
-    <string name="d1_delete_database">删除数据库</string>
-    <string name="d1_delete_table">删除表</string>
-    <string name="d1_enter_sql_hint">输入 SQL 语句</string>
+    <string name="d1_database_name_hint">数据库名称</string>    <string name="d1_enter_sql_hint">输入 SQL 语句</string>
     <string name="d1_execute_sql">执行 SQL</string>
     <string name="d1_field_count">字段数: %1$d</string>
     <string name="d1_no_binding_config">暂无 D1 绑定配置</string>
@@ -417,13 +380,11 @@
     <string name="gateway_create_list">创建列表</string>
     <string name="gateway_create_location">创建位置</string>
     <string name="gateway_create_rule">创建规则</string>
-    <string name="gateway_disabled">已禁用</string>
     <string name="gateway_dns_endpoints">DNS 端点</string>
     <string name="gateway_dns_match_desc">匹配域名查询，支持主域名和所有子域名</string>
     <string name="gateway_dns_rules">DNS 规则</string>
     <string name="gateway_domain_list">域名列表</string>
     <string name="gateway_enable_rule">启用规则</string>
-    <string name="gateway_enabled">已启用</string>
     <string name="gateway_generated_expression">生成的规则表达式</string>
     <string name="gateway_host">主机</string>
     <string name="gateway_hostname_hint">主机名 (如: example.com)</string>
@@ -482,11 +443,7 @@
     <string name="kv_key_name">键名</string>
     <string name="kv_metadata">元数据</string>
     <string name="kv_no_bindings">暂无 KV 绑定</string>
-    <string name="kv_no_namespaces">暂无命名空间\n点击 + 创建</string>
-    <string name="kv_please_select_namespace">请先选择命名空间</string>
-    <string name="kv_select_namespace">选择 KV 命名空间</string>
-    <string name="kv_value">值</string>
-    <string name="kv_worker_bindings_title">配置 Worker 的 KV 绑定</string>
+    <string name="kv_no_namespaces">暂无命名空间\n点击 + 创建</string>    <string name="kv_select_namespace">选择 KV 命名空间</string>    <string name="kv_worker_bindings_title">配置 Worker 的 KV 绑定</string>
     <string name="r2_add_binding">添加 R2 绑定</string>
     <string name="r2_binding_list">R2 绑定列表</string>
     <string name="r2_binding_name_hint">绑定名称 (如: MY_R2)</string>
@@ -506,9 +463,7 @@
     <string name="r2_size">大小</string>
     <string name="r2_upload_object">上传对象</string>
     <string name="r2_worker_bindings_title">配置 Worker 的 R2 绑定</string>
-    <string name="tunnel_active">活跃</string>
-    <string name="tunnel_add_rule">添加规则</string>
-    <string name="tunnel_config_source">配置来源</string>
+    <string name="tunnel_active">活跃</string>    <string name="tunnel_config_source">配置来源</string>
     <string name="tunnel_configure">配置隧道</string>
     <string name="tunnel_connect_instructions">在目标机器上安装cloudflared，并以管理员身份运行下面的命令，隧道即可连接。</string>
     <string name="tunnel_connect_instructions_old">在目标机器上安装cloudflared,并以管理员身份运行下面的命令，隧道即可连接。</string>
@@ -567,9 +522,7 @@
     <string name="msg_update_failed">更新失败: %1$s</string>
 
     <!-- 对话框标题通用 -->
-    <string name="dialog_loading">加载中</string>
-    <string name="dialog_loading_ellipsis">加载中…</string>
-    <string name="dialog_preparing">正在准备…</string>
+    <string name="dialog_loading">加载中</string>    <string name="dialog_preparing">正在准备…</string>
     <string name="dialog_updating">正在更新…</string>
     <string name="dialog_error_title">操作失败</string>
     <string name="dialog_close">关闭</string>
@@ -585,17 +538,13 @@
     <!-- 连接状态 -->
     <string name="status_connecting">连接中…</string>
     <string name="status_connected">已连接</string>
-    <string name="status_disconnected">已断开</string>
-    <string name="status_paused">已暂停</string>
-    <string name="status_not_connected">未连接</string>
+    <string name="status_disconnected">已断开</string>    <string name="status_not_connected">未连接</string>
     <string name="status_connection_failed">连接失败: %1$s</string>
     <string name="status_wss_url_empty">WSS URL为空</string>
 
     <!-- 通用状态词 -->
     <string name="status_active">启用</string>
-    <string name="status_disabled">已禁用</string>
-    <string name="status_expired">已过期</string>
-    <string name="status_unknown">未知</string>
+    <string name="status_disabled">已禁用</string>    <string name="status_unknown">未知</string>
     <string name="status_none">无</string>
     <string name="status_unnamed">未命名</string>
     <string name="status_never_expires">永不过期</string>
@@ -626,10 +575,7 @@
     <string name="token_select_pg_title">选择权限组</string>
     <string name="token_select_pg_btn">选择权限组 (已选 %1$d 个，上限 %2$d%3$s)</string>
     <string name="token_split_suffix">，将拆为 %1$d 个策略</string>
-    <string name="token_detail_title">令牌详情</string>
-    <string name="token_detail_name">名称: %1$s</string>
-    <string name="token_detail_status">状态: %1$s</string>
-    <string name="token_detail_time_section">—— 时间信息 ——</string>
+    <string name="token_detail_title">令牌详情</string>    <string name="token_detail_time_section">—— 时间信息 ——</string>
     <string name="token_detail_created_time">创建时间: %1$s</string>
     <string name="token_detail_modified_time">修改时间: %1$s</string>
     <string name="token_detail_last_used">最后使用: %1$s</string>
@@ -658,28 +604,20 @@
 
     <!-- 区域工具项（DomainDetail） -->
     <string name="zone_tool_analytics">域名分析</string>
-    <string name="zone_tool_dns">DNS记录</string>
-    <string name="zone_tool_route">路由</string>
-    <string name="zone_tool_waf">WAF规则</string>
+    <string name="zone_tool_dns">DNS记录</string>    <string name="zone_tool_waf">WAF规则</string>
     <string name="zone_tool_cache_rules">缓存规则</string>
-    <string name="zone_tool_rate_limit">速率限制</string>
-    <string name="zone_tool_email_routing">电子邮件路由</string>
-    <string name="zone_tool_load_balancer">负载均衡</string>
+    <string name="zone_tool_rate_limit">速率限制</string>    <string name="zone_tool_load_balancer">负载均衡</string>
     <string name="zone_tool_ssl_certs">SSL证书</string>
     <string name="zone_tool_transform_rules">转换规则</string>
     <string name="zone_tool_access_rules">IP访问规则</string>
     <string name="zone_tool_performance">性能与缓存</string>
     <string name="zone_tool_snippets">代码片段</string>
-    <string name="zone_tool_settings">设置</string>
-
     <!-- DNS 字段标签 -->
     <string name="dns_field_ipv4">IPv4 地址</string>
     <string name="dns_field_ipv6">IPv6 地址</string>
     <string name="dns_field_target_domain">目标域名</string>
     <string name="dns_field_text_content">文本内容</string>
-    <string name="dns_field_ns_server">NS 服务器</string>
-    <string name="dns_field_priority">优先级</string>
-    <string name="dns_field_mail_server">邮件服务器</string>
+    <string name="dns_field_ns_server">NS 服务器</string>    <string name="dns_field_mail_server">邮件服务器</string>
     <string name="dns_field_weight">权重</string>
     <string name="dns_field_port">端口</string>
     <string name="dns_field_target_host">目标主机</string>
@@ -712,22 +650,12 @@
     <string name="dns_field_certificate">证书</string>
     <string name="dns_field_fingerprint">指纹</string>
     <string name="dns_field_target_uri">目标 URI</string>
-    <string name="dns_field_value">值</string>
-    <string name="dns_field_target">目标</string>
-    <string name="dns_proxied">🟠 已代理</string>
+    <string name="dns_field_value">值</string>    <string name="dns_proxied">🟠 已代理</string>
     <string name="dns_dns_only">⚪ 仅 DNS</string>
     <string name="dns_invalid_format">域名格式不正确（如 example.com）</string>
 
-    <!-- Worker 通用 -->
-    <string name="worker_secrets_updated">密钥已成功更新（\'%1$s\'）</string>
-    <string name="worker_settings_load_failed">加载脚本设置失败: %1$s</string>
-    <string name="worker_route_created_success">路由创建成功</string>
-    <string name="worker_route_deleted_success">路由删除成功</string>
-    <string name="worker_route_delete_failed">删除路由失败: %1$s</string>
-    <string name="worker_custom_domain_added_success">自定义域名添加成功</string>
-    <string name="worker_custom_domain_deleted_success">自定义域名删除成功</string>
-    <string name="worker_custom_domain_delete_failed">删除自定义域名失败: %1$s</string>
-    <string name="worker_add_custom_domain_title_template">为 %1$s 添加自定义域</string>
+    <!-- Worker 通用 -->    <string name="worker_route_created_success">路由创建成功</string>
+    <string name="worker_route_deleted_success">路由删除成功</string>    <string name="worker_custom_domain_deleted_success">自定义域名删除成功</string>    <string name="worker_add_custom_domain_title_template">为 %1$s 添加自定义域</string>
     <string name="worker_adding_custom_domain">正在添加自定义域…</string>
     <string name="worker_custom_domain_add_failed_title">添加自定义域失败</string>
     <string name="worker_domain_list_title_template">%1$s - 域名列表</string>
@@ -741,9 +669,7 @@
     <!-- Worker 路由（卡片 Row 3 新增按钮） -->
     <string name="worker_view_routes_title">查看路由</string>
     <string name="worker_add_route_title_template">为 %1$s 添加路由</string>
-    <string name="worker_route_select_zone">请选择域名（Zone）</string>
-    <string name="worker_route_zone_loading">加载中…</string>
-    <string name="worker_route_zone_empty">暂无可选的域名</string>
+    <string name="worker_route_select_zone">请选择域名（Zone）</string>    <string name="worker_route_zone_empty">暂无可选的域名</string>
     <string name="worker_route_zone_required">请先选择域名（Zone）</string>
     <string name="worker_route_pattern_required">请填写路由规则</string>
     <string name="worker_route_zone_load_failed">加载域名列表失败: %1$s</string>
@@ -775,20 +701,8 @@
     <string name="worker_manage_scripts">管理脚本</string>
     <string name="worker_please_enter_name">请输入 Worker 名称</string>
     <string name="worker_please_select_file">请选择脚本文件</string>
-    <string name="worker_checking_status">正在检查 Worker 状态</string>
-    <string name="worker_fetching_kv_bindings">正在获取当前 KV 绑定配置</string>
-    <string name="worker_script_name_label">脚本名称: %1$s</string>
-    <string name="worker_please_enter_binding_name">请输入绑定名称</string>
-    <string name="worker_binding_name_already_exists_template">绑定名称 %1$s 已存在，请更换</string>
-    <string name="worker_binding_added">绑定已添加</string>
-    <string name="worker_updating_kv_bindings">正在更新 KV 绑定配置（不重新上传脚本代码）</string>
-    <string name="worker_kv_bindings_config_updated">KV 绑定配置已更新</string>
-    <string name="worker_fetching_r2_bindings">正在获取当前 R2 绑定配置</string>
-    <string name="worker_r2_load_failed">加载 R2 存储桶失败: %1$s</string>
-    <string name="worker_revision_source">来源: %1$s</string>
-    <string name="worker_runtime_settings">运行时设置</string>
-
-    <!-- KV 模块 -->
+    <string name="worker_checking_status">正在检查 Worker 状态</string>    <string name="worker_script_name_label">脚本名称: %1$s</string>    <string name="worker_binding_added">绑定已添加</string>
+    <string name="worker_updating_kv_bindings">正在更新 KV 绑定配置（不重新上传脚本代码）</string>    <!-- KV 模块 -->
     <string name="kv_delete_namespace_title">删除命名空间</string>
     <string name="kv_delete_namespace_message">确定要删除命名空间 \"%1$s\" 吗？</string>
     <string name="kv_edit_key_title">编辑键值对</string>
@@ -796,16 +710,12 @@
     <string name="kv_delete_key_message">确定要删除键 \"%1$s\" 吗？</string>
     <string name="kv_no_key_yet">暂无键值对\n点击 + 添加</string>
     <string name="kv_please_select_namespace_first">请先选择命名空间</string>
-    <string name="kv_key_title_with_namespace">键值对（%1$s）</string>
-    <string name="kv_value_loading">加载中…</string>
-    <string name="kv_value_label">值: %1$s</string>
+    <string name="kv_key_title_with_namespace">键值对（%1$s）</string>    <string name="kv_value_label">值: %1$s</string>
 
     <!-- R2 模块 -->
     <string name="r2_custom_domain_zone_not_found">添加失败：未找到对应的 Cloudflare 域名（Zone），请先在账号中添加该域名</string>
     <string name="r2_object_title_bucket">对象（%1$s）</string>
-    <string name="r2_no_objects">暂无对象</string>
-    <string name="r2_upload_file">上传文件</string>
-    <string name="r2_upload_dialog_title">上传文件</string>
+    <string name="r2_no_objects">暂无对象</string>    <string name="r2_upload_dialog_title">上传文件</string>
     <string name="r2_path_prefix_hint">路径前缀</string>
     <string name="r2_path_prefix_default">/</string>
     <string name="r2_file_label">文件</string>
@@ -850,9 +760,7 @@
     <string name="pages_menu_service_bindings">服务绑定</string>
     <string name="pages_menu_runtime_settings">运行时设置</string>
     <string name="pages_project_management">%1$s - 项目管理</string>
-    <string name="pages_configure_env_vars">配置 Pages 项目的环境变量</string>
-    <string name="pages_project_name_with_env">项目名称: %1$s (%2$s环境)</string>
-    <string name="pages_variables_list_title">环境变量列表</string>
+    <string name="pages_configure_env_vars">配置 Pages 项目的环境变量</string>    <string name="pages_variables_list_title">环境变量列表</string>
     <string name="pages_no_variables">暂无环境变量</string>
     <string name="pages_add_variable">+ 添加变量</string>
     <string name="pages_configure_secrets">配置 Pages 项目的机密</string>
@@ -894,25 +802,17 @@
     <string name="zt_app_type_bookmark">书签</string>
 
     <!-- Access Fragment -->
-    <string name="zt_access_create_app_title">创建 Access 应用</string>
-    <string name="zt_access_delete_app_title">删除应用</string>
-    <string name="zt_access_delete_app_confirm">确定要删除应用 \"%1$s\" 吗？此操作无法撤销。</string>
-    <string name="zt_access_delete_app_confirm_detail">确定要删除应用 \"%1$s\" 吗？此操作不可恢复。</string>
-    <string name="zt_access_edit_app_title">编辑应用</string>
-    <string name="zt_app_selected_toast">应用: %1$s</string>
+    <string name="zt_access_create_app_title">创建 Access 应用</string>    <string name="zt_access_delete_app_confirm">确定要删除应用 \"%1$s\" 吗？此操作无法撤销。</string>
+    <string name="zt_access_delete_app_confirm_detail">确定要删除应用 \"%1$s\" 吗？此操作不可恢复。</string>    <string name="zt_app_selected_toast">应用: %1$s</string>
     <string name="msg_app_name_empty">应用名称不能为空</string>
     <string name="msg_domain_empty">域名不能为空</string>
 
     <!-- Access Detail -->
     <string name="zt_access_detail_not_set">未设置</string>
-    <string name="zt_access_detail_default">默认</string>
-
     <!-- AccessApplicationAdapter -->
     <string name="zt_access_domain_not_set">未设置域名</string>
 
-    <!-- Access Policy Adapter -->
-    <string name="zt_policy_decision_allow">允许</string>
-    <string name="zt_policy_decision_deny">拒绝</string>
+    <!-- Access Policy Adapter -->    <string name="zt_policy_decision_deny">拒绝</string>
     <string name="zt_policy_decision_bypass">绕过</string>
     <string name="zt_policy_decision_non_identity">非身份</string>
     <string name="zt_policy_precedence_label">优先级: %1$d</string>
@@ -937,22 +837,14 @@
     <string name="zt_rule_everyone">所有人</string>
     <string name="zt_rule_group_id">Group ID: %1$s</string>
     <string name="zt_rule_geo_country">Country: %1$s</string>
-    <string name="zt_rule_ip_list_id">IP List: %1$s</string>
-    <string name="zt_rule_certificate">证书</string>
-    <string name="zt_rule_posture">Posture: %1$s</string>
+    <string name="zt_rule_ip_list_id">IP List: %1$s</string>    <string name="zt_rule_posture">Posture: %1$s</string>
     <string name="zt_rule_service_token">Token: %1$s</string>
     <string name="zt_rule_any_valid_token">Any Valid Token</string>
 
     <!-- Policy Rule Dialog Helper -->
     <string name="zt_rule_type_email">Email 地址</string>
-    <string name="zt_rule_type_email_domain">Email 域名</string>
-    <string name="zt_rule_type_ip">IP 地址</string>
-    <string name="zt_rule_type_access_group">Access 组</string>
-    <string name="zt_rule_type_geo">地理位置</string>
-    <string name="zt_rule_type_everyone">所有人</string>
-    <string name="zt_rule_type_common_name">证书通用名称</string>
-    <string name="zt_rule_add_title">添加规则</string>
-
+    <string name="zt_rule_type_email_domain">Email 域名</string>    <string name="zt_rule_type_access_group">Access 组</string>
+    <string name="zt_rule_type_geo">地理位置</string>    <string name="zt_rule_type_common_name">证书通用名称</string>
     <!-- ===== Devices 子模块 ===== -->
 
     <!-- Devices Fragment Tabs -->
@@ -961,30 +853,17 @@
 
     <!-- DeviceAdapter -->
     <string name="zt_device_unknown_device">未知设备</string>
-    <string name="zt_device_status_revoked">已撤销</string>
-    <string name="zt_device_status_active">活跃</string>
-    <string name="zt_device_status_unknown">未知</string>
-    <string name="zt_device_user_label">用户: %1$s</string>
+    <string name="zt_device_status_revoked">已撤销</string>    <string name="zt_device_user_label">用户: %1$s</string>
     <string name="zt_device_policy_label">最后活跃的设备配置文件: %1$s</string>
     <string name="zt_device_ip_label">IP: %1$s</string>
     <string name="zt_device_last_seen_label">最后活跃: %1$s</string>
 
     <!-- DevicesListFragment -->
     <string name="zt_device_detail_title">设备详情</string>
-    <string name="zt_device_unknown_user">未知用户</string>
-    <string name="zt_device_id_label">ID: %1$s</string>
-    <string name="zt_device_active_registrations">活跃注册: %1$d</string>
-    <string name="zt_device_created_label">创建时间: %1$s</string>
-    <string name="zt_device_updated_label">更新时间: %1$s</string>
+    <string name="zt_device_unknown_user">未知用户</string>    <string name="zt_device_active_registrations">活跃注册: %1$d</string>    <string name="zt_device_updated_label">更新时间: %1$s</string>
     <string name="zt_device_revoked_label">撤销时间: %1$s</string>
-    <string name="zt_device_deleted_label">删除时间: %1$s</string>
-    <string name="zt_device_revoke_title">撤销设备</string>
-    <string name="zt_device_revoke_confirm">确定要撤销设备 \"%1$s\" 吗？撤销后该设备将无法通过 WARP 连接。</string>
-    <string name="zt_device_revoke_button">撤销设备</string>
-
-    <!-- DevicePoliciesFragment -->
-    <string name="zt_policy_create_profile">创建配置文件</string>
-    <string name="zt_policy_edit_profile">编辑配置文件</string>
+    <string name="zt_device_deleted_label">删除时间: %1$s</string>    <string name="zt_device_revoke_confirm">确定要撤销设备 \"%1$s\" 吗？撤销后该设备将无法通过 WARP 连接。</string>
+    <!-- DevicePoliciesFragment -->    <string name="zt_policy_edit_profile">编辑配置文件</string>
     <string name="zt_policy_delete_profile_title">删除配置文件</string>
     <string name="zt_policy_delete_profile_confirm">确定要删除配置文件 \"%1$s\" 吗？</string>
     <string name="msg_policy_name_empty">配置文件名称不能为空</string>
@@ -998,8 +877,6 @@
     <string name="zt_device_op_not_in">不在</string>
     <string name="zt_device_op_matches">匹配</string>
     <string name="zt_device_simple_mode">简化模式</string>
-    <string name="zt_device_advanced_mode">高级：直接编辑表达式</string>
-
     <!-- 服务模式 -->
     <string name="zt_device_service_mode_warp">流量和 DNS 模式</string>
     <string name="zt_device_service_mode_1dot1">纯 DNS 模式</string>
@@ -1013,17 +890,13 @@
     <!-- DevicePolicyAdapter -->
     <string name="zt_policy_default_profile">默认配置文件</string>
     <string name="zt_policy_unnamed_profile">未命名配置文件</string>
-    <string name="zt_policy_default_desc">应用于所有未匹配其他配置文件的设备</string>
-    <string name="zt_policy_no_desc">无描述</string>
-    <string name="zt_policy_match_all_devices">匹配规则: 所有设备</string>
+    <string name="zt_policy_default_desc">应用于所有未匹配其他配置文件的设备</string>    <string name="zt_policy_match_all_devices">匹配规则: 所有设备</string>
     <string name="zt_policy_match_rule_format">匹配规则: %1$s</string>
     <string name="zt_policy_auto_connect_label">自动连接: %1$s</string>
     <string name="zt_policy_mode_switch_allow">模式切换: 允许</string>
     <string name="zt_policy_mode_switch_deny">模式切换: 禁止</string>
     <string name="zt_policy_precedence_default">优先级: 默认</string>
-    <string name="zt_policy_auto_connect_off">关闭</string>
-    <string name="zt_policy_auto_connect_on">开启</string>
-    <string name="zt_policy_auto_connect_force">强制</string>
+    <string name="zt_policy_auto_connect_off">关闭</string>    <string name="zt_policy_auto_connect_force">强制</string>
 
     <!-- ===== Gateway 子模块 ===== -->
 
@@ -1043,10 +916,7 @@
     <string name="zt_gateway_dns_blocked_users">阻止次数最多的用户</string>
     <string name="zt_gateway_dns_allowed_users">允许次数最多的用户</string>
     <string name="zt_gateway_dns_no_identity">未捕获标识信息</string>
-    <string name="zt_gateway_dns_top_count">%1$d 条</string>
-    <string name="zt_gateway_dns_empty">暂无数据</string>
-    <string name="zt_gateway_dns_loading">加载中…</string>
-    <string name="zt_gateway_dns_error_format">加载失败: %1$s</string>
+    <string name="zt_gateway_dns_top_count">%1$d 条</string>    <string name="zt_gateway_dns_error_format">加载失败: %1$s</string>
     <string name="zt_gateway_dns_retry">点击重试</string>
 
     <!-- Resolver Decision 映射 -->
@@ -1058,21 +928,13 @@
     <string name="zt_gateway_dns_decision_blocked_rule">规则阻止</string>
     <string name="zt_gateway_dns_decision_blocked_category">类别阻止</string>
     <string name="zt_gateway_dns_decision_blocked_always_category">始终阻止的类别</string>
-    <string name="zt_gateway_dns_decision_unknown">未知</string>
 
-    <!-- GatewayListsFragment -->
-    <string name="zt_list_type_domain">域名</string>
-    <string name="zt_list_type_ip">IP 地址</string>
-    <string name="zt_list_type_url">URL</string>
+    <!-- GatewayListsFragment -->    <string name="zt_list_type_url">URL</string>
     <string name="zt_list_template_domain_name">域名列表</string>
     <string name="zt_list_template_ip_name">IP列表</string>
-    <string name="zt_list_template_url_name">URL列表</string>
-    <string name="zt_list_create_title">创建列表</string>
-    <string name="zt_list_edit_title">编辑列表</string>
+    <string name="zt_list_template_url_name">URL列表</string>    <string name="zt_list_edit_title">编辑列表</string>
     <string name="zt_list_delete_title">删除列表</string>
-    <string name="zt_list_delete_confirm">确定要删除列表 \"%1$s\" 吗？</string>
-    <string name="zt_list_loading_hint">加载中…</string>
-    <string name="zt_list_items_hint">列表项内容</string>
+    <string name="zt_list_delete_confirm">确定要删除列表 \"%1$s\" 吗？</string>    <string name="zt_list_items_hint">列表项内容</string>
     <string name="msg_list_name_empty">列表名称不能为空</string>
     <string name="msg_list_items_empty">列表项不能为空</string>
     <string name="msg_list_create_success">列表创建成功: %1$s</string>
@@ -1084,13 +946,9 @@
     <string name="msg_load_lists_failed">加载列表失败: %1$s</string>
 
     <!-- GatewayListAdapter -->
-    <string name="zt_list_no_description">无描述</string>
-    <string name="zt_list_id_label">ID: %1$s</string>
-    <string name="zt_list_id_copied">已复制ID: %1$s</string>
+    <string name="zt_list_no_description">无描述</string>    <string name="zt_list_id_copied">已复制ID: %1$s</string>
 
-    <!-- GatewayLocationsFragment -->
-    <string name="zt_location_create_title">创建位置</string>
-    <string name="zt_location_edit_title">编辑位置</string>
+    <!-- GatewayLocationsFragment -->    <string name="zt_location_edit_title">编辑位置</string>
     <string name="zt_location_delete_title">删除位置</string>
     <string name="zt_location_delete_confirm">确定要删除位置 \"%1$s\" 吗？</string>
     <string name="msg_location_name_empty">位置名称不能为空</string>
@@ -1115,11 +973,7 @@
     <string name="zt_validate_ip_reserved_not_supported">保留地址不支持，请使用公网 IP 地址</string>
     <string name="zt_validate_ip_multicast_not_supported">组播/特殊地址不支持，请使用公网 IP 地址</string>
 
-    <!-- GatewayLocationAdapter -->
-    <string name="zt_location_default_label">默认</string>
-    <string name="zt_location_ecs_label">ECS</string>
-    <string name="zt_location_no_networks">无</string>
-    <string name="zt_location_networks_label">来源 IP 白名单: %1$s</string>
+    <!-- GatewayLocationAdapter -->    <string name="zt_location_ecs_label">ECS</string>    <string name="zt_location_networks_label">来源 IP 白名单: %1$s</string>
     <string name="zt_location_ipv4_label">IPv4: %1$s</string>
     <string name="zt_location_ipv4_backup">（备用 %1$s）</string>
     <string name="zt_location_ipv4_not_assigned">未分配</string>
@@ -1135,8 +989,6 @@
     <string name="zt_gateway_rule_type_dns">DNS</string>
     <string name="zt_gateway_rule_type_http">HTTP</string>
     <string name="zt_gateway_rule_type_l4">@string/settings_network</string>
-    <string name="zt_gateway_action_allow">允许</string>
-    <string name="zt_gateway_action_block">阻止</string>
     <string name="zt_gateway_action_safesearch">安全搜索</string>
     <string name="zt_gateway_action_ytrestricted">YouTube限制</string>
     <string name="zt_gateway_action_override">覆盖</string>
@@ -1150,15 +1002,10 @@
     <string name="zt_gateway_action_l4_override">L4覆盖</string>
     <string name="zt_gateway_action_egress">出口</string>
     <string name="zt_gateway_action_audit_ssh">SSH审计</string>
-    <string name="zt_gateway_action_cloud_suffix"> (云端)</string>
-    <string name="zt_gateway_create_rule_title">创建规则</string>
-    <string name="zt_gateway_edit_rule_title">编辑规则</string>
-    <string name="zt_gateway_delete_rule_title">删除规则</string>
+    <string name="zt_gateway_action_cloud_suffix"> (云端)</string>    <string name="zt_gateway_delete_rule_title">删除规则</string>
     <string name="zt_gateway_delete_rule_confirm">确定要删除规则 \"%1$s\" 吗？</string>
     <string name="zt_gateway_rule_enabled_success">规则已启用</string>
-    <string name="zt_gateway_rule_disabled_success">规则已禁用</string>
-    <string name="zt_gateway_rule_update_failed">更新失败: %1$s</string>
-    <string name="zt_gateway_template_block">阻止域名</string>
+    <string name="zt_gateway_rule_disabled_success">规则已禁用</string>    <string name="zt_gateway_template_block">阻止域名</string>
     <string name="zt_gateway_template_allow">允许域名</string>
     <string name="zt_gateway_template_safesearch">安全搜索</string>
     <string name="zt_gateway_select_domain_lists">选择域名列表</string>
@@ -1175,51 +1022,34 @@
     <string name="zt_gateway_rule_expr_label">规则表达式</string>
 
     <!-- GatewayRuleAdapter -->
-    <string name="zt_gateway_rule_unknown_action">未知</string>
     <string name="zt_gateway_rule_no_traffic">无匹配条件</string>
 
     <!-- ===== Tunnels 子模块 ===== -->
 
-    <!-- Tunnels Fragment -->
-    <string name="zt_tunnel_create_title">创建隧道</string>
-    <string name="zt_tunnel_delete_title">删除隧道</string>
-    <string name="zt_tunnel_delete_confirm">确定要删除隧道 \"%1$s\" 吗？\n\n删除后，所有通过此隧道的连接将中断。</string>
+    <!-- Tunnels Fragment -->    <string name="zt_tunnel_delete_confirm">确定要删除隧道 \"%1$s\" 吗？\n\n删除后，所有通过此隧道的连接将中断。</string>
     <string name="zt_tunnel_detail_title">隧道详情</string>
-    <string name="zt_tunnel_config_title">隧道配置: %1$s</string>
-    <string name="zt_tunnel_run_command_title">运行命令</string>
-    <string name="zt_tunnel_config_src_local">本地 (cloudflared 配置)</string>
+    <string name="zt_tunnel_config_title">隧道配置: %1$s</string>    <string name="zt_tunnel_config_src_local">本地 (cloudflared 配置)</string>
     <string name="zt_tunnel_config_src_cloudflare">远程 (Dashboard 配置)</string>
     <string name="msg_tunnel_name_empty">隧道名称不能为空</string>
 
-    <!-- Tunnel Detail -->
-    <string name="zt_tunnel_status_active">活跃</string>
-    <string name="zt_tunnel_status_inactive">未活跃</string>
+    <!-- Tunnel Detail -->    <string name="zt_tunnel_status_inactive">未活跃</string>
     <string name="zt_tunnel_status_degraded">降级</string>
     <string name="zt_tunnel_status_down">离线</string>
     <string name="zt_tunnel_config_remote">远程配置</string>
-    <string name="zt_tunnel_config_local">本地配置</string>
-    <string name="zt_tunnel_created_at">创建时间: %1$s</string>
-    <string name="zt_tunnel_last_active">最后活跃: %1$s</string>
-    <string name="zt_tunnel_inactive_at">不活跃时间: %1$s</string>
-    <string name="zt_tunnel_deleted_at">删除时间: %1$s</string>
-    <string name="zt_tunnel_show_token">显示令牌</string>
+    <string name="zt_tunnel_config_local">本地配置</string>    <string name="zt_tunnel_last_active">最后活跃: %1$s</string>
+    <string name="zt_tunnel_inactive_at">不活跃时间: %1$s</string>    <string name="zt_tunnel_show_token">显示令牌</string>
     <string name="zt_tunnel_hide_token">隐藏令牌</string>
     <string name="zt_tunnel_command_copied">命令已复制</string>
-    <string name="zt_tunnel_token_fetch_failed">获取令牌失败</string>
-    <string name="zt_tunnel_please_select_account">请先选择账号</string>
-    <string name="zt_tunnel_configure_button">配置</string>
+    <string name="zt_tunnel_token_fetch_failed">获取令牌失败</string>    <string name="zt_tunnel_configure_button">配置</string>
 
     <!-- Tunnel Connection Item -->
-    <string name="zt_tunnel_connection_reconnecting">重连中</string>
-    <string name="zt_tunnel_connection_connected">已连接</string>
-    <string name="zt_tunnel_client_version">cloudflared %1$s</string>
+    <string name="zt_tunnel_connection_reconnecting">重连中</string>    <string name="zt_tunnel_client_version">cloudflared %1$s</string>
     <string name="zt_tunnel_origin_ip">源 IP: %1$s</string>
     <string name="zt_tunnel_connection_time">连接时间: %1$s</string>
 
     <!-- TunnelAdapter -->
     <string name="zt_tunnel_colo_list">Colo: %1$s</string>
     <string name="zt_tunnel_created_label">创建: %1$s</string>
-    <string name="zt_tunnel_date_unknown">未知</string>
 
     <!-- ===== 通用（本阶段新增） ===== -->
     <string name="msg_no_account_selected">未选择账户</string>
@@ -1237,10 +1067,7 @@
     <string name="msg_expression_empty">表达式不能为空</string>
     <string name="msg_target_empty">目标不能为空</string>
     <string name="msg_name_empty">名称不能为空</string>
-    <string name="msg_name_invalid">名称仅支持小写字母、数字和下划线</string>
-    <string name="msg_email_empty">邮箱不能为空</string>
-    <string name="msg_saving">保存中…</string>
-    <string name="msg_saving_ellipsis">保存中…</string>
+    <string name="msg_name_invalid">名称仅支持小写字母、数字和下划线</string>    <string name="msg_saving_ellipsis">保存中…</string>
     <string name="msg_rule_saved">规则已保存</string>
     <string name="msg_rule_removed">规则已移除</string>
     <string name="msg_account_not_ready">账号未就绪</string>
@@ -1266,25 +1093,12 @@
     <string name="waf_action_log">记录 (Log)</string>
     <string name="waf_action_label">动作: %1$s</string>
     <string name="waf_expression_edit_hint">表达式（如 (ip.src eq 1.2.3.4)）</string>
-    <string name="waf_desc_hint">描述（可选）</string>
-    <string name="waf_action_hint">动作</string>
     <string name="waf_edit_not_supported_title">不支持编辑</string>
     <string name="waf_edit_not_supported_message">该规则的动作（%1$s）包含额外参数，无法在此编辑。请到 Cloudflare 控制台修改。</string>
     <string name="waf_delete_rule_title">删除规则</string>
     <string name="waf_delete_rule_confirm">确定要删除规则「%1$s」吗？</string>
-    <string name="waf_apply_button">应用</string>
-    <string name="waf_field_client_ip">客户端 IP</string>
-    <string name="waf_field_country_code">国家代码</string>
-    <string name="waf_field_uri_path">URI 路径</string>
-    <string name="waf_field_hostname">主机名</string>
-    <string name="waf_field_request_method">请求方法</string>
-    <string name="waf_field_full_uri">完整 URI</string>
-    <string name="waf_field_threat_score">威胁评分</string>
-    <string name="waf_please_add_condition">（请添加条件）</string>
-    <string name="waf_op_eq">等于 (=)</string>
-    <string name="waf_op_ne">不等于 (≠)</string>
-    <string name="waf_op_contains">包含</string>
-    <string name="waf_op_gt">大于 (&gt;)</string>
+    <string name="waf_apply_button">应用</string>    <string name="waf_field_threat_score">威胁评分</string>    <string name="waf_op_eq">等于 (=)</string>
+    <string name="waf_op_ne">不等于 (≠)</string>    <string name="waf_op_gt">大于 (&gt;)</string>
     <string name="waf_op_lt">小于 (&lt;)</string>
 
     <!-- ===== Cache Rules ===== -->
@@ -1303,31 +1117,21 @@
     <string name="transform_empty_rules">暂无转换规则</string>
     <string name="transform_phase_url_rewrite">URL 重写</string>
     <string name="transform_phase_request_head">请求头修改</string>
-    <string name="transform_phase_response_head">响应头修改</string>
-    <string name="transform_add_phase_title">添加%1$s</string>
-    <string name="transform_edit_phase_title">编辑%1$s</string>
-    <string name="transform_delete_rule_title">删除此规则？</string>
+    <string name="transform_phase_response_head">响应头修改</string>    <string name="transform_delete_rule_title">删除此规则？</string>
     <string name="transform_unnamed_rule">未命名规则</string>
     <string name="transform_phase_empty_hint">暂无规则</string>
 
     <!-- ===== Rate Limit ===== -->
-    <string name="rate_empty_rules">暂无速率限制规则</string>
-    <string name="rate_action_block">封锁</string>
-    <string name="rate_action_managed_challenge">托管质询</string>
-    <string name="rate_action_js_challenge">JS 质询</string>
+    <string name="rate_empty_rules">暂无速率限制规则</string>    <string name="rate_action_js_challenge">JS 质询</string>
     <string name="rate_action_log">记录</string>
     <string name="rate_delete_rule_title">删除此速率限制规则？</string>
     <string name="rate_delete_rule_message">删除后将不再按此规则限速，操作不可撤销。</string>
     <string name="lbl_seconds_short">秒</string>
-    <string name="lbl_minute_short">分钟</string>
-    <string name="lbl_minutes_short">分钟</string>
-    <string name="lbl_hour_short">小时</string>
+    <string name="lbl_minute_short">分钟</string>    <string name="lbl_hour_short">小时</string>
     <string name="rate_requests_period_format">%1$d 次 / %2$d 秒</string>
 
     <!-- ===== Access Rules (Zone IP Rules) ===== -->
-    <string name="ar_empty_rules">暂无 IP 访问规则</string>
-    <string name="ar_target_hint">目标</string>
-    <string name="ar_edit_rule_title">编辑规则</string>
+    <string name="ar_empty_rules">暂无 IP 访问规则</string>    <string name="ar_edit_rule_title">编辑规则</string>
     <string name="ar_new_rule_title">新建规则</string>
     <string name="ar_delete_rule_title">删除规则</string>
     <string name="ar_action_block">封锁</string>
@@ -1353,9 +1157,7 @@
     <string name="snippet_all_requests_label">所有格式化请求</string>
     <string name="snippet_value_multiple_values">多个值用逗号分隔</string>
     <string name="snippet_value_number">数字</string>
-    <string name="snippet_value_country_code">国家代码（如 CN）</string>
-    <string name="snippet_value_default">值</string>
-    <string name="snippet_expr_advanced_not_supported">表达式包含构建器不支持的高级特性（嵌套/not/函数），请继续使用表达式编辑器</string>
+    <string name="snippet_value_country_code">国家代码（如 CN）</string>    <string name="snippet_expr_advanced_not_supported">表达式包含构建器不支持的高级特性（嵌套/not/函数），请继续使用表达式编辑器</string>
     <string name="snippet_remove_rule_message">确定移除「%1$s」的规则吗？移除后该片段将不会执行。</string>
     <string name="snippet_remove_rule_button">移除</string>
     <string name="snippet_delete_title">删除代码片段</string>
@@ -1399,16 +1201,12 @@
     <string name="snippet_field_ssl">HTTPS 连接</string>
     <string name="snippet_field_tls_version">TLS 版本</string>
     <string name="snippet_value_ip_or_cidr">IP 或 CIDR</string>
-    <string name="snippet_expr_preview_empty">（请添加条件）</string>
-    <string name="snippet_expr_char_count_format">%1$d / %2$d</string>
-    <string name="snippet_bulk_delete_progress">已删除 %1$d / %2$d 个代码片段</string>
+    <string name="snippet_expr_preview_empty">（请添加条件）</string>    <string name="snippet_bulk_delete_progress">已删除 %1$d / %2$d 个代码片段</string>
     <string name="snippet_no_snippets">当前没有代码片段</string>
     <string name="snippet_dns_warning_title">此规则可能不适用于您的流量</string>
     <string name="snippet_dns_explain">您的 DNS 配置可能不是 %1$s 的代理流量，这意味着请求可能不符合此规则。</string>
     <string name="snippet_dns_target_format">%1$s 指向 %2$s 并通过 Cloudflare 代理其流量。</string>
-    <string name="snippet_dns_hint_ipv4_required">IPv4 地址（必填）</string>
-    <string name="snippet_dns_helper_ipv4_blackhole">使用 192.0.2.1 放弃请求</string>
-    <string name="snippet_dns_hint_ipv6_required">IPv6 地址（必填）</string>
+    <string name="snippet_dns_hint_ipv4_required">IPv4 地址（必填）</string>    <string name="snippet_dns_hint_ipv6_required">IPv6 地址（必填）</string>
     <string name="snippet_dns_helper_ipv6_blackhole">使用 100:: 放弃请求</string>
     <string name="snippet_dns_hint_content">[content]</string>
     <string name="snippet_dns_btn_create_and_deploy">创建记录和部署规则</string>
@@ -1422,9 +1220,7 @@
     <string name="msg_dns_created_and_proxied">DNS 记录已创建并开启代理</string>
     <string name="msg_create_failed">创建失败：%1$s</string>
 
-    <!-- ===== SSL / TLS ===== -->
-    <string name="ssl_empty_loading">加载中…</string>
-    <string name="ssl_mode_off">关闭</string>
+    <!-- ===== SSL / TLS ===== -->    <string name="ssl_mode_off">关闭</string>
     <string name="ssl_mode_flexible">灵活</string>
     <string name="ssl_mode_full">完全</string>
     <string name="ssl_mode_strict">完全(严格)</string>
@@ -1450,17 +1246,11 @@
     <string name="ssl_certs_type_total_tls">Total SSL</string>
     <string name="ssl_certs_status_active">已激活</string>
     <string name="ssl_certs_status_pending_validation">等待验证</string>
-    <string name="ssl_certs_status_initializing">初始化中</string>
-    <string name="ssl_certs_status_expired">已过期</string>
-    <string name="ssl_certs_universal_title">通用证书 SSL</string>
+    <string name="ssl_certs_status_initializing">初始化中</string>    <string name="ssl_certs_universal_title">通用证书 SSL</string>
     <string name="ssl_certs_universal_subtitle">Cloudflare 提供的免费通用 SSL 证书</string>
     <string name="ssl_certs_expires_format"> · 到期 %1$s</string>
 
-    <!-- ===== Performance ===== -->
-    <string name="perf_empty_loading">加载中…</string>
-    <string name="perf_section_network_optimization">网络优化</string>
-    <string name="perf_section_cache">缓存</string>
-    <string name="perf_cache_level_title">缓存级别</string>
+    <!-- ===== Performance ===== -->    <string name="perf_section_network_optimization">网络优化</string>    <string name="perf_cache_level_title">缓存级别</string>
     <string name="perf_cache_level_basic">无查询字符串</string>
     <string name="perf_cache_level_simplified">忽略查询字符串</string>
     <string name="perf_cache_level_aggressive">标准</string>
@@ -1475,8 +1265,6 @@
     <string name="perf_always_online_title">Always Online</string>
 
     <!-- ===== Email Routing ===== -->
-    <string name="email_status_enabled">已启用</string>
-    <string name="email_status_disabled">已关闭</string>
     <string name="email_destination_hint">已验证的目的地址：%1$s</string>
     <string name="email_match_address_hint">匹配地址（如 alice@%1$s）</string>
     <string name="email_destination_verify_hint">已添加，请查收验证邮件</string>
@@ -1490,7 +1278,6 @@
     <string name="email_empty_destinations">暂无目的地址</string>
     <string name="email_add_destination">添加目的地址</string>
     <string name="email_status_label">状态：%1$s</string>
-    <string name="email_status_unknown">未知</string>
     <string name="email_catch_all_label">全部邮件</string>
     <string name="email_forward_format">%1$s → %2$s</string>
     <string name="email_dest_verified">已验证</string>
@@ -1507,20 +1294,13 @@
     <string name="lb_policy_pools_format">策略 %1$s · 池数 %2$d</string>
     <string name="lb_policy_pools_default">策略 - · 池数 %1$d</string>
 
-    <!-- ===== Zone Settings ===== -->
-    <string name="zone_settings_loading">加载中…</string>
-    <string name="zone_purge_all_title">清理缓存</string>
-    <string name="zone_purge_all_message">确认清理该域名所有缓存？此操作不可撤销。</string>
+    <!-- ===== Zone Settings ===== -->    <string name="zone_purge_all_message">确认清理该域名所有缓存？此操作不可撤销。</string>
     <string name="zone_purge_button">清理</string>
     <string name="zone_purge_all_success">已清理全部缓存</string>
     <string name="zone_purge_all_failed">清理失败: %1$s</string>
-    <string name="zone_purge_url_hint">输入 URL，每行一个（最多 %1$d 个）\n例如:\nhttps://%2$s/path</string>
-    <string name="zone_purge_url_title">按 URL 清理缓存</string>
-    <string name="zone_purge_url_empty">请输入 URL</string>
+    <string name="zone_purge_url_hint">输入 URL，每行一个（最多 %1$d 个）\n例如:\nhttps://%2$s/path</string>    <string name="zone_purge_url_empty">请输入 URL</string>
     <string name="zone_purge_url_limit_exceeded">最多支持 %1$d 个 URL</string>
-    <string name="zone_purge_url_success">已清理 %1$d 条 URL</string>
-    <string name="zone_purge_url_failed">清理失败: %1$s</string>
-    <string name="zone_dev_mode_title">开发模式</string>
+    <string name="zone_purge_url_success">已清理 %1$d 条 URL</string>    <string name="zone_dev_mode_title">开发模式</string>
     <string name="zone_dev_mode_subtitle">绕过 Cloudflare 缓存，直接访问源站</string>
     <string name="zone_attack_mode_title">攻击模式</string>
     <string name="zone_attack_mode_subtitle">启用后会对所有请求进行更严格的检查</string>
@@ -1530,18 +1310,10 @@
     <!-- ===== Zone Analytics ===== -->
     <string name="zone_analytics_title">域名分析</string>
 
-    <!-- 通用状态是/否（替代 deprecated android.R.string.yes/no） -->
-    <string name="status_yes">是</string>
-    <string name="status_no">否</string>
-
-    <!-- ========= 第四阶段新增：Layout XML 文本 ========= -->
+    <!-- 通用状态是/否（替代 deprecated android.R.string.yes/no） -->    <!-- ========= 第四阶段新增：Layout XML 文本 ========= -->
 
     <!-- ===== Activities ===== -->
-    <string name="xml_activity_main">账号</string>
-    <string name="xml_activity_main_2">未选择账号</string>
-    <string name="xml_activity_log">开</string>
-    <string name="xml_activity_log_2">清除</string>
-    <string name="xml_activity_token_manager_title">API 令牌管理</string>
+    <string name="xml_activity_main">账号</string>    <string name="xml_activity_token_manager_title">API 令牌管理</string>
     <string name="xml_activity_token_manager">当前账号:</string>
     <string name="xml_activity_token_manager_2">未选择</string>
     <string name="xml_activity_token_manager_3">切换</string>
@@ -1556,10 +1328,7 @@
     <!-- ===== Fragments ===== -->
     <string name="xml_fragment_group_list">暂无 Access 组\n点击下方按钮创建</string>
     <string name="xml_fragment_group_list_desc">创建组</string>
-    <string name="xml_fragment_pages">部署 Pages 项目</string>
-    <string name="xml_fragment_pages_hint">项目名称</string>
-    <string name="xml_fragment_pages_hint_2">生产分支</string>
-    <string name="xml_fragment_pages_hint_3">默认兼容日期 2026–06–16</string>
+    <string name="xml_fragment_pages">部署 Pages 项目</string>    <string name="xml_fragment_pages_hint_3">默认兼容日期 2026–06–16</string>
     <string name="xml_fragment_pages_hint_4">兼容性标志（逗号或换行分隔）</string>
     <string name="compatibility_flags_placeholder">例如：nodejs_compat</string>
     <string name="xml_fragment_pages_hint_5">项目文件路径/URL(仅支持：.zip .js .htm .html )</string>
@@ -1572,26 +1341,13 @@
     <string name="xml_fragment_pages_8">暂无项目</string>
     <string name="xml_fragment_worker">部署 Worker 脚本</string>
     <string name="xml_fragment_worker_hint">Worker 名称</string>
-    <string name="xml_fragment_worker_hint_2">脚本文件路径/URL(仅支持：.js .zip)</string>
-    <string name="xml_fragment_worker_hint_3">默认兼容日期 2026–06–16</string>
-    <string name="xml_fragment_worker_2">部署脚本</string>
+    <string name="xml_fragment_worker_hint_2">脚本文件路径/URL(仅支持：.js .zip)</string>    <string name="xml_fragment_worker_2">部署脚本</string>
     <string name="xml_fragment_worker_3">脚本</string>
     <string name="xml_fragment_worker_4">管理版本</string>
     <string name="xml_fragment_worker_5">刷新</string>
-    <string name="xml_fragment_worker_6">已选择 0 个脚本</string>
-    <string name="xml_fragment_worker_7">批量删除</string>
-    <string name="xml_fragment_worker_8">暂无脚本</string>
-    <string name="xml_fragment_script_editor_title">编辑脚本</string>
-    <string name="xml_fragment_script_editor_desc">撤销</string>
-    <string name="xml_fragment_script_editor_desc_2">版本历史</string>
-    <string name="xml_fragment_script_editor">上传</string>
-    <string name="xml_fragment_route">暂无路由\n点击 + 添加</string>
-    <string name="xml_fragment_route_desc">添加路由</string>
-    <string name="xml_fragment_route_2">暂无自定义域\n点击 + 添加</string>
+    <string name="xml_fragment_worker_6">已选择 0 个脚本</string>    <string name="xml_fragment_script_editor_title">编辑脚本</string>    <string name="xml_fragment_script_editor_desc_2">版本历史</string>    <string name="xml_fragment_route">暂无路由\n点击 + 添加</string>    <string name="xml_fragment_route_2">暂无自定义域\n点击 + 添加</string>
 
-    <!-- ===== Cards ===== -->
-    <string name="xml_card_account_analytics">请求</string>
-    <string name="xml_card_account_analytics_2">访问量</string>
+    <!-- ===== Cards ===== -->    <string name="xml_card_account_analytics_2">访问量</string>
     <string name="xml_card_account_analytics_3">页面浏览量</string>
     <string name="xml_card_account_analytics_4">🌍 地区分布</string>
     <string name="xml_card_account_analytics_5">请求</string>
@@ -1630,9 +1386,7 @@
     <string name="xml_card_dashboard_2">带宽使用</string>
     <string name="xml_card_dashboard_3">缓存命中率</string>
     <string name="xml_card_dashboard_4">已节省流量</string>
-    <string name="xml_card_dashboard_5">源站流量</string>
-    <string name="xml_card_dashboard_6">页面浏览</string>
-    <string name="xml_card_dashboard_7">人均浏览</string>
+    <string name="xml_card_dashboard_5">源站流量</string>    <string name="xml_card_dashboard_7">人均浏览</string>
     <string name="xml_card_dashboard_8">Workers 调用</string>
     <string name="xml_card_dashboard_9">威胁拦截</string>
     <string name="xml_card_dashboard_10">HTTPS 加密</string>
@@ -1640,9 +1394,7 @@
     <string name="xml_card_dashboard_12">错误率</string>
     <string name="xml_card_dashboard_13">平均体积</string>
     <string name="xml_card_dashboard_14">子请求数</string>
-    <string name="xml_card_dashboard_15">📊 趋势图</string>
-    <string name="xml_card_dashboard_16">过去 24 小时数据</string>
-    <string name="xml_card_dashboard_17">🍰 流量分布</string>
+    <string name="xml_card_dashboard_15">📊 趋势图</string>    <string name="xml_card_dashboard_17">🍰 流量分布</string>
     <string name="xml_card_dashboard_18">📊 指标对比</string>
 
     <!-- ===== Dialogs ===== -->
@@ -1677,12 +1429,8 @@
     <string name="xml_dialog_add_trigger_10">每周日0点</string>
     <string name="xml_dialog_add_trigger_11">每30分钟</string>
     <string name="xml_dialog_add_trigger_12">每月15号0点</string>
-    <string name="xml_dialog_add_variable">添加环境变量</string>
-    <string name="xml_dialog_add_variable_hint">变量名称 (如: API_URL)</string>
-    <string name="xml_dialog_add_variable_2">变量类型</string>
-    <string name="xml_dialog_add_variable_3">文本</string>
-    <string name="xml_dialog_add_variable_hint_2">变量值</string>
-    <string name="xml_dialog_add_variable_4">💡 文本类型：普通字符串\n📋 JSON 类型：JSON 对象或数组，需符合 JSON 格式</string>
+    <string name="xml_dialog_add_variable">添加环境变量</string>    <string name="xml_dialog_add_variable_2">变量类型</string>
+    <string name="xml_dialog_add_variable_3">文本</string>    <string name="xml_dialog_add_variable_4">💡 文本类型：普通字符串\n📋 JSON 类型：JSON 对象或数组，需符合 JSON 格式</string>
     <string name="xml_dialog_build_triggers">添加触发器</string>
     <string name="xml_dialog_cache_rule_hint">描述</string>
     <string name="xml_dialog_cache_rule_hint_2">匹配表达式</string>
@@ -1700,9 +1448,7 @@
     <string name="xml_dialog_cleanup_versions_2">清理所有脚本的旧版本</string>
     <string name="xml_dialog_cleanup_versions_3">清理指定脚本的旧版本</string>
     <string name="xml_dialog_cleanup_versions_4">选择脚本</string>
-    <string name="xml_dialog_cleanup_versions_5">保留最新版本数量</string>
-    <string name="xml_dialog_cleanup_versions_hint">保留数量</string>
-    <string name="xml_dialog_create_location">网关位置用于定义 DNS 查询的来源网络，便于应用不同的 DNS 策略。</string>
+    <string name="xml_dialog_cleanup_versions_5">保留最新版本数量</string>    <string name="xml_dialog_create_location">网关位置用于定义 DNS 查询的来源网络，便于应用不同的 DNS 策略。</string>
     <string name="xml_dialog_create_location_hint">位置名称 *</string>
     <string name="xml_dialog_create_location_2">来源 IP 白名单（可选）</string>
     <string name="xml_dialog_create_location_3">限制只有这些公网 IP 范围内的设备可以使用此端点。</string>
@@ -1786,26 +1532,15 @@
     <string name="xml_dialog_pages_deployment_detail_40">排除路径:</string>
     <string name="xml_dialog_pages_deployment_detail_41">包含路径:</string>
     <string name="xml_dialog_pages_deployment_detail_42">排除分支:</string>
-    <string name="xml_dialog_pages_deployment_detail_43">包含分支:</string>
-    <string name="xml_dialog_pages_deployment_detail_44">环境变量</string>
-    <string name="xml_dialog_pages_deployment_detail_46">访问</string>
+    <string name="xml_dialog_pages_deployment_detail_43">包含分支:</string>    <string name="xml_dialog_pages_deployment_detail_46">访问</string>
     <string name="xml_dialog_pages_d1_binding">💡 提示：绑定名称将作为环境变量在 Pages 函数中使用</string>
     <string name="xml_dialog_pages_d1_bindings">配置 Pages 的 D1 绑定</string>
     <string name="xml_dialog_pages_d1_bindings_2">项目名称: my-pages</string>
     <string name="xml_dialog_pages_d1_bindings_3">暂无 D1 绑定</string>
-    <string name="xml_dialog_pages_d1_bindings_4">⚠️ 注意：更新绑定配置不会影响已部署的版本，需要重新部署</string>
-    <string name="xml_dialog_pages_input">创建 Pages 项目</string>
-    <string name="xml_dialog_pages_input_hint">项目名称</string>
+    <string name="xml_dialog_pages_d1_bindings_4">⚠️ 注意：更新绑定配置不会影响已部署的版本，需要重新部署</string>    <string name="xml_dialog_pages_input_hint">项目名称</string>
     <string name="xml_dialog_pages_input_hint_2">生产分支</string>
-    <string name="xml_dialog_pages_kv_bindings">配置 Pages 的 KV 绑定</string>
-    <string name="xml_dialog_pages_kv_bindings_2">项目名称: my-pages</string>
-    <string name="xml_dialog_pages_kv_bindings_3">⚠️ 注意：更新绑定配置不会影响已部署的版本，需要重新部署</string>
-    <string name="xml_dialog_pages_logs_hint">选择部署</string>
-    <string name="xml_dialog_pages_r2_bindings">配置 Pages 的 R2 绑定</string>
-    <string name="xml_dialog_pages_r2_bindings_2">项目名称: my-pages</string>
-    <string name="xml_dialog_pages_r2_bindings_3">⚠️ 注意：更新绑定配置不会影响已部署的版本，需要重新部署</string>
-    <string name="xml_dialog_pages_runtime_settings">项目名称</string>
-    <string name="xml_dialog_pages_runtime_settings_2">应用环境</string>
+    <string name="xml_dialog_pages_kv_bindings">配置 Pages 的 KV 绑定</string>    <string name="xml_dialog_pages_logs_hint">选择部署</string>
+    <string name="xml_dialog_pages_r2_bindings">配置 Pages 的 R2 绑定</string>    <string name="xml_dialog_pages_runtime_settings_2">应用环境</string>
     <string name="xml_dialog_pages_runtime_settings_hint">兼容性日期</string>
     <string name="xml_dialog_pages_runtime_settings_helper">格式: YYYY–MM–DD (例: 2024–01–01)，点日历图标选择</string>
     <string name="xml_dialog_pages_runtime_settings_3">兼容性标志</string>
@@ -1818,9 +1553,7 @@
     <string name="xml_dialog_pages_service_binding_hint">绑定名称 (如: MY_SERVICE)</string>
     <string name="xml_dialog_pages_service_binding_2">选择 Worker 脚本</string>
     <string name="xml_dialog_pages_service_binding_3">💡 提示：绑定名称将作为环境变量在 Pages 函数中使用，仅对 Functions 生效</string>
-    <string name="xml_dialog_pages_services">配置 Pages 的服务绑定</string>
-    <string name="xml_dialog_pages_services_2">项目名称: my-pages</string>
-    <string name="xml_dialog_pages_services_3">服务绑定列表</string>
+    <string name="xml_dialog_pages_services">配置 Pages 的服务绑定</string>    <string name="xml_dialog_pages_services_3">服务绑定列表</string>
     <string name="xml_dialog_pages_services_4">暂无服务绑定</string>
     <string name="xml_dialog_pages_services_5">⚠️ 注意：服务绑定仅对 Pages Functions 生效，更新后需要重新部署</string>
     <string name="xml_dialog_pages_variables">项目名称: my-project (生产环境)</string>
@@ -1830,16 +1563,7 @@
     <string name="xml_dialog_permission_groups_2">清空</string>
     <string name="xml_dialog_policy_edit_hint">策略名称</string>
     <string name="xml_dialog_policy_edit">决策类型</string>
-    <string name="xml_dialog_policy_edit_hint_2">优先级 (数字越小优先级越高)</string>
-    <string name="xml_dialog_policy_edit_2">包含规则 (Include)</string>
-    <string name="xml_dialog_policy_edit_3">排除规则 (Exclude)</string>
-    <string name="xml_dialog_policy_edit_4">无排除规则（可选）</string>
-    <string name="xml_dialog_policy_edit_5">必需规则 (Require)</string>
-    <string name="xml_dialog_policy_edit_6">无必需规则（可选）</string>
-    <string name="xml_dialog_policy_edit_hint_3">会话时长 (可选，如: 24h)</string>
-    <string name="xml_dialog_rate_limit_hint">描述</string>
-    <string name="xml_dialog_rate_limit_hint_2">匹配表达式</string>
-    <string name="xml_dialog_rate_limit_hint_3">请求数（每周期）</string>
+    <string name="xml_dialog_policy_edit_hint_2">优先级 (数字越小优先级越高)</string>    <string name="xml_dialog_policy_edit_hint_3">会话时长 (可选，如: 24h)</string>    <string name="xml_dialog_rate_limit_hint_3">请求数（每周期）</string>
     <string name="xml_dialog_rate_limit_hint_4">周期</string>
     <string name="xml_dialog_rate_limit_hint_5">缓解超时</string>
     <string name="xml_dialog_route_input">添加/编辑路由</string>
@@ -1850,14 +1574,9 @@
     <string name="xml_dialog_script_secrets_2">机密变量列表</string>
     <string name="xml_dialog_script_secrets_3">暂无机密变量</string>
     <string name="xml_dialog_script_secrets_4">🔒 机密变量：加密存储的敏感信息（如 API 密钥），可在 Worker 中通过 env.SECRET_NAME 访问\n\n⚠️ 注意：机密值只能设置，无法读取查看</string>
-    <string name="xml_dialog_script_service_bindings">配置 Worker 的服务绑定</string>
-    <string name="xml_dialog_script_service_bindings_2">服务绑定列表</string>
-    <string name="xml_dialog_script_service_bindings_3">暂无服务绑定配置</string>
+    <string name="xml_dialog_script_service_bindings">配置 Worker 的服务绑定</string>    <string name="xml_dialog_script_service_bindings_3">暂无服务绑定配置</string>
     <string name="xml_dialog_script_variables">配置 Worker 的环境变量</string>
-    <string name="xml_dialog_script_variables_2">💡 环境变量：以明文形式存储的配置值，可在 Worker 中通过 env.VARIABLE_NAME 访问</string>
-    <string name="xml_dialog_service_binding">添加服务绑定</string>
-    <string name="xml_dialog_service_binding_hint">绑定名称 (如: MY_SERVICE)</string>
-    <string name="xml_dialog_service_binding_2">选择目标 Worker</string>
+    <string name="xml_dialog_script_variables_2">💡 环境变量：以明文形式存储的配置值，可在 Worker 中通过 env.VARIABLE_NAME 访问</string>    <string name="xml_dialog_service_binding_2">选择目标 Worker</string>
     <string name="xml_dialog_service_binding_3">💡 提示：绑定名称将作为环境变量在 Worker 脚本中使用，通过它可直接调用目标 Worker</string>
     <string name="xml_dialog_token_edit">创建令牌</string>
     <string name="xml_dialog_token_edit_hint">令牌名称</string>
@@ -1873,26 +1592,14 @@
     <string name="xml_dialog_transform_rule_hint_2">重写查询字符串（如 a=1&amp;b=2）</string>
     <string name="xml_dialog_transform_rule">HTTP 头</string>
     <string name="xml_dialog_transform_rule_2">添加头</string>
-    <string name="xml_dialog_worker_runtime_settings">脚本名称</string>
-    <string name="xml_dialog_worker_runtime_settings_hint">兼容性日期</string>
-    <string name="xml_dialog_worker_runtime_settings_helper">格式: YYYY–MM–DD (例: 2024–01–01)，点日历图标选择</string>
-    <string name="xml_dialog_worker_runtime_settings_2">兼容性标志</string>
-    <string name="xml_dialog_worker_runtime_settings_hint_3">兼容性标志（可手动输入）</string>
-    <string name="xml_dialog_worker_runtime_settings_helper_3">每行一个标志，点击右侧下拉可快速添加</string>
-    <string name="xml_dialog_worker_runtime_settings_3">放置模式 (Placement)</string>
-    <string name="xml_dialog_worker_runtime_settings_4">默认（始终在靠近最终用户的位置处理请求）</string>
-    <string name="xml_dialog_worker_runtime_settings_5">智能（自动选择最佳位置，最大程度减少访问数据库或 API 的延迟）</string>
+    <string name="xml_dialog_worker_runtime_settings">脚本名称</string>    <string name="xml_dialog_worker_runtime_settings_5">智能（自动选择最佳位置，最大程度减少访问数据库或 API 的延迟）</string>
     <string name="xml_dialog_worker_runtime_settings_6">区域（指定托管外部资源的区域，请求路由到附近以减少延迟）</string>
     <string name="xml_dialog_worker_runtime_settings_7">服务（指定外部服务的主机名或主机:端口，Cloudflare 将就近路由）</string>
     <string name="xml_dialog_worker_runtime_settings_hint_4">区域代码（如 eu、apac，可选）</string>
     <string name="xml_dialog_worker_runtime_settings_hint_5">主机名或主机:端口（可选）</string>
     <string name="xml_dialog_worker_version_detail">版本号:</string>
-    <string name="xml_dialog_worker_version_detail_2">版本ID:</string>
-    <string name="xml_dialog_worker_version_detail_3">创建时间:</string>
-    <string name="xml_dialog_worker_version_detail_4">来源:</string>
-    <string name="xml_dialog_worker_version_detail_5">作者:</string>
-    <string name="xml_dialog_worker_version_detail_6">状态:</string>
-    <string name="xml_dialog_worker_version_detail_7">作者ID:</string>
+    <string name="xml_dialog_worker_version_detail_2">版本ID:</string>    <string name="xml_dialog_worker_version_detail_4">来源:</string>
+    <string name="xml_dialog_worker_version_detail_5">作者:</string>    <string name="xml_dialog_worker_version_detail_7">作者ID:</string>
     <string name="xml_dialog_worker_version_detail_8">预览:</string>
     <string name="xml_dialog_worker_version_detail_9">部署消息:</string>
     <string name="xml_dialog_worker_version_detail_10">触发方式:</string>
@@ -1903,34 +1610,18 @@
     <string name="xml_dialog_worker_version_detail_15">部署策略:</string>
     <string name="xml_dialog_worker_version_detail_16">流量占比:</string>
     <string name="xml_dialog_worker_version_detail_17">部署作者:</string>
-    <string name="xml_dialog_worker_version_detail_18">访问</string>
-
     <!-- ===== Items / List Items ===== -->
     <string name="xml_item_cache_rule">含高级设置，仅可查看</string>
     <string name="xml_item_ingress_rule_edit_hint">主机名（可选，留空为 catch-all）</string>
     <string name="xml_item_ingress_rule_edit_hint_2">路径前缀（可选）</string>
     <string name="xml_item_ingress_rule_edit_hint_3">服务地址 (必填)</string>
-    <string name="xml_item_ingress_rule_edit_helper">例如: http://localhost:8080 或 http_status:404</string>
-    <string name="xml_item_pages_deployment">运行中</string>
-    <string name="xml_item_pages_project_2">查看域名</string>
-    <string name="xml_item_pages_project_3">部署记录</string>
-    <string name="xml_item_route">路由模式</string>
-    <string name="xml_item_secret">🔒 加密存储，无法查看</string>
+    <string name="xml_item_ingress_rule_edit_helper">例如: http://localhost:8080 或 http_status:404</string>    <string name="xml_item_pages_project_2">查看域名</string>
+    <string name="xml_item_pages_project_3">部署记录</string>    <string name="xml_item_secret">🔒 加密存储，无法查看</string>
     <string name="xml_item_secret_desc">编辑机密</string>
-    <string name="xml_item_secret_desc_2">删除机密</string>
-    <string name="xml_item_token">令牌名称</string>
-    <string name="xml_item_token_2">权限组</string>
+    <string name="xml_item_secret_desc_2">删除机密</string>    <string name="xml_item_token_2">权限组</string>
     <string name="xml_item_token_3">详情</string>
-    <string name="xml_item_transform_header_row_hint">头名称</string>
-    <string name="xml_item_variable">[文本]</string>
-    <string name="xml_item_variable_desc">编辑变量</string>
-    <string name="xml_item_variable_desc_2">删除变量</string>
-    <string name="xml_item_worker_history">运行中</string>
-    <string name="xml_item_worker_script_2">触发器</string>
-    <string name="xml_item_worker_script_3">部署记录</string>
-    <string name="xml_item_worker_script_4">编辑脚本</string>
-
-    <!-- ========= 第四阶段新增：零散 Kotlin UI (Main/Log/Dashboard/Route/D1/Backup/ScriptEditor) ========= -->
+    <string name="xml_item_transform_header_row_hint">头名称</string>    <string name="xml_item_variable_desc">编辑变量</string>
+    <string name="xml_item_variable_desc_2">删除变量</string>    <string name="xml_item_worker_script_2">触发器</string>    <!-- ========= 第四阶段新增：零散 Kotlin UI (Main/Log/Dashboard/Route/D1/Backup/ScriptEditor) ========= -->
 
     <!-- ===== MainActivity ===== -->
     <string name="app_no_account_please_add">没有可用账号，请先添加账号</string>
@@ -1947,13 +1638,9 @@
     <!-- ===== DashboardCardView ===== -->
     <string name="dash_past_data">过去 %1$s 数据</string>
     <string name="dash_legend_requests">请求数</string>
-    <string name="dash_legend_bandwidth_mb">带宽 (MB)</string>
-    <string name="dash_legend_threats">威胁</string>
-    <string name="dash_legend_cache_mb">缓存 (MB)</string>
+    <string name="dash_legend_bandwidth_mb">带宽 (MB)</string>    <string name="dash_legend_cache_mb">缓存 (MB)</string>
     <string name="dash_legend_page_views">页面浏览</string>
-    <string name="dash_bar_label_requests">请求</string>
-    <string name="dash_bar_label_bandwidth">带宽</string>
-    <string name="dash_bar_label_cache">缓存</string>
+    <string name="dash_bar_label_requests">请求</string>    <string name="dash_bar_label_cache">缓存</string>
     <string name="dash_bar_label_threats">威胁</string>
     <string name="dash_bar_label_visitors">访客</string>
     <string name="dash_pie_cache_hit">缓存命中</string>
@@ -1968,9 +1655,7 @@
     <string name="datetime_unknown">未知时间</string>
 
     <!-- ===== Route ===== -->
-    <string name="route_title_routes">路由</string>
-    <string name="route_title_custom_domains">自定义域</string>
-    <string name="route_pages_domain_not_editable">Pages 自定义域官方不支持编辑。</string>
+    <string name="route_title_routes">路由</string>    <string name="route_pages_domain_not_editable">Pages 自定义域官方不支持编辑。</string>
     <string name="route_r2_domain_not_editable">R2 自定义域官方不支持编辑。</string>
     <string name="route_edit_custom_domain">编辑自定义域</string>
     <string name="route_domain_and_script_required">域名和脚本不能为空</string>
@@ -1979,16 +1664,10 @@
     <string name="route_add_route">添加路由</string>
     <string name="route_edit_route">编辑路由</string>
     <string name="route_delete_route">删除路由</string>
-    <string name="route_delete_route_confirm">确定要删除路由 \"%1$s\" 吗？</string>
-    <string name="route_add_custom_domain">添加自定义域</string>
-    <string name="route_please_select_worker_script">请选择 Worker 脚本</string>
+    <string name="route_delete_route_confirm">确定要删除路由 \"%1$s\" 吗？</string>    <string name="route_please_select_worker_script">请选择 Worker 脚本</string>
     <string name="route_please_select_pages_project">请选择 Pages 项目</string>
     <string name="route_r2_domain_request_sent">R2 自定义域添加请求已发出</string>
-    <string name="route_please_select_r2_bucket">请选择 R2 存储桶</string>
-    <string name="route_delete_custom_domain">删除自定义域</string>
-    <string name="route_delete_custom_domain_confirm">确定要删除域名 \"%1$s\" 吗？</string>
-    <string name="route_pages_domain_deleted_success">域名删除成功</string>
-    <string name="route_dns_add_success_title">域名添加成功！</string>
+    <string name="route_please_select_r2_bucket">请选择 R2 存储桶</string>    <string name="route_dns_add_success_title">域名添加成功！</string>
     <string name="route_dns_need_add_records">需要添加以下 DNS 记录：</string>
     <string name="route_dns_record_type">类型: %1$s</string>
     <string name="route_dns_record_name">名称: %1$s</string>
@@ -1999,9 +1678,7 @@
     <string name="route_dns_status_format">状态: %1$s</string>
     <string name="route_dns_complete_setup_title">完成 DNS 设置</string>
     <string name="route_dns_auto_configure">自动配置 DNS</string>
-    <string name="route_dns_zone_not_found">未找到对应的 Cloudflare 域名（Zone），无法自动添加 DNS 记录，请手动配置</string>
-    <string name="route_dns_configuring">正在自动配置 DNS 记录…</string>
-    <string name="route_dns_record_added_success">DNS 记录添加成功！域名验证可能需要几分钟时间。</string>
+    <string name="route_dns_zone_not_found">未找到对应的 Cloudflare 域名（Zone），无法自动添加 DNS 记录，请手动配置</string>    <string name="route_dns_record_added_success">DNS 记录添加成功！域名验证可能需要几分钟时间。</string>
     <string name="route_dns_config_failed_title">DNS 配置失败</string>
     <string name="route_dns_config_failed_message">无法自动添加 DNS 记录：%1$s\n\n请手动在 DNS 管理中添加记录。</string>
     <string name="route_dns_config_error_message">发生错误：%1$s\n\n请手动在 DNS 管理中添加记录。</string>
@@ -2061,9 +1738,7 @@
     <string name="backup_confirm_import_message">确定要从备份文件 %1$s 恢复账号吗？这将导入备份中的所有账号。</string>
     <string name="backup_action_import">导入</string>
     <string name="backup_password_required_hint">请输入密码</string>
-    <string name="backup_confirm_restore_title">确认恢复</string>
-    <string name="backup_confirm_restore_message">确定要从备份文件 %1$s 恢复账号吗？这将导入备份中的所有账号。</string>
-    <string name="backup_confirm_delete_title">确认删除</string>
+    <string name="backup_confirm_restore_title">确认恢复</string>    <string name="backup_confirm_delete_title">确认删除</string>
     <string name="backup_confirm_delete_message">确定要删除备份文件 %1$s 吗？</string>
 
     <!-- ===== Script Editor ===== -->
@@ -2076,9 +1751,7 @@
     <string name="se_no_undo_version">没有可撤销的版本</string>
     <string name="se_undo_failed">撤销失败: %1$s</string>
     <string name="se_upload_confirm_title">上传脚本</string>
-    <string name="se_upload_confirm_message">确定要上传脚本到 Cloudflare Workers 吗？这将替换现有脚本。</string>
-    <string name="se_action_upload">上传</string>
-    <string name="se_no_versions">暂无历史版本</string>
+    <string name="se_upload_confirm_message">确定要上传脚本到 Cloudflare Workers 吗？这将替换现有脚本。</string>    <string name="se_no_versions">暂无历史版本</string>
     <string name="se_ver_type_sync">同步</string>
     <string name="se_ver_type_auto">自动</string>
     <string name="se_ver_type_manual">手动</string>
@@ -2088,16 +1761,12 @@
     <string name="se_version_history_title">版本历史（共 %1$d 个版本）</string>
     <string name="se_action_clear">清除</string>
     <string name="se_version_detail_title">版本详情</string>
-    <string name="se_version_time_label">时间: %1$s</string>
-    <string name="se_version_type_label">类型: %1$s</string>
-    <string name="se_version_desc_label">描述: %1$s</string>
+    <string name="se_version_time_label">时间: %1$s</string>    <string name="se_version_desc_label">描述: %1$s</string>
     <string name="se_restore_to_editor">恢复到编辑器</string>
     <string name="se_version_restored">已恢复到此版本</string>
     <string name="se_rollback_and_upload">回滚并上传</string>
     <string name="se_rollback_confirm_title">确认回滚</string>
-    <string name="se_rollback_confirm_message">确定要回滚到此版本并上传到 Cloudflare 吗？\n\n时间: %1$s\n类型: %2$s\n\n此操作将替换当前部署的脚本。</string>
-    <string name="se_action_rollback">回滚</string>
-    <string name="se_clear_versions_title">清除历史版本</string>
+    <string name="se_rollback_confirm_message">确定要回滚到此版本并上传到 Cloudflare 吗？\n\n时间: %1$s\n类型: %2$s\n\n此操作将替换当前部署的脚本。</string>    <string name="se_clear_versions_title">清除历史版本</string>
     <string name="se_clear_versions_message">确定要清除所有自动保存和手动保存的版本吗？\n\n只会保留从 Cloudflare 加载的版本。</string>
     <string name="se_versions_cleared">已清除历史版本</string>
     <string name="se_delete_version_title">删除版本</string>
@@ -2174,36 +1843,22 @@
 
     <!-- ===== Worker ===== -->
     <string name="vm_msg_worker_upload_with_bindings_success">Worker 脚本上传成功（保留原有绑定）</string>
-    <string name="vm_msg_worker_upload_plain_success">Worker 脚本上传成功</string>
-    <string name="vm_msg_worker_upload_failed">上传失败: %1$s</string>
-    <string name="vm_msg_worker_kv_binding_updated_success">KV 绑定已成功更新（\'%1$s\'）</string>
+    <string name="vm_msg_worker_upload_plain_success">Worker 脚本上传成功</string>    <string name="vm_msg_worker_kv_binding_updated_success">KV 绑定已成功更新（\'%1$s\'）</string>
     <string name="vm_msg_worker_r2_binding_updated_success">R2 绑定已成功更新（\'%1$s\'）</string>
     <string name="vm_msg_worker_d1_binding_updated_success">D1 绑定已成功更新（\'%1$s\'）</string>
     <string name="vm_msg_worker_service_binding_updated_success">服务绑定已成功更新（\'%1$s\'）</string>
     <string name="vm_msg_worker_variable_updated_success">环境变量已成功更新（\'%1$s\'）</string>
-    <string name="vm_msg_worker_secret_updated_success">密钥已成功更新（\'%1$s\'）</string>
-    <string name="vm_msg_worker_binding_update_failed">更新绑定失败: %1$s</string>
-    <string name="vm_msg_worker_variable_update_failed">更新环境变量失败: %1$s</string>
-    <string name="vm_msg_worker_secret_update_failed">更新密钥失败: %1$s</string>
-    <string name="vm_msg_worker_d1_binding_update_failed">更新 D1 绑定失败: %1$s</string>
-    <string name="vm_msg_worker_script_settings_load_failed">加载脚本设置失败: %1$s</string>
+    <string name="vm_msg_worker_secret_updated_success">密钥已成功更新（\'%1$s\'）</string>    <string name="vm_msg_worker_secret_update_failed">更新密钥失败: %1$s</string>    <string name="vm_msg_worker_script_settings_load_failed">加载脚本设置失败: %1$s</string>
     <string name="vm_msg_worker_script_out_of_memory">内存不足，无法加载脚本</string>
     <string name="vm_msg_worker_script_load_exception">加载脚本时出错: %1$s</string>
     <string name="vm_msg_worker_custom_domains_load_failed">加载自定义域名失败: %1$s</string>
     <string name="vm_msg_worker_route_pattern_and_script_required">请填写路由规则和脚本名称</string>
-    <string name="vm_msg_worker_cleanup_single_script_success">脚本 %1$s 清理完成！成功清理了 %2$d 个旧版本</string>
-    <string name="vm_msg_worker_update_failed_template">更新失败: %1$s</string>
-    <string name="vm_msg_worker_cleanup_finished_total">清理完成！共清理了 %1$d 个旧版本</string>
+    <string name="vm_msg_worker_cleanup_single_script_success">脚本 %1$s 清理完成！成功清理了 %2$d 个旧版本</string>    <string name="vm_msg_worker_cleanup_finished_total">清理完成！共清理了 %1$d 个旧版本</string>
     <string name="vm_msg_worker_cleanup_loading_versions">加载版本列表中</string>
 
     <!-- ===== Script Editor ===== -->
     <string name="vm_msg_se_account_not_found">未找到账号</string>
-    <string name="vm_msg_se_cloudflare_loaded_local_cache">无法从Cloudflare加载，已加载本地缓存版本</string>
-    <string name="vm_msg_se_script_upload_failed">上传失败: %1$s</string>
-    <string name="vm_msg_se_rollback_failed">回滚失败: %1$s</string>
-    <string name="vm_msg_se_clear_versions_failed">清除失败: %1$s</string>
-    <string name="vm_msg_se_delete_version_failed">删除失败: %1$s</string>
-    <string name="vm_msg_se_save_version_failed">保存失败: %1$s</string>
+    <string name="vm_msg_se_cloudflare_loaded_local_cache">无法从Cloudflare加载，已加载本地缓存版本</string>    <string name="vm_msg_se_clear_versions_failed">清除失败: %1$s</string>
     <string name="vm_msg_se_script_load_failed">加载脚本失败: %1$s</string>
 
     <!-- ===== KV ===== -->
@@ -2212,16 +1867,10 @@
     <string name="vm_msg_kv_key_name_required">请输入 Key 名称</string>
 
     <!-- ===== R2 ===== -->
-    <string name="vm_msg_r2_bucket_name_required">请输入存储桶名称</string>
-    <string name="vm_msg_r2_objects_load_failed">加载对象列表失败: %1$s</string>
-    <string name="vm_msg_r2_custom_domains_load_failed">加载自定义域失败: %1$s</string>
-    <string name="vm_msg_r2_custom_domain_created_success">自定义域添加成功</string>
-    <string name="vm_msg_r2_custom_domain_create_failed">添加自定义域失败: %1$s</string>
-    <string name="vm_msg_r2_file_downloaded_success">文件下载成功</string>
+    <string name="vm_msg_r2_bucket_name_required">请输入存储桶名称</string>    <string name="vm_msg_r2_custom_domains_load_failed">加载自定义域失败: %1$s</string>
+    <string name="vm_msg_r2_custom_domain_created_success">自定义域添加成功</string>    <string name="vm_msg_r2_file_downloaded_success">文件下载成功</string>
 
-    <!-- ===== Pages ===== -->
-    <string name="vm_msg_pages_project_name_required">请输入项目名称</string>
-    <string name="vm_msg_pages_projects_load_failed">加载项目失败: %1$s</string>
+    <!-- ===== Pages ===== -->    <string name="vm_msg_pages_projects_load_failed">加载项目失败: %1$s</string>
     <string name="vm_msg_pages_deployment_retry_success">已重新发起部署</string>
     <string name="vm_msg_pages_deployment_retry_failed">重新部署失败: %1$s</string>
     <string name="vm_msg_pages_custom_domain_add_failed">自定义域添加失败: %1$s</string>
@@ -2230,11 +1879,7 @@
     <string name="vm_msg_backup_config_save_failed">配置保存失败: %1$s</string>
     <string name="vm_msg_backup_success_filename">备份成功: %1$s</string>
     <string name="vm_msg_backup_restore_success_count">恢复成功，导入了 %1$d 个账号</string>
-    <string name="vm_msg_backup_delete_success">删除成功</string>
-    <string name="vm_msg_backup_delete_failed">删除失败: %1$s</string>
-    <string name="vm_msg_backup_import_success_count">导入成功，导入了 %1$d 个账号</string>
-    <string name="vm_msg_backup_import_failed">导入失败: %1$s</string>
-    <string name="vm_msg_backup_export_success">导出成功</string>
+    <string name="vm_msg_backup_delete_success">删除成功</string>    <string name="vm_msg_backup_import_success_count">导入成功，导入了 %1$d 个账号</string>    <string name="vm_msg_backup_export_success">导出成功</string>
     <string name="vm_msg_backup_export_failed">导出失败: %1$s</string>
     <string name="vm_msg_backup_directory_set_success">备份目录已设置</string>
     <string name="vm_msg_backup_directory_set_failed">设置目录失败: %1$s</string>
@@ -2278,42 +1923,15 @@
 
     <!-- ===== DNS (补充) ===== -->
     <string name="vm_msg_dns_load_failed">加载 DNS 记录失败: %1$s</string>
-    <string name="vm_msg_dns_create_success">DNS 记录创建成功</string>
-    <string name="vm_msg_dns_create_failed">创建 DNS 记录失败: %1$s</string>
-    <string name="vm_msg_dns_update_success">DNS 记录更新成功</string>
-    <string name="vm_msg_dns_update_failed">更新 DNS 记录失败: %1$s</string>
-    <string name="vm_msg_dns_delete_success">DNS 记录删除成功</string>
-    <string name="vm_msg_dns_delete_failed">删除 DNS 记录失败: %1$s</string>
-
+    <string name="vm_msg_dns_create_success">DNS 记录创建成功</string>    <string name="vm_msg_dns_update_success">DNS 记录更新成功</string>    <string name="vm_msg_dns_delete_success">DNS 记录删除成功</string>
     <!-- ===== Worker (补充) ===== -->
     <string name="vm_msg_worker_scripts_load_failed">加载 Worker 脚本列表失败: %1$s</string>
-    <string name="vm_msg_worker_script_delete_success">脚本删除成功</string>
-    <string name="vm_msg_worker_script_delete_failed">删除脚本失败: %1$s</string>
-    <string name="vm_msg_worker_versions_load_failed">获取版本历史失败: %1$s</string>
-    <string name="vm_msg_worker_rollback_success">回滚成功</string>
-    <string name="vm_msg_worker_rollback_failed">回滚失败: %1$s</string>
-    <string name="vm_msg_worker_routes_load_failed">加载路由列表失败: %1$s</string>
-    <string name="vm_msg_worker_route_create_success">路由创建成功</string>
-    <string name="vm_msg_worker_route_create_failed">创建路由失败: %1$s</string>
-    <string name="vm_msg_worker_route_update_success">路由更新成功</string>
-    <string name="vm_msg_worker_route_update_failed">更新路由失败: %1$s</string>
-    <string name="vm_msg_worker_route_delete_success">路由删除成功</string>
-    <string name="vm_msg_worker_route_delete_failed">删除路由失败: %1$s</string>
-    <string name="vm_msg_worker_custom_domain_add_success">自定义域名添加成功</string>
-    <string name="vm_msg_worker_custom_domain_add_failed">添加自定义域名失败: %1$s</string>
-    <string name="vm_msg_worker_custom_domain_delete_success">自定义域名删除成功</string>
-    <string name="vm_msg_worker_custom_domain_delete_failed">删除自定义域名失败: %1$s</string>
-    <string name="vm_msg_worker_custom_domain_updated">自定义域名已更新</string>
-    <string name="vm_msg_worker_custom_domain_update_failed">更新自定义域名失败: %1$s</string>
-    <string name="vm_msg_worker_cleanup_failed">清理失败: %1$s</string>
-
+    <string name="vm_msg_worker_script_delete_success">脚本删除成功</string>    <string name="vm_msg_worker_rollback_success">回滚成功</string>    <string name="vm_msg_worker_routes_load_failed">加载路由列表失败: %1$s</string>
+    <string name="vm_msg_worker_route_create_success">路由创建成功</string>    <string name="vm_msg_worker_route_update_success">路由更新成功</string>    <string name="vm_msg_worker_route_delete_success">路由删除成功</string>    <string name="vm_msg_worker_custom_domain_add_failed">添加自定义域名失败: %1$s</string>
+    <string name="vm_msg_worker_custom_domain_delete_success">自定义域名删除成功</string>    <string name="vm_msg_worker_custom_domain_updated">自定义域名已更新</string>
     <!-- ===== KV (补充) ===== -->
     <string name="vm_msg_kv_namespaces_load_failed">加载命名空间失败: %1$s</string>
-    <string name="vm_msg_kv_namespace_create_success">命名空间创建成功</string>
-    <string name="vm_msg_kv_namespace_create_failed">创建命名空间失败: %1$s</string>
-    <string name="vm_msg_kv_namespace_delete_success">命名空间删除成功</string>
-    <string name="vm_msg_kv_namespace_delete_failed">删除命名空间失败: %1$s</string>
-    <string name="vm_msg_kv_value_get_failed">获取 Value 失败: %1$s</string>
+    <string name="vm_msg_kv_namespace_create_success">命名空间创建成功</string>    <string name="vm_msg_kv_namespace_delete_success">命名空间删除成功</string>    <string name="vm_msg_kv_value_get_failed">获取 Value 失败: %1$s</string>
     <string name="vm_msg_kv_value_save_success">Value 保存成功</string>
     <string name="vm_msg_kv_value_save_failed">保存 Value 失败: %1$s</string>
     <string name="vm_msg_kv_value_delete_success">Value 删除成功</string>
@@ -2321,30 +1939,15 @@
 
     <!-- ===== R2 (补充) ===== -->
     <string name="vm_msg_r2_buckets_load_failed">加载存储桶失败: %1$s</string>
-    <string name="vm_msg_r2_bucket_create_success">存储桶创建成功</string>
-    <string name="vm_msg_r2_bucket_create_failed">创建存储桶失败: %1$s</string>
-    <string name="vm_msg_r2_bucket_delete_success">存储桶删除成功</string>
-    <string name="vm_msg_r2_bucket_delete_failed">删除存储桶失败: %1$s</string>
-    <string name="vm_msg_r2_object_upload_success">对象上传成功</string>
+    <string name="vm_msg_r2_bucket_create_success">存储桶创建成功</string>    <string name="vm_msg_r2_bucket_delete_success">存储桶删除成功</string>    <string name="vm_msg_r2_object_upload_success">对象上传成功</string>
     <string name="vm_msg_r2_object_upload_failed">上传对象失败: %1$s</string>
     <string name="vm_msg_r2_object_download_failed">下载对象失败: %1$s</string>
     <string name="vm_msg_r2_object_delete_success">对象删除成功</string>
     <string name="vm_msg_r2_object_delete_failed">删除对象失败: %1$s</string>
     <string name="vm_msg_r2_custom_domain_delete_success">自定义域删除成功</string>
-    <string name="vm_msg_r2_custom_domain_delete_failed">删除自定义域失败: %1$s</string>
-
     <!-- ===== Pages (补充) ===== -->
-    <string name="vm_msg_pages_project_create_success">项目创建成功</string>
-    <string name="vm_msg_pages_project_create_failed">创建项目失败: %1$s</string>
-    <string name="vm_msg_pages_project_delete_success">项目删除成功</string>
-    <string name="vm_msg_pages_project_delete_failed">删除项目失败: %1$s</string>
-    <string name="vm_msg_pages_project_detail_load_failed">加载项目详情失败: %1$s</string>
-    <string name="vm_msg_pages_deployments_load_failed">加载部署列表失败: %1$s</string>
-    <string name="vm_msg_pages_deployment_delete_success">部署删除成功</string>
-    <string name="vm_msg_pages_deployment_delete_failed">删除部署失败: %1$s</string>
-    <string name="vm_msg_pages_deployment_rollback_success">已回滚到此部署</string>
-    <string name="vm_msg_pages_deployment_rollback_failed">回滚失败: %1$s</string>
-    <string name="vm_msg_pages_custom_domain_add_success">自定义域添加成功</string>
+    <string name="vm_msg_pages_project_create_success">项目创建成功</string>    <string name="vm_msg_pages_project_delete_success">项目删除成功</string>    <string name="vm_msg_pages_deployments_load_failed">加载部署列表失败: %1$s</string>
+    <string name="vm_msg_pages_deployment_delete_success">部署删除成功</string>    <string name="vm_msg_pages_deployment_rollback_success">已回滚到此部署</string>    <string name="vm_msg_pages_custom_domain_add_success">自定义域添加成功</string>
     <string name="vm_msg_pages_cleanup_failed">清理失败: %1$s</string>
 
     <!-- ===== Zone Rulesets (WAF/Cache/RateLimit shared) ===== -->
@@ -2352,20 +1955,14 @@
 
     <!-- ===== Backup ===== -->
     <string name="vm_msg_backup_config_saved_success">备份配置已保存</string>
-    <string name="vm_msg_backup_connection_success">连接成功</string>
-    <string name="vm_msg_backup_connection_failed">连接失败: %1$s</string>
-    <string name="vm_msg_backup_failed">备份失败: %1$s</string>
+    <string name="vm_msg_backup_connection_success">连接成功</string>    <string name="vm_msg_backup_failed">备份失败: %1$s</string>
     <string name="vm_msg_backup_filelist_load_failed">文件列表加载失败: %1$s</string>
     <string name="vm_msg_backup_files_not_found">未找到备份文件</string>
     <string name="vm_msg_backup_files_found_count">共找到 %1$d 个备份文件</string>
     <string name="vm_msg_backup_r2_buckets_empty">暂无 R2 存储桶</string>
-    <string name="vm_msg_backup_r2_buckets_found_count">共找到 %1$d 个 R2 存储桶</string>
-    <string name="vm_msg_backup_r2_buckets_load_failed">加载 R2 存储桶失败: %1$s</string>
-    <string name="vm_msg_backup_restore_failed">恢复失败: %1$s</string>
+    <string name="vm_msg_backup_r2_buckets_found_count">共找到 %1$d 个 R2 存储桶</string>    <string name="vm_msg_backup_restore_failed">恢复失败: %1$s</string>
 
-    <!-- ===== Pages (补充) ===== -->
-    <string name="vm_msg_pages_deployment_created">部署创建成功</string>
-    <string name="vm_msg_pages_deployment_create_success">部署创建成功</string>
+    <!-- ===== Pages (补充) ===== -->    <string name="vm_msg_pages_deployment_create_success">部署创建成功</string>
     <string name="vm_msg_pages_deployment_create_failed">部署创建失败: %1$s</string>
     <string name="vm_msg_pages_env_vars_update_success">环境变量配置已更新</string>
     <string name="vm_msg_pages_env_vars_update_failed">环境变量更新失败: %1$s</string>
@@ -2376,9 +1973,7 @@
     <string name="vm_msg_pages_d1_bindings_update_success">D1 绑定配置已更新</string>
     <string name="vm_msg_pages_d1_bindings_update_failed">D1 绑定更新失败: %1$s</string>
     <string name="vm_msg_pages_service_bindings_update_success">服务绑定配置已更新</string>
-    <string name="vm_msg_pages_service_bindings_update_failed">服务绑定更新失败: %1$s</string>
-    <string name="vm_msg_pages_runtime_settings_updated">运行时设置已更新</string>
-    <string name="vm_msg_pages_runtime_settings_update_failed">运行时设置更新失败: %1$s</string>
+    <string name="vm_msg_pages_service_bindings_update_failed">服务绑定更新失败: %1$s</string>    <string name="vm_msg_pages_runtime_settings_update_failed">运行时设置更新失败: %1$s</string>
 
     <!-- ===== Zero Trust: Access ===== -->
     <string name="vm_msg_zt_access_app_created">应用已创建</string>
@@ -2457,27 +2052,17 @@
     <!-- ===== R2Repository ===== -->
     <string name="repo_r2_missing_credentials">请先配置R2访问凭证（Access Key ID和Secret Access Key）</string>
     <string name="repo_r2_list_objects_failed_format">加载对象列表失败: %1$s</string>
-    <string name="repo_r2_upload_failed_format">上传失败: %1$s</string>
-    <string name="repo_r2_delete_failed_format">删除失败: %1$s</string>
-    <string name="repo_r2_create_no_result">创建成功但无返回数据</string>
+    <string name="repo_r2_upload_failed_format">上传失败: %1$s</string>    <string name="repo_r2_create_no_result">创建成功但无返回数据</string>
 
     <!-- ===== SnippetRepository ===== -->
     <string name="repo_snippet_save_no_result">保存失败：无返回数据</string>
-    <string name="repo_snippet_delete_rule_in_use_failed_format">删除触发规则失败（片段仍在使用中）：%1$s</string>
-    <string name="repo_snippet_expression_empty">表达式不能为空</string>
-    <string name="repo_snippet_expression_too_long_format">表达式长度 %1$d 超过上限 %2$d 字符</string>
+    <string name="repo_snippet_delete_rule_in_use_failed_format">删除触发规则失败（片段仍在使用中）：%1$s</string>    <string name="repo_snippet_expression_too_long_format">表达式长度 %1$d 超过上限 %2$d 字符</string>
     <string name="repo_snippet_read_existing_rule_failed_format">读取现有规则失败：%1$s</string>
     <string name="repo_snippet_read_existing_rule_failed">读取现有规则失败</string>
     <string name="repo_snippet_no_permission">该域名未开通 Snippets 权限（免费计划仅部分域名可用，需 Pro 及以上计划）</string>
     <string name="repo_snippet_name_invalid">片段名称仅支持小写字母、数字和下划线</string>
 
-    <!-- ===== PagesRepository (大量 onLog 显示消息) ===== -->
-    <string name="repo_pages_update_failed_format">更新失败: %1$s</string>
-    <string name="repo_pages_log_channel_create_no_result">创建日志通道失败: 无返回结果</string>
-    <string name="repo_pages_log_channel_create_failed_format">创建日志通道失败: %1$s</string>
-    <string name="repo_pages_log_channel_delete_failed_format">删除日志通道失败: %1$s</string>
-    <string name="repo_pages_file_not_found">文件不存在</string>
-    <string name="repo_pages_file_not_found_log">✗ 文件不存在</string>
+    <!-- ===== PagesRepository (大量 onLog 显示消息) ===== -->    <string name="repo_pages_log_channel_create_no_result">创建日志通道失败: 无返回结果</string>    <string name="repo_pages_log_channel_delete_failed_format">删除日志通道失败: %1$s</string>    <string name="repo_pages_file_not_found_log">✗ 文件不存在</string>
     <string name="repo_pages_unsupported_file_type">仅支持 .zip、.js 或 .html 文件部署。</string>
     <string name="repo_pages_unsupported_file_type_log">✗ 仅支持 .zip、.js 或 .html 文件部署</string>
     <string name="repo_pages_deploy_start_log">▶ 开始部署项目: %1$s</string>
@@ -2576,9 +2161,7 @@
     <string name="repo_worker_custom_domain_update_no_result">域名更新成功但无返回结果</string>
     <string name="repo_worker_custom_domain_update_failed_format">更新自定义域名失败: %1$s</string>
     <string name="repo_worker_update_secrets_failed_format">更新机密失败: %1$s</string>
-    <string name="repo_worker_update_env_no_result">更新成功但无返回数据</string>
-    <string name="repo_worker_update_env_failed_format">更新失败: %1$s</string>
-    <string name="repo_worker_versions_failed_format">获取版本历史失败: %1$s</string>
+    <string name="repo_worker_update_env_no_result">更新成功但无返回数据</string>    <string name="repo_worker_versions_failed_format">获取版本历史失败: %1$s</string>
     <string name="repo_worker_versions_exception_format">获取版本历史失败: %1$s: %2$s</string>
     <string name="repo_worker_version_delete_failed_format">删除版本失败: %1$s</string>
     <string name="repo_worker_deployments_failed_format">获取部署记录失败: %1$s</string>
@@ -2586,11 +2169,7 @@
     <string name="repo_worker_deployment_detail_no_result">未返回部署详情</string>
     <string name="repo_worker_deployment_detail_failed_format">获取部署详情失败: %1$s</string>
     <string name="repo_worker_deployment_detail_exception_format">获取部署详情失败: %1$s: %2$s</string>
-    <string name="repo_worker_log_channel_failed_format">获取日志通道失败: %1$s</string>
-    <string name="repo_worker_log_channel_create_no_result">创建日志通道失败: 无返回结果</string>
-    <string name="repo_worker_log_channel_create_failed_format">创建日志通道失败: %1$s</string>
-    <string name="repo_worker_log_channel_delete_failed_format">删除日志通道失败: %1$s</string>
-    <string name="repo_worker_trigger_list_failed_format">获取触发器列表失败: %1$s</string>
+    <string name="repo_worker_log_channel_failed_format">获取日志通道失败: %1$s</string>    <string name="repo_worker_trigger_list_failed_format">获取触发器列表失败: %1$s</string>
     <string name="repo_worker_trigger_update_failed_format">更新触发器失败: %1$s</string>
 
     <!-- ===== ZoneRulesetRepository (toResource 辅助) ===== -->
@@ -2621,9 +2200,7 @@
     <!-- ===== DisplaySizeHelper ===== -->
     <string name="helper_size_extra_small">极小</string>
     <string name="helper_size_smaller">较小</string>
-    <string name="helper_size_small">小</string>
-    <string name="helper_size_default">默认</string>
-    <string name="helper_size_large">大</string>
+    <string name="helper_size_small">小</string>    <string name="helper_size_large">大</string>
     <string name="helper_size_extra_large">超大</string>
 
     <!-- ===== ThemeHelper ===== -->
@@ -2631,13 +2208,8 @@
     <!-- (theme_follow_system / theme_light / theme_dark 已复用在 v133-v135 定义的现有资源) -->
 
     <!-- ===== AuthHelper ===== -->
-    <string name="helper_auth_token_empty">API Token 不能为空</string>
-    <string name="helper_auth_email_empty">邮箱不能为空</string>
-    <string name="helper_auth_global_key_empty">Global API Key 不能为空</string>
-
     <!-- ===== DialogUtils 默认值 ===== -->
     <string name="dialog_utils_positive_confirm">确定</string>
-    <string name="dialog_utils_negative_cancel">取消</string>
     <string name="dialog_utils_loading_message">加载中…</string>
 
     <!-- ===== BackupCrypto ===== -->
@@ -2646,10 +2218,7 @@
 
     <!-- ===== Models.kt 枚举 & 常量 ===== -->
     <string name="model_perm_read">读</string>
-    <string name="model_perm_write">写</string>
-    <string name="model_perm_execute">执行</string>
-    <string name="model_scope_zone">域名</string>
-    <string name="model_scope_account">账户</string>
+    <string name="model_perm_write">写</string>    <string name="model_scope_account">账户</string>
     <string name="model_scope_user">用户</string>
     <string name="model_range_24h">24小时</string>
     <string name="model_range_7d">7天</string>
@@ -2674,9 +2243,7 @@
     <string name="pages_generic_updating_secrets">正在更新机密配置</string>
     <string name="pages_generic_env_vars_updated">环境变量配置已更新</string>
     <string name="pages_generic_secrets_updated">机密配置已更新</string>
-    <string name="pages_generic_project_env_production">生产</string>
-    <string name="pages_generic_project_env_preview">预览</string>
-    <string name="pages_generic_project_name_with_env_template">项目名称: %1$s (%2$s环境)</string>
+    <string name="pages_generic_project_env_production">生产</string>    <string name="pages_generic_project_name_with_env_template">项目名称: %1$s (%2$s环境)</string>
 
     <!-- ===== Pages KV 绑定 ===== -->
     <string name="pages_kv_fetching_bindings">正在获取当前 KV 绑定配置</string>
@@ -2709,9 +2276,7 @@
     <string name="pages_service_updating_bindings">正在更新服务绑定配置</string>
     <string name="pages_service_bindings_updated">服务绑定配置已更新</string>
 
-    <!-- ===== Pages 部署 ===== -->
-    <string name="pages_deploy_please_enter_project_name">请输入项目名称</string>
-    <string name="pages_deploy_please_enter_branch_name">请输入分支名称</string>
+    <!-- ===== Pages 部署 ===== -->    <string name="pages_deploy_please_enter_branch_name">请输入分支名称</string>
     <string name="pages_deploy_please_select_file">请选择部署文件</string>
     <string name="pages_deploy_file_not_exists">文件不存在</string>
     <string name="pages_deploy_unsupported_file_type">仅支持 .zip、.js 或 .html 文件</string>
@@ -2748,9 +2313,7 @@
     <string name="pages_creating_log_channel">正在创建日志通道…</string>
     <string name="pages_no_available_deployment">未找到可用的部署</string>
     <string name="pages_log_channel_no_wss">创建日志通道失败: 无 WSS 地址</string>
-    <string name="pages_log_channel_failed_template">创建日志通道失败: %1$s</string>
-    <string name="pages_deploy_no_logs">暂无日志</string>
-    <string name="pages_deploy_logs_info_template">共 %1$d 条 • %2$s</string>
+    <string name="pages_log_channel_failed_template">创建日志通道失败: %1$s</string>    <string name="pages_deploy_logs_info_template">共 %1$d 条 • %2$s</string>
     <string name="pages_deploy_logs_include_container">包含容器日志</string>
     <string name="pages_deploy_logs_build_only">仅构建日志</string>
     <string name="pages_deploy_load_logs_failed_template">加载日志失败: %1$s</string>
@@ -2760,25 +2323,17 @@
     <string name="pages_detail_no">否</string>
     <string name="pages_detail_enabled">启用</string>
     <string name="pages_detail_disabled">禁用</string>
-    <string name="pages_detail_running">运行中</string>
-    <string name="pages_detail_unknown_time">未知时间</string>
-    <string name="pages_detail_type_encrypted">🔒 加密</string>
+    <string name="pages_detail_running">运行中</string>    <string name="pages_detail_type_encrypted">🔒 加密</string>
     <string name="pages_detail_type_plaintext">📝 明文</string>
 
     <!-- ===== Pages 域名 ===== -->
     <string name="pages_domain_add_title_template">为 %1$s 添加域名</string>
-    <string name="pages_domain_input_hint">自定义域名（例如：app.example.com）</string>
-    <string name="pages_domain_cannot_be_empty">域名不能为空</string>
-    <string name="pages_domain_no_zone_found">域名已添加，但未找到对应的 Cloudflare 域名（Zone），无法自动添加 DNS 记录，请手动配置</string>
+    <string name="pages_domain_input_hint">自定义域名（例如：app.example.com）</string>    <string name="pages_domain_no_zone_found">域名已添加，但未找到对应的 Cloudflare 域名（Zone），无法自动添加 DNS 记录，请手动配置</string>
     <string name="pages_domain_auto_configuring_dns">正在自动配置 DNS 记录…</string>
     <string name="pages_domain_added_and_dns_ok">域名添加成功，DNS 记录已自动配置，验证可能需要几分钟</string>
     <string name="pages_domain_added_but_dns_failed_template">域名已添加，DNS 自动配置失败: %1$s，请手动添加 %2$s 记录</string>
-    <string name="pages_domain_list_title_template">%1$s - 域名</string>
-    <string name="pages_domain_delete_title">删除域名</string>
-    <string name="pages_domain_delete_confirm_template">确定要删除域名 "%1$s" 吗？\n\n此操作不可恢复。</string>
-    <string name="pages_domain_delete_success">域名删除成功</string>
-    <string name="pages_domain_delete_failed_template">删除失败: %1$s</string>
-    <string name="pages_domain_preview_copied">预览域名已复制</string>
+    <string name="pages_domain_list_title_template">%1$s - 域名</string>    <string name="pages_domain_delete_confirm_template">确定要删除域名 "%1$s" 吗？\n\n此操作不可恢复。</string>
+    <string name="pages_domain_delete_success">域名删除成功</string>    <string name="pages_domain_preview_copied">预览域名已复制</string>
     <string name="pages_domain_custom_copied">域名已复制</string>
     <string name="pages_domain_status_preview">预览</string>
     <string name="pages_domain_pages_default">Pages 默认域名</string>
@@ -2792,8 +2347,6 @@
     <string name="pages_deployment_rollback_confirm_template">确定要回滚到部署 %1$s 吗？\n\n这将使此部署成为活动部署。</string>
     <string name="pages_deployment_retry_title">重新部署</string>
     <string name="pages_deployment_retry_confirm_template">确定要重新部署 %1$s 吗？\n\n将基于此部署的配置重新发起一次部署。</string>
-    <string name="pages_generic_redeploy">重新部署</string>
-
     <!-- ===== UiMessage / ViewModel ===== -->
     <string name="vm_msg_pages_cleanup_finished_total">清理完成！共清理了 %1$d 个旧部署</string>
     <string name="vm_msg_pages_project_cleanup_finished">项目 %1$s 清理完成！成功清理了 %2$d 个旧部署</string>
@@ -2807,9 +2360,7 @@
     <!-- R2 自定义域名 SSL / Ownership 状态映射（对应 Cloudflare API 返回的字符串 status 字段） -->
     <string name="r2_status_pending">等待中</string>
     <string name="r2_status_active">已激活</string>
-    <string name="r2_status_pending_deletion">待删除</string>
-    <string name="r2_status_deleted">已删除</string>
-    <string name="r2_status_migrating">迁移中</string>
+    <string name="r2_status_pending_deletion">待删除</string>    <string name="r2_status_migrating">迁移中</string>
     <string name="r2_status_moved">已迁移</string>
     <string name="r2_status_permitted">已启用</string>
     <string name="r2_status_unpermitted">未启用</string>
@@ -2818,31 +2369,13 @@
     <string name="r2_status_disabled">已停用</string>
     <string name="r2_status_expired">已过期</string>
     <string name="r2_status_error">错误</string>
-    <string name="r2_status_unknown_status">未知状态</string>
 
-    <!-- ===== Worker 绑定与设置 ===== -->
-    <string name="worker_kv_load_namespaces_failed_template">加载 KV 命名空间失败: %1$s</string>
-    <string name="worker_r2_updating_bindings_no_script">正在更新 R2 绑定配置（不重新上传脚本代码）</string>
-    <string name="worker_r2_bindings_updated">R2 绑定配置已更新</string>
-    <string name="worker_d1_fetching_bindings">正在获取当前 D1 绑定配置</string>
-    <string name="worker_d1_load_databases_failed_template">加载 D1 数据库失败: %1$s</string>
+    <!-- ===== Worker 绑定与设置 ===== -->    <string name="worker_r2_updating_bindings_no_script">正在更新 R2 绑定配置（不重新上传脚本代码）</string>
     <string name="worker_d1_updating_bindings_no_script">正在更新 D1 绑定配置（不重新上传脚本代码）</string>
-    <string name="worker_d1_bindings_updated">D1 绑定配置已更新</string>
-    <string name="worker_service_fetching_bindings">正在获取当前服务绑定配置</string>
-    <string name="worker_service_no_workers">暂无其他 Worker 脚本可绑定</string>
-    <string name="worker_service_load_workers_failed_template">加载 Worker 列表失败: %1$s</string>
-    <string name="worker_service_updating_bindings_no_script">正在更新服务绑定配置（不重新上传脚本代码）</string>
-    <string name="worker_service_bindings_updated">服务绑定配置已更新</string>
-    <string name="worker_env_fetching_vars">正在获取当前环境变量配置</string>
+    <string name="worker_service_updating_bindings_no_script">正在更新服务绑定配置（不重新上传脚本代码）</string>    <string name="worker_env_fetching_vars">正在获取当前环境变量配置</string>
     <string name="worker_env_please_enter_var_name">请输入变量名称</string>
     <string name="worker_env_please_enter_var_value">请输入变量值</string>
-    <string name="worker_env_json_invalid_template">JSON 格式无效: %1$s</string>
-    <string name="worker_env_added">环境变量已添加</string>
-    <string name="worker_env_edit_title">编辑环境变量</string>
-    <string name="worker_env_updated">环境变量已更新</string>
-    <string name="worker_env_updating_vars">正在更新环境变量配置</string>
-    <string name="worker_env_vars_updated">环境变量配置已更新</string>
-    <string name="worker_secret_fetching_vars">正在获取当前机密变量配置</string>
+    <string name="worker_env_json_invalid_template">JSON 格式无效: %1$s</string>    <string name="worker_env_edit_title">编辑环境变量</string>    <string name="worker_secret_fetching_vars">正在获取当前机密变量配置</string>
     <string name="worker_secret_please_enter_name">请输入机密名称</string>
     <string name="worker_secret_please_enter_value">请输入机密值</string>
     <string name="worker_secret_added">机密变量已添加</string>
@@ -2851,16 +2384,10 @@
     <string name="worker_secret_updating_vars">正在更新机密变量配置</string>
     <string name="worker_runtime_fetching_settings">正在获取当前运行时设置</string>
     <string name="worker_runtime_saving_title">正在保存…</string>
-    <string name="worker_runtime_updating_settings">正在更新运行时设置</string>
-    <string name="worker_runtime_updated">运行时设置已更新</string>
-    <string name="worker_runtime_update_failed_template">更新失败: %1$s</string>
-
-    <!-- ===== Worker 版本/日志/触发器 ===== -->
+    <string name="worker_runtime_updating_settings">正在更新运行时设置</string>    <!-- ===== Worker 版本/日志/触发器 ===== -->
     <string name="worker_version_fetching_history">正在获取版本历史</string>
     <string name="worker_version_no_history">暂无版本历史</string>
-    <string name="worker_version_delete_confirm_template">确定要删除版本 #%1$d 吗？</string>
-    <string name="worker_generic_delete_success">删除成功</string>
-    <string name="worker_logs_creating_channel">正在创建日志通道</string>
+    <string name="worker_version_delete_confirm_template">确定要删除版本 #%1$d 吗？</string>    <string name="worker_logs_creating_channel">正在创建日志通道</string>
     <string name="worker_triggers_fetching_list">正在获取触发器列表</string>
     <string name="worker_trigger_please_enter_cron">请输入Cron表达式</string>
     <string name="worker_trigger_create_success">创建成功</string>
@@ -2874,9 +2401,7 @@
     <string name="worker_script_delete_confirm_template">确定要删除 Worker 脚本 "%1$s" 吗？此操作无法撤销。</string>
     <string name="worker_batch_delete_confirm_single_template">确定要删除 1 个脚本吗？\n\n%1$s\n\n此操作无法撤销。</string>
     <string name="worker_batch_delete_confirm_multi_template">确定要删除 %1$d 个脚本吗？此操作无法撤销。</string>
-    <string name="worker_batch_delete_title">批量删除脚本</string>
-    <string name="worker_generic_deleting_title">删除中…</string>
-    <string name="worker_batch_deleting_message_template">正在删除 %1$d 个脚本</string>
+    <string name="worker_batch_delete_title">批量删除脚本</string>    <string name="worker_batch_deleting_message_template">正在删除 %1$d 个脚本</string>
     <string name="worker_batch_delete_success_template">成功删除 %1$d 个脚本</string>
     <string name="worker_batch_delete_mixed_template">删除了 %1$d 个脚本，%2$d 个失败</string>
     <string name="worker_generic_no_scripts">暂无脚本</string>
@@ -2902,14 +2427,10 @@
     <string name="worker_var_type_text">[文本]</string>
 
     <!-- ===== Worker 清理旧版本 行模板（成功条目） ===== -->
-    <string name="worker_cleanup_script_line_template">• %1$s: %2$s\n</string>
-
     <!-- ===== Pages 添加/编辑对话框相关 ===== -->
     <string name="pages_please_enter_name_template">请输入%1$s名称</string>
     <string name="pages_please_enter_value_template">请输入%1$s值</string>
     <string name="pages_please_enter_value">请输入变量值</string>
-    <string name="pages_rollback_deployment_btn">回滚</string>
-
     <!-- ===== Pages 项目卡片 ===== -->
     <string name="pages_project_info_template">%1$s 分支 • %2$s</string>
 
@@ -2963,14 +2484,7 @@
     <!-- ===== AccountRepository ===== -->
     <string name="repo_account_load_failed_format">加载账号失败: %1$s</string>
     <string name="repo_account_load_default_failed_format">加载默认账号失败: %1$s</string>
-    <string name="repo_account_insert_failed_format">插入账号失败: %1$s</string>
-    <string name="repo_account_update_failed_format">更新账号失败: %1$s</string>
-    <string name="repo_account_delete_failed_format">删除账号失败: %1$s</string>
-    <string name="repo_account_set_default_failed_format">设置默认账号失败: %1$s</string>
-    <string name="repo_account_import_failed_format">导入账号失败: %1$s</string>
-    <string name="repo_account_export_failed_format">导出账号失败: %1$s</string>
-
-    <!-- ===== D1Repository ===== -->
+    <string name="repo_account_insert_failed_format">插入账号失败: %1$s</string>    <!-- ===== D1Repository ===== -->
     <string name="repo_d1_create_no_result">数据库已创建但无返回数据</string>
     <string name="repo_d1_create_failed_format">创建 D1 数据库失败: %1$s</string>
     <string name="repo_d1_delete_failed_format">删除 D1 数据库失败: %1$s</string>
@@ -3027,16 +2541,11 @@
     <!-- ===== WorkerRepository ===== -->
     <string name="repo_worker_upload_no_result">上传成功但无返回数据</string>
     <string name="repo_worker_upload_failed_multi_format">上传失败（已尝试 %1$d 种内容类型）: %2$s</string>
-    <string name="repo_worker_upload_failed_format">上传失败: %1$s</string>
-
     <!-- ===== TemplateDeployRepository ===== -->
     <string name="repo_template_required_fields_empty_format">以下必填项不能为空: %1$s</string>
     <string name="repo_template_missing_source_url">模板缺少源码地址</string>
     <string name="repo_template_download_archive_failed">下载模板归档失败</string>
-    <string name="repo_template_download_script_failed">下载模板脚本失败</string>
-    <string name="repo_template_upload_failed_format">上传失败: %1$s</string>
-    <string name="repo_template_deploy_failed_format">部署失败: %1$s</string>
-    <string name="repo_template_required_vars_empty_format">以下必填变量未填写：%1$s</string>
+    <string name="repo_template_download_script_failed">下载模板脚本失败</string>    <string name="repo_template_required_vars_empty_format">以下必填变量未填写：%1$s</string>
     <string name="repo_template_missing_pages_source_url">模板缺少 Pages 源码地址</string>
     <string name="repo_template_download_pages_failed">下载 Pages 模板失败</string>
     <string name="repo_template_parse_binding_failed_format">解析绑定 %1$s 失败: %2$s</string>
@@ -3051,9 +2560,7 @@
     <string name="repo_worker_list_scripts_failed_format">获取脚本列表失败: %1$s</string>
     <string name="repo_worker_get_script_failed_format">获取脚本失败: %1$s</string>
     <string name="repo_worker_update_no_result">更新成功但未返回结果</string>
-    <string name="repo_worker_update_bindings_failed_format">更新绑定失败: %1$s</string>
-    <string name="repo_worker_update_d1_bindings_failed_format">更新 D1 绑定失败: %1$s</string>
-    <string name="repo_worker_update_service_bindings_failed_format">更新 Service 绑定失败: %1$s</string>
+    <string name="repo_worker_update_bindings_failed_format">更新绑定失败: %1$s</string>    <string name="repo_worker_update_service_bindings_failed_format">更新 Service 绑定失败: %1$s</string>
     <string name="repo_worker_update_variables_failed_format">更新变量失败: %1$s</string>
     <string name="repo_worker_no_settings">未返回设置</string>
     <string name="repo_worker_fetch_settings_failed_format">获取设置失败: %1$s</string>
@@ -3075,8 +2582,6 @@
     <string name="repo_worker_get_subdomain_failed_format">获取账户子域失败: %1$s</string>
 
     <!-- ===== Zone 仓库错误信息 ===== -->
-    <string name="repo_zone_http_error_format">HTTP %1$d: %2$s</string>
-
     <!-- ===== 本地连接开关（Pages / Worker 共用） ===== -->
     <string name="switch_allow_local_url_title">URL来源允许局域网 / 本地连接</string>
     <string name="switch_allow_local_url_summary">允许 http:// 明文协议与 127.x / 10.x / 192.168.x / 172.16–31.x 私网 IP；扩展名、大小、ZIP 魔数、Content-Type 等 7 条安全仍生效。仅在自建 NAS / 本地调试服务 / VPN场景开启。</string>
@@ -3087,9 +2592,7 @@
     <string name="worker_post_observability_title">启用可观测性</string>
     <string name="worker_post_observability_summary">激活 Workers Trace + Logs 持久化（head 采样率=1），异常诊断可用。</string>
     <string name="worker_post_observability_ok">可观测性已启用（Traces + Logs 持久化）</string>
-    <string name="worker_post_observability_fail_format">启用可观测性失败：%1$s</string>
-    <string name="worker_post_subdomain_title">启用自定义子域名</string>
-    <string name="worker_post_subdomain_summary">为脚本开启 *.workers.dev 子域名访问（首次上传后自动执行）。</string>
+    <string name="worker_post_observability_fail_format">启用可观测性失败：%1$s</string>    <string name="worker_post_subdomain_summary">为脚本开启 *.workers.dev 子域名访问（首次上传后自动执行）。</string>
     <string name="worker_post_subdomain_ok_format">子域名已启用：%1$s.workers.dev</string>
     <string name="worker_post_subdomain_fail_format">启用子域名失败：%1$s</string>
     <string name="worker_post_subdomain_403_dashboard_hint">提示：请先到 Cloudflare Dashboard → Workers &amp; Pages 完成 workers.dev 账号级子域名注册（一次性设置）。</string>
@@ -3149,22 +2652,15 @@
     <string name="binding_auto_create_hint">选择「自动创建/复用」时，系统将以绑定名作为资源名，查找已有资源或创建新资源。</string>
 
     <!-- ===== 模板商店 ===== -->
-    <string name="card_template_store">模板商店</string>
-    <string name="store_title">模板商店</string>
-    <string name="store_search_hint">搜索模板…</string>
+    <string name="card_template_store">模板商店</string>    <string name="store_search_hint">搜索模板…</string>
     <string name="store_no_templates">暂无模板</string>
     <string name="store_required">必填</string>
-    <string name="store_empty_icon">📦</string>
-    <string name="store_loading">加载中…</string>
-    <string name="store_refresh">刷新</string>
+    <string name="store_empty_icon">📦</string>    <string name="store_refresh">刷新</string>
     <string name="store_refresh_success">刷新成功</string>
     <string name="store_refresh_failed">刷新失败</string>
-    <string name="store_refresh_partial">刷新完成：%1$d 个成功，%2$d 个失败</string>
-    <string name="store_all">全部</string>
-    <string name="store_all_with_count">全部(%1$d)</string>
+    <string name="store_refresh_partial">刷新完成：%1$d 个成功，%2$d 个失败</string>    <string name="store_all_with_count">全部(%1$d)</string>
     <string name="store_worker">Worker</string>
     <string name="store_worker_with_count">Worker(%1$d)</string>
-    <string name="store_pages">Pages</string>
     <string name="store_pages_with_count">Pages(%1$d)</string>
     <string name="store_hybrid">Hybrid</string>
     <string name="store_hybrid_with_count">Hybrid(%1$d)</string>
@@ -3180,9 +2676,7 @@
     <string name="store_default_source_name">官方源</string>
     <string name="store_bindings">绑定</string>
     <string name="store_binding_type_kv">KV 命名空间</string>
-    <string name="store_binding_type_d1">D1 数据库</string>
-    <string name="store_binding_type_r2">R2 存储桶</string>
-    <string name="store_binding_type_ai">AI 绑定</string>
+    <string name="store_binding_type_d1">D1 数据库</string>    <string name="store_binding_type_ai">AI 绑定</string>
     <string name="store_binding_type_var">环境变量</string>
     <string name="store_binding_type_durable_object">Durable Object</string>
     <string name="store_binding_type_service">Service 绑定</string>
@@ -3238,11 +2732,8 @@
     <string name="store_source_added">数据源已添加</string>
     <string name="store_source_updated">数据源已更新</string>
     <string name="store_edit_source">编辑数据源</string>
-    <string name="store_save">保存</string>
     <string name="store_source_name_hint">请输入源名称</string>
-    <string name="store_source_url_invalid">请输入有效的 HTTPS 地址</string>
-    <string name="store_source_operation_failed">操作失败</string>
-    <string name="store_source_operation_failed_with_msg">操作失败：%1$s</string>
+    <string name="store_source_url_invalid">请输入有效的 HTTPS 地址</string>    <string name="store_source_operation_failed_with_msg">操作失败：%1$s</string>
     <string name="store_no_sources">暂无数据源</string>
 
     <!-- 模板商店卡片徽标 -->

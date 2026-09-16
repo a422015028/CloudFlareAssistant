@@ -15,7 +15,7 @@
             android:id="@+id/formTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/waf_add_rule_title"
+            android:text="@string/waf_add_rule_dialog_title"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
@@ -23,7 +23,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/waf_rule_name"
+            android:hint="@string/gateway_rule_name"
             android:layout_marginBottom="12dp"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 

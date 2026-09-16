@@ -14,7 +14,7 @@
         android:background="@android:color/transparent"
         android:elevation="0dp"
         app:navigationIcon="@drawable/ic_arrow_back"
-        app:title="@string/settings_title"
+        app:title="@string/card_settings"
         app:titleTextColor="?attr/colorOnSurface" />
 
     <ScrollView
@@ -74,7 +74,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/theme_follow_system"
+                            android:text="@string/language_follow_system"
                             android:textSize="12sp"
                             style="@style/Widget.Material3.Button.OutlinedButton" />
 
@@ -226,7 +226,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/helper_size_default"
+                            android:text="@string/account_default"
                             android:textSize="12sp"
                             style="@style/Widget.Material3.Button.OutlinedButton" />
 

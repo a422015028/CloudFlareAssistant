@@ -141,9 +141,9 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
         }
 
         val title = if (existing == null)
-            ctx.getString(R.string.transform_add_phase_title, phaseTitle)
+            ctx.getString(R.string.pages_add_dialog_title, phaseTitle)
         else
-            ctx.getString(R.string.transform_edit_phase_title, phaseTitle)
+            ctx.getString(R.string.pages_generic_edit_template, phaseTitle)
 
         MaterialAlertDialogBuilder(ctx)
             .setTitle(title)

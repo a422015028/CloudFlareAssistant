@@ -74,7 +74,7 @@ class StoreCardAdapter(
             // 类型标签
             val typeText = when (template.type) {
                 "worker" -> context.getString(R.string.store_worker)
-                "pages" -> context.getString(R.string.store_pages)
+                "pages" -> context.getString(R.string.card_pages)
                 "hybrid" -> context.getString(R.string.store_hybrid)
                 else -> template.type
             }

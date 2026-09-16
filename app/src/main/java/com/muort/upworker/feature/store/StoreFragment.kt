@@ -226,7 +226,7 @@ class StoreFragment : Fragment() {
 
             when {
                 isRefreshing -> {
-                    binding.emptySubtitleText.text = getString(R.string.store_loading)
+                    binding.emptySubtitleText.text = getString(R.string.dialog_utils_loading_message)
                     binding.emptyRefreshBtn.visibility = View.GONE
                 }
                 hasQuery -> {

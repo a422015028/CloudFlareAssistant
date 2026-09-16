@@ -23,7 +23,7 @@ import com.muort.upworker.core.model.AccessRule
 class PolicyEditDialogHelper(private val context: Context) {
 
     private val decisionTypes = listOf(
-        "allow" to context.getString(R.string.zt_policy_decision_allow),
+        "allow" to context.getString(R.string.ar_action_whitelist),
         "deny" to context.getString(R.string.zt_policy_decision_deny),
         "bypass" to context.getString(R.string.zt_policy_decision_bypass),
         "non_identity" to context.getString(R.string.zt_policy_decision_non_identity)

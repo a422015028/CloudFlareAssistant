@@ -459,7 +459,7 @@ class PagesLogsActivity : AppCompatActivity() {
         isPaused = !isPaused
         if (isPaused) {
             pauseBtn.setIconResource(R.drawable.ic_play)
-            connectionStatusText.text = getString(R.string.status_paused)
+            connectionStatusText.text = getString(R.string.status_paused_short)
         } else {
             pauseBtn.setIconResource(R.drawable.ic_pause)
             connectionStatusText.text = if (isConnected) getString(R.string.status_connected) else getString(R.string.status_not_connected)

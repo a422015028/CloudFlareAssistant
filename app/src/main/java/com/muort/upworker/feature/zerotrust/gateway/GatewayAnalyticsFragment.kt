@@ -320,7 +320,7 @@ class GatewayAnalyticsFragment : Fragment() {
             "8" -> R.string.zt_gateway_dns_decision_override_applied
             "9" -> R.string.zt_gateway_dns_decision_blocked_rule
             "10" -> R.string.zt_gateway_dns_decision_allowed_rule
-            else -> R.string.zt_gateway_dns_decision_unknown
+            else -> R.string.status_unknown
         }
         return getString(resId)
     }

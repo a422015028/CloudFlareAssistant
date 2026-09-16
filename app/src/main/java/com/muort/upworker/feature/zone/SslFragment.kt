@@ -42,7 +42,7 @@ class SslFragment : BaseZoneFeatureFragment() {
     // 正在写入的 key（临时禁用对应行）
     private val updating = mutableSetOf<String>()
 
-    override val emptyTextResId: Int = R.string.ssl_empty_loading
+    override val emptyTextResId: Int = R.string.dialog_utils_loading_message
     override val showAddFab: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

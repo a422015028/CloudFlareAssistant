@@ -49,7 +49,7 @@ class GatewayLocationAdapter(
             } else {
                 android.view.View.GONE
             }
-            binding.defaultChip.text = ctx.getString(R.string.zt_location_default_label)
+            binding.defaultChip.text = ctx.getString(R.string.account_default)
 
             binding.ecsChip.visibility = if (location.ecsSupport == true) {
                 android.view.View.VISIBLE
@@ -58,7 +58,7 @@ class GatewayLocationAdapter(
             }
             binding.ecsChip.text = ctx.getString(R.string.zt_location_ecs_label)
 
-            val networks = location.networks?.joinToString(", ") { it.network } ?: ctx.getString(R.string.zt_location_no_networks)
+            val networks = location.networks?.joinToString(", ") { it.network } ?: ctx.getString(R.string.status_none)
             binding.locationNetworksText.text = ctx.getString(R.string.zt_location_networks_label, networks)
 
             val clientCount = location.clientCount ?: 0

@@ -46,7 +46,7 @@
             android:layout_height="36dp"
             android:src="@android:drawable/ic_menu_delete"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/d1_delete_database" />
+            android:contentDescription="@string/d1_delete_database_title" />
 
     </LinearLayout>
 

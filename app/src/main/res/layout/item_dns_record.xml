@@ -40,7 +40,7 @@
                     android:textSize="12sp"
                     android:textColor="?attr/colorPrimary"
                     android:layout_marginTop="4dp"
-                    android:text="@string/dns_type" />
+                    android:text="@string/dns_field_type" />
 
             </LinearLayout>
 

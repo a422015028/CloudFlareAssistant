@@ -426,7 +426,7 @@ class PagesFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.worker_runtime_settings)
+            .setTitle(R.string.pages_menu_runtime_settings)
             .setView(dialogBinding.root)
             .setPositiveButton(R.string.save) { _, _ ->
                 val compatibilityDate = dialogBinding.compatibilityDateInput.text.toString().trim()
@@ -438,7 +438,7 @@ class PagesFragment : Fragment() {
                 val placement = if (dialogBinding.placementModeGroup.checkedRadioButtonId == R.id.placementSmart) Placement(mode = "smart") else null
 
                 // 保存时：环境选择仅用于回显提示，Cloudflare Pages API 会同时更新生产+预览
-                val envLabel = if (selectedEnv == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                val envLabel = if (selectedEnv == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
                 showToast(getString(R.string.pages_updating_runtime_settings, envLabel))
 
                 pagesViewModel.updateRuntimeSettings(
@@ -520,7 +520,7 @@ class PagesFragment : Fragment() {
     private fun showVariablesDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.worker_env_fetching_vars)
             .setCancelable(false)
             .create()
@@ -535,8 +535,8 @@ class PagesFragment : Fragment() {
 
                 // Setup title
                 dialogBinding.titleText.text = getString(R.string.pages_configure_env_vars)
-                val env = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
-                dialogBinding.projectNameText.text = getString(R.string.pages_project_name_with_env, project.name, env)
+                val env = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
+                dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, env)
                 dialogBinding.listTitleText.text = getString(R.string.pages_variables_list_title)
                 dialogBinding.noVariablesText.text = getString(R.string.pages_no_variables)
 
@@ -611,7 +611,7 @@ class PagesFragment : Fragment() {
     private fun showSecretsDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.worker_secret_fetching_vars)
             .setCancelable(false)
             .create()
@@ -626,8 +626,8 @@ class PagesFragment : Fragment() {
 
                 // Setup title
                 dialogBinding.titleText.text = getString(R.string.pages_configure_secrets)
-                val env = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
-                dialogBinding.projectNameText.text = getString(R.string.pages_project_name_with_env, project.name, env)
+                val env = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
+                dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, env)
                 dialogBinding.listTitleText.text = getString(R.string.pages_secrets_list_title)
                 dialogBinding.noVariablesText.text = getString(R.string.pages_no_secrets)
 
@@ -888,7 +888,7 @@ class PagesFragment : Fragment() {
     private fun showKvBindingsDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.pages_kv_fetching_bindings)
             .setCancelable(false)
             .create()
@@ -906,7 +906,7 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesKvBindingsBinding.inflate(layoutInflater)
                 
                 // Setup title
-                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
                 dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
                 
                 // Temporary list for this dialog - initialize with existing bindings
@@ -1139,7 +1139,7 @@ class PagesFragment : Fragment() {
     private fun showR2BindingsDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.pages_r2_fetching_bindings)
             .setCancelable(false)
             .create()
@@ -1153,7 +1153,7 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesR2BindingsBinding.inflate(layoutInflater)
                 
                 // Setup title
-                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
                 dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
                 
                 // Temporary list for this dialog - initialize with existing bindings
@@ -1386,7 +1386,7 @@ class PagesFragment : Fragment() {
     private fun showD1BindingsDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.pages_d1_fetching_bindings)
             .setCancelable(false)
             .create()
@@ -1409,7 +1409,7 @@ class PagesFragment : Fragment() {
                     val dialogBinding = com.muort.upworker.databinding.DialogPagesD1BindingsBinding.inflate(layoutInflater)
 
                     // Setup title
-                    val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                    val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
                     dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
 
                     // Temporary list for this dialog - initialize with existing bindings
@@ -1646,7 +1646,7 @@ class PagesFragment : Fragment() {
     private fun showServiceBindingsDialog(account: Account, project: PagesProject, environment: String) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.pages_service_fetching_bindings)
             .setCancelable(false)
             .create()
@@ -1660,7 +1660,7 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesServicesBinding.inflate(layoutInflater)
 
                 // Setup title
-                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_generic_project_env_preview)
+                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
                 dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
 
                 // Temporary list for this dialog - Triple: (bindingName, serviceName, serviceEnv)
@@ -1912,7 +1912,7 @@ class PagesFragment : Fragment() {
 
         when {
             projectName.isEmpty() -> {
-                showToast(getString(R.string.pages_deploy_please_enter_project_name))
+                showToast(getString(R.string.pages_create_please_enter_project_name))
                 return
             }
             branch.isEmpty() -> {
@@ -2100,7 +2100,7 @@ class PagesFragment : Fragment() {
         copyBtn.setOnClickListener {
             val logs = logBuilder.toString()
             if (logs.isEmpty()) {
-                showToast(getString(R.string.pages_deploy_no_logs))
+                showToast(getString(R.string.app_log_empty))
                 return@setOnClickListener
             }
             val clipboard = requireContext()
@@ -2236,7 +2236,7 @@ class PagesFragment : Fragment() {
                     pagesViewModel.message.collect { message ->
                         val msgStr = message.asString(requireContext())
                         Snackbar.make(binding.root, msgStr, Snackbar.LENGTH_SHORT).show()
-                        if (msgStr == getString(R.string.vm_msg_pages_deployment_created)) {
+                        if (msgStr == getString(R.string.vm_msg_pages_deployment_create_success)) {
                             binding.projectNameEdit.text?.clear()
                             binding.filePathEdit.text?.clear()
                             selectedFile = null
@@ -2433,7 +2433,7 @@ class PagesFragment : Fragment() {
     private fun showDeploymentsDialogWithLoading(account: com.muort.upworker.core.model.Account, project: PagesProject) {
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.pages_deployments_title_template, project.name))
-            .setMessage(R.string.dialog_loading_ellipsis)
+            .setMessage(R.string.dialog_utils_loading_message)
             .setCancelable(true)
             .create()
         loadingDialog.show()
@@ -2781,7 +2781,7 @@ class PagesFragment : Fragment() {
 
         titleText.text = getString(R.string.pages_build_logs_title_template, project.name)
         deploymentSelectorLayout.visibility = android.view.View.GONE
-        logContent.text = getString(R.string.dialog_loading_ellipsis)
+        logContent.text = getString(R.string.dialog_utils_loading_message)
 
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(dialogView)
@@ -2854,7 +2854,7 @@ class PagesFragment : Fragment() {
                     val logs = result.data as? PagesDeploymentLogs
                     val lines: List<PagesDeploymentLogLine> = logs?.data ?: emptyList()
                     if (lines.isEmpty()) {
-                        logContent.text = getString(R.string.pages_deploy_no_logs)
+                        logContent.text = getString(R.string.app_log_empty)
                     } else {
                         val logText = lines.joinToString("\n") { line -> line.line ?: "" }
                         logContent.text = logText
@@ -2943,7 +2943,7 @@ class PagesFragment : Fragment() {
                 val loadingAdapter = ArrayAdapter<String>(
                     context,
                     android.R.layout.simple_dropdown_item_1line,
-                    listOf(getString(R.string.worker_route_zone_loading))
+                    listOf(getString(R.string.dialog_utils_loading_message))
                 )
                 zoneAuto.setAdapter(loadingAdapter)
                 when (val res = zoneRepository.fetchAndSaveZones(account)) {
@@ -2992,7 +2992,7 @@ class PagesFragment : Fragment() {
             dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val hostname = editText.text?.toString()?.trim().orEmpty()
                 if (hostname.isEmpty()) {
-                    inputLayout.error = getString(R.string.pages_domain_cannot_be_empty)
+                    inputLayout.error = getString(R.string.msg_domain_empty)
                     editText.requestFocus()
                     return@setOnClickListener
                 }
@@ -3119,7 +3119,7 @@ class PagesFragment : Fragment() {
         onDeleted: () -> Unit
     ) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.pages_domain_delete_title)
+            .setTitle(R.string.domain_delete)
             .setMessage(getString(R.string.pages_domain_delete_confirm_template, domain.name))
             .setPositiveButton(R.string.delete) { _, _ ->
                 viewLifecycleOwner.lifecycleScope.launch {
@@ -3129,7 +3129,7 @@ class PagesFragment : Fragment() {
                             onDeleted()
                         }
                         is Resource.Error -> {
-                            Snackbar.make(binding.root, getString(R.string.pages_domain_delete_failed_template, result.message), Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(binding.root, getString(R.string.msg_delete_failed, result.message), Snackbar.LENGTH_LONG).show()
                         }
                         is Resource.Loading -> {}
                     }
@@ -3213,7 +3213,7 @@ class PagesFragment : Fragment() {
                 )
 
                 val method = domain.validationData?.method ?: itemView.context.getString(R.string.status_unknown)
-                val createdDate = domain.createdOn?.substringBefore('T') ?: itemView.context.getString(R.string.pages_detail_unknown_time)
+                val createdDate = domain.createdOn?.substringBefore('T') ?: itemView.context.getString(R.string.datetime_unknown)
                 infoText.text = itemView.context.getString(R.string.pages_domain_validation_info_template, method, createdDate)
 
                 val validationError = domain.validationData?.errorMessage
@@ -3263,7 +3263,7 @@ class PagesFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.pages_deployment_rollback_title)
             .setMessage(getString(R.string.pages_deployment_rollback_confirm_template, deployment.shortId ?: deployment.id))
-            .setPositiveButton(getString(R.string.pages_rollback_deployment_btn)) { _, _ ->
+            .setPositiveButton(getString(R.string.dialog_rollback)) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     viewLifecycleOwner.lifecycleScope.launch {
                         pagesViewModel.rollbackDeployment(account, project.name, deployment.id)
@@ -3280,7 +3280,7 @@ class PagesFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.pages_deployment_retry_title)
             .setMessage(getString(R.string.pages_deployment_retry_confirm_template, deployment.shortId ?: deployment.id))
-            .setPositiveButton(getString(R.string.pages_generic_redeploy)) { _, _ ->
+            .setPositiveButton(getString(R.string.pages_deployment_retry_title)) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     viewLifecycleOwner.lifecycleScope.launch {
                         pagesViewModel.retryDeployment(account, project.name, deployment.id)

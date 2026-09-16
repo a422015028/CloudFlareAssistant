@@ -854,7 +854,7 @@ data class R2CustomDomain(
             "pending", "pending-validation", "pending_validation", "inactive", "initializing" -> R.string.r2_status_pending
             "active", "success", "ok", "valid", "healthy", "verified", "complete" -> R.string.r2_status_active
             "pending-deletion", "pending_deletion", "deleting" -> R.string.r2_status_pending_deletion
-            "deleted" -> R.string.r2_status_deleted
+            "deleted" -> R.string.msg_deleted
             "migrating", "migration" -> R.string.r2_status_migrating
             "moved" -> R.string.r2_status_moved
             "permitted", "allowed" -> R.string.r2_status_permitted
@@ -870,13 +870,13 @@ data class R2CustomDomain(
     }
 
     fun getStatusText(context: Context): String = when (status) {
-        is String -> mapStatusString(context, status).ifBlank { context.getString(R.string.r2_status_unknown_status) }
+        is String -> mapStatusString(context, status).ifBlank { context.getString(R.string.status_unknown) }
         is Map<*, *> -> {
             val ssl = (status["ssl"]?.toString() ?: "unknown").let { mapStatusString(context, it) }
             val ownership = (status["ownership"]?.toString() ?: "unknown").let { mapStatusString(context, it) }
             context.getString(R.string.model_ssl_ownership_format, ssl, ownership)
         }
-        else -> context.getString(R.string.r2_status_unknown_status)
+        else -> context.getString(R.string.status_unknown)
     }
 }
 
@@ -1415,7 +1415,7 @@ data class PermissionGroup(
         if (n.endsWith("Edit")) { t.add(context.getString(R.string.model_perm_read)); t.add(context.getString(R.string.model_perm_write)) } // Edit = Read + Write
         if (n.endsWith("Write")) t.add(context.getString(R.string.model_perm_write))
         if (n.endsWith("Read")) t.add(context.getString(R.string.model_perm_read))
-        if (n.endsWith("Evaluate")) t.add(context.getString(R.string.model_perm_execute))
+        if (n.endsWith("Evaluate")) t.add(context.getString(R.string.d1_execute))
         return t
     }
 
@@ -1423,7 +1423,7 @@ data class PermissionGroup(
     fun scopeLabels(context: Context): List<String> {
         val s = scopes ?: return emptyList()
         val labels = mutableListOf<String>()
-        if (s.contains("com.cloudflare.api.account.zone")) labels.add(context.getString(R.string.model_scope_zone))
+        if (s.contains("com.cloudflare.api.account.zone")) labels.add(context.getString(R.string.common_domain))
         if (s.contains("com.cloudflare.api.account.flagship.app")) labels.add("Flagship")
         if (s.contains("com.cloudflare.api.account")) labels.add(context.getString(R.string.model_scope_account))
         if (s.contains("com.cloudflare.api.user")) labels.add(context.getString(R.string.model_scope_user))

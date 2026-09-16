@@ -26,7 +26,7 @@
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
                     android:textSize="16sp"
-                    android:text="@string/xml_item_route" />
+                    android:text="@string/xml_dialog_route_input_hint" />
 
                 <TextView
                     android:id="@+id/routeScriptText"

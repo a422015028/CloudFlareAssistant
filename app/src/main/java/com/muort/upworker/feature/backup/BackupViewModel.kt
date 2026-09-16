@@ -100,11 +100,11 @@ class BackupViewModel @Inject constructor(
                 if (result.isSuccess) {
                     _message.value = UiMessage.of(R.string.vm_msg_backup_connection_success)
                 } else {
-                    _message.value = UiMessage.of(R.string.vm_msg_backup_connection_failed, result.exceptionOrNull()?.message ?: "")
+                    _message.value = UiMessage.of(R.string.status_connection_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = UiMessage.of(R.string.vm_msg_backup_connection_failed, e.message ?: "")
+                _message.value = UiMessage.of(R.string.status_connection_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -203,11 +203,11 @@ class BackupViewModel @Inject constructor(
                     _message.value = UiMessage.of(R.string.vm_msg_backup_delete_success)
                     loadBackupFiles()
                 } else {
-                    _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, result.exceptionOrNull()?.message ?: "")
+                    _message.value = UiMessage.of(R.string.msg_delete_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, e.message ?: "")
+                _message.value = UiMessage.of(R.string.msg_delete_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -310,11 +310,11 @@ class BackupViewModel @Inject constructor(
                     _message.value = UiMessage.of(R.string.vm_msg_backup_delete_success)
                     loadR2BackupFiles()
                 } else {
-                    _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, result.exceptionOrNull()?.message ?: "")
+                    _message.value = UiMessage.of(R.string.msg_delete_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, e.message ?: "")
+                _message.value = UiMessage.of(R.string.msg_delete_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -403,11 +403,11 @@ class BackupViewModel @Inject constructor(
                     _message.value = UiMessage.of(R.string.vm_msg_backup_delete_success)
                     loadLocalBackupFiles()
                 } else {
-                    _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, result.exceptionOrNull()?.message ?: "")
+                    _message.value = UiMessage.of(R.string.msg_delete_failed, result.exceptionOrNull()?.message ?: "")
                 }
 
             } catch (e: Exception) {
-                _message.value = UiMessage.of(R.string.vm_msg_backup_delete_failed, e.message ?: "")
+                _message.value = UiMessage.of(R.string.msg_delete_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -433,10 +433,10 @@ class BackupViewModel @Inject constructor(
                     }
                     loadLocalBackupFiles()
                 } else {
-                    _message.value = UiMessage.of(R.string.vm_msg_backup_import_failed, result.exceptionOrNull()?.message ?: "")
+                    _message.value = UiMessage.of(R.string.msg_import_failed, result.exceptionOrNull()?.message ?: "")
                 }
             } catch (e: Exception) {
-                _message.value = UiMessage.of(R.string.vm_msg_backup_import_failed, e.message ?: "")
+                _message.value = UiMessage.of(R.string.msg_import_failed, e.message ?: "")
             } finally {
                 _loadingState.value = false
             }
@@ -560,12 +560,12 @@ class BackupViewModel @Inject constructor(
                     } else {
                         "未知错误"
                     }
-                    _message.value = UiMessage.of(R.string.vm_msg_backup_r2_buckets_load_failed, errorMsg)
+                    _message.value = UiMessage.of(R.string.pages_r2_load_buckets_failed_template, errorMsg)
                     _availableBuckets.value = emptyList()
                 }
 
             } catch (e: Exception) {
-                _message.value = UiMessage.of(R.string.vm_msg_backup_r2_buckets_load_failed, e.message ?: "")
+                _message.value = UiMessage.of(R.string.pages_r2_load_buckets_failed_template, e.message ?: "")
                 _availableBuckets.value = emptyList()
             } finally {
                 _loadingState.value = false

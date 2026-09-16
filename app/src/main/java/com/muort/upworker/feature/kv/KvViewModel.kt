@@ -81,7 +81,7 @@ class KvViewModel @Inject constructor(
                     loadNamespaces(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_kv_namespace_create_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_kv_create_namespace_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -104,7 +104,7 @@ class KvViewModel @Inject constructor(
                     loadNamespaces(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_kv_namespace_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_kv_delete_namespace_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }

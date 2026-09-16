@@ -103,7 +103,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/common_action"
+            android:text="@string/access_rule_action"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 

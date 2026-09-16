@@ -216,7 +216,7 @@ class WorkerViewModel @Inject constructor(
                         }
                         is Resource.Error -> {
                             _uploadState.value = UploadState.Error(UiMessage.RawString(uploadResult.message))
-                            _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_failed, uploadResult.message))
+                            _message.emit(UiMessage.of(R.string.repo_r2_upload_failed_format, uploadResult.message))
                             Timber.e("Failed to upload script: ${uploadResult.message}")
                         }
                         is Resource.Loading -> {
@@ -231,7 +231,7 @@ class WorkerViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _uploadState.value = UploadState.Error(UiMessage.RawString(e.message ?: "Unknown error"))
-                _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_failed, e.message ?: ""))
+                _message.emit(UiMessage.of(R.string.repo_r2_upload_failed_format, e.message ?: ""))
                 Timber.e(e, "Failed to upload script")
             }
         }
@@ -303,7 +303,7 @@ class WorkerViewModel @Inject constructor(
                     }
                     is Resource.Error -> {
                         _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
-                        _message.emit(UiMessage.of(R.string.vm_msg_worker_upload_failed, result.message))
+                        _message.emit(UiMessage.of(R.string.repo_r2_upload_failed_format, result.message))
                         Timber.e("Failed to upload script: ${result.message}")
                     }
                     is Resource.Loading -> {
@@ -344,7 +344,7 @@ class WorkerViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_binding_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_update_bindings_failed_format, result.message))
                     Timber.e("Failed to update KV bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -380,7 +380,7 @@ class WorkerViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_binding_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_update_bindings_failed_format, result.message))
                     Timber.e("Failed to update R2 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -415,7 +415,7 @@ class WorkerViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_d1_binding_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_update_d1_failed_format, result.message))
                     Timber.e("Failed to update D1 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -450,7 +450,7 @@ class WorkerViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_binding_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_update_bindings_failed_format, result.message))
                     Timber.e("Failed to update service bindings: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -484,7 +484,7 @@ class WorkerViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_variable_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_update_env_vars_failed_format, result.message))
                     Timber.e("Failed to update variables: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -613,7 +613,7 @@ class WorkerViewModel @Inject constructor(
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_script_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_delete_script_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -658,7 +658,7 @@ class WorkerViewModel @Inject constructor(
                     loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_route_create_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_create_route_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -677,7 +677,7 @@ class WorkerViewModel @Inject constructor(
                     loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_route_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_update_route_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -696,7 +696,7 @@ class WorkerViewModel @Inject constructor(
                     loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_route_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_delete_route_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -729,7 +729,7 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.addCustomDomain(account, hostname, scriptName)) {
                 is Resource.Success -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_add_success))
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_custom_domain_add_success))
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {
@@ -752,7 +752,7 @@ class WorkerViewModel @Inject constructor(
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_r2_delete_custom_domain_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -808,7 +808,7 @@ class WorkerViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to update runtime settings")
-                onResult(Resource.Error(appContext.getString(R.string.vm_msg_worker_update_failed_template, e.message ?: "")))
+                onResult(Resource.Error(appContext.getString(R.string.msg_update_failed, e.message ?: "")))
             }
         }
     }
@@ -825,7 +825,7 @@ class WorkerViewModel @Inject constructor(
                     _versions.value = result.data
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_versions_load_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_versions_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -856,7 +856,7 @@ class WorkerViewModel @Inject constructor(
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_rollback_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_rollback_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -883,7 +883,7 @@ class WorkerViewModel @Inject constructor(
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_custom_domain_update_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -944,7 +944,7 @@ class WorkerViewModel @Inject constructor(
             if (result.success) {
                 _message.emit(UiMessage.of(R.string.vm_msg_worker_cleanup_single_script_success, result.scriptName, result.deletedCount))
             } else {
-                _message.emit(UiMessage.of(R.string.vm_msg_worker_cleanup_failed, result.errorMessage ?: ""))
+                _message.emit(UiMessage.of(R.string.vm_msg_pages_cleanup_failed, result.errorMessage ?: ""))
             }
 
             _loadingState.value = false

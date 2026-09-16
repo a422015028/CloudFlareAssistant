@@ -20,10 +20,10 @@ class PolicyRuleDialogHelper(private val context: Context) {
     private val ruleTypes = listOf(
         "email" to context.getString(R.string.zt_rule_type_email),
         "email_domain" to context.getString(R.string.zt_rule_type_email_domain),
-        "ip" to context.getString(R.string.zt_rule_type_ip),
+        "ip" to context.getString(R.string.ar_target_ip),
         "access_group" to context.getString(R.string.zt_rule_type_access_group),
         "geo" to context.getString(R.string.zt_rule_type_geo),
-        "everyone" to context.getString(R.string.zt_rule_type_everyone),
+        "everyone" to context.getString(R.string.zt_rule_everyone),
         "common_name" to context.getString(R.string.zt_rule_type_common_name)
     )
 
@@ -103,7 +103,7 @@ class PolicyRuleDialogHelper(private val context: Context) {
         }
 
         MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.zt_rule_add_title)
+            .setTitle(R.string.email_add_routing_rule)
             .setView(dialogView)
             .setPositiveButton(R.string.add) { _, _ ->
                 val selectedType = ruleTypes[typeSpinner.selectedItemPosition].first

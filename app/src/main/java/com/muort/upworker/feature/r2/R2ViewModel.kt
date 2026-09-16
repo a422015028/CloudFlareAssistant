@@ -86,7 +86,7 @@ class R2ViewModel @Inject constructor(
                     loadBuckets(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_r2_bucket_create_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_r2_create_bucket_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -109,7 +109,7 @@ class R2ViewModel @Inject constructor(
                     loadBuckets(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_r2_bucket_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_r2_delete_bucket_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -138,7 +138,7 @@ class R2ViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.objects?.size ?: 0} objects")
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_r2_objects_load_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_r2_list_objects_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -270,7 +270,7 @@ class R2ViewModel @Inject constructor(
                     loadCustomDomains(account, bucketName)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domain_create_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_add_custom_domain_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -289,7 +289,7 @@ class R2ViewModel @Inject constructor(
                     loadCustomDomains(account, bucketName)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domain_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_delete_custom_domain_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }

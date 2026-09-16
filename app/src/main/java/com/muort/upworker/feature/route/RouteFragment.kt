@@ -123,7 +123,7 @@ class RouteFragment : Fragment() {
                     weight = 1f
                     width = 0
                 }
-            activity?.setTitle(R.string.route_title_custom_domains)
+            activity?.setTitle(R.string.card_custom_domain)
         }
 
         setupAdapter()
@@ -432,7 +432,7 @@ class RouteFragment : Fragment() {
         val zoneAdapter = ArrayAdapter<String>(
             requireContext(),
             android.R.layout.simple_dropdown_item_1line,
-            mutableListOf(getString(R.string.worker_route_zone_loading))
+            mutableListOf(getString(R.string.dialog_utils_loading_message))
         )
         dialogBinding.domainZone.setAdapter(zoneAdapter)
         dialogBinding.domainZone.keyListener = null
@@ -508,7 +508,7 @@ class RouteFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.route_add_custom_domain)
+            .setTitle(R.string.r2_add_custom_domain_title)
             .setView(dialogBinding.root)
             .setPositiveButton(R.string.save) { _, _ ->
                 val hostname = dialogBinding.domainHostname.text.toString()
@@ -561,8 +561,8 @@ class RouteFragment : Fragment() {
     
     private fun showDeleteDomainDialog(domain: UnifiedDomain) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.route_delete_custom_domain)
-            .setMessage(getString(R.string.route_delete_custom_domain_confirm, domain.hostname))
+            .setTitle(R.string.r2_delete_custom_domain_title)
+            .setMessage(getString(R.string.r2_delete_custom_domain_message, domain.hostname))
             .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     when (domain.type) {
@@ -592,7 +592,7 @@ class RouteFragment : Fragment() {
         lifecycleScope.launch {
             when (val result = pagesRepository.deleteDomain(account, projectName, domainName)) {
                 is Resource.Success -> {
-                    Snackbar.make(binding.root, getString(R.string.route_pages_domain_deleted_success), Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(binding.root, getString(R.string.pages_domain_delete_success), Snackbar.LENGTH_SHORT).show()
                     // 重新加载项目列表
                     pagesViewModel.loadProjects(account)
                 }
@@ -799,7 +799,7 @@ class RouteFragment : Fragment() {
                 }
 
                 // 显示加载状态
-                Snackbar.make(binding.root, getString(R.string.route_dns_configuring), Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, getString(R.string.pages_domain_auto_configuring_dns), Snackbar.LENGTH_SHORT).show()
                 
                 val dnsRequest = DnsRecordRequest(
                     type = recordType,

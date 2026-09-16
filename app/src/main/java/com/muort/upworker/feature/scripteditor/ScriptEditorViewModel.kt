@@ -138,7 +138,7 @@ class ScriptEditorViewModel @Inject constructor(
             } catch (e: Exception) {
                 Timber.e(e, "Error saving version")
                 if (!isAutoSave) {
-                    _error.value = UiMessage.of(R.string.vm_msg_se_save_version_failed, e.message ?: "")
+                    _error.value = UiMessage.of(R.string.msg_save_failed, e.message ?: "")
                 }
             }
         }
@@ -217,7 +217,7 @@ class ScriptEditorViewModel @Inject constructor(
                         }
                         is Resource.Error -> {
                             _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
-                            _error.value = UiMessage.of(R.string.vm_msg_se_script_upload_failed, result.message)
+                            _error.value = UiMessage.of(R.string.repo_r2_upload_failed_format, result.message)
                             Timber.e("Failed to upload script: ${result.message}")
                         }
                         is Resource.Loading -> {
@@ -232,7 +232,7 @@ class ScriptEditorViewModel @Inject constructor(
                 
             } catch (e: Exception) {
                 Timber.e(e, "Error uploading script")
-                _error.value = UiMessage.of(R.string.vm_msg_se_script_upload_failed, e.message ?: "")
+                _error.value = UiMessage.of(R.string.repo_r2_upload_failed_format, e.message ?: "")
                 _uploadState.value = UploadState.Error(UiMessage.RawString(e.message ?: "Unknown error"))
             } finally {
                 _isLoading.value = false
@@ -276,7 +276,7 @@ class ScriptEditorViewModel @Inject constructor(
                 Timber.d("Deleted version: ${version.id}")
             } catch (e: Exception) {
                 Timber.e(e, "Error deleting version")
-                _error.value = UiMessage.of(R.string.vm_msg_se_delete_version_failed, e.message ?: "")
+                _error.value = UiMessage.of(R.string.msg_delete_failed, e.message ?: "")
             }
         }
     }
@@ -358,7 +358,7 @@ class ScriptEditorViewModel @Inject constructor(
                         }
                         is Resource.Error -> {
                             _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
-                            _error.value = UiMessage.of(R.string.vm_msg_se_rollback_failed, result.message)
+                            _error.value = UiMessage.of(R.string.repo_pages_rollback_failed_format, result.message)
                             Timber.e("Failed to rollback script: ${result.message}")
                         }
                         is Resource.Loading -> {
@@ -373,7 +373,7 @@ class ScriptEditorViewModel @Inject constructor(
                 
             } catch (e: Exception) {
                 Timber.e(e, "Error rolling back script")
-                _error.value = UiMessage.of(R.string.vm_msg_se_rollback_failed, e.message ?: "")
+                _error.value = UiMessage.of(R.string.repo_pages_rollback_failed_format, e.message ?: "")
                 _uploadState.value = UploadState.Error(UiMessage.RawString(e.message ?: "Unknown error"))
             } finally {
                 _isLoading.value = false

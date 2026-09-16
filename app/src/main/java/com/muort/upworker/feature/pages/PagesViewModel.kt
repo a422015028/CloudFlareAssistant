@@ -97,7 +97,7 @@ class PagesViewModel @Inject constructor(
     ) {
         if (name.isBlank()) {
             viewModelScope.launch {
-                _message.emit(UiMessage.of(R.string.vm_msg_pages_project_name_required))
+                _message.emit(UiMessage.of(R.string.pages_create_please_enter_project_name))
             }
             return
         }
@@ -120,7 +120,7 @@ class PagesViewModel @Inject constructor(
                     loadProjects(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_project_create_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_project_create_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -143,7 +143,7 @@ class PagesViewModel @Inject constructor(
                     loadProjects(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_project_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_project_delete_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -165,7 +165,7 @@ class PagesViewModel @Inject constructor(
                     _projectDetail.value = result.data
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_project_detail_load_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_project_detail_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -222,7 +222,7 @@ class PagesViewModel @Inject constructor(
                     loadDeployments(account, projectName)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_delete_deployment_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -241,7 +241,7 @@ class PagesViewModel @Inject constructor(
                     loadDeployments(account, projectName)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_rollback_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_rollback_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -678,7 +678,7 @@ class PagesViewModel @Inject constructor(
                 account, projectName, compatibilityDate, compatibilityFlags, placement
             )
             when (result) {
-                is Resource.Success -> _message.emit(UiMessage.of(R.string.vm_msg_pages_runtime_settings_updated))
+                is Resource.Success -> _message.emit(UiMessage.of(R.string.pages_runtime_settings_updated))
                 is Resource.Error -> _message.emit(UiMessage.of(R.string.vm_msg_pages_runtime_settings_update_failed, result.message))
                 else -> {}
             }

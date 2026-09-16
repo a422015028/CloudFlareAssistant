@@ -85,7 +85,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/xml_fragment_worker_hint_3"
+                            android:hint="@string/xml_fragment_pages_hint_3"
                             app:placeholderText="输入格式：2026-06-16"
                             app:boxBackgroundMode="outline"
                             android:layout_marginBottom="10dp">
@@ -138,7 +138,7 @@
                             android:id="@+id/selectFileBtn"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/worker_select_file"
+                            android:text="@string/r2_select_file"
                             android:layout_marginBottom="12dp"
                             style="@style/Widget.Material3.Button.OutlinedButton" />
 
@@ -200,7 +200,7 @@
                             android:layout_marginTop="4dp"
                             android:layout_marginBottom="4dp"
                             android:checked="true"
-                            android:text="@string/worker_post_subdomain_title"
+                            android:text="@string/worker_feature_subdomain_enable_title"
                             android:textSize="14sp"
                             app:showText="false" />
 
@@ -347,7 +347,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="2"
-                            android:text="@string/xml_fragment_worker_7"
+                            android:text="@string/xml_fragment_pages_7"
                             style="@style/AppButton" />
 
                     </LinearLayout>
@@ -363,7 +363,7 @@
                         android:id="@+id/emptyText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/xml_fragment_worker_8"
+                        android:text="@string/worker_generic_no_scripts"
                         android:textAlignment="center"
                         android:padding="24dp"
                         android:textColor="?android:textColorSecondary"

@@ -158,7 +158,7 @@ class PagesRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error(appContext.getString(R.string.repo_pages_update_failed_format, errorMsg))
+                Resource.Error(appContext.getString(R.string.msg_update_failed, errorMsg))
             }
         }
     }
@@ -536,7 +536,7 @@ class PagesRepository @Inject constructor(
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
-                Resource.Error(appContext.getString(R.string.repo_pages_log_channel_create_failed_format, errorMsg))
+                Resource.Error(appContext.getString(R.string.pages_log_channel_failed_template, errorMsg))
             }
         }
     }
@@ -582,7 +582,7 @@ class PagesRepository @Inject constructor(
         safeApiCall {
             if (!file.exists()) {
                 onLog?.invoke(appContext.getString(R.string.repo_pages_file_not_found_log))
-                return@safeApiCall Resource.Error(appContext.getString(R.string.repo_pages_file_not_found))
+                return@safeApiCall Resource.Error(appContext.getString(R.string.pages_deploy_file_not_exists))
             }
 
             val isZip = file.name.endsWith(".zip", ignoreCase = true)

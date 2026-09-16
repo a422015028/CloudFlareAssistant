@@ -286,11 +286,11 @@ class DnsFragment : Fragment() {
             "NS" to listOf(DnsFieldConfig("content", ctx.getString(R.string.dns_field_ns_server), false, FieldLocation.CONTENT)),
             "PTR" to listOf(DnsFieldConfig("content", ctx.getString(R.string.dns_field_target_domain), false, FieldLocation.CONTENT)),
             "MX" to listOf(
-                DnsFieldConfig("priority", ctx.getString(R.string.dns_field_priority), true, FieldLocation.TOP_LEVEL),
+                DnsFieldConfig("priority", ctx.getString(R.string.device_priority), true, FieldLocation.TOP_LEVEL),
                 DnsFieldConfig("content", ctx.getString(R.string.dns_field_mail_server), false, FieldLocation.CONTENT)
             ),
             "SRV" to listOf(
-                DnsFieldConfig("priority", ctx.getString(R.string.dns_field_priority), true, FieldLocation.DATA),
+                DnsFieldConfig("priority", ctx.getString(R.string.device_priority), true, FieldLocation.DATA),
                 DnsFieldConfig("weight", ctx.getString(R.string.dns_field_weight), true, FieldLocation.DATA),
                 DnsFieldConfig("port", ctx.getString(R.string.dns_field_port), true, FieldLocation.DATA),
                 DnsFieldConfig("target", ctx.getString(R.string.dns_field_target_host), false, FieldLocation.DATA)
@@ -341,8 +341,8 @@ class DnsFragment : Fragment() {
                 DnsFieldConfig("fingerprint", ctx.getString(R.string.dns_field_fingerprint), false, FieldLocation.DATA)
             ),
             "SVCB" to listOf(
-                DnsFieldConfig("priority", ctx.getString(R.string.dns_field_priority), true, FieldLocation.DATA),
-                DnsFieldConfig("target", ctx.getString(R.string.dns_field_target), false, FieldLocation.DATA),
+                DnsFieldConfig("priority", ctx.getString(R.string.device_priority), true, FieldLocation.DATA),
+                DnsFieldConfig("target", ctx.getString(R.string.access_rule_target_hint), false, FieldLocation.DATA),
                 DnsFieldConfig("value", ctx.getString(R.string.dns_field_value), false, FieldLocation.DATA)
             ),
             "TLSA" to listOf(
@@ -352,13 +352,13 @@ class DnsFragment : Fragment() {
                 DnsFieldConfig("certificate", ctx.getString(R.string.dns_field_certificate), false, FieldLocation.DATA)
             ),
             "URI" to listOf(
-                DnsFieldConfig("priority", ctx.getString(R.string.dns_field_priority), true, FieldLocation.TOP_LEVEL),
+                DnsFieldConfig("priority", ctx.getString(R.string.device_priority), true, FieldLocation.TOP_LEVEL),
                 DnsFieldConfig("weight", ctx.getString(R.string.dns_field_weight), true, FieldLocation.DATA),
                 DnsFieldConfig("target", ctx.getString(R.string.dns_field_target_uri), false, FieldLocation.DATA)
             ),
             "HTTPS" to listOf(
-                DnsFieldConfig("priority", ctx.getString(R.string.dns_field_priority), true, FieldLocation.DATA),
-                DnsFieldConfig("target", ctx.getString(R.string.dns_field_target), false, FieldLocation.DATA),
+                DnsFieldConfig("priority", ctx.getString(R.string.device_priority), true, FieldLocation.DATA),
+                DnsFieldConfig("target", ctx.getString(R.string.access_rule_target_hint), false, FieldLocation.DATA),
                 DnsFieldConfig("value", ctx.getString(R.string.dns_field_value), false, FieldLocation.DATA)
             )
         )

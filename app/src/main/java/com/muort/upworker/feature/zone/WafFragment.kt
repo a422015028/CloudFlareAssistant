@@ -150,7 +150,7 @@ class WafFragment : BaseZoneRulesetFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             rulesetViewModel.state.collect { state ->
                 saveButton.isEnabled = !state.isSaving
-                saveButton.text = if (state.isSaving) getString(R.string.msg_saving) else if (isEdit) getString(R.string.save) else getString(R.string.add)
+                saveButton.text = if (state.isSaving) getString(R.string.msg_saving_ellipsis) else if (isEdit) getString(R.string.save) else getString(R.string.add)
             }
         }
     }
@@ -159,13 +159,13 @@ class WafFragment : BaseZoneRulesetFragment() {
 
     /** 可用字段。 */
     private fun wafFields(ctx: android.content.Context) = listOf(
-        WafField("ip.src", ctx.getString(R.string.waf_field_client_ip), valueType = ValueType.IP),
-        WafField("ip.geoip.country", ctx.getString(R.string.waf_field_country_code), valueType = ValueType.STRING),
-        WafField("http.request.uri.path", ctx.getString(R.string.waf_field_uri_path), valueType = ValueType.STRING),
-        WafField("http.host", ctx.getString(R.string.waf_field_hostname), valueType = ValueType.STRING),
-        WafField("http.request.method", ctx.getString(R.string.waf_field_request_method), valueType = ValueType.STRING),
+        WafField("ip.src", ctx.getString(R.string.snippet_field_client_ip), valueType = ValueType.IP),
+        WafField("ip.geoip.country", ctx.getString(R.string.snippet_field_country_code), valueType = ValueType.STRING),
+        WafField("http.request.uri.path", ctx.getString(R.string.snippet_field_uri_path), valueType = ValueType.STRING),
+        WafField("http.host", ctx.getString(R.string.snippet_field_hostname), valueType = ValueType.STRING),
+        WafField("http.request.method", ctx.getString(R.string.snippet_field_request_method), valueType = ValueType.STRING),
         WafField("http.user_agent", "User-Agent", valueType = ValueType.STRING),
-        WafField("http.request.full_uri", ctx.getString(R.string.waf_field_full_uri), valueType = ValueType.STRING),
+        WafField("http.request.full_uri", ctx.getString(R.string.snippet_field_full_uri), valueType = ValueType.STRING),
         WafField("cf.threat_score", ctx.getString(R.string.waf_field_threat_score), valueType = ValueType.NUMERIC),
     )
 
@@ -173,7 +173,7 @@ class WafFragment : BaseZoneRulesetFragment() {
     private fun wafOps(ctx: android.content.Context) = listOf(
         WafOp("eq", ctx.getString(R.string.waf_op_eq)),
         WafOp("ne", ctx.getString(R.string.waf_op_ne)),
-        WafOp("contains", ctx.getString(R.string.waf_op_contains)),
+        WafOp("contains", ctx.getString(R.string.snippet_op_contains)),
         WafOp("gt", ctx.getString(R.string.waf_op_gt)),
         WafOp("lt", ctx.getString(R.string.waf_op_lt)),
     )
@@ -199,7 +199,7 @@ class WafFragment : BaseZoneRulesetFragment() {
 
         fun updatePreview() {
             val preview = buildExpression(conditions, useAnd, fields, ops)
-            exprBinding.previewText.text = preview.ifBlank { getString(R.string.waf_please_add_condition) }
+            exprBinding.previewText.text = preview.ifBlank { getString(R.string.snippet_expr_preview_empty) }
         }
 
         // 初始条件

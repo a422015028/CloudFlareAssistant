@@ -35,7 +35,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/xml_dialog_script_service_bindings_2"
+            android:text="@string/xml_dialog_pages_services_3"
             android:textSize="14sp"
             android:textStyle="bold" />
 

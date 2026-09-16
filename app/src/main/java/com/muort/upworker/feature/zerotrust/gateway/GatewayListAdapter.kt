@@ -42,8 +42,8 @@ class GatewayListAdapter(
             val ctx = binding.root.context
             binding.listNameText.text = list.name
             binding.listTypeChip.text = when (list.type) {
-                "DOMAIN" -> ctx.getString(R.string.zt_list_type_domain)
-                "IP" -> ctx.getString(R.string.zt_list_type_ip)
+                "DOMAIN" -> ctx.getString(R.string.common_domain)
+                "IP" -> ctx.getString(R.string.ar_target_ip)
                 "URL" -> ctx.getString(R.string.zt_list_type_url)
                 else -> list.type
             }
@@ -51,7 +51,7 @@ class GatewayListAdapter(
             binding.listDescriptionText.text = list.description ?: ctx.getString(R.string.zt_list_no_description)
             val listCount = list.count ?: 0
             binding.itemCountText.text = ctx.resources.getQuantityString(R.plurals.zt_list_items, listCount, listCount)
-            binding.listIdText.text = ctx.getString(R.string.zt_list_id_label, list.id)
+            binding.listIdText.text = ctx.getString(R.string.d1_db_id_label, list.id)
 
             binding.listIdText.setOnClickListener {
                 val clipboard = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

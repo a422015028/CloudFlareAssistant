@@ -302,7 +302,7 @@ class R2Fragment : Fragment() {
             // Show loading dialog first
             val loadingDialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle("${bucket.name}")
-                .setMessage(R.string.dialog_loading_ellipsis)
+                .setMessage(R.string.dialog_utils_loading_message)
                 .setCancelable(true)
                 .create()
             loadingDialog.show()
@@ -332,12 +332,12 @@ class R2Fragment : Fragment() {
         val customDomains = r2ViewModel.customDomains.value
         
         val items = if (objects.isEmpty()) {
-            arrayOf(getString(R.string.r2_no_objects), getString(R.string.r2_upload_file))
+            arrayOf(getString(R.string.r2_no_objects), getString(R.string.r2_upload_dialog_title))
         } else {
             objects.map { obj ->
                 val size = formatFileSize(obj.size ?: 0)
                 "${obj.key} ($size)"
-            }.toTypedArray() + getString(R.string.r2_upload_file)
+            }.toTypedArray() + getString(R.string.r2_upload_dialog_title)
         }
         
         MaterialAlertDialogBuilder(requireContext())
@@ -668,7 +668,7 @@ class R2Fragment : Fragment() {
             val bucketName = bucket.name
             val loadingDialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(getString(R.string.r2_custom_domain_bucket, bucketName))
-                .setMessage(R.string.dialog_loading_ellipsis)
+                .setMessage(R.string.dialog_utils_loading_message)
                 .setCancelable(true)
                 .create()
             loadingDialog.show()
@@ -781,7 +781,7 @@ class R2Fragment : Fragment() {
                 val loadingAdapter = android.widget.ArrayAdapter<String>(
                     context,
                     android.R.layout.simple_dropdown_item_1line,
-                    listOf(getString(R.string.worker_route_zone_loading))
+                    listOf(getString(R.string.dialog_utils_loading_message))
                 )
                 zoneAuto.setAdapter(loadingAdapter)
                 when (val res = zoneRepository.fetchAndSaveZones(account)) {
@@ -827,7 +827,7 @@ class R2Fragment : Fragment() {
             dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val domain = editText.text?.toString()?.trim()?.lowercase().orEmpty()
                 if (domain.isEmpty()) {
-                    inputLayout.error = getString(R.string.pages_domain_cannot_be_empty)
+                    inputLayout.error = getString(R.string.msg_domain_empty)
                     editText.requestFocus()
                     return@setOnClickListener
                 }

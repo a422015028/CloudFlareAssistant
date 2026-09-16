@@ -55,7 +55,7 @@ class PerformanceFragment : BaseZoneFeatureFragment() {
     private lateinit var adapter: PerfAdapter
     private var state = PerfState(isLoading = true)
 
-    override val emptyTextResId: Int = R.string.perf_empty_loading
+    override val emptyTextResId: Int = R.string.dialog_utils_loading_message
     override val showAddFab: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -116,7 +116,7 @@ class PerformanceFragment : BaseZoneFeatureFragment() {
                 enabled = toggle.id !in state.updating && toggle.id in state.values,
             )
         }
-        items += PerfItem.Section(ctx.getString(R.string.perf_section_cache))
+        items += PerfItem.Section(ctx.getString(R.string.dash_bar_label_cache))
         items += PerfItem.Selector(
             id = "cache_level",
             title = ctx.getString(R.string.perf_cache_level_title),

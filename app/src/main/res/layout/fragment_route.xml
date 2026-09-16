@@ -29,7 +29,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/zone_tool_route"
+                    android:text="@string/route_title_routes"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     android:textSize="18sp"
@@ -68,7 +68,7 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:src="@android:drawable/ic_input_add"
-                android:contentDescription="@string/xml_fragment_route_desc" />
+                android:contentDescription="@string/route_add_route" />
 
         </LinearLayout>
 

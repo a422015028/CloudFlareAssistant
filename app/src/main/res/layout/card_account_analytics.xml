@@ -179,7 +179,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/xml_card_account_analytics"
+                            android:text="@string/xml_card_account_analytics_5"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 

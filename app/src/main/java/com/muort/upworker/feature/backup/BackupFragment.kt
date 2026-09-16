@@ -659,7 +659,7 @@ class BackupFragment : Fragment() {
     private fun showRestoreConfirmDialog(fileName: String, password: String?) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.backup_confirm_restore_title)
-            .setMessage(getString(R.string.backup_confirm_restore_message, fileName))
+            .setMessage(getString(R.string.backup_confirm_import_message, fileName))
             .setPositiveButton(R.string.backup_restore) { _, _ ->
                 when (viewModel.selectedStorageType.value) {
                     StorageType.WEBDAV -> viewModel.restoreAccounts(fileName, password)

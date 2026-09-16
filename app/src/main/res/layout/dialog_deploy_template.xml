@@ -115,7 +115,7 @@
                         style="@style/AppChip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/store_pages" />
+                        android:text="@string/card_pages" />
 
                 </com.google.android.material.chip.ChipGroup>
 

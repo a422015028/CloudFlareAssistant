@@ -69,7 +69,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/xml_fragment_pages_hint"
+                            android:hint="@string/xml_dialog_pages_input_hint"
                             app:boxBackgroundMode="outline"
                             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                             android:layout_marginBottom="10dp">
@@ -85,7 +85,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/xml_fragment_pages_hint_2"
+                            android:hint="@string/xml_dialog_pages_input_hint_2"
                             app:boxBackgroundMode="outline"
                             android:layout_marginBottom="10dp">
 
@@ -154,7 +154,7 @@
                             android:id="@+id/selectFileBtn"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/worker_select_file"
+                            android:text="@string/r2_select_file"
                             android:layout_marginBottom="12dp"
                             style="@style/Widget.Material3.Button.OutlinedButton" />
 

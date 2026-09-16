@@ -192,7 +192,7 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         binding.analyticsLoadingContainer.visibility = View.VISIBLE
         binding.analyticsContentContainer.visibility = View.GONE
         binding.analyticsErrorContainer.visibility = View.GONE
-        setStatus(context.getString(R.string.analytics_loading))
+        setStatus(context.getString(R.string.dialog_utils_loading_message))
     }
 
     fun showError(message: String) {

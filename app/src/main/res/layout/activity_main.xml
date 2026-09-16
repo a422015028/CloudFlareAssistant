@@ -58,7 +58,7 @@
                             android:id="@+id/currentAccountText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/xml_activity_main_2"
+                            android:text="@string/app_no_account_selected"
                             android:textColor="?attr/colorPrimary"
                             android:textSize="14sp"
                             android:maxLines="1"

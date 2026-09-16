@@ -256,7 +256,7 @@ class DashboardCardView @JvmOverloads constructor(
                 val threatsEntries = metrics.threatsTimeSeries.map { point ->
                     Entry(point.timestamp.toFloat(), point.value.toFloat())
                 }
-                dataSets.add(LineDataSet(threatsEntries, context.getString(R.string.dash_legend_threats)).apply {
+                dataSets.add(LineDataSet(threatsEntries, context.getString(R.string.dash_bar_label_threats)).apply {
                     color = context.getColor(R.color.md_theme_error)
                     setCircleColor(context.getColor(R.color.md_theme_error))
                     lineWidth = 2f
@@ -362,7 +362,7 @@ class DashboardCardView @JvmOverloads constructor(
                     private val labels by lazy {
                         listOf(
                             context.getString(R.string.dash_bar_label_requests),
-                            context.getString(R.string.dash_bar_label_bandwidth),
+                            context.getString(R.string.analytics_bandwidth),
                             context.getString(R.string.dash_bar_label_cache),
                             context.getString(R.string.dash_bar_label_threats),
                             context.getString(R.string.dash_bar_label_visitors)

@@ -143,7 +143,7 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
         "active" -> ctx.getString(R.string.ssl_certs_status_active)
         "pending_validation" -> ctx.getString(R.string.ssl_certs_status_pending_validation)
         "initializing" -> ctx.getString(R.string.ssl_certs_status_initializing)
-        "expired" -> ctx.getString(R.string.ssl_certs_status_expired)
+        "expired" -> ctx.getString(R.string.r2_status_expired)
         else -> status ?: "—"
     }
 
@@ -201,7 +201,7 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
                 "active" -> ctx.getString(R.string.ssl_certs_status_active)
                 "pending_validation" -> ctx.getString(R.string.ssl_certs_status_pending_validation)
                 "initializing" -> ctx.getString(R.string.ssl_certs_status_initializing)
-                "expired" -> ctx.getString(R.string.ssl_certs_status_expired)
+                "expired" -> ctx.getString(R.string.r2_status_expired)
                 else -> status ?: "—"
             }
         }
@@ -268,7 +268,7 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
                 "active" -> ctx.getString(R.string.ssl_certs_status_active)
                 "pending_validation" -> ctx.getString(R.string.ssl_certs_status_pending_validation)
                 "initializing" -> ctx.getString(R.string.ssl_certs_status_initializing)
-                "expired" -> ctx.getString(R.string.ssl_certs_status_expired)
+                "expired" -> ctx.getString(R.string.r2_status_expired)
                 else -> status ?: "—"
             }
         }

@@ -81,7 +81,7 @@ object AuthHelper {
         return when (account.getAuthTypeEnum()) {
             AuthType.TOKEN -> {
                 if (account.token.isBlank()) {
-                    ValidationResult.Error(context.getString(R.string.helper_auth_token_empty))
+                    ValidationResult.Error(context.getString(R.string.account_token_cannot_be_empty))
                 } else {
                     ValidationResult.Success
                 }
@@ -89,10 +89,10 @@ object AuthHelper {
             AuthType.GLOBAL_API_KEY -> {
                 val errors = mutableListOf<String>()
                 if (account.email?.isBlank() != false) {
-                    errors.add(context.getString(R.string.helper_auth_email_empty))
+                    errors.add(context.getString(R.string.account_email_cannot_be_empty))
                 }
                 if (account.globalApiKey?.isBlank() != false) {
-                    errors.add(context.getString(R.string.helper_auth_global_key_empty))
+                    errors.add(context.getString(R.string.account_global_key_cannot_be_empty))
                 }
                 if (errors.isEmpty()) {
                     ValidationResult.Success

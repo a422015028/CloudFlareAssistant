@@ -175,7 +175,7 @@ class GatewayLocationsFragment : Fragment() {
         if (ipv4Switch.isChecked) prefillCurrentNetwork()
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(if (existingLocation == null) R.string.zt_location_create_title else R.string.zt_location_edit_title)
+            .setTitle(if (existingLocation == null) R.string.gateway_create_location else R.string.zt_location_edit_title)
             .setView(dialogView)
             .setPositiveButton(if (existingLocation == null) R.string.dialog_create else R.string.save) { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton

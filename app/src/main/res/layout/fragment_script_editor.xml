@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="0dp"
-                android:contentDescription="@string/xml_fragment_script_editor_desc"
+                android:contentDescription="@string/se_action_undo"
                 app:icon="@drawable/ic_undo" />
 
             <!-- Select All Button -->
@@ -190,7 +190,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/xml_fragment_script_editor"
+                    android:text="@string/r2_upload_btn"
                     app:icon="@drawable/ic_cloud_upload" />
 
                 <!-- Search Button -->

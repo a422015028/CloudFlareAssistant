@@ -111,7 +111,7 @@
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/store_all"
+                    android:text="@string/gateway_all"
                     android:checked="true" />
 
                 <com.google.android.material.chip.Chip
@@ -126,7 +126,7 @@
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/store_pages" />
+                    android:text="@string/card_pages" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipHybrid"

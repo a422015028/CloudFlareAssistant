@@ -38,7 +38,7 @@ class DevicePolicyAdapter(
             val isDefault = policy.isDefault == true
             
             binding.policyNameText.text = if (isDefault) ctx.getString(R.string.zt_policy_default_profile) else (policy.name ?: ctx.getString(R.string.zt_policy_unnamed_profile))
-            binding.policyDescriptionText.text = policy.description ?: (if (isDefault) ctx.getString(R.string.zt_policy_default_desc) else ctx.getString(R.string.zt_policy_no_desc))
+            binding.policyDescriptionText.text = policy.description ?: (if (isDefault) ctx.getString(R.string.zt_policy_default_desc) else ctx.getString(R.string.zt_list_no_description))
             
             // Match rule - default policy doesn't have match
             binding.matchRuleText.text = if (isDefault) ctx.getString(R.string.zt_policy_match_all_devices) else ctx.getString(R.string.zt_policy_match_rule_format, policy.match ?: "any")
@@ -69,9 +69,9 @@ class DevicePolicyAdapter(
         private fun getAutoConnectLabel(autoConnect: Int?, ctx: android.content.Context): String {
             return when (autoConnect) {
                 0 -> ctx.getString(R.string.zt_policy_auto_connect_off)
-                1 -> ctx.getString(R.string.zt_policy_auto_connect_on)
+                1 -> ctx.getString(R.string.zt_gateway_action_on)
                 2 -> ctx.getString(R.string.zt_policy_auto_connect_force)
-                else -> ctx.getString(R.string.zt_access_detail_default)
+                else -> ctx.getString(R.string.account_default)
             }
         }
     }

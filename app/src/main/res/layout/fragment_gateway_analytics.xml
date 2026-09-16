@@ -116,7 +116,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="@string/zt_gateway_dns_loading"
+                    android:text="@string/dialog_utils_loading_message"
                     android:textSize="14sp"
                     android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -166,7 +166,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:padding="48dp"
-                    android:text="@string/zt_gateway_dns_empty"
+                    android:text="@string/empty_list"
                     android:textSize="14sp"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:visibility="gone" />

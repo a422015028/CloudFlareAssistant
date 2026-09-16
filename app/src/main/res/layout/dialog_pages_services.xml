@@ -19,7 +19,7 @@
         android:id="@+id/projectNameText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/xml_dialog_pages_services_2"
+        android:text="@string/xml_dialog_pages_d1_bindings_2"
         android:textSize="14sp"
         android:textColor="?attr/colorPrimary"
         android:layout_marginBottom="16dp" />

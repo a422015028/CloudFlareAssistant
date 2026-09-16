@@ -100,7 +100,7 @@ class ZoneRepository @Inject constructor(
                     Resource.Error(errorMsg)
                 }
             } else {
-                Resource.Error(appContext.getString(R.string.repo_zone_http_error_format, response.code(), response.message()))
+                Resource.Error(appContext.getString(R.string.repo_generic_http_error_format, response.code(), response.message()))
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: appContext.getString(R.string.repo_generic_network_error))

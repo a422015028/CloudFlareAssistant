@@ -410,7 +410,7 @@ class ScriptEditorFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.se_upload_confirm_title)
             .setMessage(getString(R.string.se_upload_confirm_message))
-            .setPositiveButton(R.string.se_action_upload) { _, _ ->
+            .setPositiveButton(R.string.r2_upload_btn) { _, _ ->
                 viewModel.uploadScript(args.accountEmail, args.scriptName, content)
             }
             .setNegativeButton(R.string.cancel, null)
@@ -467,7 +467,7 @@ class ScriptEditorFragment : Fragment() {
 
         val message = buildString {
             appendLine(getString(R.string.se_version_time_label, date))
-            append(getString(R.string.se_version_type_label, type))
+            append(getString(R.string.route_dns_record_type, type))
             append(desc)
         }
 
@@ -507,7 +507,7 @@ class ScriptEditorFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.se_rollback_confirm_title)
             .setMessage(getString(R.string.se_rollback_confirm_message, date, type))
-            .setPositiveButton(R.string.se_action_rollback) { _, _ ->
+            .setPositiveButton(R.string.dialog_rollback) { _, _ ->
                 viewModel.rollbackScript(args.accountEmail, args.scriptName, version)
             }
             .setNegativeButton(R.string.cancel, null)

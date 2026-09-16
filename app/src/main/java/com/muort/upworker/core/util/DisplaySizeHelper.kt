@@ -18,7 +18,7 @@ object DisplaySizeHelper {
         context.getString(R.string.helper_size_extra_small) to 0.7f,
         context.getString(R.string.helper_size_smaller) to 0.78f,
         context.getString(R.string.helper_size_small) to 0.85f,
-        context.getString(R.string.helper_size_default) to 1.0f,
+        context.getString(R.string.account_default) to 1.0f,
         context.getString(R.string.helper_size_large) to 1.15f,
         context.getString(R.string.helper_size_extra_large) to 1.3f
     )

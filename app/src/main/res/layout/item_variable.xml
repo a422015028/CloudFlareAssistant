@@ -41,7 +41,7 @@
                     android:id="@+id/variableTypeText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/xml_item_variable"
+                    android:text="@string/worker_var_type_text"
                     android:textSize="11sp"
                     android:textColor="?attr/colorSecondary"
                     android:layout_marginStart="6dp"

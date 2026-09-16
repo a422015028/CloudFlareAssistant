@@ -270,22 +270,22 @@ class GatewayRulesFragment : Fragment() {
         typeSpinner.adapter = typeAdapter
 
         val dnsActions = listOf(
-            "allow" to getString(R.string.zt_gateway_action_allow),
-            "block" to getString(R.string.zt_gateway_action_block),
+            "allow" to getString(R.string.ar_action_whitelist),
+            "block" to getString(R.string.gateway_block),
             "safesearch" to getString(R.string.zt_gateway_action_safesearch),
             "ytrestricted" to getString(R.string.zt_gateway_action_ytrestricted),
             "override" to getString(R.string.zt_gateway_action_override)
         )
         val httpActions = listOf(
-            "allow" to getString(R.string.zt_gateway_action_allow),
+            "allow" to getString(R.string.ar_action_whitelist),
             "redirect" to getString(R.string.zt_gateway_action_redirect),
-            "block" to getString(R.string.zt_gateway_action_block),
+            "block" to getString(R.string.gateway_block),
             "off" to getString(R.string.zt_gateway_action_off),
             "noscan" to getString(R.string.zt_gateway_action_noscan)
         )
         val l4Actions = listOf(
-            "allow" to getString(R.string.zt_gateway_action_allow),
-            "block" to getString(R.string.zt_gateway_action_block),
+            "allow" to getString(R.string.ar_action_whitelist),
+            "block" to getString(R.string.gateway_block),
             "l4_override" to getString(R.string.zt_gateway_action_l4_override)
         )
 
@@ -297,8 +297,8 @@ class GatewayRulesFragment : Fragment() {
 
         // 云端动作 → 资源标签映射（涵盖 Cloudflare Gateway 所有可能的动作值）
         fun actionLabel(action: String): String = when (action) {
-            "allow" -> getString(R.string.zt_gateway_action_allow)
-            "block" -> getString(R.string.zt_gateway_action_block)
+            "allow" -> getString(R.string.ar_action_whitelist)
+            "block" -> getString(R.string.gateway_block)
             "safesearch" -> getString(R.string.zt_gateway_action_safesearch)
             "ytrestricted" -> getString(R.string.zt_gateway_action_ytrestricted)
             "override" -> getString(R.string.zt_gateway_action_override)
@@ -661,7 +661,7 @@ class GatewayRulesFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(if (existingRule == null) R.string.zt_gateway_create_rule_title else R.string.zt_gateway_edit_rule_title)
+            .setTitle(if (existingRule == null) R.string.gateway_create_rule else R.string.ar_edit_rule_title)
             .setView(dialogView)
             .setPositiveButton(if (existingRule == null) R.string.dialog_create else R.string.save) { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
@@ -726,7 +726,7 @@ class GatewayRulesFragment : Fragment() {
                         val result = viewModel.updateRule(account, existingRule.id, request)
                         val msg = when (result) {
                             is Resource.Success -> getString(R.string.zt_gateway_rule_update_success, result.data.name)
-                            is Resource.Error -> getString(R.string.zt_gateway_rule_update_failed, result.message)
+                            is Resource.Error -> getString(R.string.msg_update_failed, result.message)
                             else -> return@launch
                         }
                         android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()
@@ -865,7 +865,7 @@ class GatewayRulesFragment : Fragment() {
             val result = viewModel.updateRule(account, rule.id, request)
             val msg = when (result) {
                 is Resource.Success -> getString(if (enabled) R.string.zt_gateway_rule_enabled_success else R.string.zt_gateway_rule_disabled_success)
-                is Resource.Error -> getString(R.string.zt_gateway_rule_update_failed, result.message)
+                is Resource.Error -> getString(R.string.msg_update_failed, result.message)
                 else -> return@launch
             }
             android.widget.Toast.makeText(requireContext(), msg, if (result is Resource.Error) android.widget.Toast.LENGTH_LONG else android.widget.Toast.LENGTH_SHORT).show()

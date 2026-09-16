@@ -135,7 +135,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Error updating account")
-            Resource.Error(appContext.getString(R.string.repo_account_update_failed_format, e.message ?: ""), e)
+            Resource.Error(appContext.getString(R.string.account_update_failed, e.message ?: ""), e)
         }
     }
     
@@ -146,7 +146,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Error deleting account")
-            Resource.Error(appContext.getString(R.string.repo_account_delete_failed_format, e.message ?: ""), e)
+            Resource.Error(appContext.getString(R.string.account_delete_failed, e.message ?: ""), e)
         }
     }
     
@@ -156,7 +156,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Error setting default account")
-            Resource.Error(appContext.getString(R.string.repo_account_set_default_failed_format, e.message ?: ""), e)
+            Resource.Error(appContext.getString(R.string.account_set_default_failed, e.message ?: ""), e)
         }
     }
     
@@ -167,7 +167,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(Unit)
         } catch (e: Exception) {
             Timber.e(e, "Error importing accounts")
-            Resource.Error(appContext.getString(R.string.repo_account_import_failed_format, e.message ?: ""), e)
+            Resource.Error(appContext.getString(R.string.account_import_failed, e.message ?: ""), e)
         }
     }
     
@@ -178,7 +178,7 @@ class AccountRepository @Inject constructor(
             Resource.Success(accounts)
         } catch (e: Exception) {
             Timber.e(e, "Error exporting accounts")
-            Resource.Error(appContext.getString(R.string.repo_account_export_failed_format, e.message ?: ""), e)
+            Resource.Error(appContext.getString(R.string.account_export_failed, e.message ?: ""), e)
         }
     }
     

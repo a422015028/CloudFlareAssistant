@@ -91,7 +91,7 @@ class DnsViewModel @Inject constructor(
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_dns_create_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_dns_create_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -133,7 +133,7 @@ class DnsViewModel @Inject constructor(
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_dns_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_dns_update_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -152,7 +152,7 @@ class DnsViewModel @Inject constructor(
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_dns_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_dns_delete_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }

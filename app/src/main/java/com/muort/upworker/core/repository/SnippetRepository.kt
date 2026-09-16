@@ -223,7 +223,7 @@ class SnippetRepository @Inject constructor(
         safeApiCall {
             val expr = rule.expression.trim()
             when {
-                expr.isEmpty() -> return@safeApiCall Resource.Error(appContext.getString(R.string.repo_snippet_expression_empty))
+                expr.isEmpty() -> return@safeApiCall Resource.Error(appContext.getString(R.string.msg_expression_empty))
                 expr.length > MAX_EXPRESSION_LENGTH ->
                     return@safeApiCall Resource.Error(appContext.getString(R.string.repo_snippet_expression_too_long_format, expr.length, MAX_EXPRESSION_LENGTH))
             }

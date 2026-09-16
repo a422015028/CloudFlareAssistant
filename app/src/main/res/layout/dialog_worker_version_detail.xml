@@ -74,7 +74,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="@string/xml_dialog_worker_version_detail_3"
+                        android:text="@string/xml_dialog_pages_deployment_detail_6"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <TextView
@@ -146,7 +146,7 @@
                     <TextView
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:text="@string/xml_dialog_worker_version_detail_6"
+                        android:text="@string/xml_dialog_pages_deployment_detail_4"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"/>
                     <LinearLayout
@@ -400,7 +400,7 @@
             android:layout_weight="1"
             android:layout_marginHorizontal="4dp"
             style="@style/AppButton"
-            android:text="@string/xml_dialog_worker_version_detail_18"/>
+            android:text="@string/xml_dialog_pages_deployment_detail_46"/>
 
         <!-- 统一：关闭按钮使用填充背景 Filled Button，与访问按钮的 Filled 保持同一视觉体系，
              避免 Outlined（白底描边）造成"背景色不统一、空白一块"的观感。 -->

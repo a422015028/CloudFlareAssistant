@@ -31,8 +31,8 @@
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/xml_dialog_worker_runtime_settings_hint"
-            app:helperText="@string/xml_dialog_worker_runtime_settings_helper"
+            android:hint="@string/xml_dialog_pages_runtime_settings_hint"
+            app:helperText="@string/xml_dialog_pages_runtime_settings_helper"
             app:helperTextEnabled="true"
             app:endIconMode="custom"
             app:endIconDrawable="@drawable/ic_calendar">
@@ -48,7 +48,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/xml_dialog_worker_runtime_settings_2"
+            android:text="@string/xml_dialog_pages_runtime_settings_3"
             android:textSize="14sp"
             android:textStyle="bold"
             android:layout_marginTop="16dp"
@@ -59,8 +59,8 @@
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/xml_dialog_worker_runtime_settings_hint_3"
-            app:helperText="@string/xml_dialog_worker_runtime_settings_helper_3"
+            android:hint="@string/xml_dialog_pages_runtime_settings_hint_3"
+            app:helperText="@string/xml_dialog_pages_runtime_settings_helper_3"
             app:helperTextEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -76,7 +76,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/xml_dialog_worker_runtime_settings_3"
+            android:text="@string/xml_dialog_pages_runtime_settings_4"
             android:textSize="14sp"
             android:textStyle="bold"
             android:layout_marginTop="16dp"
@@ -93,7 +93,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="@string/xml_dialog_worker_runtime_settings_4" />
+                android:text="@string/xml_dialog_pages_runtime_settings_5" />
 
             <RadioButton
                 android:id="@+id/placementSmart"

@@ -26,7 +26,7 @@ object DialogUtils {
         onCancel: () -> Unit = {}
     ) {
         val pos = positiveText ?: context.getString(R.string.dialog_utils_positive_confirm)
-        val neg = negativeText ?: context.getString(R.string.dialog_utils_negative_cancel)
+        val neg = negativeText ?: context.getString(R.string.cancel)
         MaterialAlertDialogBuilder(context)
             .setTitle(title)
             .setMessage(message)
@@ -57,7 +57,7 @@ object DialogUtils {
                 onItemSelected(which)
                 dialog.dismiss()
             }
-            .setNegativeButton(context.getString(R.string.dialog_utils_negative_cancel), null)
+            .setNegativeButton(context.getString(R.string.cancel), null)
             .show()
     }
     
@@ -74,7 +74,7 @@ object DialogUtils {
         onConfirm: (String) -> Unit
     ) {
         val pos = positiveText ?: context.getString(R.string.dialog_utils_positive_confirm)
-        val neg = negativeText ?: context.getString(R.string.dialog_utils_negative_cancel)
+        val neg = negativeText ?: context.getString(R.string.cancel)
         val editText = android.widget.EditText(context).apply {
             this.hint = hint
             setText(defaultValue)

@@ -60,7 +60,7 @@
     <fragment
         android:id="@+id/storeFragment"
         android:name="com.muort.upworker.feature.store.StoreFragment"
-        android:label="@string/store_title"
+        android:label="@string/card_template_store"
         tools:layout="@layout/fragment_store" />
 
     <fragment

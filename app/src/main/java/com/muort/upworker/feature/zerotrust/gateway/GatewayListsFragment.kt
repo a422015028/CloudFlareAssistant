@@ -127,8 +127,8 @@ class GatewayListsFragment : Fragment() {
         val templateUrlBtn = dialogView.findViewById<Button>(R.id.templateUrlBtn)
 
         val types = listOf(
-            "DOMAIN" to getString(R.string.zt_list_type_domain),
-            "IP" to getString(R.string.zt_list_type_ip),
+            "DOMAIN" to getString(R.string.common_domain),
+            "IP" to getString(R.string.ar_target_ip),
             "URL" to getString(R.string.zt_list_type_url)
         )
         val typeAdapter = ArrayAdapter(
@@ -167,7 +167,7 @@ class GatewayListsFragment : Fragment() {
                 itemsInput.setText(text)
                 adjustItemsInputHeight(itemsInput, text)
             } else {
-                itemsInput.hint = getString(R.string.zt_list_loading_hint)
+                itemsInput.hint = getString(R.string.dialog_utils_loading_message)
                 val account = accountViewModel.defaultAccount.value
                 if (account != null) {
                     viewModel.loadListItems(account, list.id) { loadedItems ->
@@ -181,7 +181,7 @@ class GatewayListsFragment : Fragment() {
         }
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(if (existingList == null) R.string.zt_list_create_title else R.string.zt_list_edit_title)
+            .setTitle(if (existingList == null) R.string.gateway_create_list else R.string.zt_list_edit_title)
             .setView(dialogView)
             .setPositiveButton(if (existingList == null) R.string.dialog_create else R.string.save) { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton

@@ -211,7 +211,7 @@ class R2Repository @Inject constructor(
             } catch (e: IllegalArgumentException) {
                 Resource.Error(appContext.getString(R.string.repo_r2_missing_credentials))
             } catch (e: Exception) {
-                Resource.Error(appContext.getString(R.string.repo_r2_delete_failed_format, e.message))
+                Resource.Error(appContext.getString(R.string.msg_delete_failed, e.message))
             }
         }
     }

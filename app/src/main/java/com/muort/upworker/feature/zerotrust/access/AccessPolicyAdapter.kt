@@ -64,7 +64,7 @@ class AccessPolicyAdapter(
 
         private fun getDecisionLabel(decision: String, ctx: android.content.Context): String {
             return when (decision) {
-                "allow" -> ctx.getString(R.string.zt_policy_decision_allow)
+                "allow" -> ctx.getString(R.string.ar_action_whitelist)
                 "deny" -> ctx.getString(R.string.zt_policy_decision_deny)
                 "bypass" -> ctx.getString(R.string.zt_policy_decision_bypass)
                 "non_identity" -> ctx.getString(R.string.zt_policy_decision_non_identity)

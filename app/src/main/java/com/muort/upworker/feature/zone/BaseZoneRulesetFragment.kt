@@ -123,12 +123,12 @@ abstract class BaseZoneRulesetFragment : BaseZoneFeatureFragment() {
             setPadding(48, 32, 48, 32)
         }
         val descEditText = EditText(ctx).apply {
-            hint = ctx.getString(R.string.waf_desc_hint)
+            hint = ctx.getString(R.string.device_description_optional)
             setSingleLine(false)
             setPadding(48, 32, 48, 32)
         }
         val actionAutoComplete = AutoCompleteTextView(ctx).apply {
-            hint = ctx.getString(R.string.waf_action_hint)
+            hint = ctx.getString(R.string.access_rule_action)
             val actions = listOf("block", "challenge", "managed_challenge", "js_challenge", "log", "skip")
             setAdapter(ArrayAdapter(ctx, android.R.layout.simple_list_item_1, actions))
             setText("block", false)

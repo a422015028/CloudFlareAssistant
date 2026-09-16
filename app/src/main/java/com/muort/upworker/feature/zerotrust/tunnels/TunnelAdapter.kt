@@ -85,7 +85,7 @@ class TunnelAdapter(
 
         private fun getStatusLabel(ctx: android.content.Context, status: String): String {
             return when (status.lowercase()) {
-                "active" -> ctx.getString(R.string.zt_tunnel_status_active)
+                "active" -> ctx.getString(R.string.tunnel_active)
                 "inactive" -> ctx.getString(R.string.zt_tunnel_status_inactive)
                 "degraded" -> ctx.getString(R.string.zt_tunnel_status_degraded)
                 "down" -> ctx.getString(R.string.zt_tunnel_status_down)
@@ -112,7 +112,7 @@ class TunnelAdapter(
         }
 
         private fun formatDate(ctx: android.content.Context, dateString: String?): String {
-            if (dateString == null) return ctx.getString(R.string.zt_tunnel_date_unknown)
+            if (dateString == null) return ctx.getString(R.string.status_unknown)
             return try {
                 dateString.substring(0, 10)
             } catch (e: Exception) {

@@ -297,7 +297,7 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
                 saveButton.isEnabled = !state.isSaving
-                saveButton.text = if (state.isSaving) getString(R.string.msg_saving) else if (isEdit) getString(R.string.save) else getString(R.string.add)
+                saveButton.text = if (state.isSaving) getString(R.string.msg_saving_ellipsis) else if (isEdit) getString(R.string.save) else getString(R.string.add)
             }
         }
     }

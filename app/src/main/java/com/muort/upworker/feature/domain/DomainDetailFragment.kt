@@ -66,11 +66,11 @@ class DomainDetailFragment : Fragment() {
         val tools = listOf(
             ZoneToolItem(getString(R.string.zone_tool_analytics), android.R.drawable.ic_menu_mapmode, R.id.action_domainDetail_to_zoneAnalytics),
             ZoneToolItem(getString(R.string.zone_tool_dns), android.R.drawable.ic_menu_edit, R.id.action_domainDetail_to_dns),
-            ZoneToolItem(getString(R.string.zone_tool_route), android.R.drawable.ic_menu_directions, R.id.action_domainDetail_to_route),
+            ZoneToolItem(getString(R.string.route_title_routes), android.R.drawable.ic_menu_directions, R.id.action_domainDetail_to_route),
             ZoneToolItem(getString(R.string.zone_tool_waf), android.R.drawable.ic_menu_search, R.id.action_domainDetail_to_waf),
             ZoneToolItem(getString(R.string.zone_tool_cache_rules), android.R.drawable.ic_menu_save, R.id.action_domainDetail_to_cache),
             ZoneToolItem(getString(R.string.zone_tool_rate_limit), android.R.drawable.ic_menu_recent_history, R.id.action_domainDetail_to_rateLimit),
-            ZoneToolItem(getString(R.string.zone_tool_email_routing), android.R.drawable.ic_menu_send, R.id.action_domainDetail_to_emailRouting),
+            ZoneToolItem(getString(R.string.email_routing_title), android.R.drawable.ic_menu_send, R.id.action_domainDetail_to_emailRouting),
             ZoneToolItem(getString(R.string.zone_tool_load_balancer), android.R.drawable.ic_menu_share, R.id.action_domainDetail_to_loadBalancer),
             ZoneToolItem("SSL/TLS", android.R.drawable.ic_lock_lock, R.id.action_domainDetail_to_ssl),
             ZoneToolItem(getString(R.string.zone_tool_ssl_certs), android.R.drawable.ic_menu_manage, R.id.action_domainDetail_to_sslCerts),
@@ -78,7 +78,7 @@ class DomainDetailFragment : Fragment() {
             ZoneToolItem(getString(R.string.zone_tool_access_rules), android.R.drawable.ic_menu_view, R.id.action_domainDetail_to_accessRules),
             ZoneToolItem(getString(R.string.zone_tool_performance), android.R.drawable.ic_menu_compass, R.id.action_domainDetail_to_performance),
             ZoneToolItem(getString(R.string.zone_tool_snippets), android.R.drawable.ic_menu_agenda, R.id.action_domainDetail_to_snippets),
-            ZoneToolItem(getString(R.string.zone_tool_settings), android.R.drawable.ic_menu_preferences, R.id.action_domainDetail_to_zoneSettings),
+            ZoneToolItem(getString(R.string.card_settings), android.R.drawable.ic_menu_preferences, R.id.action_domainDetail_to_zoneSettings),
         )
         tools.forEach { tool -> binding.toolsContainer.addView(buildToolRow(tool)) }
     }

@@ -73,7 +73,7 @@ class PolicyRuleAdapter(
                 rule.geo != null -> ctx.getString(R.string.zt_rule_geo_country, rule.geo["country_code"]?.joinToString() ?: "")
                 rule.commonName != null -> rule.commonName["common_name"] ?: "N/A"
                 rule.ipList != null -> ctx.getString(R.string.zt_rule_ip_list_id, rule.ipList["id"] ?: "")
-                rule.certificate != null -> ctx.getString(R.string.zt_rule_certificate)
+                rule.certificate != null -> ctx.getString(R.string.dns_field_certificate)
                 rule.authMethod != null -> rule.authMethod["auth_method"] ?: "N/A"
                 rule.devicePosture != null -> ctx.getString(R.string.zt_rule_posture, rule.devicePosture["integration_uid"] ?: "")
                 rule.serviceToken != null -> ctx.getString(R.string.zt_rule_service_token, rule.serviceToken["token_id"] ?: "")

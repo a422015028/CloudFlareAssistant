@@ -52,7 +52,7 @@ class DevicesListFragment : Fragment() {
     private fun setupRecyclerView() {
         deviceAdapter = DeviceAdapter(
             onRevokeClick = { device ->
-                confirmRevokeDevice(device.id, device.name ?: device.model ?: getString(R.string.zt_device_status_unknown))
+                confirmRevokeDevice(device.id, device.name ?: device.model ?: getString(R.string.status_unknown))
             },
             onItemClick = { device ->
                 showDeviceDetailDialog(device)
@@ -125,7 +125,7 @@ class DevicesListFragment : Fragment() {
         // Status Chip
         val isRevoked = device.revokedAt != null
         val statusChip = dialogView.findViewById<Chip>(R.id.statusChip)
-        statusChip.text = if (isRevoked) getString(R.string.zt_device_status_revoked) else getString(R.string.zt_device_status_active)
+        statusChip.text = if (isRevoked) getString(R.string.zt_device_status_revoked) else getString(R.string.tunnel_active)
         statusChip.setChipBackgroundColorResource(
             if (isRevoked) android.R.color.holo_red_light else android.R.color.holo_green_light
         )
@@ -139,7 +139,7 @@ class DevicesListFragment : Fragment() {
         dialogView.findViewById<TextView>(R.id.userEmailText).text =
             user?.email ?: user?.name ?: getString(R.string.zt_device_unknown_user)
         dialogView.findViewById<TextView>(R.id.userIdText).text =
-            getString(R.string.zt_device_id_label, user?.id ?: "N/A")
+            getString(R.string.d1_db_id_label, user?.id ?: "N/A")
 
         // Device Info
         dialogView.findViewById<TextView>(R.id.modelText).text = device.model ?: "N/A"
@@ -156,16 +156,16 @@ class DevicesListFragment : Fragment() {
         // Network Info
         val ipAddr = device.publicIp ?: device.ip
         dialogView.findViewById<TextView>(R.id.ipAddressText).text =
-            getString(R.string.zt_device_ip_label, ipAddr ?: getString(R.string.zt_device_status_unknown))
+            getString(R.string.zt_device_ip_label, ipAddr ?: getString(R.string.status_unknown))
 
         // Policy Info - last_seen_registration.policy
         val policy = device.lastSeenRegistration?.policy
         dialogView.findViewById<TextView>(R.id.policyNameText).text =
-            policy?.name ?: device.policyName ?: getString(R.string.zt_access_detail_default)
+            policy?.name ?: device.policyName ?: getString(R.string.account_default)
         dialogView.findViewById<TextView>(R.id.policyDefaultText).text =
-            if (policy?.default == true) getString(R.string.status_yes) else getString(R.string.status_no)
+            if (policy?.default == true) getString(R.string.pages_detail_yes) else getString(R.string.pages_detail_no)
         dialogView.findViewById<TextView>(R.id.policyDeletedText).text =
-            if (policy?.deleted == true) getString(R.string.status_yes) else getString(R.string.status_no)
+            if (policy?.deleted == true) getString(R.string.pages_detail_yes) else getString(R.string.pages_detail_no)
         dialogView.findViewById<TextView>(R.id.policyUpdatedAtText).text =
             formatDateTime(policy?.updatedAt)
 
@@ -173,7 +173,7 @@ class DevicesListFragment : Fragment() {
         val createdTime = device.createdAt ?: device.created
         val updatedTime = device.updatedAt ?: device.updated
         dialogView.findViewById<TextView>(R.id.createdAtText).text =
-            getString(R.string.zt_device_created_label, formatDateTime(createdTime))
+            getString(R.string.token_detail_created_time, formatDateTime(createdTime))
         dialogView.findViewById<TextView>(R.id.updatedAtText).text =
             getString(R.string.zt_device_updated_label, formatDateTime(updatedTime))
         dialogView.findViewById<TextView>(R.id.lastSeenAtText).text =
@@ -203,8 +203,8 @@ class DevicesListFragment : Fragment() {
             .setNegativeButton(R.string.dialog_close, null)
 
         if (!isRevoked) {
-            builder.setPositiveButton(R.string.zt_device_revoke_button) { _, _ ->
-                confirmRevokeDevice(device.id, device.name ?: device.model ?: getString(R.string.zt_device_status_unknown))
+            builder.setPositiveButton(R.string.device_revoke) { _, _ ->
+                confirmRevokeDevice(device.id, device.name ?: device.model ?: getString(R.string.status_unknown))
             }
         }
 
@@ -213,9 +213,9 @@ class DevicesListFragment : Fragment() {
 
     private fun confirmRevokeDevice(deviceId: String, deviceName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.zt_device_revoke_title)
+            .setTitle(R.string.device_revoke)
             .setMessage(getString(R.string.zt_device_revoke_confirm, deviceName))
-            .setPositiveButton(getString(R.string.zt_device_revoke_button)) { _, _ ->
+            .setPositiveButton(getString(R.string.device_revoke)) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
                     viewModel.revokeDevice(account, deviceId)
                 }
@@ -232,7 +232,7 @@ class DevicesListFragment : Fragment() {
             "android" -> "Android"
             "ios" -> "iOS"
             "chromeos" -> "ChromeOS"
-            else -> type?.uppercase() ?: getString(R.string.zt_device_status_unknown)
+            else -> type?.uppercase() ?: getString(R.string.status_unknown)
         }
     }
 

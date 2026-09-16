@@ -99,7 +99,7 @@ object ThemeHelper {
     }
 
     fun getThemeModeLabels(ctx: Context): List<String> = listOf(
-        ctx.getString(R.string.theme_follow_system),
+        ctx.getString(R.string.language_follow_system),
         ctx.getString(R.string.theme_light),
         ctx.getString(R.string.theme_dark)
     )

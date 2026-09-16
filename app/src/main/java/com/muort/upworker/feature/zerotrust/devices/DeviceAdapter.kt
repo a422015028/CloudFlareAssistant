@@ -43,7 +43,7 @@ class DeviceAdapter(
 
             // Status chip
             val isRevoked = device.revokedAt != null
-            binding.statusChip.text = if (isRevoked) ctx.getString(R.string.zt_device_status_revoked) else ctx.getString(R.string.zt_device_status_active)
+            binding.statusChip.text = if (isRevoked) ctx.getString(R.string.zt_device_status_revoked) else ctx.getString(R.string.tunnel_active)
             binding.statusChip.setChipBackgroundColorResource(
                 if (isRevoked) android.R.color.holo_red_light else android.R.color.holo_green_light
             )
@@ -51,14 +51,14 @@ class DeviceAdapter(
             // User info
             val userEmail = device.lastSeenUser?.email ?: device.user?.email
                 ?: device.lastSeenUser?.name ?: device.user?.name
-            val userUnknown = ctx.getString(R.string.zt_device_status_unknown)
+            val userUnknown = ctx.getString(R.string.status_unknown)
             binding.userInfoText.text = ctx.getString(R.string.zt_device_user_label, userEmail ?: userUnknown)
             binding.userInfoText.visibility = if (userEmail != null) View.VISIBLE else View.GONE
 
             // Policy info - 最后活跃的设备配置文件
             val policyName = device.lastSeenRegistration?.policy?.name
                 ?: device.policyName
-                ?: ctx.getString(R.string.zt_access_detail_default)
+                ?: ctx.getString(R.string.account_default)
             binding.policyNameText.text = ctx.getString(R.string.zt_device_policy_label, policyName)
             binding.policyNameText.visibility = View.VISIBLE
 
@@ -87,7 +87,7 @@ class DeviceAdapter(
                 "android" -> "Android"
                 "ios" -> "iOS"
                 "chromeos" -> "ChromeOS"
-                else -> type?.uppercase() ?: ctx.getString(R.string.zt_device_status_unknown)
+                else -> type?.uppercase() ?: ctx.getString(R.string.status_unknown)
             }
         }
 
@@ -100,7 +100,7 @@ class DeviceAdapter(
         }
 
         private fun formatDate(dateString: String?, ctx: android.content.Context): String {
-            if (dateString == null) return ctx.getString(R.string.zt_device_status_unknown)
+            if (dateString == null) return ctx.getString(R.string.status_unknown)
             return try {
                 dateString.substring(0, 10)
             } catch (e: Exception) {

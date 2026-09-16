@@ -180,7 +180,7 @@ class SnippetRuleDialog : DialogFragment() {
                 field.type == SnippetRuleExpression.ValueType.IP -> R.string.snippet_value_ip_or_cidr
                 field.type == SnippetRuleExpression.ValueType.NUMBER -> R.string.snippet_value_number
                 field.expr == "ip.src.country" -> R.string.snippet_value_country_code
-                else -> R.string.snippet_value_default
+                else -> R.string.dns_field_value
             }
             row.valueLayout.hint = ctx.getString(valueHintRes)
         }
@@ -261,7 +261,7 @@ class SnippetRuleDialog : DialogFragment() {
         val expr = SnippetRuleExpression.build(conditions, useAnd)
         binding.previewText.text = expr.ifBlank { getString(R.string.snippet_expr_preview_empty) }
         binding.builderCharCount.text = getString(
-            R.string.snippet_expr_char_count_format,
+            R.string.email_url_count_format,
             expr.length,
             SnippetRepository.MAX_EXPRESSION_LENGTH,
         )
@@ -308,7 +308,7 @@ class SnippetRuleDialog : DialogFragment() {
     private fun updateEditorCounter() {
         val len = binding.expressionInput.text?.toString()?.length ?: 0
         binding.editorCharCount.text = getString(
-            R.string.snippet_expr_char_count_format,
+            R.string.email_url_count_format,
             len,
             SnippetRepository.MAX_EXPRESSION_LENGTH,
         )
@@ -533,7 +533,7 @@ class SnippetRuleDialog : DialogFragment() {
                 "A" -> {
                     dBinding.recordContentLayout.setHint(R.string.snippet_dns_hint_ipv4_required)
                     dBinding.recordContentLayout.helperText =
-                        getString(R.string.snippet_dns_helper_ipv4_blackhole)
+                        getString(R.string.dns_ipv4_helper)
                     dBinding.recordContentInput.setText("192.0.2.1")
                 }
                 "AAAA" -> {

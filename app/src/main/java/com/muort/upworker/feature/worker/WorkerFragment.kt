@@ -572,8 +572,8 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
-            .setMessage(R.string.worker_fetching_kv_bindings)
+            .setTitle(R.string.dialog_utils_loading_message)
+            .setMessage(R.string.pages_kv_fetching_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -704,12 +704,12 @@ class WorkerFragment : Fragment() {
                     val selectedIndex = dialogBinding.namespaceSpinner.selectedItemPosition
 
                     if (bindingName.isEmpty()) {
-                        showToast(getString(R.string.worker_please_enter_binding_name))
+                        showToast(getString(R.string.pages_generic_please_enter_binding_name))
                         return@setOnClickListener
                     }
 
                     if (tempBindings.any { it.first == bindingName }) {
-                        showToast(getString(R.string.worker_binding_name_already_exists_template, bindingName))
+                        showToast(getString(R.string.pages_generic_binding_name_already_exists_template, bindingName))
                         return@setOnClickListener
                     }
 
@@ -772,7 +772,7 @@ class WorkerFragment : Fragment() {
                     }
                 }
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
-                showToast(getString(R.string.worker_kv_load_namespaces_failed_template, result.message))
+                showToast(getString(R.string.pages_kv_load_namespaces_failed_template, result.message))
             }
         }
     }
@@ -801,7 +801,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast(getString(R.string.worker_kv_bindings_config_updated))
+            showToast(getString(R.string.pages_kv_bindings_updated))
         }
     }
     
@@ -816,8 +816,8 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
-            .setMessage(R.string.worker_fetching_r2_bindings)
+            .setTitle(R.string.dialog_utils_loading_message)
+            .setMessage(R.string.pages_r2_fetching_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -941,12 +941,12 @@ class WorkerFragment : Fragment() {
                     val selectedIndex = dialogBinding.bucketSpinner.selectedItemPosition
 
                     if (bindingName.isEmpty()) {
-                        showToast(getString(R.string.worker_please_enter_binding_name))
+                        showToast(getString(R.string.pages_generic_please_enter_binding_name))
                         return@setOnClickListener
                     }
 
                     if (tempBindings.any { it.first == bindingName }) {
-                        showToast(getString(R.string.worker_binding_name_already_exists_template, bindingName))
+                        showToast(getString(R.string.pages_generic_binding_name_already_exists_template, bindingName))
                         return@setOnClickListener
                     }
 
@@ -1010,7 +1010,7 @@ class WorkerFragment : Fragment() {
                     }
                 }
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
-                showToast(getString(R.string.worker_r2_load_failed, result.message))
+                showToast(getString(R.string.pages_r2_load_buckets_failed_template, result.message))
             }
         }
     }
@@ -1039,7 +1039,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast(getString(R.string.worker_r2_bindings_updated))
+            showToast(getString(R.string.pages_r2_bindings_updated))
         }
     }
     
@@ -1054,8 +1054,8 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
-            .setMessage(R.string.worker_d1_fetching_bindings)
+            .setTitle(R.string.dialog_utils_loading_message)
+            .setMessage(R.string.pages_d1_fetching_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1191,12 +1191,12 @@ class WorkerFragment : Fragment() {
                     val selectedIndex = dialogBinding.databaseSpinner.selectedItemPosition
 
                     if (bindingName.isEmpty()) {
-                        showToast(getString(R.string.worker_please_enter_binding_name))
+                        showToast(getString(R.string.pages_generic_please_enter_binding_name))
                         return@setOnClickListener
                     }
 
                     if (tempBindings.any { it.bindingName == bindingName }) {
-                        showToast(getString(R.string.worker_binding_name_already_exists_template, bindingName))
+                        showToast(getString(R.string.pages_generic_binding_name_already_exists_template, bindingName))
                         return@setOnClickListener
                     }
 
@@ -1262,7 +1262,7 @@ class WorkerFragment : Fragment() {
                     }
                 }
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
-                showToast(getString(R.string.worker_d1_load_databases_failed_template, result.message))
+                showToast(getString(R.string.pages_d1_load_databases_failed_template, result.message))
             }
         }
     }
@@ -1292,7 +1292,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast(getString(R.string.worker_d1_bindings_updated))
+            showToast(getString(R.string.pages_d1_bindings_updated))
         }
     }
     
@@ -1307,8 +1307,8 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
-            .setMessage(R.string.worker_service_fetching_bindings)
+            .setTitle(R.string.dialog_utils_loading_message)
+            .setMessage(R.string.pages_service_fetching_bindings)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1401,7 +1401,7 @@ class WorkerFragment : Fragment() {
                 val workers = result.data.filter { it.id != currentScript.id }
                 
                 if (workers.isEmpty()) {
-                    showToast(getString(R.string.worker_service_no_workers))
+                    showToast(getString(R.string.pages_service_no_workers))
                     return@launch
                 }
                 
@@ -1420,12 +1420,12 @@ class WorkerFragment : Fragment() {
                         val selectedIndex = dialogBinding.workerSpinner.selectedItemPosition
 
                         if (bindingName.isEmpty()) {
-                            showToast(getString(R.string.worker_please_enter_binding_name))
+                            showToast(getString(R.string.pages_generic_please_enter_binding_name))
                             return@setPositiveButton
                         }
 
                         if (tempBindings.any { it.bindingName == bindingName }) {
-                            showToast(getString(R.string.worker_binding_name_already_exists_template, bindingName))
+                            showToast(getString(R.string.pages_generic_binding_name_already_exists_template, bindingName))
                             return@setPositiveButton
                         }
 
@@ -1439,7 +1439,7 @@ class WorkerFragment : Fragment() {
                     .setNegativeButton(R.string.cancel, null)
                     .show()
             } else if (result is com.muort.upworker.core.model.Resource.Error) {
-                showToast(getString(R.string.worker_service_load_workers_failed_template, result.message))
+                showToast(getString(R.string.pages_service_load_workers_failed_template, result.message))
             }
         }
     }
@@ -1468,7 +1468,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast(getString(R.string.worker_service_bindings_updated))
+            showToast(getString(R.string.pages_service_bindings_updated))
         }
     }
     
@@ -1483,7 +1483,7 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.worker_env_fetching_vars)
             .setCancelable(false)
             .create()
@@ -1603,7 +1603,7 @@ class WorkerFragment : Fragment() {
                 
                 tempVariables.add(Triple(name, value, type))
                 onAdded()
-                showToast(getString(R.string.worker_env_added))
+                showToast(getString(R.string.pages_generic_env_added))
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
@@ -1656,7 +1656,7 @@ class WorkerFragment : Fragment() {
                 
                 tempVariables[position] = Triple(name, value, type)
                 onEdited()
-                showToast(getString(R.string.worker_env_updated))
+                showToast(getString(R.string.pages_generic_env_updated))
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
@@ -1674,7 +1674,7 @@ class WorkerFragment : Fragment() {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_updating)
-            .setMessage(R.string.worker_env_updating_vars)
+            .setMessage(R.string.pages_generic_updating_env_vars)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -1684,7 +1684,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast(getString(R.string.worker_env_vars_updated))
+            showToast(getString(R.string.pages_generic_env_vars_updated))
         }
     }
     
@@ -1699,7 +1699,7 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.worker_secret_fetching_vars)
             .setCancelable(false)
             .create()
@@ -1871,7 +1871,7 @@ class WorkerFragment : Fragment() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(500)
             loadingDialog.dismiss()
-            showToast(getString(R.string.worker_secrets_updated))
+            showToast(getString(R.string.vm_msg_worker_secret_updated_success))
         }
     }
     
@@ -1886,7 +1886,7 @@ class WorkerFragment : Fragment() {
         
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.worker_runtime_fetching_settings)
             .setCancelable(false)
             .create()
@@ -1898,7 +1898,7 @@ class WorkerFragment : Fragment() {
             
             if (settingsResult !is com.muort.upworker.core.model.Resource.Success) {
                 val msg = (settingsResult as? com.muort.upworker.core.model.Resource.Error)?.message ?: getString(R.string.msg_unknown_error)
-                showToast(getString(R.string.worker_settings_load_failed, msg))
+                showToast(getString(R.string.vm_msg_worker_script_settings_load_failed, msg))
                 return@runOnUiThread
             }
             
@@ -1930,7 +1930,7 @@ class WorkerFragment : Fragment() {
             
             // Show dialog
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.worker_runtime_settings)
+                .setTitle(R.string.pages_menu_runtime_settings)
                 .setView(dialogBinding.root)
                 .setPositiveButton(R.string.save) { _, _ ->
                     val compatibilityDate = dialogBinding.compatibilityDateInput.text.toString().trim()
@@ -1991,9 +1991,9 @@ class WorkerFragment : Fragment() {
                 loadingDialog.dismiss()
                 when (result) {
                     is com.muort.upworker.core.model.Resource.Success ->
-                        showToast(getString(R.string.worker_runtime_updated))
+                        showToast(getString(R.string.pages_runtime_settings_updated))
                     is com.muort.upworker.core.model.Resource.Error ->
-                        showToast(getString(R.string.worker_runtime_update_failed_template, result.message))
+                        showToast(getString(R.string.msg_update_failed, result.message))
                     else -> {}
                 }
             }
@@ -2047,7 +2047,7 @@ class WorkerFragment : Fragment() {
         }
         
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.worker_version_fetching_history)
             .setCancelable(false)
             .create()
@@ -2117,7 +2117,7 @@ class WorkerFragment : Fragment() {
                         val result = viewModel.deleteWorkerVersion(account, script.id, version.id)
                         when (result) {
                             is Resource.Success -> {
-                                showToast(getString(R.string.worker_generic_delete_success))
+                                showToast(getString(R.string.vm_msg_backup_delete_success))
                                 historyDialog?.dismiss()
                                 showScriptHistoryDialog(script)
                             }
@@ -2143,7 +2143,7 @@ class WorkerFragment : Fragment() {
         }
 
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.worker_logs_creating_channel)
             .setCancelable(false)
             .create()
@@ -2173,7 +2173,7 @@ class WorkerFragment : Fragment() {
         }
 
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.worker_triggers_fetching_list)
             .setCancelable(false)
             .create()
@@ -2321,7 +2321,7 @@ class WorkerFragment : Fragment() {
                             val result = viewModel.updateSchedules(account, script.id, currentCronList)
                             when (result) {
                                 is Resource.Success -> {
-                                    showToast(getString(R.string.worker_generic_delete_success))
+                                    showToast(getString(R.string.vm_msg_backup_delete_success))
                                     triggersDialog?.dismiss()
                                     showBuildTriggersDialog(script)
                                 }
@@ -2348,7 +2348,7 @@ class WorkerFragment : Fragment() {
         }
 
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_loading_ellipsis)
+            .setTitle(R.string.dialog_utils_loading_message)
             .setMessage(R.string.worker_detail_fetching_info)
             .setCancelable(false)
             .create()
@@ -2476,7 +2476,7 @@ class WorkerFragment : Fragment() {
                             val result = viewModel.deleteWorkerVersion(account, script.id, version.id)
                             when (result) {
                                 is Resource.Success -> {
-                                    showToast(getString(R.string.worker_generic_delete_success))
+                                    showToast(getString(R.string.vm_msg_backup_delete_success))
                                     showScriptHistoryDialog(script)
                                 }
                                 is Resource.Error -> {
@@ -2641,7 +2641,7 @@ class WorkerFragment : Fragment() {
         
         val scriptsToDelete = selectedScripts.toList()
         val progressDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.worker_generic_deleting_title)
+            .setTitle(R.string.pages_generic_deleting)
             .setMessage(getString(R.string.worker_batch_deleting_message_template, scriptsToDelete.size))
             .setCancelable(false)
             .create()
@@ -2869,7 +2869,7 @@ class WorkerFragment : Fragment() {
                 } else {
                     getString(R.string.worker_cleanup_script_no_need_template, result.totalVersions)
                 }
-                resultBuilder.append(getString(R.string.worker_cleanup_script_line_template, result.scriptName, status)).append("\n")
+                resultBuilder.append(getString(R.string.pages_cleanup_result_line_template, result.scriptName, status)).append("\n")
             } else {
                 resultBuilder.append(getString(R.string.worker_cleanup_script_failed_line_template, result.scriptName, result.errorMessage ?: "")).append("\n")
             }
@@ -2955,7 +2955,7 @@ class WorkerFragment : Fragment() {
                 val loadingAdapter = ArrayAdapter<String>(
                     context,
                     android.R.layout.simple_dropdown_item_1line,
-                    listOf(getString(R.string.worker_route_zone_loading))
+                    listOf(getString(R.string.dialog_utils_loading_message))
                 )
                 zoneAuto.setAdapter(loadingAdapter)
                 when (val res = zoneRepository.fetchAndSaveZones(account)) {
@@ -3001,14 +3001,14 @@ class WorkerFragment : Fragment() {
             dlg.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val hostname = editText.text?.toString()?.trim()?.lowercase().orEmpty()
                 if (hostname.isEmpty()) {
-                    inputLayout.error = getString(R.string.pages_domain_cannot_be_empty)
+                    inputLayout.error = getString(R.string.msg_domain_empty)
                     editText.requestFocus()
                     return@setOnClickListener
                 }
                 inputLayout.error = null
                 viewLifecycleOwner.lifecycleScope.launch {
                     val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.dialog_loading_ellipsis)
+                        .setTitle(R.string.dialog_utils_loading_message)
                         .setMessage(R.string.worker_adding_custom_domain)
                         .setCancelable(false)
                         .create()
@@ -3017,7 +3017,7 @@ class WorkerFragment : Fragment() {
                     when (val addResult = workerRepository.addCustomDomain(account, hostname, script.id)) {
                         is com.muort.upworker.core.model.Resource.Success -> {
                             loadingDialog.dismiss()
-                            requireContext().showToast(getString(R.string.worker_custom_domain_added_success))
+                            requireContext().showToast(getString(R.string.vm_msg_pages_custom_domain_add_success))
                             dlg.dismiss()
                         }
                         is com.muort.upworker.core.model.Resource.Error -> {
@@ -3226,7 +3226,7 @@ class WorkerFragment : Fragment() {
 
                 viewLifecycleOwner.lifecycleScope.launch {
                     val loading = MaterialAlertDialogBuilder(context)
-                        .setTitle(R.string.dialog_loading_ellipsis)
+                        .setTitle(R.string.dialog_utils_loading_message)
                         .setMessage(R.string.worker_feature_saving)
                         .setCancelable(false)
                         .create()
@@ -3338,8 +3338,8 @@ class WorkerFragment : Fragment() {
                 ) { domain ->
                     // 删除确认
                     MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.route_delete_custom_domain)
-                        .setMessage(getString(R.string.route_delete_custom_domain_confirm, domain.hostname))
+                        .setTitle(R.string.r2_delete_custom_domain_title)
+                        .setMessage(getString(R.string.r2_delete_custom_domain_message, domain.hostname))
                         .setPositiveButton(R.string.delete) { _, _ ->
                             viewLifecycleOwner.lifecycleScope.launch {
                                 when (val del = workerRepository.deleteCustomDomain(account, domain.id)) {
@@ -3349,7 +3349,7 @@ class WorkerFragment : Fragment() {
                                     }
                                     is com.muort.upworker.core.model.Resource.Error -> {
                                         requireContext().showToast(
-                                            getString(R.string.worker_custom_domain_delete_failed, del.message)
+                                            getString(R.string.repo_r2_delete_custom_domain_failed_format, del.message)
                                         )
                                     }
                                     else -> {}
@@ -3543,7 +3543,7 @@ class WorkerFragment : Fragment() {
                 val loadingAdapter = ArrayAdapter<String>(
                     context,
                     android.R.layout.simple_dropdown_item_1line,
-                    listOf(getString(R.string.worker_route_zone_loading))
+                    listOf(getString(R.string.dialog_utils_loading_message))
                 )
                 zoneAuto.setAdapter(loadingAdapter)
 
@@ -3614,7 +3614,7 @@ class WorkerFragment : Fragment() {
 
                 viewLifecycleOwner.lifecycleScope.launch {
                     val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.dialog_loading_ellipsis)
+                        .setTitle(R.string.dialog_utils_loading_message)
                         .setMessage(R.string.worker_adding_route)
                         .setCancelable(false)
                         .create()
@@ -3710,7 +3710,7 @@ class WorkerFragment : Fragment() {
                                     }
                                     is com.muort.upworker.core.model.Resource.Error -> {
                                         requireContext().showToast(
-                                            getString(R.string.worker_route_delete_failed, del.message)
+                                            getString(R.string.repo_worker_delete_route_failed_format, del.message)
                                         )
                                     }
                                     else -> {}

@@ -137,7 +137,7 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
             dialogBinding.titleText.text = getString(R.string.store_edit_source)
             dialogBinding.nameEditText.setText(editingSource!!.name)
             dialogBinding.urlEditText.setText(editingSource.url)
-            dialogBinding.saveBtn.setText(R.string.store_save)
+            dialogBinding.saveBtn.setText(R.string.save)
             // 非默认源显示删除按钮
             if (!editingSource.isDefault) {
                 dialogBinding.deleteBtn.visibility = View.VISIBLE
@@ -198,7 +198,7 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
                     } else {
                         dialogBinding.savingProgress.visibility = View.GONE
                         setButtonsEnabled(true)
-                        dialogBinding.errorText.text = getString(R.string.store_source_operation_failed)
+                        dialogBinding.errorText.text = getString(R.string.dialog_error_title)
                         dialogBinding.errorText.visibility = View.VISIBLE
                     }
                 }.onFailure {

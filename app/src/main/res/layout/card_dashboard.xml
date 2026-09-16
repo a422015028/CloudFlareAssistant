@@ -347,7 +347,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/xml_card_dashboard_6"
+                        android:text="@string/dash_legend_page_views"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -607,7 +607,7 @@
                 android:id="@+id/timeRangeHintText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/xml_card_dashboard_16"
+                android:text="@string/xml_card_account_analytics_36"
                 android:textSize="11sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:layout_gravity="center"

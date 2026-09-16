@@ -32,7 +32,7 @@ class WorkerHistoryAdapter(
             revisionTimeText.text = time
             
             val source = version.metadata?.source ?: "unknown"
-            revisionSourceText.text = itemView.context.getString(R.string.worker_revision_source, source)
+            revisionSourceText.text = itemView.context.getString(R.string.pages_source_other, source)
             
             val isRunning = version.id == runningVersionId
             runningBadge.visibility = if (isRunning) View.VISIBLE else View.GONE

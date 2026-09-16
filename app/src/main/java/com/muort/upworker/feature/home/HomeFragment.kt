@@ -508,7 +508,7 @@ class HomeFragment : Fragment() {
         val message = if (updateContent.isNotBlank()) {
             getString(R.string.version_with_build_format, versionName, versionCode) + "\n\n$updateContent"
         } else {
-            getString(R.string.new_version_available, getString(R.string.version_format, versionName))
+            getString(R.string.new_version_available, getString(R.string.about_version, versionName))
         }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.new_version_found)

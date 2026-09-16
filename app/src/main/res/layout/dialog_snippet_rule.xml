@@ -29,7 +29,7 @@
                 android:id="@+id/radioAllRequests"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/snippet_all_requests"
+                android:text="@string/snippet_all_requests_label"
                 android:textSize="14sp"
                 android:paddingStart="4dp"
                 android:paddingEnd="0dp" />
@@ -139,7 +139,7 @@
                 android:textSize="12sp"
                 android:background="?attr/colorSurfaceContainerHighest"
                 android:padding="12dp"
-                android:text="@string/snippet_please_add_condition"
+                android:text="@string/snippet_expr_preview_empty"
                 android:minHeight="44dp" />
 
             <TextView

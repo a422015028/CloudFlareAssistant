@@ -328,7 +328,7 @@ class WorkerRepository @Inject constructor(
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Multi-file upload failed: $errorMsg\nError body: $errorBody")
-                Resource.Error(appContext.getString(R.string.repo_worker_upload_failed_format, errorMsg))
+                Resource.Error(appContext.getString(R.string.repo_r2_upload_failed_format, errorMsg))
             }
         }
     }
@@ -510,7 +510,7 @@ class WorkerRepository @Inject constructor(
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message() 
                     ?: "Unknown error"
-                Resource.Error(appContext.getString(R.string.repo_worker_upload_failed_format, errorMsg))
+                Resource.Error(appContext.getString(R.string.repo_r2_upload_failed_format, errorMsg))
             }
         }
     }
@@ -873,7 +873,7 @@ class WorkerRepository @Inject constructor(
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
                 Timber.e("Failed to update D1 bindings: Response code: ${response.code()}, Error body: $errorBody")
-                Resource.Error(appContext.getString(R.string.repo_worker_update_d1_bindings_failed_format, errorMsg))
+                Resource.Error(appContext.getString(R.string.repo_pages_update_d1_failed_format, errorMsg))
             }
         }
     }
@@ -1238,7 +1238,7 @@ class WorkerRepository @Inject constructor(
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Failed to update runtime settings: $errorMsg")
-                Resource.Error(appContext.getString(R.string.repo_worker_update_env_failed_format, errorMsg))
+                Resource.Error(appContext.getString(R.string.msg_update_failed, errorMsg))
             }
         }
     }
@@ -1284,7 +1284,7 @@ class WorkerRepository @Inject constructor(
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Failed to update script-level settings: $errorMsg")
-                Resource.Error(appContext.getString(R.string.repo_worker_update_env_failed_format, errorMsg))
+                Resource.Error(appContext.getString(R.string.msg_update_failed, errorMsg))
             }
         }
     }
@@ -2002,11 +2002,11 @@ class WorkerRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     response.body()?.result?.let {
                         Resource.Success(it)
-                    } ?: Resource.Error(appContext.getString(R.string.repo_worker_log_channel_create_no_result))
+                    } ?: Resource.Error(appContext.getString(R.string.repo_pages_log_channel_create_no_result))
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error(appContext.getString(R.string.repo_worker_log_channel_create_failed_format, errorMsg))
+                    Resource.Error(appContext.getString(R.string.pages_log_channel_failed_template, errorMsg))
                 }
             }
         }
@@ -2028,7 +2028,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error(appContext.getString(R.string.repo_worker_log_channel_delete_failed_format, errorMsg))
+                    Resource.Error(appContext.getString(R.string.repo_pages_log_channel_delete_failed_format, errorMsg))
                 }
             }
         }

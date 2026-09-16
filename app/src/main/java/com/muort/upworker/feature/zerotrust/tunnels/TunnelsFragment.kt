@@ -143,7 +143,7 @@ class TunnelsFragment : Fragment() {
         configSrcSpinner.setText(configSources[0].second, false)
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.zt_tunnel_create_title)
+            .setTitle(R.string.tunnel_create)
             .setView(dialogView)
             .setPositiveButton(R.string.dialog_create) { _, _ ->
                 val account = accountViewModel.defaultAccount.value ?: return@setPositiveButton
@@ -219,7 +219,7 @@ class TunnelsFragment : Fragment() {
         
         // Time Info
         dialogView.findViewById<TextView>(R.id.createdAtText).text =
-            getString(R.string.zt_tunnel_created_at, formatDateTime(tunnel.createdAt))
+            getString(R.string.token_detail_created_time, formatDateTime(tunnel.createdAt))
         dialogView.findViewById<TextView>(R.id.activeAtText).text =
             getString(R.string.zt_tunnel_last_active, formatDateTime(tunnel.connsActiveAt))
         
@@ -235,7 +235,7 @@ class TunnelsFragment : Fragment() {
         // Deleted time
         val deletedAtText = dialogView.findViewById<TextView>(R.id.deletedAtText)
         if (tunnel.deletedAt != null) {
-            deletedAtText.text = getString(R.string.zt_tunnel_deleted_at, formatDateTime(tunnel.deletedAt))
+            deletedAtText.text = getString(R.string.zt_device_deleted_label, formatDateTime(tunnel.deletedAt))
             deletedAtText.visibility = View.VISIBLE
         } else {
             deletedAtText.visibility = View.GONE
@@ -275,7 +275,7 @@ class TunnelsFragment : Fragment() {
                     }
                 }
             } ?: run {
-                tokenText.text = getString(R.string.zt_tunnel_please_select_account)
+                tokenText.text = getString(R.string.msg_please_select_account_first)
                 hideTokenButton.visibility = View.GONE
                 copyCommandButton.visibility = View.GONE
             }
@@ -411,7 +411,7 @@ class TunnelsFragment : Fragment() {
 
     private fun confirmDeleteTunnel(tunnelId: String, tunnelName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.zt_tunnel_delete_title)
+            .setTitle(R.string.tunnel_delete)
             .setMessage(getString(R.string.zt_tunnel_delete_confirm, tunnelName))
             .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->
@@ -453,7 +453,7 @@ class TunnelsFragment : Fragment() {
             }
             
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.zt_tunnel_run_command_title)
+                .setTitle(R.string.tunnel_run_command)
                 .setView(dialogView)
                 .setPositiveButton(R.string.dialog_close, null)
                 .show()
@@ -462,7 +462,7 @@ class TunnelsFragment : Fragment() {
 
     private fun getStatusLabel(status: String): String {
         return when (status.lowercase()) {
-            "active" -> getString(R.string.zt_tunnel_status_active)
+            "active" -> getString(R.string.tunnel_active)
             "inactive" -> getString(R.string.zt_tunnel_status_inactive)
             "degraded" -> getString(R.string.zt_tunnel_status_degraded)
             "down" -> getString(R.string.zt_tunnel_status_down)
@@ -505,7 +505,7 @@ class TunnelsFragment : Fragment() {
         binding.coloNameText.text = connection.coloName ?: "Unknown Colo"
 
         val isPendingReconnect = connection.isPendingReconnect == true
-        binding.connectionStatusChip.text = if (isPendingReconnect) getString(R.string.zt_tunnel_connection_reconnecting) else getString(R.string.zt_tunnel_connection_connected)
+        binding.connectionStatusChip.text = if (isPendingReconnect) getString(R.string.zt_tunnel_connection_reconnecting) else getString(R.string.status_connected)
         binding.connectionStatusChip.setChipBackgroundColorResource(
             if (isPendingReconnect) android.R.color.holo_orange_light else android.R.color.holo_green_light
         )
@@ -517,7 +517,7 @@ class TunnelsFragment : Fragment() {
         if (!originIp.isNullOrBlank()) {
             binding.originIpText.text = getString(R.string.zt_tunnel_origin_ip, originIp)
         } else {
-            binding.originIpText.text = getString(R.string.zt_tunnel_origin_ip, ctx.getString(R.string.zt_device_status_unknown))
+            binding.originIpText.text = getString(R.string.zt_tunnel_origin_ip, ctx.getString(R.string.status_unknown))
         }
 
         binding.openedAtText.text = getString(R.string.zt_tunnel_connection_time, formatConnectionDateTime(connection.openedAt))

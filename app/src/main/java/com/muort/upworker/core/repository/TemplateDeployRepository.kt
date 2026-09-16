@@ -316,7 +316,7 @@ class TemplateDeployRepository @Inject constructor(
             if (uploadResult !is Resource.Success) {
                 val errorMsg = (uploadResult as? Resource.Error)?.message ?: "Upload failed"
                 rollbackResources(account, rollbackSteps, createdResources)
-                return@withContext Resource.Error(appContext.getString(R.string.repo_template_upload_failed_format, errorMsg))
+                return@withContext Resource.Error(appContext.getString(R.string.repo_r2_upload_failed_format, errorMsg))
             }
 
             Timber.d("[TemplateDeploy] 脚本上传成功，环境变量已随 metadata 一并设置")
@@ -367,7 +367,7 @@ class TemplateDeployRepository @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e, "[TemplateDeploy] 部署异常")
             rollbackResources(account, rollbackSteps, createdResources)
-            Resource.Error(appContext.getString(R.string.repo_template_deploy_failed_format, e.message ?: ""))
+            Resource.Error(appContext.getString(R.string.repo_pages_deploy_failed_format, e.message ?: ""))
         } finally {
             // 清理所有临时文件/目录（无论成功失败）
             for (file in tempFilesToClean) {
@@ -1106,7 +1106,7 @@ class TemplateDeployRepository @Inject constructor(
             }
         } catch (e: Exception) {
             Timber.e(e, "[TemplateDeploy] Pages 部署异常")
-            Resource.Error(appContext.getString(R.string.repo_template_deploy_failed_format, e.message ?: ""))
+            Resource.Error(appContext.getString(R.string.repo_pages_deploy_failed_format, e.message ?: ""))
         } finally {
             // ====== 回滚：部署失败时执行回滚步骤 ======
             if (!deploymentSucceeded && rollbackSteps.isNotEmpty()) {
@@ -1233,7 +1233,7 @@ class TemplateDeployRepository @Inject constructor(
             }
         } catch (e: Exception) {
             Timber.e(e, "[TemplateDeploy] Hybrid 部署异常")
-            Resource.Error(appContext.getString(R.string.repo_template_deploy_failed_format, e.message ?: ""))
+            Resource.Error(appContext.getString(R.string.repo_pages_deploy_failed_format, e.message ?: ""))
         }
     }
 

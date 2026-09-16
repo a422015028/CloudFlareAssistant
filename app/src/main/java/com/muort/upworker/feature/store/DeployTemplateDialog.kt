@@ -1,4 +1,4 @@
-﻿package com.muort.upworker.feature.store
+package com.muort.upworker.feature.store
 
 import android.app.Dialog
 import android.os.Bundle

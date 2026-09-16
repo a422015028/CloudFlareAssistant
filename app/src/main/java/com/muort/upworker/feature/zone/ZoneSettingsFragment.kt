@@ -37,7 +37,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
     private lateinit var adapter: SettingsAdapter
     private var state = ZoneSettingsState(isLoading = true)
 
-    override val emptyTextResId: Int = R.string.zone_settings_loading
+    override val emptyTextResId: Int = R.string.dialog_utils_loading_message
     override val showAddFab: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -128,7 +128,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
 
     private fun showPurgeConfirmDialog() {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.zone_purge_all_title)
+            .setTitle(R.string.zone_purge_all_text)
             .setMessage(R.string.zone_purge_all_message)
             .setPositiveButton(R.string.zone_purge_button) { _, _ -> purgeAllCache() }
             .setNegativeButton(R.string.cancel, null)
@@ -182,7 +182,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
         })
 
         MaterialAlertDialogBuilder(ctx)
-            .setTitle(R.string.zone_purge_url_title)
+            .setTitle(R.string.zone_purge_url_text)
             .setView(binding.root)
             .setPositiveButton(R.string.zone_purge_button) { _, _ ->
                 val text = binding.urlInput.text.toString()
@@ -211,7 +211,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
                     toast(getString(R.string.zone_purge_url_success, urls.size))
                 }
                 is Resource.Error -> {
-                    toast(getString(R.string.zone_purge_url_failed, r.message))
+                    toast(getString(R.string.zone_purge_all_failed, r.message))
                 }
                 is Resource.Loading -> {}
             }

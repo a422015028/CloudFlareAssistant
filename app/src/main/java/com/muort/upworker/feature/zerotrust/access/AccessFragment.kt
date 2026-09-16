@@ -207,7 +207,7 @@ class AccessFragment : Fragment() {
     
     private fun confirmDelete(app: com.muort.upworker.core.model.AccessApplication) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.zt_access_delete_app_title)
+            .setTitle(R.string.access_delete_app)
             .setMessage(getString(R.string.zt_access_delete_app_confirm, app.name))
             .setPositiveButton(R.string.delete) { _, _ ->
                 accountViewModel.defaultAccount.value?.let { account ->

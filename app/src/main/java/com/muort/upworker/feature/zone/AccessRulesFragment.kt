@@ -159,10 +159,10 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
                 b.targetChips.addView(chip)
             }
             selectChip(b.targetChips, "ip")
-            b.valueLayout.hint = ctx.getString(R.string.ar_target_hint)
+            b.valueLayout.hint = ctx.getString(R.string.access_rule_target_hint)
             b.targetChips.setOnCheckedStateChangeListener { group, _ ->
                 val raw = selectedRaw(group) ?: "ip"
-                b.valueLayout.hint = TARGET_PLACEHOLDERS[raw] ?: ctx.getString(R.string.ar_target_hint)
+                b.valueLayout.hint = TARGET_PLACEHOLDERS[raw] ?: ctx.getString(R.string.access_rule_target_hint)
             }
         }
 

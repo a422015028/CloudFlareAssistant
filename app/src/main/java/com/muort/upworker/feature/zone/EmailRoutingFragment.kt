@@ -171,7 +171,7 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
             .setPositiveButton(R.string.add) { _, _ ->
                 val email = b.emailInput.text.toString().trim()
                 if (email.isEmpty()) {
-                    toast(getString(R.string.msg_email_empty)); return@setPositiveButton
+                    toast(getString(R.string.account_email_cannot_be_empty)); return@setPositiveButton
                 }
                 account?.let { addAddress(it, email) }
             }
@@ -374,11 +374,11 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
                 val ctx = itemView.context
                 val status = settings?.status?.let {
                     when (it) {
-                        "enabled" -> ctx.getString(R.string.email_status_enabled)
-                        "disabled" -> ctx.getString(R.string.email_status_disabled)
+                        "enabled" -> ctx.getString(R.string.msg_enabled)
+                        "disabled" -> ctx.getString(R.string.msg_disabled)
                         else -> it
                     }
-                } ?: ctx.getString(R.string.email_status_unknown)
+                } ?: ctx.getString(R.string.status_unknown)
                 b.statusText.text = ctx.getString(R.string.email_status_label, status)
                 b.toggleSwitch.isChecked = settings?.isEnabled == true
                 b.toggleSwitch.setOnCheckedChangeListener(null)

@@ -124,7 +124,7 @@
                         style="@style/Widget.Material3.Button.IconButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:contentDescription="@string/domain_close"
+                        android:contentDescription="@string/dialog_close"
                         app:icon="@drawable/ic_close" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -159,7 +159,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/snippet_import"
+                    android:text="@string/backup_action_import"
                     app:icon="@drawable/ic_cloud_upload" />
 
                 <com.google.android.material.button.MaterialButton

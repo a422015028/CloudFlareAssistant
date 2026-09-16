@@ -48,13 +48,13 @@ class RateLimitFragment : BaseZoneFeatureFragment() {
     private fun periodLabels(ctx: android.content.Context): List<Pair<Int, String>> = listOf(
         10 to "10 " + ctx.getString(R.string.lbl_seconds_short),
         60 to "1 " + ctx.getString(R.string.lbl_minute_short),
-        600 to "10 " + ctx.getString(R.string.lbl_minutes_short),
+        600 to "10 " + ctx.getString(R.string.lbl_minute_short),
         3600 to "1 " + ctx.getString(R.string.lbl_hour_short),
     )
 
     private fun actions(ctx: android.content.Context) = listOf(
-        "block" to ctx.getString(R.string.rate_action_block),
-        "managed_challenge" to ctx.getString(R.string.rate_action_managed_challenge),
+        "block" to ctx.getString(R.string.ar_action_block),
+        "managed_challenge" to ctx.getString(R.string.ar_action_managed_challenge),
         "js_challenge" to ctx.getString(R.string.rate_action_js_challenge),
         "log" to ctx.getString(R.string.rate_action_log),
     )
@@ -274,7 +274,7 @@ class RateLimitFragment : BaseZoneFeatureFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
                 saveButton.isEnabled = !state.isSaving
-                saveButton.text = if (state.isSaving) getString(R.string.msg_saving) else if (isEdit) getString(R.string.save) else getString(R.string.add)
+                saveButton.text = if (state.isSaving) getString(R.string.msg_saving_ellipsis) else if (isEdit) getString(R.string.save) else getString(R.string.add)
             }
         }
     }

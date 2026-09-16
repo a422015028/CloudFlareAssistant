@@ -89,7 +89,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/xml_dialog_policy_edit_2"
+                        android:text="@string/xml_dialog_group_edit"
                         android:textStyle="bold"
                         android:textSize="14sp" />
 
@@ -149,7 +149,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/xml_dialog_policy_edit_3"
+                        android:text="@string/xml_dialog_group_edit_2"
                         android:textStyle="bold"
                         android:textSize="14sp" />
 
@@ -175,7 +175,7 @@
                     android:id="@+id/noExcludeRulesText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/xml_dialog_policy_edit_4"
+                    android:text="@string/xml_dialog_group_edit_3"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp"
                     android:visibility="visible" />
@@ -209,7 +209,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/xml_dialog_policy_edit_5"
+                        android:text="@string/xml_dialog_group_edit_4"
                         android:textStyle="bold"
                         android:textSize="14sp" />
 
@@ -235,7 +235,7 @@
                     android:id="@+id/noRequireRulesText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/xml_dialog_policy_edit_6"
+                    android:text="@string/xml_dialog_group_edit_5"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp"
                     android:visibility="visible" />
