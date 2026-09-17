@@ -2278,8 +2278,9 @@ class WorkerFragment : Fragment() {
                     } else {
                         emptyList()
                     }
-                    
-                    val newCronList = currentCronList + cron
+
+                    // 用户按 UTC+8 填写，Cloudflare 按 UTC 执行，提交前转换
+                    val newCronList = currentCronList + com.muort.upworker.core.util.CronTimezoneConverter.toUtc(cron)
                     val result = viewModel.updateSchedules(account, script.id, newCronList)
                     
                     when (result) {
@@ -2306,9 +2307,10 @@ class WorkerFragment : Fragment() {
     }
 
     private fun showDeleteTriggerConfirmDialog(script: WorkerScript, schedule: com.muort.upworker.core.model.Schedule) {
+        val localCron = com.muort.upworker.core.util.CronTimezoneConverter.toLocal(schedule.cron)
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.delete)
-            .setMessage(getString(R.string.worker_trigger_delete_confirm_template, schedule.cron))
+            .setMessage(getString(R.string.worker_trigger_delete_confirm_template, localCron))
             .setPositiveButton(R.string.delete) { _, _ ->
                 val account = accountViewModel.defaultAccount.value
                 if (account != null) {

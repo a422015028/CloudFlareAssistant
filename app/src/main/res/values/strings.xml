@@ -752,7 +752,7 @@
     <string name="zt_app_type_bookmark">书签</string>
     <!-- Access Fragment -->
     <string name="zt_access_create_app_title">创建 Access 应用</string>    <string name="zt_access_delete_app_confirm">确定要删除应用 \"%1$s\" 吗？此操作无法撤销。</string>
-    <string name="zt_access_delete_app_confirm_detail">确定要删除应用 \"%1$s\" 吗？此操作不可恢复。</string>    <string name="zt_app_selected_toast">应用: %1$s</string>
+    <string name="zt_access_delete_app_confirm_detail">确定要删除应用 \"%1$s\" 吗？此操作不可恢复。</string>
     <string name="msg_app_name_empty">应用名称不能为空</string>
     <string name="msg_domain_empty">域名不能为空</string>
     <!-- Access Detail -->

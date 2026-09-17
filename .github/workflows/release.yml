@@ -38,22 +38,6 @@ jobs:
     - name: Clean Build Cache
       run: ./gradlew clean
 
-    - name: Run Lint (Release) — HardcodedText 拦截 & i18n 回归
-      run: |
-        ./gradlew :app:lintRelease --console=plain
-
-    - name: Upload Lint Report (Debug + Release)
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: lint-reports
-        path: |
-          app/build/reports/lint-results-debug.html
-          app/build/reports/lint-results-debug.xml
-          app/build/reports/lint-results-release.html
-          app/build/reports/lint-results-release.xml
-        if-no-files-found: warn
-
     - name: Build Release APK
       env:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}

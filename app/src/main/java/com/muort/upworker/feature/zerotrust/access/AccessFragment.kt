@@ -72,7 +72,6 @@ class AccessFragment : Fragment() {
                 accessViewModel.selectApplication(app)
                 val action = AccessFragmentDirections.actionAccessToDetail(app.id)
                 findNavController().navigate(action)
-                android.widget.Toast.makeText(requireContext(), getString(R.string.zt_app_selected_toast, app.name), android.widget.Toast.LENGTH_SHORT).show()
             },
             onDeleteClick = { app ->
                 confirmDelete(app)

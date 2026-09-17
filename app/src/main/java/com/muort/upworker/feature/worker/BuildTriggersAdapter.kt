@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.muort.upworker.R
 import com.muort.upworker.core.model.Schedule
+import com.muort.upworker.core.util.CronTimezoneConverter
 
 class BuildTriggersAdapter(
     private val schedules: List<Schedule>,
@@ -20,7 +21,9 @@ class BuildTriggersAdapter(
         private val deleteBtn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
 
         fun bind(schedule: Schedule, position: Int) {
-            triggerNameText.text = itemView.context.getString(R.string.format_trigger_name, position + 1, schedule.cron)
+            // Cloudflare 返回的是 UTC 表达式，展示时转回 UTC+8
+            val localCron = CronTimezoneConverter.toLocal(schedule.cron)
+            triggerNameText.text = itemView.context.getString(R.string.format_trigger_name, position + 1, localCron)
             triggerCommandText.text = formatDate(schedule.createdOn)
             
             deleteBtn.setOnClickListener {

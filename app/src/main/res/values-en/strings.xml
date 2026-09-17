@@ -761,7 +761,7 @@
     <string name="zt_app_type_bookmark">Bookmark</string>
     <!-- Access Fragment -->
     <string name="zt_access_create_app_title">Create Access Application</string>    <string name="zt_access_delete_app_confirm">Delete application \"%1$s\"? This action cannot be undone.</string>
-    <string name="zt_access_delete_app_confirm_detail">Delete application \"%1$s\"? This operation cannot be restored.</string>    <string name="zt_app_selected_toast">App: %1$s</string>
+    <string name="zt_access_delete_app_confirm_detail">Delete application \"%1$s\"? This operation cannot be restored.</string>
     <string name="msg_app_name_empty">Application name cannot be empty</string>
     <string name="msg_domain_empty">Domain cannot be empty</string>
     <!-- Access Detail -->

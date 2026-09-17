@@ -260,7 +260,7 @@ class WorkerLogsActivity : AppCompatActivity() {
         }
         val request = item.event?.request
         val method = request?.method ?: item.event?.cron?.let { "CRON" } ?: ""
-        val url = request?.url ?: item.event?.cron ?: ""
+        val url = request?.url ?: item.event?.cron?.let { com.muort.upworker.core.util.CronTimezoneConverter.toLocal(it) } ?: ""
         val sdf = SimpleDateFormat("yyyy/M/d HH:mm:ss", Locale.getDefault())
         val timeStr = sdf.format(Date(item.eventTimestamp ?: System.currentTimeMillis()))
         val card = LinearLayout(this).apply {
