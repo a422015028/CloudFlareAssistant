@@ -97,7 +97,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:background="?attr/colorSurface"
-            app:layout_constraintStart_toStartOf="@id/centerGuide"
+            app:layout_constraintStart_toEndOf="@id/divider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">

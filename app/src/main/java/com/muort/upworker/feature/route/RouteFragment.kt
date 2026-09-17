@@ -8,8 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.LinearLayout
 import android.widget.PopupMenu
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.updateLayoutParams
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -108,21 +109,19 @@ class RouteFragment : Fragment() {
             binding.domainPanel.visibility = View.GONE
             binding.dividerView.visibility = View.GONE
             // 左侧路由占满宽度
-            binding.routePanel.layoutParams =
-                (binding.routePanel.layoutParams as LinearLayout.LayoutParams).apply {
-                    weight = 1f
-                    width = 0
-                }
+            binding.routePanel.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                endToStart = ConstraintLayout.LayoutParams.UNSET
+                endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            }
             activity?.setTitle(R.string.route_title_routes)
         } else {
             binding.routePanel.visibility = View.GONE
             binding.dividerView.visibility = View.GONE
             // 右侧自定义域占满宽度
-            binding.domainPanel.layoutParams =
-                (binding.domainPanel.layoutParams as LinearLayout.LayoutParams).apply {
-                    weight = 1f
-                    width = 0
-                }
+            binding.domainPanel.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                startToEnd = ConstraintLayout.LayoutParams.UNSET
+                startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            }
             activity?.setTitle(R.string.card_custom_domain)
         }
 
