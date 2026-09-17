@@ -12,7 +12,7 @@ class D1DataAdapter(private var columns: List<String>, private var rows: List<Ma
     fun updateData(newColumns: List<String>, newRows: List<Map<String, Any?>>) {
         this.columns = newColumns
         this.rows = newRows
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     override fun getItemViewType(position: Int): Int {

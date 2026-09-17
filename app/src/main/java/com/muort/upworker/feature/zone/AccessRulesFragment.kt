@@ -267,7 +267,7 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
         fun submitList(newItems: List<FirewallAccessRule>) {
             items.clear()
             items.addAll(newItems)
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {

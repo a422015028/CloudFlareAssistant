@@ -260,7 +260,7 @@ class KvFragment : Fragment() {
         
         fun submitList(newList: List<KvNamespace>) {
             namespaces = newList
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -328,7 +328,7 @@ class KvFragment : Fragment() {
         
         fun submitList(newList: List<KvKey>) {
             keys = newList
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

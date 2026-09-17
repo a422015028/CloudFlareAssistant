@@ -637,7 +637,7 @@ class TokenAdapter(
 
     fun submitList(newTokens: List<ApiToken>) {
         tokens = newTokens
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TokenViewHolder {
@@ -717,7 +717,7 @@ class PermissionGroupAdapter(
                 it.name?.contains(query, ignoreCase = true) == true || it.id.contains(query, ignoreCase = true)
             }
         }
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     fun selectAllFiltered() {
@@ -725,7 +725,7 @@ class PermissionGroupAdapter(
             if (selectedIds.size >= TokenManagerActivity.MAX_TOTAL_PG) break
             selectedIds.add(g.id)
         }
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
         if (selectedIds.size >= TokenManagerActivity.MAX_TOTAL_PG && filtered.any { it.id !in selectedIds }) {
             onLimitReached()
         }
@@ -734,7 +734,7 @@ class PermissionGroupAdapter(
 
     fun clearAll() {
         selectedIds.clear()
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PgViewHolder {

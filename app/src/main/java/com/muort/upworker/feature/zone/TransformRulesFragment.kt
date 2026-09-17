@@ -319,7 +319,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
                     items += rules.map { ListItem.RuleItem(phase, it) }
                 }
             }
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
         override fun getItemViewType(position: Int): Int = when (items[position]) {

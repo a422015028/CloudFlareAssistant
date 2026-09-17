@@ -241,7 +241,7 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
         @SuppressLint("NotifyDataSetChanged")
         fun submitList(list: List<CatalogSource>) {
             items = list
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
         inner class SourceViewHolder(val binding: ItemSourceRowBinding) :

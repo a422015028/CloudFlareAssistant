@@ -82,7 +82,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
                     isLoading = false,
                 )
                 showList()
-                adapter.notifyDataSetChanged()
+                adapter.notifyItemRangeChanged(0, adapter.itemCount)
             } finally {
                 state = state.copy(isLoading = false)
             }
@@ -91,12 +91,12 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
 
     private fun setDevelopmentMode(account: Account, on: Boolean) {
         state = state.copy(developmentMode = on)
-        adapter.notifyDataSetChanged()
+        adapter.notifyItemRangeChanged(0, adapter.itemCount)
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = settingsRepo.setSetting(account, zoneId, "development_mode", if (on) "on" else "off")) {
                 is Resource.Success -> {
                     state = state.copy(developmentMode = r.data == "on")
-                    adapter.notifyDataSetChanged()
+                    adapter.notifyItemRangeChanged(0, adapter.itemCount)
                 }
                 is Resource.Error -> {
                     toast(getString(R.string.msg_update_failed, r.message))
@@ -109,13 +109,13 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
 
     private fun setUnderAttack(account: Account, on: Boolean) {
         state = state.copy(underAttack = on)
-        adapter.notifyDataSetChanged()
+        adapter.notifyItemRangeChanged(0, adapter.itemCount)
         viewLifecycleOwner.lifecycleScope.launch {
             val value = if (on) "under_attack" else "medium"
             when (val r = settingsRepo.setSetting(account, zoneId, "security_level", value)) {
                 is Resource.Success -> {
                     state = state.copy(underAttack = r.data == "under_attack")
-                    adapter.notifyDataSetChanged()
+                    adapter.notifyItemRangeChanged(0, adapter.itemCount)
                 }
                 is Resource.Error -> {
                     toast(getString(R.string.msg_update_failed, r.message))
@@ -138,7 +138,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
     private fun purgeAllCache() {
         val account = account ?: return
         state = state.copy(isPurging = true)
-        adapter.notifyDataSetChanged()
+        adapter.notifyItemRangeChanged(0, adapter.itemCount)
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = settingsRepo.purgeAllCache(account, zoneId)) {
                 is Resource.Success -> {
@@ -150,7 +150,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
                 is Resource.Loading -> {}
             }
             state = state.copy(isPurging = false)
-            adapter.notifyDataSetChanged()
+            adapter.notifyItemRangeChanged(0, adapter.itemCount)
         }
     }
 
@@ -204,7 +204,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
     private fun purgeUrls(urls: List<String>) {
         val account = account ?: return
         state = state.copy(isPurging = true)
-        adapter.notifyDataSetChanged()
+        adapter.notifyItemRangeChanged(0, adapter.itemCount)
         viewLifecycleOwner.lifecycleScope.launch {
             when (val r = settingsRepo.purgeFiles(account, zoneId, urls.take(MAX_PURGE_URLS))) {
                 is Resource.Success -> {
@@ -216,7 +216,7 @@ class ZoneSettingsFragment : BaseZoneFeatureFragment() {
                 is Resource.Loading -> {}
             }
             state = state.copy(isPurging = false)
-            adapter.notifyDataSetChanged()
+            adapter.notifyItemRangeChanged(0, adapter.itemCount)
         }
     }
 

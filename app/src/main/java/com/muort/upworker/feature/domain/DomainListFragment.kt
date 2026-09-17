@@ -215,7 +215,7 @@ class DomainListFragment : Fragment() {
 
         fun submitList(newList: List<Zone>) {
             zones = newList
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

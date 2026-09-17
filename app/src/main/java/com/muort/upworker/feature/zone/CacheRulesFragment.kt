@@ -102,7 +102,7 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
         fun submitList(newItems: List<CacheRule>) {
             items.clear()
             items.addAll(newItems)
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {

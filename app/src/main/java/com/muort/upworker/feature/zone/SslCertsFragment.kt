@@ -179,7 +179,7 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
                 items += CertItem.UniversalToggle(universalEnabled, isTogglingUniversal)
             }
             items += packs.map { CertItem.CertPack(it) }
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
         private var cachedCtx: android.content.Context? = null

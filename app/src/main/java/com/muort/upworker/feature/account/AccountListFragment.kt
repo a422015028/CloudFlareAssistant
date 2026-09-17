@@ -161,7 +161,7 @@ class AccountAdapter : RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() 
     
     fun submitList(newAccounts: List<Account>) {
         accounts = newAccounts
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder {

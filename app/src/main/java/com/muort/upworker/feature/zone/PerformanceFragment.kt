@@ -215,7 +215,7 @@ class PerformanceFragment : BaseZoneFeatureFragment() {
 
         fun submitList(newItems: List<PerfItem>) {
             items = newItems
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
         override fun getItemViewType(position: Int): Int = when (items[position]) {

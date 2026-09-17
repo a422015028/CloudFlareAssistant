@@ -144,7 +144,7 @@ abstract class BaseZoneFeatureFragment : Fragment() {
         fun submitList(newItems: List<ZoneRuleItem>) {
             items.clear()
             items.addAll(newItems)
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
         fun getItem(position: Int): ZoneRuleItem = items[position]

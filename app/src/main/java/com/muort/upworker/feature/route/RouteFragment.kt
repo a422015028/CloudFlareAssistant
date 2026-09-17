@@ -618,7 +618,7 @@ class RouteFragment : Fragment() {
         
         fun submitList(newList: List<Route>) {
             routes = newList
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -678,7 +678,7 @@ class RouteFragment : Fragment() {
         
         fun submitList(newList: List<UnifiedDomain>) {
             domains = newList
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

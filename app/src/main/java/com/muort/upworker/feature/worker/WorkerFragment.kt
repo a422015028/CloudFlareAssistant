@@ -2025,7 +2025,7 @@ class WorkerFragment : Fragment() {
                             viewModel.getWorkerScript(account, script.id, silent = true) { content ->
                                 scriptSizeCache[script.id] = content.length.toLong()
                                 // 更新UI
-                                scriptsAdapter.notifyDataSetChanged()
+                                scriptsAdapter.notifyItemRangeChanged(0, scriptsAdapter.itemCount)
                             }
                         } catch (e: Exception) {
                             Timber.e(e, "Failed to get script size for ${script.id}")
@@ -3825,13 +3825,13 @@ class WorkerScriptsAdapter(
     
     fun submitList(newScripts: List<WorkerScript>) {
         scripts = newScripts
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     fun setSelectionMode(enabled: Boolean) {
         selectionMode = enabled
         selectedItems.clear()
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     fun getAllScripts(): List<WorkerScript> = scripts
@@ -3839,7 +3839,7 @@ class WorkerScriptsAdapter(
     fun selectAll() {
         selectedItems.clear()
         scripts.forEach { selectedItems.add(it.id) }
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScriptViewHolder {
@@ -4032,7 +4032,7 @@ class KvBindingsAdapter(
     
     fun submitList(newBindings: List<Pair<String, String>>) {
         bindings = newBindings
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -4077,7 +4077,7 @@ class R2BindingsAdapter(
     
     fun submitList(newBindings: List<Pair<String, String>>) {
         bindings = newBindings
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -4119,7 +4119,7 @@ class VariablesAdapter(
     
     fun submitList(newVariables: List<Triple<String, String, String>>) {
         variables = newVariables
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VariableViewHolder {
@@ -4170,7 +4170,7 @@ class SecretsAdapter(
     
     fun submitList(newSecrets: List<Pair<String, String>>) {
         secrets = newSecrets
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SecretViewHolder {
@@ -4214,7 +4214,7 @@ class D1BindingsAdapter(
     
     fun submitList(newBindings: List<D1BindingItem>) {
         bindings = newBindings
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -4255,7 +4255,7 @@ class ServiceBindingsAdapter(
 
     fun submitList(newBindings: List<ServiceBindingItem>) {
         bindings = newBindings
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {

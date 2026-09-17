@@ -3341,13 +3341,13 @@ class PagesFragment : Fragment() {
         
         fun submitList(newList: List<PagesProject>) {
             projects = newList
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
         
         fun setSelectionMode(enabled: Boolean) {
             selectionMode = enabled
             selectedItems.clear()
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
         
         fun getAllProjects(): List<PagesProject> = projects
@@ -3355,7 +3355,7 @@ class PagesFragment : Fragment() {
         fun selectAll() {
             selectedItems.clear()
             projects.forEach { selectedItems.add(it.name) }
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -3633,7 +3633,7 @@ class PagesKvBindingsAdapter(
     
     fun submitList(newBindings: List<Pair<String, String>>) {
         bindings = newBindings
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -3674,7 +3674,7 @@ class PagesR2BindingsAdapter(
     
     fun submitList(newBindings: List<Pair<String, String>>) {
         bindings = newBindings
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -3715,7 +3715,7 @@ class PagesD1BindingsAdapter(
     
     fun submitList(newBindings: List<Triple<String, String, String>>) {
         bindings = newBindings
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -3758,7 +3758,7 @@ class PagesServiceBindingsAdapter(
 
     fun submitList(newBindings: List<Triple<String, String, String>>) {
         bindings = newBindings
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -3801,7 +3801,7 @@ class PagesVariablesAndSecretsAdapter(
     
     fun submitList(newVariables: List<Triple<String, String, String>>) {
         variables = newVariables
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VariableViewHolder {

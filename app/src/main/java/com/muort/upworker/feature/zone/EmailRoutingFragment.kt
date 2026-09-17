@@ -285,7 +285,7 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
                 items += addresses.map { EmailItem.AddressItem(it) }
             }
             items += EmailItem.AddButton(R.string.email_add_destination, isRule = false)
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
         override fun getItemViewType(position: Int): Int = when (items[position]) {

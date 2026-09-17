@@ -250,7 +250,7 @@ class SslFragment : BaseZoneFeatureFragment() {
                 subtitle = ctx.getString(R.string.ssl_tls_1_3_subtitle),
                 checked = tls13,
             )
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
 
         override fun getItemViewType(position: Int): Int = when (items[position]) {

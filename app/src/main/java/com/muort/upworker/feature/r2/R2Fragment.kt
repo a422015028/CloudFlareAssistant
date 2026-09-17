@@ -876,7 +876,7 @@ class R2Fragment : Fragment() {
         
         fun submitList(newList: List<R2Bucket>) {
             buckets = newList
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

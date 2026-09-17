@@ -16,7 +16,7 @@ class ObjectAdapter : RecyclerView.Adapter<ObjectAdapter.ViewHolder>() {
 
     fun submitList(newList: List<R2Object>) {
         objects = newList
-        notifyDataSetChanged()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     fun setOnObjectClickListener(listener: (R2Object) -> Unit) {

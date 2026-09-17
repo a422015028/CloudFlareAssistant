@@ -425,7 +425,7 @@ class D1ManagerFragment : Fragment() {
         private var databases = listOf<D1Database>()
         fun submitList(newList: List<D1Database>) {
             databases = newList
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_d1_database, parent, false)
@@ -466,7 +466,7 @@ class D1ManagerFragment : Fragment() {
         private var tables = listOf<D1Table>()
         fun submitList(newList: List<D1Table>) {
             tables = newList
-            notifyDataSetChanged()
+            notifyItemRangeChanged(0, itemCount)
         }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_d1_table, parent, false)
