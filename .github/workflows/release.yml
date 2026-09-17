@@ -95,25 +95,34 @@ jobs:
         TAG_NAME="${{ steps.version.outputs.tag_name }}"
         APK_FILE="app/build/outputs/apk/release/CloudFlareAssistant-${TAG_NAME}.apk"
 
-        # 如果 release 已存在（例如上一次上传失败留下的空 release），先删除
+        # 1. 删除旧 release（如存在）
         if gh release view "$TAG_NAME" > /dev/null 2>&1; then
           echo "⚠️  Release $TAG_NAME 已存在，先删除旧 release"
           gh release delete "$TAG_NAME" --yes
         fi
 
-        # 如果 tag 已存在，也删除（确保源码包时间戳与 APK 上传时间一致）
-        if git ls-remote --exit-code --tags origin "refs/tags/${TAG_NAME}" > /dev/null 2>&1; then
-          echo "⚠️  Tag $TAG_NAME 已存在，先删除旧 tag"
-          git push origin --delete "$TAG_NAME"
-        fi
+        # 2. 删除旧 tag（通过 GitHub API，确保成功）
+        gh api "repos/${GITHUB_REPOSITORY}/git/refs/tags/${TAG_NAME}" -X DELETE 2>/dev/null || true
+        # 同时清理本地可能存在的同名 tag
+        git tag -d "$TAG_NAME" 2>/dev/null || true
 
-        # 使用 GitHub 官方 CLI 原子化创建 tag + release + 上传 asset，
-        # 避免第三方 action 的 tag 推送与 release 创建竞态导致 500
+        # 3. 创建带注释的 tag（annotated tag），tagger 日期为当前时间
+        #    —— 这样 GitHub 源码包(zip/tar.gz)的时间戳会取 tagger date，与 APK 上传时间一致
+        #    （轻量级 tag 的时间戳取的是 commit 日期，会导致与 APK 时间不一致）
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+        git push origin "$TAG_NAME"
+        echo "✅ Tag $TAG_NAME 已创建并推送"
+
+        # 4. 等待 GitHub 索引 tag（避免 release 创建时找不到 tag）
+        sleep 5
+
+        # 5. 创建 release 并上传 APK（tag 已存在，gh 会直接使用）
         gh release create "$TAG_NAME" \
           "$APK_FILE" \
           --title "$TAG_NAME" \
-          --notes-file release_notes.md \
-          --target "$GITHUB_SHA"
+          --notes-file release_notes.md
         echo "✅ Release $TAG_NAME 创建并上传 APK 成功"
 
     # ==================== Telegram 推送步骤 ====================
