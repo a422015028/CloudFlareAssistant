@@ -131,7 +131,7 @@ abstract class BaseZoneRulesetFragment : BaseZoneFeatureFragment() {
             hint = ctx.getString(R.string.access_rule_action)
             val actions = listOf("block", "challenge", "managed_challenge", "js_challenge", "log", "skip")
             setAdapter(ArrayAdapter(ctx, android.R.layout.simple_list_item_1, actions))
-            setText("block", false)
+            setText(getString(R.string.ar_action_block), false)
             setPadding(48, 32, 48, 32)
         }
         val container = android.widget.LinearLayout(ctx).apply {

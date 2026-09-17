@@ -47,8 +47,8 @@ class GatewayRuleAdapter(
             
             val ruleType = rule.filters.firstOrNull() ?: "unknown"
             binding.ruleTypeChip.text = when (ruleType) {
-                "dns" -> ctx.getString(R.string.zt_gateway_rule_type_dns)
-                "http" -> ctx.getString(R.string.zt_gateway_rule_type_http)
+                "dns" -> ctx.getString(R.string.tech_dns)
+                "http" -> ctx.getString(R.string.tech_http)
                 "l4" -> ctx.getString(R.string.zt_gateway_rule_type_l4)
                 else -> ruleType.uppercase()
             }

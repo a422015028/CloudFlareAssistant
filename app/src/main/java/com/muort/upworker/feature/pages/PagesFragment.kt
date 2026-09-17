@@ -328,23 +328,23 @@ class PagesFragment : Fragment() {
     
     private fun setupBatchOperationUI() {
         val selectionActionsLayout = binding.root.findViewById<android.widget.LinearLayout>(
-            resources.getIdentifier("pagesSelectionActionsLayout", "id", requireContext().packageName)
+            R.id.pagesSelectionActionsLayout
         )
         
         val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("pagesToggleSelectionModeBtn", "id", requireContext().packageName)
+            R.id.pagesToggleSelectionModeBtn
         )
         
         val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
-            resources.getIdentifier("pagesSelectionStatusText", "id", requireContext().packageName)
+            R.id.pagesSelectionStatusText
         )
         
         val selectAllBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("pagesSelectAllBtn", "id", requireContext().packageName)
+            R.id.pagesSelectAllBtn
         )
         
         val batchDeleteBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("pagesBatchDeleteBtn", "id", requireContext().packageName)
+            R.id.pagesBatchDeleteBtn
         )
         
         toggleSelectionBtn?.text = if (isSelectionMode) getString(R.string.cancel) else getString(R.string.pages_manage_projects)
@@ -2342,19 +2342,19 @@ class PagesFragment : Fragment() {
     
     private fun updateSelectionUI() {
         val selectionActionsLayout = binding.root.findViewById<android.widget.LinearLayout>(
-            resources.getIdentifier("pagesSelectionActionsLayout", "id", requireContext().packageName)
+            R.id.pagesSelectionActionsLayout
         )
         
         val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("pagesToggleSelectionModeBtn", "id", requireContext().packageName)
+            R.id.pagesToggleSelectionModeBtn
         )
         
         val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
-            resources.getIdentifier("pagesSelectionStatusText", "id", requireContext().packageName)
+            R.id.pagesSelectionStatusText
         )
         
         val batchDeleteBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("pagesBatchDeleteBtn", "id", requireContext().packageName)
+            R.id.pagesBatchDeleteBtn
         )
         
         toggleSelectionBtn?.text = if (isSelectionMode) getString(R.string.cancel) else getString(R.string.pages_manage_projects)

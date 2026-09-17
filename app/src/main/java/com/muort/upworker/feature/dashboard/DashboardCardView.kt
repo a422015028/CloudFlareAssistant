@@ -539,7 +539,7 @@ class DashboardCardView @JvmOverloads constructor(
         binding.totalRequestsText.text = formatNumber(metrics.totalRequests)
         
         // 缓存命中率
-        binding.cacheHitRateText.text = "${formatPercentage(metrics.cacheHitRate)}%"
+        binding.cacheHitRateText.text = context.getString(R.string.format_percent, formatPercentage(metrics.cacheHitRate))
         
         // 带宽使用
         binding.bandwidthText.text = formatBytes(metrics.bandwidthBytes)
@@ -596,7 +596,7 @@ class DashboardCardView @JvmOverloads constructor(
         binding.pagesPerVisitText.text = formatDecimal(metrics.pagesPerVisit)
         
         // 平均请求体积 (性能监控)
-        binding.avgRequestSizeText.text = "${formatDecimal(metrics.avgRequestSize)} KB"
+        binding.avgRequestSizeText.text = context.getString(R.string.format_kb, formatDecimal(metrics.avgRequestSize))
         
         // 未加密请求数 (应该为0，否则显示警告)
         binding.unencryptedRequestsText.text = formatNumber(metrics.unencryptedRequests)

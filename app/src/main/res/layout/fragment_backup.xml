@@ -41,7 +41,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="WebDAV"
+                android:text="@string/tech_webdav"
                 style="@style/Widget.Material3.Button.OutlinedButton" />
 
             <com.google.android.material.button.MaterialButton
@@ -57,7 +57,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="R2"
+                android:text="@string/tech_r2"
                 style="@style/Widget.Material3.Button.OutlinedButton" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 

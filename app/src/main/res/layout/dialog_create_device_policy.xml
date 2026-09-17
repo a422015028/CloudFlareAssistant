@@ -115,7 +115,7 @@
                         android:id="@+id/osWindows"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Windows"
+                        android:text="@string/os_windows"
                         android:textSize="13sp"
                         android:paddingVertical="2dp" />
 
@@ -123,7 +123,7 @@
                         android:id="@+id/osMacos"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="macOS"
+                        android:text="@string/os_macos"
                         android:textSize="13sp"
                         android:paddingVertical="2dp" />
 
@@ -131,7 +131,7 @@
                         android:id="@+id/osLinux"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Linux"
+                        android:text="@string/os_linux"
                         android:textSize="13sp"
                         android:paddingVertical="2dp" />
 
@@ -139,7 +139,7 @@
                         android:id="@+id/osIos"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="iOS"
+                        android:text="@string/os_ios"
                         android:textSize="13sp"
                         android:paddingVertical="2dp" />
 
@@ -147,7 +147,7 @@
                         android:id="@+id/osAndroid"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Android"
+                        android:text="@string/os_android"
                         android:textSize="13sp"
                         android:paddingVertical="2dp" />
 
@@ -155,7 +155,7 @@
                         android:id="@+id/osChromeOs"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="ChromeOS"
+                        android:text="@string/os_chromeos"
                         android:textSize="13sp"
                         android:paddingVertical="2dp" />
                 </LinearLayout>
@@ -232,7 +232,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:maxLines="1"
-                android:text="100"
+                android:text="@string/default_session_duration"
                 android:textSize="13sp" />
         </com.google.android.material.textfield.TextInputLayout>
 

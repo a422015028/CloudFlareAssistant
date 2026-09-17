@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="4dp"
@@ -25,7 +26,7 @@
                 android:id="@+id/bindingNameText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="MY_R2"
+                tools:text="MY_R2"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorPrimary" />
@@ -34,7 +35,7 @@
                 android:id="@+id/bucketNameText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bucket: my-bucket"
+                tools:text="Bucket: my-bucket"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:layout_marginTop="4dp" />

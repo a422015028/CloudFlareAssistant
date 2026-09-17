@@ -253,7 +253,7 @@ class TunnelsFragment : Fragment() {
                     if (token != null) {
                         val fullCommand = "cloudflared service install $token"
                         var isTokenHidden = true
-                        tokenText.text = "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
+                        tokenText.text = getString(R.string.tunnel_install_masked)
                         hideTokenButton.setText(R.string.zt_tunnel_show_token)
                         
                         hideTokenButton.setOnClickListener {
@@ -436,7 +436,7 @@ class TunnelsFragment : Fragment() {
             
             val fullCommand = "cloudflared tunnel run --token $token"
             var isTokenHidden = true
-            tokenTextView.text = "cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
+            tokenTextView.text = getString(R.string.tunnel_run_masked)
             hideTokenButton.setText(R.string.zt_tunnel_show_token)
             
             hideTokenButton.setOnClickListener {

@@ -154,7 +154,7 @@
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="DNS"
+                    android:text="@string/tech_dns"
                     android:textSize="11sp"
                     android:layout_marginStart="6dp" />
 
@@ -163,7 +163,7 @@
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="HTTP"
+                    android:text="@string/tech_http"
                     android:textSize="11sp"
                     android:layout_marginStart="6dp" />
 
@@ -172,7 +172,7 @@
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="IP"
+                    android:text="@string/tech_ip"
                     android:textSize="11sp"
                     android:layout_marginStart="6dp" />
 

@@ -230,31 +230,31 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         // 安全性
         binding.analyticsEncryptedRequestsText.text = formatNumber(overview.encryptedRequests)
         applyDelta(binding.analyticsEncryptedRequestsDelta, overview.encryptedRequestsDelta)
-        binding.analyticsEncryptedRequestRateText.text = "${formatPercentage(overview.encryptedRequestRate)}%"
+        binding.analyticsEncryptedRequestRateText.text = context.getString(R.string.format_percent, formatPercentage(overview.encryptedRequestRate))
         applyDelta(binding.analyticsEncryptedRequestRateDelta, overview.encryptedRequestRateDelta)
         binding.analyticsEncryptedBytesText.text = formatBytes(overview.encryptedBytes)
         applyDelta(binding.analyticsEncryptedBytesDelta, overview.encryptedBytesDelta)
-        binding.analyticsEncryptedBytesRateText.text = "${formatPercentage(overview.encryptedBytesRate)}%"
+        binding.analyticsEncryptedBytesRateText.text = context.getString(R.string.format_percent, formatPercentage(overview.encryptedBytesRate))
         applyDelta(binding.analyticsEncryptedBytesRateDelta, overview.encryptedBytesRateDelta)
 
         // 缓存
         binding.analyticsCachedRequestsText.text = formatNumber(overview.cachedRequests)
         applyDelta(binding.analyticsCachedRequestsDelta, overview.cachedRequestsDelta)
-        binding.analyticsCachedRequestRateText.text = "${formatPercentage(overview.cachedRequestRate)}%"
+        binding.analyticsCachedRequestRateText.text = context.getString(R.string.format_percent, formatPercentage(overview.cachedRequestRate))
         applyDelta(binding.analyticsCachedRequestRateDelta, overview.cachedRequestRateDelta)
         binding.analyticsCachedBytesText.text = formatBytes(overview.cachedBytes)
         applyDelta(binding.analyticsCachedBytesDelta, overview.cachedBytesDelta)
-        binding.analyticsCachedBytesRateText.text = "${formatPercentage(overview.cachedBytesRate)}%"
+        binding.analyticsCachedBytesRateText.text = context.getString(R.string.format_percent, formatPercentage(overview.cachedBytesRate))
         applyDelta(binding.analyticsCachedBytesRateDelta, overview.cachedBytesRateDelta)
 
         // 错误
         binding.analyticsError4xxText.text = formatNumber(overview.error4xxRequests)
         applyDelta(binding.analyticsError4xxDelta, overview.error4xxDelta)
-        binding.analyticsError4xxRateText.text = "${formatPercentage(overview.error4xxRate)}%"
+        binding.analyticsError4xxRateText.text = context.getString(R.string.format_percent, formatPercentage(overview.error4xxRate))
         applyDelta(binding.analyticsError4xxRateDelta, overview.error4xxRateDelta)
         binding.analyticsError5xxText.text = formatNumber(overview.error5xxRequests)
         applyDelta(binding.analyticsError5xxDelta, overview.error5xxDelta)
-        binding.analyticsError5xxRateText.text = "${formatPercentage(overview.error5xxRate)}%"
+        binding.analyticsError5xxRateText.text = context.getString(R.string.format_percent, formatPercentage(overview.error5xxRate))
         applyDelta(binding.analyticsError5xxRateDelta, overview.error5xxRateDelta)
     }
 
@@ -279,7 +279,8 @@ class AccountAnalyticsCardView @JvmOverloads constructor(
         val valueText = String.format(Locale.US, "%.2f", absValue)
 
         deltaView.visibility = View.VISIBLE
-        deltaView.text = "$arrow ${if (delta < 0) "-" else "+"}$valueText%"
+        val sign = if (delta < 0) "-" else "+"
+        deltaView.text = context.getString(R.string.format_percent, "$arrow $sign$valueText")
         deltaView.setTextColor(color)
     }
 

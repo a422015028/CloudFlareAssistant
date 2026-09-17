@@ -152,7 +152,7 @@ class GatewayLocationsFragment : Fragment() {
         fun prefillCurrentNetwork() {
             if (networksInput.text?.toString()?.isNotBlank() == true) return
             prefilledIp?.let { ip ->
-                networksInput.setText("$ip/32")
+                networksInput.setText(getString(R.string.format_cidr_32, ip))
                 return
             }
             lifecycleScope.launch {
@@ -160,7 +160,7 @@ class GatewayLocationsFragment : Fragment() {
                 if (ipv4Switch.isChecked && networksInput.text?.toString()?.isBlank() == true) {
                     if (ip != null) {
                         prefilledIp = ip
-                        networksInput.setText("$ip/32")
+                        networksInput.setText(getString(R.string.format_cidr_32, ip))
                         android.widget.Toast.makeText(requireContext(), getString(R.string.msg_location_filled_current_ip, "$ip/32"), android.widget.Toast.LENGTH_SHORT).show()
                     } else {
                         android.widget.Toast.makeText(requireContext(), getString(R.string.msg_location_fetch_ip_failed), android.widget.Toast.LENGTH_LONG).show()

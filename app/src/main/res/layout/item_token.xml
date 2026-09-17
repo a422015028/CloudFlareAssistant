@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
@@ -34,7 +35,7 @@
                 android:id="@+id/tokenStatusChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="active"
+                tools:text="active"
                 android:textSize="11sp"
                 android:checkable="false"
                 style="@style/Widget.Material3.Chip.Assist" />
@@ -45,7 +46,7 @@
             android:id="@+id/tokenIdText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ID"
+            android:text="@string/tech_id"
             android:textSize="11sp"
             android:textColor="?android:textColorSecondary"
             android:layout_marginTop="4dp"

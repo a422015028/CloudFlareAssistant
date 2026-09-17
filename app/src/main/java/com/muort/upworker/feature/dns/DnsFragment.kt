@@ -411,8 +411,8 @@ class DnsFragment : Fragment() {
                 val displayContent = record.content
                     ?: record.data?.values?.filterNotNull()?.joinToString(" ")
                     ?: ""
-                binding.dnsContentText.text = "→ $displayContent"
-                binding.dnsTtlText.text = "TTL: ${record.ttl}"
+                binding.dnsContentText.text = binding.root.context.getString(R.string.format_arrow_prefix, displayContent)
+                binding.dnsTtlText.text = binding.root.context.getString(R.string.format_ttl, record.ttl.toString())
                 binding.dnsProxiedText.text = if (record.proxied)
                     binding.root.context.getString(R.string.dns_proxied)
                 else

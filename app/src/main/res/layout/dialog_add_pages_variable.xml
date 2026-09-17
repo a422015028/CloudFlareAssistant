@@ -51,7 +51,7 @@
             android:id="@+id/variableTypeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="txt"
+            android:text="@string/default_var_type_txt"
             android:textSize="14sp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"

@@ -38,7 +38,7 @@
                 android:textSize="11sp"
                 android:textColor="?attr/colorOutline"
                 android:layout_marginTop="2dp"
-                android:text="ID"
+                android:text="@string/tech_id"
                 android:fontFamily="sans-serif"
                 android:letterSpacing="0.01" />
 

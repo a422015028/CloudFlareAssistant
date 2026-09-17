@@ -111,7 +111,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="Consumer Service URL"
+                    android:hint="@string/label_consumer_service_url"
                     app:endIconMode="clear_text">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -127,7 +127,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="SP Entity ID"
+                    android:hint="@string/label_sp_entity_id"
                     app:endIconMode="clear_text">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -142,7 +142,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Name ID Format"
+                    android:hint="@string/label_name_id_format"
                     app:endIconMode="clear_text"
                     app:helperText="@string/access_saas_example">
 

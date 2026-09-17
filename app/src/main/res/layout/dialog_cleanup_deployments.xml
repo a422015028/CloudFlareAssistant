@@ -88,7 +88,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
-                android:text="10" />
+                android:text="@string/default_count_10" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

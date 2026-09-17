@@ -534,13 +534,13 @@ class SnippetRuleDialog : DialogFragment() {
                     dBinding.recordContentLayout.setHint(R.string.dns_ipv4_address_required)
                     dBinding.recordContentLayout.helperText =
                         getString(R.string.dns_ipv4_helper)
-                    dBinding.recordContentInput.setText("192.0.2.1")
+                    dBinding.recordContentInput.setText(R.string.example_ipv4)
                 }
                 "AAAA" -> {
                     dBinding.recordContentLayout.setHint(R.string.snippet_dns_hint_ipv6_required)
                     dBinding.recordContentLayout.helperText =
                         getString(R.string.snippet_dns_helper_ipv6_blackhole)
-                    dBinding.recordContentInput.setText("100::")
+                    dBinding.recordContentInput.setText(R.string.example_ipv6_blackhole)
                 }
                 else -> {
                     dBinding.recordContentLayout.setHint(R.string.snippet_dns_hint_content)

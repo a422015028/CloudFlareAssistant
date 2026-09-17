@@ -209,7 +209,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Consumer Service URL"
+                        android:text="@string/label_consumer_service_url"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
 
@@ -224,7 +224,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="SP Entity ID"
+                        android:text="@string/label_sp_entity_id"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
 
@@ -239,7 +239,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Name ID Format"
+                        android:text="@string/label_name_id_format"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
 

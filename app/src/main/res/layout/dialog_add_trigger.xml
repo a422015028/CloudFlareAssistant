@@ -68,7 +68,7 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="*/5 * * * *"
+                        android:text="@string/cron_every_5min"
                         android:textSize="13sp"
                         android:fontFamily="monospace"
                         android:textColor="?attr/colorPrimary" />
@@ -94,7 +94,7 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="0 * * * *"
+                        android:text="@string/cron_hourly"
                         android:textSize="13sp"
                         android:fontFamily="monospace"
                         android:textColor="?attr/colorPrimary" />
@@ -120,7 +120,7 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="0 0 * * *"
+                        android:text="@string/cron_daily_midnight"
                         android:textSize="13sp"
                         android:fontFamily="monospace"
                         android:textColor="?attr/colorPrimary" />
@@ -146,7 +146,7 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="0 0 * * 1"
+                        android:text="@string/cron_weekly_monday"
                         android:textSize="13sp"
                         android:fontFamily="monospace"
                         android:textColor="?attr/colorPrimary" />
@@ -172,7 +172,7 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="0 12 * * *"
+                        android:text="@string/cron_daily_noon"
                         android:textSize="13sp"
                         android:fontFamily="monospace"
                         android:textColor="?attr/colorPrimary" />
@@ -198,7 +198,7 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="0 8,18 * * *"
+                        android:text="@string/cron_twice_daily"
                         android:textSize="13sp"
                         android:fontFamily="monospace"
                         android:textColor="?attr/colorPrimary" />
@@ -224,7 +224,7 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="0 0 1 * *"
+                        android:text="@string/cron_monthly_1st"
                         android:textSize="13sp"
                         android:fontFamily="monospace"
                         android:textColor="?attr/colorPrimary" />
@@ -250,7 +250,7 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="0 0 * * 0"
+                        android:text="@string/cron_weekly_sunday"
                         android:textSize="13sp"
                         android:fontFamily="monospace"
                         android:textColor="?attr/colorPrimary" />
@@ -276,7 +276,7 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="*/30 * * * *"
+                        android:text="@string/cron_every_30min"
                         android:textSize="13sp"
                         android:fontFamily="monospace"
                         android:textColor="?attr/colorPrimary" />
@@ -302,7 +302,7 @@
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="wrap_content"
-                        android:text="0 0 15 * *"
+                        android:text="@string/cron_monthly_15th"
                         android:textSize="13sp"
                         android:fontFamily="monospace"
                         android:textColor="?attr/colorPrimary" />

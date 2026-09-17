@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
@@ -24,7 +25,7 @@
                     android:id="@+id/domainHostnameText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="example.com"
+                    tools:text="example.com"
                     android:textColor="?android:textColorPrimary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -34,7 +35,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="→ worker-script"
+                    tools:text="→ worker-script"
                     android:textColor="?android:textColorSecondary"
                     android:textSize="14sp" />
 

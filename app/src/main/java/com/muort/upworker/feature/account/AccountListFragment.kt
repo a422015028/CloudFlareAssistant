@@ -185,7 +185,7 @@ class AccountAdapter : RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() 
         
         fun bind(account: Account) {
             binding.accountNameText.text = account.name
-            binding.accountIdText.text = "${binding.root.context.getString(R.string.account_id)}: ${account.accountId}"
+            binding.accountIdText.text = binding.root.context.getString(R.string.format_label_value, binding.root.context.getString(R.string.account_id), account.accountId)
             
             binding.defaultChip.visibility = if (account.isDefault) View.VISIBLE else View.GONE
             

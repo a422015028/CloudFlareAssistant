@@ -38,7 +38,7 @@ class PagesDeploymentsAdapter(
             val shortId = deployment.shortId ?: deployment.id.take(8)
             val time = formatDate(deployment.createdOn)
 
-            deploymentInfoText.text = "#${deployments.size - position} - $shortId ($statusText)"
+            deploymentInfoText.text = itemView.context.getString(R.string.format_deployment_info, deployments.size - position, shortId, statusText)
             deploymentTimeText.text = time
 
             val triggerType = deployment.deploymentTrigger?.type ?: "unknown"

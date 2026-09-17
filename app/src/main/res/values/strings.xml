@@ -907,8 +907,6 @@
     <string name="zt_location_cannot_delete_default">无法删除默认位置，请先设置其他位置为默认</string>
     <string name="zt_location_copy_label_format">%1$s 已复制到剪贴板</string>
     <!-- GatewayRulesFragment -->
-    <string name="zt_gateway_rule_type_dns">DNS</string>
-    <string name="zt_gateway_rule_type_http">HTTP</string>
     <string name="zt_gateway_rule_type_l4">@string/settings_network</string>
     <string name="zt_gateway_action_ytrestricted">YouTube限制</string>
     <string name="zt_gateway_action_override">覆盖</string>
@@ -2455,9 +2453,6 @@
     <string name="store_source_name_hint">请输入源名称</string>
     <string name="store_source_url_invalid">请输入有效的 HTTPS 地址</string>    <string name="store_no_sources">暂无数据源</string>
     <!-- 模板商店卡片徽标 -->
-    <string name="store_badge_kv">KV</string>
-    <string name="store_badge_d1">D1</string>
-    <string name="store_badge_r2">R2</string>
     <string name="store_badge_ai">AI</string>
     <string name="store_badge_none">无绑定</string>
     <string name="store_github_link">仓库</string>
@@ -2531,4 +2526,79 @@
         <item quantity="one">1 个模板</item>
         <item quantity="other">共 %d 个模板</item>
     </plurals>
+    <!-- 通用技术术语（中英文相同） -->
+    <string name="tech_id">ID</string>
+    <string name="tech_ip">IP</string>
+    <string name="tech_kv">KV</string>
+    <string name="tech_r2">R2</string>
+    <string name="tech_d1">D1</string>
+    <string name="tech_dns">DNS</string>
+    <string name="tech_http">HTTP</string>
+    <string name="tech_ttl">TTL</string>
+    <string name="tech_json">JSON</string>
+    <string name="tech_edns">EDNS</string>
+    <string name="tech_webdav">WebDAV</string>
+    <string name="tech_url">URL：</string>
+    <!-- 操作系统名称 -->
+    <string name="os_windows">Windows</string>
+    <string name="os_macos">macOS</string>
+    <string name="os_linux">Linux</string>
+    <string name="os_ios">iOS</string>
+    <string name="os_android">Android</string>
+    <string name="os_chromeos">ChromeOS</string>
+    <!-- 通用标签 -->
+    <string name="label_device_name">设备名称</string>
+    <string name="label_policy_description">策略描述</string>
+    <string name="label_functions">函数</string>
+    <string name="label_consumer_service_url">使用者服务 URL</string>
+    <string name="label_sp_entity_id">SP 实体 ID</string>
+    <string name="label_name_id_format">名称 ID 格式</string>
+    <string name="cloudflare_zero_trust">Cloudflare Zero Trust</string>
+    <string name="cloudflare_tunnels">🔌 Cloudflare Tunnels</string>
+    <!-- 静态标签 -->
+    <string name="label_id_colon">ID：</string>
+    <!-- 输入默认值 -->
+    <string name="default_branch_main">main</string>
+    <string name="default_build_command">npm run build</string>
+    <string name="default_output_dir">dist</string>
+    <string name="default_var_type_txt">txt</string>
+    <string name="default_count_10">10</string>
+    <string name="default_session_duration">100</string>
+    <string name="default_ttl_1">1</string>
+    <!-- 图表符号 -->
+    <string name="chart_less_than">&lt;</string>
+    <string name="chart_greater_than">&gt;</string>
+    <!-- Cron 预设表达式 -->
+    <string name="cron_every_5min">*/5 * * * *</string>
+    <string name="cron_hourly">0 * * * *</string>
+    <string name="cron_daily_midnight">0 0 * * *</string>
+    <string name="cron_weekly_monday">0 0 * * 1</string>
+    <string name="cron_daily_noon">0 12 * * *</string>
+    <string name="cron_twice_daily">0 8,18 * * *</string>
+    <string name="cron_monthly_1st">0 0 1 * *</string>
+    <string name="cron_weekly_sunday">0 0 * * 0</string>
+    <string name="cron_every_30min">*/30 * * * *</string>
+    <string name="cron_monthly_15th">0 0 15 * *</string>
+    <!-- 文本拼接格式 -->
+    <string name="format_percent">%1$s%%</string>
+    <string name="format_kb">%1$s KB</string>
+    <string name="format_name_with_suffix">%1$s-%2$s</string>
+    <string name="format_cidr_32">%1$s/32</string>
+    <string name="format_arrow_prefix">→ %1$s</string>
+    <string name="format_ttl">TTL: %1$s</string>
+    <string name="format_bullet_separator">%1$s • %2$s</string>
+    <string name="format_dot_separator">%1$s · %2$s</string>
+    <string name="format_zone_id">区域 ID · %1$s</string>
+    <string name="format_worker_url">https://%1$s.%2$s.workers.dev</string>
+    <string name="format_version_number">#%1$d</string>
+    <string name="format_label_value">%1$s: %2$s</string>
+    <string name="format_trigger_name">#%1$d  %2$s</string>
+    <string name="format_deployment_info">#%1$d - %2$s (%3$s)</string>
+    <string name="format_revision_id">#%1$d - %2$s</string>
+    <string name="format_domain_target">%1$s%2$s</string>
+    <!-- 示例/默认值 -->
+    <string name="example_ipv4">192.0.2.1</string>
+    <string name="example_ipv6_blackhole">100::</string>
+    <string name="tunnel_install_masked">cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</string>
+    <string name="tunnel_run_masked">cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</string>
 </resources>

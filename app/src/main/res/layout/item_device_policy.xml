@@ -20,7 +20,7 @@
             android:layout_marginEnd="8dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Policy Name"
+            android:text="@string/xml_dialog_policy_edit_hint"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/enabledSwitch"
@@ -43,7 +43,7 @@
             android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="Policy description"
+            android:text="@string/label_policy_description"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="13sp"
             app:layout_constraintTop_toBottomOf="@id/policyNameText" />

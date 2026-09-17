@@ -20,7 +20,7 @@ class BuildTriggersAdapter(
         private val deleteBtn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.deleteBtn)
 
         fun bind(schedule: Schedule, position: Int) {
-            triggerNameText.text = "#${position + 1}  ${schedule.cron}"
+            triggerNameText.text = itemView.context.getString(R.string.format_trigger_name, position + 1, schedule.cron)
             triggerCommandText.text = formatDate(schedule.createdOn)
             
             deleteBtn.setOnClickListener {

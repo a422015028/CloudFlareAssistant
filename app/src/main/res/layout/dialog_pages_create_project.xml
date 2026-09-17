@@ -41,7 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:text="main" />
+            android:text="@string/default_branch_main" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -57,7 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:text="npm run build" />
+            android:text="@string/default_build_command" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -73,7 +73,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:text="dist" />
+            android:text="@string/default_output_dir" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -89,7 +89,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:text="/" />
+            android:text="@string/r2_path_prefix_default" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

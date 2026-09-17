@@ -43,7 +43,7 @@
                     android:id="@+id/functionsBadge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Functions"
+                    android:text="@string/label_functions"
                     android:textSize="11sp"
                     android:textColor="?attr/colorPrimary"
                     android:background="@drawable/bg_chip"

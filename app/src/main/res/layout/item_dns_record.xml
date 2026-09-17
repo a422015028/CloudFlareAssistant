@@ -75,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
                 android:textColor="?android:textColorSecondary"
-                android:text="TTL" />
+                android:text="@string/tech_ttl" />
 
             <TextView
                 android:id="@+id/dnsProxiedText"

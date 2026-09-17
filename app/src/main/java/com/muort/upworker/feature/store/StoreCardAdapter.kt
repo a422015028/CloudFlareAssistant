@@ -148,17 +148,17 @@ class StoreCardAdapter(
             // 有绑定类型时显示对应 Chip，无绑定时显示"无绑定"
             if (hasBindings) {
                 badgeKv.visibility = if (bindingTypes.contains("kv")) {
-                    badgeKv.text = context.getString(R.string.store_badge_kv)
+                    badgeKv.text = context.getString(R.string.tech_kv)
                     View.VISIBLE
                 } else View.GONE
 
                 badgeD1.visibility = if (bindingTypes.contains("d1")) {
-                    badgeD1.text = context.getString(R.string.store_badge_d1)
+                    badgeD1.text = context.getString(R.string.tech_d1)
                     View.VISIBLE
                 } else View.GONE
 
                 badgeR2.visibility = if (bindingTypes.contains("r2")) {
-                    badgeR2.text = context.getString(R.string.store_badge_r2)
+                    badgeR2.text = context.getString(R.string.tech_r2)
                     View.VISIBLE
                 } else View.GONE
 

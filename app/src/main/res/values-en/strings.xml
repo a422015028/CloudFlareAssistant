@@ -916,8 +916,6 @@
     <string name="zt_location_cannot_delete_default">Cannot delete the default location; please set another location as default first</string>
     <string name="zt_location_copy_label_format">%1$s copied to clipboard</string>
     <!-- GatewayRulesFragment -->
-    <string name="zt_gateway_rule_type_dns">DNS</string>
-    <string name="zt_gateway_rule_type_http">HTTP</string>
     <string name="zt_gateway_rule_type_l4">@string/settings_network</string>
     <string name="zt_gateway_action_ytrestricted">YouTube restricted</string>
     <string name="zt_gateway_action_override">Override</string>
@@ -2464,9 +2462,6 @@
     <string name="store_source_name_hint">Please enter source name</string>
     <string name="store_source_url_invalid">Please enter a valid HTTPS URL</string>    <string name="store_no_sources">No sources</string>
     <!-- Template Store card badges -->
-    <string name="store_badge_kv">KV</string>
-    <string name="store_badge_d1">D1</string>
-    <string name="store_badge_r2">R2</string>
     <string name="store_badge_ai">AI</string>
     <string name="store_badge_none">No bindings</string>
     <string name="store_github_link">Repository</string>
@@ -2475,4 +2470,79 @@
         <item quantity="one">1 template</item>
         <item quantity="other">%d templates</item>
     </plurals>
+    <!-- Common technical terms -->
+    <string name="tech_id">ID</string>
+    <string name="tech_ip">IP</string>
+    <string name="tech_kv">KV</string>
+    <string name="tech_r2">R2</string>
+    <string name="tech_d1">D1</string>
+    <string name="tech_dns">DNS</string>
+    <string name="tech_http">HTTP</string>
+    <string name="tech_ttl">TTL</string>
+    <string name="tech_json">JSON</string>
+    <string name="tech_edns">EDNS</string>
+    <string name="tech_webdav">WebDAV</string>
+    <string name="tech_url">URL:</string>
+    <!-- OS names -->
+    <string name="os_windows">Windows</string>
+    <string name="os_macos">macOS</string>
+    <string name="os_linux">Linux</string>
+    <string name="os_ios">iOS</string>
+    <string name="os_android">Android</string>
+    <string name="os_chromeos">ChromeOS</string>
+    <!-- Common labels -->
+    <string name="label_device_name">Device Name</string>
+    <string name="label_policy_description">Policy description</string>
+    <string name="label_functions">Functions</string>
+    <string name="label_consumer_service_url">Consumer Service URL</string>
+    <string name="label_sp_entity_id">SP Entity ID</string>
+    <string name="label_name_id_format">Name ID Format</string>
+    <string name="cloudflare_zero_trust">Cloudflare Zero Trust</string>
+    <string name="cloudflare_tunnels">🔌 Cloudflare Tunnels</string>
+    <!-- Static labels -->
+    <string name="label_id_colon">ID:</string>
+    <!-- Input defaults -->
+    <string name="default_branch_main">main</string>
+    <string name="default_build_command">npm run build</string>
+    <string name="default_output_dir">dist</string>
+    <string name="default_var_type_txt">txt</string>
+    <string name="default_count_10">10</string>
+    <string name="default_session_duration">100</string>
+    <string name="default_ttl_1">1</string>
+    <!-- Chart symbols -->
+    <string name="chart_less_than">&lt;</string>
+    <string name="chart_greater_than">&gt;</string>
+    <!-- Cron preset expressions -->
+    <string name="cron_every_5min">*/5 * * * *</string>
+    <string name="cron_hourly">0 * * * *</string>
+    <string name="cron_daily_midnight">0 0 * * *</string>
+    <string name="cron_weekly_monday">0 0 * * 1</string>
+    <string name="cron_daily_noon">0 12 * * *</string>
+    <string name="cron_twice_daily">0 8,18 * * *</string>
+    <string name="cron_monthly_1st">0 0 1 * *</string>
+    <string name="cron_weekly_sunday">0 0 * * 0</string>
+    <string name="cron_every_30min">*/30 * * * *</string>
+    <string name="cron_monthly_15th">0 0 15 * *</string>
+    <!-- Text concatenation formats -->
+    <string name="format_percent">%1$s%%</string>
+    <string name="format_kb">%1$s KB</string>
+    <string name="format_name_with_suffix">%1$s-%2$s</string>
+    <string name="format_cidr_32">%1$s/32</string>
+    <string name="format_arrow_prefix">→ %1$s</string>
+    <string name="format_ttl">TTL: %1$s</string>
+    <string name="format_bullet_separator">%1$s • %2$s</string>
+    <string name="format_dot_separator">%1$s · %2$s</string>
+    <string name="format_zone_id">Zone ID · %1$s</string>
+    <string name="format_worker_url">https://%1$s.%2$s.workers.dev</string>
+    <string name="format_version_number">#%1$d</string>
+    <string name="format_label_value">%1$s: %2$s</string>
+    <string name="format_trigger_name">#%1$d  %2$s</string>
+    <string name="format_deployment_info">#%1$d - %2$s (%3$s)</string>
+    <string name="format_revision_id">#%1$d - %2$s</string>
+    <string name="format_domain_target">%1$s%2$s</string>
+    <!-- Example/default values -->
+    <string name="example_ipv4">192.0.2.1</string>
+    <string name="example_ipv6_blackhole">100::</string>
+    <string name="tunnel_install_masked">cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</string>
+    <string name="tunnel_run_masked">cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</string>
 </resources>

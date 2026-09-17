@@ -57,7 +57,7 @@ class DomainDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         domainDetailViewModel.bind(zoneIdArg)
-        binding.zoneIdText.text = "Zone ID · $zoneIdArg"
+        binding.zoneIdText.text = getString(R.string.format_zone_id, zoneIdArg)
         setupTools()
         observeZone()
     }

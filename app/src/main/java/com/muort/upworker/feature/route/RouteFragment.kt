@@ -643,7 +643,7 @@ class RouteFragment : Fragment() {
             
             fun bind(route: Route) {
                 binding.routePatternText.text = route.pattern
-                binding.routeScriptText.text = "→ ${route.script}"
+                binding.routeScriptText.text = itemView.context.getString(R.string.format_arrow_prefix, route.script)
                 
                 binding.routeMenuButton.setOnClickListener { view ->
                     PopupMenu(view.context, view).apply {
@@ -710,7 +710,7 @@ class RouteFragment : Fragment() {
                     DomainType.R2 -> itemView.context.getString(R.string.route_label_r2_prefix)
                 }
                 // 显示目标（Worker脚本名/Pages项目名/R2桶名）
-                binding.domainScriptText.text = "$prefix${domain.target}"
+                binding.domainScriptText.text = itemView.context.getString(R.string.format_domain_target, prefix, domain.target)
                 binding.domainMenuButton.setOnClickListener { view ->
                     PopupMenu(view.context, view).apply {
                         inflate(R.menu.menu_account)

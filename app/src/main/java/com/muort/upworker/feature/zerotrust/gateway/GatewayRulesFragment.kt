@@ -257,8 +257,8 @@ class GatewayRulesFragment : Fragment() {
         val templateSafeBtn = dialogView.findViewById<Button>(R.id.templateSafeBtn)
 
         val types = listOf(
-            "dns" to getString(R.string.zt_gateway_rule_type_dns),
-            "http" to getString(R.string.zt_gateway_rule_type_http),
+            "dns" to getString(R.string.tech_dns),
+            "http" to getString(R.string.tech_http),
             "l4" to getString(R.string.zt_gateway_rule_type_l4)
         )
         val typeAdapter = ArrayAdapter(

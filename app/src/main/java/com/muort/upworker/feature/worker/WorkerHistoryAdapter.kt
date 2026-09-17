@@ -28,7 +28,7 @@ class WorkerHistoryAdapter(
             val shortId = version.id.take(8)
             val time = formatDate(version.metadata?.createdOn)
             
-            revisionIdText.text = "#${versions.size - position} - $shortId"
+            revisionIdText.text = itemView.context.getString(R.string.format_revision_id, versions.size - position, shortId)
             revisionTimeText.text = time
             
             val source = version.metadata?.source ?: "unknown"

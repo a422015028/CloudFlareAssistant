@@ -178,7 +178,7 @@ class WorkerFragment : Fragment() {
                 if (binding.workerNameEdit.text.isNullOrEmpty()) {
                     val baseName = fileName.substringBeforeLast(".")
                     val randomSuffix = generateRandomSuffix()
-                    binding.workerNameEdit.setText("$baseName-$randomSuffix")
+                    binding.workerNameEdit.setText(getString(R.string.format_name_with_suffix, baseName, randomSuffix))
                 }
             }
         }
@@ -356,27 +356,27 @@ class WorkerFragment : Fragment() {
     
     private fun setupBatchOperationUI() {
         val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("toggleSelectionModeBtn", "id", requireContext().packageName)
+            R.id.toggleSelectionModeBtn
         )
         
         val selectionActionsLayout = binding.root.findViewById<android.widget.LinearLayout>(
-            resources.getIdentifier("selectionActionsLayout", "id", requireContext().packageName)
+            R.id.selectionActionsLayout
         )
         
         val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
-            resources.getIdentifier("selectionStatusText", "id", requireContext().packageName)
+            R.id.selectionStatusText
         )
         
         val selectAllBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("selectAllBtn", "id", requireContext().packageName)
+            R.id.selectAllBtn
         )
         
         val batchDeleteBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("batchDeleteBtn", "id", requireContext().packageName)
+            R.id.batchDeleteBtn
         )
         
         val cleanupBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("cleanupDeploymentsBtn", "id", requireContext().packageName)
+            R.id.cleanupDeploymentsBtn
         )
         
         toggleSelectionBtn?.text = if (isSelectionMode) getString(R.string.cancel) else getString(R.string.worker_manage_scripts)
@@ -2388,11 +2388,11 @@ class WorkerFragment : Fragment() {
             val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
 
             titleText.text = getString(R.string.worker_version_detail_title_template, script.id)
-            versionNumberText.text = "#${version.number}"
+            versionNumberText.text = getString(R.string.format_version_number, version.number)
             versionIdText.text = version.id
             createTimeText.text = formatDate(version.metadata?.createdOn)
             sourceText.text = version.metadata?.source ?: getString(R.string.status_unknown)
-            urlText.text = "https://${script.id}.${subdomainPrefix}.workers.dev"
+            urlText.text = getString(R.string.format_worker_url, script.id, subdomainPrefix)
             authorText.text = version.metadata?.authorEmail ?: getString(R.string.status_unknown)
             authorIdText.text = version.metadata?.authorId ?: getString(R.string.status_unknown)
             hasPreviewText.text = version.metadata?.hasPreview?.let { if (it) getString(R.string.pages_detail_yes) else getString(R.string.pages_detail_no) } ?: getString(R.string.status_unknown)
@@ -2594,19 +2594,19 @@ class WorkerFragment : Fragment() {
     
     private fun updateSelectionUI() {
         val selectionActionsLayout = binding.root.findViewById<android.widget.LinearLayout>(
-            resources.getIdentifier("selectionActionsLayout", "id", requireContext().packageName)
+            R.id.selectionActionsLayout
         )
         
         val toggleSelectionBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("toggleSelectionModeBtn", "id", requireContext().packageName)
+            R.id.toggleSelectionModeBtn
         )
         
         val selectionStatusText = binding.root.findViewById<android.widget.TextView>(
-            resources.getIdentifier("selectionStatusText", "id", requireContext().packageName)
+            R.id.selectionStatusText
         )
         
         val batchDeleteBtn = binding.root.findViewById<android.widget.Button>(
-            resources.getIdentifier("batchDeleteBtn", "id", requireContext().packageName)
+            R.id.batchDeleteBtn
         )
         
         toggleSelectionBtn?.text = if (isSelectionMode) getString(R.string.cancel) else getString(R.string.worker_manage_scripts)
@@ -3868,7 +3868,7 @@ class WorkerScriptsAdapter(
             // 优先使用缓存的大小，其次是API返回的size
             val size = scriptSizeCache[script.id] ?: script.size
             val sizeText = formatSize(size)
-            binding.scriptSizeText.text = "$sizeText \u2022 $dateText"
+            binding.scriptSizeText.text = binding.root.context.getString(R.string.format_bullet_separator, sizeText, dateText)
             
             // 添加多选模式支持 - 通过改变卡片背景色表示选中状态
             if (selectionMode) {

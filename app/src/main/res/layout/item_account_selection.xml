@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/accountCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -37,7 +38,7 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnPrimaryContainer"
-                android:text="A" />
+                tools:text="A" />
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -64,7 +65,7 @@
                 android:id="@+id/accountId"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Account ID"
+                android:text="@string/account_id"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:maxLines="1"

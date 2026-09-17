@@ -618,9 +618,9 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
 
     private fun getBindingTypeName(type: String): String {
         return when (type) {
-            "kv" -> getString(R.string.store_badge_kv)
-            "d1" -> getString(R.string.store_badge_d1)
-            "r2" -> getString(R.string.store_badge_r2)
+            "kv" -> getString(R.string.tech_kv)
+            "d1" -> getString(R.string.tech_d1)
+            "r2" -> getString(R.string.tech_r2)
             "ai" -> getString(R.string.store_badge_ai)
             "var" -> getString(R.string.store_env_vars)
             "durable_object" -> getString(R.string.store_binding_abbr_durable_object)

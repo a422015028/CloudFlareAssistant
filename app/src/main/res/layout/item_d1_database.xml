@@ -34,7 +34,7 @@
                 android:id="@+id/databaseUuidText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ID"
+                android:text="@string/tech_id"
                 android:textSize="12sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:layout_marginTop="4dp" />

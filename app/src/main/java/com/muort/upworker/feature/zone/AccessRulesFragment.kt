@@ -142,7 +142,7 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
             b.editHint.visibility = View.VISIBLE
             val targetLabel = targetLabelCtx(ctx, existing?.configuration?.target)
             val value = existing?.configuration?.value ?: ""
-            b.targetReadonly.text = "$targetLabel · $value"
+            b.targetReadonly.text = getString(R.string.format_dot_separator, targetLabel, value)
             b.notesInput.setText(existing?.notes ?: "")
         } else {
             // 新建：匹配类型 Chip + 值输入
