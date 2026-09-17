@@ -101,6 +101,12 @@ jobs:
           gh release delete "$TAG_NAME" --yes
         fi
 
+        # 如果 tag 已存在，也删除（确保源码包时间戳与 APK 上传时间一致）
+        if git ls-remote --exit-code --tags origin "refs/tags/${TAG_NAME}" > /dev/null 2>&1; then
+          echo "⚠️  Tag $TAG_NAME 已存在，先删除旧 tag"
+          git push origin --delete "$TAG_NAME"
+        fi
+
         # 使用 GitHub 官方 CLI 原子化创建 tag + release + 上传 asset，
         # 避免第三方 action 的 tag 推送与 release 创建竞态导致 500
         gh release create "$TAG_NAME" \
@@ -154,13 +160,13 @@ jobs:
             -F "chat_id=${TELEGRAM_CHAT_ID}" \
             -F "message_thread_id=${TELEGRAM_TOPIC_ID}" \
             -F "document=@${APK_FILE}" \
-            -F "caption=${CAPTION}" \
+            --form-string "caption=${CAPTION}" \
             -F "parse_mode=HTML"
         else
           curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument" \
             -F "chat_id=${TELEGRAM_CHAT_ID}" \
             -F "document=@${APK_FILE}" \
-            -F "caption=${CAPTION}" \
+            --form-string "caption=${CAPTION}" \
             -F "parse_mode=HTML"
         fi
         echo "✅ APK 文件和发布说明已发送到 Telegram"
