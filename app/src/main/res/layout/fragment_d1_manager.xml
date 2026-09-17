@@ -97,7 +97,7 @@
                     android:id="@+id/tableTitleText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/d1_table"
+                    android:text="@string/d1_tables_title"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     android:textSize="18sp"

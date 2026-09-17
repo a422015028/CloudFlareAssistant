@@ -25,7 +25,7 @@
             android:id="@+id/cleanupAllProjectsRadio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/xml_dialog_cleanup_deployments_2"
+            android:text="@string/pages_cleanup_all_title"
             android:textSize="16sp"
             android:checked="true"
             android:layout_marginBottom="8dp" />

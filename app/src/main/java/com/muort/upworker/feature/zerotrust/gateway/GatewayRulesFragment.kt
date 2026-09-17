@@ -175,7 +175,7 @@ class GatewayRulesFragment : Fragment() {
     private fun loadRules() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            android.widget.Toast.makeText(requireContext(), getString(R.string.msg_no_account_selected), android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), getString(R.string.app_no_account_selected), android.widget.Toast.LENGTH_SHORT).show()
             return
         }
         lifecycleScope.launch {
@@ -271,21 +271,21 @@ class GatewayRulesFragment : Fragment() {
 
         val dnsActions = listOf(
             "allow" to getString(R.string.ar_action_whitelist),
-            "block" to getString(R.string.gateway_block),
-            "safesearch" to getString(R.string.zt_gateway_action_safesearch),
+            "block" to getString(R.string.ar_action_block),
+            "safesearch" to getString(R.string.gateway_safe_search),
             "ytrestricted" to getString(R.string.zt_gateway_action_ytrestricted),
             "override" to getString(R.string.zt_gateway_action_override)
         )
         val httpActions = listOf(
             "allow" to getString(R.string.ar_action_whitelist),
             "redirect" to getString(R.string.zt_gateway_action_redirect),
-            "block" to getString(R.string.gateway_block),
-            "off" to getString(R.string.zt_gateway_action_off),
+            "block" to getString(R.string.ar_action_block),
+            "off" to getString(R.string.app_log_switch_off),
             "noscan" to getString(R.string.zt_gateway_action_noscan)
         )
         val l4Actions = listOf(
             "allow" to getString(R.string.ar_action_whitelist),
-            "block" to getString(R.string.gateway_block),
+            "block" to getString(R.string.ar_action_block),
             "l4_override" to getString(R.string.zt_gateway_action_l4_override)
         )
 
@@ -298,14 +298,14 @@ class GatewayRulesFragment : Fragment() {
         // 云端动作 → 资源标签映射（涵盖 Cloudflare Gateway 所有可能的动作值）
         fun actionLabel(action: String): String = when (action) {
             "allow" -> getString(R.string.ar_action_whitelist)
-            "block" -> getString(R.string.gateway_block)
-            "safesearch" -> getString(R.string.zt_gateway_action_safesearch)
+            "block" -> getString(R.string.ar_action_block)
+            "safesearch" -> getString(R.string.gateway_safe_search)
             "ytrestricted" -> getString(R.string.zt_gateway_action_ytrestricted)
             "override" -> getString(R.string.zt_gateway_action_override)
             "redirect" -> getString(R.string.zt_gateway_action_redirect)
-            "off" -> getString(R.string.zt_gateway_action_off)
+            "off" -> getString(R.string.app_log_switch_off)
             "noscan" -> getString(R.string.zt_gateway_action_noscan)
-            "on" -> getString(R.string.zt_gateway_action_on)
+            "on" -> getString(R.string.app_log_switch_on)
             "scan" -> getString(R.string.zt_gateway_action_scan)
             "isolate" -> getString(R.string.zt_gateway_action_isolate)
             "noisolate" -> getString(R.string.zt_gateway_action_noisolate)
@@ -369,7 +369,7 @@ class GatewayRulesFragment : Fragment() {
 
         fun updateListSelectorText(selector: TextView, selectedIds: Set<String>, lists: List<com.muort.upworker.core.model.GatewayList>) {
             val names = lists.filter { selectedIds.contains(it.id) }.map { it.name }
-            selector.text = if (names.isEmpty()) getString(R.string.zt_gateway_tap_select_list) else names.joinToString(", ")
+            selector.text = if (names.isEmpty()) getString(R.string.gateway_tap_select_list) else names.joinToString(", ")
         }
 
         fun showMultiListDialog(
@@ -515,7 +515,7 @@ class GatewayRulesFragment : Fragment() {
             val text = trafficExpressionText.text?.toString()
             if (!text.isNullOrBlank()) {
                 val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = ClipData.newPlainText(getString(R.string.zt_gateway_rule_expr_label), text)
+                val clip = ClipData.newPlainText(getString(R.string.gateway_rule_expression), text)
                 clipboard.setPrimaryClip(clip)
                 Toast.makeText(requireContext(), getString(R.string.msg_copied_to_clipboard), Toast.LENGTH_SHORT).show()
             }
@@ -524,19 +524,19 @@ class GatewayRulesFragment : Fragment() {
         templateBlockBtn.setOnClickListener {
             typeSpinner.setSelection(0)
             actionSpinner.setSelection(1)
-            nameInput.setText(getString(R.string.zt_gateway_template_block))
+            nameInput.setText(getString(R.string.gateway_block_domains))
         }
 
         templateAllowBtn.setOnClickListener {
             typeSpinner.setSelection(0)
             actionSpinner.setSelection(0)
-            nameInput.setText(getString(R.string.zt_gateway_template_allow))
+            nameInput.setText(getString(R.string.gateway_allow_domains))
         }
 
         templateSafeBtn.setOnClickListener {
             typeSpinner.setSelection(0)
             actionSpinner.setSelection(2)
-            nameInput.setText(getString(R.string.zt_gateway_template_safesearch))
+            nameInput.setText(getString(R.string.gateway_safe_search))
         }
 
         existingRule?.let { rule ->
@@ -828,7 +828,7 @@ class GatewayRulesFragment : Fragment() {
 
     private fun confirmDeleteRule(ruleId: String, ruleName: String) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.zt_gateway_delete_rule_title)
+            .setTitle(R.string.ar_delete_rule_title)
             .setMessage(getString(R.string.zt_gateway_delete_rule_confirm, ruleName))
             .setPositiveButton(R.string.delete) { _, _ ->
                 deleteRule(ruleId)

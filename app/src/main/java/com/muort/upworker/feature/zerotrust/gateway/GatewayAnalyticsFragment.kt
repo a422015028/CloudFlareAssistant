@@ -225,7 +225,7 @@ class GatewayAnalyticsFragment : Fragment() {
                             binding.errorContainer.visibility = View.VISIBLE
                             binding.contentContainer.visibility = View.GONE
                             binding.errorText.text =
-                                getString(R.string.zt_gateway_dns_error_format, error)
+                                getString(R.string.store_readme_failed, error)
                         } else {
                             binding.errorContainer.visibility = View.GONE
                         }
@@ -356,7 +356,7 @@ class GatewayAnalyticsFragment : Fragment() {
         if (account == null) {
             binding.errorContainer.visibility = View.VISIBLE
             binding.contentContainer.visibility = View.GONE
-            binding.errorText.text = getString(R.string.msg_no_account_selected)
+            binding.errorText.text = getString(R.string.app_no_account_selected)
             return
         }
         binding.errorContainer.visibility = View.GONE

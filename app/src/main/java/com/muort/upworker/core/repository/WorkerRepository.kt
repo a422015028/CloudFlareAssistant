@@ -960,7 +960,7 @@ class WorkerRepository @Inject constructor(
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message
                     ?: response.message()
                 Timber.e("Failed to update service bindings: Response code: ${response.code()}, Error body: $errorBody")
-                Resource.Error(appContext.getString(R.string.repo_worker_update_service_bindings_failed_format, errorMsg))
+                Resource.Error(appContext.getString(R.string.repo_pages_update_service_failed_format, errorMsg))
             }
         }
     }
@@ -1199,7 +1199,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     Timber.e("Failed to fetch settings: $errorMsg (code: $errorCode)")
                 }
-                Resource.Error(appContext.getString(R.string.repo_worker_fetch_settings_failed_format, errorMsg))
+                Resource.Error(appContext.getString(R.string.pages_get_settings_failed, errorMsg))
             }
         }
     }
@@ -1595,7 +1595,7 @@ class WorkerRepository @Inject constructor(
                 } else {
                     val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                         ?: response.message()
-                    Resource.Error(appContext.getString(R.string.repo_worker_list_custom_domains_failed_format, errorMsg))
+                    Resource.Error(appContext.getString(R.string.repo_r2_list_custom_domains_failed_format, errorMsg))
                 }
             }
         }
@@ -1620,7 +1620,7 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.result?.let {
                     Resource.Success(it)
-                } ?: Resource.Error(appContext.getString(R.string.repo_worker_add_domain_no_result))
+                } ?: Resource.Error(appContext.getString(R.string.repo_pages_add_domain_no_result))
             } else {
                 val errorMsg = response.body()?.errors?.firstOrNull()?.message 
                     ?: response.message()
@@ -1650,11 +1650,11 @@ class WorkerRepository @Inject constructor(
             } else {
                 val errorMsg = response.message() ?: "HTTP ${response.code()}"
                 Timber.e("Delete custom domain failed: $errorMsg")
-                Resource.Error(appContext.getString(R.string.repo_worker_delete_custom_domain_failed_format, errorMsg))
+                Resource.Error(appContext.getString(R.string.repo_r2_delete_custom_domain_failed_format, errorMsg))
             }
         } catch (e: Exception) {
             Timber.e(e, "Exception in deleteCustomDomain")
-            Resource.Error(appContext.getString(R.string.repo_worker_delete_custom_domain_failed_format, e.message ?: ""))
+            Resource.Error(appContext.getString(R.string.repo_r2_delete_custom_domain_failed_format, e.message ?: ""))
         }
     }
     

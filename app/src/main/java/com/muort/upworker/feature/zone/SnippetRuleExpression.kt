@@ -66,7 +66,7 @@ object SnippetRuleExpression {
     )
 
     val OPS = listOf(
-        Op("eq", R.string.snippet_op_eq, ValueType.entries.toList()),
+        Op("eq", R.string.zt_device_op_is, ValueType.entries.toList()),
         Op("ne", R.string.snippet_op_ne, ValueType.entries.toList()),
         Op("contains", R.string.snippet_op_contains, listOf(ValueType.STRING)),
         Op("wildcard", R.string.snippet_op_wildcard, listOf(ValueType.STRING)),

@@ -851,7 +851,7 @@ data class R2CustomDomain(
     private fun mapStatusString(context: Context, raw: String): String {
         val lower = raw.trim().lowercase()
         val resId = when (lower) {
-            "pending", "pending-validation", "pending_validation", "inactive", "initializing" -> R.string.r2_status_pending
+            "pending", "pending-validation", "pending_validation", "inactive", "initializing" -> R.string.domain_pending
             "active", "success", "ok", "valid", "healthy", "verified", "complete" -> R.string.r2_status_active
             "pending-deletion", "pending_deletion", "deleting" -> R.string.r2_status_pending_deletion
             "deleted" -> R.string.msg_deleted
@@ -861,7 +861,7 @@ data class R2CustomDomain(
             "unpermitted", "not_allowed", "disallowed" -> R.string.r2_status_unpermitted
             "blocked", "blocked-new", "blocked_new", "revoked" -> R.string.r2_status_blocked
             "quarantined", "quarantine" -> R.string.r2_status_quarantined
-            "disabled", "paused" -> R.string.r2_status_disabled
+            "disabled", "paused" -> R.string.msg_disabled
             "expired", "expiring" -> R.string.r2_status_expired
             "error", "failed", "failure", "invalid", "rejected" -> R.string.r2_status_error
             else -> 0
@@ -1516,9 +1516,9 @@ enum class TimeRange(val days: Int) {
     THIRTY_DAYS(30);
 
     fun displayName(context: Context): String = when (this) {
-        ONE_DAY -> context.getString(R.string.model_range_24h)
-        SEVEN_DAYS -> context.getString(R.string.model_range_7d)
-        THIRTY_DAYS -> context.getString(R.string.model_range_30d)
+        ONE_DAY -> context.getString(R.string.analytics_time_range_24h)
+        SEVEN_DAYS -> context.getString(R.string.analytics_time_range_7d)
+        THIRTY_DAYS -> context.getString(R.string.analytics_time_range_30d)
     }
 
     @Deprecated("Use displayName(Context) for UI strings; this property returns a static fallback value for logs.", ReplaceWith("displayName(context)"))

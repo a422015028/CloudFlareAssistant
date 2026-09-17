@@ -93,7 +93,7 @@ class GatewayListsFragment : Fragment() {
     private fun loadLists() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            android.widget.Toast.makeText(requireContext(), getString(R.string.msg_no_account_selected), android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), getString(R.string.app_no_account_selected), android.widget.Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -141,17 +141,17 @@ class GatewayListsFragment : Fragment() {
 
         templateDomainBtn.setOnClickListener {
             typeSpinner.setSelection(0)
-            nameInput.setText(getString(R.string.zt_list_template_domain_name))
+            nameInput.setText(getString(R.string.gateway_domain_list))
         }
 
         templateIpBtn.setOnClickListener {
             typeSpinner.setSelection(1)
-            nameInput.setText(getString(R.string.zt_list_template_ip_name))
+            nameInput.setText(getString(R.string.gateway_ip_list))
         }
 
         templateUrlBtn.setOnClickListener {
             typeSpinner.setSelection(2)
-            nameInput.setText(getString(R.string.zt_list_template_url_name))
+            nameInput.setText(getString(R.string.gateway_url_list))
         }
 
         existingList?.let { list ->

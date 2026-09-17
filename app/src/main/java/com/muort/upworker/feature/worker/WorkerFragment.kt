@@ -1587,7 +1587,7 @@ class WorkerFragment : Fragment() {
                 }
                 
                 if (value.isEmpty()) {
-                    showToast(getString(R.string.worker_env_please_enter_var_value))
+                    showToast(getString(R.string.pages_please_enter_value))
                     return@setPositiveButton
                 }
                 
@@ -1640,7 +1640,7 @@ class WorkerFragment : Fragment() {
                 }
                 
                 if (value.isEmpty()) {
-                    showToast(getString(R.string.worker_env_please_enter_var_value))
+                    showToast(getString(R.string.pages_please_enter_value))
                     return@setPositiveButton
                 }
                 
@@ -1973,7 +1973,7 @@ class WorkerFragment : Fragment() {
     ) {
         // Show loading dialog
         val loadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.worker_runtime_saving_title)
+            .setTitle(R.string.msg_saving_ellipsis)
             .setMessage(R.string.worker_runtime_updating_settings)
             .setCancelable(false)
             .create()
@@ -3280,7 +3280,7 @@ class WorkerFragment : Fragment() {
                     } else {
                         MaterialAlertDialogBuilder(context)
                             .setTitle(R.string.dialog_error_title)
-                            .setMessage(getString(R.string.worker_feature_save_failed, errorMessage.orEmpty()))
+                            .setMessage(getString(R.string.msg_update_failed, errorMessage.orEmpty()))
                             .setPositiveButton(R.string.confirm, null)
                             .show()
                     }
@@ -3299,7 +3299,7 @@ class WorkerFragment : Fragment() {
         val domainsRecyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.domainsRecyclerView)
         val closeBtn = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.closeBtn)
 
-        titleText.text = getString(R.string.worker_domain_list_title_template, script.id)
+        titleText.text = getString(R.string.pages_domain_list_title_template, script.id)
         emptyText.text = getString(R.string.worker_domain_no_custom)
         loadingProgress.visibility = android.view.View.VISIBLE
         domainsRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
@@ -3433,7 +3433,7 @@ class WorkerFragment : Fragment() {
                 onDelete: (com.muort.upworker.core.model.CustomDomain) -> Unit
             ) {
                 nameText.text = domain.hostname
-                statusText.text = itemView.context.getString(R.string.worker_domain_custom_label)
+                statusText.text = itemView.context.getString(R.string.card_custom_domain)
                 statusText.setBackgroundColor(
                     androidx.core.content.ContextCompat.getColor(itemView.context, R.color.status_success)
                 )
@@ -3705,7 +3705,7 @@ class WorkerFragment : Fragment() {
                                 }
                                 when (val del = workerRepository.deleteRoute(account, zId, route.id)) {
                                     is com.muort.upworker.core.model.Resource.Success -> {
-                                        requireContext().showToast(getString(R.string.worker_route_deleted_success))
+                                        requireContext().showToast(getString(R.string.vm_msg_worker_route_delete_success))
                                         loadRoutes()
                                     }
                                     is com.muort.upworker.core.model.Resource.Error -> {
@@ -3758,7 +3758,7 @@ class WorkerFragment : Fragment() {
 
             fun bind(route: com.muort.upworker.core.model.Route, zoneName: String) {
                 nameText.text = route.pattern
-                statusText.text = itemView.context.getString(R.string.worker_route_item_label)
+                statusText.text = itemView.context.getString(R.string.route_title_routes)
                 statusText.setBackgroundColor(
                     androidx.core.content.ContextCompat.getColor(itemView.context, R.color.status_warning)
                 )

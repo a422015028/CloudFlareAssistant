@@ -157,7 +157,7 @@ class KvViewModel @Inject constructor(
                     onResult(result.data)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_kv_value_get_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_kv_get_value_failed_format, result.message))
                     onResult(null)
                 }
                 is Resource.Loading -> {}
@@ -207,7 +207,7 @@ class KvViewModel @Inject constructor(
                     loadKeys(account, namespaceId)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_kv_value_delete_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_kv_delete_value_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }

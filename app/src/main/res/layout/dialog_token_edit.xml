@@ -14,7 +14,7 @@
             android:id="@+id/dialogTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/xml_dialog_token_edit"
+            android:text="@string/xml_activity_token_manager_6"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />

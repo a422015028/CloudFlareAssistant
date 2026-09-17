@@ -64,7 +64,7 @@
                         android:paddingTop="1dp"
                         android:paddingEnd="5dp"
                         android:paddingBottom="1dp"
-                        android:text="@string/gateway_block"
+                        android:text="@string/ar_action_block"
                         android:textColor="?attr/colorOnSecondary"
                         android:textSize="11sp" />
 

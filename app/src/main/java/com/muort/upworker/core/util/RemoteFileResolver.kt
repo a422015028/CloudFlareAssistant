@@ -416,7 +416,7 @@ object RemoteFileResolver {
                 RemoteSecurityCode.ZIP_SIZE_EXCEEDED_25MIB -> R.string.remote_url_security_zip_size_exceeded_25mib
                 RemoteSecurityCode.ZIP_MAGIC_MISMATCH -> R.string.remote_url_security_zip_magic_mismatch
                 RemoteSecurityCode.HTTP_STATUS_ERROR -> R.string.remote_url_security_http_status_error_format
-                RemoteSecurityCode.FETCH_IO_ERROR -> R.string.remote_url_security_fetch_io_error_format
+                RemoteSecurityCode.FETCH_IO_ERROR -> R.string.msg_download_failed
             }
             when {
                 formatArg1 != null && formatArg2 != null -> context.getString(resId, formatArg1, formatArg2)

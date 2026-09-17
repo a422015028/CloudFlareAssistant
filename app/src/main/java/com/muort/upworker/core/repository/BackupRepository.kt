@@ -149,7 +149,7 @@ class BackupRepository @Inject constructor(
                 try {
                     BackupCrypto.decrypt(content.trim(), password, context)
                 } catch (e: Exception) {
-                    return Result.failure(Exception(context.getString(R.string.repo_generic_decrypt_failed)))
+                    return Result.failure(Exception(context.getString(R.string.repo_crypto_decrypt_failed)))
                 }
             } else {
                 content
@@ -264,7 +264,7 @@ class BackupRepository @Inject constructor(
                 try {
                     BackupCrypto.decrypt(content.trim(), password, context)
                 } catch (e: Exception) {
-                    return Result.failure(Exception(context.getString(R.string.repo_generic_decrypt_failed)))
+                    return Result.failure(Exception(context.getString(R.string.repo_crypto_decrypt_failed)))
                 }
             } else {
                 content

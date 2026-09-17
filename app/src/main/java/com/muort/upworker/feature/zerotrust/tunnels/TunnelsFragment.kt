@@ -221,7 +221,7 @@ class TunnelsFragment : Fragment() {
         dialogView.findViewById<TextView>(R.id.createdAtText).text =
             getString(R.string.token_detail_created_time, formatDateTime(tunnel.createdAt))
         dialogView.findViewById<TextView>(R.id.activeAtText).text =
-            getString(R.string.zt_tunnel_last_active, formatDateTime(tunnel.connsActiveAt))
+            getString(R.string.zt_device_last_seen_label, formatDateTime(tunnel.connsActiveAt))
         
         // Inactive time
         val inactiveAtText = dialogView.findViewById<TextView>(R.id.inactiveAtText)
@@ -259,7 +259,7 @@ class TunnelsFragment : Fragment() {
                         hideTokenButton.setOnClickListener {
                             isTokenHidden = !isTokenHidden
                             tokenText.text = if (isTokenHidden) "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else fullCommand
-                            hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.zt_tunnel_hide_token)
+                            hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.tunnel_hide_token)
                         }
                         
                         copyCommandButton.setOnClickListener {
@@ -442,7 +442,7 @@ class TunnelsFragment : Fragment() {
             hideTokenButton.setOnClickListener {
                 isTokenHidden = !isTokenHidden
                 tokenTextView.text = if (isTokenHidden) "cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else fullCommand
-                hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.zt_tunnel_hide_token)
+                hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.tunnel_hide_token)
             }
             
             copyCommandButton.setOnClickListener {
@@ -462,7 +462,7 @@ class TunnelsFragment : Fragment() {
 
     private fun getStatusLabel(status: String): String {
         return when (status.lowercase()) {
-            "active" -> getString(R.string.tunnel_active)
+            "active" -> getString(R.string.r2_status_active)
             "inactive" -> getString(R.string.zt_tunnel_status_inactive)
             "degraded" -> getString(R.string.zt_tunnel_status_degraded)
             "down" -> getString(R.string.zt_tunnel_status_down)

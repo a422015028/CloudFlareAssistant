@@ -168,7 +168,7 @@ class StoreCardAdapter(
                 } else View.GONE
 
                 badgeVar.visibility = if (bindingTypes.contains("var")) {
-                    badgeVar.text = context.getString(R.string.store_badge_var)
+                    badgeVar.text = context.getString(R.string.pages_label_variable)
                     View.VISIBLE
                 } else View.GONE
 

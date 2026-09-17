@@ -166,7 +166,7 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
         val b = DialogEmailAddAddressBinding.inflate(LayoutInflater.from(ctx))
 
         MaterialAlertDialogBuilder(ctx)
-            .setTitle(R.string.email_add_address_dialog_title)
+            .setTitle(R.string.email_add_destination)
             .setView(b.root)
             .setPositiveButton(R.string.add) { _, _ ->
                 val email = b.emailInput.text.toString().trim()

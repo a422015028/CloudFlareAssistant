@@ -204,7 +204,7 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
                 }.onFailure {
                     dialogBinding.savingProgress.visibility = View.GONE
                     setButtonsEnabled(true)
-                    dialogBinding.errorText.text = getString(R.string.store_source_operation_failed_with_msg, it.message ?: "unknown")
+                    dialogBinding.errorText.text = getString(R.string.msg_operation_failed, it.message ?: "unknown")
                     dialogBinding.errorText.visibility = View.VISIBLE
                 }
             }
@@ -276,7 +276,7 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
 
             // 状态
             val statusRes = when (source.lastStatus) {
-                "ok" -> R.string.store_source_ok
+                "ok" -> R.string.se_ver_type_sync
                 "error" -> R.string.store_source_error
                 "loading" -> R.string.store_source_loading
                 else -> R.string.store_source_idle

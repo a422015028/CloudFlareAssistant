@@ -930,7 +930,7 @@
             android:layout_weight="1"
             android:layout_marginHorizontal="4dp"
             style="@style/AppButton"
-            android:text="@string/ssl_mode_off"/>
+            android:text="@string/app_log_switch_off"/>
 
     </LinearLayout>
 

@@ -177,14 +177,14 @@ class BackupViewModel @Inject constructor(
                     val error = result.exceptionOrNull()
                     val errorMsg = error?.message ?: "未知错误"
                     val stackTrace = error?.stackTraceToString()?.take(200) ?: ""
-                    _message.value = UiMessage.of(R.string.vm_msg_backup_load_files_failed, errorMsg + "\n" + stackTrace)
+                    _message.value = UiMessage.of(R.string.vm_msg_backup_filelist_load_failed, errorMsg + "\n" + stackTrace)
                     _backupFiles.value = emptyList()
                 }
 
             } catch (e: Exception) {
                 val errorMsg = e.message ?: "未知错误"
                 val stackTrace = e.stackTraceToString().take(200)
-                _message.value = UiMessage.of(R.string.vm_msg_backup_load_files_failed, errorMsg + "\n" + stackTrace)
+                _message.value = UiMessage.of(R.string.vm_msg_backup_filelist_load_failed, errorMsg + "\n" + stackTrace)
                 _backupFiles.value = emptyList()
             } finally {
                 _loadingState.value = false

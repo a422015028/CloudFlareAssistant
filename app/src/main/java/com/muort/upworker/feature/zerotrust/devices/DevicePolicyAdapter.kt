@@ -45,7 +45,7 @@ class DevicePolicyAdapter(
             
             // Settings
             binding.autoConnectText.text = ctx.getString(R.string.zt_policy_auto_connect_label, getAutoConnectLabel(policy.autoConnect, ctx))
-            binding.modeSwitchText.text = if (policy.allowModeSwitch == true) ctx.getString(R.string.zt_policy_mode_switch_allow) else ctx.getString(R.string.zt_policy_mode_switch_deny)
+            binding.modeSwitchText.text = if (policy.allowModeSwitch == true) ctx.getString(R.string.device_mode_switch_preview) else ctx.getString(R.string.zt_policy_mode_switch_deny)
             binding.precedenceText.text = if (isDefault) ctx.getString(R.string.zt_policy_precedence_default) else ctx.getString(R.string.zt_policy_precedence_label, policy.precedence ?: 0)
             
             // Enabled switch
@@ -68,8 +68,8 @@ class DevicePolicyAdapter(
 
         private fun getAutoConnectLabel(autoConnect: Int?, ctx: android.content.Context): String {
             return when (autoConnect) {
-                0 -> ctx.getString(R.string.zt_policy_auto_connect_off)
-                1 -> ctx.getString(R.string.zt_gateway_action_on)
+                0 -> ctx.getString(R.string.app_log_switch_off)
+                1 -> ctx.getString(R.string.app_log_switch_on)
                 2 -> ctx.getString(R.string.zt_policy_auto_connect_force)
                 else -> ctx.getString(R.string.account_default)
             }

@@ -105,7 +105,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/status_disabled"
+                        android:text="@string/msg_disabled"
                         android:textSize="11sp"
                         android:textColor="?android:attr/textColorSecondary" />
 

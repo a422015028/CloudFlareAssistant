@@ -317,7 +317,7 @@ class StoreFragment : Fragment() {
         val dialog = DeployTemplateDialog.newInstance(
             template = item.template,
             onDeploySuccess = {
-                showToast(getString(R.string.store_deploy_success))
+                showToast(getString(R.string.pages_deploy_status_success))
             }
         )
         dialog.show(childFragmentManager, "DeployTemplateDialog")

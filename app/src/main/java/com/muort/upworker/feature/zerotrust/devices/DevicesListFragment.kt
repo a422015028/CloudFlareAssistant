@@ -125,7 +125,7 @@ class DevicesListFragment : Fragment() {
         // Status Chip
         val isRevoked = device.revokedAt != null
         val statusChip = dialogView.findViewById<Chip>(R.id.statusChip)
-        statusChip.text = if (isRevoked) getString(R.string.zt_device_status_revoked) else getString(R.string.tunnel_active)
+        statusChip.text = if (isRevoked) getString(R.string.zt_device_status_revoked) else getString(R.string.r2_status_active)
         statusChip.setChipBackgroundColorResource(
             if (isRevoked) android.R.color.holo_red_light else android.R.color.holo_green_light
         )

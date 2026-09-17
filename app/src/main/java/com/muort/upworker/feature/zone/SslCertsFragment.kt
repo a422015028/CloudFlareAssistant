@@ -140,7 +140,7 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
     }
 
     private fun certStatusLabel(ctx: android.content.Context, status: String?): String = when (status) {
-        "active" -> ctx.getString(R.string.ssl_certs_status_active)
+        "active" -> ctx.getString(R.string.r2_status_active)
         "pending_validation" -> ctx.getString(R.string.ssl_certs_status_pending_validation)
         "initializing" -> ctx.getString(R.string.ssl_certs_status_initializing)
         "expired" -> ctx.getString(R.string.r2_status_expired)
@@ -198,7 +198,7 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
         private fun certStatusLabel(status: String?): String {
             val ctx = cachedCtx ?: return status ?: "—"
             return when (status) {
-                "active" -> ctx.getString(R.string.ssl_certs_status_active)
+                "active" -> ctx.getString(R.string.r2_status_active)
                 "pending_validation" -> ctx.getString(R.string.ssl_certs_status_pending_validation)
                 "initializing" -> ctx.getString(R.string.ssl_certs_status_initializing)
                 "expired" -> ctx.getString(R.string.r2_status_expired)
@@ -265,7 +265,7 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
             }
 
             private fun certStatusLabel(ctx: android.content.Context, status: String?): String = when (status) {
-                "active" -> ctx.getString(R.string.ssl_certs_status_active)
+                "active" -> ctx.getString(R.string.r2_status_active)
                 "pending_validation" -> ctx.getString(R.string.ssl_certs_status_pending_validation)
                 "initializing" -> ctx.getString(R.string.ssl_certs_status_initializing)
                 "expired" -> ctx.getString(R.string.r2_status_expired)

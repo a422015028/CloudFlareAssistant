@@ -165,7 +165,7 @@ class SslFragment : BaseZoneFeatureFragment() {
     }
 
     private fun modeLabel(ctx: android.content.Context, mode: String): String = when (mode) {
-        "off" -> ctx.getString(R.string.ssl_mode_off)
+        "off" -> ctx.getString(R.string.app_log_switch_off)
         "flexible" -> ctx.getString(R.string.ssl_mode_flexible)
         "full" -> ctx.getString(R.string.ssl_mode_full)
         "strict" -> ctx.getString(R.string.ssl_mode_strict)
@@ -204,7 +204,7 @@ class SslFragment : BaseZoneFeatureFragment() {
         }
 
         private fun modeLabel(ctx: android.content.Context, mode: String): String = when (mode) {
-            "off" -> ctx.getString(R.string.ssl_mode_off)
+            "off" -> ctx.getString(R.string.app_log_switch_off)
             "flexible" -> ctx.getString(R.string.ssl_mode_flexible)
             "full" -> ctx.getString(R.string.ssl_mode_full)
             "strict" -> ctx.getString(R.string.ssl_mode_strict)

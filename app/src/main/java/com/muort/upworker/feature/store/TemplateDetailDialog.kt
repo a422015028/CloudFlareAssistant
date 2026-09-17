@@ -155,7 +155,7 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
                 sourceCount
             )
         } else {
-            binding.sourceText.text = getString(R.string.store_source_single, templateItem.template.sourceName)
+            binding.sourceText.text = getString(R.string.pages_source_other, templateItem.template.sourceName)
         }
 
         // 收藏状态
@@ -210,11 +210,11 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
 
     private fun getBindingTypeInfo(type: String): Pair<String, String> {
         return when (type) {
-            "kv" -> "🗄️" to getString(R.string.store_binding_type_kv)
-            "d1" -> "🗃️" to getString(R.string.store_binding_type_d1)
+            "kv" -> "🗄️" to getString(R.string.card_kv)
+            "d1" -> "🗃️" to getString(R.string.card_d1)
             "r2" -> "📦" to getString(R.string.domain_r2_bucket)
             "ai" -> "🤖" to getString(R.string.store_binding_type_ai)
-            "var" -> "🔑" to getString(R.string.store_binding_type_var)
+            "var" -> "🔑" to getString(R.string.store_env_vars)
             "durable_object" -> "📌" to getString(R.string.store_binding_type_durable_object)
             "service" -> "🔗" to getString(R.string.store_binding_type_service)
             "queue" -> "📬" to getString(R.string.store_binding_type_queue)

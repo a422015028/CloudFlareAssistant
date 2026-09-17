@@ -179,7 +179,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/xml_card_account_analytics_5"
+                            android:text="@string/dash_bar_label_requests"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -332,7 +332,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/xml_card_account_analytics_3"
+                            android:text="@string/dash_legend_page_views"
                             android:textSize="12sp"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -403,7 +403,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.32"
                         android:gravity="center"
-                        android:text="@string/xml_card_account_analytics_5"
+                        android:text="@string/dash_bar_label_requests"
                         android:textSize="12sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 

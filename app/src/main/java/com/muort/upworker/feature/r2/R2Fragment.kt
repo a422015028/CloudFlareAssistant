@@ -323,7 +323,7 @@ class R2Fragment : Fragment() {
                 // Show the objects list dialog
                 showObjectsListDialog(account, bucket)
             }
-        } ?: showToast(getString(R.string.msg_account_info_unavailable))
+        } ?: showToast(getString(R.string.d1_account_info_unavailable))
     }
     
     private fun showObjectsListDialog(account: Account, bucket: R2Bucket) {
@@ -427,7 +427,7 @@ class R2Fragment : Fragment() {
         options.add(getString(R.string.delete))
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.dialog_operation)
+            .setTitle(R.string.access_rule_action)
             .setItems(options.toTypedArray()) { _, which ->
                 var index = 0
                 when {

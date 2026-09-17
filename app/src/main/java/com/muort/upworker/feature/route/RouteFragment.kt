@@ -762,7 +762,7 @@ class RouteFragment : Fragment() {
                 appendLine(getString(R.string.route_dns_auto_hint_default))
             }
             appendLine()
-            appendLine(getString(R.string.route_dns_status_format, domain.status
+            appendLine(getString(R.string.email_status_label, domain.status
                 ?: getString(R.string.route_dns_status_pending).substringAfter(": ").trim()))
         }
         

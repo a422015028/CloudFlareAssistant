@@ -252,7 +252,7 @@ class DomainListFragment : Fragment() {
             }
 
             private fun statusLabel(status: String): String = when (status) {
-                "active" -> binding.root.context.getString(R.string.status_activated)
+                "active" -> binding.root.context.getString(R.string.r2_status_active)
                 "pending", "initializing" -> binding.root.context.getString(R.string.domain_pending)
                 "paused" -> binding.root.context.getString(R.string.status_paused_short)
                 else -> status

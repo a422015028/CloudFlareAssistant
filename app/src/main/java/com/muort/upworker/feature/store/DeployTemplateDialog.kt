@@ -576,13 +576,13 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
                 when (result) {
                     is Resource.Success -> {
                         val info = result.data
-                        showToast(getString(R.string.store_deploy_success))
+                        showToast(getString(R.string.pages_deploy_status_success))
                         Timber.d("[DeployDialog] 部署成功: ${info.url}")
                         onDeploySuccess?.invoke()
                         dismiss()
                     }
                     is Resource.Error -> {
-                        showToast("${getString(R.string.store_deploy_failed)}: ${result.message}")
+                        showToast("${getString(R.string.pages_deploy_status_failed)}: ${result.message}")
                     }
                     else -> {
                         // Unexpected state
@@ -595,7 +595,7 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
                     b.progressSection.visibility = View.GONE
                     b.deployBtn.isEnabled = true
                 }
-                showToast("${getString(R.string.store_deploy_failed)}: ${e.message}")
+                showToast("${getString(R.string.pages_deploy_status_failed)}: ${e.message}")
             }
         }
     }
@@ -622,7 +622,7 @@ class DeployTemplateDialog : BottomSheetDialogFragment() {
             "d1" -> getString(R.string.store_badge_d1)
             "r2" -> getString(R.string.store_badge_r2)
             "ai" -> getString(R.string.store_badge_ai)
-            "var" -> getString(R.string.store_binding_type_var)
+            "var" -> getString(R.string.store_env_vars)
             "durable_object" -> getString(R.string.store_binding_abbr_durable_object)
             "service" -> getString(R.string.store_binding_abbr_service)
             "queue" -> getString(R.string.store_binding_abbr_queue)

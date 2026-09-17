@@ -184,7 +184,7 @@ class PagesViewModel @Inject constructor(
                     Timber.d("Loaded ${result.data.size} deployments")
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployments_load_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_deployments_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -203,7 +203,7 @@ class PagesViewModel @Inject constructor(
                     loadDeployments(account, projectName)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_retry_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_redeploy_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -506,7 +506,7 @@ class PagesViewModel @Inject constructor(
                 account, projectName, environment, variables
             )) {
                 is Resource.Success -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_env_vars_update_success))
+                    _message.emit(UiMessage.of(R.string.pages_generic_env_vars_updated))
                     _projectDetail.value = result.data
                     Timber.d("Environment variables updated for $projectName")
                 }
@@ -537,12 +537,12 @@ class PagesViewModel @Inject constructor(
                 account, projectName, environment, bindings
             )) {
                 is Resource.Success -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_kv_bindings_update_success))
+                    _message.emit(UiMessage.of(R.string.pages_kv_bindings_updated))
                     _projectDetail.value = result.data
                     Timber.d("KV bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_kv_bindings_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_update_kv_failed_format, result.message))
                     Timber.e("Failed to update KV bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -568,12 +568,12 @@ class PagesViewModel @Inject constructor(
                 account, projectName, environment, bindings
             )) {
                 is Resource.Success -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_r2_bindings_update_success))
+                    _message.emit(UiMessage.of(R.string.pages_r2_bindings_updated))
                     _projectDetail.value = result.data
                     Timber.d("R2 bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_r2_bindings_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_update_r2_failed_format, result.message))
                     Timber.e("Failed to update R2 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -599,12 +599,12 @@ class PagesViewModel @Inject constructor(
                 account, projectName, environment, bindings
             )) {
                 is Resource.Success -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_d1_bindings_update_success))
+                    _message.emit(UiMessage.of(R.string.pages_d1_bindings_updated))
                     _projectDetail.value = result.data
                     Timber.d("D1 bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_d1_bindings_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_update_d1_failed_format, result.message))
                     Timber.e("Failed to update D1 bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -630,12 +630,12 @@ class PagesViewModel @Inject constructor(
                 account, projectName, environment, bindings
             )) {
                 is Resource.Success -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_service_bindings_update_success))
+                    _message.emit(UiMessage.of(R.string.pages_service_bindings_updated))
                     _projectDetail.value = result.data
                     Timber.d("Service bindings updated for $projectName")
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_service_bindings_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_pages_update_service_failed_format, result.message))
                     Timber.e("Failed to update service bindings: ${result.message}")
                 }
                 is Resource.Loading -> {}
@@ -757,7 +757,7 @@ class PagesViewModel @Inject constructor(
                     callback(result)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_pages_custom_domain_add_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_add_custom_domain_failed_format, result.message))
                     Timber.e("Failed to add domain: ${result.message}")
                     callback(result)
                 }

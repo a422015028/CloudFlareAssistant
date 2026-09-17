@@ -116,7 +116,7 @@ class AccountListFragment : Fragment() {
             when (item.itemId) {
                 R.id.action_set_default -> {
                     viewModel.setDefaultAccount(account.id)
-                    showToast(getString(R.string.account_set_default_success))
+                    showToast(getString(R.string.account_set_as_default))
                     true
                 }
                 R.id.action_edit -> {

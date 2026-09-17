@@ -221,7 +221,7 @@ class DashboardCardView @JvmOverloads constructor(
                 val requestsEntries = metrics.requestsTimeSeries.map { point ->
                     Entry(point.timestamp.toFloat(), point.value.toFloat())
                 }
-                dataSets.add(LineDataSet(requestsEntries, context.getString(R.string.dash_legend_requests)).apply {
+                dataSets.add(LineDataSet(requestsEntries, context.getString(R.string.dash_bar_label_requests)).apply {
                     color = context.getColor(R.color.purple_700)
                     setCircleColor(context.getColor(R.color.purple_700))
                     lineWidth = 2.5f

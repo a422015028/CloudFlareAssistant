@@ -438,7 +438,7 @@ class PagesFragment : Fragment() {
                 val placement = if (dialogBinding.placementModeGroup.checkedRadioButtonId == R.id.placementSmart) Placement(mode = "smart") else null
 
                 // 保存时：环境选择仅用于回显提示，Cloudflare Pages API 会同时更新生产+预览
-                val envLabel = if (selectedEnv == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
+                val envLabel = if (selectedEnv == "production") getString(R.string.env_production) else getString(R.string.env_preview)
                 showToast(getString(R.string.pages_updating_runtime_settings, envLabel))
 
                 pagesViewModel.updateRuntimeSettings(
@@ -535,7 +535,7 @@ class PagesFragment : Fragment() {
 
                 // Setup title
                 dialogBinding.titleText.text = getString(R.string.pages_configure_env_vars)
-                val env = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
+                val env = if (environment == "production") getString(R.string.env_production) else getString(R.string.env_preview)
                 dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, env)
                 dialogBinding.listTitleText.text = getString(R.string.pages_variables_list_title)
                 dialogBinding.noVariablesText.text = getString(R.string.pages_no_variables)
@@ -626,7 +626,7 @@ class PagesFragment : Fragment() {
 
                 // Setup title
                 dialogBinding.titleText.text = getString(R.string.pages_configure_secrets)
-                val env = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
+                val env = if (environment == "production") getString(R.string.env_production) else getString(R.string.env_preview)
                 dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, env)
                 dialogBinding.listTitleText.text = getString(R.string.pages_secrets_list_title)
                 dialogBinding.noVariablesText.text = getString(R.string.pages_no_secrets)
@@ -906,7 +906,7 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesKvBindingsBinding.inflate(layoutInflater)
                 
                 // Setup title
-                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
+                val envLabel = if (environment == "production") getString(R.string.env_production) else getString(R.string.env_preview)
                 dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
                 
                 // Temporary list for this dialog - initialize with existing bindings
@@ -1153,7 +1153,7 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesR2BindingsBinding.inflate(layoutInflater)
                 
                 // Setup title
-                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
+                val envLabel = if (environment == "production") getString(R.string.env_production) else getString(R.string.env_preview)
                 dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
                 
                 // Temporary list for this dialog - initialize with existing bindings
@@ -1409,7 +1409,7 @@ class PagesFragment : Fragment() {
                     val dialogBinding = com.muort.upworker.databinding.DialogPagesD1BindingsBinding.inflate(layoutInflater)
 
                     // Setup title
-                    val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
+                    val envLabel = if (environment == "production") getString(R.string.env_production) else getString(R.string.env_preview)
                     dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
 
                     // Temporary list for this dialog - initialize with existing bindings
@@ -1660,7 +1660,7 @@ class PagesFragment : Fragment() {
                 val dialogBinding = com.muort.upworker.databinding.DialogPagesServicesBinding.inflate(layoutInflater)
 
                 // Setup title
-                val envLabel = if (environment == "production") getString(R.string.pages_generic_project_env_production) else getString(R.string.pages_domain_status_preview)
+                val envLabel = if (environment == "production") getString(R.string.env_production) else getString(R.string.env_preview)
                 dialogBinding.projectNameText.text = getString(R.string.pages_generic_project_name_with_env_template, project.name, envLabel)
 
                 // Temporary list for this dialog - Triple: (bindingName, serviceName, serviceEnv)
@@ -2619,7 +2619,7 @@ class PagesFragment : Fragment() {
         val webAnalyticsTagText = dialogView.findViewById<android.widget.TextView>(R.id.webAnalyticsTagText)
         val webAnalyticsTokenText = dialogView.findViewById<android.widget.TextView>(R.id.webAnalyticsTokenText)
 
-        buildCachingText.text = deployment.buildConfig?.buildCaching?.let { if (it) getString(R.string.pages_detail_enabled) else getString(R.string.pages_detail_disabled) } ?: getString(R.string.status_unknown)
+        buildCachingText.text = deployment.buildConfig?.buildCaching?.let { if (it) getString(R.string.msg_enabled) else getString(R.string.msg_disabled) } ?: getString(R.string.status_unknown)
         webAnalyticsTagText.text = deployment.buildConfig?.webAnalyticsTag ?: getString(R.string.status_none)
         webAnalyticsTokenText.text = deployment.buildConfig?.webAnalyticsToken ?: getString(R.string.status_none)
 
@@ -2644,9 +2644,9 @@ class PagesFragment : Fragment() {
         ownerIdText.text = srcCfg?.ownerId ?: getString(R.string.status_unknown)
         repoIdText.text = srcCfg?.repoId ?: getString(R.string.status_unknown)
         productionBranchText.text = srcCfg?.productionBranch ?: getString(R.string.status_unknown)
-        deploymentsEnabledText.text = srcCfg?.deploymentsEnabled?.let { if (it) getString(R.string.pages_detail_enabled) else getString(R.string.pages_detail_disabled) } ?: getString(R.string.status_unknown)
-        prodDeploymentsText.text = srcCfg?.productionDeploymentsEnabled?.let { if (it) getString(R.string.pages_detail_enabled) else getString(R.string.pages_detail_disabled) } ?: getString(R.string.status_unknown)
-        prCommentsText.text = srcCfg?.prCommentsEnabled?.let { if (it) getString(R.string.pages_detail_enabled) else getString(R.string.pages_detail_disabled) } ?: getString(R.string.status_unknown)
+        deploymentsEnabledText.text = srcCfg?.deploymentsEnabled?.let { if (it) getString(R.string.msg_enabled) else getString(R.string.msg_disabled) } ?: getString(R.string.status_unknown)
+        prodDeploymentsText.text = srcCfg?.productionDeploymentsEnabled?.let { if (it) getString(R.string.msg_enabled) else getString(R.string.msg_disabled) } ?: getString(R.string.status_unknown)
+        prCommentsText.text = srcCfg?.prCommentsEnabled?.let { if (it) getString(R.string.msg_enabled) else getString(R.string.msg_disabled) } ?: getString(R.string.status_unknown)
         previewDeploySettingText.text = srcCfg?.previewDeploymentSetting ?: getString(R.string.status_unknown)
 
         pathExcludesSection.visibility = if (srcCfg?.pathExcludes?.isNotEmpty() == true)
@@ -2721,7 +2721,7 @@ class PagesFragment : Fragment() {
                 layoutParams = android.widget.LinearLayout.LayoutParams(14, 14)
             }
             val statusText = android.widget.TextView(requireContext()).apply {
-                text = getString(R.string.status_active)
+                text = getString(R.string.r2_status_active)
                 textSize = 11f
                 setTextColor(resources.getColor(R.color.red_500, requireContext().theme))
                 layoutParams = android.widget.LinearLayout.LayoutParams(
@@ -3180,7 +3180,7 @@ class PagesFragment : Fragment() {
                 nameText.setOnClickListener {
                     copyToClipboard("https://$domain", itemView.context.getString(R.string.pages_domain_preview_copied))
                 }
-                statusText.text = itemView.context.getString(R.string.pages_domain_status_preview)
+                statusText.text = itemView.context.getString(R.string.env_preview)
                 statusText.setBackgroundColor(
                     ContextCompat.getColor(itemView.context, R.color.blue)
                 )
@@ -3831,7 +3831,7 @@ class PagesVariablesAndSecretsAdapter(
 
             // For secrets, show encrypted indicator; for plain text, show value
             if (isSecret) {
-                binding.variableValueText.text = binding.root.context.getString(R.string.pages_var_encrypted_hidden)
+                binding.variableValueText.text = binding.root.context.getString(R.string.xml_item_secret)
                 binding.variableValueText.setTypeface(null, Typeface.ITALIC)
             } else {
                 binding.variableValueText.text = value

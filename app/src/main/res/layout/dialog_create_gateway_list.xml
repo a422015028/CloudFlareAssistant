@@ -100,7 +100,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="@string/gateway_list_desc_optional">
+            android:hint="@string/device_description_optional">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/descriptionInput"

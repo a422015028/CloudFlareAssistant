@@ -43,7 +43,7 @@ class DeviceAdapter(
 
             // Status chip
             val isRevoked = device.revokedAt != null
-            binding.statusChip.text = if (isRevoked) ctx.getString(R.string.zt_device_status_revoked) else ctx.getString(R.string.tunnel_active)
+            binding.statusChip.text = if (isRevoked) ctx.getString(R.string.zt_device_status_revoked) else ctx.getString(R.string.r2_status_active)
             binding.statusChip.setChipBackgroundColorResource(
                 if (isRevoked) android.R.color.holo_red_light else android.R.color.holo_green_light
             )

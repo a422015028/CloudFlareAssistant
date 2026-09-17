@@ -63,7 +63,7 @@ class TunnelAdapter(
             }
             
             // Created date
-            binding.createdDateText.text = ctx.getString(R.string.zt_tunnel_created_label, formatDate(ctx, tunnel.createdAt))
+            binding.createdDateText.text = ctx.getString(R.string.token_detail_created_time, formatDate(ctx, tunnel.createdAt))
             
             // Delete button - only show if not deleted
             val isDeleted = tunnel.deletedAt != null
@@ -85,7 +85,7 @@ class TunnelAdapter(
 
         private fun getStatusLabel(ctx: android.content.Context, status: String): String {
             return when (status.lowercase()) {
-                "active" -> ctx.getString(R.string.tunnel_active)
+                "active" -> ctx.getString(R.string.r2_status_active)
                 "inactive" -> ctx.getString(R.string.zt_tunnel_status_inactive)
                 "degraded" -> ctx.getString(R.string.zt_tunnel_status_degraded)
                 "down" -> ctx.getString(R.string.zt_tunnel_status_down)

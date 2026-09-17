@@ -34,11 +34,11 @@ class WafFragment : BaseZoneRulesetFragment() {
 
     /** 可创建/编辑的动作（skip 需额外参数，暂不提供）。 */
     private fun supportedActionLabels(ctx: android.content.Context) = listOf(
-        "block" to ctx.getString(R.string.waf_action_block),
-        "challenge" to ctx.getString(R.string.waf_action_challenge),
-        "managed_challenge" to ctx.getString(R.string.waf_action_managed_challenge),
-        "js_challenge" to ctx.getString(R.string.waf_action_js_challenge),
-        "log" to ctx.getString(R.string.waf_action_log),
+        "block" to ctx.getString(R.string.ar_action_block),
+        "challenge" to ctx.getString(R.string.ar_action_challenge),
+        "managed_challenge" to ctx.getString(R.string.ar_action_managed_challenge),
+        "js_challenge" to ctx.getString(R.string.rate_action_js_challenge),
+        "log" to ctx.getString(R.string.rate_action_log),
     )
 
     /** 规则被点击 → 编辑（仅支持的动作可编辑）。 */
@@ -65,7 +65,7 @@ class WafFragment : BaseZoneRulesetFragment() {
     override fun onRuleDeleteRequested(rule: WafRule) {
         val ruleLabel = rule.description ?: rule.expression?.take(40) ?: rule.id
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.waf_delete_rule_title)
+            .setTitle(R.string.ar_delete_rule_title)
             .setMessage(getString(R.string.waf_delete_rule_confirm, ruleLabel))
             .setPositiveButton(R.string.delete) { _, _ ->
                 account?.let { rulesetViewModel.deleteRule(it, zoneId, rule) }

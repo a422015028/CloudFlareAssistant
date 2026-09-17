@@ -531,7 +531,7 @@ class SnippetRuleDialog : DialogFragment() {
         fun applyType(type: String) {
             when (type) {
                 "A" -> {
-                    dBinding.recordContentLayout.setHint(R.string.snippet_dns_hint_ipv4_required)
+                    dBinding.recordContentLayout.setHint(R.string.dns_ipv4_address_required)
                     dBinding.recordContentLayout.helperText =
                         getString(R.string.dns_ipv4_helper)
                     dBinding.recordContentInput.setText("192.0.2.1")

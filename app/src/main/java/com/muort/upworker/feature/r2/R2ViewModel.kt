@@ -266,7 +266,7 @@ class R2ViewModel @Inject constructor(
 
             when (val result = r2Repository.createCustomDomain(account, bucketName, domain, zone.id)) {
                 is Resource.Success -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domain_created_success))
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_custom_domain_add_success))
                     loadCustomDomains(account, bucketName)
                 }
                 is Resource.Error -> {
@@ -289,7 +289,7 @@ class R2ViewModel @Inject constructor(
                     loadCustomDomains(account, bucketName)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.repo_worker_delete_custom_domain_failed_format, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_r2_delete_custom_domain_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }

@@ -64,8 +64,8 @@ class DomainDetailFragment : Fragment() {
 
     private fun setupTools() {
         val tools = listOf(
-            ZoneToolItem(getString(R.string.zone_tool_analytics), android.R.drawable.ic_menu_mapmode, R.id.action_domainDetail_to_zoneAnalytics),
-            ZoneToolItem(getString(R.string.zone_tool_dns), android.R.drawable.ic_menu_edit, R.id.action_domainDetail_to_dns),
+            ZoneToolItem(getString(R.string.zone_analytics_title), android.R.drawable.ic_menu_mapmode, R.id.action_domainDetail_to_zoneAnalytics),
+            ZoneToolItem(getString(R.string.dns_record), android.R.drawable.ic_menu_edit, R.id.action_domainDetail_to_dns),
             ZoneToolItem(getString(R.string.route_title_routes), android.R.drawable.ic_menu_directions, R.id.action_domainDetail_to_route),
             ZoneToolItem(getString(R.string.zone_tool_waf), android.R.drawable.ic_menu_search, R.id.action_domainDetail_to_waf),
             ZoneToolItem(getString(R.string.zone_tool_cache_rules), android.R.drawable.ic_menu_save, R.id.action_domainDetail_to_cache),

@@ -474,7 +474,7 @@ class TokenManagerActivity : AppCompatActivity() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_token_detail, null)
         val content = buildString {
             appendLine(getString(R.string.route_dns_record_name, token.name ?: getString(R.string.status_none)))
-            appendLine(getString(R.string.route_dns_status_format, statusDisplay(token.status)))
+            appendLine(getString(R.string.email_status_label, statusDisplay(token.status)))
             appendLine("ID: ${token.id}")
             appendLine()
             appendLine(getString(R.string.token_detail_time_section))
@@ -515,7 +515,7 @@ class TokenManagerActivity : AppCompatActivity() {
 
     private fun showVerifyResultDialog(result: com.muort.upworker.core.model.TokenVerifyResult) {
         val content = buildString {
-            appendLine(getString(R.string.route_dns_status_format, statusDisplay(result.status)))
+            appendLine(getString(R.string.email_status_label, statusDisplay(result.status)))
             appendLine(getString(R.string.token_verify_id, result.id ?: getString(R.string.status_none)))
             appendLine(getString(R.string.token_detail_not_before, formatIsoTime(result.notBefore)))
             appendLine(getString(R.string.token_detail_expires_on, formatIsoTime(result.expiresOn)))
@@ -611,8 +611,8 @@ class TokenManagerActivity : AppCompatActivity() {
 
     private fun statusDisplay(status: String?): String {
         return when (status) {
-            "active" -> getString(R.string.status_active)
-            "disabled" -> getString(R.string.status_disabled)
+            "active" -> getString(R.string.r2_status_active)
+            "disabled" -> getString(R.string.msg_disabled)
             "expired" -> getString(R.string.r2_status_expired)
             else -> status ?: getString(R.string.status_unknown)
         }
@@ -664,8 +664,8 @@ class TokenAdapter(
             idText.text = token.id
 
             statusChip.text = when (token.status) {
-                "active" -> context.getString(R.string.status_active)
-                "disabled" -> context.getString(R.string.status_disabled)
+                "active" -> context.getString(R.string.r2_status_active)
+                "disabled" -> context.getString(R.string.msg_disabled)
                 "expired" -> context.getString(R.string.r2_status_expired)
                 else -> token.status ?: context.getString(R.string.status_unknown)
             }

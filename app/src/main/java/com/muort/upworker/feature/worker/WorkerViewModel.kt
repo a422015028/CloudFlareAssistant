@@ -518,7 +518,7 @@ class WorkerViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     _uploadState.value = UploadState.Error(UiMessage.RawString(result.message))
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_secret_update_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_update_secrets_failed_format, result.message))
                     Timber.e("Failed to update secrets: ${result.message}")
                 }
                 is Resource.Loading -> {
@@ -654,7 +654,7 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.createRoute(account, zoneId, pattern, scriptName)) {
                 is Resource.Success -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_route_create_success))
+                    _message.emit(UiMessage.of(R.string.worker_route_created_success))
                     loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
@@ -714,7 +714,7 @@ class WorkerViewModel @Inject constructor(
                     _customDomains.value = result.data
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domains_load_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domains_load_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -733,7 +733,7 @@ class WorkerViewModel @Inject constructor(
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_add_failed, result.message))
+                    _message.emit(UiMessage.of(R.string.repo_worker_add_custom_domain_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
@@ -748,7 +748,7 @@ class WorkerViewModel @Inject constructor(
             
             when (val result = workerRepository.deleteCustomDomain(account, domainId)) {
                 is Resource.Success -> {
-                    _message.emit(UiMessage.of(R.string.vm_msg_worker_custom_domain_delete_success))
+                    _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domain_delete_success))
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {

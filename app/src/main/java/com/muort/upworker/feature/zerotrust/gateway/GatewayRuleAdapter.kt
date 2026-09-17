@@ -63,7 +63,7 @@ class GatewayRuleAdapter(
             binding.ruleTrafficText.setOnClickListener {
                 if (!rule.traffic.isNullOrBlank()) {
                     val clipboard = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText(ctx.getString(R.string.zt_gateway_rule_expr_label), rule.traffic)
+                    val clip = ClipData.newPlainText(ctx.getString(R.string.gateway_rule_expression), rule.traffic)
                     clipboard.setPrimaryClip(clip)
                     Toast.makeText(ctx, ctx.getString(R.string.msg_copied_to_clipboard), Toast.LENGTH_SHORT).show()
                 }
@@ -84,12 +84,12 @@ class GatewayRuleAdapter(
         private fun getActionLabel(ctx: Context, action: String?): String {
             return when (action) {
                 "allow" -> ctx.getString(R.string.ar_action_whitelist)
-                "block" -> ctx.getString(R.string.gateway_block)
-                "safesearch" -> ctx.getString(R.string.zt_gateway_action_safesearch)
+                "block" -> ctx.getString(R.string.ar_action_block)
+                "safesearch" -> ctx.getString(R.string.gateway_safe_search)
                 "ytrestricted" -> ctx.getString(R.string.zt_gateway_action_ytrestricted)
                 "override" -> ctx.getString(R.string.zt_gateway_action_override)
                 "redirect" -> ctx.getString(R.string.zt_gateway_action_redirect)
-                "off" -> ctx.getString(R.string.zt_gateway_action_off)
+                "off" -> ctx.getString(R.string.app_log_switch_off)
                 "noscan" -> ctx.getString(R.string.zt_gateway_action_noscan)
                 else -> action ?: ctx.getString(R.string.status_unknown)
             }

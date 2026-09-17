@@ -108,7 +108,7 @@ class GroupFragment : Fragment() {
     private fun loadGroups() {
         val account = accountViewModel.defaultAccount.value
         if (account == null) {
-            android.widget.Toast.makeText(requireContext(), R.string.msg_no_account_selected, android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(requireContext(), R.string.app_no_account_selected, android.widget.Toast.LENGTH_SHORT).show()
             return
         }
 

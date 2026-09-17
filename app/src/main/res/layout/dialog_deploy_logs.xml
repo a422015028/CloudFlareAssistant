@@ -123,7 +123,7 @@
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:enabled="false"
-            android:text="@string/ssl_mode_off" />
+            android:text="@string/app_log_switch_off" />
 
     </LinearLayout>
 
