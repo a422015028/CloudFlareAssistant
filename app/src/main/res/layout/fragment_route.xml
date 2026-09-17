@@ -4,19 +4,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/centerGuide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
 
         <!-- 左侧：路由列表 -->
         <LinearLayout
             android:id="@+id/routePanel"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:orientation="vertical"
-            android:background="?attr/colorSurface">
+            android:background="?attr/colorSurface"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/centerGuide"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -77,16 +86,22 @@
             android:id="@+id/dividerView"
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:background="?attr/colorOutlineVariant" />
+            android:background="?attr/colorOutlineVariant"
+            app:layout_constraintStart_toStartOf="@id/centerGuide"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <!-- 右侧：自定义域列表 -->
         <LinearLayout
             android:id="@+id/domainPanel"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:orientation="vertical"
-            android:background="?attr/colorSurface">
+            android:background="?attr/colorSurface"
+            app:layout_constraintStart_toStartOf="@id/centerGuide"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -142,6 +157,6 @@
 
         </LinearLayout>
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

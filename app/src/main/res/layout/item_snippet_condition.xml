@@ -6,7 +6,8 @@
     android:orientation="vertical"
     android:padding="12dp"
     android:layout_marginBottom="8dp"
-    android:background="?attr/colorSurfaceContainerLow">
+    android:background="?attr/colorSurfaceContainerLow"
+    tools:ignore="Overdraw">
 
     <LinearLayout
         android:layout_width="match_parent"

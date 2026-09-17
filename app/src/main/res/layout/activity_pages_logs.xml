@@ -90,21 +90,14 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/logsScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:paddingTop="0dp"
-        android:paddingBottom="0dp"
-        android:orientation="vertical">
-
-        <ScrollView
-            android:id="@+id/logsScrollView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+        android:fillViewport="true">
 
             <LinearLayout
                 android:id="@+id/logsContainer"
@@ -126,8 +119,6 @@
 
             </LinearLayout>
 
-        </ScrollView>
-
-    </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
