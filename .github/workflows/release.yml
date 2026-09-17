@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: '版本标签 (例如: v7.7.8)'
+        description: '版本标签 (例如: v7.8.2)'
         required: true
         type: string
 
@@ -81,29 +81,19 @@ jobs:
 
         if [ -f "$RELEASE_NOTES_FILE" ]; then
           echo "使用 $RELEASE_NOTES_FILE 作为发布说明"
-          {
-            echo "## 🎉 CloudFlare Assistant ${TAG_NAME} 发布"
-            echo ""
-            echo "**版本号**: ${{ steps.version.outputs.version_name }}"
-            echo "**Build**: ${{ steps.version.outputs.version_code }}"
-            echo ""
-            cat "$RELEASE_NOTES_FILE"
-            echo ""
-          } > release_notes.md
+          # 直接使用 RELEASE_NOTES 文件内容，不再添加额外标题/版本信息
+          cp "$RELEASE_NOTES_FILE" release_notes.md
         else
           echo "未找到 $RELEASE_NOTES_FILE，使用默认模板"
           {
             echo "## 🎉 新版本发布"
-            echo ""
-            echo "**版本号**: ${{ steps.version.outputs.version_name }}"
-            echo "**Build**: ${{ steps.version.outputs.version_code }}"
             echo ""
             echo "### 📥 下载"
             echo "点击下方的 APK 文件即可下载安装（已签名）"
             echo ""
             echo "### 📦 安装要求"
             echo "- 最低 Android 版本: 8.0 (API 26)"
-            echo "- 目标 Android 版本: 16 (API 36)"
+            echo "- 目标 Android 版本: 17 (API 37)"
             echo ""
             echo "### 🔐 签名信息"
             echo "此版本已使用开发者证书签名，可以直接安装使用。"
@@ -122,7 +112,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # ==================== 修复后的 Telegram 推送步骤 ====================
+    # ==================== Telegram 推送步骤 ====================
     - name: Send APK to Telegram
       if: success()
       env:
@@ -131,27 +121,33 @@ jobs:
         TELEGRAM_TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
       run: |
         TAG_NAME="${{ steps.version.outputs.tag_name }}"
-        VERSION_NAME="${{ steps.version.outputs.version_name }}"
-        VERSION_CODE="${{ steps.version.outputs.version_code }}"
         APK_FILE="app/build/outputs/apk/release/CloudFlareAssistant-${TAG_NAME}.apk"
-
-        # 详细更新说明链接（直接指向 GitHub 仓库中的 RELEASE_NOTES 文件）
+        RELEASE_NOTES_FILE="RELEASE_NOTES_${TAG_NAME}.md"
         RELEASE_NOTES_URL="https://github.com/a422015028/CloudFlareAssistant/blob/main/RELEASE_NOTES_${TAG_NAME}.md"
 
-        # 构建简短 caption（不含长篇文本，只有链接）
-        CAPTION="🎉 <b>CloudFlare Assistant ${TAG_NAME} 发布</b>
+        # 优先使用 RELEASE_NOTES 文件内容作为 caption（Markdown 转 HTML）
+        if [ -f "$RELEASE_NOTES_FILE" ] && [ -s "$RELEASE_NOTES_FILE" ]; then
+          CAPTION=$(sed -E \
+            -e 's/^## \*\*(.+)\*\*$/<b>\1<\/b>/' \
+            -e 's/^#### (.+)$/<b>\1<\/b>/' \
+            -e 's/^> \*\*(.+)\*\*(.*)$/<b>\1<\/b>\2/' \
+            -e 's/^- (.+)$/• \1/' \
+            -e 's/\*\*(.+?)\*\*/<b>\1<\/b>/g' \
+            "$RELEASE_NOTES_FILE")
 
-        📱 <b>版本信息</b>
-        • 版本号: ${VERSION_NAME}
-        • Build: ${VERSION_CODE}
-        • 发布日期: $(date +'%Y年%m月%d日')
-
-        📄 <b>详细更新说明</b>
-        <a href=\"${RELEASE_NOTES_URL}\">点击查看完整更新日志</a>
-
-        📦 <b>安装要求</b>
-        • 最低版本: Android 8.0 (API 26)
-        • 目标版本: Android 16 (API 36)"
+          # Telegram caption 上限 1024 字符，超长则截断并附链接
+          if [ ${#CAPTION} -gt 900 ]; then
+            CAPTION=$(printf '%s\n\n%s' "${CAPTION:0:900}..." "<a href=\"${RELEASE_NOTES_URL}\">查看完整更新说明</a>")
+          fi
+          echo "使用 $RELEASE_NOTES_FILE 内容作为 Telegram caption"
+        else
+          # 解析失败时回退到链接
+          CAPTION=$(printf '%s\n\n%s\n%s' \
+            "🎉 <b>CloudFlare Assistant ${TAG_NAME} 发布</b>" \
+            "📄 <b>更新说明</b>" \
+            "<a href=\"${RELEASE_NOTES_URL}\">点击查看完整更新日志</a>")
+          echo "未找到 $RELEASE_NOTES_FILE，使用链接回退"
+        fi
 
         # 发送 APK 文件到 Telegram（支持话题）
         echo "📤 正在发送 APK 文件到 Telegram..."
