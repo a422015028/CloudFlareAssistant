@@ -129,6 +129,10 @@ class StoreFragment : Fragment() {
             val next = if (current == "name") "version" else "name"
             viewModel.setSortBy(next)
             updateSortButton(next)
+            // 排序后立即回到顶部
+            binding.recyclerView.post {
+                binding.recyclerView.scrollToPosition(0)
+            }
         }
 
         // 仅收藏按钮
@@ -153,6 +157,10 @@ class StoreFragment : Fragment() {
                 launch {
                     viewModel.templates.collect { templates ->
                         adapter.submitList(templates)
+                        // 数据变更（排序、筛选、刷新）后回到顶部，post 到布局完成后执行
+                        binding.recyclerView.post {
+                            binding.recyclerView.scrollToPosition(0)
+                        }
                         updateResultCount(templates.size)
                         updateEmptyState(templates.isEmpty())
                     }
@@ -202,7 +210,14 @@ class StoreFragment : Fragment() {
 
     private fun updateSourceStatus(sources: List<com.muort.upworker.core.model.CatalogSource>) {
         val updated = sources.count { it.lastStatus == "ok" }
-        binding.sourceStatusText.text = getString(R.string.store_source_status, updated)
+        val latestSync = sources.mapNotNull { it.lastSynced }.maxOrNull()
+        val timeStr = if (latestSync != null) {
+            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+                .format(java.util.Date(latestSync))
+        } else {
+            getString(R.string.store_source_idle)
+        }
+        binding.sourceStatusText.text = getString(R.string.store_source_status, updated, timeStr)
     }
 
     private fun updateResultCount(count: Int) {

@@ -99,6 +99,16 @@
             tools:text="已同步" />
 
         <TextView
+            android:id="@+id/syncTimeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorTertiary"
+            android:visibility="gone"
+            tools:text="2025-01-01 12:00:00" />
+
+        <TextView
             android:id="@+id/templateCountText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

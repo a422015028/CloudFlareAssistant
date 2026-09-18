@@ -2607,7 +2607,7 @@
     <string name="store_pages_project_name">Pages 项目名称</string>
     <string name="store_pages_name_hint">请输入 Pages 项目名称</string>
     <string name="store_sources">数据源</string>
-    <string name="store_source_status">%1$d 个源已更新</string>
+    <string name="store_source_status">%1$d 个源同步时间 %2$s</string>
     <string name="store_add_source">添加数据源</string>
     <string name="store_source_name">源名称</string>
     <string name="store_source_url">源地址 (URL)</string>

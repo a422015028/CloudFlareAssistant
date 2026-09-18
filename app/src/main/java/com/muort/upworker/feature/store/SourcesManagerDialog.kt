@@ -1,4 +1,4 @@
-﻿package com.muort.upworker.feature.store
+package com.muort.upworker.feature.store
 
 import com.muort.upworker.core.util.notifyListChanged
 
@@ -284,6 +284,16 @@ class SourcesManagerDialog : BottomSheetDialogFragment() {
                 else -> R.string.store_source_idle
             }
             binding.statusText.text = binding.root.context.getString(statusRes)
+
+            // 同步时间：有 lastSynced 才显示
+            if (source.lastSynced != null) {
+                binding.syncTimeText.text = java.text.SimpleDateFormat(
+                    "yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()
+                ).format(java.util.Date(source.lastSynced))
+                binding.syncTimeText.visibility = View.VISIBLE
+            } else {
+                binding.syncTimeText.visibility = View.GONE
+            }
 
             // 模板数量 - 隐藏（数据源不直接存储模板数量）
             binding.templateCountText.visibility = View.GONE

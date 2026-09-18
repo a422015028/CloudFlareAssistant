@@ -2616,7 +2616,7 @@
     <string name="store_pages_project_name">Pages Project Name</string>
     <string name="store_pages_name_hint">Enter Pages project name</string>
     <string name="store_sources">Sources</string>
-    <string name="store_source_status">%1$d sources updated</string>
+    <string name="store_source_status">%1$d sources synced at %2$s</string>
     <string name="store_add_source">Add Source</string>
     <string name="store_source_name">Source Name</string>
     <string name="store_source_url">Source URL</string>
