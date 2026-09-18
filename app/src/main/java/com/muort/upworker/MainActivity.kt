@@ -92,8 +92,11 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // 从设置页返回时，若语言/主题/动态配色/显示大小被修改，则重建 Activity 以应用新配置
+        // 注意：不能在 onResume 中直接调用 recreate()，否则部分 ROM（如 MIUI）在
+        // onResume 尚未完成时调度 relaunch 会触发 ClassCastException。
+        // 用 post 延迟到当前消息循环结束后再重建。
         if (hasConfigChanged()) {
-            recreate()
+            window.decorView.post { recreate() }
         }
     }
 

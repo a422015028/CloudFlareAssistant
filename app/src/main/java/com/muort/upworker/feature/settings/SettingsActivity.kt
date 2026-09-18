@@ -98,7 +98,7 @@ class SettingsActivity : AppCompatActivity() {
                     else -> ThemeHelper.THEME_FOLLOW_SYSTEM
                 }
                 ThemeHelper.setThemeMode(this, mode)
-                recreate()
+                window.decorView.post { recreate() }
             }
         }
     }
@@ -111,7 +111,7 @@ class SettingsActivity : AppCompatActivity() {
             binding.dynamicColorSwitch.isChecked = ThemeHelper.isDynamicColorEnabled(this)
             binding.dynamicColorSwitch.setOnCheckedChangeListener { _, isChecked ->
                 ThemeHelper.setDynamicColorEnabled(this, isChecked)
-                recreate()
+                window.decorView.post { recreate() }
             }
         } else {
             binding.dynamicColorLayout.visibility = View.GONE
@@ -144,7 +144,7 @@ class SettingsActivity : AppCompatActivity() {
             val scale = sizeOptions[idx].second
             if (scale != DisplaySizeHelper.getFontScale(this)) {
                 DisplaySizeHelper.setFontScale(this, scale)
-                recreate()
+                window.decorView.post { recreate() }
             }
         }
         binding.displaySizeRow1.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -173,7 +173,7 @@ class SettingsActivity : AppCompatActivity() {
                     else -> LocaleHelper.LANGUAGE_FOLLOW_SYSTEM
                 }
                 LocaleHelper.setLanguage(this, lang)
-                recreate()
+                window.decorView.post { recreate() }
             }
         }
     }

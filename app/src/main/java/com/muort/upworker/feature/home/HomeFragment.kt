@@ -157,7 +157,8 @@ class HomeFragment : Fragment() {
             for (i in 0 until childCount) {
                 val child = grid.getChildAt(i)
                 val params = child.layoutParams as GridLayout.LayoutParams
-                params.height = 0
+                // WRAP_CONTENT 保证内容不被压缩，剩余空间再按 weight 平分给各行
+                params.height = GridLayout.LayoutParams.WRAP_CONTENT
                 params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                 child.layoutParams = params
             }
@@ -191,9 +192,10 @@ class HomeFragment : Fragment() {
         // 每行可用高度
         val rowHeight = availableHeight / rowCount
 
-        // 阈值：当每行高度小于 80dp 时，认为高度不足，切换为横向布局
+        // 阈值：当每行高度小于 95dp 时，认为高度不足，切换为横向布局
+        // 纵向布局内容最小高度约 88dp（36dp图标 + 24dp padding + 8dp marginTop + 约20dp文字）
         val density = resources.displayMetrics.density
-        val minHeightForVertical = (80 * density).toInt()
+        val minHeightForVertical = (95 * density).toInt()
         val useHorizontal = rowHeight < minHeightForVertical
 
         // 方向未变化则跳过，避免重复修改布局导致循环触发 onGlobalLayout
@@ -206,6 +208,11 @@ class HomeFragment : Fragment() {
             val innerLayout = card.getChildAt(0) as? LinearLayout ?: continue
             val imageView = innerLayout.getChildAt(0) as? android.widget.ImageView ?: continue
             val textView = innerLayout.getChildAt(1) as? android.widget.TextView ?: continue
+
+            // 让内部 LinearLayout 填满卡片高度，gravity 才能让内容垂直居中
+            val innerParams = innerLayout.layoutParams as android.view.ViewGroup.LayoutParams
+            innerParams.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT
+            innerLayout.layoutParams = innerParams
 
             if (useHorizontal) {
                 // 横向布局：图标在左，文字在右
