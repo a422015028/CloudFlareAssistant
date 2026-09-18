@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.worker
+﻿package com.muort.upworker.feature.worker
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.app.Activity
 import android.app.Dialog
@@ -3826,8 +3828,9 @@ class WorkerScriptsAdapter(
     private val selectedItems = mutableSetOf<String>()
     
     fun submitList(newScripts: List<WorkerScript>) {
+        val oldSize = scripts.size
         scripts = newScripts
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, scripts.size)
     }
     
     fun setSelectionMode(enabled: Boolean) {
@@ -4033,8 +4036,9 @@ class KvBindingsAdapter(
     private var bindings = listOf<Pair<String, String>>()
     
     fun submitList(newBindings: List<Pair<String, String>>) {
+        val oldSize = bindings.size
         bindings = newBindings
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, bindings.size)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -4078,8 +4082,9 @@ class R2BindingsAdapter(
     private var bindings = listOf<Pair<String, String>>()
     
     fun submitList(newBindings: List<Pair<String, String>>) {
+        val oldSize = bindings.size
         bindings = newBindings
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, bindings.size)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -4120,8 +4125,9 @@ class VariablesAdapter(
     private var variables = listOf<Triple<String, String, String>>()
     
     fun submitList(newVariables: List<Triple<String, String, String>>) {
+        val oldSize = variables.size
         variables = newVariables
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, variables.size)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VariableViewHolder {
@@ -4171,8 +4177,9 @@ class SecretsAdapter(
     private var secrets = listOf<Pair<String, String>>()
     
     fun submitList(newSecrets: List<Pair<String, String>>) {
+        val oldSize = secrets.size
         secrets = newSecrets
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, secrets.size)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SecretViewHolder {
@@ -4215,8 +4222,9 @@ class D1BindingsAdapter(
     private var bindings = listOf<D1BindingItem>()
     
     fun submitList(newBindings: List<D1BindingItem>) {
+        val oldSize = bindings.size
         bindings = newBindings
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, bindings.size)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -4256,8 +4264,9 @@ class ServiceBindingsAdapter(
     private var bindings = listOf<ServiceBindingItem>()
 
     fun submitList(newBindings: List<ServiceBindingItem>) {
+        val oldSize = bindings.size
         bindings = newBindings
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, bindings.size)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {

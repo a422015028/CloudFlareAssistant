@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.domain
+﻿package com.muort.upworker.feature.domain
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -214,8 +216,9 @@ class DomainListFragment : Fragment() {
         private var zones = listOf<Zone>()
 
         fun submitList(newList: List<Zone>) {
+            val oldSize = zones.size
             zones = newList
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, zones.size)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

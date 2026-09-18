@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.dns
+﻿package com.muort.upworker.feature.dns
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.os.Bundle
 import android.text.InputType
@@ -383,8 +385,9 @@ class DnsFragment : Fragment() {
         private var records = listOf<DnsRecord>()
         
         fun submitList(newList: List<DnsRecord>) {
+            val oldSize = records.size
             records = newList
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, records.size)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

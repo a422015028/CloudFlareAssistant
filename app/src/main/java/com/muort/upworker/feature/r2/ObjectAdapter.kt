@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.r2
+﻿package com.muort.upworker.feature.r2
+
+import com.muort.upworker.core.util.notifyListChanged
 
 
 import java.util.Locale
@@ -15,8 +17,9 @@ class ObjectAdapter : RecyclerView.Adapter<ObjectAdapter.ViewHolder>() {
     private var onDeleteClick: ((R2Object) -> Unit)? = null
 
     fun submitList(newList: List<R2Object>) {
+        val oldSize = objects.size
         objects = newList
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, objects.size)
     }
 
     fun setOnObjectClickListener(listener: (R2Object) -> Unit) {

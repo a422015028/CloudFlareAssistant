@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.kv
+﻿package com.muort.upworker.feature.kv
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -259,8 +261,9 @@ class KvFragment : Fragment() {
         private var namespaces = listOf<KvNamespace>()
         
         fun submitList(newList: List<KvNamespace>) {
+            val oldSize = namespaces.size
             namespaces = newList
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, namespaces.size)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -327,8 +330,9 @@ class KvFragment : Fragment() {
         private var keys = listOf<KvKey>()
         
         fun submitList(newList: List<KvKey>) {
+            val oldSize = keys.size
             keys = newList
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, keys.size)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

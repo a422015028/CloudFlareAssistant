@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.d1
+﻿package com.muort.upworker.feature.d1
+
+import com.muort.upworker.core.util.notifyListChanged
 
 
 import android.os.Bundle
@@ -424,8 +426,9 @@ class D1ManagerFragment : Fragment() {
     ) : androidx.recyclerview.widget.RecyclerView.Adapter<DatabaseAdapter.ViewHolder>() {
         private var databases = listOf<D1Database>()
         fun submitList(newList: List<D1Database>) {
+            val oldSize = databases.size
             databases = newList
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, databases.size)
         }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_d1_database, parent, false)
@@ -465,8 +468,9 @@ class D1ManagerFragment : Fragment() {
     ) : androidx.recyclerview.widget.RecyclerView.Adapter<TableAdapter.ViewHolder>() {
         private var tables = listOf<D1Table>()
         fun submitList(newList: List<D1Table>) {
+            val oldSize = tables.size
             tables = newList
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, tables.size)
         }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_d1_table, parent, false)

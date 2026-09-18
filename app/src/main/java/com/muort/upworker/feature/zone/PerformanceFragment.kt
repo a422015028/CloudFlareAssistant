@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.zone
+﻿package com.muort.upworker.feature.zone
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -214,8 +216,9 @@ class PerformanceFragment : BaseZoneFeatureFragment() {
         private var items: List<PerfItem> = emptyList()
 
         fun submitList(newItems: List<PerfItem>) {
+            val oldSize = items.size
             items = newItems
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, items.size)
         }
 
         override fun getItemViewType(position: Int): Int = when (items[position]) {

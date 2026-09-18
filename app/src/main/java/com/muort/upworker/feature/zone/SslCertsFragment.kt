@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.zone
+﻿package com.muort.upworker.feature.zone
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -174,12 +176,14 @@ class SslCertsFragment : BaseZoneFeatureFragment() {
             packs: List<SslCertificatePack>,
         ) {
             this.cachedCtx = ctx
+            val oldSize = items.size
+
             items.clear()
             if (universalLoaded) {
                 items += CertItem.UniversalToggle(universalEnabled, isTogglingUniversal)
             }
             items += packs.map { CertItem.CertPack(it) }
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, items.size)
         }
 
         private var cachedCtx: android.content.Context? = null

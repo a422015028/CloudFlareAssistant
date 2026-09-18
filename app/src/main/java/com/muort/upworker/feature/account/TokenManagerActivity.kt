@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.account
+﻿package com.muort.upworker.feature.account
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -636,8 +638,11 @@ class TokenAdapter(
     private var tokens = listOf<ApiToken>()
 
     fun submitList(newTokens: List<ApiToken>) {
+        val oldSize = tokens.size
         tokens = newTokens
-        notifyItemRangeChanged(0, itemCount)
+        // 用 notifyListChanged 正确处理列表大小变化，
+        // 避免缩容时悬空 ViewHolder 触发 "Inconsistency detected"。
+        notifyListChanged(oldSize, tokens.size)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TokenViewHolder {
@@ -710,6 +715,7 @@ class PermissionGroupAdapter(
     private var filtered = allGroups
 
     fun filter(query: String) {
+        val oldSize = filtered.size
         filtered = if (query.isBlank()) {
             allGroups
         } else {
@@ -717,7 +723,7 @@ class PermissionGroupAdapter(
                 it.name?.contains(query, ignoreCase = true) == true || it.id.contains(query, ignoreCase = true)
             }
         }
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, filtered.size)
     }
 
     fun selectAllFiltered() {

@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.route
+﻿package com.muort.upworker.feature.route
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -616,8 +618,9 @@ class RouteFragment : Fragment() {
         private var routes = listOf<Route>()
         
         fun submitList(newList: List<Route>) {
+            val oldSize = routes.size
             routes = newList
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, routes.size)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -676,8 +679,9 @@ class RouteFragment : Fragment() {
         private var domains = listOf<UnifiedDomain>()
         
         fun submitList(newList: List<UnifiedDomain>) {
+            val oldSize = domains.size
             domains = newList
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, domains.size)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.zone
+﻿package com.muort.upworker.feature.zone
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -309,6 +311,8 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
 
         fun update(rulesets: Map<String, TransformRuleset?>, togglingIds: Set<String>) {
             this.togglingIds = togglingIds
+            val oldSize = items.size
+
             items.clear()
             for (phase in PHASES) {
                 items += ListItem.PhaseHeader(phase)
@@ -319,7 +323,7 @@ class TransformRulesFragment : BaseZoneFeatureFragment() {
                     items += rules.map { ListItem.RuleItem(phase, it) }
                 }
             }
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, items.size)
         }
 
         override fun getItemViewType(position: Int): Int = when (items[position]) {

@@ -6,13 +6,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.muort.upworker.R
+import com.muort.upworker.core.util.notifyListChanged
 
 class D1DataAdapter(private var columns: List<String>, private var rows: List<Map<String, Any?>>) : RecyclerView.Adapter<D1DataAdapter.RowViewHolder>() {
 
     fun updateData(newColumns: List<String>, newRows: List<Map<String, Any?>>) {
+        val oldSize = itemCount
         this.columns = newColumns
         this.rows = newRows
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, itemCount)
     }
 
     override fun getItemViewType(position: Int): Int {

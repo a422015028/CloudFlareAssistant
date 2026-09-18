@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.account
+﻿package com.muort.upworker.feature.account
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -160,8 +162,9 @@ class AccountAdapter : RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() 
     var onMenuClick: ((Account, View) -> Unit)? = null
     
     fun submitList(newAccounts: List<Account>) {
+        val oldSize = accounts.size
         accounts = newAccounts
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, accounts.size)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder {

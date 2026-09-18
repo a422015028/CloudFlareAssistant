@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.pages
+﻿package com.muort.upworker.feature.pages
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.app.Activity
 import android.app.Dialog
@@ -3340,8 +3342,9 @@ class PagesFragment : Fragment() {
         private val selectedItems = mutableSetOf<String>()
         
         fun submitList(newList: List<PagesProject>) {
+            val oldSize = projects.size
             projects = newList
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, projects.size)
         }
         
         fun setSelectionMode(enabled: Boolean) {
@@ -3632,8 +3635,9 @@ class PagesKvBindingsAdapter(
     private var bindings = listOf<Pair<String, String>>()
     
     fun submitList(newBindings: List<Pair<String, String>>) {
+        val oldSize = bindings.size
         bindings = newBindings
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, bindings.size)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -3673,8 +3677,9 @@ class PagesR2BindingsAdapter(
     private var bindings = listOf<Pair<String, String>>()
     
     fun submitList(newBindings: List<Pair<String, String>>) {
+        val oldSize = bindings.size
         bindings = newBindings
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, bindings.size)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -3714,8 +3719,9 @@ class PagesD1BindingsAdapter(
     private var bindings = listOf<Triple<String, String, String>>()
     
     fun submitList(newBindings: List<Triple<String, String, String>>) {
+        val oldSize = bindings.size
         bindings = newBindings
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, bindings.size)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -3757,8 +3763,9 @@ class PagesServiceBindingsAdapter(
     private var bindings = listOf<Triple<String, String, String>>()
 
     fun submitList(newBindings: List<Triple<String, String, String>>) {
+        val oldSize = bindings.size
         bindings = newBindings
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, bindings.size)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder {
@@ -3800,8 +3807,9 @@ class PagesVariablesAndSecretsAdapter(
     private var variables = listOf<Triple<String, String, String>>()
     
     fun submitList(newVariables: List<Triple<String, String, String>>) {
+        val oldSize = variables.size
         variables = newVariables
-        notifyItemRangeChanged(0, itemCount)
+        notifyListChanged(oldSize, variables.size)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VariableViewHolder {

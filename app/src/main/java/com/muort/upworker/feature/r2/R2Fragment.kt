@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.r2
+﻿package com.muort.upworker.feature.r2
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -875,8 +877,9 @@ class R2Fragment : Fragment() {
         private var buckets = listOf<R2Bucket>()
         
         fun submitList(newList: List<R2Bucket>) {
+            val oldSize = buckets.size
             buckets = newList
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, buckets.size)
         }
         
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

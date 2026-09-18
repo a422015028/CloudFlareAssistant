@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.zone
+﻿package com.muort.upworker.feature.zone
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.os.Bundle
 import android.view.Gravity
@@ -269,6 +271,8 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
             rules: List<EmailRoutingRule>,
             addresses: List<EmailDestinationAddress>,
         ) {
+            val oldSize = items.size
+
             items.clear()
             items += EmailItem.SettingsItem(settings)
             items += EmailItem.SectionHeader(R.string.email_section_routing_rules)
@@ -285,7 +289,7 @@ class EmailRoutingFragment : BaseZoneFeatureFragment() {
                 items += addresses.map { EmailItem.AddressItem(it) }
             }
             items += EmailItem.AddButton(R.string.email_add_destination, isRule = false)
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, items.size)
         }
 
         override fun getItemViewType(position: Int): Int = when (items[position]) {

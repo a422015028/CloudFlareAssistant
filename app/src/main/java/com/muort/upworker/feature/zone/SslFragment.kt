@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.zone
+﻿package com.muort.upworker.feature.zone
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -219,6 +221,8 @@ class SslFragment : BaseZoneFeatureFragment() {
             minTls: String,
             tls13: Boolean,
         ) {
+            val oldSize = items.size
+
             items.clear()
             items += SslItem.Selector(
                 key = "ssl",
@@ -250,7 +254,7 @@ class SslFragment : BaseZoneFeatureFragment() {
                 subtitle = ctx.getString(R.string.ssl_tls_1_3_subtitle),
                 checked = tls13,
             )
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, items.size)
         }
 
         override fun getItemViewType(position: Int): Int = when (items[position]) {

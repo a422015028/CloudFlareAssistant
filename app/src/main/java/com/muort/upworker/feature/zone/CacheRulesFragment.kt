@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.zone
+﻿package com.muort.upworker.feature.zone
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.content.DialogInterface
 import android.os.Bundle
@@ -100,9 +102,10 @@ class CacheRulesFragment : BaseZoneFeatureFragment() {
         private val items = mutableListOf<CacheRule>()
 
         fun submitList(newItems: List<CacheRule>) {
+            val oldSize = items.size
             items.clear()
             items.addAll(newItems)
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, items.size)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {

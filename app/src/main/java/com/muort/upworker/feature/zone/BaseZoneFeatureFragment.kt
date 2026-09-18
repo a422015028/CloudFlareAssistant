@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.zone
+﻿package com.muort.upworker.feature.zone
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -142,9 +144,10 @@ abstract class BaseZoneFeatureFragment : Fragment() {
         private val items = mutableListOf<ZoneRuleItem>()
 
         fun submitList(newItems: List<ZoneRuleItem>) {
+            val oldSize = items.size
             items.clear()
             items.addAll(newItems)
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, items.size)
         }
 
         fun getItem(position: Int): ZoneRuleItem = items[position]

@@ -1,4 +1,6 @@
-package com.muort.upworker.feature.zone
+﻿package com.muort.upworker.feature.zone
+
+import com.muort.upworker.core.util.notifyListChanged
 
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -265,9 +267,10 @@ class AccessRulesFragment : BaseZoneFeatureFragment() {
         private val items = mutableListOf<FirewallAccessRule>()
 
         fun submitList(newItems: List<FirewallAccessRule>) {
+            val oldSize = items.size
             items.clear()
             items.addAll(newItems)
-            notifyItemRangeChanged(0, itemCount)
+            notifyListChanged(oldSize, items.size)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
