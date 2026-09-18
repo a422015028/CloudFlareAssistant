@@ -1,4 +1,5 @@
-﻿package com.muort.upworker.feature.worker
+package com.muort.upworker.feature.worker
+
 
 import com.muort.upworker.core.util.notifyListChanged
 
@@ -3822,10 +3823,36 @@ class WorkerScriptsAdapter(
     private val onToggleFeaturesClick: (WorkerScript) -> Unit = {},
     private val onSelectionModeClick: (WorkerScript, Boolean) -> Unit = { _, _ -> }
 ) : RecyclerView.Adapter<WorkerScriptsAdapter.ScriptViewHolder>() {
-    
+
     private var scripts = listOf<WorkerScript>()
     private var selectionMode = false
     private val selectedItems = mutableSetOf<String>()
+
+    // 功能按钮配置：文字、图标、点击回调
+    private data class FeatureItem(
+        val textRes: Int,
+        val iconRes: Int,
+        val click: (WorkerScript) -> Unit
+    )
+
+    private val featureItems = listOf(
+        FeatureItem(R.string.tech_kv, android.R.drawable.ic_menu_add) { onConfigKvClick(it) },
+        FeatureItem(R.string.tech_r2, android.R.drawable.ic_menu_add) { onConfigR2Click(it) },
+        FeatureItem(R.string.tech_d1, android.R.drawable.ic_menu_add) { onConfigD1Click(it) },
+        FeatureItem(R.string.dns_field_service, android.R.drawable.ic_menu_add) { onConfigServiceClick(it) },
+        FeatureItem(R.string.pages_label_variable, android.R.drawable.ic_menu_add) { onConfigVariablesClick(it) },
+        FeatureItem(R.string.pages_label_secret, android.R.drawable.ic_menu_add) { onConfigSecretsClick(it) },
+        FeatureItem(R.string.card_settings, android.R.drawable.ic_menu_preferences) { onRuntimeSettingsClick(it) },
+        FeatureItem(R.string.delete, android.R.drawable.ic_menu_delete) { onDeleteClick(it) },
+        FeatureItem(R.string.xml_item_worker_script_2, android.R.drawable.ic_menu_today) { onTriggerClick(it) },
+        FeatureItem(R.string.xml_item_pages_project_3, android.R.drawable.ic_menu_recent_history) { onHistoryClick(it) },
+        FeatureItem(R.string.xml_fragment_script_editor_title, android.R.drawable.ic_menu_edit) { onEditClick(it) },
+        FeatureItem(R.string.domain_add_title, android.R.drawable.ic_menu_add) { onAddCustomDomainClick(it) },
+        FeatureItem(R.string.xml_item_pages_project_2, android.R.drawable.ic_menu_myplaces) { onViewDomainsClick(it) },
+        FeatureItem(R.string.route_add_route, android.R.drawable.ic_menu_add) { onAddRouteClick(it) },
+        FeatureItem(R.string.worker_view_routes_title, android.R.drawable.ic_menu_directions) { onViewRoutesClick(it) },
+        FeatureItem(R.string.worker_feature_toggles_title, android.R.drawable.ic_menu_preferences) { onToggleFeaturesClick(it) }
+    )
     
     fun submitList(newScripts: List<WorkerScript>) {
         val oldSize = scripts.size
@@ -3865,7 +3892,92 @@ class WorkerScriptsAdapter(
     inner class ScriptViewHolder(
         private val binding: ItemWorkerScriptBinding
     ) : RecyclerView.ViewHolder(binding.root) {
-        
+
+        // 默认显示前 8 个按钮，其余收起
+        private val defaultVisibleCount = 8
+        private var isExpanded = false
+
+        // 保存创建的按钮 View，用于控制可见性
+        private val featureViews = mutableListOf<android.view.View>()
+
+        init {
+            createFeatureButtons()
+            binding.expandBtn.setOnClickListener {
+                isExpanded = !isExpanded
+                updateExpandState()
+            }
+        }
+
+        private fun createFeatureButtons() {
+            val ctx = binding.root.context
+            val density = ctx.resources.displayMetrics.density
+            val iconSize = (20 * density).toInt()
+            val padding = (8 * density).toInt()
+
+            // 获取主题 colorPrimary 和点击反馈背景
+            val typedValue = android.util.TypedValue()
+            ctx.theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+            val primaryColor = typedValue.data
+            ctx.theme.resolveAttribute(android.R.attr.selectableItemBackground, typedValue, true)
+            val selectableBgId = typedValue.resourceId
+
+            featureItems.forEachIndexed { index, item ->
+                // 垂直布局：图标在上，文字在下
+                val container = android.widget.LinearLayout(ctx).apply {
+                    orientation = android.widget.LinearLayout.VERTICAL
+                    gravity = android.view.Gravity.CENTER
+                    setPadding(padding, padding, padding, padding)
+                    setBackgroundResource(selectableBgId)
+                    isClickable = true
+                    isFocusable = true
+                    layoutParams = android.widget.GridLayout.LayoutParams().apply {
+                        width = 0
+                        height = android.widget.GridLayout.LayoutParams.WRAP_CONTENT
+                        columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
+                    }
+                }
+
+                val icon = android.widget.ImageView(ctx).apply {
+                    layoutParams = android.widget.LinearLayout.LayoutParams(iconSize, iconSize)
+                    setImageResource(item.iconRes)
+                    setColorFilter(primaryColor, android.graphics.PorterDuff.Mode.SRC_IN)
+                }
+
+                val label = android.widget.TextView(ctx).apply {
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { topMargin = (4 * density).toInt() }
+                    setText(item.textRes)
+                    textSize = 11f
+                    setTextColor(primaryColor)
+                    maxLines = 2
+                    ellipsize = android.text.TextUtils.TruncateAt.END
+                    gravity = android.view.Gravity.CENTER
+                }
+
+                container.addView(icon)
+                container.addView(label)
+                featureViews.add(container)
+                binding.featureGrid.addView(container)
+            }
+        }
+
+        private fun updateExpandState() {
+            featureViews.forEachIndexed { index, view ->
+                view.visibility = if (isExpanded || index < defaultVisibleCount)
+                    android.view.View.VISIBLE else android.view.View.GONE
+            }
+            binding.expandBtn.text = if (isExpanded)
+                binding.root.context.getString(R.string.worker_collapse_features)
+            else
+                binding.root.context.getString(R.string.worker_expand_all_features)
+            // 展开/收起按钮本身：如果按钮总数 <= 默认显示数，隐藏展开按钮
+            binding.expandBtn.visibility =
+                if (featureViews.size <= defaultVisibleCount) android.view.View.GONE
+                else android.view.View.VISIBLE
+        }
+
         fun bind(script: WorkerScript) {
             binding.scriptNameText.text = script.id
             
@@ -3877,21 +3989,14 @@ class WorkerScriptsAdapter(
             
             // 添加多选模式支持 - 通过改变卡片背景色表示选中状态
             if (selectionMode) {
-                binding.deleteBtn.visibility = android.view.View.GONE
-                binding.historyBtn.visibility = android.view.View.GONE
-                binding.editBtn.visibility = android.view.View.GONE
-                binding.triggerBtn.visibility = android.view.View.GONE
-                binding.runtimeSettingsBtn.visibility = android.view.View.GONE
+                // 选择模式：隐藏所有功能按钮和展开按钮
+                featureViews.forEach { it.visibility = android.view.View.GONE }
+                binding.expandBtn.visibility = android.view.View.GONE
                 binding.logsBtn.visibility = android.view.View.GONE
-                binding.addCustomDomainBtn.visibility = android.view.View.GONE
-                binding.viewDomainsBtn.visibility = android.view.View.GONE
-                binding.addRouteBtn.visibility = android.view.View.GONE
-                binding.viewRoutesBtn.visibility = android.view.View.GONE
-                binding.toggleFeaturesBtn.visibility = android.view.View.GONE
-                
+
                 val isSelected = selectedItems.contains(script.id)
                 updateSelectionUI(binding.root, isSelected)
-                
+
                 binding.root.setOnClickListener {
                     val newSelected = !selectedItems.contains(script.id)
                     if (newSelected) {
@@ -3903,87 +4008,20 @@ class WorkerScriptsAdapter(
                     onSelectionModeClick(script, newSelected)
                 }
             } else {
-                binding.deleteBtn.visibility = android.view.View.VISIBLE
-                binding.historyBtn.visibility = android.view.View.VISIBLE
-                binding.editBtn.visibility = android.view.View.VISIBLE
-                binding.triggerBtn.visibility = android.view.View.VISIBLE
-                binding.runtimeSettingsBtn.visibility = android.view.View.VISIBLE
+                // 正常模式：恢复功能按钮可见性
+                updateExpandState()
                 binding.logsBtn.visibility = android.view.View.VISIBLE
-                binding.addCustomDomainBtn.visibility = android.view.View.VISIBLE
-                binding.viewDomainsBtn.visibility = android.view.View.VISIBLE
-                binding.addRouteBtn.visibility = android.view.View.VISIBLE
-                binding.viewRoutesBtn.visibility = android.view.View.VISIBLE
-                binding.toggleFeaturesBtn.visibility = android.view.View.VISIBLE
                 updateSelectionUI(binding.root, false)
                 binding.root.setOnClickListener(null)
             }
-            
-            binding.configKvBtn.setOnClickListener {
-                onConfigKvClick(script)
-            }
-            
-            binding.configR2Btn.setOnClickListener {
-                onConfigR2Click(script)
-            }
-            
-            binding.configD1Btn.setOnClickListener {
-                onConfigD1Click(script)
+
+            // 为每个功能按钮设置点击事件
+            featureViews.forEachIndexed { index, view ->
+                view.setOnClickListener { featureItems[index].click(script) }
             }
 
-            binding.configServiceBtn.setOnClickListener {
-                onConfigServiceClick(script)
-            }
-            
-            binding.configVariablesBtn.setOnClickListener {
-                onConfigVariablesClick(script)
-            }
-            
-            binding.configSecretsBtn.setOnClickListener {
-                onConfigSecretsClick(script)
-            }
-            
-            binding.runtimeSettingsBtn.setOnClickListener {
-                onRuntimeSettingsClick(script)
-            }
-            
             binding.logsBtn.setOnClickListener {
                 onLogsClick(script)
-            }
-            
-            binding.triggerBtn.setOnClickListener {
-                onTriggerClick(script)
-            }
-            
-            binding.historyBtn.setOnClickListener {
-                onHistoryClick(script)
-            }
-            
-            binding.editBtn.setOnClickListener {
-                onEditClick(script)
-            }
-            
-            binding.deleteBtn.setOnClickListener {
-                onDeleteClick(script)
-            }
-            
-            binding.addCustomDomainBtn.setOnClickListener {
-                onAddCustomDomainClick(script)
-            }
-            
-            binding.viewDomainsBtn.setOnClickListener {
-                onViewDomainsClick(script)
-            }
-
-            binding.addRouteBtn.setOnClickListener {
-                onAddRouteClick(script)
-            }
-
-            binding.viewRoutesBtn.setOnClickListener {
-                onViewRoutesClick(script)
-            }
-
-            binding.toggleFeaturesBtn.setOnClickListener {
-                onToggleFeaturesClick(script)
             }
         }
         

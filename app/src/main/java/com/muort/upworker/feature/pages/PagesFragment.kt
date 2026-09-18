@@ -1,4 +1,5 @@
-﻿package com.muort.upworker.feature.pages
+package com.muort.upworker.feature.pages
+
 
 import com.muort.upworker.core.util.notifyListChanged
 
@@ -276,7 +277,7 @@ class PagesFragment : Fragment() {
                 val account = accountViewModel.defaultAccount.value
                 if (account != null) {
                     // 先禁用按钮、显示进行中文字；loadProjectDetail 拿到 production 环境配置
-                    itemBinding.envSyncButton.isEnabled = false
+                    itemBinding.featureGrid.getChildAt(11)?.isEnabled = false
                     itemBinding.envSyncProgressText.visibility = View.VISIBLE
                     itemBinding.envSyncProgressText.text = getString(R.string.pages_env_sync_in_progress)
                     pagesViewModel.getProjectDetail(account, project.name) { res ->
@@ -2262,7 +2263,7 @@ class PagesFragment : Fragment() {
                                     val itemBinding = ItemPagesProjectBinding.bind(child)
                                     if (itemBinding.envSyncProgressText.isVisible) {
                                         itemBinding.envSyncProgressText.text = formatted
-                                        itemBinding.envSyncButton.isEnabled = true
+                                        itemBinding.featureGrid.getChildAt(11)?.isEnabled = true
                                     }
                                 }
                             }
@@ -3340,6 +3341,27 @@ class PagesFragment : Fragment() {
         private var projects = listOf<PagesProject>()
         private var selectionMode = false
         private val selectedItems = mutableSetOf<String>()
+
+        private data class FeatureItem(
+            val textRes: Int,
+            val iconRes: Int,
+            val click: (PagesProject) -> Unit
+        )
+
+        private val featureItems = listOf(
+            FeatureItem(R.string.tech_kv, android.R.drawable.ic_menu_add) { onConfigKvClick(it) },
+            FeatureItem(R.string.tech_r2, android.R.drawable.ic_menu_add) { onConfigR2Click(it) },
+            FeatureItem(R.string.tech_d1, android.R.drawable.ic_menu_add) { onConfigD1Click(it) },
+            FeatureItem(R.string.dns_field_service, android.R.drawable.ic_menu_add) { onConfigServiceClick(it) },
+            FeatureItem(R.string.pages_label_variable, android.R.drawable.ic_menu_add) { onConfigEnvClick(it) },
+            FeatureItem(R.string.pages_label_secret, android.R.drawable.ic_menu_add) { onConfigSecretClick(it) },
+            FeatureItem(R.string.card_settings, android.R.drawable.ic_menu_preferences) { onRuntimeSettingsClick(it) },
+            FeatureItem(R.string.delete, android.R.drawable.ic_menu_delete) { onDeleteClick(it) },
+            FeatureItem(R.string.domain_add_title, android.R.drawable.ic_menu_add) { onAddDomainClick(it) },
+            FeatureItem(R.string.xml_item_pages_project_2, android.R.drawable.ic_menu_myplaces) { onViewDomainsClick(it) },
+            FeatureItem(R.string.xml_item_pages_project_3, android.R.drawable.ic_menu_recent_history) { onViewDeploymentsClick(it) },
+            FeatureItem(R.string.pages_env_sync_short, android.R.drawable.ic_menu_rotate) { /* 在 bind 中单独设置，需要 binding */ }
+        )
         
         fun submitList(newList: List<PagesProject>) {
             val oldSize = projects.size
@@ -3377,7 +3399,89 @@ class PagesFragment : Fragment() {
         inner class ViewHolder(
             private val binding: ItemPagesProjectBinding
         ) : RecyclerView.ViewHolder(binding.root) {
-            
+
+            // 默认显示前 8 个按钮，其余收起
+            private val defaultVisibleCount = 8
+            private var isExpanded = false
+
+            private val featureViews = mutableListOf<android.view.View>()
+
+            init {
+                createFeatureButtons()
+                binding.expandBtn.setOnClickListener {
+                    isExpanded = !isExpanded
+                    updateExpandState()
+                }
+            }
+
+            private fun createFeatureButtons() {
+                val ctx = binding.root.context
+                val density = ctx.resources.displayMetrics.density
+                val iconSize = (20 * density).toInt()
+                val padding = (8 * density).toInt()
+
+                // 获取主题 colorPrimary 和点击反馈背景
+                val typedValue = android.util.TypedValue()
+                ctx.theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+                val primaryColor = typedValue.data
+                ctx.theme.resolveAttribute(android.R.attr.selectableItemBackground, typedValue, true)
+                val selectableBgId = typedValue.resourceId
+
+                featureItems.forEachIndexed { index, item ->
+                    val container = android.widget.LinearLayout(ctx).apply {
+                        orientation = android.widget.LinearLayout.VERTICAL
+                        gravity = android.view.Gravity.CENTER
+                        setPadding(padding, padding, padding, padding)
+                        setBackgroundResource(selectableBgId)
+                        isClickable = true
+                        isFocusable = true
+                        layoutParams = android.widget.GridLayout.LayoutParams().apply {
+                            width = 0
+                            height = android.widget.GridLayout.LayoutParams.WRAP_CONTENT
+                            columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1f)
+                        }
+                    }
+
+                    val icon = android.widget.ImageView(ctx).apply {
+                        layoutParams = android.widget.LinearLayout.LayoutParams(iconSize, iconSize)
+                        setImageResource(item.iconRes)
+                        setColorFilter(primaryColor, android.graphics.PorterDuff.Mode.SRC_IN)
+                    }
+
+                    val label = android.widget.TextView(ctx).apply {
+                        layoutParams = android.widget.LinearLayout.LayoutParams(
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                        ).apply { topMargin = (4 * density).toInt() }
+                        setText(item.textRes)
+                        textSize = 11f
+                        setTextColor(primaryColor)
+                        maxLines = 2
+                        ellipsize = android.text.TextUtils.TruncateAt.END
+                        gravity = android.view.Gravity.CENTER
+                    }
+
+                    container.addView(icon)
+                    container.addView(label)
+                    featureViews.add(container)
+                    binding.featureGrid.addView(container)
+                }
+            }
+
+            private fun updateExpandState() {
+                featureViews.forEachIndexed { index, view ->
+                    view.visibility = if (isExpanded || index < defaultVisibleCount)
+                        android.view.View.VISIBLE else android.view.View.GONE
+                }
+                binding.expandBtn.text = if (isExpanded)
+                    binding.root.context.getString(R.string.worker_collapse_features)
+                else
+                    binding.root.context.getString(R.string.worker_expand_all_features)
+                binding.expandBtn.visibility =
+                    if (featureViews.size <= defaultVisibleCount) android.view.View.GONE
+                    else android.view.View.VISIBLE
+            }
+
             fun bind(project: PagesProject) {
                 binding.projectNameText.text = project.name
                 
@@ -3386,18 +3490,14 @@ class PagesFragment : Fragment() {
                 
                 // 添加多选模式支持 - 通过改变卡片背景色表示选中状态
                 if (selectionMode) {
-                    binding.deleteBtn.visibility = android.view.View.GONE
-                    binding.viewDeploymentsBtn.visibility = android.view.View.GONE
-                    binding.viewDomainsBtn.visibility = android.view.View.GONE
-                    binding.addDomainBtn.visibility = android.view.View.GONE
-                    binding.runtimeSettingsBtn.visibility = android.view.View.GONE
+                    featureViews.forEach { it.visibility = android.view.View.GONE }
+                    binding.expandBtn.visibility = android.view.View.GONE
                     binding.logsBtn.visibility = android.view.View.GONE
-                    binding.envSyncButton.visibility = android.view.View.GONE
                     binding.envSyncProgressText.visibility = android.view.View.GONE
-                    
+
                     val isSelected = selectedItems.contains(project.name)
                     updateSelectionUI(binding.root, isSelected)
-                    
+
                     binding.root.setOnClickListener {
                         val newSelected = !selectedItems.contains(project.name)
                         if (newSelected) {
@@ -3409,67 +3509,23 @@ class PagesFragment : Fragment() {
                         onSelectionModeClick(project, newSelected)
                     }
                 } else {
-                    binding.deleteBtn.visibility = android.view.View.VISIBLE
-                    binding.viewDeploymentsBtn.visibility = android.view.View.VISIBLE
-                    binding.viewDomainsBtn.visibility = android.view.View.VISIBLE
-                    binding.addDomainBtn.visibility = android.view.View.VISIBLE
-                    binding.runtimeSettingsBtn.visibility = android.view.View.VISIBLE
+                    updateExpandState()
                     binding.logsBtn.visibility = android.view.View.VISIBLE
-                    binding.envSyncButton.visibility = android.view.View.VISIBLE
                     updateSelectionUI(binding.root, false)
                     binding.root.setOnClickListener(null)
                 }
-                
-                binding.configEnvBtn.setOnClickListener {
-                    onConfigEnvClick(project)
+
+                // 为每个功能按钮设置点击事件
+                featureViews.forEachIndexed { index, view ->
+                    view.setOnClickListener { featureItems[index].click(project) }
+                }
+                // 环境同步按钮需要 binding，单独设置
+                if (featureViews.size > 11) {
+                    featureViews[11].setOnClickListener { onEnvSyncClick(project, binding) }
                 }
 
-                binding.configSecretBtn.setOnClickListener {
-                    onConfigSecretClick(project)
-                }
-
-                binding.configKvBtn.setOnClickListener {
-                    onConfigKvClick(project)
-                }
-                
-                binding.configD1Btn.setOnClickListener {
-                    onConfigD1Click(project)
-                }
-
-                binding.configServiceBtn.setOnClickListener {
-                    onConfigServiceClick(project)
-                }
-
-                binding.configR2Btn.setOnClickListener {
-                    onConfigR2Click(project)
-                }
-                
-                binding.viewDeploymentsBtn.setOnClickListener {
-                    onViewDeploymentsClick(project)
-                }
-                
-                binding.viewDomainsBtn.setOnClickListener {
-                    onViewDomainsClick(project)
-                }
-                
-                binding.addDomainBtn.setOnClickListener {
-                    onAddDomainClick(project)
-                }
-
-                binding.runtimeSettingsBtn.setOnClickListener {
-                    onRuntimeSettingsClick(project)
-                }
-                
                 binding.logsBtn.setOnClickListener {
                     onLogsClick(project)
-                }
-                
-                binding.deleteBtn.setOnClickListener {
-                    onDeleteClick(project)
-                }
-
-                binding.envSyncButton.setOnClickListener {
-                    onEnvSyncClick(project, binding)
                 }
             }
             

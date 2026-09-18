@@ -675,6 +675,8 @@
     <string name="worker_route_no_custom">No routes configured for this script yet.</string>
     <!-- Worker script card row 3 "Feature Toggles" dialog: subdomain / logs / traces -->
     <string name="worker_feature_toggles_title">Feature Toggles</string>
+    <string name="worker_expand_all_features">Show all features</string>
+    <string name="worker_collapse_features">Collapse</string>
     <string name="worker_feature_toggles_dialog_title_template">%1$s · Feature Toggles</string>
     <string name="worker_feature_subdomain_enable_title">Enable Custom Subdomain</string>
     <string name="worker_feature_subdomain_enable_summary">Expose your Worker on a *.workers.dev subdomain</string>
@@ -2526,7 +2528,7 @@
     <string name="worker_nodejs_flag_dup_skip_format">compatibility_flags already contains %1$s; skipping duplicate append.</string>
     <string name="worker_nodejs_flag_append_fail_format">Failed to append nodejs_compat flag: %1$s</string>
     <!-- ===== P1-4 Dual-env deployment_configs (production + preview) sync ===== -->
-    <string name="pages_env_sync_title">Production / Preview Env Sync</string>
+    <string name="pages_env_sync_short">Env Sync</string>
     <string name="pages_env_sync_in_progress">Syncing production + preview deployment_configs…</string>
     <string name="pages_env_sync_ok_format">Dual-envs synced: %1$d vars + %2$d KV + %3$d D1 + %4$d R2 + %5$d Service bindings</string>
     <string name="pages_env_sync_preview_fail_format">Preview env write failed: %1$s\nProduction config is active; please fill in preview manually.</string>

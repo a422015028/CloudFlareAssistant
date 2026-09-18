@@ -666,6 +666,8 @@
     <string name="worker_route_no_custom">该脚本尚未配置路由规则</string>
     <!-- Worker 卡片 Row 3 「功能开关」对话框：子域名 / 日志 / Workers 跟踪 -->
     <string name="worker_feature_toggles_title">功能开关</string>
+    <string name="worker_expand_all_features">展开全部功能</string>
+    <string name="worker_collapse_features">收起</string>
     <string name="worker_feature_toggles_dialog_title_template">%1$s · 功能开关</string>
     <string name="worker_feature_subdomain_enable_title">启用自定义子域名</string>
     <string name="worker_feature_subdomain_enable_summary">为脚本开启 *.workers.dev 子域名访问</string>
@@ -2517,7 +2519,7 @@
     <string name="worker_nodejs_flag_dup_skip_format">compatibility_flags 已包含 %1$s，跳过重复追加。</string>
     <string name="worker_nodejs_flag_append_fail_format">追加 nodejs_compat flag 失败：%1$s</string>
     <!-- ===== P1-4 双环境 deployment_configs（production + preview）同步 ===== -->
-    <string name="pages_env_sync_title">生产/预览 双环境配置同步</string>
+    <string name="pages_env_sync_short">环境同步</string>
     <string name="pages_env_sync_in_progress">正在同步 production + preview deployment_configs…</string>
     <string name="pages_env_sync_ok_format">双环境配置已同步：%1$d 个变量 + %2$d 个 KV + %3$d 个 D1 + %4$d 个 R2 + %5$d 个 Service</string>
     <string name="pages_env_sync_preview_fail_format">preview 环境写入失败：%1$s\n生产环境配置已生效，请手动补全预览环境。</string>
