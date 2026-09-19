@@ -183,6 +183,7 @@ class EsbuildBundler @Inject constructor(
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(120, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS)
+                    .fastFallback(true)
                     .build()
 
                 val jsUrls = listOf(
@@ -228,6 +229,7 @@ class EsbuildBundler @Inject constructor(
             val client = OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
+                .fastFallback(true)
                 .build()
             val request = Request.Builder().url(NPM_REGISTRY).build()
             client.newCall(request).execute().use { response ->

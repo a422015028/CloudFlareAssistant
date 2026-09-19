@@ -59,6 +59,7 @@ class TemplateDetailDialog : BottomSheetDialogFragment() {
         OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
+            .fastFallback(true)
             .build()
     }
 

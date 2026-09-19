@@ -49,10 +49,12 @@
 -keep,allowobfuscation,allowshrinking class retrofit2.Response
 -keep,allowobfuscation,allowshrinking interface retrofit2.Call
 
-# OkHttp
+# OkHttp 5.x
+# OkHttp 自带 consumer proguard rules，大部分规则由库自动提供
+# 以下是补充规则：
 -dontwarn okhttp3.**
 -dontwarn okio.**
--keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+-dontwarn okhttp3.internal.**
 
 # Coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}

@@ -375,6 +375,7 @@ object RemoteFileResolver {
         // 所有重定向必须手动 follow，防止 OkHttp 跳过后我们不再做 DNS SSRF 校验。
         .followRedirects(false)
         .followSslRedirects(false)
+        .fastFallback(true)
         .build()
 
     private fun resolveLocation(current: String, location: String): URL? {

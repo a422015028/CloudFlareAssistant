@@ -76,6 +76,7 @@ class CatalogRepository @Inject constructor(
         OkHttpClient.Builder()
             .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .fastFallback(true)
             .build()
     }
 

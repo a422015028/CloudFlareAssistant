@@ -46,6 +46,7 @@ class R2S3Client @Inject constructor(
         .connectTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(120, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
+        .fastFallback(true)
         .build()
 
     private fun getS3Client(config: S3Config): AmazonS3Client {
@@ -67,8 +68,10 @@ class R2S3Client @Inject constructor(
         }
 
         val clientConfiguration = ClientConfiguration().apply {
-            connectionTimeout = 30 * 1000
-            socketTimeout = 30 * 1000
+            // 缩短连接超时：IPv6 不通时更快回退到 IPv4
+            connectionTimeout = 5 * 1000      // 5 秒连接超时（默认 50s）
+            socketTimeout = 30 * 1000          // 30 秒读写超时
+            maxErrorRetry = 3                  // 失败重试 3 次
             signerOverride = "AWSS3V4SignerType"
         }
 

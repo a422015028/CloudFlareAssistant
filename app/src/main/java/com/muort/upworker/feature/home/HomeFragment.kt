@@ -486,6 +486,7 @@ class HomeFragment : Fragment() {
                 val client = OkHttpClient.Builder()
                     .connectTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(10, TimeUnit.SECONDS)
+                    .fastFallback(true)
                     .build()
 
                 val request = Request.Builder()
@@ -494,8 +495,8 @@ class HomeFragment : Fragment() {
                     .build()
 
                 val response = client.newCall(request).execute()
-                if (response.isSuccessful && response.body != null) {
-                    val json = JSONObject(response.body!!.string())
+                if (response.isSuccessful) {
+                    val json = JSONObject(response.body.string())
                     val versionName = json.optString("versionName", "")
                     val versionCode = json.optLong("versionCode", 0)
                     val updateContent = json.optString("updateContent", "")

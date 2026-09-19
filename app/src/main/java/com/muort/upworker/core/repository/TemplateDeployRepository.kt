@@ -67,6 +67,7 @@ class TemplateDeployRepository @Inject constructor(
         OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
+            .fastFallback(true)
             .build()
     }
 

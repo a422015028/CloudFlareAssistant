@@ -89,6 +89,7 @@ class WorkerLogsActivity : AppCompatActivity() {
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(0, TimeUnit.MILLISECONDS)
         .pingInterval(30, TimeUnit.SECONDS)
+        .fastFallback(true)
         .build()
 
     companion object {
