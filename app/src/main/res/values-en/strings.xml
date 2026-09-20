@@ -1014,6 +1014,14 @@
     <string name="zt_tunnel_configure_button">Configure</string>
     <string name="zt_tunnel_view_routes_button">View Routes</string>
     <string name="zt_tunnel_local_config_readonly">Locally managed tunnel. Routes are read-only (managed via local cloudflared config file)</string>
+    <string name="zt_tunnel_refresh_token">Refresh Token</string>
+    <string name="zt_tunnel_refresh_token_confirm">Are you sure you want to refresh the tunnel token?\n\nThe current token will be immediately invalidated. All cloudflared instances using the old token will not be able to establish new connections. You will need to update all replica instances with the new token.</string>
+    <string name="zt_tunnel_refresh_token_title">Refresh Token Confirmation</string>
+    <string name="zt_tunnel_copy_json">Copy JSON</string>
+    <string name="zt_tunnel_mode_token">Token Command</string>
+    <string name="zt_tunnel_mode_json">JSON Credentials</string>
+    <string name="zt_tunnel_mode_yaml">YAML Config</string>
+    <string name="zt_tunnel_mode_run_cmd">Run Command</string>
     <!-- Tunnel Connection Item -->
     <string name="zt_tunnel_connection_reconnecting">Reconnecting</string>
     <string name="zt_tunnel_client_version">cloudflared %1$s</string>
@@ -1882,6 +1890,8 @@
     <string name="vm_msg_zt_tunnel_delete_failed">Failed to delete tunnel: %1$s</string>
     <string name="vm_msg_zt_tunnel_detail_load_failed">Failed to load tunnel details: %1$s</string>
     <string name="vm_msg_zt_tunnel_token_load_failed">Failed to load tunnel token: %1$s</string>
+    <string name="vm_msg_zt_tunnel_token_refresh_success">Tunnel token refreshed successfully</string>
+    <string name="vm_msg_zt_tunnel_token_refresh_failed">Failed to refresh tunnel token: %1$s</string>
     <!-- ===== DNS (supplement) ===== -->
     <string name="vm_msg_dns_load_failed">Failed to load DNS records: %1$s</string>
     <string name="vm_msg_dns_create_success">DNS record created</string>

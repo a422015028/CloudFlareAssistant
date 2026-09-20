@@ -1005,6 +1005,14 @@
     <string name="zt_tunnel_configure_button">配置</string>
     <string name="zt_tunnel_view_routes_button">查看路由</string>
     <string name="zt_tunnel_local_config_readonly">本地配置隧道，路由规则为只读（通过本地 cloudflared 配置文件管理）</string>
+    <string name="zt_tunnel_refresh_token">刷新令牌</string>
+    <string name="zt_tunnel_refresh_token_confirm">确定要刷新隧道令牌吗？\n\n刷新后当前令牌将立即失效，所有使用旧令牌的 cloudflared 实例将无法建立新连接。你需要使用新令牌更新所有副本实例。</string>
+    <string name="zt_tunnel_refresh_token_title">刷新令牌确认</string>
+    <string name="zt_tunnel_copy_json">复制 JSON</string>
+    <string name="zt_tunnel_mode_token">Token 命令</string>
+    <string name="zt_tunnel_mode_json">JSON 凭证</string>
+    <string name="zt_tunnel_mode_yaml">YAML 配置</string>
+    <string name="zt_tunnel_mode_run_cmd">配置命令</string>
     <!-- Tunnel Connection Item -->
     <string name="zt_tunnel_connection_reconnecting">重连中</string>
     <string name="zt_tunnel_client_version">cloudflared %1$s</string>
@@ -1873,6 +1881,8 @@
     <string name="vm_msg_zt_tunnel_delete_failed">删除隧道失败: %1$s</string>
     <string name="vm_msg_zt_tunnel_detail_load_failed">获取隧道详情失败: %1$s</string>
     <string name="vm_msg_zt_tunnel_token_load_failed">获取隧道令牌失败: %1$s</string>
+    <string name="vm_msg_zt_tunnel_token_refresh_success">隧道令牌刷新成功</string>
+    <string name="vm_msg_zt_tunnel_token_refresh_failed">刷新隧道令牌失败: %1$s</string>
     <!-- ===== DNS (补充) ===== -->
     <string name="vm_msg_dns_load_failed">加载 DNS 记录失败: %1$s</string>
     <string name="vm_msg_dns_create_success">DNS 记录创建成功</string>

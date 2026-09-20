@@ -189,6 +189,45 @@
             android:text="@string/tunnel_connect_instructions_old"
             android:textSize="13sp" />
 
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/tokenModeChipGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipModeToken"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/zt_tunnel_mode_token"
+                android:checked="true"
+                style="@style/Widget.Material3.Chip.Filter" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipModeJson"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/zt_tunnel_mode_json"
+                style="@style/Widget.Material3.Chip.Filter" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipModeYaml"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/zt_tunnel_mode_yaml"
+                style="@style/Widget.Material3.Chip.Filter" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipModeRunCmd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/zt_tunnel_mode_run_cmd"
+                style="@style/Widget.Material3.Chip.Filter" />
+
+        </com.google.android.material.chip.ChipGroup>
+
         <TextView
             android:id="@+id/tunnelTokenText"
             android:layout_width="match_parent"
@@ -225,6 +264,16 @@
                 android:text="@string/tunnel_copy_command" />
 
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/refreshTokenButton"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/zt_tunnel_refresh_token"
+            app:icon="@android:drawable/ic_menu_rotate"
+            app:iconGravity="textStart" />
 
         <TextView
             android:layout_width="match_parent"

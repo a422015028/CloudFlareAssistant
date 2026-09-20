@@ -248,44 +248,129 @@ class TunnelsFragment : Fragment() {
         val tokenText = dialogView.findViewById<TextView>(R.id.tunnelTokenText)
         val hideTokenButton = dialogView.findViewById<android.widget.Button>(R.id.hideTokenButton)
         val copyCommandButton = dialogView.findViewById<android.widget.Button>(R.id.copyCommandButton)
+        val refreshTokenButton = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.refreshTokenButton)
+        val tokenModeChipGroup = dialogView.findViewById<com.google.android.material.chip.ChipGroup>(R.id.tokenModeChipGroup)
+        
+        // Hide mode switcher for remote config tunnels - only show token mode
+        if (tunnel.remoteConfig == true) {
+            tokenModeChipGroup.visibility = View.GONE
+        }
         
         if (tunnel.deletedAt == null) {
             val account = accountViewModel.defaultAccount.value
             account?.let { acc ->
                 viewModel.getTunnelToken(acc, tunnel.id) { token ->
                     if (token != null) {
-                        val fullCommand = "cloudflared service install $token"
+                        var currentToken: String = token
+                        val isLocalConfig = tunnel.remoteConfig == false
                         var isTokenHidden = true
-                        tokenText.text = getString(R.string.tunnel_install_masked)
-                        hideTokenButton.setText(R.string.zt_tunnel_show_token)
+                        
+                        // Display mode: 0=Token, 1=JSON, 2=YAML, 3=RunCommand
+                        var currentMode = 0
+                        
+                        fun getDisplayContent(tokenValue: String, mode: Int): String {
+                            return when (mode) {
+                                1 -> decodeTunnelTokenToJson(tokenValue) ?: tokenValue
+                                2 -> {
+                                    val tunnelId = tunnel.id
+                                    "tunnel: $tunnelId\ncredentials-file: /data/local/tmp/cloudflared/credentials.json\n\ningress:\n  - hostname: gitlab.widgetcorp.tech\n    service: http://localhost:80\n  - hostname: gitlab-ssh.widgetcorp.tech\n    service: ssh://localhost:22\n  - service: http_status:404"
+                                }
+                                3 -> "cloudflared tunnel --config /data/local/tmp/cloudflared/config.yml run ${tunnel.name}"
+                                else -> "cloudflared service install $tokenValue"
+                            }
+                        }
+                        
+                        fun getMaskedContent(mode: Int): String {
+                            return when (mode) {
+                                1 -> "{\"AccountTag\":\"●●●●●●●●●●●●\",\"TunnelSecret\":\"●●●●●●●●●●●●●●●●●●●●●●●●●●●●\",\"TunnelID\":\"●●●●●●●●-●●●●-●●●●-●●●●-●●●●●●●●●●●●\",\"Endpoint\":\"\"}"
+                                2 -> "tunnel: ●●●●●●●●-●●●●-●●●●-●●●●-●●●●●●●●●●●●\ncredentials-file: /data/local/tmp/cloudflared/credentials.json\n\ningress:\n  - hostname: ●●●●●●●●●●●●●●●●●●\n    service: http://localhost:80\n  - hostname: ●●●●●●●●●●●●●●●●●●\n    service: ssh://localhost:22\n  - service: http_status:404"
+                                3 -> "cloudflared tunnel --config /data/local/tmp/cloudflared/config.yml run ●●●●●●●●●●●●"
+                                else -> "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
+                            }
+                        }
+                        
+                        fun getCopyButtonText(mode: Int): Int {
+                            return when (mode) {
+                                1 -> R.string.zt_tunnel_copy_json
+                                else -> R.string.tunnel_copy_command
+                            }
+                        }
+                        
+                        fun getClipLabel(mode: Int): String {
+                            return when (mode) {
+                                1 -> "Tunnel Credentials JSON"
+                                2 -> "Cloudflared YAML Config"
+                                3 -> "Cloudflared Tunnel Run Command"
+                                else -> "Cloudflared Service Command"
+                            }
+                        }
+                        
+                        fun updateDisplay() {
+                            tokenText.text = if (isTokenHidden) getMaskedContent(currentMode) else getDisplayContent(currentToken, currentMode)
+                            hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.tunnel_hide_token)
+                            copyCommandButton.setText(getCopyButtonText(currentMode))
+                        }
+                        
+                        updateDisplay()
+                        
+                        tokenModeChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
+                            currentMode = when (group.checkedChipId) {
+                                R.id.chipModeJson -> 1
+                                R.id.chipModeYaml -> 2
+                                R.id.chipModeRunCmd -> 3
+                                else -> 0
+                            }
+                            updateDisplay()
+                        }
                         
                         hideTokenButton.setOnClickListener {
                             isTokenHidden = !isTokenHidden
-                            tokenText.text = if (isTokenHidden) "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else fullCommand
-                            hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.tunnel_hide_token)
+                            updateDisplay()
                         }
                         
                         copyCommandButton.setOnClickListener {
                             val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                            val clip = android.content.ClipData.newPlainText("Cloudflared Service Command", fullCommand)
+                            val clip = android.content.ClipData.newPlainText(getClipLabel(currentMode), getDisplayContent(currentToken, currentMode))
                             clipboard.setPrimaryClip(clip)
                             android.widget.Toast.makeText(requireContext(), getString(R.string.zt_tunnel_command_copied), android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                        
+                        refreshTokenButton.setOnClickListener {
+                            MaterialAlertDialogBuilder(requireContext())
+                                .setTitle(R.string.zt_tunnel_refresh_token_title)
+                                .setMessage(R.string.zt_tunnel_refresh_token_confirm)
+                                .setPositiveButton(R.string.zt_tunnel_refresh_token) { _, _ ->
+                                    refreshTokenButton.isEnabled = false
+                                    viewModel.refreshTunnelToken(acc, tunnel.id) { newToken ->
+                                        refreshTokenButton.isEnabled = true
+                                        if (newToken != null) {
+                                            currentToken = newToken
+                                            isTokenHidden = true
+                                            updateDisplay()
+                                        }
+                                    }
+                                }
+                                .setNegativeButton(R.string.cancel, null)
+                                .show()
                         }
                     } else {
                         tokenText.text = getString(R.string.zt_tunnel_token_fetch_failed)
                         hideTokenButton.visibility = View.GONE
                         copyCommandButton.visibility = View.GONE
+                        refreshTokenButton.visibility = View.GONE
                     }
                 }
             } ?: run {
                 tokenText.text = getString(R.string.msg_please_select_account_first)
                 hideTokenButton.visibility = View.GONE
                 copyCommandButton.visibility = View.GONE
+                refreshTokenButton.visibility = View.GONE
             }
         } else {
             tokenText.visibility = View.GONE
             hideTokenButton.visibility = View.GONE
             copyCommandButton.visibility = View.GONE
+            refreshTokenButton.visibility = View.GONE
         }
         
         val builder = MaterialAlertDialogBuilder(requireContext())
@@ -481,23 +566,106 @@ class TunnelsFragment : Fragment() {
             val tokenTextView = dialogView.findViewById<TextView>(R.id.tokenTextView)
             val copyCommandButton = dialogView.findViewById<android.widget.Button>(R.id.copyCommandButton)
             val hideTokenButton = dialogView.findViewById<android.widget.Button>(R.id.hideTokenButton)
+            val refreshTokenButton = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.refreshTokenButton)
+            val tokenModeChipGroup = dialogView.findViewById<com.google.android.material.chip.ChipGroup>(R.id.tokenModeChipGroup)
             
-            val fullCommand = "cloudflared tunnel run --token $token"
+            // Hide mode switcher for remote config tunnels - only show token mode
+            if (tunnel.remoteConfig == true) {
+                tokenModeChipGroup.visibility = View.GONE
+            }
+            
+            var currentToken: String = token
+            val isLocalConfig = tunnel.remoteConfig == false
             var isTokenHidden = true
-            tokenTextView.text = getString(R.string.tunnel_run_masked)
-            hideTokenButton.setText(R.string.zt_tunnel_show_token)
+            
+            // Display mode: 0=Token, 1=JSON, 2=YAML, 3=RunCommand
+            var currentMode = 0
+            
+            fun getDisplayContent(tokenValue: String, mode: Int): String {
+                return when (mode) {
+                    1 -> decodeTunnelTokenToJson(tokenValue) ?: tokenValue
+                    2 -> {
+                        val tunnelId = tunnel.id
+                        "tunnel: $tunnelId\ncredentials-file: /data/local/tmp/cloudflared/credentials.json\n\ningress:\n  - hostname: gitlab.widgetcorp.tech\n    service: http://localhost:80\n  - hostname: gitlab-ssh.widgetcorp.tech\n    service: ssh://localhost:22\n  - service: http_status:404"
+                    }
+                    3 -> "cloudflared tunnel --config /data/local/tmp/cloudflared/config.yml run ${tunnel.name}"
+                    else -> "cloudflared tunnel run --token $tokenValue"
+                }
+            }
+            
+            fun getMaskedContent(mode: Int): String {
+                return when (mode) {
+                    1 -> "{\"AccountTag\":\"●●●●●●●●●●●●\",\"TunnelSecret\":\"●●●●●●●●●●●●●●●●●●●●●●●●●●●●\",\"TunnelID\":\"●●●●●●●●-●●●●-●●●●-●●●●-●●●●●●●●●●●●\",\"Endpoint\":\"\"}"
+                    2 -> "tunnel: ●●●●●●●●-●●●●-●●●●-●●●●-●●●●●●●●●●●●\ncredentials-file: /data/local/tmp/cloudflared/credentials.json\n\ningress:\n  - hostname: ●●●●●●●●●●●●●●●●●●\n    service: http://localhost:80\n  - hostname: ●●●●●●●●●●●●●●●●●●\n    service: ssh://localhost:22\n  - service: http_status:404"
+                    3 -> "cloudflared tunnel --config /data/local/tmp/cloudflared/config.yml run ●●●●●●●●●●●●"
+                    else -> "cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
+                }
+            }
+            
+            fun getCopyButtonText(mode: Int): Int {
+                return when (mode) {
+                    1 -> R.string.zt_tunnel_copy_json
+                    else -> R.string.tunnel_copy_command
+                }
+            }
+            
+            fun getClipLabel(mode: Int): String {
+                return when (mode) {
+                    1 -> "Tunnel Credentials JSON"
+                    2 -> "Cloudflared YAML Config"
+                    3 -> "Cloudflared Tunnel Run Command"
+                    else -> "Cloudflared Tunnel Command"
+                }
+            }
+            
+            fun updateDisplay() {
+                tokenTextView.text = if (isTokenHidden) getMaskedContent(currentMode) else getDisplayContent(currentToken, currentMode)
+                hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.tunnel_hide_token)
+                copyCommandButton.setText(getCopyButtonText(currentMode))
+            }
+            
+            updateDisplay()
+            
+            tokenModeChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
+                currentMode = when (group.checkedChipId) {
+                    R.id.chipModeJson -> 1
+                    R.id.chipModeYaml -> 2
+                    R.id.chipModeRunCmd -> 3
+                    else -> 0
+                }
+                updateDisplay()
+            }
             
             hideTokenButton.setOnClickListener {
                 isTokenHidden = !isTokenHidden
-                tokenTextView.text = if (isTokenHidden) "cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" else fullCommand
-                hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.tunnel_hide_token)
+                updateDisplay()
             }
             
+            copyCommandButton.setText(getCopyButtonText(currentMode))
             copyCommandButton.setOnClickListener {
                 val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                val clip = android.content.ClipData.newPlainText("Cloudflared Tunnel Command", fullCommand)
+                val clip = android.content.ClipData.newPlainText(getClipLabel(currentMode), getDisplayContent(currentToken, currentMode))
                 clipboard.setPrimaryClip(clip)
                 android.widget.Toast.makeText(requireContext(), getString(R.string.zt_tunnel_command_copied), android.widget.Toast.LENGTH_SHORT).show()
+            }
+            
+            refreshTokenButton.setOnClickListener {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.zt_tunnel_refresh_token_title)
+                    .setMessage(R.string.zt_tunnel_refresh_token_confirm)
+                    .setPositiveButton(R.string.zt_tunnel_refresh_token) { _, _ ->
+                        refreshTokenButton.isEnabled = false
+                        viewModel.refreshTunnelToken(account, tunnel.id) { newToken ->
+                            refreshTokenButton.isEnabled = true
+                            if (newToken != null) {
+                                currentToken = newToken
+                                isTokenHidden = true
+                                updateDisplay()
+                            }
+                        }
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .show()
             }
             
             MaterialAlertDialogBuilder(requireContext())
@@ -595,4 +763,34 @@ class TunnelsFragment : Fragment() {
         val pathInput: TextInputEditText,
         val serviceInput: TextInputEditText
     )
+
+    /**
+     * Decode a Cloudflare tunnel token (base64-encoded JSON) into credentials JSON format.
+     * Token format: base64({"a":"account_id","t":"tunnel_id","s":"tunnel_secret"})
+     * Output format: {"AccountTag":"...","TunnelSecret":"...","TunnelID":"...","Endpoint":""}
+     */
+    private fun decodeTunnelTokenToJson(token: String): String? {
+        return try {
+            val cleanToken = token.trim()
+            val padded = cleanToken + "=".repeat((4 - cleanToken.length % 4) % 4)
+            val decoded = android.util.Base64.decode(
+                padded.replace('-', '+').replace('_', '/'),
+                android.util.Base64.DEFAULT
+            )
+            val jsonStr = String(decoded, Charsets.UTF_8)
+            val jsonObj = org.json.JSONObject(jsonStr)
+            val accountTag = jsonObj.optString("a", "")
+            val tunnelId = jsonObj.optString("t", "")
+            val tunnelSecret = jsonObj.optString("s", "")
+
+            val result = org.json.JSONObject()
+            result.put("AccountTag", accountTag)
+            result.put("TunnelSecret", tunnelSecret)
+            result.put("TunnelID", tunnelId)
+            result.put("Endpoint", "")
+            result.toString()
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

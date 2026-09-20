@@ -175,6 +175,22 @@ class TunnelsViewModel @Inject constructor(
             }
         }
     }
+
+    fun refreshTunnelToken(account: Account, tunnelId: String, callback: (String?) -> Unit) {
+        viewModelScope.launch {
+            when (val result = zeroTrustRepository.refreshTunnelToken(account, tunnelId)) {
+                is Resource.Success -> {
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_token_refresh_success))
+                    callback(result.data)
+                }
+                is Resource.Error -> {
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_token_refresh_failed, result.message))
+                    callback(null)
+                }
+                is Resource.Loading -> {}
+            }
+        }
+    }
     
     fun clearSelectedTunnel() {
         _selectedTunnel.value = null

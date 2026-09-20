@@ -1851,6 +1851,19 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String,
         @Path("tunnel_id") tunnelId: String
     ): Response<CloudFlareResponse<Unit>>
+
+    /**
+     * Update Cloudflare Tunnel (name, tunnel_secret, etc.)
+     */
+    @PATCH("accounts/{account_id}/cfd_tunnel/{tunnel_id}")
+    suspend fun updateCloudflaredTunnel(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("tunnel_id") tunnelId: String,
+        @Body body: TunnelUpdateRequest
+    ): Response<CloudFlareResponse<CloudflareTunnel>>
     
     /**
      * List Tunnel Connections

@@ -1409,12 +1409,18 @@ class ZeroTrustRepository @Inject constructor(
     ): Resource<CloudflareTunnel> =
         withContext(Dispatchers.IO) {
             safeApiCall {
+                // Generate Cloudflare-style secret if not provided
+                val tunnelRequest = if (request.tunnelSecret.isNullOrEmpty()) {
+                    request.copy(tunnelSecret = generateTunnelSecret())
+                } else {
+                    request
+                }
                 val response = api.createCloudflaredTunnel(
                     token = AuthHelper.getBearerToken(account),
                     email = AuthHelper.getEmail(account),
                     apiKey = AuthHelper.getGlobalApiKey(account),
                     accountId = account.accountId,
-                    tunnel = request
+                    tunnel = tunnelRequest
                 )
                 if (response.isSuccessful && response.body()?.success == true) {
                     val tunnel = response.body()!!.result!!
@@ -1562,6 +1568,65 @@ class ZeroTrustRepository @Inject constructor(
                 }
             }
         }
+
+    /**
+     * Refresh / rotate tunnel token - invalidates current token and generates a new one
+     * Works by generating a new random tunnel_secret and PATCH-ing the tunnel
+     */
+    suspend fun refreshTunnelToken(account: Account, tunnelId: String): Resource<String> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val newSecret = generateTunnelSecret()
+
+                // PATCH tunnel with new secret - this invalidates the old token
+                val patchResponse = api.updateCloudflaredTunnel(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    tunnelId = tunnelId,
+                    body = TunnelUpdateRequest(tunnelSecret = newSecret)
+                )
+
+                if (patchResponse.isSuccessful && patchResponse.body()?.success == true) {
+                    // Get the new token
+                    val tokenResponse = api.getTunnelToken(
+                        token = AuthHelper.getBearerToken(account),
+                        email = AuthHelper.getEmail(account),
+                        apiKey = AuthHelper.getGlobalApiKey(account),
+                        accountId = account.accountId,
+                        tunnelId = tunnelId
+                    )
+                    if (tokenResponse.isSuccessful && tokenResponse.body()?.success == true && tokenResponse.body()?.result != null) {
+                        val token = tokenResponse.body()!!.result!!
+                        Timber.d("Refreshed tunnel token for tunnel $tunnelId")
+                        Resource.Success(token)
+                    } else {
+                        val errorMsg = tokenResponse.body()?.errors?.firstOrNull()?.message
+                            ?: "Failed to get new tunnel token after refresh"
+                        Resource.Error(errorMsg)
+                    }
+                } else {
+                    val errorMsg = patchResponse.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to refresh tunnel token"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    /**
+     * Generate a Cloudflare-style tunnel secret: two UUIDs concatenated, base64 encoded.
+     * Matches the format Cloudflare uses natively, resulting in consistent token appearance.
+     */
+    private fun generateTunnelSecret(): String {
+        val uuid1 = java.util.UUID.randomUUID().toString()
+        val uuid2 = java.util.UUID.randomUUID().toString()
+        val secretStr = uuid1 + uuid2
+        return android.util.Base64.encodeToString(
+            secretStr.toByteArray(Charsets.UTF_8),
+            android.util.Base64.NO_WRAP
+        )
+    }
     
     // ==================== Service Tokens ====================
     

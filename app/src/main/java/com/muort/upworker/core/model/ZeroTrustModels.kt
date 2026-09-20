@@ -534,6 +534,11 @@ data class TunnelCreateRequest(
     @SerializedName("config_src") val configSrc: String? = "local" // "local" or "cloudflare"
 )
 
+data class TunnelUpdateRequest(
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("tunnel_secret") val tunnelSecret: String? = null
+)
+
 data class TunnelConnection(
     @SerializedName("id") val id: String? = null,
     @SerializedName("client_id") val clientId: String? = null,
