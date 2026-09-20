@@ -52,6 +52,18 @@
             app:layout_constraintStart_toEndOf="@id/statusChip"
             app:layout_constraintTop_toTopOf="@id/statusChip" />
 
+        <!-- Config Source Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/configSourceChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            tools:text="远程配置"
+            android:textSize="11sp"
+            app:chipMinHeight="24dp"
+            app:layout_constraintStart_toEndOf="@id/tunnelTypeChip"
+            app:layout_constraintTop_toTopOf="@id/statusChip" />
+
         <!-- Connections Info -->
         <TextView
             android:id="@+id/connectionsText"
@@ -107,7 +119,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:tint="?attr/colorPrimary" />
 
-        <!-- Config Button -->
+        <!-- Config Button (remote config tunnels) -->
         <ImageButton
             android:id="@+id/configButton"
             android:layout_width="40dp"
@@ -120,6 +132,27 @@
             app:layout_constraintTop_toBottomOf="@id/runCommandButton"
             app:tint="?attr/colorPrimary" />
 
+        <!-- View Routes Button (local config tunnels) -->
+        <ImageButton
+            android:id="@+id/viewRoutesButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/zt_tunnel_view_routes_button"
+            android:src="@android:drawable/ic_menu_view"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/runCommandButton"
+            app:tint="?attr/colorPrimary" />
+
+        <!-- Barrier to align delete button below config/viewRoutes button (whichever is visible) -->
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/actionBarrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="configButton,viewRoutesButton" />
+
         <!-- Delete Button -->
         <ImageButton
             android:id="@+id/deleteButton"
@@ -129,7 +162,7 @@
             android:contentDescription="@string/tunnel_delete"
             android:src="@android:drawable/ic_menu_delete"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/configButton"
+            app:layout_constraintTop_toBottomOf="@id/actionBarrier"
             app:tint="?attr/colorError" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

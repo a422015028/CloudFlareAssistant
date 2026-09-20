@@ -69,10 +69,13 @@ class TunnelsFragment : Fragment() {
                 showTunnelDetailDialog(tunnel)
             },
             onConfigClick = { tunnel ->
-                showTunnelConfigDialog(tunnel)
+                showTunnelConfigDialog(tunnel, readOnly = false)
             },
             onRunCommandClick = { tunnel ->
                 showRunCommandDialog(tunnel)
+            },
+            onViewRoutesClick = { tunnel ->
+                showTunnelConfigDialog(tunnel, readOnly = true)
             }
         )
         
@@ -293,7 +296,14 @@ class TunnelsFragment : Fragment() {
         // Add config button for remote config tunnels
         if (tunnel.remoteConfig == true && tunnel.deletedAt == null) {
             builder.setPositiveButton(R.string.zt_tunnel_configure_button) { _, _ ->
-                showTunnelConfigDialog(tunnel)
+                showTunnelConfigDialog(tunnel, readOnly = false)
+            }
+        }
+
+        // Add view routes button for local config tunnels
+        if (tunnel.remoteConfig == false && tunnel.deletedAt == null) {
+            builder.setPositiveButton(R.string.zt_tunnel_view_routes_button) { _, _ ->
+                showTunnelConfigDialog(tunnel, readOnly = true)
             }
         }
         
@@ -307,7 +317,7 @@ class TunnelsFragment : Fragment() {
         builder.show()
     }
 
-    private fun showTunnelConfigDialog(tunnel: CloudflareTunnel) {
+    private fun showTunnelConfigDialog(tunnel: CloudflareTunnel, readOnly: Boolean = false) {
         val account = accountViewModel.defaultAccount.value ?: return
         
         // Load current configuration
@@ -317,6 +327,14 @@ class TunnelsFragment : Fragment() {
         val ingressContainer = dialogView.findViewById<LinearLayout>(R.id.ingressRulesContainer)
         val addRuleButton = dialogView.findViewById<View>(R.id.addIngressRuleButton)
         val warpRoutingSwitch = dialogView.findViewById<SwitchMaterial>(R.id.warpRoutingSwitch)
+
+        // Read-only mode notice
+        val readonlyNotice = dialogView.findViewById<TextView>(R.id.readonlyNoticeText)
+        if (readOnly) {
+            readonlyNotice?.visibility = View.VISIBLE
+        } else {
+            readonlyNotice?.visibility = View.GONE
+        }
         
         // Mutable list to track ingress rules
         val ingressRules = mutableListOf<IngressRuleViewHolder>()
@@ -333,6 +351,20 @@ class TunnelsFragment : Fragment() {
             hostnameInput.setText(hostname ?: "")
             pathInput.setText(path ?: "")
             serviceInput.setText(service)
+
+            // Apply read-only mode
+            if (readOnly) {
+                hostnameInput.isFocusable = false
+                hostnameInput.isCursorVisible = false
+                hostnameInput.keyListener = null
+                pathInput.isFocusable = false
+                pathInput.isCursorVisible = false
+                pathInput.keyListener = null
+                serviceInput.isFocusable = false
+                serviceInput.isCursorVisible = false
+                serviceInput.keyListener = null
+                removeButton.visibility = View.GONE
+            }
             
             val holder = IngressRuleViewHolder(ruleView, hostnameInput, pathInput, serviceInput)
             ingressRules.add(holder)
@@ -360,24 +392,39 @@ class TunnelsFragment : Fragment() {
                     
                     // Set WARP routing
                     warpRoutingSwitch.isChecked = tunnelConfig.warpRouting?.enabled == true
+                    // Disable switch in read-only mode
+                    if (readOnly) {
+                        warpRoutingSwitch.isEnabled = false
+                    }
                 }
             }
         }
         
-        // Add rule button
-        addRuleButton.setOnClickListener {
-            addIngressRuleView()
+        // Add rule button - hidden in read-only mode
+        if (readOnly) {
+            addRuleButton.visibility = View.GONE
+        } else {
+            addRuleButton.setOnClickListener {
+                addIngressRuleView()
+            }
         }
         
-        // Add a catch-all rule if no rules exist
-        if (ingressRules.isEmpty()) {
+        // Add a catch-all rule if no rules exist (only for editable mode)
+        if (!readOnly && ingressRules.isEmpty()) {
             addIngressRuleView(service = "http_status:404")
         }
         
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.zt_tunnel_config_title, tunnel.name))
+        val builder = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(
+                if (readOnly) getString(R.string.zt_tunnel_view_routes_button)
+                else getString(R.string.zt_tunnel_config_title, tunnel.name)
+            )
             .setView(dialogView)
-            .setPositiveButton(R.string.save) { _, _ ->
+            .setNegativeButton(R.string.cancel, null)
+
+        // Save button only for editable mode
+        if (!readOnly) {
+            builder.setPositiveButton(R.string.save) { _, _ ->
                 // Build ingress rules
                 val rules = ingressRules.mapNotNull { holder ->
                     val service = holder.serviceInput.text?.toString()
@@ -405,8 +452,9 @@ class TunnelsFragment : Fragment() {
                 val request = TunnelConfigurationRequest(config = tunnelConfig)
                 viewModel.updateTunnelConfiguration(account, tunnel.id, request)
             }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
+        }
+        
+        builder.show()
     }
 
     private fun confirmDeleteTunnel(tunnelId: String, tunnelName: String) {

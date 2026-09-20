@@ -14,14 +14,15 @@ class TunnelAdapter(
     private val onDeleteClick: (CloudflareTunnel) -> Unit,
     private val onItemClick: (CloudflareTunnel) -> Unit,
     private val onConfigClick: (CloudflareTunnel) -> Unit,
-    private val onRunCommandClick: (CloudflareTunnel) -> Unit
+    private val onRunCommandClick: (CloudflareTunnel) -> Unit,
+    private val onViewRoutesClick: (CloudflareTunnel) -> Unit
 ) : ListAdapter<CloudflareTunnel, TunnelAdapter.TunnelViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TunnelViewHolder {
         val binding = ItemTunnelBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return TunnelViewHolder(binding, onDeleteClick, onItemClick, onConfigClick, onRunCommandClick)
+        return TunnelViewHolder(binding, onDeleteClick, onItemClick, onConfigClick, onRunCommandClick, onViewRoutesClick)
     }
 
     override fun onBindViewHolder(holder: TunnelViewHolder, position: Int) {
@@ -33,7 +34,8 @@ class TunnelAdapter(
         private val onDeleteClick: (CloudflareTunnel) -> Unit,
         private val onItemClick: (CloudflareTunnel) -> Unit,
         private val onConfigClick: (CloudflareTunnel) -> Unit,
-        private val onRunCommandClick: (CloudflareTunnel) -> Unit
+        private val onRunCommandClick: (CloudflareTunnel) -> Unit,
+        private val onViewRoutesClick: (CloudflareTunnel) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(tunnel: CloudflareTunnel) {
@@ -48,6 +50,14 @@ class TunnelAdapter(
             // Tunnel type
             val tunnelType = tunnel.tunType ?: "cfd_tunnel"
             binding.tunnelTypeChip.text = getTunnelTypeLabel(tunnelType)
+            
+            // Config source chip
+            val isRemoteConfig = tunnel.remoteConfig == true
+            binding.configSourceChip.text = if (isRemoteConfig) {
+                ctx.getString(R.string.zt_tunnel_config_remote)
+            } else {
+                ctx.getString(R.string.zt_tunnel_config_local)
+            }
             
             // Connections
             val connectionCount = tunnel.connections?.size ?: 0
@@ -71,9 +81,13 @@ class TunnelAdapter(
             binding.deleteButton.setOnClickListener { onDeleteClick(tunnel) }
             
             // Config button - only for remote config tunnels that are not deleted
-            val isRemoteConfig = tunnel.remoteConfig == true
             binding.configButton.visibility = if (isRemoteConfig && !isDeleted) View.VISIBLE else View.GONE
             binding.configButton.setOnClickListener { onConfigClick(tunnel) }
+
+            // View Routes button - only for local config tunnels that are not deleted
+            val isLocalConfig = tunnel.remoteConfig == false
+            binding.viewRoutesButton.visibility = if (isLocalConfig && !isDeleted) View.VISIBLE else View.GONE
+            binding.viewRoutesButton.setOnClickListener { onViewRoutesClick(tunnel) }
             
             // Run command button - only show if not deleted
             binding.runCommandButton.visibility = if (isDeleted) View.GONE else View.VISIBLE

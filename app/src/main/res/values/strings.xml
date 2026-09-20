@@ -1003,6 +1003,8 @@
     <string name="zt_tunnel_command_copied">命令已复制</string>
     <string name="zt_tunnel_token_fetch_failed">获取令牌失败</string>
     <string name="zt_tunnel_configure_button">配置</string>
+    <string name="zt_tunnel_view_routes_button">查看路由</string>
+    <string name="zt_tunnel_local_config_readonly">本地配置隧道，路由规则为只读（通过本地 cloudflared 配置文件管理）</string>
     <!-- Tunnel Connection Item -->
     <string name="zt_tunnel_connection_reconnecting">重连中</string>
     <string name="zt_tunnel_client_version">cloudflared %1$s</string>

@@ -551,7 +551,8 @@ data class TunnelConfiguration(
     @SerializedName("config") val config: TunnelConfig? = null,
     @SerializedName("tunnel_id") val tunnelId: String? = null,
     @SerializedName("version") val version: Int? = null,
-    @SerializedName("created_at") val createdAt: String? = null
+    @SerializedName("created_at") val createdAt: String? = null,
+    @SerializedName("source") val source: String? = null // "local" or "cloudflare"
 )
 
 data class TunnelConfigurationRequest(

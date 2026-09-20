@@ -122,6 +122,7 @@ class HomeFragment : Fragment() {
         val grid = binding.featureGrid
         val container = binding.homeContainer
         val childCount = grid.childCount
+        val columnCount = grid.columnCount
 
         if (analyticsEnabled) {
             // 分析开启：wrap_content 模式，内容可滚动
@@ -138,7 +139,11 @@ class HomeFragment : Fragment() {
                 val child = grid.getChildAt(i)
                 val params = child.layoutParams as GridLayout.LayoutParams
                 params.height = GridLayout.LayoutParams.WRAP_CONTENT
-                params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED)
+                // 显式指定行列索引和列权重，避免 GridLayout 自动布局在部分设备上出现列宽计算异常
+                val row = i / columnCount
+                val col = i % columnCount
+                params.rowSpec = GridLayout.spec(row)
+                params.columnSpec = GridLayout.spec(col, 1f)
                 child.layoutParams = params
             }
             // 布局变化后重新计算卡片方向
@@ -159,7 +164,12 @@ class HomeFragment : Fragment() {
                 val params = child.layoutParams as GridLayout.LayoutParams
                 // WRAP_CONTENT 保证内容不被压缩，剩余空间再按 weight 平分给各行
                 params.height = GridLayout.LayoutParams.WRAP_CONTENT
-                params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                // 显式指定行列索引和权重，避免 GridLayout UNDEFINED 自动布局在部分设备/ROM 上
+                // 因行权重测量干扰列权重计算，导致卡片宽度缩窄、文字被截断
+                val row = i / columnCount
+                val col = i % columnCount
+                params.rowSpec = GridLayout.spec(row, 1f)
+                params.columnSpec = GridLayout.spec(col, 1f)
                 child.layoutParams = params
             }
             // 布局变化后重新计算卡片方向

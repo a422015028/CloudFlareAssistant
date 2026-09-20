@@ -1012,6 +1012,8 @@
     <string name="zt_tunnel_command_copied">Command copied</string>
     <string name="zt_tunnel_token_fetch_failed">Failed to fetch token</string>
     <string name="zt_tunnel_configure_button">Configure</string>
+    <string name="zt_tunnel_view_routes_button">View Routes</string>
+    <string name="zt_tunnel_local_config_readonly">Locally managed tunnel. Routes are read-only (managed via local cloudflared config file)</string>
     <!-- Tunnel Connection Item -->
     <string name="zt_tunnel_connection_reconnecting">Reconnecting</string>
     <string name="zt_tunnel_client_version">cloudflared %1$s</string>
