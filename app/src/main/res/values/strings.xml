@@ -247,7 +247,6 @@
     <string name="access_app_name">应用名称</string>
     <string name="access_app_type">应用类型</string>
     <string name="access_auto_redirect_auth">自动重定向到身份验证</string>
-    <string name="access_basic_info">基本信息</string>
     <string name="access_create_app">创建应用</string>
     <string name="access_created_time">创建时间</string>
     <string name="access_default_group">默认组</string>
@@ -292,6 +291,10 @@
     <string name="binding_add">+ 添加绑定</string>
     <string name="binding_script_name_preview">脚本名称: my-worker</string>
     <string name="common_domain">域名</string>
+    <string name="common_hostname">主机名</string>
+    <string name="common_basic_info">基本信息</string>
+    <string name="common_view_routes">查看路由</string>
+    <string name="common_add_route">添加路由</string>
     <string name="common_priority_zero">优先级: 0</string>
     <string name="common_time_info">时间信息</string>
     <string name="d1_add_binding">添加 D1 绑定</string>
@@ -650,7 +653,6 @@
     <string name="worker_domain_custom_copied">自定义域已复制到剪贴板</string>
     <string name="worker_domain_no_custom">该脚本尚未绑定自定义域名</string>
     <!-- Worker 路由（卡片 Row 3 新增按钮） -->
-    <string name="worker_view_routes_title">查看路由</string>
     <string name="worker_add_route_title_template">为 %1$s 添加路由</string>
     <string name="worker_route_select_zone">请选择域名（Zone）</string>
     <string name="worker_route_zone_empty">暂无可选的域名</string>
@@ -992,6 +994,28 @@
     <string name="zt_tunnel_config_src_local">本地 (cloudflared 配置)</string>
     <string name="zt_tunnel_config_src_cloudflare">远程 (Dashboard 配置)</string>
     <string name="msg_tunnel_name_empty">隧道名称不能为空</string>
+    <string name="msg_tunnel_service_empty">服务地址不能为空</string>
+    <string name="tunnel_catch_all_rule">Catch-all 规则</string>
+    <string name="tunnel_origin_request">源站请求</string>
+    <string name="tunnel_origin_request_desc">全局源站请求配置（适用于所有未单独配置的路由）</string>
+    <string name="tunnel_origin_connect_timeout">连接超时（秒）</string>
+    <string name="tunnel_origin_tls_timeout">TLS 超时（秒）</string>
+    <string name="tunnel_origin_tcp_keepalive">TCP 保活间隔（秒）</string>
+    <string name="tunnel_origin_no_happy_eyeballs">禁用 Happy Eyeballs</string>
+    <string name="tunnel_origin_keepalive_connections">保活连接数</string>
+    <string name="tunnel_origin_keepalive_timeout">保活超时（秒）</string>
+    <string name="tunnel_origin_http_host_header">HTTP Host 头</string>
+    <string name="tunnel_origin_server_name">源站服务器名称</string>
+    <string name="tunnel_origin_ca_pool">CA 证书池</string>
+    <string name="tunnel_origin_no_tls_verify">禁用 TLS 验证</string>
+    <string name="tunnel_origin_disable_chunked_encoding">禁用分块编码</string>
+    <string name="tunnel_origin_http2_origin">HTTP/2 源站</string>
+    <string name="tunnel_origin_match_sni_to_host">SNI 匹配主机名</string>
+    <string name="tunnel_origin_proxy_address">代理地址</string>
+    <string name="tunnel_origin_proxy_port">代理端口</string>
+    <string name="tunnel_origin_proxy_type">代理类型</string>
+    <string name="tunnel_ingress_rule_zone_select">选择域名</string>
+    <string name="tunnel_origin_request_settings">源站请求设置</string>
     <!-- Tunnel Detail -->
     <string name="zt_tunnel_status_inactive">未活跃</string>
     <string name="zt_tunnel_status_degraded">降级</string>
@@ -1003,12 +1027,25 @@
     <string name="zt_tunnel_command_copied">命令已复制</string>
     <string name="zt_tunnel_token_fetch_failed">获取令牌失败</string>
     <string name="zt_tunnel_configure_button">配置</string>
-    <string name="zt_tunnel_view_routes_button">查看路由</string>
     <string name="zt_tunnel_local_config_readonly">本地配置隧道，路由规则为只读（通过本地 cloudflared 配置文件管理）</string>
     <string name="zt_tunnel_refresh_token">刷新令牌</string>
     <string name="zt_tunnel_refresh_token_confirm">确定要刷新隧道令牌吗？\n\n刷新后当前令牌将立即失效，所有使用旧令牌的 cloudflared 实例将无法建立新连接。你需要使用新令牌更新所有副本实例。</string>
     <string name="zt_tunnel_refresh_token_title">刷新令牌确认</string>
     <string name="zt_tunnel_copy_json">复制 JSON</string>
+    <string name="zt_tunnel_show_config">显示配置</string>
+    <string name="zt_tunnel_hide_config">隐藏配置</string>
+    <string name="zt_tunnel_copy_config">复制配置</string>
+    <string name="zt_tunnel_warp_routing_readonly">远程配置的 WARP 路由为只读状态，私有网络路由通过 Zero Trust 团队网络路由单独管理</string>
+    <string name="zt_tunnel_private_routes">网络路由</string>
+    <string name="zt_tunnel_private_routes_desc">CIDR 网段和主机名路由，WARP 客户端可通过这些路由访问私有网络资源</string>
+    <string name="zt_tunnel_private_routes_empty">暂无网络路由</string>
+    <string name="zt_tunnel_private_route_network">网络 (CIDR)</string>
+    <string name="zt_tunnel_private_route_network_hint">10.0.0.0/8</string>
+    <string name="zt_tunnel_private_route_comment">备注 (可选)</string>
+    <string name="zt_tunnel_private_route_delete_confirm">确定要删除这条路由吗？</string>
+    <string name="zt_tunnel_route_type_cidr">CIDR</string>
+    <string name="zt_tunnel_route_type">路由类型</string>
+    <string name="zt_tunnel_route_hostname_hint">例如：wiki.internal.local</string>
     <string name="zt_tunnel_mode_token">Token 命令</string>
     <string name="zt_tunnel_mode_json">JSON 凭证</string>
     <string name="zt_tunnel_mode_yaml">YAML 配置</string>
@@ -1128,7 +1165,6 @@
     <string name="snippet_delete_with_rules_progress">正在删除「%1$s」（含规则与 DNS）…</string>
     <!-- ===== Snippet Rule Expression (fields &amp; ops) ===== -->
     <string name="snippet_field_full_uri">完整 URI</string>
-    <string name="snippet_field_hostname">主机名</string>
     <string name="snippet_field_request_method">请求方法</string>
     <string name="snippet_field_request_headers">指定请求头</string>
     <string name="snippet_field_client_ip">客户端 IP</string>
@@ -1584,7 +1620,7 @@
     <string name="xml_item_ingress_rule_edit_hint">主机名（可选，留空为 catch-all）</string>
     <string name="xml_item_ingress_rule_edit_hint_2">路径前缀（可选）</string>
     <string name="xml_item_ingress_rule_edit_hint_3">服务地址 (必填)</string>
-    <string name="xml_item_ingress_rule_edit_helper">例如: http://localhost:8080 或 http_status:404</string>
+    <string name="xml_item_ingress_rule_edit_helper">例如: http://localhost:8080 或 tcp://localhost:3306</string>
     <string name="xml_item_pages_project_2">查看域名</string>
     <string name="xml_item_pages_project_3">部署记录</string>
     <string name="xml_item_secret">🔒 加密存储，无法查看</string>
@@ -1632,7 +1668,6 @@
     <string name="route_domain_and_script_required">域名和脚本不能为空</string>
     <string name="route_pages_domain_not_modifiable">Pages 项目的自定义域官方不支持修改。</string>
     <string name="route_r2_domain_edit_not_supported">R2 自定义域暂不支持编辑。</string>
-    <string name="route_add_route">添加路由</string>
     <string name="route_edit_route">编辑路由</string>
     <string name="route_delete_route">删除路由</string>
     <string name="route_delete_route_confirm">确定要删除路由 \"%1$s\" 吗？</string>
@@ -1877,6 +1912,7 @@
     <string name="vm_msg_zt_device_policy_delete_failed">删除配置文件失败: %1$s</string>
     <!-- Tunnels -->
     <string name="vm_msg_zt_tunnel_config_update_failed">更新配置失败: %1$s</string>
+    <string name="vm_msg_zt_tunnel_config_load_failed">加载配置失败: %1$s</string>
     <string name="vm_msg_zt_tunnel_create_failed">创建隧道失败: %1$s</string>
     <string name="vm_msg_zt_tunnel_delete_failed">删除隧道失败: %1$s</string>
     <string name="vm_msg_zt_tunnel_detail_load_failed">获取隧道详情失败: %1$s</string>
@@ -2780,6 +2816,4 @@
     <!-- 示例/默认值 -->
     <string name="example_ipv4">192.0.2.1</string>
     <string name="example_ipv6_blackhole">100::</string>
-    <string name="tunnel_install_masked">cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</string>
-    <string name="tunnel_run_masked">cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</string>
 </resources>

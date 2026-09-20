@@ -53,17 +53,25 @@
 
     </com.google.android.material.chip.ChipGroup>
 
-    <TextView
-        android:id="@+id/tokenTextView"
+    <ScrollView
+        android:id="@+id/tokenScrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textColor="?attr/colorError"
-        android:background="?attr/colorSurfaceContainer"
-        android:padding="12dp"
-        android:textIsSelectable="true"
-        android:fontFamily="monospace"
-        android:layout_marginBottom="8dp"/>
+        android:fillViewport="true"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tokenTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="?attr/colorError"
+            android:background="?attr/colorSurfaceContainer"
+            android:padding="12dp"
+            android:textIsSelectable="true"
+            android:fontFamily="monospace"/>
+
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"

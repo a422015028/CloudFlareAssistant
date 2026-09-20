@@ -30,6 +30,12 @@ class TunnelsViewModel @Inject constructor(
     
     private val _tunnelConfiguration = MutableStateFlow<TunnelConfiguration?>(null)
     val tunnelConfiguration: StateFlow<TunnelConfiguration?> = _tunnelConfiguration.asStateFlow()
+
+    private val _teamnetRoutes = MutableStateFlow<List<TeamnetRoute>>(emptyList())
+    val teamnetRoutes: StateFlow<List<TeamnetRoute>> = _teamnetRoutes.asStateFlow()
+
+    private val _teamnetRoutesLoading = MutableStateFlow(false)
+    val teamnetRoutesLoading: StateFlow<Boolean> = _teamnetRoutesLoading.asStateFlow()
     
     private val _loadingState = MutableStateFlow(false)
     val loadingState: StateFlow<Boolean> = _loadingState.asStateFlow()
@@ -126,7 +132,123 @@ class TunnelsViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
-    
+
+    // ==================== Teamnet Routes (私有网络路由) ====================
+
+    fun loadTeamnetRoutes(account: Account, tunnelId: String) {
+        viewModelScope.launch {
+            _teamnetRoutesLoading.value = true
+            when (val result = zeroTrustRepository.listTeamnetRoutes(account, tunnelId)) {
+                is Resource.Success -> {
+                    _teamnetRoutes.value = result.data
+                    Timber.d("Loaded ${result.data.size} teamnet routes")
+                }
+                is Resource.Error -> {
+                    Timber.w("Failed to load teamnet routes: ${result.message}")
+                    _teamnetRoutes.value = emptyList()
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_load_failed, result.message))
+                }
+                is Resource.Loading -> {}
+            }
+            _teamnetRoutesLoading.value = false
+        }
+    }
+
+    fun createTeamnetRoute(account: Account, network: String, tunnelId: String, comment: String? = null) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.createTeamnetRoute(account, network, tunnelId, comment)) {
+                is Resource.Success -> {
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_updated))
+                    loadTeamnetRoutes(account, tunnelId)
+                }
+                is Resource.Error -> {
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_update_failed, result.message))
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+
+    fun deleteTeamnetRoute(account: Account, routeId: String, tunnelId: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.deleteTeamnetRoute(account, routeId)) {
+                is Resource.Success -> {
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_updated))
+                    loadTeamnetRoutes(account, tunnelId)
+                }
+                is Resource.Error -> {
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_update_failed, result.message))
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+
+    // ==================== Hostname Routes (主机名路由) ====================
+
+    private val _hostnameRoutes = MutableStateFlow<List<HostnameRoute>>(emptyList())
+    val hostnameRoutes: StateFlow<List<HostnameRoute>> = _hostnameRoutes.asStateFlow()
+
+    private val _hostnameRoutesLoading = MutableStateFlow(false)
+    val hostnameRoutesLoading: StateFlow<Boolean> = _hostnameRoutesLoading.asStateFlow()
+
+    fun loadHostnameRoutes(account: Account, tunnelId: String) {
+        viewModelScope.launch {
+            _hostnameRoutesLoading.value = true
+            when (val result = zeroTrustRepository.listHostnameRoutes(account, tunnelId)) {
+                is Resource.Success -> {
+                    _hostnameRoutes.value = result.data
+                    Timber.d("Loaded ${result.data.size} hostname routes")
+                }
+                is Resource.Error -> {
+                    Timber.w("Failed to load hostname routes: ${result.message}")
+                    _hostnameRoutes.value = emptyList()
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_load_failed, result.message))
+                }
+                is Resource.Loading -> {}
+            }
+            _hostnameRoutesLoading.value = false
+        }
+    }
+
+    fun createHostnameRoute(account: Account, hostname: String, tunnelId: String, comment: String? = null) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.createHostnameRoute(account, hostname, tunnelId, comment)) {
+                is Resource.Success -> {
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_updated))
+                    loadHostnameRoutes(account, tunnelId)
+                }
+                is Resource.Error -> {
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_update_failed, result.message))
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+
+    fun deleteHostnameRoute(account: Account, routeId: String, tunnelId: String) {
+        viewModelScope.launch {
+            _loadingState.value = true
+            when (val result = zeroTrustRepository.deleteHostnameRoute(account, routeId)) {
+                is Resource.Success -> {
+                    _message.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_updated))
+                    loadHostnameRoutes(account, tunnelId)
+                }
+                is Resource.Error -> {
+                    _error.emit(UiMessage.of(R.string.vm_msg_zt_tunnel_config_update_failed, result.message))
+                }
+                is Resource.Loading -> {}
+            }
+            _loadingState.value = false
+        }
+    }
+
     fun createTunnel(account: Account, request: TunnelCreateRequest) {
         viewModelScope.launch {
             _loadingState.value = true

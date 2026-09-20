@@ -1910,7 +1910,85 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String,
         @Path("tunnel_id") tunnelId: String
     ): Response<CloudFlareResponse<String>>
-    
+
+    // ==================== Zero Trust - Teamnet Routes (私有网络路由) ====================
+
+    /**
+     * List tunnel routes (可通过 tunnel_id 过滤)
+     */
+    @GET("accounts/{account_id}/teamnet/routes")
+    suspend fun listTeamnetRoutes(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Query("tunnel_id") tunnelId: String? = null,
+        @Query("per_page") perPage: Int = 1000
+    ): Response<CloudFlareResponse<List<TeamnetRoute>>>
+
+    /**
+     * Create a tunnel route
+     */
+    @POST("accounts/{account_id}/teamnet/routes")
+    suspend fun createTeamnetRoute(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body request: CreateTeamnetRouteRequest
+    ): Response<CloudFlareResponse<TeamnetRoute>>
+
+    /**
+     * Delete a tunnel route
+     */
+    @DELETE("accounts/{account_id}/teamnet/routes/{route_id}")
+    suspend fun deleteTeamnetRoute(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("route_id") routeId: String
+    ): Response<CloudFlareResponse<TeamnetRoute>>
+
+    // ==================== Zero Trust - Hostname Routes (主机名路由) ====================
+
+    /**
+     * List hostname routes (可通过 tunnel_id 过滤)
+     */
+    @GET("accounts/{account_id}/zerotrust/routes/hostname")
+    suspend fun listHostnameRoutes(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Query("tunnel_id") tunnelId: String? = null,
+        @Query("per_page") perPage: Int = 1000
+    ): Response<CloudFlareResponse<List<HostnameRoute>>>
+
+    /**
+     * Create a hostname route
+     */
+    @POST("accounts/{account_id}/zerotrust/routes/hostname")
+    suspend fun createHostnameRoute(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body request: CreateHostnameRouteRequest
+    ): Response<CloudFlareResponse<HostnameRoute>>
+
+    /**
+     * Delete a hostname route
+     */
+    @DELETE("accounts/{account_id}/zerotrust/routes/hostname/{hostname_route_id}")
+    suspend fun deleteHostnameRoute(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("hostname_route_id") routeId: String
+    ): Response<CloudFlareResponse<HostnameRoute>>
+
     // ==================== Zero Trust - Service Tokens ====================
     
     /**

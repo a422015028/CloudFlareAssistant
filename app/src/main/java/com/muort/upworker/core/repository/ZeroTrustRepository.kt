@@ -1627,7 +1627,177 @@ class ZeroTrustRepository @Inject constructor(
             android.util.Base64.NO_WRAP
         )
     }
-    
+
+    // ==================== Teamnet Routes (私有网络路由) ====================
+
+    /**
+     * 获取指定隧道的私有网络路由列表
+     */
+    suspend fun listTeamnetRoutes(account: Account, tunnelId: String): Resource<List<TeamnetRoute>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.listTeamnetRoutes(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    tunnelId = tunnelId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val routes = response.body()?.result ?: emptyList()
+                    Timber.d("Got ${routes.size} teamnet routes for tunnel $tunnelId")
+                    Resource.Success(routes)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to list teamnet routes"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    /**
+     * 创建私有网络路由
+     */
+    suspend fun createTeamnetRoute(account: Account, network: String, tunnelId: String, comment: String? = null): Resource<TeamnetRoute> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val request = CreateTeamnetRouteRequest(
+                    network = network,
+                    tunnelId = tunnelId,
+                    comment = comment ?: ""
+                )
+                val response = api.createTeamnetRoute(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    request = request
+                )
+                if (response.isSuccessful && response.body()?.success == true && response.body()?.result != null) {
+                    val route = response.body()!!.result!!
+                    Timber.d("Created teamnet route: ${route.network} for tunnel $tunnelId")
+                    Resource.Success(route)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to create teamnet route"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    /**
+     * 删除私有网络路由
+     */
+    suspend fun deleteTeamnetRoute(account: Account, routeId: String): Resource<Unit> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.deleteTeamnetRoute(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    routeId = routeId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Timber.d("Deleted teamnet route: $routeId")
+                    Resource.Success(Unit)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to delete teamnet route"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    // ==================== Hostname Routes (主机名路由) ====================
+
+    /**
+     * List hostname routes for a tunnel
+     */
+    suspend fun listHostnameRoutes(
+        account: Account,
+        tunnelId: String? = null
+    ): Resource<List<HostnameRoute>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.listHostnameRoutes(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    tunnelId = tunnelId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val routes = response.body()!!.result ?: emptyList()
+                    Timber.d("Loaded ${routes.size} hostname routes")
+                    Resource.Success(routes)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to list hostname routes"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    /**
+     * Create a hostname route
+     */
+    suspend fun createHostnameRoute(
+        account: Account,
+        hostname: String,
+        tunnelId: String,
+        comment: String? = null
+    ): Resource<HostnameRoute> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val request = CreateHostnameRouteRequest(
+                    hostname = hostname,
+                    tunnelId = tunnelId,
+                    comment = comment ?: ""
+                )
+                val response = api.createHostnameRoute(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    request = request
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val route = response.body()!!.result!!
+                    Timber.d("Created hostname route: ${route.hostname}")
+                    Resource.Success(route)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to create hostname route"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    /**
+     * Delete a hostname route
+     */
+    suspend fun deleteHostnameRoute(account: Account, routeId: String): Resource<Unit> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.deleteHostnameRoute(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    routeId = routeId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Timber.d("Deleted hostname route: $routeId")
+                    Resource.Success(Unit)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                        ?: "Failed to delete hostname route"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
     // ==================== Service Tokens ====================
     
     /**

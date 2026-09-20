@@ -249,7 +249,6 @@
     <string name="access_app_name">Application Name</string>
     <string name="access_app_type">Application Type</string>
     <string name="access_auto_redirect_auth">Auto Redirect to Authentication</string>
-    <string name="access_basic_info">Basic Information</string>
     <string name="access_create_app">Create Application</string>
     <string name="access_created_time">Created Time</string>
     <string name="access_default_group">Default Group</string>
@@ -296,6 +295,10 @@
     <string name="binding_add">+ Add Binding</string>
     <string name="binding_script_name_preview">Script name: my-worker</string>
     <string name="common_domain">Domain</string>
+    <string name="common_hostname">Hostname</string>
+    <string name="common_basic_info">Basic Info</string>
+    <string name="common_view_routes">View Routes</string>
+    <string name="common_add_route">Add Route</string>
     <string name="common_priority_zero">Priority: 0</string>
     <string name="common_time_info">Time Info</string>
     <!-- D1 -->
@@ -659,7 +662,6 @@
     <string name="worker_domain_custom_copied">Custom domain copied to clipboard</string>
     <string name="worker_domain_no_custom">No custom domains bound to this script yet</string>
     <!-- Worker routes (Row 3 buttons) -->
-    <string name="worker_view_routes_title">View Routes</string>
     <string name="worker_add_route_title_template">Add route for %1$s</string>
     <string name="worker_route_select_zone">Select Zone</string>
     <string name="worker_route_zone_empty">No zones available</string>
@@ -1001,6 +1003,28 @@
     <string name="zt_tunnel_config_src_local">Local (cloudflared config)</string>
     <string name="zt_tunnel_config_src_cloudflare">Remote (Dashboard config)</string>
     <string name="msg_tunnel_name_empty">Tunnel name cannot be empty</string>
+    <string name="msg_tunnel_service_empty">Service address cannot be empty</string>
+    <string name="tunnel_catch_all_rule">Catch-all rule</string>
+    <string name="tunnel_origin_request">Origin Request</string>
+    <string name="tunnel_origin_request_desc">Global origin request settings (applied to all routes without individual config)</string>
+    <string name="tunnel_origin_connect_timeout">Connect Timeout (seconds)</string>
+    <string name="tunnel_origin_tls_timeout">TLS Timeout (seconds)</string>
+    <string name="tunnel_origin_tcp_keepalive">TCP Keep Alive (seconds)</string>
+    <string name="tunnel_origin_no_happy_eyeballs">Disable Happy Eyeballs</string>
+    <string name="tunnel_origin_keepalive_connections">Keep Alive Connections</string>
+    <string name="tunnel_origin_keepalive_timeout">Keep Alive Timeout (seconds)</string>
+    <string name="tunnel_origin_http_host_header">HTTP Host Header</string>
+    <string name="tunnel_origin_server_name">Origin Server Name</string>
+    <string name="tunnel_origin_ca_pool">CA Pool</string>
+    <string name="tunnel_origin_no_tls_verify">Disable TLS Verify</string>
+    <string name="tunnel_origin_disable_chunked_encoding">Disable Chunked Encoding</string>
+    <string name="tunnel_origin_http2_origin">HTTP/2 Origin</string>
+    <string name="tunnel_origin_match_sni_to_host">Match SNI to Host</string>
+    <string name="tunnel_origin_proxy_address">Proxy Address</string>
+    <string name="tunnel_origin_proxy_port">Proxy Port</string>
+    <string name="tunnel_origin_proxy_type">Proxy Type</string>
+    <string name="tunnel_ingress_rule_zone_select">Select Domain</string>
+    <string name="tunnel_origin_request_settings">Origin Request Settings</string>
     <!-- Tunnel Detail -->
     <string name="zt_tunnel_status_inactive">Inactive</string>
     <string name="zt_tunnel_status_degraded">Degraded</string>
@@ -1012,7 +1036,6 @@
     <string name="zt_tunnel_command_copied">Command copied</string>
     <string name="zt_tunnel_token_fetch_failed">Failed to fetch token</string>
     <string name="zt_tunnel_configure_button">Configure</string>
-    <string name="zt_tunnel_view_routes_button">View Routes</string>
     <string name="zt_tunnel_local_config_readonly">Locally managed tunnel. Routes are read-only (managed via local cloudflared config file)</string>
     <string name="zt_tunnel_refresh_token">Refresh Token</string>
     <string name="zt_tunnel_refresh_token_confirm">Are you sure you want to refresh the tunnel token?\n\nThe current token will be immediately invalidated. All cloudflared instances using the old token will not be able to establish new connections. You will need to update all replica instances with the new token.</string>
@@ -1021,7 +1044,22 @@
     <string name="zt_tunnel_mode_token">Token Command</string>
     <string name="zt_tunnel_mode_json">JSON Credentials</string>
     <string name="zt_tunnel_mode_yaml">YAML Config</string>
-    <string name="zt_tunnel_mode_run_cmd">Run Command</string>
+    <string name="zt_tunnel_mode_run_cmd">Config Command</string>
+    <string name="zt_tunnel_show_config">Show Config</string>
+    <string name="zt_tunnel_hide_config">Hide Config</string>
+    <string name="zt_tunnel_copy_config">Copy Config</string>
+    <string name="zt_tunnel_warp_routing_readonly">WARP routing is read-only for remotely managed tunnels. Private routes are managed separately via Zero Trust Teamnet Routes.</string>
+    <string name="zt_tunnel_private_routes">Network Routes</string>
+    <string name="zt_tunnel_private_routes_desc">CIDR and hostname routes for accessing private network resources via WARP client</string>
+    <string name="zt_tunnel_private_routes_empty">No network routes</string>
+    <string name="zt_tunnel_private_route_network">Network (CIDR)</string>
+    <string name="zt_tunnel_private_route_network_hint">10.0.0.0/8</string>
+    <string name="zt_tunnel_private_route_comment">Comment (optional)</string>
+    <string name="zt_tunnel_private_route_delete_confirm">Delete this route?</string>
+    <string name="zt_tunnel_route_type_cidr">CIDR</string>
+    <string name="zt_tunnel_route_type">Route Type</string>
+    <string name="zt_tunnel_route_hostname_hint">e.g. wiki.internal.local</string>
+    <string name="vm_msg_zt_tunnel_config_load_failed">Failed to load config: %1$s</string>
     <!-- Tunnel Connection Item -->
     <string name="zt_tunnel_connection_reconnecting">Reconnecting</string>
     <string name="zt_tunnel_client_version">cloudflared %1$s</string>
@@ -1137,7 +1175,6 @@
     <string name="snippet_delete_with_rules_progress">Deleting \"%1$s\" (including rules and DNS)…</string>
     <!-- ===== Snippet Rule Expression (fields &amp; ops) ===== -->
     <string name="snippet_field_full_uri">Full URI</string>
-    <string name="snippet_field_hostname">Hostname</string>
     <string name="snippet_field_request_method">Request Method</string>
     <string name="snippet_field_request_headers">Specific Request Header</string>
     <string name="snippet_field_client_ip">Client IP</string>
@@ -1593,7 +1630,7 @@
     <string name="xml_item_ingress_rule_edit_hint">Hostname (optional, blank = catch-all)</string>
     <string name="xml_item_ingress_rule_edit_hint_2">Path Prefix (optional)</string>
     <string name="xml_item_ingress_rule_edit_hint_3">Service Address (required)</string>
-    <string name="xml_item_ingress_rule_edit_helper">e.g. http://localhost:8080 or http_status:404</string>
+    <string name="xml_item_ingress_rule_edit_helper">e.g. http://localhost:8080 or tcp://localhost:3306</string>
     <string name="xml_item_pages_project_2">View Domains</string>
     <string name="xml_item_pages_project_3">Deployment History</string>
     <string name="xml_item_secret">🔒 Encrypted, cannot be viewed</string>
@@ -1641,7 +1678,6 @@
     <string name="route_domain_and_script_required">Domain and script cannot be empty</string>
     <string name="route_pages_domain_not_modifiable">Modifying Pages project custom domains is not officially supported.</string>
     <string name="route_r2_domain_edit_not_supported">Editing R2 custom domains is not supported yet.</string>
-    <string name="route_add_route">Add Route</string>
     <string name="route_edit_route">Edit Route</string>
     <string name="route_delete_route">Delete Route</string>
     <string name="route_delete_route_confirm">Delete route \"%1$s\"?</string>
@@ -2724,6 +2760,4 @@
     <!-- Example/default values -->
     <string name="example_ipv4">192.0.2.1</string>
     <string name="example_ipv6_blackhole">100::</string>
-    <string name="tunnel_install_masked">cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</string>
-    <string name="tunnel_run_masked">cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</string>
 </resources>

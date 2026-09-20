@@ -581,26 +581,117 @@ data class WarpRouting(
     @SerializedName("enabled") val enabled: Boolean? = null
 )
 
+data class AccessConfig(
+    @SerializedName("audTag") val audTag: List<String>? = null,
+    @SerializedName("teamName") val teamName: String? = null,
+    @SerializedName("required") val required: Boolean? = null
+)
+
 data class OriginRequest(
     @SerializedName("connectTimeout") val connectTimeout: Int? = null,
     @SerializedName("tlsTimeout") val tlsTimeout: Int? = null,
     @SerializedName("tcpKeepAlive") val tcpKeepAlive: Int? = null,
     @SerializedName("noHappyEyeballs") val noHappyEyeballs: Boolean? = null,
     @SerializedName("keepAliveConnections") val keepAliveConnections: Int? = null,
+    @SerializedName("keepAliveTimeout") val keepAliveTimeout: Int? = null,
     @SerializedName("httpHostHeader") val httpHostHeader: String? = null,
     @SerializedName("originServerName") val originServerName: String? = null,
     @SerializedName("caPool") val caPool: String? = null,
     @SerializedName("noTLSVerify") val noTLSVerify: Boolean? = null,
     @SerializedName("disableChunkedEncoding") val disableChunkedEncoding: Boolean? = null,
+    @SerializedName("http2Origin") val http2Origin: Boolean? = null,
+    @SerializedName("matchSNItoHost") val matchSNItoHost: Boolean? = null,
     @SerializedName("proxyAddress") val proxyAddress: String? = null,
     @SerializedName("proxyPort") val proxyPort: Int? = null,
-    @SerializedName("proxyType") val proxyType: String? = null
+    @SerializedName("proxyType") val proxyType: String? = null,
+    @SerializedName("access") val access: AccessConfig? = null
 )
 
 data class TunnelToken(
     @SerializedName("token") val token: String,
     @SerializedName("expires_at") val expiresAt: String? = null
 )
+
+// ==================== Zero Trust - Teamnet Routes (网络路由) ====================
+
+/**
+ * 网络路由（Teamnet Route）
+ * 支持 CIDR 路由和主机名路由两种类型，通过 WARP 客户端访问私有网络资源
+ */
+data class TeamnetRoute(
+    @SerializedName("id") val id: String? = null,
+    @SerializedName("network") val network: String,
+    @SerializedName("tunnel_id") val tunnelId: String? = null,
+    @SerializedName("comment") val comment: String? = null,
+    @SerializedName("virtual_network_id") val virtualNetworkId: String? = null,
+    @SerializedName("created_at") val createdAt: String? = null,
+    @SerializedName("deleted_at") val deletedAt: String? = null
+) {
+    /**
+     * 判断是否为主机名路由（包含字母的非 CIDR 格式）
+     */
+    val isHostnameRoute: Boolean
+        get() = network.any { it.isLetter() } && !network.contains('/')
+}
+
+/**
+ * 创建网络路由请求
+ * 支持 CIDR 格式（如 10.0.0.0/8）和主机名格式（如 wiki.internal.local）
+ */
+data class CreateTeamnetRouteRequest(
+    @SerializedName("network") val network: String,
+    @SerializedName("tunnel_id") val tunnelId: String,
+    @SerializedName("comment") val comment: String = ""
+)
+
+// ==================== Zero Trust - Hostname Routes (主机名路由) ====================
+
+/**
+ * 主机名路由（Hostname Route）
+ * 通过 WARP 客户端使用私有主机名访问内部资源
+ * 独立 API：/zerotrust/routes/hostname
+ */
+data class HostnameRoute(
+    @SerializedName("id") val id: String,
+    @SerializedName("hostname") val hostname: String,
+    @SerializedName("tunnel_id") val tunnelId: String? = null,
+    @SerializedName("comment") val comment: String? = null,
+    @SerializedName("created_at") val createdAt: String? = null,
+    @SerializedName("updated_at") val updatedAt: String? = null
+)
+
+/**
+ * 创建主机名路由请求
+ */
+data class CreateHostnameRouteRequest(
+    @SerializedName("hostname") val hostname: String,
+    @SerializedName("tunnel_id") val tunnelId: String,
+    @SerializedName("comment") val comment: String = ""
+)
+
+/**
+ * 网络路由统一显示模型（合并 CIDR 路由和主机名路由）
+ */
+sealed class NetworkRouteItem {
+    abstract val id: String
+    abstract val displayText: String
+    abstract val comment: String?
+    abstract val typeLabel: String
+
+    data class CidrRoute(val route: TeamnetRoute) : NetworkRouteItem() {
+        override val id: String get() = route.id ?: ""
+        override val displayText: String get() = route.network
+        override val comment: String? get() = route.comment
+        override val typeLabel: String = "CIDR"
+    }
+
+    data class HostnameRouteItem(val route: HostnameRoute) : NetworkRouteItem() {
+        override val id: String get() = route.id
+        override val displayText: String get() = route.hostname
+        override val comment: String? get() = route.comment
+        override val typeLabel: String = "主机名"
+    }
+}
 
 // ==================== Zero Trust - Service Tokens ====================
 

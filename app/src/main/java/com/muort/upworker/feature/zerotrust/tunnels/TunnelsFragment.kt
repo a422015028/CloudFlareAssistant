@@ -69,13 +69,13 @@ class TunnelsFragment : Fragment() {
                 showTunnelDetailDialog(tunnel)
             },
             onConfigClick = { tunnel ->
-                showTunnelConfigDialog(tunnel, readOnly = false)
+                TunnelConfigActivity.start(requireContext(), tunnel.id, tunnel.name, readOnly = false, remoteConfig = tunnel.remoteConfig == true)
             },
             onRunCommandClick = { tunnel ->
                 showRunCommandDialog(tunnel)
             },
             onViewRoutesClick = { tunnel ->
-                showTunnelConfigDialog(tunnel, readOnly = true)
+                TunnelConfigActivity.start(requireContext(), tunnel.id, tunnel.name, readOnly = true, remoteConfig = tunnel.remoteConfig == true)
             }
         )
         
@@ -264,38 +264,44 @@ class TunnelsFragment : Fragment() {
                         var currentToken: String = token
                         val isLocalConfig = tunnel.remoteConfig == false
                         var isTokenHidden = true
-                        
+                        var currentTunnelConfig: TunnelConfig? = null
+
                         // Display mode: 0=Token, 1=JSON, 2=YAML, 3=RunCommand
                         var currentMode = 0
-                        
+
                         fun getDisplayContent(tokenValue: String, mode: Int): String {
                             return when (mode) {
                                 1 -> decodeTunnelTokenToJson(tokenValue) ?: tokenValue
-                                2 -> {
-                                    val tunnelId = tunnel.id
-                                    "tunnel: $tunnelId\ncredentials-file: /data/local/tmp/cloudflared/credentials.json\n\ningress:\n  - hostname: gitlab.widgetcorp.tech\n    service: http://localhost:80\n  - hostname: gitlab-ssh.widgetcorp.tech\n    service: ssh://localhost:22\n  - service: http_status:404"
-                                }
+                                2 -> generateYamlConfig(tunnel.id, currentTunnelConfig)
                                 3 -> "cloudflared tunnel --config /data/local/tmp/cloudflared/config.yml run ${tunnel.name}"
                                 else -> "cloudflared service install $tokenValue"
                             }
                         }
-                        
+
                         fun getMaskedContent(mode: Int): String {
                             return when (mode) {
                                 1 -> "{\"AccountTag\":\"●●●●●●●●●●●●\",\"TunnelSecret\":\"●●●●●●●●●●●●●●●●●●●●●●●●●●●●\",\"TunnelID\":\"●●●●●●●●-●●●●-●●●●-●●●●-●●●●●●●●●●●●\",\"Endpoint\":\"\"}"
-                                2 -> "tunnel: ●●●●●●●●-●●●●-●●●●-●●●●-●●●●●●●●●●●●\ncredentials-file: /data/local/tmp/cloudflared/credentials.json\n\ningress:\n  - hostname: ●●●●●●●●●●●●●●●●●●\n    service: http://localhost:80\n  - hostname: ●●●●●●●●●●●●●●●●●●\n    service: ssh://localhost:22\n  - service: http_status:404"
+                                2 -> "tunnel: ●●●●●●●●-●●●●-●●●●-●●●●-●●●●●●●●●●●●\ncredentials-file: /data/local/tmp/cloudflared/credentials.json\n\ningress:\n  - ●●●●●●●●●●●●●●●●●●\n    ●●●●●●●●●●●●●●●●●●\n  - service: http_status:404"
                                 3 -> "cloudflared tunnel --config /data/local/tmp/cloudflared/config.yml run ●●●●●●●●●●●●"
                                 else -> "cloudflared service install ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
                             }
                         }
-                        
+
                         fun getCopyButtonText(mode: Int): Int {
                             return when (mode) {
                                 1 -> R.string.zt_tunnel_copy_json
+                                2 -> R.string.zt_tunnel_copy_config
                                 else -> R.string.tunnel_copy_command
                             }
                         }
-                        
+
+                        fun getShowHideButtonText(mode: Int, isHidden: Boolean): Int {
+                            return when (mode) {
+                                2 -> if (isHidden) R.string.zt_tunnel_show_config else R.string.zt_tunnel_hide_config
+                                else -> if (isHidden) R.string.zt_tunnel_show_token else R.string.tunnel_hide_token
+                            }
+                        }
+
                         fun getClipLabel(mode: Int): String {
                             return when (mode) {
                                 1 -> "Tunnel Credentials JSON"
@@ -304,15 +310,32 @@ class TunnelsFragment : Fragment() {
                                 else -> "Cloudflared Service Command"
                             }
                         }
-                        
+
                         fun updateDisplay() {
                             tokenText.text = if (isTokenHidden) getMaskedContent(currentMode) else getDisplayContent(currentToken, currentMode)
-                            hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.tunnel_hide_token)
+                            hideTokenButton.setText(getShowHideButtonText(currentMode, isTokenHidden))
                             copyCommandButton.setText(getCopyButtonText(currentMode))
                         }
-                        
+
                         updateDisplay()
-                        
+
+                        // Load tunnel configuration for YAML mode (local config tunnels)
+                        if (isLocalConfig) {
+                            viewModel.loadTunnelConfiguration(acc, tunnel.id)
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                                    viewModel.tunnelConfiguration.collect { config ->
+                                        config?.config?.let { tunnelConfig ->
+                                            currentTunnelConfig = tunnelConfig
+                                            if (currentMode == 2) {
+                                                updateDisplay()
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         tokenModeChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
                             currentMode = when (group.checkedChipId) {
                                 R.id.chipModeJson -> 1
@@ -381,14 +404,14 @@ class TunnelsFragment : Fragment() {
         // Add config button for remote config tunnels
         if (tunnel.remoteConfig == true && tunnel.deletedAt == null) {
             builder.setPositiveButton(R.string.zt_tunnel_configure_button) { _, _ ->
-                showTunnelConfigDialog(tunnel, readOnly = false)
+                TunnelConfigActivity.start(requireContext(), tunnel.id, tunnel.name, readOnly = false, remoteConfig = true)
             }
         }
 
         // Add view routes button for local config tunnels
         if (tunnel.remoteConfig == false && tunnel.deletedAt == null) {
-            builder.setPositiveButton(R.string.zt_tunnel_view_routes_button) { _, _ ->
-                showTunnelConfigDialog(tunnel, readOnly = true)
+            builder.setPositiveButton(R.string.common_view_routes) { _, _ ->
+                TunnelConfigActivity.start(requireContext(), tunnel.id, tunnel.name, readOnly = true, remoteConfig = false)
             }
         }
         
@@ -501,7 +524,7 @@ class TunnelsFragment : Fragment() {
         
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle(
-                if (readOnly) getString(R.string.zt_tunnel_view_routes_button)
+                if (readOnly) getString(R.string.common_view_routes)
                 else getString(R.string.zt_tunnel_config_title, tunnel.name)
             )
             .setView(dialogView)
@@ -577,38 +600,44 @@ class TunnelsFragment : Fragment() {
             var currentToken: String = token
             val isLocalConfig = tunnel.remoteConfig == false
             var isTokenHidden = true
-            
+            var currentTunnelConfig: TunnelConfig? = null
+
             // Display mode: 0=Token, 1=JSON, 2=YAML, 3=RunCommand
             var currentMode = 0
-            
+
             fun getDisplayContent(tokenValue: String, mode: Int): String {
                 return when (mode) {
                     1 -> decodeTunnelTokenToJson(tokenValue) ?: tokenValue
-                    2 -> {
-                        val tunnelId = tunnel.id
-                        "tunnel: $tunnelId\ncredentials-file: /data/local/tmp/cloudflared/credentials.json\n\ningress:\n  - hostname: gitlab.widgetcorp.tech\n    service: http://localhost:80\n  - hostname: gitlab-ssh.widgetcorp.tech\n    service: ssh://localhost:22\n  - service: http_status:404"
-                    }
+                    2 -> generateYamlConfig(tunnel.id, currentTunnelConfig)
                     3 -> "cloudflared tunnel --config /data/local/tmp/cloudflared/config.yml run ${tunnel.name}"
                     else -> "cloudflared tunnel run --token $tokenValue"
                 }
             }
-            
+
             fun getMaskedContent(mode: Int): String {
                 return when (mode) {
                     1 -> "{\"AccountTag\":\"●●●●●●●●●●●●\",\"TunnelSecret\":\"●●●●●●●●●●●●●●●●●●●●●●●●●●●●\",\"TunnelID\":\"●●●●●●●●-●●●●-●●●●-●●●●-●●●●●●●●●●●●\",\"Endpoint\":\"\"}"
-                    2 -> "tunnel: ●●●●●●●●-●●●●-●●●●-●●●●-●●●●●●●●●●●●\ncredentials-file: /data/local/tmp/cloudflared/credentials.json\n\ningress:\n  - hostname: ●●●●●●●●●●●●●●●●●●\n    service: http://localhost:80\n  - hostname: ●●●●●●●●●●●●●●●●●●\n    service: ssh://localhost:22\n  - service: http_status:404"
+                    2 -> "tunnel: ●●●●●●●●-●●●●-●●●●-●●●●-●●●●●●●●●●●●\ncredentials-file: /data/local/tmp/cloudflared/credentials.json\n\ningress:\n  - ●●●●●●●●●●●●●●●●●●\n    ●●●●●●●●●●●●●●●●●●\n  - service: http_status:404"
                     3 -> "cloudflared tunnel --config /data/local/tmp/cloudflared/config.yml run ●●●●●●●●●●●●"
                     else -> "cloudflared tunnel run ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●"
                 }
             }
-            
+
             fun getCopyButtonText(mode: Int): Int {
                 return when (mode) {
                     1 -> R.string.zt_tunnel_copy_json
+                    2 -> R.string.zt_tunnel_copy_config
                     else -> R.string.tunnel_copy_command
                 }
             }
-            
+
+            fun getShowHideButtonText(mode: Int, isHidden: Boolean): Int {
+                return when (mode) {
+                    2 -> if (isHidden) R.string.zt_tunnel_show_config else R.string.zt_tunnel_hide_config
+                    else -> if (isHidden) R.string.zt_tunnel_show_token else R.string.tunnel_hide_token
+                }
+            }
+
             fun getClipLabel(mode: Int): String {
                 return when (mode) {
                     1 -> "Tunnel Credentials JSON"
@@ -617,15 +646,32 @@ class TunnelsFragment : Fragment() {
                     else -> "Cloudflared Tunnel Command"
                 }
             }
-            
+
             fun updateDisplay() {
                 tokenTextView.text = if (isTokenHidden) getMaskedContent(currentMode) else getDisplayContent(currentToken, currentMode)
-                hideTokenButton.setText(if (isTokenHidden) R.string.zt_tunnel_show_token else R.string.tunnel_hide_token)
+                hideTokenButton.setText(getShowHideButtonText(currentMode, isTokenHidden))
                 copyCommandButton.setText(getCopyButtonText(currentMode))
             }
-            
+
             updateDisplay()
-            
+
+            // Load tunnel configuration for YAML mode (local config tunnels)
+            if (isLocalConfig) {
+                viewModel.loadTunnelConfiguration(account, tunnel.id)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                        viewModel.tunnelConfiguration.collect { config ->
+                            config?.config?.let { tunnelConfig ->
+                                currentTunnelConfig = tunnelConfig
+                                if (currentMode == 2) {
+                                    updateDisplay()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             tokenModeChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
                 currentMode = when (group.checkedChipId) {
                     R.id.chipModeJson -> 1
@@ -668,11 +714,33 @@ class TunnelsFragment : Fragment() {
                     .show()
             }
             
-            MaterialAlertDialogBuilder(requireContext())
+            val dialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.tunnel_run_command)
                 .setView(dialogView)
                 .setPositiveButton(R.string.dialog_close, null)
                 .show()
+
+            // 动态调整 ScrollView 高度：内容少时自适应，内容多时限制最大高度保证按钮可见
+            val scrollView = dialogView.findViewById<android.widget.ScrollView>(R.id.tokenScrollView)
+            scrollView?.viewTreeObserver?.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    scrollView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    val displayMetrics = resources.displayMetrics
+                    val maxDialogHeight = (displayMetrics.heightPixels * 0.85f).toInt()
+                    val dialogWindow = dialog.window
+                    val dialogHeight = dialogWindow?.decorView?.height ?: 0
+                    if (dialogHeight > maxDialogHeight) {
+                        // 计算需要给 ScrollView 限制的高度
+                        val otherViewsHeight = dialogHeight - scrollView.height
+                        val maxScrollHeight = maxDialogHeight - otherViewsHeight
+                        if (maxScrollHeight > 0) {
+                            val lp = scrollView.layoutParams
+                            lp.height = maxScrollHeight
+                            scrollView.layoutParams = lp
+                        }
+                    }
+                }
+            })
         }
     }
 
@@ -791,6 +859,117 @@ class TunnelsFragment : Fragment() {
             result.toString()
         } catch (e: Exception) {
             null
+        }
+    }
+
+    /**
+     * Generate Cloudflared YAML config from tunnel configuration.
+     * Reference: https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/configure-tunnels/local-management/configuration-file/
+     */
+    private fun generateYamlConfig(tunnelId: String, config: TunnelConfig?): String {
+        val sb = StringBuilder()
+
+        // Tunnel basic info
+        sb.append("tunnel: ").append(tunnelId).append('\n')
+        sb.append("credentials-file: /data/local/tmp/cloudflared/credentials.json").append('\n')
+
+        // WARP Routing
+        if (config?.warpRouting?.enabled == true) {
+            sb.append('\n')
+            sb.append("warp-routing:").append('\n')
+            sb.append("  enabled: true").append('\n')
+        }
+
+        // Top-level originRequest
+        val topOrigin = config?.originRequest
+        if (topOrigin != null && hasOriginRequestFields(topOrigin)) {
+            sb.append('\n')
+            sb.append("originRequest:").append('\n')
+            appendOriginRequestYaml(sb, topOrigin, indent = "  ")
+        }
+
+        // Ingress rules
+        sb.append('\n')
+        sb.append("ingress:").append('\n')
+
+        val rules = config?.ingress
+        if (rules.isNullOrEmpty()) {
+            sb.append("  - service: http_status:404").append('\n')
+        } else {
+            for (rule in rules) {
+                sb.append("  - ")
+                if (!rule.hostname.isNullOrBlank()) {
+                    sb.append("hostname: ").append(rule.hostname).append('\n')
+                    sb.append("    ")
+                }
+                sb.append("service: ").append(rule.service).append('\n')
+                if (!rule.path.isNullOrBlank()) {
+                    sb.append("    path: ").append(rule.path).append('\n')
+                }
+                // Per-rule originRequest
+                val ruleOrigin = rule.originRequest
+                if (ruleOrigin != null && hasOriginRequestFields(ruleOrigin)) {
+                    sb.append("    originRequest:").append('\n')
+                    appendOriginRequestYaml(sb, ruleOrigin, indent = "      ")
+                }
+            }
+        }
+        return sb.toString()
+    }
+
+    /**
+     * Check if OriginRequest has any non-null fields
+     */
+    private fun hasOriginRequestFields(origin: OriginRequest): Boolean {
+        return origin.connectTimeout != null ||
+                origin.tlsTimeout != null ||
+                origin.tcpKeepAlive != null ||
+                origin.noHappyEyeballs != null ||
+                origin.keepAliveConnections != null ||
+                origin.keepAliveTimeout != null ||
+                origin.httpHostHeader != null ||
+                origin.originServerName != null ||
+                origin.caPool != null ||
+                origin.noTLSVerify != null ||
+                origin.disableChunkedEncoding != null ||
+                origin.http2Origin != null ||
+                origin.matchSNItoHost != null ||
+                origin.proxyAddress != null ||
+                origin.proxyPort != null ||
+                origin.proxyType != null ||
+                origin.access != null
+    }
+
+    /**
+     * Append originRequest fields to YAML string builder
+     */
+    private fun appendOriginRequestYaml(sb: StringBuilder, origin: OriginRequest, indent: String) {
+        origin.connectTimeout?.let { sb.append(indent).append("connectTimeout: ").append(it).append("s").append('\n') }
+        origin.tlsTimeout?.let { sb.append(indent).append("tlsTimeout: ").append(it).append("s").append('\n') }
+        origin.tcpKeepAlive?.let { sb.append(indent).append("tcpKeepAlive: ").append(it).append("s").append('\n') }
+        origin.noHappyEyeballs?.let { sb.append(indent).append("noHappyEyeballs: ").append(it).append('\n') }
+        origin.keepAliveConnections?.let { sb.append(indent).append("keepAliveConnections: ").append(it).append('\n') }
+        origin.keepAliveTimeout?.let { sb.append(indent).append("keepAliveTimeout: ").append(it).append("s").append('\n') }
+        origin.httpHostHeader?.let { sb.append(indent).append("httpHostHeader: ").append(it).append('\n') }
+        origin.originServerName?.let { sb.append(indent).append("originServerName: ").append(it).append('\n') }
+        origin.caPool?.let { sb.append(indent).append("caPool: ").append(it).append('\n') }
+        origin.noTLSVerify?.let { sb.append(indent).append("noTLSVerify: ").append(it).append('\n') }
+        origin.disableChunkedEncoding?.let { sb.append(indent).append("disableChunkedEncoding: ").append(it).append('\n') }
+        origin.http2Origin?.let { sb.append(indent).append("http2Origin: ").append(it).append('\n') }
+        origin.matchSNItoHost?.let { sb.append(indent).append("matchSNItoHost: ").append(it).append('\n') }
+        origin.proxyAddress?.let { sb.append(indent).append("proxyAddress: ").append(it).append('\n') }
+        origin.proxyPort?.let { sb.append(indent).append("proxyPort: ").append(it).append('\n') }
+        origin.proxyType?.let { sb.append(indent).append("proxyType: ").append(it).append('\n') }
+        origin.access?.let { access ->
+            sb.append(indent).append("access:").append('\n')
+            access.teamName?.let { sb.append(indent).append("  teamName: ").append(it).append('\n') }
+            access.required?.let { sb.append(indent).append("  required: ").append(it).append('\n') }
+            access.audTag?.takeIf { it.isNotEmpty() }?.let { tags ->
+                sb.append(indent).append("  audTag:").append('\n')
+                for (tag in tags) {
+                    sb.append(indent).append("    - ").append(tag).append('\n')
+                }
+            }
         }
     }
 }

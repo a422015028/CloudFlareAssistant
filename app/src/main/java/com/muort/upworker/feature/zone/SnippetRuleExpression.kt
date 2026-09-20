@@ -46,7 +46,7 @@ object SnippetRuleExpression {
         Field("http.request.uri.path", R.string.snippet_field_uri_path, ValueType.STRING),
         Field("http.request.uri.query", R.string.snippet_field_uri_query, ValueType.STRING),
         Field("http.request.full_uri", R.string.snippet_field_full_uri, ValueType.STRING),
-        Field("http.host", R.string.snippet_field_hostname, ValueType.STRING),
+        Field("http.host", R.string.common_hostname, ValueType.STRING),
         Field("http.request.method", R.string.snippet_field_request_method, ValueType.STRING),
         Field("http.request.version", R.string.snippet_field_http_version, ValueType.STRING),
         Field("http.user_agent", R.string.snippet_field_user_agent, ValueType.STRING),

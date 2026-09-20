@@ -162,7 +162,7 @@ class WafFragment : BaseZoneRulesetFragment() {
         WafField("ip.src", ctx.getString(R.string.snippet_field_client_ip), valueType = ValueType.IP),
         WafField("ip.geoip.country", ctx.getString(R.string.snippet_field_country_code), valueType = ValueType.STRING),
         WafField("http.request.uri.path", ctx.getString(R.string.snippet_field_uri_path), valueType = ValueType.STRING),
-        WafField("http.host", ctx.getString(R.string.snippet_field_hostname), valueType = ValueType.STRING),
+        WafField("http.host", ctx.getString(R.string.common_hostname), valueType = ValueType.STRING),
         WafField("http.request.method", ctx.getString(R.string.snippet_field_request_method), valueType = ValueType.STRING),
         WafField("http.user_agent", "User-Agent", valueType = ValueType.STRING),
         WafField("http.request.full_uri", ctx.getString(R.string.snippet_field_full_uri), valueType = ValueType.STRING),

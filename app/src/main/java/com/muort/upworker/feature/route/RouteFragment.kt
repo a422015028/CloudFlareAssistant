@@ -1,4 +1,4 @@
-﻿package com.muort.upworker.feature.route
+package com.muort.upworker.feature.route
 
 import com.muort.upworker.core.util.notifyListChanged
 
@@ -367,7 +367,7 @@ class RouteFragment : Fragment() {
         }
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.route_add_route)
+            .setTitle(R.string.common_add_route)
             .setView(dialogBinding.root)
             .setPositiveButton(R.string.save) { _, _ ->
                 val pattern = dialogBinding.routePattern.text.toString()

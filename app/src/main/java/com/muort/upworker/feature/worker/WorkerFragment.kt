@@ -3849,8 +3849,8 @@ class WorkerScriptsAdapter(
         FeatureItem(R.string.xml_fragment_script_editor_title, android.R.drawable.ic_menu_edit) { onEditClick(it) },
         FeatureItem(R.string.domain_add_title, android.R.drawable.ic_menu_add) { onAddCustomDomainClick(it) },
         FeatureItem(R.string.xml_item_pages_project_2, android.R.drawable.ic_menu_myplaces) { onViewDomainsClick(it) },
-        FeatureItem(R.string.route_add_route, android.R.drawable.ic_menu_add) { onAddRouteClick(it) },
-        FeatureItem(R.string.worker_view_routes_title, android.R.drawable.ic_menu_directions) { onViewRoutesClick(it) },
+        FeatureItem(R.string.common_add_route, android.R.drawable.ic_menu_add) { onAddRouteClick(it) },
+        FeatureItem(R.string.common_view_routes, android.R.drawable.ic_menu_directions) { onViewRoutesClick(it) },
         FeatureItem(R.string.worker_feature_toggles_title, android.R.drawable.ic_menu_preferences) { onToggleFeaturesClick(it) }
     )
     
