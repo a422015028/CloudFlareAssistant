@@ -52,10 +52,14 @@ class GatewayViewModel @Inject constructor(
      * Create a Gateway rule
      */
     suspend fun createRule(account: Account, request: GatewayRuleRequest): Resource<GatewayRule> {
+        Timber.d("Creating Gateway rule: accountId=%s, name=%s", account.accountId, request.name)
         _loadingState.value = true
         val result = zeroTrustRepository.createGatewayRule(account, request)
         if (result is Resource.Success) {
+            Timber.d("Gateway rule created: name=%s, id=%s", request.name, result.data.id)
             loadRules(account)
+        } else if (result is Resource.Error) {
+            Timber.e("Failed to create Gateway rule: name=%s, error=%s", request.name, result.message)
         }
         _loadingState.value = false
         return result
@@ -65,23 +69,31 @@ class GatewayViewModel @Inject constructor(
      * Update a Gateway rule
      */
     suspend fun updateRule(account: Account, ruleId: String, request: GatewayRuleRequest): Resource<GatewayRule> {
+        Timber.d("Updating Gateway rule: accountId=%s, ruleId=%s", account.accountId, ruleId)
         _loadingState.value = true
         val result = zeroTrustRepository.updateGatewayRule(account, ruleId, request)
         if (result is Resource.Success) {
+            Timber.d("Gateway rule updated: ruleId=%s", ruleId)
             loadRules(account)
+        } else if (result is Resource.Error) {
+            Timber.e("Failed to update Gateway rule: ruleId=%s, error=%s", ruleId, result.message)
         }
         _loadingState.value = false
         return result
     }
-    
+
     /**
      * Delete a Gateway rule
      */
     suspend fun deleteRule(account: Account, ruleId: String): Resource<Unit> {
+        Timber.d("Deleting Gateway rule: accountId=%s, ruleId=%s", account.accountId, ruleId)
         _loadingState.value = true
         val result = zeroTrustRepository.deleteGatewayRule(account, ruleId)
         if (result is Resource.Success) {
+            Timber.d("Gateway rule deleted: ruleId=%s", ruleId)
             loadRules(account)
+        } else if (result is Resource.Error) {
+            Timber.e("Failed to delete Gateway rule: ruleId=%s, error=%s", ruleId, result.message)
         }
         _loadingState.value = false
         return result
@@ -136,23 +148,31 @@ class GatewayViewModel @Inject constructor(
      * Create a Gateway list
      */
     suspend fun createList(account: Account, request: GatewayListRequest): Resource<GatewayList> {
+        Timber.d("Creating Gateway list: accountId=%s, name=%s", account.accountId, request.name)
         _loadingState.value = true
         val result = zeroTrustRepository.createGatewayList(account, request)
         if (result is Resource.Success) {
+            Timber.d("Gateway list created: name=%s, id=%s", request.name, result.data.id)
             loadLists(account)
+        } else if (result is Resource.Error) {
+            Timber.e("Failed to create Gateway list: name=%s, error=%s", request.name, result.message)
         }
         _loadingState.value = false
         return result
     }
-    
+
     /**
      * Delete a Gateway list
      */
     suspend fun deleteList(account: Account, listId: String): Resource<Unit> {
+        Timber.d("Deleting Gateway list: accountId=%s, listId=%s", account.accountId, listId)
         _loadingState.value = true
         val result = zeroTrustRepository.deleteGatewayList(account, listId)
         if (result is Resource.Success) {
+            Timber.d("Gateway list deleted: listId=%s", listId)
             loadLists(account)
+        } else if (result is Resource.Error) {
+            Timber.e("Failed to delete Gateway list: listId=%s, error=%s", listId, result.message)
         }
         _loadingState.value = false
         return result
@@ -174,10 +194,14 @@ class GatewayViewModel @Inject constructor(
      * Update a Gateway list
      */
     suspend fun updateList(account: Account, listId: String, request: GatewayListRequest): Resource<GatewayList> {
+        Timber.d("Updating Gateway list: accountId=%s, listId=%s", account.accountId, listId)
         _loadingState.value = true
         val result = zeroTrustRepository.updateGatewayList(account, listId, request)
         if (result is Resource.Success) {
+            Timber.d("Gateway list updated: listId=%s", listId)
             loadLists(account)
+        } else if (result is Resource.Error) {
+            Timber.e("Failed to update Gateway list: listId=%s, error=%s", listId, result.message)
         }
         _loadingState.value = false
         return result
@@ -201,36 +225,48 @@ class GatewayViewModel @Inject constructor(
      * Create a Gateway location
      */
     suspend fun createLocation(account: Account, request: GatewayLocationRequest): Resource<GatewayLocation> {
+        Timber.d("Creating Gateway location: accountId=%s, name=%s", account.accountId, request.name)
         _loadingState.value = true
         val result = zeroTrustRepository.createGatewayLocation(account, request)
         if (result is Resource.Success) {
+            Timber.d("Gateway location created: name=%s, id=%s", request.name, result.data.id)
             loadLocations(account)
+        } else if (result is Resource.Error) {
+            Timber.e("Failed to create Gateway location: name=%s, error=%s", request.name, result.message)
         }
         _loadingState.value = false
         return result
     }
-    
+
     /**
      * Delete a Gateway location
      */
     suspend fun deleteLocation(account: Account, locationId: String): Resource<Unit> {
+        Timber.d("Deleting Gateway location: accountId=%s, locationId=%s", account.accountId, locationId)
         _loadingState.value = true
         val result = zeroTrustRepository.deleteGatewayLocation(account, locationId)
         if (result is Resource.Success) {
+            Timber.d("Gateway location deleted: locationId=%s", locationId)
             loadLocations(account)
+        } else if (result is Resource.Error) {
+            Timber.e("Failed to delete Gateway location: locationId=%s, error=%s", locationId, result.message)
         }
         _loadingState.value = false
         return result
     }
-    
+
     /**
      * Update a Gateway location
      */
     suspend fun updateLocation(account: Account, locationId: String, request: GatewayLocationRequest): Resource<GatewayLocation> {
+        Timber.d("Updating Gateway location: accountId=%s, locationId=%s", account.accountId, locationId)
         _loadingState.value = true
         val result = zeroTrustRepository.updateGatewayLocation(account, locationId, request)
         if (result is Resource.Success) {
+            Timber.d("Gateway location updated: locationId=%s", locationId)
             loadLocations(account)
+        } else if (result is Resource.Error) {
+            Timber.e("Failed to update Gateway location: locationId=%s, error=%s", locationId, result.message)
         }
         _loadingState.value = false
         return result

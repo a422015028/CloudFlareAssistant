@@ -148,14 +148,17 @@ class AccessViewModel @Inject constructor(
      * Create a new Access application
      */
     fun createApplication(account: Account, request: AccessApplicationRequest) {
+        Timber.d("Creating Access application: accountId=%s, name=%s", account.accountId, request.name)
         viewModelScope.launch {
             _loadingState.value = true
             when (val result = zeroTrustRepository.createAccessApplication(account, request)) {
                 is Resource.Success -> {
+                    Timber.d("Access application created: name=%s, id=%s", result.data.name, result.data.id)
                     _message.emit(UiMessage.of(R.string.vm_msg_zt_access_app_created, result.data.name))
                     loadApplications(account) // Reload list
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create Access application: name=%s, error=%s", request.name, result.message)
                     _error.emit(UiMessage.of(R.string.vm_msg_zt_access_app_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -163,7 +166,7 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
-    
+
     /**
      * Update an Access application
      */
@@ -172,10 +175,12 @@ class AccessViewModel @Inject constructor(
         appId: String,
         request: AccessApplicationRequest
     ) {
+        Timber.d("Updating Access application: accountId=%s, appId=%s", account.accountId, appId)
         viewModelScope.launch {
             _loadingState.value = true
             when (val result = zeroTrustRepository.updateAccessApplication(account, appId, request)) {
                 is Resource.Success -> {
+                    Timber.d("Access application updated: appId=%s, name=%s", appId, result.data.name)
                     _message.emit(UiMessage.of(R.string.vm_msg_zt_access_app_updated, result.data.name))
                     // Cloudflare API响应可能不包含所有字段(如enable_binding_cookie等)，
                     // 用请求数据填充响应中缺失的字段
@@ -189,6 +194,7 @@ class AccessViewModel @Inject constructor(
                     loadApplications(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to update Access application: appId=%s, error=%s", appId, result.message)
                     _error.emit(UiMessage.of(R.string.vm_msg_zt_access_app_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -196,19 +202,22 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
-    
+
     /**
      * Delete an Access application
      */
     fun deleteApplication(account: Account, appId: String) {
+        Timber.d("Deleting Access application: accountId=%s, appId=%s", account.accountId, appId)
         viewModelScope.launch {
             _loadingState.value = true
             when (val result = zeroTrustRepository.deleteAccessApplication(account, appId)) {
                 is Resource.Success -> {
+                    Timber.d("Access application deleted: appId=%s", appId)
                     _message.emit(UiMessage.of(R.string.vm_msg_zt_access_app_deleted))
                     loadApplications(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete Access application: appId=%s, error=%s", appId, result.message)
                     _error.emit(UiMessage.of(R.string.vm_msg_zt_access_app_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -221,14 +230,17 @@ class AccessViewModel @Inject constructor(
      * Create an Access group
      */
     fun createGroup(account: Account, request: AccessGroupRequest) {
+        Timber.d("Creating Access group: accountId=%s, name=%s", account.accountId, request.name)
         viewModelScope.launch {
             _loadingState.value = true
             when (val result = zeroTrustRepository.createAccessGroup(account, request)) {
                 is Resource.Success -> {
+                    Timber.d("Access group created: name=%s, id=%s", result.data.name, result.data.id)
                     _message.emit(UiMessage.of(R.string.vm_msg_zt_access_group_created, result.data.name))
                     loadGroups(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create Access group: name=%s, error=%s", request.name, result.message)
                     _error.emit(UiMessage.of(R.string.vm_msg_zt_access_group_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -236,19 +248,22 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
-    
+
     /**
      * Update an Access group
      */
     fun updateGroup(account: Account, groupId: String, request: AccessGroupRequest) {
+        Timber.d("Updating Access group: accountId=%s, groupId=%s", account.accountId, groupId)
         viewModelScope.launch {
             _loadingState.value = true
             when (val result = zeroTrustRepository.updateAccessGroup(account, groupId, request)) {
                 is Resource.Success -> {
+                    Timber.d("Access group updated: groupId=%s, name=%s", groupId, result.data.name)
                     _message.emit(UiMessage.of(R.string.vm_msg_zt_access_group_updated, result.data.name))
                     loadGroups(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to update Access group: groupId=%s, error=%s", groupId, result.message)
                     _error.emit(UiMessage.of(R.string.vm_msg_zt_access_group_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -256,19 +271,22 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
-    
+
     /**
      * Delete an Access group
      */
     fun deleteGroup(account: Account, groupId: String) {
+        Timber.d("Deleting Access group: accountId=%s, groupId=%s", account.accountId, groupId)
         viewModelScope.launch {
             _loadingState.value = true
             when (val result = zeroTrustRepository.deleteAccessGroup(account, groupId)) {
                 is Resource.Success -> {
+                    Timber.d("Access group deleted: groupId=%s", groupId)
                     _message.emit(UiMessage.of(R.string.vm_msg_zt_access_group_deleted))
                     loadGroups(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete Access group: groupId=%s, error=%s", groupId, result.message)
                     _error.emit(UiMessage.of(R.string.vm_msg_zt_access_group_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -276,19 +294,22 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
-    
+
     /**
      * Create a policy for an application
      */
     fun createAppPolicy(account: Account, appId: String, request: AccessPolicyRequest) {
+        Timber.d("Creating Access policy: accountId=%s, appId=%s, name=%s", account.accountId, appId, request.name)
         viewModelScope.launch {
             _loadingState.value = true
             when (val result = zeroTrustRepository.createAppPolicy(account, appId, request)) {
                 is Resource.Success -> {
+                    Timber.d("Access policy created: appId=%s, name=%s, id=%s", appId, result.data.name, result.data.id)
                     _message.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_created, result.data.name))
                     loadAppPolicies(account, appId)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create Access policy: appId=%s, name=%s, error=%s", appId, request.name, result.message)
                     _error.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -296,7 +317,7 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
-    
+
     /**
      * Update an application policy
      */
@@ -306,14 +327,17 @@ class AccessViewModel @Inject constructor(
         policyId: String,
         request: AccessPolicyRequest
     ) {
+        Timber.d("Updating Access policy: accountId=%s, appId=%s, policyId=%s", account.accountId, appId, policyId)
         viewModelScope.launch {
             _loadingState.value = true
             when (val result = zeroTrustRepository.updateAppPolicy(account, appId, policyId, request)) {
                 is Resource.Success -> {
+                    Timber.d("Access policy updated: appId=%s, policyId=%s, name=%s", appId, policyId, result.data.name)
                     _message.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_updated, result.data.name))
                     loadAppPolicies(account, appId)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to update Access policy: appId=%s, policyId=%s, error=%s", appId, policyId, result.message)
                     _error.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_update_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -321,19 +345,22 @@ class AccessViewModel @Inject constructor(
             _loadingState.value = false
         }
     }
-    
+
     /**
      * Delete an application policy
      */
     fun deleteAppPolicy(account: Account, appId: String, policyId: String) {
+        Timber.d("Deleting Access policy: accountId=%s, appId=%s, policyId=%s", account.accountId, appId, policyId)
         viewModelScope.launch {
             _loadingState.value = true
             when (val result = zeroTrustRepository.deleteAppPolicy(account, appId, policyId)) {
                 is Resource.Success -> {
+                    Timber.d("Access policy deleted: appId=%s, policyId=%s", appId, policyId)
                     _message.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_deleted))
                     loadAppPolicies(account, appId)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete Access policy: appId=%s, policyId=%s, error=%s", appId, policyId, result.message)
                     _error.emit(UiMessage.of(R.string.vm_msg_zt_access_policy_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}

@@ -76,31 +76,36 @@ class R2ViewModel @Inject constructor(
             }
             return
         }
-        
+
+        Timber.d("Creating R2 bucket: accountId=%s, name=%s, location=%s", account.accountId, name, location)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = r2Repository.createBucket(account, name, location)) {
                 is Resource.Success -> {
+                    Timber.d("R2 bucket created: name=%s", name)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_bucket_create_success))
                     loadBuckets(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create R2 bucket: name=%s, error=%s", name, result.message)
                     _message.emit(UiMessage.of(R.string.repo_r2_create_bucket_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun deleteBucket(account: Account, bucketName: String) {
+        Timber.d("Deleting R2 bucket: accountId=%s, bucket=%s", account.accountId, bucketName)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = r2Repository.deleteBucket(account, bucketName)) {
                 is Resource.Success -> {
+                    Timber.d("R2 bucket deleted: bucket=%s", bucketName)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_bucket_delete_success))
                     if (_selectedBucket.value?.name == bucketName) {
                         _selectedBucket.value = null
@@ -109,11 +114,12 @@ class R2ViewModel @Inject constructor(
                     loadBuckets(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete R2 bucket: bucket=%s, error=%s", bucketName, result.message)
                     _message.emit(UiMessage.of(R.string.repo_r2_delete_bucket_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
@@ -148,41 +154,47 @@ class R2ViewModel @Inject constructor(
     }
     
     fun uploadObject(account: Account, bucketName: String, objectKey: String, file: File, onComplete: (Boolean) -> Unit = {}) {
+        Timber.d("Uploading R2 object: bucket=%s, key=%s, size=%d", bucketName, objectKey, file.length())
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = r2Repository.uploadObject(account, bucketName, objectKey, file)) {
                 is Resource.Success -> {
+                    Timber.d("R2 object uploaded: bucket=%s, key=%s", bucketName, objectKey)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_object_upload_success))
                     loadObjects(account, bucketName)
                     onComplete(true)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to upload R2 object: bucket=%s, key=%s, error=%s", bucketName, objectKey, result.message)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_object_upload_failed, result.message))
                     onComplete(false)
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun downloadObject(account: Account, bucketName: String, objectKey: String, onResult: (ByteArray?) -> Unit) {
+        Timber.d("Downloading R2 object: bucket=%s, key=%s", bucketName, objectKey)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = r2Repository.downloadObject(account, bucketName, objectKey)) {
                 is Resource.Success -> {
+                    Timber.d("R2 object downloaded: bucket=%s, key=%s", bucketName, objectKey)
                     onResult(result.data)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to download R2 object: bucket=%s, key=%s, error=%s", bucketName, objectKey, result.message)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_object_download_failed, result.message))
                     onResult(null)
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
@@ -191,40 +203,46 @@ class R2ViewModel @Inject constructor(
      * 流式下载到文件（推荐用于大文件）
      */
     fun downloadObjectToFile(account: Account, bucketName: String, objectKey: String, destinationFile: File, onComplete: (Boolean) -> Unit) {
+        Timber.d("Downloading R2 object to file: bucket=%s, key=%s, dest=%s", bucketName, objectKey, destinationFile.name)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = r2Repository.downloadObjectToFile(account, bucketName, objectKey, destinationFile)) {
                 is Resource.Success -> {
+                    Timber.d("R2 object downloaded to file: bucket=%s, key=%s", bucketName, objectKey)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_file_downloaded_success))
                     onComplete(true)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to download R2 object to file: bucket=%s, key=%s, error=%s", bucketName, objectKey, result.message)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_object_download_failed, result.message))
                     onComplete(false)
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun deleteObject(account: Account, bucketName: String, objectKey: String) {
+        Timber.d("Deleting R2 object: bucket=%s, key=%s", bucketName, objectKey)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = r2Repository.deleteObject(account, bucketName, objectKey)) {
                 is Resource.Success -> {
+                    Timber.d("R2 object deleted: bucket=%s, key=%s", bucketName, objectKey)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_object_delete_success))
                     loadObjects(account, bucketName)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete R2 object: bucket=%s, key=%s, error=%s", bucketName, objectKey, result.message)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_object_delete_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
@@ -254,11 +272,13 @@ class R2ViewModel @Inject constructor(
     }
     
     fun createCustomDomain(account: Account, bucketName: String, domain: String) {
+        Timber.d("Creating R2 custom domain: bucket=%s, domain=%s", bucketName, domain)
         viewModelScope.launch {
             _loadingState.value = true
 
             val zone = zoneRepository.findZoneByHostname(account.id, domain)
             if (zone == null) {
+                Timber.e("R2 custom domain zone not found: domain=%s", domain)
                 _message.emit(UiMessage.of(R.string.r2_custom_domain_zone_not_found))
                 _loadingState.value = false
                 return@launch
@@ -266,29 +286,34 @@ class R2ViewModel @Inject constructor(
 
             when (val result = r2Repository.createCustomDomain(account, bucketName, domain, zone.id)) {
                 is Resource.Success -> {
+                    Timber.d("R2 custom domain created: bucket=%s, domain=%s", bucketName, domain)
                     _message.emit(UiMessage.of(R.string.vm_msg_pages_custom_domain_add_success))
                     loadCustomDomains(account, bucketName)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create R2 custom domain: bucket=%s, domain=%s, error=%s", bucketName, domain, result.message)
                     _message.emit(UiMessage.of(R.string.repo_worker_add_custom_domain_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun deleteCustomDomain(account: Account, bucketName: String, domain: String) {
+        Timber.d("Deleting R2 custom domain: bucket=%s, domain=%s", bucketName, domain)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = r2Repository.deleteCustomDomain(account, bucketName, domain)) {
                 is Resource.Success -> {
+                    Timber.d("R2 custom domain deleted: bucket=%s, domain=%s", bucketName, domain)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domain_delete_success))
                     loadCustomDomains(account, bucketName)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete R2 custom domain: bucket=%s, domain=%s, error=%s", bucketName, domain, result.message)
                     _message.emit(UiMessage.of(R.string.repo_r2_delete_custom_domain_failed_format, result.message))
                 }
                 is Resource.Loading -> {}

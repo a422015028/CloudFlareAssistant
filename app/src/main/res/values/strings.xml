@@ -2030,8 +2030,6 @@
     <string name="repo_generic_file_not_found">备份文件不存在</string>
     <string name="repo_generic_read_file_failed">读取备份文件失败</string>
     <string name="repo_generic_no_account">没有账号可备份</string>
-    <!-- ===== AccountRepository ===== -->
-    <string name="repo_account_fetch_list_failed">获取账号列表失败</string>
     <!-- ===== DnsRepository ===== -->
     <string name="repo_dns_error_403">权限不足：API Token 没有访问此 Zone DNS 记录的权限。请检查 Token 权限设置。</string>
     <string name="repo_dns_error_401">认证失败：API Token 无效或已过期。</string>
@@ -2042,8 +2040,6 @@
     <string name="repo_analytics_fetch_failed_format">获取分析数据失败: %1$s</string>
     <!-- ===== EmailRoutingRepository ===== -->
     <string name="repo_email_settings_no_result">获取设置失败：无返回数据</string>
-    <!-- ===== ZoneRepository ===== -->
-    <string name="repo_zone_fetch_list_failed">获取Zone列表失败</string>
     <!-- ===== BackupRepository ===== -->
     <string name="repo_backup_webdav_not_configured">未配置WebDAV</string>
     <string name="repo_backup_r2_not_configured">未配置R2备份</string>

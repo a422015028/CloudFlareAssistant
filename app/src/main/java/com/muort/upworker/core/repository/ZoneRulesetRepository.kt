@@ -5,6 +5,7 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import com.muort.upworker.core.util.safeApiCall
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -45,8 +46,7 @@ class ZoneRulesetRepository @Inject constructor(
                     // phase 还没有规则集，视为空
                     Resource.Success(null)
                 } else {
-                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                    Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
                 }
             }
         }
@@ -147,8 +147,7 @@ class ZoneRulesetRepository @Inject constructor(
         return if (isSuccessful && body()?.success == true) {
             body()?.result?.let { Resource.Success(it) } ?: Resource.Error(appContext.getString(R.string.repo_generic_operation_no_result_format, errorMsg))
         } else {
-            Resource.Error(body()?.errors?.firstOrNull()?.message
-                ?: "HTTP ${code()}: ${message()}")
+            Resource.Error(resolveApiError(body()?.errors?.firstOrNull()?.message, this))
         }
     }
 
@@ -170,8 +169,7 @@ class ZoneRulesetRepository @Inject constructor(
                 } else if (resp.code() == 404 || isNoEntrypoint(resp.body())) {
                     Resource.Success(null)
                 } else {
-                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                    Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
                 }
             }
         }
@@ -276,8 +274,7 @@ class ZoneRulesetRepository @Inject constructor(
                 } else if (resp.code() == 404 || isNoEntrypoint(resp.body())) {
                     Resource.Success(null)
                 } else {
-                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                    Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
                 }
             }
         }

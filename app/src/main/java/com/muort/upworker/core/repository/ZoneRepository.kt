@@ -10,6 +10,7 @@ import com.muort.upworker.core.model.ZoneInfo
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -96,7 +97,7 @@ class ZoneRepository @Inject constructor(
 
                     Resource.Success(zones)
                 } else {
-                    val errorMsg = body?.errors?.firstOrNull()?.message ?: appContext.getString(R.string.repo_zone_fetch_list_failed)
+                    val errorMsg = resolveApiError(body?.errors?.firstOrNull()?.message, response)
                     Resource.Error(errorMsg)
                 }
             } else {
@@ -126,8 +127,7 @@ class ZoneRepository @Inject constructor(
                 zoneDao.insertZone(zone)
                 Resource.Success(zone)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
-                    ?: "HTTP ${response.code()}: ${response.message()}"
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                 Resource.Error(errorMsg)
             }
         } catch (e: Exception) {

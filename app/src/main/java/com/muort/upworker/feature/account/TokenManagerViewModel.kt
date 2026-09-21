@@ -66,6 +66,7 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> {
+                    Timber.d("Loaded %d tokens for accountId=%s, scope=%s", result.data.size, account.accountId, scope)
                     _uiState.value = if (result.data.isEmpty()) {
                         TokenUiState.Empty
                     } else {
@@ -73,8 +74,8 @@ class TokenManagerViewModel @Inject constructor(
                     }
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to load tokens: accountId=%s, scope=%s, error=%s", account.accountId, scope, result.message)
                     _uiState.value = TokenUiState.Error(UiMessage.RawString(result.message))
-                    Timber.e("Failed to load tokens: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
@@ -97,7 +98,10 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> _permissionGroups.value = result.data
-                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
+                is Resource.Error -> {
+                    Timber.e("Failed to load permission groups: accountId=%s, scope=%s, error=%s", account.accountId, _scope.value, result.message)
+                    _message.emit(UiMessage.RawString(result.message))
+                }
                 is Resource.Loading -> {}
             }
         }
@@ -113,9 +117,11 @@ class TokenManagerViewModel @Inject constructor(
         return when (val result = tokenRepository.getUserId(account)) {
             is Resource.Success -> {
                 cachedUserId = result.data
+                Timber.d("Fetched user id: accountId=%s", account.accountId)
                 result.data
             }
             is Resource.Error -> {
+                Timber.e("Failed to fetch user id: accountId=%s, error=%s", account.accountId, result.message)
                 _message.emit(UiMessage.RawString(result.message))
                 null
             }
@@ -134,8 +140,14 @@ class TokenManagerViewModel @Inject constructor(
                 tokenRepository.getAccountToken(account, tokenId)
             }
             when (result) {
-                is Resource.Success -> _tokenDetail.emit(result.data)
-                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
+                is Resource.Success -> {
+                    Timber.d("Loaded token detail: tokenId=%s, scope=%s", tokenId, _scope.value)
+                    _tokenDetail.emit(result.data)
+                }
+                is Resource.Error -> {
+                    Timber.e("Failed to load token detail: tokenId=%s, error=%s", tokenId, result.message)
+                    _message.emit(UiMessage.RawString(result.message))
+                }
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -143,6 +155,7 @@ class TokenManagerViewModel @Inject constructor(
     }
 
     fun createToken(account: Account, request: TokenUpsertRequest) {
+        Timber.d("Creating token: accountId=%s, scope=%s, name=%s", account.accountId, _scope.value, request.name)
         viewModelScope.launch {
             _busy.value = true
             val result = if (_scope.value == TokenScope.USER) {
@@ -152,11 +165,15 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> {
+                    Timber.d("Token created: id=%s, name=%s", result.data.id, request.name)
                     _message.emit(if (_scope.value == TokenScope.USER) UiMessage.of(R.string.token_created_success) else UiMessage.of(R.string.vm_msg_token_account_scope_created_success))
                     _tokenCreated.emit(result.data)
                     loadTokens(account)
                 }
-                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
+                is Resource.Error -> {
+                    Timber.e("Failed to create token: name=%s, error=%s", request.name, result.message)
+                    _message.emit(UiMessage.RawString(result.message))
+                }
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -164,6 +181,7 @@ class TokenManagerViewModel @Inject constructor(
     }
 
     fun updateToken(account: Account, tokenId: String, request: TokenUpsertRequest) {
+        Timber.d("Updating token: accountId=%s, tokenId=%s, name=%s", account.accountId, tokenId, request.name)
         viewModelScope.launch {
             _busy.value = true
             val result = if (_scope.value == TokenScope.USER) {
@@ -173,10 +191,14 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> {
+                    Timber.d("Token updated: tokenId=%s", tokenId)
                     _message.emit(UiMessage.of(R.string.token_updated_success))
                     loadTokens(account)
                 }
-                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
+                is Resource.Error -> {
+                    Timber.e("Failed to update token: tokenId=%s, error=%s", tokenId, result.message)
+                    _message.emit(UiMessage.RawString(result.message))
+                }
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -184,6 +206,7 @@ class TokenManagerViewModel @Inject constructor(
     }
 
     fun deleteToken(account: Account, tokenId: String) {
+        Timber.d("Deleting token: accountId=%s, tokenId=%s, scope=%s", account.accountId, tokenId, _scope.value)
         viewModelScope.launch {
             _busy.value = true
             val result = if (_scope.value == TokenScope.USER) {
@@ -193,10 +216,14 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> {
+                    Timber.d("Token deleted: tokenId=%s", tokenId)
                     _message.emit(UiMessage.of(R.string.token_deleted_success))
                     loadTokens(account)
                 }
-                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
+                is Resource.Error -> {
+                    Timber.e("Failed to delete token: tokenId=%s, error=%s", tokenId, result.message)
+                    _message.emit(UiMessage.RawString(result.message))
+                }
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -207,6 +234,7 @@ class TokenManagerViewModel @Inject constructor(
      * 更换令牌 secret，按当前作用域分发到用户级/账户级端点，返回新值
      */
     fun rollToken(account: Account, tokenId: String) {
+        Timber.d("Rolling token: accountId=%s, tokenId=%s, scope=%s", account.accountId, tokenId, _scope.value)
         viewModelScope.launch {
             _busy.value = true
             val result = if (_scope.value == TokenScope.USER) {
@@ -216,10 +244,14 @@ class TokenManagerViewModel @Inject constructor(
             }
             when (result) {
                 is Resource.Success -> {
+                    Timber.d("Token rolled: tokenId=%s", tokenId)
                     _message.emit(UiMessage.of(R.string.token_rolled_success))
                     _tokenRolled.emit(TokenSecretResult(id = tokenId, value = result.data))
                 }
-                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
+                is Resource.Error -> {
+                    Timber.e("Failed to roll token: tokenId=%s, error=%s", tokenId, result.message)
+                    _message.emit(UiMessage.RawString(result.message))
+                }
                 is Resource.Loading -> {}
             }
             _busy.value = false
@@ -233,8 +265,14 @@ class TokenManagerViewModel @Inject constructor(
         viewModelScope.launch {
             _busy.value = true
             when (val result = tokenRepository.verifyToken(account)) {
-                is Resource.Success -> _verifyResult.emit(result.data)
-                is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
+                is Resource.Success -> {
+                    Timber.d("Token verified: accountId=%s, status=%s", account.accountId, result.data.status)
+                    _verifyResult.emit(result.data)
+                }
+                is Resource.Error -> {
+                    Timber.e("Token verify failed: accountId=%s, error=%s", account.accountId, result.message)
+                    _message.emit(UiMessage.RawString(result.message))
+                }
                 is Resource.Loading -> {}
             }
             _busy.value = false

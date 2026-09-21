@@ -82,15 +82,18 @@ class DnsViewModel @Inject constructor(
     }
 
     fun createDnsRecord(account: Account, record: DnsRecordRequest) {
+        Timber.d("Creating DNS record: zoneId=%s, type=%s, name=%s", currentZoneId, record.type, record.name)
         viewModelScope.launch {
             _loadingState.value = true
 
             when (val result = dnsRepository.createDnsRecord(account, currentZoneId, record)) {
                 is Resource.Success -> {
+                    Timber.d("DNS record created: zoneId=%s, type=%s, name=%s", currentZoneId, record.type, record.name)
                     _message.emit(UiMessage.of(R.string.vm_msg_dns_create_success))
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create DNS record: zoneId=%s, type=%s, name=%s, error=%s", currentZoneId, record.type, record.name, result.message)
                     _message.emit(UiMessage.of(R.string.repo_dns_create_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
@@ -124,15 +127,18 @@ class DnsViewModel @Inject constructor(
     }
 
     fun updateDnsRecord(account: Account, recordId: String, record: DnsRecordRequest) {
+        Timber.d("Updating DNS record: zoneId=%s, recordId=%s, type=%s, name=%s", currentZoneId, recordId, record.type, record.name)
         viewModelScope.launch {
             _loadingState.value = true
 
             when (val result = dnsRepository.updateDnsRecord(account, currentZoneId, recordId, record)) {
                 is Resource.Success -> {
+                    Timber.d("DNS record updated: zoneId=%s, recordId=%s", currentZoneId, recordId)
                     _message.emit(UiMessage.of(R.string.vm_msg_dns_update_success))
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to update DNS record: zoneId=%s, recordId=%s, error=%s", currentZoneId, recordId, result.message)
                     _message.emit(UiMessage.of(R.string.repo_dns_update_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
@@ -143,15 +149,18 @@ class DnsViewModel @Inject constructor(
     }
 
     fun deleteDnsRecord(account: Account, recordId: String) {
+        Timber.d("Deleting DNS record: zoneId=%s, recordId=%s", currentZoneId, recordId)
         viewModelScope.launch {
             _loadingState.value = true
 
             when (val result = dnsRepository.deleteDnsRecord(account, currentZoneId, recordId)) {
                 is Resource.Success -> {
+                    Timber.d("DNS record deleted: zoneId=%s, recordId=%s", currentZoneId, recordId)
                     _message.emit(UiMessage.of(R.string.vm_msg_dns_delete_success))
                     loadDnsRecords(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete DNS record: zoneId=%s, recordId=%s, error=%s", currentZoneId, recordId, result.message)
                     _message.emit(UiMessage.of(R.string.repo_dns_delete_failed_format, result.message))
                 }
                 is Resource.Loading -> {}

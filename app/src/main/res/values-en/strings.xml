@@ -2039,8 +2039,6 @@
     <string name="repo_generic_file_not_found">Backup file does not exist</string>
     <string name="repo_generic_read_file_failed">Failed to read backup file</string>
     <string name="repo_generic_no_account">No account available to backup</string>
-    <!-- ===== AccountRepository ===== -->
-    <string name="repo_account_fetch_list_failed">Failed to fetch account list</string>
     <!-- ===== DnsRepository ===== -->
     <string name="repo_dns_error_403">Permission denied: API Token does not have access to this Zone DNS records. Please check Token permissions.</string>
     <string name="repo_dns_error_401">Authentication failed: API Token is invalid or expired.</string>
@@ -2051,8 +2049,6 @@
     <string name="repo_analytics_fetch_failed_format">Failed to fetch analytics data: %1$s</string>
     <!-- ===== EmailRoutingRepository ===== -->
     <string name="repo_email_settings_no_result">Failed to fetch settings: no response data</string>
-    <!-- ===== ZoneRepository ===== -->
-    <string name="repo_zone_fetch_list_failed">Failed to fetch Zone list</string>
     <!-- ===== BackupRepository ===== -->
     <string name="repo_backup_webdav_not_configured">WebDAV not configured</string>
     <string name="repo_backup_r2_not_configured">R2 backup not configured</string>

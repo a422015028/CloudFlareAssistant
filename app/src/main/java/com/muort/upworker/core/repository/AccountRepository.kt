@@ -8,6 +8,7 @@ import com.muort.upworker.core.model.AccountInfo
 import com.muort.upworker.core.model.Resource
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -120,10 +121,11 @@ class AccountRepository @Inject constructor(
     suspend fun insertAccount(account: Account): Resource<Long> {
         return try {
             val id = accountDao.insertAccount(account)
+            Timber.d("Account inserted: name=%s, accountId=%s, dbId=%d, authType=%s", account.name, account.accountId, id, account.authType)
             triggerAutoBackup() // 触发自动备份
             Resource.Success(id)
         } catch (e: Exception) {
-            Timber.e(e, "Error inserting account")
+            Timber.e(e, "Error inserting account: name=%s, accountId=%s", account.name, account.accountId)
             Resource.Error(appContext.getString(R.string.repo_account_insert_failed_format, e.message ?: ""), e)
         }
     }
@@ -131,10 +133,11 @@ class AccountRepository @Inject constructor(
     suspend fun updateAccount(account: Account): Resource<Unit> {
         return try {
             accountDao.updateAccount(account.copy(updatedAt = System.currentTimeMillis()))
+            Timber.d("Account updated: id=%d, name=%s, accountId=%s", account.id, account.name, account.accountId)
             triggerAutoBackup() // 触发自动备份
             Resource.Success(Unit)
         } catch (e: Exception) {
-            Timber.e(e, "Error updating account")
+            Timber.e(e, "Error updating account: id=%d, name=%s", account.id, account.name)
             Resource.Error(appContext.getString(R.string.account_update_failed, e.message ?: ""), e)
         }
     }
@@ -208,7 +211,7 @@ class AccountRepository @Inject constructor(
                 if (body?.success == true && body.result != null) {
                     Resource.Success(body.result)
                 } else {
-                    val errorMsg = body?.errors?.firstOrNull()?.message ?: appContext.getString(R.string.repo_account_fetch_list_failed)
+                    val errorMsg = resolveApiError(body?.errors?.firstOrNull()?.message, response)
                     Resource.Error(errorMsg)
                 }
             } else {

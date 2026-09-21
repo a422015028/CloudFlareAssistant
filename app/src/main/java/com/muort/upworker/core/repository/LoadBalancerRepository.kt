@@ -5,6 +5,7 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import com.muort.upworker.core.util.safeApiCall
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -33,8 +34,7 @@ class LoadBalancerRepository @Inject constructor(
                 if (resp.isSuccessful && resp.body()?.success == true) {
                     Resource.Success(resp.body()?.result ?: emptyList())
                 } else {
-                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                    Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
                 }
             }
         }
@@ -52,8 +52,7 @@ class LoadBalancerRepository @Inject constructor(
             if (resp.isSuccessful && resp.body()?.success == true) {
                 resp.body()?.result?.let { Resource.Success(it) } ?: Resource.Error(appContext.getString(R.string.repo_generic_toggle_no_result))
             } else {
-                Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                    ?: "HTTP ${resp.code()}: ${resp.message()}")
+                Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
             }
         }
     }
@@ -70,8 +69,7 @@ class LoadBalancerRepository @Inject constructor(
                 if (resp.isSuccessful && resp.body()?.success == true) {
                     Resource.Success(Unit)
                 } else {
-                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                    Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
                 }
             }
         }
@@ -87,8 +85,7 @@ class LoadBalancerRepository @Inject constructor(
             if (resp.isSuccessful && resp.body()?.success == true) {
                 Resource.Success(resp.body()?.result ?: emptyList())
             } else {
-                Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                    ?: "HTTP ${resp.code()}: ${resp.message()}")
+                Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
             }
         }
     }
@@ -104,8 +101,7 @@ class LoadBalancerRepository @Inject constructor(
             if (resp.isSuccessful && resp.body()?.success == true) {
                 Resource.Success(resp.body()?.result ?: emptyList())
             } else {
-                Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                    ?: "HTTP ${resp.code()}: ${resp.message()}")
+                Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
             }
         }
     }

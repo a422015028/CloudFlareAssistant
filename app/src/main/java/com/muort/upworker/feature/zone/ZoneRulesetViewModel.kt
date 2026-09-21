@@ -49,6 +49,7 @@ class ZoneRulesetViewModel @Inject constructor(
                     val ruleset: WafRuleset? = result.data
                     rulesetId = ruleset?.id ?: ""
                     hasEntrypoint = ruleset != null
+                    Timber.d("Loaded ruleset: zoneId=%s, phase=%s, rules=%d", zoneId, phase, ruleset?.rules?.size ?: 0)
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -57,7 +58,7 @@ class ZoneRulesetViewModel @Inject constructor(
                     }
                 }
                 is Resource.Error -> {
-                    Timber.e("load ruleset error: ${result.message}")
+                    Timber.e("load ruleset error: zoneId=%s, phase=%s, error=%s", zoneId, phase, result.message)
                     _state.update { it.copy(isLoading = false, error = UiMessage.RawString(result.message)) }
                 }
                 is Resource.Loading -> {}
@@ -67,15 +68,17 @@ class ZoneRulesetViewModel @Inject constructor(
 
     fun toggleRule(account: Account, zoneId: String, rule: WafRule, enabled: Boolean) {
         val rsId = rulesetId.ifBlank { return }
+        Timber.d("Toggling rule: zoneId=%s, phase=%s, ruleId=%s, enabled=%s", zoneId, phase, rule.id, enabled)
         viewModelScope.launch {
             when (val result = repository.setRuleEnabled(account, zoneId, rsId, rule, enabled)) {
                 is Resource.Success -> {
                     val ruleset = result.data
                     rulesetId = ruleset.id
+                    Timber.d("Rule toggled: zoneId=%s, phase=%s, ruleId=%s, enabled=%s", zoneId, phase, rule.id, enabled)
                     _state.update { it.copy(rules = ruleset.rules ?: emptyList()) }
                 }
                 is Resource.Error -> {
-                    Timber.e("toggle rule error: ${result.message}")
+                    Timber.e("toggle rule error: zoneId=%s, phase=%s, ruleId=%s, error=%s", zoneId, phase, rule.id, result.message)
                     load(account, zoneId)
                 }
                 is Resource.Loading -> {}
@@ -85,13 +88,15 @@ class ZoneRulesetViewModel @Inject constructor(
 
     fun deleteRule(account: Account, zoneId: String, rule: WafRule) {
         val rsId = rulesetId.ifBlank { return }
+        Timber.d("Deleting rule: zoneId=%s, phase=%s, ruleId=%s", zoneId, phase, rule.id)
         viewModelScope.launch {
             when (val result = repository.deleteRule(account, zoneId, rsId, rule.id)) {
                 is Resource.Success -> {
+                    Timber.d("Rule deleted: zoneId=%s, phase=%s, ruleId=%s", zoneId, phase, rule.id)
                     _state.update { st -> st.copy(rules = st.rules.filter { it.id != rule.id }) }
                 }
                 is Resource.Error -> {
-                    Timber.e("delete rule error: ${result.message}")
+                    Timber.e("delete rule error: zoneId=%s, phase=%s, ruleId=%s, error=%s", zoneId, phase, rule.id, result.message)
                     load(account, zoneId)
                 }
                 is Resource.Loading -> {}
@@ -101,6 +106,7 @@ class ZoneRulesetViewModel @Inject constructor(
 
     /** 新建规则：Zone 没有规则集时先 PUT entrypoint 建集，否则 POST 追加。 */
     fun addRule(account: Account, zoneId: String, rule: WafRuleCreate, onDone: (Boolean, UiMessage?) -> Unit) {
+        Timber.d("Adding rule: zoneId=%s, phase=%s, hasEntrypoint=%s", zoneId, phase, hasEntrypoint)
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
             val result = if (hasEntrypoint) {
@@ -113,10 +119,12 @@ class ZoneRulesetViewModel @Inject constructor(
                     val ruleset = result.data
                     hasEntrypoint = true
                     rulesetId = ruleset.id
+                    Timber.d("Rule added: zoneId=%s, phase=%s, totalRules=%d", zoneId, phase, ruleset.rules?.size ?: 0)
                     _state.update { it.copy(isSaving = false, rules = ruleset.rules ?: emptyList()) }
                     onDone(true, null)
                 }
                 is Resource.Error -> {
+                    Timber.e("add rule error: zoneId=%s, phase=%s, error=%s", zoneId, phase, result.message)
                     _state.update { it.copy(isSaving = false) }
                     onDone(false, UiMessage.RawString(result.message))
                 }
@@ -131,16 +139,19 @@ class ZoneRulesetViewModel @Inject constructor(
             onDone(false, UiMessage.of(R.string.vm_msg_zone_ruleset_not_initialized))
             return
         }
+        Timber.d("Updating rule: zoneId=%s, phase=%s, ruleId=%s", zoneId, phase, ruleId)
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
             when (val result = repository.updateRule(account, zoneId, rsId, ruleId, rule)) {
                 is Resource.Success -> {
                     val ruleset = result.data
                     rulesetId = ruleset.id
+                    Timber.d("Rule updated: zoneId=%s, phase=%s, ruleId=%s", zoneId, phase, ruleId)
                     _state.update { it.copy(isSaving = false, rules = ruleset.rules ?: emptyList()) }
                     onDone(true, null)
                 }
                 is Resource.Error -> {
+                    Timber.e("update rule error: zoneId=%s, phase=%s, ruleId=%s, error=%s", zoneId, phase, ruleId, result.message)
                     _state.update { it.copy(isSaving = false) }
                     onDone(false, UiMessage.RawString(result.message))
                 }

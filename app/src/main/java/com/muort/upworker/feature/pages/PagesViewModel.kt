@@ -101,10 +101,11 @@ class PagesViewModel @Inject constructor(
             }
             return
         }
-        
+
+        Timber.d("Creating Pages project: accountId=%s, name=%s", account.accountId, name)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = pagesRepository.createProject(
                 account = account,
                 name = name,
@@ -116,25 +117,29 @@ class PagesViewModel @Inject constructor(
                 compatibilityDate = compatibilityDate
             )) {
                 is Resource.Success -> {
+                    Timber.d("Pages project created: name=%s", name)
                     _message.emit(UiMessage.of(R.string.vm_msg_pages_project_create_success))
                     loadProjects(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create Pages project: name=%s, error=%s", name, result.message)
                     _message.emit(UiMessage.of(R.string.repo_pages_project_create_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun deleteProject(account: Account, projectName: String) {
+        Timber.d("Deleting Pages project: accountId=%s, project=%s", account.accountId, projectName)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = pagesRepository.deleteProject(account, projectName)) {
                 is Resource.Success -> {
+                    Timber.d("Pages project deleted: project=%s", projectName)
                     _message.emit(UiMessage.of(R.string.vm_msg_pages_project_delete_success))
                     if (_selectedProject.value?.name == projectName) {
                         _selectedProject.value = null
@@ -143,11 +148,12 @@ class PagesViewModel @Inject constructor(
                     loadProjects(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete Pages project: project=%s, error=%s", projectName, result.message)
                     _message.emit(UiMessage.of(R.string.repo_pages_project_delete_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
@@ -213,39 +219,45 @@ class PagesViewModel @Inject constructor(
     }
     
     fun deleteDeployment(account: Account, projectName: String, deploymentId: String) {
+        Timber.d("Deleting Pages deployment: project=%s, deploymentId=%s", projectName, deploymentId)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = pagesRepository.deleteDeployment(account, projectName, deploymentId)) {
                 is Resource.Success -> {
+                    Timber.d("Pages deployment deleted: project=%s, deploymentId=%s", projectName, deploymentId)
                     _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_delete_success))
                     loadDeployments(account, projectName)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete Pages deployment: project=%s, deploymentId=%s, error=%s", projectName, deploymentId, result.message)
                     _message.emit(UiMessage.of(R.string.repo_pages_delete_deployment_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun rollbackDeployment(account: Account, projectName: String, deploymentId: String) {
+        Timber.d("Rolling back Pages deployment: project=%s, deploymentId=%s", projectName, deploymentId)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = pagesRepository.rollbackDeployment(account, projectName, deploymentId)) {
                 is Resource.Success -> {
+                    Timber.d("Pages deployment rolled back: project=%s, deploymentId=%s", projectName, deploymentId)
                     _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_rollback_success))
                     loadDeployments(account, projectName)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to rollback Pages deployment: project=%s, deploymentId=%s, error=%s", projectName, deploymentId, result.message)
                     _message.emit(UiMessage.of(R.string.repo_pages_rollback_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
@@ -305,15 +317,18 @@ class PagesViewModel @Inject constructor(
         customCompatibilityDate: String? = null,
         customCompatibilityFlags: List<String>? = null
     ) {
+        Timber.d("Creating Pages deployment: project=%s, branch=%s, fileSize=%d", projectName, branch, file.length())
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = pagesRepository.createDeployment(account, projectName, branch, file, customCompatibilityDate, customCompatibilityFlags)) {
                 is Resource.Success -> {
+                    Timber.d("Pages deployment created: project=%s, branch=%s", projectName, branch)
                     _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_create_success))
                     loadProjects(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create Pages deployment: project=%s, branch=%s, error=%s", projectName, branch, result.message)
                     _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -341,6 +356,7 @@ class PagesViewModel @Inject constructor(
         onLog: (String) -> Unit,
         onComplete: (success: Boolean, errorMessage: String?) -> Unit
     ) {
+        Timber.d("Creating Pages deployment with logs: project=%s, branch=%s", projectName, branch)
         viewModelScope.launch {
             _loadingState.value = true
 
@@ -352,12 +368,14 @@ class PagesViewModel @Inject constructor(
 
             when (result) {
                 is Resource.Success -> {
+                    Timber.d("Pages deployment created (with logs): project=%s, branch=%s", projectName, branch)
                     onLog("◇ 刷新项目列表...")
                     loadProjects(account)
                     _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_create_success))
                     onComplete(true, null)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create Pages deployment (with logs): project=%s, branch=%s, error=%s", projectName, branch, result.message)
                     _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_create_failed, result.message))
                     onComplete(false, result.message)
                 }
@@ -391,6 +409,7 @@ class PagesViewModel @Inject constructor(
         extraEnvVars: Map<String, String>? = null,
         onLog: suspend (String) -> Unit
     ) {
+        Timber.d("Creating Pages deployment (with poll): project=%s, branch=%s", projectName, prodBranch)
         viewModelScope.launch outerLaunch@{
             _loadingState.value = true
 
@@ -413,6 +432,7 @@ class PagesViewModel @Inject constructor(
             when (result) {
                 is Resource.Success -> {
                     val deploymentId = result.data.id
+                    Timber.d("Pages deployment created (with poll): project=%s, deploymentId=%s", projectName, deploymentId)
                     onLog("◇ 刷新项目列表...")
                     loadProjects(account)
 
@@ -478,6 +498,7 @@ class PagesViewModel @Inject constructor(
                     }
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create Pages deployment (with poll): project=%s, branch=%s, error=%s", projectName, prodBranch, result.message)
                     _message.emit(UiMessage.of(R.string.vm_msg_pages_deployment_create_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -673,13 +694,20 @@ class PagesViewModel @Inject constructor(
         placement: Placement?,
         callback: (Resource<Unit>) -> Unit = {}
     ) {
+        Timber.d("Updating Pages runtime settings: project=%s, compatibilityDate=%s", projectName, compatibilityDate)
         viewModelScope.launch {
             val result = pagesRepository.updateRuntimeSettings(
                 account, projectName, compatibilityDate, compatibilityFlags, placement
             )
             when (result) {
-                is Resource.Success -> _message.emit(UiMessage.of(R.string.pages_runtime_settings_updated))
-                is Resource.Error -> _message.emit(UiMessage.of(R.string.vm_msg_pages_runtime_settings_update_failed, result.message))
+                is Resource.Success -> {
+                    Timber.d("Pages runtime settings updated: project=%s", projectName)
+                    _message.emit(UiMessage.of(R.string.pages_runtime_settings_updated))
+                }
+                is Resource.Error -> {
+                    Timber.e("Failed to update Pages runtime settings: project=%s, error=%s", projectName, result.message)
+                    _message.emit(UiMessage.of(R.string.vm_msg_pages_runtime_settings_update_failed, result.message))
+                }
                 else -> {}
             }
             callback(result)
@@ -698,6 +726,7 @@ class PagesViewModel @Inject constructor(
         projectName: String,
         sharedEnvConfig: EnvironmentConfig
     ) {
+        Timber.d("Syncing dual env configs: project=%s", projectName)
         viewModelScope.launch {
             _loadingState.value = true
             _message.emit(UiMessage.of(R.string.pages_env_sync_in_progress))
@@ -705,6 +734,8 @@ class PagesViewModel @Inject constructor(
             val r = pagesRepository.syncDualEnvConfigs(account, projectName, sharedEnvConfig)
             when (r) {
                 is PagesEnvSyncResult.Success -> {
+                    Timber.d("Dual env configs synced: project=%s, envVars=%d, kv=%d, d1=%d, r2=%d, services=%d",
+                        projectName, r.envVarsCount, r.kvCount, r.d1Count, r.r2Count, r.servicesCount)
                     _message.emit(
                         UiMessage.of(
                             R.string.pages_env_sync_ok_format,
@@ -713,6 +744,7 @@ class PagesViewModel @Inject constructor(
                     )
                 }
                 is PagesEnvSyncResult.ProductionFail -> {
+                    Timber.e("Dual env configs production sync failed: project=%s, error=%s", projectName, r.errorMessage)
                     _message.emit(
                         UiMessage.of(
                             R.string.pages_env_sync_production_fail_format,
@@ -721,6 +753,7 @@ class PagesViewModel @Inject constructor(
                     )
                 }
                 is PagesEnvSyncResult.PreviewFail -> {
+                    Timber.e("Dual env configs preview sync failed: project=%s, error=%s", projectName, r.errorMessage)
                     _message.emit(
                         UiMessage.of(
                             R.string.pages_env_sync_preview_fail_format,

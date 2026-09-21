@@ -3,6 +3,7 @@ package com.muort.upworker.core.repository
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -30,8 +31,7 @@ class SslRepository @Inject constructor(
                 if (resp.isSuccessful && resp.body()?.success == true) {
                     Resource.Success(resp.body()?.result ?: emptyList())
                 } else {
-                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                    Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
                 }
             }
         }
@@ -48,8 +48,7 @@ class SslRepository @Inject constructor(
                 if (resp.isSuccessful && resp.body()?.success == true) {
                     Resource.Success(resp.body()?.result?.enabled ?: false)
                 } else {
-                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                    Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
                 }
             }
         }
@@ -66,8 +65,7 @@ class SslRepository @Inject constructor(
                 if (resp.isSuccessful && resp.body()?.success == true) {
                     Resource.Success(resp.body()?.result?.enabled ?: enabled)
                 } else {
-                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                    Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
                 }
             }
         }
@@ -84,8 +82,7 @@ class SslRepository @Inject constructor(
                 if (resp.isSuccessful && resp.body()?.success == true) {
                     Resource.Success(Unit)
                 } else {
-                    Resource.Error(resp.body()?.errors?.firstOrNull()?.message
-                        ?: "HTTP ${resp.code()}: ${resp.message()}")
+                    Resource.Error(resolveApiError(resp.body()?.errors?.firstOrNull()?.message, resp))
                 }
             }
         }

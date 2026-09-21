@@ -115,6 +115,7 @@ class AccountViewModel @Inject constructor(
         authType: String = AuthType.TOKEN.name
     ) {
         if (name.isBlank() || accountId.isBlank()) {
+            Timber.w("Add account failed: name or accountId is blank (name=%s, accountId=%s)", name, accountId)
             viewModelScope.launch {
                 _message.emit(UiMessage.of(R.string.account_please_fill_required))
             }
@@ -138,12 +139,14 @@ class AccountViewModel @Inject constructor(
         }
         
         if (validationError != null) {
+            Timber.w("Add account validation failed: name=%s, accountId=%s, authType=%s", name, accountId, authType)
             viewModelScope.launch {
                 _message.emit(validationError)
             }
             return
         }
         
+        Timber.d("Adding account: name=%s, accountId=%s, authType=%s, isDefault=%s, hasR2Key=%s", name, accountId, authType, isDefault, !r2AccessKeyId.isNullOrBlank())
         viewModelScope.launch {
             val account = Account(
                 name = name,
@@ -159,12 +162,14 @@ class AccountViewModel @Inject constructor(
             
             when (val result = accountRepository.insertAccount(account)) {
                 is Resource.Success -> {
+                    Timber.d("Account added successfully: name=%s, accountId=%s, dbId=%d", name, accountId, result.data)
                     _message.emit(UiMessage.of(R.string.account_add_success))
                     if (isDefault) {
                         accountRepository.setDefaultAccount(result.data)
                     }
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to add account: name=%s, accountId=%s, error=%s", name, accountId, result.message)
                     _message.emit(UiMessage.of(R.string.account_add_failed, result.message))
                 }
                 is Resource.Loading -> {}
@@ -173,15 +178,18 @@ class AccountViewModel @Inject constructor(
     }
     
     fun updateAccount(account: Account) {
+        Timber.d("Updating account: id=%d, name=%s, accountId=%s, authType=%s, isDefault=%s", account.id, account.name, account.accountId, account.authType, account.isDefault)
         viewModelScope.launch {
             when (val result = accountRepository.updateAccount(account)) {
                 is Resource.Success -> {
+                    Timber.d("Account updated successfully: id=%d, name=%s", account.id, account.name)
                     _message.emit(UiMessage.of(R.string.account_update_success))
                     if (account.isDefault) {
                         accountRepository.setDefaultAccount(account.id)
                     }
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to update account: id=%d, name=%s, error=%s", account.id, account.name, result.message)
                     _message.emit(UiMessage.of(R.string.account_update_failed, result.message))
                 }
                 is Resource.Loading -> {}

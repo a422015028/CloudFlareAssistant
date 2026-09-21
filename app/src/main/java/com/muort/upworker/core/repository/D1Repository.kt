@@ -40,12 +40,12 @@ class D1Repository @Inject constructor(
                     Timber.d("D1Repository: Successfully retrieved ${databases.size} databases")
                     Resource.Success(databases)
                 } else if (response.isSuccessful && response.body()?.success == false) {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "API returned success=false"
                     Timber.e("D1Repository: API returned success=false. Error: $errorMsg")
                     Resource.Error(errorMsg)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: response.message()
                     Timber.e("D1Repository: HTTP error. Code: ${response.code()}, Message: $errorMsg")
                     Resource.Error(AppContextHolder.get().getString(R.string.repo_generic_http_error_format, response.code(), errorMsg ?: ""))
@@ -72,7 +72,7 @@ class D1Repository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_create_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_create_failed_format, errorMsg ?: ""))
             }
@@ -95,7 +95,7 @@ class D1Repository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_delete_failed_format, errorMsg ?: ""))
             }
@@ -223,7 +223,7 @@ class D1Repository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                 Resource.Error(AppContextHolder.get().getString(R.string.repo_d1_import_failed_format, errorMsg ?: ""))
             }
         }

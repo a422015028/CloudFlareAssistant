@@ -5,6 +5,7 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import com.muort.upworker.core.util.safeApiCall
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -24,9 +25,10 @@ class TokenRepository @Inject constructor(
 ) {
 
     private fun errorMessage(response: retrofit2.Response<*>): String {
-        return response.body()?.let { body ->
+        val bodyMsg = response.body()?.let { body ->
             (body as? CloudFlareResponse<*>)?.errors?.firstOrNull()?.message
-        } ?: response.message()
+        }
+        return resolveApiError(bodyMsg, response)
     }
 
     suspend fun listTokens(account: Account): Resource<List<ApiToken>> =

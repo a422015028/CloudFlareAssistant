@@ -65,10 +65,11 @@ class DomainListViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, hasError = false) }
             when (val result = zoneRepository.fetchAndSaveZones(account)) {
                 is com.muort.upworker.core.model.Resource.Success -> {
+                    Timber.d("Zones refreshed for accountId=%s, count=%d", account.accountId, result.data.size)
                     _uiState.update { it.copy(isLoading = false) }
                 }
                 is com.muort.upworker.core.model.Resource.Error -> {
-                    Timber.e("refresh zones error: ${result.message}")
+                    Timber.e("refresh zones error: accountId=%s, error=%s", account.accountId, result.message)
                     _uiState.update { it.copy(isLoading = false, hasError = true) }
                 }
                 is com.muort.upworker.core.model.Resource.Loading -> {}
@@ -79,13 +80,16 @@ class DomainListViewModel @Inject constructor(
     /** 新建域名。成功后 createdZone 非空，表单切到名称服务器结果页。 */
     fun createZone(account: Account, domain: String) {
         if (_addState.value.isSaving) return
+        Timber.d("Creating zone: accountId=%s, domain=%s", account.accountId, domain)
         viewModelScope.launch {
             _addState.update { it.copy(isSaving = true, error = null) }
             when (val result = zoneRepository.createZone(account, domain)) {
                 is com.muort.upworker.core.model.Resource.Success -> {
+                    Timber.d("Zone created: domain=%s, zoneId=%s", domain, result.data.id)
                     _addState.update { it.copy(createdZone = result.data, isSaving = false) }
                 }
                 is com.muort.upworker.core.model.Resource.Error -> {
+                    Timber.e("Failed to create zone: domain=%s, error=%s", domain, result.message)
                     _addState.update { it.copy(error = UiMessage.RawString(result.message), isSaving = false) }
                 }
                 is com.muort.upworker.core.model.Resource.Loading -> {}

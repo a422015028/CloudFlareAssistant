@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.muort.upworker.R
 import com.muort.upworker.core.model.AuthType
+import com.muort.upworker.core.model.UiMessage
 import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.showToast
 import com.muort.upworker.databinding.FragmentAccountEditBinding
@@ -248,8 +249,7 @@ class AccountEditFragment : Fragment() {
                     }
                 }
             }
-            
-            findNavController().navigateUp()
+            // 不在此处立即 navigateUp，等待 addAccount/updateAccount 的协程完成并收到成功消息后再返回
         }
     }
     
@@ -258,6 +258,12 @@ class AccountEditFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.message.collect { message ->
                     showToast(message.asString(requireContext()))
+                    // 添加/修改成功后返回上一页
+                    if (message is UiMessage.ResourceString &&
+                        (message.resId == R.string.account_add_success || message.resId == R.string.account_update_success)
+                    ) {
+                        findNavController().navigateUp()
+                    }
                 }
             }
         }

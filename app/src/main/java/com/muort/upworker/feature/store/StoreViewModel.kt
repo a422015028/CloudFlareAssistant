@@ -186,6 +186,7 @@ class StoreViewModel @Inject constructor(
     // ========== 收藏 ==========
 
     fun toggleFavorite(templateId: String) {
+        Timber.d("Toggling favorite: templateId=%s", templateId)
         viewModelScope.launch {
             catalogRepository.toggleFavorite(templateId)
         }

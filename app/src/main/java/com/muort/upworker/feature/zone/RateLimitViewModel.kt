@@ -41,12 +41,13 @@ class RateLimitViewModel @Inject constructor(
                     val ruleset: RateLimitRuleset? = result.data
                     rulesetId = ruleset?.id ?: ""
                     hasEntrypoint = ruleset != null
+                    Timber.d("Loaded rate limit ruleset: zoneId=%s, rules=%d", zoneId, ruleset?.rules?.size ?: 0)
                     _state.update {
                         it.copy(isLoading = false, rules = ruleset?.rules ?: emptyList())
                     }
                 }
                 is Resource.Error -> {
-                    Timber.e("load rate limit ruleset error: ${result.message}")
+                    Timber.e("load rate limit ruleset error: zoneId=%s, error=%s", zoneId, result.message)
                     _state.update { it.copy(isLoading = false, error = UiMessage.RawString(result.message)) }
                 }
                 is Resource.Loading -> {}
@@ -56,15 +57,17 @@ class RateLimitViewModel @Inject constructor(
 
     fun toggleRule(account: Account, zoneId: String, rule: RateLimitRule, enabled: Boolean) {
         val rsId = rulesetId.ifBlank { return }
+        Timber.d("Toggling rate limit rule: zoneId=%s, ruleId=%s, enabled=%s", zoneId, rule.id, enabled)
         viewModelScope.launch {
             when (val result = repository.setRateLimitRuleEnabled(account, zoneId, rsId, rule, enabled)) {
                 is Resource.Success -> {
                     val ruleset = result.data
                     rulesetId = ruleset.id
+                    Timber.d("Rate limit rule toggled: zoneId=%s, ruleId=%s, enabled=%s", zoneId, rule.id, enabled)
                     _state.update { it.copy(rules = ruleset.rules ?: emptyList()) }
                 }
                 is Resource.Error -> {
-                    Timber.e("toggle rate limit rule error: ${result.message}")
+                    Timber.e("toggle rate limit rule error: zoneId=%s, ruleId=%s, error=%s", zoneId, rule.id, result.message)
                     load(account, zoneId)
                 }
                 is Resource.Loading -> {}
@@ -74,13 +77,15 @@ class RateLimitViewModel @Inject constructor(
 
     fun deleteRule(account: Account, zoneId: String, rule: RateLimitRule) {
         val rsId = rulesetId.ifBlank { return }
+        Timber.d("Deleting rate limit rule: zoneId=%s, ruleId=%s", zoneId, rule.id)
         viewModelScope.launch {
             when (val result = repository.deleteRateLimitRule(account, zoneId, rsId, rule.id)) {
                 is Resource.Success -> {
+                    Timber.d("Rate limit rule deleted: zoneId=%s, ruleId=%s", zoneId, rule.id)
                     _state.update { st -> st.copy(rules = st.rules.filter { it.id != rule.id }) }
                 }
                 is Resource.Error -> {
-                    Timber.e("delete rate limit rule error: ${result.message}")
+                    Timber.e("delete rate limit rule error: zoneId=%s, ruleId=%s, error=%s", zoneId, rule.id, result.message)
                     load(account, zoneId)
                 }
                 is Resource.Loading -> {}
@@ -101,6 +106,7 @@ class RateLimitViewModel @Inject constructor(
         enabled: Boolean,
         onDone: (Boolean, UiMessage?) -> Unit,
     ) {
+        Timber.d("Saving rate limit rule: zoneId=%s, ruleId=%s, isNew=%s", zoneId, ruleId, ruleId == null)
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
             val draft = RateLimitRuleCreate(
@@ -128,10 +134,12 @@ class RateLimitViewModel @Inject constructor(
                     val ruleset = result.data
                     hasEntrypoint = true
                     rulesetId = ruleset.id
+                    Timber.d("Rate limit rule saved: zoneId=%s, ruleId=%s, totalRules=%d", zoneId, ruleId, ruleset.rules?.size ?: 0)
                     _state.update { it.copy(isSaving = false, rules = ruleset.rules ?: emptyList()) }
                     onDone(true, null)
                 }
                 is Resource.Error -> {
+                    Timber.e("save rate limit rule error: zoneId=%s, ruleId=%s, error=%s", zoneId, ruleId, result.message)
                     _state.update { it.copy(isSaving = false) }
                     onDone(false, UiMessage.RawString(result.message))
                 }

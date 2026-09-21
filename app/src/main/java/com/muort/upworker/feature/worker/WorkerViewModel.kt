@@ -606,13 +606,16 @@ class WorkerViewModel @Inject constructor(
     }
     
     fun deleteWorkerScript(account: Account, scriptName: String) {
+        Timber.d("Deleting worker script: accountId=%s, script=%s", account.accountId, scriptName)
         viewModelScope.launch {
             when (val result = workerRepository.deleteWorkerScript(account, scriptName)) {
                 is Resource.Success -> {
+                    Timber.d("Worker script deleted: script=%s", scriptName)
                     _message.emit(UiMessage.of(R.string.vm_msg_worker_script_delete_success))
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete worker script: script=%s, error=%s", scriptName, result.message)
                     _message.emit(UiMessage.of(R.string.repo_worker_delete_script_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
@@ -648,54 +651,63 @@ class WorkerViewModel @Inject constructor(
             }
             return
         }
-        
+
+        Timber.d("Creating worker route: zoneId=%s, pattern=%s, script=%s", zoneId, pattern, scriptName)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = workerRepository.createRoute(account, zoneId, pattern, scriptName)) {
                 is Resource.Success -> {
+                    Timber.d("Worker route created: zoneId=%s, pattern=%s", zoneId, pattern)
                     _message.emit(UiMessage.of(R.string.worker_route_created_success))
                     loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create worker route: zoneId=%s, pattern=%s, error=%s", zoneId, pattern, result.message)
                     _message.emit(UiMessage.of(R.string.repo_worker_create_route_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun updateRoute(account: Account, zoneId: String, routeId: String, pattern: String, scriptName: String) {
+        Timber.d("Updating worker route: zoneId=%s, routeId=%s, pattern=%s, script=%s", zoneId, routeId, pattern, scriptName)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = workerRepository.updateRoute(account, zoneId, routeId, pattern, scriptName)) {
                 is Resource.Success -> {
+                    Timber.d("Worker route updated: zoneId=%s, routeId=%s", zoneId, routeId)
                     _message.emit(UiMessage.of(R.string.vm_msg_worker_route_update_success))
                     loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to update worker route: zoneId=%s, routeId=%s, error=%s", zoneId, routeId, result.message)
                     _message.emit(UiMessage.of(R.string.repo_worker_update_route_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun deleteRoute(account: Account, zoneId: String, routeId: String) {
+        Timber.d("Deleting worker route: zoneId=%s, routeId=%s", zoneId, routeId)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = workerRepository.deleteRoute(account, zoneId, routeId)) {
                 is Resource.Success -> {
+                    Timber.d("Worker route deleted: zoneId=%s, routeId=%s", zoneId, routeId)
                     _message.emit(UiMessage.of(R.string.vm_msg_worker_route_delete_success))
                     loadRoutes(account, zoneId)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete worker route: zoneId=%s, routeId=%s, error=%s", zoneId, routeId, result.message)
                     _message.emit(UiMessage.of(R.string.repo_worker_delete_route_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
@@ -743,20 +755,23 @@ class WorkerViewModel @Inject constructor(
     }
     
     fun deleteCustomDomain(account: Account, domainId: String) {
+        Timber.d("Deleting worker custom domain: accountId=%s, domainId=%s", account.accountId, domainId)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = workerRepository.deleteCustomDomain(account, domainId)) {
                 is Resource.Success -> {
+                    Timber.d("Worker custom domain deleted: domainId=%s", domainId)
                     _message.emit(UiMessage.of(R.string.vm_msg_r2_custom_domain_delete_success))
                     loadCustomDomains(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete worker custom domain: domainId=%s, error=%s", domainId, result.message)
                     _message.emit(UiMessage.of(R.string.repo_r2_delete_custom_domain_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
@@ -846,16 +861,19 @@ class WorkerViewModel @Inject constructor(
     }
 
     fun deployWorkerVersion(account: Account, scriptName: String, versionId: String) {
+        Timber.d("Deploying worker version: script=%s, versionId=%s", scriptName, versionId)
         viewModelScope.launch {
             _loadingState.value = true
             val result = workerRepository.deployWorkerVersion(account, scriptName, versionId)
             when (result) {
                 is Resource.Success -> {
+                    Timber.d("Worker version deployed: script=%s, versionId=%s", scriptName, versionId)
                     _message.emit(UiMessage.of(R.string.vm_msg_worker_rollback_success))
                     loadWorkerVersions(account, scriptName)
                     loadWorkerScripts(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to deploy worker version: script=%s, versionId=%s, error=%s", scriptName, versionId, result.message)
                     _message.emit(UiMessage.of(R.string.repo_pages_rollback_failed_format, result.message))
                 }
                 is Resource.Loading -> {}

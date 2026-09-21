@@ -71,31 +71,36 @@ class KvViewModel @Inject constructor(
             }
             return
         }
-        
+
+        Timber.d("Creating KV namespace: accountId=%s, title=%s", account.accountId, title)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = kvRepository.createNamespace(account, title)) {
                 is Resource.Success -> {
+                    Timber.d("KV namespace created: title=%s", title)
                     _message.emit(UiMessage.of(R.string.vm_msg_kv_namespace_create_success))
                     loadNamespaces(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to create KV namespace: title=%s, error=%s", title, result.message)
                     _message.emit(UiMessage.of(R.string.repo_kv_create_namespace_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun deleteNamespace(account: Account, namespaceId: String) {
+        Timber.d("Deleting KV namespace: accountId=%s, namespaceId=%s", account.accountId, namespaceId)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = kvRepository.deleteNamespace(account, namespaceId)) {
                 is Resource.Success -> {
+                    Timber.d("KV namespace deleted: namespaceId=%s", namespaceId)
                     _message.emit(UiMessage.of(R.string.vm_msg_kv_namespace_delete_success))
                     if (_selectedNamespace.value?.id == namespaceId) {
                         _selectedNamespace.value = null
@@ -104,11 +109,12 @@ class KvViewModel @Inject constructor(
                     loadNamespaces(account)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete KV namespace: namespaceId=%s, error=%s", namespaceId, result.message)
                     _message.emit(UiMessage.of(R.string.repo_kv_delete_namespace_failed_format, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
@@ -174,31 +180,36 @@ class KvViewModel @Inject constructor(
             }
             return
         }
-        
+
+        Timber.d("Putting KV value: namespaceId=%s, key=%s, valueLen=%d", namespaceId, keyName, value.length)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = kvRepository.putValue(account, namespaceId, keyName, value)) {
                 is Resource.Success -> {
+                    Timber.d("KV value saved: namespaceId=%s, key=%s", namespaceId, keyName)
                     _message.emit(UiMessage.of(R.string.vm_msg_kv_value_save_success))
                     loadKeys(account, namespaceId)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to save KV value: namespaceId=%s, key=%s, error=%s", namespaceId, keyName, result.message)
                     _message.emit(UiMessage.of(R.string.vm_msg_kv_value_save_failed, result.message))
                 }
                 is Resource.Loading -> {}
             }
-            
+
             _loadingState.value = false
         }
     }
-    
+
     fun deleteValue(account: Account, namespaceId: String, keyName: String) {
+        Timber.d("Deleting KV value: namespaceId=%s, key=%s", namespaceId, keyName)
         viewModelScope.launch {
             _loadingState.value = true
-            
+
             when (val result = kvRepository.deleteValue(account, namespaceId, keyName)) {
                 is Resource.Success -> {
+                    Timber.d("KV value deleted: namespaceId=%s, key=%s", namespaceId, keyName)
                     _message.emit(UiMessage.of(R.string.vm_msg_kv_value_delete_success))
                     if (_selectedKey.value?.name == keyName) {
                         _selectedKey.value = null
@@ -207,6 +218,7 @@ class KvViewModel @Inject constructor(
                     loadKeys(account, namespaceId)
                 }
                 is Resource.Error -> {
+                    Timber.e("Failed to delete KV value: namespaceId=%s, key=%s, error=%s", namespaceId, keyName, result.message)
                     _message.emit(UiMessage.of(R.string.repo_kv_delete_value_failed_format, result.message))
                 }
                 is Resource.Loading -> {}

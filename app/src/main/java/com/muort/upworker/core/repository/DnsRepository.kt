@@ -5,6 +5,7 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import com.muort.upworker.core.util.safeApiCall
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +53,7 @@ class DnsRepository @Inject constructor(
             } else {
                 val body = response.body()
                 val errors = body?.errors
-                val errorMsg = errors?.firstOrNull()?.message ?: response.message()
+                val errorMsg = resolveApiError(errors?.firstOrNull()?.message, response)
                 
                 // Log detailed error information
                 Timber.e("DNS API error - code: ${response.code()}")
@@ -98,7 +99,7 @@ class DnsRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_dns_create_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_dns_create_failed_format, errorMsg ?: ""))
             }
@@ -130,7 +131,7 @@ class DnsRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_dns_update_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_dns_update_failed_format, errorMsg ?: ""))
             }
@@ -158,7 +159,7 @@ class DnsRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_dns_delete_failed_format, errorMsg ?: ""))
             }
