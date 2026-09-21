@@ -29,4 +29,11 @@
 
 - 调整账号编辑页面的返回逻辑，等待操作结果返回后再导航返回，避免保存未完成时退出导致数据丢失
 
-本次更新包含应用内日志捕获与导出、S3 客户端凭据支持、API 错误处理统一化、全模块调试日志增强及账号编辑返回逻辑修复
+#### 修复：资源列表分页缺失
+
+- 修复 Pages 项目列表仅显示 10 条的问题：Pages Projects 接口 `per_page` 上限为 10，实现翻页循环拉取全部项目
+- 修复 Pages 部署列表分页：Pages Deployments 接口 `per_page` 上限为 25，实现翻页循环拉取全部部署
+- 为 Workers Scripts、DNS Records、KV、D1、Access、Gateway、Devices、Tokens、Email、SSL、Snippets 等列表接口补充 `per_page` 参数（值经 Cloudflare OpenAPI 与实际请求双重验证）
+- 为 `CloudFlareResponse` 新增 `result_info` 分页字段，支持判断总页数并循环翻页
+
+本次更新包含应用内日志捕获与导出、S3 客户端凭据支持、API 错误处理统一化、全模块调试日志增强、账号编辑返回逻辑修复及资源列表分页修复

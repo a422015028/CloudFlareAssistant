@@ -43,24 +43,39 @@ class PagesRepository @Inject constructor(
     private val esbuildBundler: EsbuildBundler
 ) {
 
-    suspend fun listProjects(account: Account): Resource<List<PagesProject>> =   
-        withContext(Dispatchers.IO) {  
-            safeApiCall {  
-                val response = api.listPagesProjects(  
-                    token = AuthHelper.getBearerToken(account),  
-                    email = AuthHelper.getEmail(account),  
-                    apiKey = AuthHelper.getGlobalApiKey(account),  
-                    accountId = account.accountId  
-                )  
-                  
-                if (response.isSuccessful && response.body()?.success == true) {  
-                    Resource.Success(response.body()?.result ?: emptyList())  
-                } else {  
-                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
-                        ?: response.message()  
-                    Resource.Error(appContext.getString(R.string.repo_pages_project_list_failed_format, errorMsg ?: ""))  
-                }  
-            }  
+    suspend fun listProjects(account: Account): Resource<List<PagesProject>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                // Pages Projects 接口 per_page 上限仅 10，必须翻页拉取全部
+                val allProjects = mutableListOf<PagesProject>()
+                var page = 1
+                val perPage = 10
+                while (true) {
+                    val response = api.listPagesProjects(
+                        token = AuthHelper.getBearerToken(account),
+                        email = AuthHelper.getEmail(account),
+                        apiKey = AuthHelper.getGlobalApiKey(account),
+                        accountId = account.accountId,
+                        perPage = perPage,
+                        page = page
+                    )
+
+                    val body = response.body()
+                    if (response.isSuccessful && body?.success == true) {
+                        allProjects.addAll(body.result ?: emptyList())
+                        val totalPages = body.resultInfo?.totalPages ?: 1
+                        if (page >= totalPages) break
+                        page++
+                    } else {
+                        val errorMsg = resolveApiError(body?.errors?.firstOrNull()?.message, response)
+                            ?: response.message()
+                        return@safeApiCall Resource.Error(
+                            appContext.getString(R.string.repo_pages_project_list_failed_format, errorMsg ?: "")
+                        )
+                    }
+                }
+                Resource.Success(allProjects)
+            }
         }  
       
     /**
@@ -384,27 +399,42 @@ class PagesRepository @Inject constructor(
         }  
     }  
       
-    suspend fun listDeployments(  
-        account: Account,  
-        projectName: String  
-    ): Resource<List<PagesDeployment>> = withContext(Dispatchers.IO) {  
-        safeApiCall {  
-            val response = api.listPagesDeployments(  
-                token = AuthHelper.getBearerToken(account),  
-                email = AuthHelper.getEmail(account),  
-                apiKey = AuthHelper.getGlobalApiKey(account),  
-                accountId = account.accountId,  
-                projectName = projectName  
-            )  
-              
-            if (response.isSuccessful && response.body()?.success == true) {  
-                Resource.Success(response.body()?.result ?: emptyList())  
-            } else {  
-                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
-                    ?: response.message()  
-                Resource.Error(appContext.getString(R.string.repo_pages_deployments_failed_format, errorMsg ?: ""))  
-            }  
-        }  
+    suspend fun listDeployments(
+        account: Account,
+        projectName: String
+    ): Resource<List<PagesDeployment>> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            // Pages Deployments 接口 per_page 上限 25，必须翻页拉取全部
+            val allDeployments = mutableListOf<PagesDeployment>()
+            var page = 1
+            val perPage = 25
+            while (true) {
+                val response = api.listPagesDeployments(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    projectName = projectName,
+                    perPage = perPage,
+                    page = page
+                )
+
+                val body = response.body()
+                if (response.isSuccessful && body?.success == true) {
+                    allDeployments.addAll(body.result ?: emptyList())
+                    val totalPages = body.resultInfo?.totalPages ?: 1
+                    if (page >= totalPages) break
+                    page++
+                } else {
+                    val errorMsg = resolveApiError(body?.errors?.firstOrNull()?.message, response)
+                        ?: response.message()
+                    return@safeApiCall Resource.Error(
+                        appContext.getString(R.string.repo_pages_deployments_failed_format, errorMsg ?: "")
+                    )
+                }
+            }
+            Resource.Success(allDeployments)
+        }
     }  
       
     suspend fun retryDeployment(  

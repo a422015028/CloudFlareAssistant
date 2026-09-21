@@ -321,7 +321,8 @@ interface CloudFlareApi {
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
-        @Path("script_name") scriptName: String
+        @Path("script_name") scriptName: String,
+        @Query("per_page") perPage: Int = 100
     ): Response<CloudFlareResponse<List<WorkerDeployment>>>
 
     /**
@@ -529,7 +530,8 @@ interface CloudFlareApi {
         @Header("X-Auth-Key") apiKey: String?,
         @Path("zone_id") zoneId: String,
         @Query("type") type: String? = null,
-        @Query("name") name: String? = null
+        @Query("name") name: String? = null,
+        @Query("per_page") perPage: Int = 100
     ): Response<CloudFlareResponse<List<DnsRecord>>>
     
     @POST("zones/{zone_id}/dns_records")
@@ -566,7 +568,8 @@ interface CloudFlareApi {
     suspend fun listUserTokens(
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
-        @Header("X-Auth-Key") apiKey: String?
+        @Header("X-Auth-Key") apiKey: String?,
+        @Query("per_page") perPage: Int = 50
     ): Response<CloudFlareResponse<List<ApiToken>>>
 
     @GET("user/tokens/{token_id}")
@@ -665,7 +668,8 @@ interface CloudFlareApi {
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("account_id") accountId: String
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 50
     ): Response<CloudFlareResponse<List<ApiToken>>>
 
     @GET("accounts/{account_id}/tokens/{token_id}")
@@ -712,7 +716,8 @@ interface CloudFlareApi {
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("account_id") accountId: String
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 1000
     ): Response<CloudFlareResponse<List<KvNamespace>>>
     
     @POST("accounts/{account_id}/storage/kv/namespaces")
@@ -780,7 +785,9 @@ interface CloudFlareApi {
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("account_id") accountId: String
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 10,
+        @Query("page") page: Int = 1
     ): Response<CloudFlareResponse<List<PagesProject>>>
     
     @POST("accounts/{account_id}/pages/projects")
@@ -816,7 +823,9 @@ interface CloudFlareApi {
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
-        @Path("project_name") projectName: String
+        @Path("project_name") projectName: String,
+        @Query("per_page") perPage: Int = 25,
+        @Query("page") page: Int = 1
     ): Response<CloudFlareResponse<List<PagesDeployment>>>
     
     @POST("accounts/{account_id}/pages/projects/{project_name}/deployments/{deployment_id}/retry")
@@ -1063,7 +1072,8 @@ interface CloudFlareApi {
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("account_id") accountId: String
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 1000
     ): Response<CloudFlareResponse<List<D1Database>>>
     
     @POST("accounts/{account_id}/d1/database")
@@ -1296,7 +1306,8 @@ interface CloudFlareApi {
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("account_id") accountId: String
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 1000
     ): Response<CloudFlareResponse<List<AccessPolicy>>>
     
     /**
@@ -1320,7 +1331,8 @@ interface CloudFlareApi {
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
-        @Path("app_id") appId: String
+        @Path("app_id") appId: String,
+        @Query("per_page") perPage: Int = 1000
     ): Response<CloudFlareResponse<List<AccessPolicy>>>
     
     /**
@@ -1373,7 +1385,8 @@ interface CloudFlareApi {
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("account_id") accountId: String
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 1000
     ): Response<CloudFlareResponse<List<AccessGroup>>>
     
     /**
@@ -1638,7 +1651,8 @@ interface CloudFlareApi {
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("account_id") accountId: String,
-        @Query("include") include: String = "last_seen_registration.policy"
+        @Query("include") include: String = "last_seen_registration.policy",
+        @Query("per_page") perPage: Int = 100
     ): Response<CloudFlareResponse<List<Device>>>
 
     /**
@@ -1999,7 +2013,8 @@ interface CloudFlareApi {
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("account_id") accountId: String
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 1000
     ): Response<CloudFlareResponse<List<ServiceToken>>>
     
     /**
@@ -2302,7 +2317,8 @@ interface CloudFlareApi {
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("zone_id") zoneId: String
+        @Path("zone_id") zoneId: String,
+        @Query("per_page") perPage: Int = 50
     ): Response<CloudFlareResponse<List<EmailRoutingRule>>>
 
     @POST("zones/{zone_id}/email/routing/rules")
@@ -2338,7 +2354,8 @@ interface CloudFlareApi {
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("account_id") accountId: String
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 50
     ): Response<CloudFlareResponse<List<EmailDestinationAddress>>>
 
     @POST("accounts/{account_id}/email/routing/addresses")
@@ -2367,7 +2384,8 @@ interface CloudFlareApi {
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
         @Path("zone_id") zoneId: String,
-        @Query("status") status: String = "all"
+        @Query("status") status: String = "all",
+        @Query("per_page") perPage: Int = 50
     ): Response<CloudFlareResponse<List<SslCertificatePack>>>
 
     @GET("zones/{zone_id}/ssl/universal/settings")
@@ -2487,7 +2505,8 @@ interface CloudFlareApi {
         @Header("Authorization") token: String?,
         @Header("X-Auth-Email") email: String?,
         @Header("X-Auth-Key") apiKey: String?,
-        @Path("zone_id") zoneId: String
+        @Path("zone_id") zoneId: String,
+        @Query("per_page") perPage: Int = 1000
     ): Response<CloudFlareResponse<List<Snippet>>>
 
     @GET("zones/{zone_id}/snippets/{snippet_name}/content")

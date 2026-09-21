@@ -13,7 +13,9 @@ data class CloudFlareResponse<T>(
     @SerializedName("success") val success: Boolean,
     @SerializedName("errors") val errors: List<CloudFlareError>?,
     // 实际返回为对象数组 {code, message, type}，非字符串数组；项目未消费此字段，声明为 Any 兼容解析
-    @SerializedName("messages") val messages: List<Any>?
+    @SerializedName("messages") val messages: List<Any>?,
+    // 分页信息（部分列表接口返回）
+    @SerializedName("result_info") val resultInfo: ResultInfo?
 )
 
 data class CloudFlareError(
@@ -239,10 +241,11 @@ data class WorkerVersionsResult(
 )
 
 data class ResultInfo(
-    @SerializedName("page") val page: Int,
-    @SerializedName("per_page") val perPage: Int,
-    @SerializedName("count") val count: Int,
-    @SerializedName("total_count") val totalCount: Int
+    @SerializedName("page") val page: Int?,
+    @SerializedName("per_page") val perPage: Int?,
+    @SerializedName("total_pages") val totalPages: Int?,
+    @SerializedName("count") val count: Int?,
+    @SerializedName("total_count") val totalCount: Int?
 )
 
 /**
