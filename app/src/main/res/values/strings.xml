@@ -551,6 +551,14 @@
     <string name="token_updated_success">令牌更新成功</string>
     <string name="token_deleted_success">令牌删除成功</string>
     <string name="token_rolled_success">令牌已更换，旧值立即失效</string>
+    <string name="token_rolled_dialog_title">令牌更换成功</string>
+    <string name="token_value_label">令牌值</string>
+    <string name="s3_credentials_section_title">为 S3 客户端使用以下凭据</string>
+    <string name="s3_credentials_section_desc">访问密钥 ID 为令牌 ID，机密访问密钥为令牌值的 SHA-256 哈希。</string>
+    <string name="s3_access_key_id_label">访问密钥 ID</string>
+    <string name="s3_secret_access_key_label">机密访问密钥</string>
+    <string name="s3_copy_access_key_id">复制访问密钥 ID</string>
+    <string name="s3_copy_secret_access_key">复制机密访问密钥</string>
     <string name="token_name_cannot_be_empty">令牌名称不能为空</string>
     <string name="token_please_select_pg">请至少选择一个权限组</string>
     <string name="token_pg_limit_exceeded">权限组数量超出上限（最多 %1$d 个 = %2$d 个策略 × %3$d 个，当前 %4$d 个）</string>
@@ -1643,6 +1651,12 @@
     <string name="app_log_empty">暂无日志</string>
     <string name="app_log_switch_on">开</string>
     <string name="app_log_switch_off">关</string>
+    <string name="log_save_btn_desc">保存日志到文件</string>
+    <string name="log_save_success">日志已保存到文件</string>
+    <string name="log_save_failed">保存日志失败: %1$s</string>
+    <string name="log_filter_app">应用日志</string>
+    <string name="log_filter_http">HTTP日志</string>
+    <string name="log_filter_error">错误日志</string>
     <!-- ===== DashboardCardView ===== -->
     <string name="dash_past_data">过去 %1$s 数据</string>
     <string name="dash_legend_bandwidth_mb">带宽 (MB)</string>

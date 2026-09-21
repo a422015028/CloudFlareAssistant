@@ -6,6 +6,7 @@ import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.network.R2S3Client
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import com.muort.upworker.core.util.safeApiCall
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +45,7 @@ class R2Repository @Inject constructor(
                     val buckets = response.body()?.result?.buckets ?: emptyList()
                     Resource.Success(buckets)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message()
                     Resource.Error(appContext.getString(R.string.repo_r2_list_buckets_failed_format, errorMsg ?: ""))
                 }
@@ -73,7 +74,7 @@ class R2Repository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_r2_create_bucket_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_r2_create_bucket_failed_format, errorMsg ?: ""))
             }
@@ -96,7 +97,7 @@ class R2Repository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_r2_delete_bucket_failed_format, errorMsg ?: ""))
             }
@@ -235,7 +236,7 @@ class R2Repository @Inject constructor(
                 val domains = response.body()?.result?.domains ?: emptyList()
                 Resource.Success(domains)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_r2_list_custom_domains_failed_format, errorMsg ?: ""))
             }
@@ -272,7 +273,7 @@ class R2Repository @Inject constructor(
                     Resource.Error(appContext.getString(R.string.repo_r2_create_no_result))
                 }
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_r2_create_custom_domain_failed_format, errorMsg ?: ""))
             }
@@ -297,7 +298,7 @@ class R2Repository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_r2_delete_custom_domain_failed_format, errorMsg ?: ""))
             }

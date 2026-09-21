@@ -3,9 +3,11 @@ package com.muort.upworker.feature.log
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.muort.upworker.R
@@ -20,11 +22,64 @@ import kotlinx.coroutines.launch
 
 class LogActivity : AppCompatActivity() {
 
+    /** 日志过滤类型 */
+    private enum class LogFilter { APP, HTTP, ERROR, ALL }
+
+    private var currentFilter = LogFilter.APP
+
+    /**
+     * 按过滤类型过滤日志内容。
+     * 日志条目分为两类：
+     *   - 应用日志：以 [VDIWEA] 开头（如 [D] 2026 ... Tag: message）
+     *   - HTTP 日志：以 --- 开头的块（请求、响应、响应异常）
+     * 条目的后续行（不以上述标记开头）归属于当前条目。
+     */
+    private fun filterLog(raw: String, filter: LogFilter): String {
+        if (filter == LogFilter.ALL) return raw
+        val lines = raw.split("\n")
+        val result = StringBuilder()
+        var keep = false
+        for (line in lines) {
+            val isAppLog = line.length >= 3 && line[0] == '[' && line[1] in "VDIWEA" && line[2] == ']'
+            val isHttpMarker = line.startsWith("--- ")
+            if (isAppLog || isHttpMarker) {
+                keep = when (filter) {
+                    LogFilter.APP -> isAppLog
+                    LogFilter.HTTP -> isHttpMarker
+                    LogFilter.ERROR -> (isAppLog && (line[1] == 'E' || line[1] == 'A')) ||
+                            line.startsWith("--- 响应异常")
+                    LogFilter.ALL -> true
+                }
+            }
+            if (keep) {
+                if (result.isNotEmpty()) result.append("\n")
+                result.append(line)
+            }
+        }
+        return result.toString()
+    }
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(DisplaySizeHelper.wrap(LocaleHelper.applyLocale(newBase)))
     }
 
     private val scope = MainScope()
+
+    /** 保存日志到用户选择的文件 */
+    private val saveLogLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("text/plain")
+    ) { uri: Uri? ->
+        if (uri == null) return@registerForActivityResult
+        val content = filterLog(LogRepository.getLog(), currentFilter)
+        try {
+            contentResolver.openOutputStream(uri)?.use { output ->
+                output.write(content.toByteArray(Charsets.UTF_8))
+            }
+            android.widget.Toast.makeText(this, getString(R.string.log_save_success), android.widget.Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            android.widget.Toast.makeText(this, getString(R.string.log_save_failed, e.message), android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.applyDynamicColorIfEnabled(this)
         super.onCreate(savedInstanceState)
@@ -133,7 +188,7 @@ class LogActivity : AppCompatActivity() {
         }
         scope.launch {
             LogRepository.getLogFlow().collectLatest {
-                logTextView.text = colorizeLog(it)
+                logTextView.text = colorizeLog(filterLog(it, currentFilter))
             }
         }
         findViewById<com.google.android.material.button.MaterialButton>(R.id.logCloseBtn).setOnClickListener { finish() }
@@ -146,6 +201,22 @@ class LogActivity : AppCompatActivity() {
             val clip = android.content.ClipData.newPlainText("log", text)
             clipboard.setPrimaryClip(clip)
             android.widget.Toast.makeText(this, getString(R.string.msg_logs_copied), android.widget.Toast.LENGTH_SHORT).show()
+        }
+        findViewById<com.google.android.material.button.MaterialButton>(R.id.logSaveBtn).setOnClickListener {
+            val timestamp = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+            saveLogLauncher.launch("cloudflare_log_$timestamp.txt")
+        }
+        // 日志过滤标签
+        val filterChips = findViewById<com.google.android.material.chip.ChipGroup>(R.id.logFilterChips)
+        filterChips.setOnCheckedStateChangeListener { _, checkedIds ->
+            currentFilter = when (checkedIds.firstOrNull()) {
+                R.id.filterHttpChip -> LogFilter.HTTP
+                R.id.filterErrorChip -> LogFilter.ERROR
+                R.id.filterAllChip -> LogFilter.ALL
+                else -> LogFilter.APP
+            }
+            logTextView.text = colorizeLog(filterLog(LogRepository.getLog(), currentFilter))
         }
         val logSwitch = findViewById<com.google.android.material.button.MaterialButton>(R.id.logSwitch)
         var isLoggingEnabled = false

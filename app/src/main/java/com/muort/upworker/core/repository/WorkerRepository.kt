@@ -6,6 +6,7 @@ import com.muort.upworker.R
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import com.muort.upworker.core.util.safeApiCall
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -133,7 +134,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_custom_domain_update_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_worker_custom_domain_update_failed_format, errorMsg))
             }
@@ -243,7 +244,7 @@ class WorkerRepository @Inject constructor(
                     } ?: return@safeApiCall Resource.Error(appContext.getString(R.string.repo_worker_upload_no_result))
                 } else {
                     lastErrorBody = response.errorBody()?.string()
-                    lastError = response.body()?.errors?.firstOrNull()?.message 
+                    lastError = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message() 
                         ?: "Unknown error"
                     Timber.w("Upload failed with $contentType: $lastError (code: ${response.code()})")
@@ -325,7 +326,7 @@ class WorkerRepository @Inject constructor(
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_upload_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Timber.e("Multi-file upload failed: $errorMsg\nError body: $errorBody")
                 Resource.Error(appContext.getString(R.string.repo_r2_upload_failed_format, errorMsg))
@@ -507,7 +508,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_upload_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message() 
                     ?: "Unknown error"
                 Resource.Error(appContext.getString(R.string.repo_r2_upload_failed_format, errorMsg))
@@ -558,7 +559,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_upload_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message() 
                     ?: "Unknown error"
                 Resource.Error(appContext.getString(R.string.repo_worker_upload_methods_failed_format, errorMsg))
@@ -579,7 +580,7 @@ class WorkerRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result ?: emptyList())
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message()
                     Resource.Error(appContext.getString(R.string.repo_worker_list_scripts_failed_format, errorMsg))
                 }
@@ -698,7 +699,7 @@ class WorkerRepository @Inject constructor(
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Timber.e("Failed to update bindings: Response code: ${response.code()}, Error body: $errorBody")
                 Resource.Error(appContext.getString(R.string.repo_worker_update_bindings_failed_format, errorMsg))
@@ -783,7 +784,7 @@ class WorkerRepository @Inject constructor(
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Timber.e("Failed to update bindings: Response code: ${response.code()}, Error body: $errorBody")
                 Resource.Error(appContext.getString(R.string.repo_worker_update_bindings_failed_format, errorMsg))
@@ -870,7 +871,7 @@ class WorkerRepository @Inject constructor(
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Timber.e("Failed to update D1 bindings: Response code: ${response.code()}, Error body: $errorBody")
                 Resource.Error(appContext.getString(R.string.repo_pages_update_d1_failed_format, errorMsg))
@@ -957,7 +958,7 @@ class WorkerRepository @Inject constructor(
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Timber.e("Failed to update service bindings: Response code: ${response.code()}, Error body: $errorBody")
                 Resource.Error(appContext.getString(R.string.repo_pages_update_service_failed_format, errorMsg))
@@ -1062,7 +1063,7 @@ class WorkerRepository @Inject constructor(
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_no_result))
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Timber.e("Failed to update variables: Response code: ${response.code()}, Error body: $errorBody")
                 Resource.Error(appContext.getString(R.string.repo_worker_update_variables_failed_format, errorMsg))
@@ -1155,7 +1156,7 @@ class WorkerRepository @Inject constructor(
                 Resource.Success(Unit)
             } else {
                 val errorBody = response.errorBody()?.string()
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Timber.e("Failed to update secrets: Response code: ${response.code()}, Error body: $errorBody")
                 Resource.Error(appContext.getString(R.string.repo_worker_update_secrets_failed_format, errorMsg))
@@ -1235,7 +1236,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_env_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Timber.e("Failed to update runtime settings: $errorMsg")
                 Resource.Error(appContext.getString(R.string.msg_update_failed, errorMsg))
@@ -1281,7 +1282,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_update_env_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Timber.e("Failed to update script-level settings: $errorMsg")
                 Resource.Error(appContext.getString(R.string.msg_update_failed, errorMsg))
@@ -1305,7 +1306,7 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_worker_delete_script_failed_format, errorMsg))
             }
@@ -1333,7 +1334,7 @@ class WorkerRepository @Inject constructor(
                 Timber.d("Successfully fetched ${versions.size} versions")
                 Resource.Success(versions)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Timber.e("Failed to list versions: $errorMsg, code: ${response.code()}")
                 Resource.Error(appContext.getString(R.string.repo_worker_versions_failed_format, errorMsg))
@@ -1364,7 +1365,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_no_version))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_worker_get_version_failed_format, errorMsg))
             }
@@ -1391,7 +1392,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_no_version))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_worker_deploy_version_failed_format, errorMsg))
             }
@@ -1416,7 +1417,7 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_worker_version_delete_failed_format, errorMsg))
             }
@@ -1445,7 +1446,7 @@ class WorkerRepository @Inject constructor(
                 Timber.d("Successfully fetched ${deployments.size} deployments for script: $scriptName")
                 Resource.Success(deployments)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Timber.e("Failed to list deployments: $errorMsg, code: ${response.code()}")
                 Resource.Error(appContext.getString(R.string.repo_worker_deployments_failed_format, errorMsg))
@@ -1480,7 +1481,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_deployment_detail_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Timber.e("Failed to get deployment: $errorMsg, code: ${response.code()}")
                 Resource.Error(appContext.getString(R.string.repo_worker_deployment_detail_failed_format, errorMsg))
@@ -1509,7 +1510,7 @@ class WorkerRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result ?: emptyList())
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message()
                     Resource.Error(appContext.getString(R.string.repo_worker_list_routes_failed_format, errorMsg))
                 }
@@ -1540,7 +1541,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_route_create_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_worker_create_route_failed_format, errorMsg))
             }
@@ -1573,7 +1574,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_worker_route_update_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_worker_update_route_failed_format, errorMsg))
             }
@@ -1593,7 +1594,7 @@ class WorkerRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result ?: emptyList())
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message()
                     Resource.Error(appContext.getString(R.string.repo_r2_list_custom_domains_failed_format, errorMsg))
                 }
@@ -1622,7 +1623,7 @@ class WorkerRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_add_domain_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_worker_add_custom_domain_failed_format, errorMsg))
             }
@@ -1679,7 +1680,7 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_worker_delete_route_failed_format, errorMsg))
             }
@@ -1747,7 +1748,7 @@ class WorkerRepository @Inject constructor(
                         )
                     )
                 } else {
-                    val errorMsg = body?.errors?.firstOrNull()?.message ?: response.message()
+                    val errorMsg = resolveApiError(body?.errors?.firstOrNull()?.message, response)
                     Resource.Error(appContext.getString(R.string.worker_settings_fetch_failed_format, errorMsg))
                 }
             }
@@ -1854,7 +1855,7 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                 Resource.Error(appContext.getString(R.string.worker_settings_update_failed_format, errorMsg))
             }
         }
@@ -1877,7 +1878,7 @@ class WorkerRepository @Inject constructor(
                 if (response.isSuccessful && body?.success == true && body.result != null) {
                     Resource.Success(body.result.subdomain)
                 } else {
-                    val errorMsg = body?.errors?.firstOrNull()?.message ?: response.message()
+                    val errorMsg = resolveApiError(body?.errors?.firstOrNull()?.message, response)
                     Resource.Error(appContext.getString(R.string.repo_worker_get_subdomain_failed_format, errorMsg))
                 }
             }
@@ -1909,7 +1910,7 @@ class WorkerRepository @Inject constructor(
                         )
                     )
                 } else {
-                    val errorMsg = body?.errors?.firstOrNull()?.message ?: response.message()
+                    val errorMsg = resolveApiError(body?.errors?.firstOrNull()?.message, response)
                     Resource.Error(appContext.getString(R.string.worker_subdomain_status_fetch_failed_format, errorMsg))
                 }
             }
@@ -1945,7 +1946,7 @@ class WorkerRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                 Resource.Error(appContext.getString(R.string.worker_subdomain_update_failed_format, errorMsg))
             }
         }
@@ -1965,7 +1966,7 @@ class WorkerRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result ?: emptyList())
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message()
                     Resource.Error(appContext.getString(R.string.repo_worker_log_channel_failed_format, errorMsg))
                 }
@@ -2004,7 +2005,7 @@ class WorkerRepository @Inject constructor(
                         Resource.Success(it)
                     } ?: Resource.Error(appContext.getString(R.string.repo_pages_log_channel_create_no_result))
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message()
                     Resource.Error(appContext.getString(R.string.pages_log_channel_failed_template, errorMsg))
                 }
@@ -2026,7 +2027,7 @@ class WorkerRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message()
                     Resource.Error(appContext.getString(R.string.repo_pages_log_channel_delete_failed_format, errorMsg))
                 }
@@ -2047,7 +2048,7 @@ class WorkerRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result?.schedules ?: emptyList())
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message()
                     Resource.Error(appContext.getString(R.string.repo_worker_trigger_list_failed_format, errorMsg))
                 }
@@ -2070,7 +2071,7 @@ class WorkerRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result?.schedules ?: emptyList())
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message()
                     Resource.Error(appContext.getString(R.string.repo_worker_trigger_update_failed_format, errorMsg))
                 }
@@ -2228,7 +2229,7 @@ class WorkerRepository @Inject constructor(
                         )
                     }
                     response.code() == 403 -> {
-                        val rawErr = response.body()?.errors?.firstOrNull()?.message
+                        val rawErr = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                             ?: response.errorBody()?.string()?.take(200)
                             ?: "HTTP 403 Forbidden"
                         val dashboardHint = appContext.getString(
@@ -2242,7 +2243,7 @@ class WorkerRepository @Inject constructor(
                         )
                     }
                     else -> {
-                        val err = response.body()?.errors?.firstOrNull()?.message
+                        val err = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                             ?: response.errorBody()?.string()?.take(200)
                             ?: response.message()
                         WorkerPostActionStage.Failure(
@@ -2312,7 +2313,7 @@ class WorkerRepository @Inject constructor(
                     formatArgs = arrayOf(realVersion, safePercentage)
                 )
             } else {
-                val err = response.body()?.errors?.firstOrNull()?.message
+                val err = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.errorBody()?.string()?.take(200)
                     ?: response.message()
                 WorkerPostActionStage.Failure(

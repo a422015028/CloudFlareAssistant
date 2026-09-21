@@ -1,63 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?android:attr/colorBackground">
-        <TextView
-            android:id="@+id/logTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:padding="12dp"
-            android:background="?android:attr/colorBackground"
-            android:scrollbars="vertical"
-            android:textIsSelectable="true"
-            android:gravity="start|top"
-            android:maxLines="10000" />
-    </ScrollView>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        android:gravity="center"
-        android:weightSum="4"
-        android:layout_gravity="bottom">
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/logSwitch"
-            android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="?android:attr/colorBackground">
+
+        <!-- 顶部过滤栏：过滤标签 + 保存按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <HorizontalScrollView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/logFilterChips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/filterAppChip"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/log_filter_app" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/filterHttpChip"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/log_filter_http" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/filterErrorChip"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/log_filter_error" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/filterAllChip"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/gateway_all" />
+
+                </com.google.android.material.chip.ChipGroup>
+
+            </HorizontalScrollView>
+
+            <!-- 保存日志按钮 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/logSaveBtn"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_save"
+                android:contentDescription="@string/log_save_btn_desc"
+                app:iconSize="22dp" />
+
+        </LinearLayout>
+
+        <!-- 日志内容 -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:text="@string/app_log_switch_on"
-            android:textSize="14sp"
-            android:layout_marginEnd="8dp" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/logClearBtn"
-            android:layout_width="0dp"
+            android:background="?android:attr/colorBackground">
+            <TextView
+                android:id="@+id/logTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:padding="12dp"
+                android:background="?android:attr/colorBackground"
+                android:scrollbars="vertical"
+                android:textIsSelectable="true"
+                android:gravity="start|top"
+                android:maxLines="10000" />
+        </ScrollView>
+
+        <!-- 底部操作按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/se_action_clear"
-            android:textSize="14sp"
-            android:layout_marginEnd="8dp" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/logCopyBtn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/snippet_copy"
-            android:textSize="14sp"
-            android:layout_marginEnd="8dp" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/logCloseBtn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/dialog_back"
-            android:textSize="14sp" />
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center"
+            android:weightSum="4">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/logSwitch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/app_log_switch_on"
+                android:textSize="14sp"
+                android:layout_marginEnd="8dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/logClearBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/se_action_clear"
+                android:textSize="14sp"
+                android:layout_marginEnd="8dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/logCopyBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/snippet_copy"
+                android:textSize="14sp"
+                android:layout_marginEnd="8dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/logCloseBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/dialog_back"
+                android:textSize="14sp" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </merge>

@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import java.security.MessageDigest
 import kotlin.math.min
 
 /**
@@ -36,4 +37,13 @@ fun <VH : RecyclerView.ViewHolder> RecyclerView.Adapter<VH>.notifyListChanged(ol
         newSize > oldSize -> notifyItemRangeInserted(oldSize, newSize - oldSize)
         newSize < oldSize -> notifyItemRangeRemoved(newSize, oldSize - newSize)
     }
+}
+
+/**
+ * 计算字符串的 SHA-256 摘要，返回小写十六进制字符串（64 字符）。
+ * 用于从 API 令牌 value 派生 R2 S3 客户端的 Secret Access Key。
+ */
+fun String.sha256Hex(): String {
+    val digest = MessageDigest.getInstance("SHA-256").digest(this.toByteArray(Charsets.UTF_8))
+    return digest.joinToString("") { "%02x".format(it) }
 }

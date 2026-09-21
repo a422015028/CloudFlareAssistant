@@ -121,10 +121,11 @@
 }
 
 # Release 版本移除非错误级别 Timber 日志调用
+# 注意：不能用 assumenosideeffects 删除 Timber.d/i/w，否则应用内日志（InAppLogTree）
+# 在 release 包中将收不到这些级别的日志，无法用于问题反馈。
+# 改为依靠 ReleaseTree.isLoggable() 过滤 logcat 输出（仅 ERROR/WTF 输出到 logcat），
+# InAppLogTree 则在日志开关开启时捕获全部级别写入应用内日志。
+# 仅删除从未使用的 v 级别。
 -assumenosideeffects class timber.log.Timber {
     public static void v(...);
-    public static void d(...);
-    public static void i(...);
-    public static void w(...);
-    public static void tag(java.lang.String);
 }

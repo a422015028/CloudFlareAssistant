@@ -11,6 +11,7 @@ import com.muort.upworker.core.util.AuthHelper
 import com.muort.upworker.core.util.EsbuildBundler
 import com.muort.upworker.core.util.EsbuildInput
 import com.muort.upworker.core.util.ExponentialRetry
+import com.muort.upworker.core.util.resolveApiError
 import com.muort.upworker.core.util.SucraseInput
 import com.muort.upworker.core.util.SucraseTransformer
 import com.muort.upworker.core.util.safeApiCall
@@ -55,7 +56,7 @@ class PagesRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {  
                     Resource.Success(response.body()?.result ?: emptyList())  
                 } else {  
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                         ?: response.message()  
                     Resource.Error(appContext.getString(R.string.repo_pages_project_list_failed_format, errorMsg ?: ""))  
                 }  
@@ -156,7 +157,7 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.msg_update_failed, errorMsg))
             }
@@ -190,7 +191,7 @@ class PagesRepository @Inject constructor(
                 response.body()?.result?.let { Resource.Success(it) }
                     ?: Resource.Error(appContext.getString(R.string.repo_pages_asset_config_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                 Resource.Error(appContext.getString(R.string.repo_pages_asset_config_failed_format, errorMsg ?: ""))
             }
         }
@@ -230,7 +231,7 @@ class PagesRepository @Inject constructor(
                 response.body()?.result?.let { Resource.Success(it) }
                     ?: Resource.Error(appContext.getString(R.string.repo_pages_durable_objects_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                 Resource.Error(appContext.getString(R.string.repo_pages_durable_objects_failed_format, errorMsg ?: ""))
             }
         }
@@ -270,7 +271,7 @@ class PagesRepository @Inject constructor(
                 response.body()?.result?.let { Resource.Success(it) }
                     ?: Resource.Error(appContext.getString(R.string.repo_pages_service_bindings_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message ?: response.message()
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                 Resource.Error(appContext.getString(R.string.repo_pages_update_service_failed_format, errorMsg ?: ""))
             }
         }
@@ -328,7 +329,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)  
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_project_create_no_result))  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_project_create_failed_format, errorMsg ?: ""))  
             }  
@@ -351,7 +352,7 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 Resource.Success(Unit)  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_project_delete_failed_format, errorMsg ?: ""))  
             }  
@@ -376,7 +377,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)  
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_project_not_found))  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_project_detail_failed_format, errorMsg ?: ""))  
             }  
@@ -399,7 +400,7 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 Resource.Success(response.body()?.result ?: emptyList())  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_deployments_failed_format, errorMsg ?: ""))  
             }  
@@ -426,7 +427,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)  
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_retry_deployment_no_result))  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_redeploy_failed_format, errorMsg ?: ""))  
             }  
@@ -451,7 +452,7 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 Resource.Success(Unit)  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_delete_deployment_failed_format, errorMsg ?: ""))  
             }  
@@ -478,7 +479,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)  
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_rollback_no_result))  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_rollback_failed_format, errorMsg ?: ""))  
             }  
@@ -505,7 +506,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)  
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_logs_no_result))  
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_pages_logs_failed_format, errorMsg ?: ""))
             }
@@ -534,7 +535,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_log_channel_create_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.pages_log_channel_failed_template, errorMsg))
             }
@@ -561,7 +562,7 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                     ?: response.message()
                 Resource.Error(appContext.getString(R.string.repo_pages_log_channel_delete_failed_format, errorMsg))
             }
@@ -2391,7 +2392,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)  
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_variables_no_result))  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_update_env_vars_failed_format, errorMsg ?: ""))  
             }  
@@ -2433,7 +2434,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)  
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_kv_bindings_no_result))  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_update_kv_failed_format, errorMsg ?: ""))  
             }  
@@ -2475,7 +2476,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)  
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_r2_bindings_no_result))  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_update_r2_failed_format, errorMsg ?: ""))  
             }  
@@ -2517,7 +2518,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)  
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_d1_bindings_no_result))  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_update_d1_failed_format, errorMsg ?: ""))  
             }  
@@ -2542,7 +2543,7 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 Resource.Success(response.body()?.result ?: emptyList())  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_domains_failed_format, errorMsg ?: ""))  
             }  
@@ -2569,7 +2570,7 @@ class PagesRepository @Inject constructor(
                     Resource.Success(it)  
                 } ?: Resource.Error(appContext.getString(R.string.repo_pages_add_domain_no_result))  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_custom_domain_failed_format, errorMsg ?: ""))  
             }  
@@ -2594,7 +2595,7 @@ class PagesRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {  
                 Resource.Success(Unit)  
             } else {  
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message   
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)   
                     ?: response.message()  
                 Resource.Error(appContext.getString(R.string.repo_pages_custom_domain_failed_format, errorMsg ?: ""))  
             }  

@@ -1,4 +1,4 @@
-﻿package com.muort.upworker.feature.account
+package com.muort.upworker.feature.account
 
 import com.muort.upworker.core.util.notifyListChanged
 
@@ -40,6 +40,7 @@ import com.muort.upworker.core.model.TokenUpsertRequest
 import com.muort.upworker.core.util.DisplaySizeHelper
 import com.muort.upworker.core.util.LocaleHelper
 import com.muort.upworker.core.util.ThemeHelper
+import com.muort.upworker.core.util.sha256Hex
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -183,12 +184,12 @@ class TokenManagerActivity : AppCompatActivity() {
                 }
                 launch {
                     viewModel.tokenCreated.collect { token ->
-                        token.value?.let { showTokenValueDialog(it) }
+                        token.value?.let { showTokenValueDialog(token.id, it, isRoll = false) }
                     }
                 }
                 launch {
-                    viewModel.tokenRolled.collect { newValue ->
-                        showTokenValueDialog(newValue)
+                    viewModel.tokenRolled.collect { result ->
+                        showTokenValueDialog(result.id, result.value, isRoll = true)
                     }
                 }
                 launch {
@@ -529,13 +530,33 @@ class TokenManagerActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showTokenValueDialog(value: String) {
+    private fun showTokenValueDialog(tokenId: String, value: String, isRoll: Boolean) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_token_value, null)
         val valueInput = dialogView.findViewById<TextInputEditText>(R.id.tokenValueInput)
+        val accessKeyIdInput = dialogView.findViewById<TextInputEditText>(R.id.s3AccessKeyIdInput)
+        val secretAccessKeyInput = dialogView.findViewById<TextInputEditText>(R.id.s3SecretAccessKeyInput)
+        val titleText = dialogView.findViewById<TextView>(R.id.resultTitleText)
+
         valueInput.setText(value)
+        // S3 客户端凭据：Access Key ID = 令牌 id，Secret Access Key = SHA-256(令牌 value)
+        val secretAccessKey = value.sha256Hex()
+        accessKeyIdInput.setText(tokenId)
+        secretAccessKeyInput.setText(secretAccessKey)
+
+        titleText.text = if (isRoll) getString(R.string.token_rolled_dialog_title)
+                         else getString(R.string.token_created_success)
+
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         dialogView.findViewById<View>(R.id.copyValueBtn).setOnClickListener {
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             clipboard.setPrimaryClip(ClipData.newPlainText("token", value))
+            showToast(getString(R.string.msg_copied_to_clipboard))
+        }
+        dialogView.findViewById<View>(R.id.copyAccessKeyIdBtn).setOnClickListener {
+            clipboard.setPrimaryClip(ClipData.newPlainText("access_key_id", tokenId))
+            showToast(getString(R.string.msg_copied_to_clipboard))
+        }
+        dialogView.findViewById<View>(R.id.copySecretAccessKeyBtn).setOnClickListener {
+            clipboard.setPrimaryClip(ClipData.newPlainText("secret_access_key", secretAccessKey))
             showToast(getString(R.string.msg_copied_to_clipboard))
         }
         MaterialAlertDialogBuilder(this)

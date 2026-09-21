@@ -39,6 +39,9 @@ object LogRepository {
     fun getLogFlow(): StateFlow<String> = _logFlow
     fun getEnableFlow(): StateFlow<Boolean> = _enableFlow
 
+    /** 当前日志内容（用于导出保存） */
+    fun getLog(): String = _logFlow.value
+
     /** 当前是否启用 HTTP 日志（受应用内开关控制） */
     val isEnabled: Boolean
         get() = _enableFlow.value

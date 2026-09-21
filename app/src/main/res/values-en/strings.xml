@@ -562,6 +562,14 @@
     <string name="token_updated_success">Token updated successfully</string>
     <string name="token_deleted_success">Token deleted successfully</string>
     <string name="token_rolled_success">Token replaced, old value immediately revoked</string>
+    <string name="token_rolled_dialog_title">Token replaced successfully</string>
+    <string name="token_value_label">Token Value</string>
+    <string name="s3_credentials_section_title">Use the following credentials for S3 clients</string>
+    <string name="s3_credentials_section_desc">Access Key ID is the token ID; Secret Access Key is the SHA-256 hash of the token value.</string>
+    <string name="s3_access_key_id_label">Access Key ID</string>
+    <string name="s3_secret_access_key_label">Secret Access Key</string>
+    <string name="s3_copy_access_key_id">Copy Access Key ID</string>
+    <string name="s3_copy_secret_access_key">Copy Secret Access Key</string>
     <string name="token_name_cannot_be_empty">Token name cannot be empty</string>
     <string name="token_please_select_pg">Please select at least one permission group</string>
     <string name="token_pg_limit_exceeded">Permission group limit exceeded (max %1$d = %2$d policies × %3$d each, current %4$d)</string>
@@ -1653,6 +1661,12 @@
     <string name="app_log_empty">No logs yet</string>
     <string name="app_log_switch_on">On</string>
     <string name="app_log_switch_off">Off</string>
+    <string name="log_save_btn_desc">Save logs to file</string>
+    <string name="log_save_success">Logs saved to file</string>
+    <string name="log_save_failed">Failed to save logs: %1$s</string>
+    <string name="log_filter_app">App Logs</string>
+    <string name="log_filter_http">HTTP Logs</string>
+    <string name="log_filter_error">Error Logs</string>
     <!-- ===== DashboardCardView ===== -->
     <string name="dash_past_data">Past %1$s data</string>
     <string name="dash_legend_bandwidth_mb">Bandwidth (MB)</string>

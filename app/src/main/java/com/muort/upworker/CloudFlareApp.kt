@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import com.muort.upworker.core.AppContextHolder
+import com.muort.upworker.core.log.InAppLogTree
 import com.muort.upworker.core.log.LogRepository
 import com.muort.upworker.core.util.LocaleHelper
 import com.muort.upworker.core.util.ThemeHelper
@@ -38,6 +39,9 @@ class CloudFlareApp : Application() {
             // Release 版本仅输出 ERROR 及以上级别日志
             Timber.plant(ReleaseTree())
         }
+        // 应用内日志树：将应用日志转发到 LogRepository，与 HTTP 日志一同展示
+        // （受应用内日志开关控制，关闭时不捕获）
+        Timber.plant(InAppLogTree())
     }
 
     /**

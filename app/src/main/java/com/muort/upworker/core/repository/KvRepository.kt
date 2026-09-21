@@ -5,6 +5,7 @@ import com.muort.upworker.core.AppContextHolder
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -32,7 +33,7 @@ class KvRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()?.result ?: emptyList())
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                         ?: response.message()
                     Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_list_namespaces_failed_format, errorMsg ?: ""))
                 }
@@ -57,7 +58,7 @@ class KvRepository @Inject constructor(
                     Resource.Success(it)
                 } ?: Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_create_namespace_no_result))
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_create_namespace_failed_format, errorMsg ?: ""))
             }
@@ -80,7 +81,7 @@ class KvRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_delete_namespace_failed_format, errorMsg ?: ""))
             }
@@ -103,7 +104,7 @@ class KvRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(response.body()?.result ?: emptyList())
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_list_keys_failed_format, errorMsg ?: ""))
             }
@@ -160,7 +161,7 @@ class KvRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_put_value_failed_format, errorMsg ?: ""))
             }
@@ -185,7 +186,7 @@ class KvRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.success == true) {
                 Resource.Success(Unit)
             } else {
-                val errorMsg = response.body()?.errors?.firstOrNull()?.message 
+                val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response) 
                     ?: response.message()
                 Resource.Error(AppContextHolder.get().getString(R.string.repo_kv_delete_value_failed_format, errorMsg ?: ""))
             }

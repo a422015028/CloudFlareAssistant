@@ -52,8 +52,8 @@ class TokenManagerViewModel @Inject constructor(
     private val _tokenDetail = MutableSharedFlow<ApiToken>()
     val tokenDetail: SharedFlow<ApiToken> = _tokenDetail.asSharedFlow()
 
-    private val _tokenRolled = MutableSharedFlow<String>()
-    val tokenRolled: SharedFlow<String> = _tokenRolled.asSharedFlow()
+    private val _tokenRolled = MutableSharedFlow<TokenSecretResult>()
+    val tokenRolled: SharedFlow<TokenSecretResult> = _tokenRolled.asSharedFlow()
 
     fun loadTokens(account: Account, scope: TokenScope = _scope.value) {
         _scope.value = scope
@@ -217,7 +217,7 @@ class TokenManagerViewModel @Inject constructor(
             when (result) {
                 is Resource.Success -> {
                     _message.emit(UiMessage.of(R.string.token_rolled_success))
-                    _tokenRolled.emit(result.data)
+                    _tokenRolled.emit(TokenSecretResult(id = tokenId, value = result.data))
                 }
                 is Resource.Error -> _message.emit(UiMessage.RawString(result.message))
                 is Resource.Loading -> {}
@@ -248,3 +248,14 @@ sealed class TokenUiState {
     data class Success(val tokens: List<ApiToken>) : TokenUiState()
     data class Error(val message: UiMessage) : TokenUiState()
 }
+
+/**
+ * 令牌密钥结果：包含令牌 id 与 value。
+ * 创建或更换令牌后，S3 客户端凭据可由此派生：
+ *   Access Key ID   = id
+ *   Secret Access Key = SHA-256(value)
+ */
+data class TokenSecretResult(
+    val id: String,
+    val value: String
+)

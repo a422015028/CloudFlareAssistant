@@ -3,6 +3,7 @@ package com.muort.upworker.core.repository
 import com.muort.upworker.core.model.*
 import com.muort.upworker.core.network.CloudFlareApi
 import com.muort.upworker.core.util.AuthHelper
+import com.muort.upworker.core.util.resolveApiError
 import com.muort.upworker.core.util.safeApiCall
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,7 +39,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${apps.size} Access applications")
                     Resource.Success(apps)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list applications"
                     Timber.e("Error listing applications: $errorMsg")
                     Resource.Error(errorMsg)
@@ -64,7 +65,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded Access application: ${app.name}")
                     Resource.Success(app)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to get application"
                     Resource.Error(errorMsg)
                 }
@@ -92,7 +93,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created Access application: ${app.name}")
                     Resource.Success(app)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create application"
                     Resource.Error(errorMsg)
                 }
@@ -122,7 +123,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Updated Access application: ${app.name}")
                     Resource.Success(app)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to update application"
                     Resource.Error(errorMsg)
                 }
@@ -146,7 +147,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted Access application: $appId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete application"
                     Resource.Error(errorMsg)
                 }
@@ -172,7 +173,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${policies.size} Access policies")
                     Resource.Success(policies)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list policies"
                     Resource.Error(errorMsg)
                 }
@@ -197,7 +198,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${policies.size} policies for app $appId")
                     Resource.Success(policies)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list app policies"
                     Resource.Error(errorMsg)
                 }
@@ -227,7 +228,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created policy: ${policy.name}")
                     Resource.Success(policy)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create policy"
                     Resource.Error(errorMsg)
                 }
@@ -259,7 +260,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Updated policy: ${policy.name}")
                     Resource.Success(policy)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to update policy"
                     Resource.Error(errorMsg)
                 }
@@ -288,7 +289,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted policy: $policyId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete policy"
                     Resource.Error(errorMsg)
                 }
@@ -314,7 +315,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${groups.size} Access groups")
                     Resource.Success(groups)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list groups"
                     Resource.Error(errorMsg)
                 }
@@ -339,7 +340,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded Access group: ${group.name}")
                     Resource.Success(group)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to get group"
                     Resource.Error(errorMsg)
                 }
@@ -367,7 +368,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created Access group: ${group.name}")
                     Resource.Success(group)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create group"
                     Resource.Error(errorMsg)
                 }
@@ -397,7 +398,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Updated Access group: ${group.name}")
                     Resource.Success(group)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to update group"
                     Resource.Error(errorMsg)
                 }
@@ -421,7 +422,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted Access group: $groupId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete group"
                     Resource.Error(errorMsg)
                 }
@@ -447,7 +448,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${rules.size} Gateway rules")
                     Resource.Success(rules)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list rules"
                     Resource.Error(errorMsg)
                 }
@@ -475,7 +476,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created Gateway rule: ${rule.name}")
                     Resource.Success(rule)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create rule"
                     Resource.Error(errorMsg)
                 }
@@ -505,7 +506,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Updated Gateway rule: ${rule.name}")
                     Resource.Success(rule)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to update rule"
                     Resource.Error(errorMsg)
                 }
@@ -529,7 +530,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted Gateway rule: $ruleId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete rule"
                     Resource.Error(errorMsg)
                 }
@@ -555,7 +556,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${lists.size} Gateway lists")
                     Resource.Success(lists)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list gateway lists"
                     Resource.Error(errorMsg)
                 }
@@ -580,7 +581,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded Gateway list: ${list.name}")
                     Resource.Success(list)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to get list"
                     Resource.Error(errorMsg)
                 }
@@ -605,7 +606,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${items.size} items for list $listId")
                     Resource.Success(items)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to get list items"
                     Resource.Error(errorMsg)
                 }
@@ -633,7 +634,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created Gateway list: ${list.name}")
                     Resource.Success(list)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create list"
                     Resource.Error(errorMsg)
                 }
@@ -663,7 +664,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Updated Gateway list: ${list.name}")
                     Resource.Success(list)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to update list"
                     Resource.Error(errorMsg)
                 }
@@ -693,7 +694,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Patched Gateway list: ${list.name}")
                     Resource.Success(list)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to patch list"
                     Resource.Error(errorMsg)
                 }
@@ -717,7 +718,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted Gateway list: $listId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete list"
                     Resource.Error(errorMsg)
                 }
@@ -743,7 +744,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${locations.size} Gateway locations")
                     Resource.Success(locations)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list locations"
                     Resource.Error(errorMsg)
                 }
@@ -768,7 +769,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded Gateway location: ${location.name}")
                     Resource.Success(location)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to get location"
                     Resource.Error(errorMsg)
                 }
@@ -796,7 +797,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created Gateway location: ${location.name}")
                     Resource.Success(location)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create location"
                     Resource.Error(errorMsg)
                 }
@@ -826,7 +827,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Updated Gateway location: ${location.name}")
                     Resource.Success(location)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to update location"
                     Resource.Error(errorMsg)
                 }
@@ -1010,7 +1011,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${devices.size} devices")
                     Resource.Success(devices)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list devices"
                     Resource.Error(errorMsg)
                 }
@@ -1035,7 +1036,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded device: ${device.name}")
                     Resource.Success(device)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to get device"
                     Resource.Error(errorMsg)
                 }
@@ -1059,7 +1060,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Revoked device: $deviceId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to revoke device"
                     Resource.Error(errorMsg)
                 }
@@ -1083,7 +1084,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted device: $deviceId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete device"
                     Resource.Error(errorMsg)
                 }
@@ -1109,7 +1110,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${policies.size} device policies")
                     Resource.Success(policies)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list device policies"
                     Resource.Error(errorMsg)
                 }
@@ -1133,7 +1134,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded default device policy")
                     Resource.Success(policy)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to get default policy"
                     Resource.Error(errorMsg)
                 }
@@ -1161,7 +1162,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Updated default device policy")
                     Resource.Success(policy)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to update default policy"
                     Resource.Error(errorMsg)
                 }
@@ -1189,7 +1190,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created device policy: ${policy.name}")
                     Resource.Success(policy)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create policy"
                     Resource.Error(errorMsg)
                 }
@@ -1219,7 +1220,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Updated device policy: ${policy.name}")
                     Resource.Success(policy)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to update policy"
                     Resource.Error(errorMsg)
                 }
@@ -1242,7 +1243,7 @@ class ZeroTrustRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()!!.result!!)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to set split tunnel exclude"
                     Resource.Error(errorMsg)
                 }
@@ -1265,7 +1266,7 @@ class ZeroTrustRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()!!.result!!)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to set split tunnel include"
                     Resource.Error(errorMsg)
                 }
@@ -1290,7 +1291,7 @@ class ZeroTrustRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()!!.result!!)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to set split tunnel exclude"
                     Resource.Error(errorMsg)
                 }
@@ -1315,7 +1316,7 @@ class ZeroTrustRepository @Inject constructor(
                 if (response.isSuccessful && response.body()?.success == true) {
                     Resource.Success(response.body()!!.result!!)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to set split tunnel include"
                     Resource.Error(errorMsg)
                 }
@@ -1342,7 +1343,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted device policy: $policyId")
                     Resource.Success(true)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete policy"
                     Resource.Error(errorMsg)
                 }
@@ -1368,7 +1369,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${tunnels.size} Cloudflare Tunnels")
                     Resource.Success(tunnels)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list tunnels"
                     Resource.Error(errorMsg)
                 }
@@ -1393,7 +1394,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded tunnel: ${tunnel.name}")
                     Resource.Success(tunnel)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to get tunnel"
                     Resource.Error(errorMsg)
                 }
@@ -1427,7 +1428,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created tunnel: ${tunnel.name}")
                     Resource.Success(tunnel)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create tunnel"
                     Resource.Error(errorMsg)
                 }
@@ -1451,7 +1452,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted tunnel: $tunnelId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete tunnel"
                     Resource.Error(errorMsg)
                 }
@@ -1479,7 +1480,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${connections.size} connections for tunnel $tunnelId")
                     Resource.Success(connections)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list connections"
                     Resource.Error(errorMsg)
                 }
@@ -1507,7 +1508,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded configuration for tunnel $tunnelId")
                     Resource.Success(config)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to get configuration"
                     Resource.Error(errorMsg)
                 }
@@ -1537,7 +1538,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Updated configuration for tunnel $tunnelId")
                     Resource.Success(config)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to update configuration"
                     Resource.Error(errorMsg)
                 }
@@ -1562,7 +1563,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Got tunnel token for tunnel $tunnelId")
                     Resource.Success(token)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to get tunnel token"
                     Resource.Error(errorMsg)
                 }
@@ -1602,12 +1603,12 @@ class ZeroTrustRepository @Inject constructor(
                         Timber.d("Refreshed tunnel token for tunnel $tunnelId")
                         Resource.Success(token)
                     } else {
-                        val errorMsg = tokenResponse.body()?.errors?.firstOrNull()?.message
+                        val errorMsg = resolveApiError(tokenResponse.body()?.errors?.firstOrNull()?.message, tokenResponse)
                             ?: "Failed to get new tunnel token after refresh"
                         Resource.Error(errorMsg)
                     }
                 } else {
-                    val errorMsg = patchResponse.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(patchResponse.body()?.errors?.firstOrNull()?.message, patchResponse)
                         ?: "Failed to refresh tunnel token"
                     Resource.Error(errorMsg)
                 }
@@ -1648,7 +1649,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Got ${routes.size} teamnet routes for tunnel $tunnelId")
                     Resource.Success(routes)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list teamnet routes"
                     Resource.Error(errorMsg)
                 }
@@ -1678,7 +1679,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created teamnet route: ${route.network} for tunnel $tunnelId")
                     Resource.Success(route)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create teamnet route"
                     Resource.Error(errorMsg)
                 }
@@ -1702,7 +1703,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted teamnet route: $routeId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete teamnet route"
                     Resource.Error(errorMsg)
                 }
@@ -1732,7 +1733,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${routes.size} hostname routes")
                     Resource.Success(routes)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list hostname routes"
                     Resource.Error(errorMsg)
                 }
@@ -1767,7 +1768,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created hostname route: ${route.hostname}")
                     Resource.Success(route)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create hostname route"
                     Resource.Error(errorMsg)
                 }
@@ -1791,7 +1792,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted hostname route: $routeId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete hostname route"
                     Resource.Error(errorMsg)
                 }
@@ -1817,7 +1818,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Loaded ${tokens.size} service tokens")
                     Resource.Success(tokens)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to list service tokens"
                     Resource.Error(errorMsg)
                 }
@@ -1845,7 +1846,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Created service token: ${serviceToken.name}")
                     Resource.Success(serviceToken)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to create service token"
                     Resource.Error(errorMsg)
                 }
@@ -1875,7 +1876,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Updated service token: ${serviceToken.name}")
                     Resource.Success(serviceToken)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to update service token"
                     Resource.Error(errorMsg)
                 }
@@ -1899,7 +1900,7 @@ class ZeroTrustRepository @Inject constructor(
                     Timber.d("Deleted service token: $tokenId")
                     Resource.Success(Unit)
                 } else {
-                    val errorMsg = response.body()?.errors?.firstOrNull()?.message
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete service token"
                     Resource.Error(errorMsg)
                 }
