@@ -651,6 +651,12 @@ class TunnelsFragment : Fragment() {
                 tokenTextView.text = if (isTokenHidden) getMaskedContent(currentMode) else getDisplayContent(currentToken, currentMode)
                 hideTokenButton.setText(getShowHideButtonText(currentMode, isTokenHidden))
                 copyCommandButton.setText(getCopyButtonText(currentMode))
+                // YAML 配置展开时限制为 20 行，其余可滑动查看
+                if (currentMode == 2 && !isTokenHidden) {
+                    tokenTextView.maxLines = 20
+                } else {
+                    tokenTextView.maxLines = Int.MAX_VALUE
+                }
             }
 
             updateDisplay()
@@ -899,12 +905,12 @@ class TunnelsFragment : Fragment() {
             for (rule in rules) {
                 sb.append("  - ")
                 if (!rule.hostname.isNullOrBlank()) {
-                    sb.append("hostname: ").append(rule.hostname).append('\n')
+                    sb.append("hostname: ").append(yamlValue(rule.hostname)).append('\n')
                     sb.append("    ")
                 }
-                sb.append("service: ").append(rule.service).append('\n')
+                sb.append("service: ").append(yamlValue(rule.service)).append('\n')
                 if (!rule.path.isNullOrBlank()) {
-                    sb.append("    path: ").append(rule.path).append('\n')
+                    sb.append("    path: ").append(yamlValue(rule.path)).append('\n')
                 }
                 // Per-rule originRequest
                 val ruleOrigin = rule.originRequest
@@ -915,6 +921,37 @@ class TunnelsFragment : Fragment() {
             }
         }
         return sb.toString()
+    }
+
+    /**
+     * Quote a string value for YAML when it contains characters that would
+     * otherwise be interpreted as YAML syntax (e.g. '*' for alias references,
+     * leading indicators, reserved words, colon-space sequences).
+     */
+    private fun yamlValue(value: String): String {
+        if (value.isEmpty()) return "\"\""
+
+        val leadingSpecial = setOf('*', '&', '!', '|', '>', '%', '@', '`', '"', '\'', '#')
+        val reservedWords = setOf("true", "false", "yes", "no", "on", "off", "null", "~")
+
+        val needsQuote = value.first() in leadingSpecial ||
+                value.lowercase() in reservedWords ||
+                value.contains(": ") ||
+                value.contains(" #") ||
+                value.contains("{") || value.contains("}") ||
+                value.contains("[") || value.contains("]") ||
+                value.contains(",") ||
+                value.startsWith(" ") || value.endsWith(" ") ||
+                value.toDoubleOrNull() != null
+
+        if (!needsQuote) return value
+
+        val escaped = value
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\t", "\\t")
+        return "\"$escaped\""
     }
 
     /**
@@ -950,24 +987,24 @@ class TunnelsFragment : Fragment() {
         origin.noHappyEyeballs?.let { sb.append(indent).append("noHappyEyeballs: ").append(it).append('\n') }
         origin.keepAliveConnections?.let { sb.append(indent).append("keepAliveConnections: ").append(it).append('\n') }
         origin.keepAliveTimeout?.let { sb.append(indent).append("keepAliveTimeout: ").append(it).append("s").append('\n') }
-        origin.httpHostHeader?.let { sb.append(indent).append("httpHostHeader: ").append(it).append('\n') }
-        origin.originServerName?.let { sb.append(indent).append("originServerName: ").append(it).append('\n') }
-        origin.caPool?.let { sb.append(indent).append("caPool: ").append(it).append('\n') }
+        origin.httpHostHeader?.let { sb.append(indent).append("httpHostHeader: ").append(yamlValue(it)).append('\n') }
+        origin.originServerName?.let { sb.append(indent).append("originServerName: ").append(yamlValue(it)).append('\n') }
+        origin.caPool?.let { sb.append(indent).append("caPool: ").append(yamlValue(it)).append('\n') }
         origin.noTLSVerify?.let { sb.append(indent).append("noTLSVerify: ").append(it).append('\n') }
         origin.disableChunkedEncoding?.let { sb.append(indent).append("disableChunkedEncoding: ").append(it).append('\n') }
         origin.http2Origin?.let { sb.append(indent).append("http2Origin: ").append(it).append('\n') }
         origin.matchSNItoHost?.let { sb.append(indent).append("matchSNItoHost: ").append(it).append('\n') }
-        origin.proxyAddress?.let { sb.append(indent).append("proxyAddress: ").append(it).append('\n') }
+        origin.proxyAddress?.let { sb.append(indent).append("proxyAddress: ").append(yamlValue(it)).append('\n') }
         origin.proxyPort?.let { sb.append(indent).append("proxyPort: ").append(it).append('\n') }
-        origin.proxyType?.let { sb.append(indent).append("proxyType: ").append(it).append('\n') }
+        origin.proxyType?.let { sb.append(indent).append("proxyType: ").append(yamlValue(it)).append('\n') }
         origin.access?.let { access ->
             sb.append(indent).append("access:").append('\n')
-            access.teamName?.let { sb.append(indent).append("  teamName: ").append(it).append('\n') }
+            access.teamName?.let { sb.append(indent).append("  teamName: ").append(yamlValue(it)).append('\n') }
             access.required?.let { sb.append(indent).append("  required: ").append(it).append('\n') }
             access.audTag?.takeIf { it.isNotEmpty() }?.let { tags ->
                 sb.append(indent).append("  audTag:").append('\n')
                 for (tag in tags) {
-                    sb.append(indent).append("    - ").append(tag).append('\n')
+                    sb.append(indent).append("    - ").append(yamlValue(tag)).append('\n')
                 }
             }
         }
