@@ -2094,6 +2094,92 @@ interface CloudFlareApi {
         @Body request: ServiceTokenRotateRequest
     ): Response<CloudFlareResponse<ServiceToken>>
 
+    // ==================== Zero Trust - mTLS Certificates ====================
+
+    /**
+     * List mTLS certificates
+     */
+    @GET("accounts/{account_id}/access/certificates")
+    suspend fun listMtlsCertificates(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 1000
+    ): Response<CloudFlareResponse<List<MtlsCertificate>>>
+
+    /**
+     * Get a single mTLS certificate
+     */
+    @GET("accounts/{account_id}/access/certificates/{certificate_id}")
+    suspend fun getMtlsCertificate(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("certificate_id") certificateId: String
+    ): Response<CloudFlareResponse<MtlsCertificate>>
+
+    /**
+     * Add an mTLS root certificate
+     */
+    @POST("accounts/{account_id}/access/certificates")
+    suspend fun createMtlsCertificate(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body request: MtlsCertificateCreateRequest
+    ): Response<CloudFlareResponse<MtlsCertificate>>
+
+    /**
+     * Update an mTLS certificate (name and associated hostnames)
+     */
+    @PUT("accounts/{account_id}/access/certificates/{certificate_id}")
+    suspend fun updateMtlsCertificate(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("certificate_id") certificateId: String,
+        @Body request: MtlsCertificateUpdateRequest
+    ): Response<CloudFlareResponse<MtlsCertificate>>
+
+    /**
+     * Delete an mTLS certificate
+     */
+    @DELETE("accounts/{account_id}/access/certificates/{certificate_id}")
+    suspend fun deleteMtlsCertificate(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("certificate_id") certificateId: String
+    ): Response<CloudFlareResponse<Unit>>
+
+    /**
+     * List all mTLS hostname settings
+     */
+    @GET("accounts/{account_id}/access/certificates/settings")
+    suspend fun listMtlsCertificateSettings(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<MtlsCertificateSetting>>>
+
+    /**
+     * Replace all mTLS hostname settings
+     */
+    @PUT("accounts/{account_id}/access/certificates/settings")
+    suspend fun updateMtlsCertificateSettings(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body request: MtlsCertificateSettingsRequest
+    ): Response<CloudFlareResponse<List<MtlsCertificateSetting>>>
+
     // ==================== Zone Rulesets（WAF / Cache / Rate Limit / Transform 共用 phase 入口） ====================
 
     /** GET /zones/{zone_id}/rulesets/phases/{phase}/entrypoint —— 取某 phase 的 entrypoint ruleset。 */

@@ -731,6 +731,56 @@ data class ServiceTokenRotateRequest(
     val previousClientSecretExpiresAt: String? = null
 )
 
+// ==================== Zero Trust - mTLS Certificates ====================
+
+/**
+ * mTLS root certificate configured in Access.
+ * https://developers.cloudflare.com/api/resources/zero_trust/subresources/access/subresources/certificates/
+ */
+data class MtlsCertificate(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("associated_hostnames") val associatedHostnames: List<String>? = null,
+    @SerializedName("expires_on") val expiresOn: String? = null,
+    @SerializedName("fingerprint") val fingerprint: String? = null,
+    @SerializedName("created_at") val createdAt: String? = null,
+    @SerializedName("updated_at") val updatedAt: String? = null
+)
+
+/**
+ * Create mTLS certificate request.
+ * @param certificate PEM-encoded root certificate chain content.
+ */
+data class MtlsCertificateCreateRequest(
+    @SerializedName("name") val name: String,
+    @SerializedName("certificate") val certificate: String,
+    @SerializedName("associated_hostnames") val associatedHostnames: List<String>? = null
+)
+
+/**
+ * Update mTLS certificate request (certificate content itself cannot be changed).
+ */
+data class MtlsCertificateUpdateRequest(
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("associated_hostnames") val associatedHostnames: List<String>
+)
+
+/**
+ * Per-hostname mTLS edge settings.
+ */
+data class MtlsCertificateSetting(
+    @SerializedName("hostname") val hostname: String,
+    @SerializedName("china_network") val chinaNetwork: Boolean? = null,
+    @SerializedName("client_certificate_forwarding") val clientCertificateForwarding: Boolean? = null
+)
+
+/**
+ * Wrapper for PUT access/certificates/settings (replaces the whole settings list).
+ */
+data class MtlsCertificateSettingsRequest(
+    @SerializedName("settings") val settings: List<MtlsCertificateSetting>
+)
+
 // ==================== Gateway DNS Analytics ====================
 
 /**

@@ -493,9 +493,20 @@
     <string name="zt_groups_card_desc">创建和管理 Access 用户组及组规则</string>
     <string name="zt_groups_card_title">👥 Access 组管理</string>
     <string name="zt_tunnel_card_desc">管理 Cloudflare Tunnel 连接和配置</string>
+    <!-- Service Credentials 服务凭证管理 -->
+    <string name="zt_service_credentials_card_title">🔑 服务凭证管理</string>
+    <string name="zt_service_credentials_card_desc">管理服务令牌、Mutual TLS 证书和 SSH 短期证书等机器身份凭证</string>
+    <string name="zt_service_credentials_title">服务凭证管理</string>
+    <string name="zt_service_credentials_intro">为非人类调用方（脚本、CI/CD、服务间通信）配置身份凭证</string>
+    <string name="zt_service_credentials_tokens_title">🔑 服务令牌</string>
+    <string name="zt_service_credentials_tokens_desc">通过请求头携带 Client ID / Secret 完成免登录认证，支持续期与密钥轮换</string>
+    <string name="zt_service_credentials_mtls_title">📜 Mutual TLS 证书</string>
+    <string name="zt_service_credentials_mtls_desc">上传根 CA 证书，要求客户端出示受信任的双向 TLS 证书才能访问应用</string>
+    <string name="zt_service_credentials_ssh_title">🖥️ SSH 短期证书</string>
+    <string name="zt_service_credentials_ssh_desc">通过 Access 签发短期 SSH 证书，替代静态 SSH 密钥登录基础设施</string>
+    <string name="zt_service_credentials_coming_soon">即将推出</string>
+
     <!-- Service Tokens 服务令牌 -->
-    <string name="zt_service_tokens_card_title">🔑 服务令牌</string>
-    <string name="zt_service_tokens_card_desc">为脚本、CI/CD 和服务间调用创建免登录凭证</string>
     <string name="zt_service_token_empty">暂无服务令牌，点击右下角 + 创建</string>
     <string name="zt_service_token_create_title">创建服务令牌</string>
     <string name="zt_service_token_edit_title">编辑服务令牌</string>
@@ -553,6 +564,48 @@
     <string name="vm_msg_zt_service_token_created">服务令牌已创建</string>
     <string name="vm_msg_zt_service_token_updated">服务令牌已更新</string>
     <string name="vm_msg_zt_service_token_deleted">服务令牌已删除</string>
+
+    <!-- Mutual TLS -->
+    <string name="zt_mtls_tab_certificates">根证书</string>
+    <string name="zt_mtls_tab_settings">主机名设置</string>
+    <string name="zt_mtls_certs_empty">暂无 mTLS 根证书，点击右下角 + 上传 PEM 证书</string>
+    <string name="zt_mtls_cert_create_title">上传 mTLS 根证书</string>
+    <string name="zt_mtls_cert_edit_title">编辑 mTLS 证书</string>
+    <string name="zt_mtls_cert_name_hint">证书名称</string>
+    <string name="zt_mtls_cert_name_empty">请输入证书名称</string>
+    <string name="zt_mtls_cert_pem_hint">PEM 证书内容（-----BEGIN CERTIFICATE-----）</string>
+    <string name="zt_mtls_cert_pem_invalid">请粘贴有效的 PEM 根证书（需包含 BEGIN/END CERTIFICATE 标记）</string>
+    <string name="zt_mtls_cert_hostnames_hint">关联主机名（每行一个）</string>
+    <string name="zt_mtls_cert_hostnames_hint_text">仅这些主机名上的应用会强制校验客户端证书；留空表示暂不关联</string>
+    <string name="zt_mtls_cert_no_hostnames">未关联任何主机名</string>
+    <string name="zt_mtls_cert_associated_hostnames">关联主机名</string>
+    <string name="zt_mtls_cert_fingerprint">MD5 指纹</string>
+    <string name="zt_mtls_cert_delete_title">删除 mTLS 证书</string>
+    <string name="zt_mtls_cert_delete_confirm">确定删除 mTLS 证书「%1$s」吗？删除后关联主机名上将不再信任该 CA 签发的客户端证书。</string>
+    <string name="zt_mtls_settings_empty">暂无主机名设置。\n可为启用了 mTLS 的主机名配置客户端证书转发等边缘行为。</string>
+    <string name="zt_mtls_setting_create_title">添加主机名设置</string>
+    <string name="zt_mtls_setting_edit_title">编辑主机名设置</string>
+    <string name="zt_mtls_setting_delete_title">删除主机名设置</string>
+    <string name="zt_mtls_setting_delete_confirm">确定删除主机名「%1$s」的 mTLS 设置吗？</string>
+    <string name="zt_mtls_setting_hostname_hint">主机名（如 admin.example.com）</string>
+    <string name="zt_mtls_setting_hostname_empty">请输入主机名</string>
+    <string name="zt_mtls_setting_hostname_duplicate">该主机名已存在设置</string>
+    <string name="zt_mtls_setting_forwarding">客户端证书转发</string>
+    <string name="zt_mtls_setting_forwarding_hint">将客户端证书通过 HTTP 头转发到源站，便于源站记录日志或二次校验</string>
+    <string name="zt_mtls_setting_china_network">中国网络请求客户端证书</string>
+    <string name="zt_mtls_setting_china_hint">仅当该域名所在区域已启用中国网络时可开启</string>
+    <string name="zt_mtls_setting_forwarding_state">证书转发：%1$s</string>
+    <string name="zt_mtls_setting_china_state">中国网络校验：%1$s</string>
+    <string name="vm_msg_zt_mtls_certs_load_failed">加载 mTLS 证书失败: %1$s</string>
+    <string name="vm_msg_zt_mtls_cert_created">mTLS 证书已上传</string>
+    <string name="vm_msg_zt_mtls_cert_create_failed">上传 mTLS 证书失败: %1$s</string>
+    <string name="vm_msg_zt_mtls_cert_updated">mTLS 证书已更新</string>
+    <string name="vm_msg_zt_mtls_cert_update_failed">更新 mTLS 证书失败: %1$s</string>
+    <string name="vm_msg_zt_mtls_cert_deleted">mTLS 证书已删除</string>
+    <string name="vm_msg_zt_mtls_cert_delete_failed">删除 mTLS 证书失败: %1$s</string>
+    <string name="vm_msg_zt_mtls_settings_load_failed">加载 mTLS 主机名设置失败: %1$s</string>
+    <string name="vm_msg_zt_mtls_settings_saved">mTLS 主机名设置已保存</string>
+    <string name="vm_msg_zt_mtls_settings_save_failed">保存 mTLS 主机名设置失败: %1$s</string>
     <!-- WAF 缺失的示例 -->
     <string name="waf_expression_example">示例: (ip.src in {192.168.0.0/16 10.0.0.0/8}) or (http.request.uri.path contains "/admin")</string>
     <!-- ========= 第二阶段新增：通用 Toast / Dialog / 状态类 ========= -->

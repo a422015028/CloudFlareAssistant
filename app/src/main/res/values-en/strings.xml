@@ -504,9 +504,20 @@
     <string name="zt_groups_card_desc">Create and manage Access user groups and group rules</string>
     <string name="zt_groups_card_title">👥 Access Groups</string>
     <string name="zt_tunnel_card_desc">Manage Cloudflare Tunnel connections and configurations</string>
+    <!-- Service Credentials -->
+    <string name="zt_service_credentials_card_title">🔑 Service Credentials</string>
+    <string name="zt_service_credentials_card_desc">Manage machine identity credentials: service tokens, Mutual TLS certificates and SSH short-lived certificates</string>
+    <string name="zt_service_credentials_title">Service Credentials</string>
+    <string name="zt_service_credentials_intro">Configure identity credentials for non-human callers (scripts, CI/CD, service-to-service traffic)</string>
+    <string name="zt_service_credentials_tokens_title">🔑 Service Tokens</string>
+    <string name="zt_service_credentials_tokens_desc">Login-free auth via Client ID / Secret headers, with expiry refresh and secret rotation</string>
+    <string name="zt_service_credentials_mtls_title">📜 Mutual TLS</string>
+    <string name="zt_service_credentials_mtls_desc">Upload root CA certificates and require clients to present trusted mutual TLS certificates</string>
+    <string name="zt_service_credentials_ssh_title">🖥️ SSH Short-Lived Certs</string>
+    <string name="zt_service_credentials_ssh_desc">Issue short-lived SSH certificates via Access to replace static SSH keys for infrastructure access</string>
+    <string name="zt_service_credentials_coming_soon">Coming soon</string>
+
     <!-- Service Tokens -->
-    <string name="zt_service_tokens_card_title">🔑 Service Tokens</string>
-    <string name="zt_service_tokens_card_desc">Create login-free credentials for scripts, CI/CD and service-to-service calls</string>
     <string name="zt_service_token_empty">No service tokens yet. Tap + below to create one</string>
     <string name="zt_service_token_create_title">Create service token</string>
     <string name="zt_service_token_edit_title">Edit service token</string>
@@ -564,6 +575,48 @@
     <string name="vm_msg_zt_service_token_created">Service token created</string>
     <string name="vm_msg_zt_service_token_updated">Service token updated</string>
     <string name="vm_msg_zt_service_token_deleted">Service token deleted</string>
+
+    <!-- Mutual TLS -->
+    <string name="zt_mtls_tab_certificates">Root CAs</string>
+    <string name="zt_mtls_tab_settings">Hostname settings</string>
+    <string name="zt_mtls_certs_empty">No mTLS root certificates yet. Tap + below to upload a PEM certificate</string>
+    <string name="zt_mtls_cert_create_title">Upload mTLS root certificate</string>
+    <string name="zt_mtls_cert_edit_title">Edit mTLS certificate</string>
+    <string name="zt_mtls_cert_name_hint">Certificate name</string>
+    <string name="zt_mtls_cert_name_empty">Please enter a certificate name</string>
+    <string name="zt_mtls_cert_pem_hint">PEM certificate content (-----BEGIN CERTIFICATE-----)</string>
+    <string name="zt_mtls_cert_pem_invalid">Please paste a valid PEM root certificate (BEGIN/END CERTIFICATE markers required)</string>
+    <string name="zt_mtls_cert_hostnames_hint">Associated hostnames (one per line)</string>
+    <string name="zt_mtls_cert_hostnames_hint_text">Client certificates are enforced only on applications at these hostnames. Leave empty to associate none for now.</string>
+    <string name="zt_mtls_cert_no_hostnames">No associated hostnames</string>
+    <string name="zt_mtls_cert_associated_hostnames">Associated hostnames</string>
+    <string name="zt_mtls_cert_fingerprint">MD5 fingerprint</string>
+    <string name="zt_mtls_cert_delete_title">Delete mTLS certificate</string>
+    <string name="zt_mtls_cert_delete_confirm">Delete mTLS certificate \"%1$s\"? Client certificates issued by this CA will no longer be trusted on the associated hostnames.</string>
+    <string name="zt_mtls_settings_empty">No hostname settings yet.\nConfigure edge behavior such as client certificate forwarding for mTLS-enabled hostnames.</string>
+    <string name="zt_mtls_setting_create_title">Add hostname setting</string>
+    <string name="zt_mtls_setting_edit_title">Edit hostname setting</string>
+    <string name="zt_mtls_setting_delete_title">Delete hostname setting</string>
+    <string name="zt_mtls_setting_delete_confirm">Delete mTLS settings for hostname \"%1$s\"?</string>
+    <string name="zt_mtls_setting_hostname_hint">Hostname (e.g. admin.example.com)</string>
+    <string name="zt_mtls_setting_hostname_empty">Please enter a hostname</string>
+    <string name="zt_mtls_setting_hostname_duplicate">Settings for this hostname already exist</string>
+    <string name="zt_mtls_setting_forwarding">Client certificate forwarding</string>
+    <string name="zt_mtls_setting_forwarding_hint">Forwards the client certificate to the origin in an HTTP header for origin-side logging or verification</string>
+    <string name="zt_mtls_setting_china_network">Request client certificates in China</string>
+    <string name="zt_mtls_setting_china_hint">Can only be enabled if this hostname\'s zone is China network enabled</string>
+    <string name="zt_mtls_setting_forwarding_state">Certificate forwarding: %1$s</string>
+    <string name="zt_mtls_setting_china_state">China network enforcement: %1$s</string>
+    <string name="vm_msg_zt_mtls_certs_load_failed">Failed to load mTLS certificates: %1$s</string>
+    <string name="vm_msg_zt_mtls_cert_created">mTLS certificate uploaded</string>
+    <string name="vm_msg_zt_mtls_cert_create_failed">Failed to upload mTLS certificate: %1$s</string>
+    <string name="vm_msg_zt_mtls_cert_updated">mTLS certificate updated</string>
+    <string name="vm_msg_zt_mtls_cert_update_failed">Failed to update mTLS certificate: %1$s</string>
+    <string name="vm_msg_zt_mtls_cert_deleted">mTLS certificate deleted</string>
+    <string name="vm_msg_zt_mtls_cert_delete_failed">Failed to delete mTLS certificate: %1$s</string>
+    <string name="vm_msg_zt_mtls_settings_load_failed">Failed to load mTLS hostname settings: %1$s</string>
+    <string name="vm_msg_zt_mtls_settings_saved">mTLS hostname settings saved</string>
+    <string name="vm_msg_zt_mtls_settings_save_failed">Failed to save mTLS hostname settings: %1$s</string>
     <!-- Missing WAF example -->
     <string name="waf_expression_example">Example: (ip.src in {192.168.0.0/16 10.0.0.0/8}) or (http.request.uri.path contains "/admin")</string>
     <!-- ========= Phase 2: Toast / Dialog / Status ========= -->

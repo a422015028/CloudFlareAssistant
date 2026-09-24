@@ -348,8 +348,23 @@
             app:destination="@id/groupFragment" />
 
         <action
-            android:id="@+id/action_zeroTrust_to_serviceTokens"
+            android:id="@+id/action_zeroTrust_to_serviceCredentials"
+            app:destination="@id/serviceCredentialsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/serviceCredentialsFragment"
+        android:name="com.muort.upworker.feature.zerotrust.servicecredentials.ServiceCredentialsFragment"
+        android:label="服务凭证管理"
+        tools:layout="@layout/fragment_service_credentials">
+
+        <action
+            android:id="@+id/action_serviceCredentials_to_serviceTokens"
             app:destination="@id/serviceTokensFragment" />
+
+        <action
+            android:id="@+id/action_serviceCredentials_to_mtls"
+            app:destination="@id/mtlsFragment" />
     </fragment>
 
     <fragment
@@ -400,5 +415,11 @@
         android:name="com.muort.upworker.feature.zerotrust.servicetoken.ServiceTokensFragment"
         android:label="服务令牌"
         tools:layout="@layout/fragment_service_tokens.xml" />
+
+    <fragment
+        android:id="@+id/mtlsFragment"
+        android:name="com.muort.upworker.feature.zerotrust.mtls.MtlsFragment"
+        android:label="Mutual TLS"
+        tools:layout="@layout/fragment_mtls.xml" />
 
 </navigation>

@@ -1987,4 +1987,166 @@ class ZeroTrustRepository @Inject constructor(
                 }
             }
         }
+
+    // ==================== mTLS Certificates ====================
+
+    suspend fun listMtlsCertificates(account: Account): Resource<List<MtlsCertificate>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.listMtlsCertificates(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val certs = response.body()!!.result ?: emptyList()
+                    Timber.d("Loaded ${certs.size} mTLS certificates")
+                    Resource.Success(certs)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to list mTLS certificates"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun getMtlsCertificate(account: Account, certificateId: String): Resource<MtlsCertificate> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.getMtlsCertificate(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    certificateId = certificateId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result!!)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to get mTLS certificate"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun createMtlsCertificate(
+        account: Account,
+        request: MtlsCertificateCreateRequest
+    ): Resource<MtlsCertificate> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.createMtlsCertificate(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    request = request
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val cert = response.body()!!.result!!
+                    Timber.d("Created mTLS certificate: ${cert.name}")
+                    Resource.Success(cert)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to create mTLS certificate"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun updateMtlsCertificate(
+        account: Account,
+        certificateId: String,
+        request: MtlsCertificateUpdateRequest
+    ): Resource<MtlsCertificate> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.updateMtlsCertificate(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    certificateId = certificateId,
+                    request = request
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val cert = response.body()!!.result!!
+                    Timber.d("Updated mTLS certificate: ${cert.name}")
+                    Resource.Success(cert)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to update mTLS certificate"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun deleteMtlsCertificate(account: Account, certificateId: String): Resource<Unit> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.deleteMtlsCertificate(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    certificateId = certificateId
+                )
+                if (response.isSuccessful) {
+                    Timber.d("Deleted mTLS certificate: $certificateId")
+                    Resource.Success(Unit)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to delete mTLS certificate"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun listMtlsCertificateSettings(account: Account): Resource<List<MtlsCertificateSetting>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.listMtlsCertificateSettings(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val settings = response.body()!!.result ?: emptyList()
+                    Timber.d("Loaded ${settings.size} mTLS hostname settings")
+                    Resource.Success(settings)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to list mTLS settings"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun updateMtlsCertificateSettings(
+        account: Account,
+        settings: List<MtlsCertificateSetting>
+    ): Resource<List<MtlsCertificateSetting>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.updateMtlsCertificateSettings(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    request = MtlsCertificateSettingsRequest(settings)
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val result = response.body()!!.result ?: emptyList()
+                    Timber.d("Updated ${result.size} mTLS hostname settings")
+                    Resource.Success(result)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to update mTLS settings"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
 }
