@@ -365,6 +365,10 @@
         <action
             android:id="@+id/action_serviceCredentials_to_mtls"
             app:destination="@id/mtlsFragment" />
+
+        <action
+            android:id="@+id/action_serviceCredentials_to_sshCa"
+            app:destination="@id/sshCaFragment" />
     </fragment>
 
     <fragment
@@ -421,5 +425,11 @@
         android:name="com.muort.upworker.feature.zerotrust.mtls.MtlsFragment"
         android:label="Mutual TLS"
         tools:layout="@layout/fragment_mtls.xml" />
+
+    <fragment
+        android:id="@+id/sshCaFragment"
+        android:name="com.muort.upworker.feature.zerotrust.sshca.SshCaFragment"
+        android:label="@string/zt_ssh_ca_title"
+        tools:layout="@layout/fragment_ssh_ca.xml" />
 
 </navigation>

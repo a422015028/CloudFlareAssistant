@@ -35,5 +35,9 @@ class ServiceCredentialsFragment : Fragment() {
         view.findViewById<MaterialCardView>(R.id.mtlsEntryCard).setOnClickListener {
             findNavController().navigate(R.id.action_serviceCredentials_to_mtls)
         }
+
+        view.findViewById<MaterialCardView>(R.id.sshEntryCard).setOnClickListener {
+            findNavController().navigate(R.id.action_serviceCredentials_to_sshCa)
+        }
     }
 }

@@ -781,6 +781,18 @@ data class MtlsCertificateSettingsRequest(
     @SerializedName("settings") val settings: List<MtlsCertificateSetting>
 )
 
+// ==================== Zero Trust - SSH Certificate Authority (Gateway CA) ====================
+
+/**
+ * Cloudflare SSH Certificate Authority for Access for Infrastructure (Gateway SSH proxy).
+ * GET returns a list (max one per account), POST returns a single object.
+ * https://developers.cloudflare.com/api/resources/zero_trust/subresources/access/subresources/gateway_ca/
+ */
+data class GatewayCa(
+    @SerializedName("id") val id: String? = null,
+    @SerializedName("public_key") val publicKey: String? = null
+)
+
 // ==================== Gateway DNS Analytics ====================
 
 /**

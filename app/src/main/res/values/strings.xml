@@ -504,7 +504,6 @@
     <string name="zt_service_credentials_mtls_desc">上传根 CA 证书，要求客户端出示受信任的双向 TLS 证书才能访问应用</string>
     <string name="zt_service_credentials_ssh_title">🖥️ SSH 短期证书</string>
     <string name="zt_service_credentials_ssh_desc">通过 Access 签发短期 SSH 证书，替代静态 SSH 密钥登录基础设施</string>
-    <string name="zt_service_credentials_coming_soon">即将推出</string>
 
     <!-- Service Tokens 服务令牌 -->
     <string name="zt_service_token_empty">暂无服务令牌，点击右下角 + 创建</string>
@@ -606,6 +605,19 @@
     <string name="vm_msg_zt_mtls_settings_load_failed">加载 mTLS 主机名设置失败: %1$s</string>
     <string name="vm_msg_zt_mtls_settings_saved">mTLS 主机名设置已保存</string>
     <string name="vm_msg_zt_mtls_settings_save_failed">保存 mTLS 主机名设置失败: %1$s</string>
+    <!-- SSH Certificate Authority -->
+    <string name="zt_ssh_ca_title">SSH 证书签发机构</string>
+    <string name="zt_ssh_ca_intro">为账号生成全局 SSH CA 公钥，用于 Access for Infrastructure 签发短期 SSH 证书，替代静态密钥登录服务器。</string>
+    <string name="zt_ssh_ca_public_key_label">CA 公钥</string>
+    <string name="zt_ssh_ca_copy">复制公钥</string>
+    <string name="zt_ssh_ca_generate">生成 SSH CA</string>
+    <string name="zt_ssh_ca_generate_confirm">确定生成账号级 SSH 证书签发机构吗？生成后 CA 公钥可用于配置 SSH 服务器信任 Cloudflare Access 签发的短期证书。</string>
+    <string name="zt_ssh_ca_empty_title">尚未生成 SSH CA</string>
+    <string name="zt_ssh_ca_empty_desc">生成后将获得 SSH 格式的 CA 公钥，可添加到受管服务器的 trustedCA 中，实现无密钥 SSH 登录。</string>
+    <string name="zt_ssh_ca_info">使用说明：将上方公钥添加到 SSH 服务器的 /etc/ssh/ca.pub，并在 sshd_config 中配置 TrustedUserCAKeys，Cloudflare Access 即可为用户签发短期证书登录该服务器。</string>
+    <string name="vm_msg_zt_ssh_ca_load_failed">加载 SSH CA 失败: %1$s</string>
+    <string name="vm_msg_zt_ssh_ca_generated">SSH CA 已生成</string>
+    <string name="vm_msg_zt_ssh_ca_generate_failed">生成 SSH CA 失败: %1$s</string>
     <!-- WAF 缺失的示例 -->
     <string name="waf_expression_example">示例: (ip.src in {192.168.0.0/16 10.0.0.0/8}) or (http.request.uri.path contains "/admin")</string>
     <!-- ========= 第二阶段新增：通用 Toast / Dialog / 状态类 ========= -->

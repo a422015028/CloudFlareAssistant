@@ -2180,6 +2180,32 @@ interface CloudFlareApi {
         @Body request: MtlsCertificateSettingsRequest
     ): Response<CloudFlareResponse<List<MtlsCertificateSetting>>>
 
+    // ==================== Zero Trust - SSH Certificate Authority (Gateway CA) ====================
+
+    /**
+     * Get the SSH Certificate Authority for the account (at most one).
+     * Returns a single object in result, not a list.
+     */
+    @GET("accounts/{account_id}/access/gateway_ca")
+    suspend fun getGatewayCa(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<GatewayCa>>
+
+    /**
+     * Generate the SSH Certificate Authority. Fails with
+     * access.api.error.gateway_ca_already_exists when one already exists.
+     */
+    @POST("accounts/{account_id}/access/gateway_ca")
+    suspend fun createGatewayCa(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<GatewayCa>>
+
     // ==================== Zone Rulesets（WAF / Cache / Rate Limit / Transform 共用 phase 入口） ====================
 
     /** GET /zones/{zone_id}/rulesets/phases/{phase}/entrypoint —— 取某 phase 的 entrypoint ruleset。 */

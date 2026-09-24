@@ -515,7 +515,6 @@
     <string name="zt_service_credentials_mtls_desc">Upload root CA certificates and require clients to present trusted mutual TLS certificates</string>
     <string name="zt_service_credentials_ssh_title">🖥️ SSH Short-Lived Certs</string>
     <string name="zt_service_credentials_ssh_desc">Issue short-lived SSH certificates via Access to replace static SSH keys for infrastructure access</string>
-    <string name="zt_service_credentials_coming_soon">Coming soon</string>
 
     <!-- Service Tokens -->
     <string name="zt_service_token_empty">No service tokens yet. Tap + below to create one</string>
@@ -617,6 +616,19 @@
     <string name="vm_msg_zt_mtls_settings_load_failed">Failed to load mTLS hostname settings: %1$s</string>
     <string name="vm_msg_zt_mtls_settings_saved">mTLS hostname settings saved</string>
     <string name="vm_msg_zt_mtls_settings_save_failed">Failed to save mTLS hostname settings: %1$s</string>
+    <!-- SSH Certificate Authority -->
+    <string name="zt_ssh_ca_title">SSH Certificate Authority</string>
+    <string name="zt_ssh_ca_intro">Generate an account-level SSH CA public key for Access for Infrastructure to issue short-lived SSH certificates, replacing static keys for server access.</string>
+    <string name="zt_ssh_ca_public_key_label">CA Public Key</string>
+    <string name="zt_ssh_ca_copy">Copy Public Key</string>
+    <string name="zt_ssh_ca_generate">Generate SSH CA</string>
+    <string name="zt_ssh_ca_generate_confirm">Generate the account-level SSH certificate authority? Once generated, the CA public key can be used to configure SSH servers to trust short-lived certificates issued by Cloudflare Access.</string>
+    <string name="zt_ssh_ca_empty_title">No SSH CA generated yet</string>
+    <string name="zt_ssh_ca_empty_desc">After generation, you will get an SSH-format CA public key that can be added to the trustedCA of managed servers for keyless SSH access.</string>
+    <string name="zt_ssh_ca_info">Usage: Add the public key above to /etc/ssh/ca.pub on your SSH server and configure TrustedUserCAKeys in sshd_config. Cloudflare Access can then issue short-lived certificates for users to log in to that server.</string>
+    <string name="vm_msg_zt_ssh_ca_load_failed">Failed to load SSH CA: %1$s</string>
+    <string name="vm_msg_zt_ssh_ca_generated">SSH CA generated</string>
+    <string name="vm_msg_zt_ssh_ca_generate_failed">Failed to generate SSH CA: %1$s</string>
     <!-- Missing WAF example -->
     <string name="waf_expression_example">Example: (ip.src in {192.168.0.0/16 10.0.0.0/8}) or (http.request.uri.path contains "/admin")</string>
     <!-- ========= Phase 2: Toast / Dialog / Status ========= -->

@@ -2149,4 +2149,74 @@ class ZeroTrustRepository @Inject constructor(
                 }
             }
         }
+
+    // ==================== SSH Certificate Authority (Gateway CA) ====================
+
+    /**
+     * Get the SSH CA for the account. Returns null if not yet generated (404).
+     * GET returns a single object (not a list) in result.
+     */
+    suspend fun getGatewayCa(account: Account): Resource<GatewayCa?> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.getGatewayCa(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result)
+                } else if (response.code() == 404) {
+                    // CA not yet generated — treat as empty, not an error
+                    Timber.d("SSH CA not found (404), account has not generated one yet")
+                    Resource.Success(null)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to get SSH CA"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    /**
+     * Generate the account SSH CA. If one already exists
+     * (access.api.error.gateway_ca_already_exists) the existing CA is returned
+     * via the get endpoint instead of an error.
+     */
+    suspend fun createGatewayCa(account: Account): Resource<GatewayCa> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.createGatewayCa(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Timber.d("Generated SSH CA")
+                    Resource.Success(response.body()!!.result!!)
+                } else {
+                    val errorMsg = response.body()?.errors?.firstOrNull()?.message.orEmpty()
+                    if (errorMsg.contains("gateway_ca_already_exists")) {
+                        val existing = api.getGatewayCa(
+                            token = AuthHelper.getBearerToken(account),
+                            email = AuthHelper.getEmail(account),
+                            apiKey = AuthHelper.getGlobalApiKey(account),
+                            accountId = account.accountId
+                        )
+                        if (existing.isSuccessful && existing.body()?.success == true) {
+                            val ca = existing.body()!!.result
+                            if (ca != null) {
+                                Timber.d("SSH CA already existed, fetched it")
+                                return@safeApiCall Resource.Success(ca)
+                            }
+                        }
+                    }
+                    val msg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to generate SSH CA"
+                    Resource.Error(msg)
+                }
+            }
+        }
 }
