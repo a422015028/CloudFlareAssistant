@@ -504,6 +504,66 @@
     <string name="zt_groups_card_desc">Create and manage Access user groups and group rules</string>
     <string name="zt_groups_card_title">👥 Access Groups</string>
     <string name="zt_tunnel_card_desc">Manage Cloudflare Tunnel connections and configurations</string>
+    <!-- Service Tokens -->
+    <string name="zt_service_tokens_card_title">🔑 Service Tokens</string>
+    <string name="zt_service_tokens_card_desc">Create login-free credentials for scripts, CI/CD and service-to-service calls</string>
+    <string name="zt_service_token_empty">No service tokens yet. Tap + below to create one</string>
+    <string name="zt_service_token_create_title">Create service token</string>
+    <string name="zt_service_token_edit_title">Edit service token</string>
+    <string name="zt_service_token_name_empty">Please enter a token name</string>
+    <string name="zt_service_token_duration">Duration</string>
+    <string name="zt_service_token_duration_hint">After expiry the token must be renewed and all consumers updated</string>
+    <string name="zt_service_token_duration_30d">30 days</string>
+    <string name="zt_service_token_duration_90d">90 days</string>
+    <string name="zt_service_token_duration_180d">180 days</string>
+    <string name="zt_service_token_duration_1y">1 year (default)</string>
+    <string name="zt_service_token_duration_custom">Current (%1$s)</string>
+    <string name="zt_service_token_enabled">Enable this token</string>
+    <string name="zt_service_token_expires_unknown">Expires: unknown</string>
+    <string name="zt_service_token_never_used">Never used</string>
+    <string name="zt_service_token_detail_duration">Duration: %1$s</string>
+    <string name="zt_service_token_menu_detail">View details</string>
+    <string name="zt_service_token_action_rotate">Rotate secret</string>
+    <string name="zt_service_token_action_enable">Enable</string>
+    <string name="zt_service_token_action_disable">Disable</string>
+    <string name="zt_service_token_refresh_title">Refresh service token</string>
+    <string name="zt_service_token_refresh_confirm">Extend the expiration of \"%1$s\" by %2$s from now. The secret stays unchanged. Continue?</string>
+    <string name="zt_service_token_rotate_title">Rotate Client Secret</string>
+    <string name="zt_service_token_rotated_dialog_title">New secret generated (save now)</string>
+    <string name="zt_service_token_rotate_warning_immediate">The previous secret has been revoked immediately. Update every consumer with the new secret now.</string>
+    <string name="zt_service_token_rotate_warning_grace">The previous secret will stop working after the selected grace period. Switch all consumers before then.</string>
+    <string name="zt_service_token_disable_title">Disable service token</string>
+    <string name="zt_service_token_disable_confirm">Disabling \"%1$s\" immediately rejects both its current and previous Client Secrets; every service using it will fail authentication. The token is preserved and can be re-enabled. Continue?</string>
+    <string-array name="zt_service_token_rotate_grace_options">
+        <item>Revoke old secret immediately (recommended)</item>
+        <item>Keep old secret for 24 hours</item>
+        <item>Keep old secret for 7 days</item>
+    </string-array>
+    <string name="vm_msg_zt_service_token_load_failed">Failed to load service token detail: %1$s</string>
+    <string name="vm_msg_zt_service_token_refreshed">Service token refreshed</string>
+    <string name="vm_msg_zt_service_token_refresh_failed">Failed to refresh service token: %1$s</string>
+    <string name="vm_msg_zt_service_token_rotated">Service token secret rotated</string>
+    <string name="vm_msg_zt_service_token_rotate_failed">Failed to rotate service token secret: %1$s</string>
+    <string name="zt_service_token_client_id">Client ID</string>
+    <string name="zt_service_token_client_secret">Client Secret</string>
+    <string name="zt_service_token_copy_id">Copy ID</string>
+    <string name="zt_service_token_copy_secret">Copy Secret</string>
+    <string name="zt_service_token_copy_curl">Copy cURL example</string>
+    <string name="zt_service_token_secret_warning">The Client Secret is shown only once and cannot be viewed again. Copy and store it securely now.</string>
+    <string name="zt_service_token_secret_usage_hint">Usage: send CF-Access-Client-Id and CF-Access-Client-Secret request headers, and reference this token in an Access policy.</string>
+    <string name="zt_service_token_created_dialog_title">Token credentials (save now)</string>
+    <string name="zt_service_token_expires">Expires: %1$s</string>
+    <string name="zt_service_token_status_active">Valid</string>
+    <string name="zt_service_token_status_expiring">Expires in %1$d days</string>
+    <string name="zt_service_token_delete_title">Delete service token</string>
+    <string name="zt_service_token_delete_confirm">Delete service token \"%1$s\"? Services using this token will immediately fail Access authentication.</string>
+    <string name="vm_msg_zt_service_tokens_load_failed">Failed to load service tokens: %1$s</string>
+    <string name="vm_msg_zt_service_token_create_failed">Failed to create service token: %1$s</string>
+    <string name="vm_msg_zt_service_token_update_failed">Failed to update service token: %1$s</string>
+    <string name="vm_msg_zt_service_token_delete_failed">Failed to delete service token: %1$s</string>
+    <string name="vm_msg_zt_service_token_created">Service token created</string>
+    <string name="vm_msg_zt_service_token_updated">Service token updated</string>
+    <string name="vm_msg_zt_service_token_deleted">Service token deleted</string>
     <!-- Missing WAF example -->
     <string name="waf_expression_example">Example: (ip.src in {192.168.0.0/16 10.0.0.0/8}) or (http.request.uri.path contains "/admin")</string>
     <!-- ========= Phase 2: Toast / Dialog / Status ========= -->

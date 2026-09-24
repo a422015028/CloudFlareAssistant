@@ -697,21 +697,38 @@ sealed class NetworkRouteItem {
 
 /**
  * Service Token (Non-user authentication for services)
+ * https://developers.cloudflare.com/api/resources/zero_trust/subresources/access/subresources/service_tokens/
  */
 data class ServiceToken(
     @SerializedName("id") val id: String,
     @SerializedName("name") val name: String,
     @SerializedName("client_id") val clientId: String? = null,
-    @SerializedName("client_secret") val clientSecret: String? = null, // Only returned on creation
+    // Only returned on creation or rotation
+    @SerializedName("client_secret") val clientSecret: String? = null,
     @SerializedName("expires_at") val expiresAt: String? = null,
+    // e.g. "8760h" or "forever" (non-expiring)
     @SerializedName("duration") val duration: String? = null,
+    // A disabled token cannot authenticate, but is preserved and can be re-enabled
+    @SerializedName("enabled") val enabled: Boolean? = null,
+    @SerializedName("last_seen_at") val lastSeenAt: String? = null,
     @SerializedName("created_at") val createdAt: String? = null,
     @SerializedName("updated_at") val updatedAt: String? = null
 )
 
 data class ServiceTokenRequest(
     @SerializedName("name") val name: String,
-    @SerializedName("duration") val duration: String? = "8760h" // Default: 1 year
+    // Default: 1 year; "forever" creates a non-expiring token
+    @SerializedName("duration") val duration: String? = "8760h",
+    @SerializedName("enabled") val enabled: Boolean? = null
+)
+
+/**
+ * Rotate request for a service token.
+ * When [previousClientSecretExpiresAt] is null the old secret is revoked immediately.
+ */
+data class ServiceTokenRotateRequest(
+    @SerializedName("previous_client_secret_expires_at")
+    val previousClientSecretExpiresAt: String? = null
 )
 
 // ==================== Gateway DNS Analytics ====================

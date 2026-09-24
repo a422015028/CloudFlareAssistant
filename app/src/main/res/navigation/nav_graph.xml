@@ -346,6 +346,10 @@
         <action
             android:id="@+id/action_zeroTrust_to_groups"
             app:destination="@id/groupFragment" />
+
+        <action
+            android:id="@+id/action_zeroTrust_to_serviceTokens"
+            app:destination="@id/serviceTokensFragment" />
     </fragment>
 
     <fragment
@@ -390,5 +394,11 @@
         android:id="@+id/tunnelsFragment"
         android:name="com.muort.upworker.feature.zerotrust.tunnels.TunnelsFragment"
         android:label="Cloudflare Tunnels" />
+
+    <fragment
+        android:id="@+id/serviceTokensFragment"
+        android:name="com.muort.upworker.feature.zerotrust.servicetoken.ServiceTokensFragment"
+        android:label="服务令牌"
+        tools:layout="@layout/fragment_service_tokens.xml" />
 
 </navigation>

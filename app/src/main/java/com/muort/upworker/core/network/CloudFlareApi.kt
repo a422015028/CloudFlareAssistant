@@ -2016,6 +2016,18 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String,
         @Query("per_page") perPage: Int = 1000
     ): Response<CloudFlareResponse<List<ServiceToken>>>
+
+    /**
+     * Get a single Service Token
+     */
+    @GET("accounts/{account_id}/access/service_tokens/{token_id}")
+    suspend fun getServiceToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("token_id") tokenId: String
+    ): Response<CloudFlareResponse<ServiceToken>>
     
     /**
      * Create Service Token
@@ -2053,6 +2065,34 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String,
         @Path("token_id") tokenId: String
     ): Response<CloudFlareResponse<Unit>>
+
+    /**
+     * Refresh Service Token expiration
+     * Extends expires_at from now by the token's current duration. No request body.
+     */
+    @POST("accounts/{account_id}/access/service_tokens/{token_id}/refresh")
+    suspend fun refreshServiceToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("token_id") tokenId: String
+    ): Response<CloudFlareResponse<ServiceToken>>
+
+    /**
+     * Rotate Service Token secret.
+     * Body optionally sets when the previous secret stops being accepted;
+     * when omitted the old secret is revoked immediately.
+     */
+    @POST("accounts/{account_id}/access/service_tokens/{token_id}/rotate")
+    suspend fun rotateServiceToken(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("token_id") tokenId: String,
+        @Body request: ServiceTokenRotateRequest
+    ): Response<CloudFlareResponse<ServiceToken>>
 
     // ==================== Zone Rulesets（WAF / Cache / Rate Limit / Transform 共用 phase 入口） ====================
 

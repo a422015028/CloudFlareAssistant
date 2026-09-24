@@ -1826,6 +1826,31 @@ class ZeroTrustRepository @Inject constructor(
         }
     
     /**
+     * Get a single service token
+     */
+    suspend fun getServiceToken(account: Account, tokenId: String): Resource<ServiceToken> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.getServiceToken(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    tokenId = tokenId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val serviceToken = response.body()!!.result!!
+                    Timber.d("Loaded service token: ${serviceToken.name}")
+                    Resource.Success(serviceToken)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to get service token"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    /**
      * Create a service token
      */
     suspend fun createServiceToken(
@@ -1902,6 +1927,62 @@ class ZeroTrustRepository @Inject constructor(
                 } else {
                     val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
                         ?: "Failed to delete service token"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    /**
+     * Refresh a service token's expiration (extends by the token's configured duration)
+     */
+    suspend fun refreshServiceToken(account: Account, tokenId: String): Resource<ServiceToken> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.refreshServiceToken(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    tokenId = tokenId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val serviceToken = response.body()!!.result!!
+                    Timber.d("Refreshed service token: ${serviceToken.name}")
+                    Resource.Success(serviceToken)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to refresh service token"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    /**
+     * Rotate a service token secret.
+     * [previousSecretExpiresAt] RFC3339 timestamp; null revokes the old secret immediately.
+     */
+    suspend fun rotateServiceToken(
+        account: Account,
+        tokenId: String,
+        previousSecretExpiresAt: String?
+    ): Resource<ServiceToken> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.rotateServiceToken(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    tokenId = tokenId,
+                    request = ServiceTokenRotateRequest(previousClientSecretExpiresAt = previousSecretExpiresAt)
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val serviceToken = response.body()!!.result!!
+                    Timber.d("Rotated service token secret: ${serviceToken.name}")
+                    Resource.Success(serviceToken)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to rotate service token"
                     Resource.Error(errorMsg)
                 }
             }

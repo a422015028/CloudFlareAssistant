@@ -493,6 +493,66 @@
     <string name="zt_groups_card_desc">创建和管理 Access 用户组及组规则</string>
     <string name="zt_groups_card_title">👥 Access 组管理</string>
     <string name="zt_tunnel_card_desc">管理 Cloudflare Tunnel 连接和配置</string>
+    <!-- Service Tokens 服务令牌 -->
+    <string name="zt_service_tokens_card_title">🔑 服务令牌</string>
+    <string name="zt_service_tokens_card_desc">为脚本、CI/CD 和服务间调用创建免登录凭证</string>
+    <string name="zt_service_token_empty">暂无服务令牌，点击右下角 + 创建</string>
+    <string name="zt_service_token_create_title">创建服务令牌</string>
+    <string name="zt_service_token_edit_title">编辑服务令牌</string>
+    <string name="zt_service_token_name_empty">请输入令牌名称</string>
+    <string name="zt_service_token_duration">有效期</string>
+    <string name="zt_service_token_duration_hint">到期后需续期，并同步更新所有使用方</string>
+    <string name="zt_service_token_duration_30d">30 天</string>
+    <string name="zt_service_token_duration_90d">90 天</string>
+    <string name="zt_service_token_duration_180d">180 天</string>
+    <string name="zt_service_token_duration_1y">1 年（默认）</string>
+    <string name="zt_service_token_duration_custom">当前（%1$s）</string>
+    <string name="zt_service_token_enabled">启用此令牌</string>
+    <string name="zt_service_token_expires_unknown">到期时间：未知</string>
+    <string name="zt_service_token_never_used">从未使用</string>
+    <string name="zt_service_token_detail_duration">有效期：%1$s</string>
+    <string name="zt_service_token_menu_detail">查看详情</string>
+    <string name="zt_service_token_action_rotate">轮换密钥</string>
+    <string name="zt_service_token_action_enable">启用</string>
+    <string name="zt_service_token_action_disable">禁用</string>
+    <string name="zt_service_token_refresh_title">刷新服务令牌</string>
+    <string name="zt_service_token_refresh_confirm">刷新仅把令牌「%1$s」的到期时间从现在起延长 %2$s，Client ID 和 Secret 都不变，使用方无需改动。确定刷新吗？</string>
+    <string name="zt_service_token_rotate_title">轮换 Client Secret</string>
+    <string name="zt_service_token_rotated_dialog_title">新密钥已生成（请立即保存）</string>
+    <string name="zt_service_token_rotate_warning_immediate">旧密钥已立即作废，请立即将新 Secret 更新到所有使用方。</string>
+    <string name="zt_service_token_rotate_warning_grace">旧密钥将在所选宽限期结束后作废，请在此之前完成所有使用方的切换。</string>
+    <string name="zt_service_token_disable_title">禁用服务令牌</string>
+    <string name="zt_service_token_disable_confirm">禁用令牌「%1$s」后，其当前和旧版 Client Secret 都将立即被拒绝，所有使用该令牌的服务会认证失败。令牌会被保留，可随时重新启用。确定禁用吗？</string>
+    <string-array name="zt_service_token_rotate_grace_options">
+        <item>立即作废旧密钥（推荐）</item>
+        <item>旧密钥保留 24 小时</item>
+        <item>旧密钥保留 7 天</item>
+    </string-array>
+    <string name="vm_msg_zt_service_token_load_failed">加载服务令牌详情失败: %1$s</string>
+    <string name="vm_msg_zt_service_token_refreshed">服务令牌有效期已刷新</string>
+    <string name="vm_msg_zt_service_token_refresh_failed">刷新服务令牌失败: %1$s</string>
+    <string name="vm_msg_zt_service_token_rotated">服务令牌密钥已轮换</string>
+    <string name="vm_msg_zt_service_token_rotate_failed">轮换服务令牌密钥失败: %1$s</string>
+    <string name="zt_service_token_client_id">Client ID</string>
+    <string name="zt_service_token_client_secret">Client Secret</string>
+    <string name="zt_service_token_copy_id">复制 ID</string>
+    <string name="zt_service_token_copy_secret">复制 Secret</string>
+    <string name="zt_service_token_copy_curl">复制 cURL 示例</string>
+    <string name="zt_service_token_secret_warning">Client Secret 仅显示这一次，关闭后无法再次查看，请立即复制并妥善保存。</string>
+    <string name="zt_service_token_secret_usage_hint">使用方法：在请求头中携带 CF-Access-Client-Id 和 CF-Access-Client-Secret，并在 Access 策略中引用此令牌。</string>
+    <string name="zt_service_token_created_dialog_title">令牌凭证（请立即保存）</string>
+    <string name="zt_service_token_expires">到期时间：%1$s</string>
+    <string name="zt_service_token_status_active">有效</string>
+    <string name="zt_service_token_status_expiring">%1$d 天后到期</string>
+    <string name="zt_service_token_delete_title">删除服务令牌</string>
+    <string name="zt_service_token_delete_confirm">确定删除服务令牌「%1$s」吗？删除后使用该令牌的服务将立即无法通过 Access 认证。</string>
+    <string name="vm_msg_zt_service_tokens_load_failed">加载服务令牌失败: %1$s</string>
+    <string name="vm_msg_zt_service_token_create_failed">创建服务令牌失败: %1$s</string>
+    <string name="vm_msg_zt_service_token_update_failed">更新服务令牌失败: %1$s</string>
+    <string name="vm_msg_zt_service_token_delete_failed">删除服务令牌失败: %1$s</string>
+    <string name="vm_msg_zt_service_token_created">服务令牌已创建</string>
+    <string name="vm_msg_zt_service_token_updated">服务令牌已更新</string>
+    <string name="vm_msg_zt_service_token_deleted">服务令牌已删除</string>
     <!-- WAF 缺失的示例 -->
     <string name="waf_expression_example">示例: (ip.src in {192.168.0.0/16 10.0.0.0/8}) or (http.request.uri.path contains "/admin")</string>
     <!-- ========= 第二阶段新增：通用 Toast / Dialog / 状态类 ========= -->
