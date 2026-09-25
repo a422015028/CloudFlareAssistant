@@ -494,6 +494,9 @@
     <string name="zt_groups_card_title">👥 Access 组管理</string>
     <string name="zt_tunnel_card_desc">管理 Cloudflare Tunnel 连接和配置</string>
     <!-- Service Credentials 服务凭证管理 -->
+    <string name="zt_device_posture_card_title">🩺 设备姿态检查</string>
+    <string name="zt_device_posture_card_desc">校验设备 OS 版本、磁盘加密、防火墙、EDR 合规状态等姿态信号</string>
+
     <string name="zt_service_credentials_card_title">🔑 服务凭证管理</string>
     <string name="zt_service_credentials_card_desc">管理服务令牌、Mutual TLS 证书和 SSH 短期证书等机器身份凭证</string>
     <string name="zt_service_credentials_title">服务凭证管理</string>
@@ -618,6 +621,83 @@
     <string name="vm_msg_zt_ssh_ca_load_failed">加载 SSH CA 失败: %1$s</string>
     <string name="vm_msg_zt_ssh_ca_generated">SSH CA 已生成</string>
     <string name="vm_msg_zt_ssh_ca_generate_failed">生成 SSH CA 失败: %1$s</string>
+
+    <!-- Device Posture 设备姿态 -->
+    <string name="zt_posture_tab_rules">姿态规则</string>
+    <string name="zt_posture_tab_integrations">安全集成</string>
+    <string name="zt_posture_rules_empty">暂无姿态检查，点击右下角 + 创建</string>
+    <string name="zt_posture_rule_create_title">创建设备姿态检查</string>
+    <string name="zt_posture_rule_edit_title">编辑设备姿态检查</string>
+    <string name="zt_posture_rule_delete_title">删除姿态检查</string>
+    <string name="zt_posture_rule_delete_confirm">确定删除姿态检查「%1$s」吗？引用该检查的 Access / Gateway 策略将无法匹配设备。</string>
+    <string name="zt_posture_rule_name_empty">请输入规则名称</string>
+    <string name="zt_posture_rule_type">检查类型</string>
+    <string name="zt_posture_rule_integration">选择集成</string>
+    <string name="zt_posture_rule_integration_hint">选择已配置的安全集成，自动填入 connection_id</string>
+    <string name="zt_posture_rule_schedule">WARP 轮询频率</string>
+    <string name="zt_posture_rule_platforms">匹配平台（不选 = 全部平台）</string>
+    <string name="zt_posture_platforms_label">平台：%1$s</string>
+    <string name="zt_posture_platforms_all">全部平台</string>
+    <string name="zt_posture_schedule_label">轮询：%1$s</string>
+
+    <string name="zt_posture_rule_input_json">检查条件（JSON）</string>
+    <string name="zt_posture_rule_input_hint">切换类型会自动填入模板；S2S 类检查的 connection_id 需在「安全集成」创建后复制填入。</string>
+    <string name="zt_posture_rule_input_invalid">检查条件必须是合法的 JSON 对象</string>
+    <string name="zt_posture_detail_type">类型：%1$s</string>
+    <string name="zt_posture_type_unknown">未知类型</string>
+    <string name="zt_posture_type_file">文件存在性</string>
+    <string name="zt_posture_type_application">应用校验</string>
+    <string name="zt_posture_type_firewall">防火墙</string>
+    <string name="zt_posture_type_disk_encryption">磁盘加密</string>
+    <string name="zt_posture_type_domain_joined">域加入</string>
+    <string name="zt_posture_type_antivirus">杀毒软件</string>
+    <string name="zt_posture_type_client_certificate">客户端证书（旧版）</string>
+    <string name="zt_posture_type_client_certificate_v2">客户端证书</string>
+    <string name="zt_posture_type_serial_number">序列号列表</string>
+    <string name="zt_posture_type_unique_client_id">唯一设备 ID</string>
+    <string name="zt_posture_type_warp">WARP 连接</string>
+    <string name="zt_posture_type_gateway">Gateway 连接</string>
+    <string name="zt_posture_type_crowdstrike_s2s">CrowdStrike</string>
+    <string name="zt_posture_type_sentinelone_s2s">SentinelOne S2S</string>
+    <string name="zt_posture_type_sentinelone">SentinelOne 应用</string>
+    <string name="zt_posture_type_carbonblack">Carbon Black 应用</string>
+    <string name="zt_posture_type_tanium">Tanium</string>
+    <string name="zt_posture_type_tanium_s2s">Tanium S2S</string>
+    <string name="zt_posture_type_intune">Microsoft Intune</string>
+    <string name="zt_posture_type_workspace_one">VMware Workspace ONE</string>
+    <string name="zt_posture_type_kolide">Kolide</string>
+    <string name="zt_posture_type_custom_s2s">自定义 S2S</string>
+    <string name="zt_posture_integrations_empty">暂无安全集成。\n集成 CrowdStrike、Intune、Tanium 等第三方 EDR/UEM 后，可在 S2S 姿态检查中引用其 connection_id。</string>
+    <string name="zt_posture_integration_create_title">添加安全集成</string>
+    <string name="zt_posture_integration_edit_title">编辑安全集成</string>
+    <string name="zt_posture_integration_delete_title">删除安全集成</string>
+    <string name="zt_posture_integration_delete_confirm">确定删除集成「%1$s」吗？引用其 connection_id 的姿态检查将停止工作。</string>
+    <string name="zt_posture_integration_name_hint">集成名称</string>
+    <string name="zt_posture_integration_name_empty">请输入集成名称</string>
+    <string name="zt_posture_integration_type">提供方</string>
+    <string name="zt_posture_integration_interval">轮询间隔</string>
+    <string name="zt_posture_integration_interval_label">轮询间隔：%1$s</string>
+    <string name="zt_posture_integration_config_json">连接配置（JSON）</string>
+    <string name="zt_posture_integration_config_hint">密钥仅在创建时提交，切换提供方会自动填入对应模板；保存后密钥不可再读取。</string>
+    <string name="zt_posture_integration_config_hint_edit">密钥字段不显示。如需修改密钥请直接填写新值，否则保留为空即可。</string>
+    <string name="zt_posture_integration_config_invalid">连接配置必须是合法的 JSON 对象</string>
+    <string name="zt_posture_integration_workspace_one">Workspace ONE</string>
+    <string name="zt_posture_integration_uptycs">Uptycs</string>
+    <string name="zt_posture_integration_sentinelone_s2s">SentinelOne</string>
+    <string name="vm_msg_zt_posture_rules_load_failed">加载姿态规则失败: %1$s</string>
+    <string name="vm_msg_zt_posture_rule_created">姿态检查已创建</string>
+    <string name="vm_msg_zt_posture_rule_create_failed">创建姿态检查失败: %1$s</string>
+    <string name="vm_msg_zt_posture_rule_updated">姿态检查已更新</string>
+    <string name="vm_msg_zt_posture_rule_update_failed">更新姿态检查失败: %1$s</string>
+    <string name="vm_msg_zt_posture_rule_deleted">姿态检查已删除</string>
+    <string name="vm_msg_zt_posture_rule_delete_failed">删除姿态检查失败: %1$s</string>
+    <string name="vm_msg_zt_posture_integrations_load_failed">加载安全集成失败: %1$s</string>
+    <string name="vm_msg_zt_posture_integration_created">安全集成已添加</string>
+    <string name="vm_msg_zt_posture_integration_create_failed">添加安全集成失败: %1$s</string>
+    <string name="vm_msg_zt_posture_integration_updated">安全集成已更新</string>
+    <string name="vm_msg_zt_posture_integration_update_failed">更新安全集成失败: %1$s</string>
+    <string name="vm_msg_zt_posture_integration_deleted">安全集成已删除</string>
+    <string name="vm_msg_zt_posture_integration_delete_failed">删除安全集成失败: %1$s</string>
     <!-- WAF 缺失的示例 -->
     <string name="waf_expression_example">示例: (ip.src in {192.168.0.0/16 10.0.0.0/8}) or (http.request.uri.path contains "/admin")</string>
     <!-- ========= 第二阶段新增：通用 Toast / Dialog / 状态类 ========= -->

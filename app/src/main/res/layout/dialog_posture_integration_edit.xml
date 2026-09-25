@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="24dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/integrationNameLayout"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/zt_posture_integration_name_hint"
+            app:errorEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/integrationNameInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/zt_posture_integration_type">
+
+            <AutoCompleteTextView
+                android:id="@+id/integrationTypeDropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="false"
+                android:hint="@string/zt_posture_integration_type"
+                android:inputType="none"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/zt_posture_integration_interval">
+
+            <AutoCompleteTextView
+                android:id="@+id/integrationIntervalDropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="false"
+                android:hint="@string/zt_posture_integration_interval"
+                android:inputType="none"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/zt_posture_integration_config_json"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/integrationConfigJson"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="monospace"
+            android:gravity="top|start"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:minLines="6"
+            android:maxLines="12"
+            android:overScrollMode="always"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/integrationConfigHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/zt_posture_integration_config_hint"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+</ScrollView>

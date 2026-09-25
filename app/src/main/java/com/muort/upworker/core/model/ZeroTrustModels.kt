@@ -793,6 +793,71 @@ data class GatewayCa(
     @SerializedName("public_key") val publicKey: String? = null
 )
 
+// ==================== Zero Trust - Device Posture ====================
+
+/**
+ * Platform condition inside a posture rule's match list.
+ */
+data class PosturePlatformMatch(
+    @SerializedName("platform") val platform: String
+)
+
+/**
+ * Device posture rule.
+ * [input] is provider/type-specific and therefore carried as raw JSON,
+ * e.g. {"enabled":true,"operating_system":"windows"} for a firewall check.
+ * https://developers.cloudflare.com/api/resources/zero_trust/subresources/devices/subresources/posture/
+ */
+data class DevicePostureRule(
+    @SerializedName("id") val id: String? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("description") val description: String? = null,
+    @SerializedName("type") val type: String? = null,
+    @SerializedName("enabled") val enabled: Boolean? = null,
+    // Polling frequency, e.g. "5m"
+    @SerializedName("schedule") val schedule: String? = null,
+    // Posture result expiration, e.g. "24h"
+    @SerializedName("expiration") val expiration: String? = null,
+    @SerializedName("match") val match: List<PosturePlatformMatch>? = null,
+    @SerializedName("input") val input: com.google.gson.JsonObject? = null
+)
+
+/**
+ * Create/update payload for a posture rule. [input] raw JSON is validated
+ * by the caller before sending.
+ */
+data class DevicePostureRuleRequest(
+    @SerializedName("name") val name: String,
+    @SerializedName("type") val type: String,
+    @SerializedName("description") val description: String? = null,
+    @SerializedName("schedule") val schedule: String? = null,
+    @SerializedName("expiration") val expiration: String? = null,
+    @SerializedName("match") val match: List<PosturePlatformMatch>? = null,
+    @SerializedName("input") val input: com.google.gson.JsonObject
+)
+
+/**
+ * Third-party posture provider integration (EDR/UEM).
+ * [config] is provider-specific; secrets are write-only and never returned.
+ */
+data class PostureIntegration(
+    @SerializedName("id") val id: String? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("type") val type: String? = null,
+    @SerializedName("interval") val interval: String? = null,
+    @SerializedName("config") val config: com.google.gson.JsonObject? = null
+)
+
+/**
+ * Create payload for a posture integration.
+ */
+data class PostureIntegrationRequest(
+    @SerializedName("name") val name: String,
+    @SerializedName("type") val type: String,
+    @SerializedName("interval") val interval: String? = null,
+    @SerializedName("config") val config: com.google.gson.JsonObject
+)
+
 // ==================== Gateway DNS Analytics ====================
 
 /**

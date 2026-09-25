@@ -350,6 +350,10 @@
         <action
             android:id="@+id/action_zeroTrust_to_serviceCredentials"
             app:destination="@id/serviceCredentialsFragment" />
+
+        <action
+            android:id="@+id/action_zeroTrust_to_devicePosture"
+            app:destination="@id/devicePostureFragment" />
     </fragment>
 
     <fragment
@@ -425,6 +429,12 @@
         android:name="com.muort.upworker.feature.zerotrust.mtls.MtlsFragment"
         android:label="Mutual TLS"
         tools:layout="@layout/fragment_mtls.xml" />
+
+    <fragment
+        android:id="@+id/devicePostureFragment"
+        android:name="com.muort.upworker.feature.zerotrust.posture.DevicePostureFragment"
+        android:label="设备姿态检查"
+        tools:layout="@layout/fragment_device_posture.xml" />
 
     <fragment
         android:id="@+id/sshCaFragment"

@@ -43,6 +43,10 @@ class ZeroTrustFragment : Fragment() {
         view.findViewById<MaterialCardView>(R.id.tunnelsCard).setOnClickListener {
             findNavController().navigate(R.id.action_zeroTrust_to_tunnels)
         }
+
+        view.findViewById<MaterialCardView>(R.id.devicePostureCard).setOnClickListener {
+            findNavController().navigate(R.id.action_zeroTrust_to_devicePosture)
+        }
         
         view.findViewById<MaterialCardView>(R.id.groupsCard).setOnClickListener {
             findNavController().navigate(R.id.action_zeroTrust_to_groups)

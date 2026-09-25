@@ -2219,4 +2219,182 @@ class ZeroTrustRepository @Inject constructor(
                 }
             }
         }
+
+    // ==================== Device Posture Rules ====================
+
+    suspend fun listPostureRules(account: Account): Resource<List<DevicePostureRule>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.listPostureRules(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result ?: emptyList())
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to list posture rules"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun createPostureRule(
+        account: Account,
+        request: DevicePostureRuleRequest
+    ): Resource<DevicePostureRule> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.createPostureRule(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    request = request
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result!!)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to create posture rule"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun updatePostureRule(
+        account: Account,
+        ruleId: String,
+        request: DevicePostureRuleRequest
+    ): Resource<DevicePostureRule> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.updatePostureRule(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    ruleId = ruleId,
+                    request = request
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result!!)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to update posture rule"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun deletePostureRule(account: Account, ruleId: String): Resource<Unit> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.deletePostureRule(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    ruleId = ruleId
+                )
+                if (response.isSuccessful) {
+                    Resource.Success(Unit)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to delete posture rule"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    // ==================== Device Posture Integrations ====================
+
+    suspend fun listPostureIntegrations(account: Account): Resource<List<PostureIntegration>> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.listPostureIntegrations(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result ?: emptyList())
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to list posture integrations"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun createPostureIntegration(
+        account: Account,
+        request: PostureIntegrationRequest
+    ): Resource<PostureIntegration> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.createPostureIntegration(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    request = request
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result!!)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to create posture integration"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun updatePostureIntegration(
+        account: Account,
+        integrationId: String,
+        request: PostureIntegrationRequest
+    ): Resource<PostureIntegration> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.updatePostureIntegration(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    integrationId = integrationId,
+                    request = request
+                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Resource.Success(response.body()!!.result!!)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to update posture integration"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
+
+    suspend fun deletePostureIntegration(account: Account, integrationId: String): Resource<Unit> =
+        withContext(Dispatchers.IO) {
+            safeApiCall {
+                val response = api.deletePostureIntegration(
+                    token = AuthHelper.getBearerToken(account),
+                    email = AuthHelper.getEmail(account),
+                    apiKey = AuthHelper.getGlobalApiKey(account),
+                    accountId = account.accountId,
+                    integrationId = integrationId
+                )
+                if (response.isSuccessful) {
+                    Resource.Success(Unit)
+                } else {
+                    val errorMsg = resolveApiError(response.body()?.errors?.firstOrNull()?.message, response)
+                        ?: "Failed to delete posture integration"
+                    Resource.Error(errorMsg)
+                }
+            }
+        }
 }

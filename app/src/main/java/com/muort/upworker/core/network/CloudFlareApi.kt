@@ -2206,6 +2206,82 @@ interface CloudFlareApi {
         @Path("account_id") accountId: String
     ): Response<CloudFlareResponse<GatewayCa>>
 
+    // ==================== Zero Trust - Device Posture Rules ====================
+
+    @GET("accounts/{account_id}/devices/posture")
+    suspend fun listPostureRules(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<DevicePostureRule>>>
+
+    @POST("accounts/{account_id}/devices/posture")
+    suspend fun createPostureRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body request: DevicePostureRuleRequest
+    ): Response<CloudFlareResponse<DevicePostureRule>>
+
+    @PUT("accounts/{account_id}/devices/posture/{rule_id}")
+    suspend fun updatePostureRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("rule_id") ruleId: String,
+        @Body request: DevicePostureRuleRequest
+    ): Response<CloudFlareResponse<DevicePostureRule>>
+
+    @DELETE("accounts/{account_id}/devices/posture/{rule_id}")
+    suspend fun deletePostureRule(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("rule_id") ruleId: String
+    ): Response<CloudFlareResponse<Unit>>
+
+    // ==================== Zero Trust - Device Posture Integrations ====================
+
+    @GET("accounts/{account_id}/devices/posture/integration")
+    suspend fun listPostureIntegrations(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<List<PostureIntegration>>>
+
+    @POST("accounts/{account_id}/devices/posture/integration")
+    suspend fun createPostureIntegration(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body request: PostureIntegrationRequest
+    ): Response<CloudFlareResponse<PostureIntegration>>
+
+    @PATCH("accounts/{account_id}/devices/posture/integration/{integration_id}")
+    suspend fun updatePostureIntegration(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("integration_id") integrationId: String,
+        @Body request: PostureIntegrationRequest
+    ): Response<CloudFlareResponse<PostureIntegration>>
+
+    @DELETE("accounts/{account_id}/devices/posture/integration/{integration_id}")
+    suspend fun deletePostureIntegration(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("integration_id") integrationId: String
+    ): Response<CloudFlareResponse<Unit>>
+
     // ==================== Zone Rulesets（WAF / Cache / Rate Limit / Transform 共用 phase 入口） ====================
 
     /** GET /zones/{zone_id}/rulesets/phases/{phase}/entrypoint —— 取某 phase 的 entrypoint ruleset。 */

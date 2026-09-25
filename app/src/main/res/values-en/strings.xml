@@ -505,6 +505,9 @@
     <string name="zt_groups_card_title">👥 Access Groups</string>
     <string name="zt_tunnel_card_desc">Manage Cloudflare Tunnel connections and configurations</string>
     <!-- Service Credentials -->
+    <string name="zt_device_posture_card_title">🩺 Device Posture</string>
+    <string name="zt_device_posture_card_desc">Check device signals: OS version, disk encryption, firewall, EDR compliance and more</string>
+
     <string name="zt_service_credentials_card_title">🔑 Service Credentials</string>
     <string name="zt_service_credentials_card_desc">Manage machine identity credentials: service tokens, Mutual TLS certificates and SSH short-lived certificates</string>
     <string name="zt_service_credentials_title">Service Credentials</string>
@@ -629,6 +632,82 @@
     <string name="vm_msg_zt_ssh_ca_load_failed">Failed to load SSH CA: %1$s</string>
     <string name="vm_msg_zt_ssh_ca_generated">SSH CA generated</string>
     <string name="vm_msg_zt_ssh_ca_generate_failed">Failed to generate SSH CA: %1$s</string>
+
+    <!-- Device Posture -->
+    <string name="zt_posture_tab_rules">Posture rules</string>
+    <string name="zt_posture_tab_integrations">Integrations</string>
+    <string name="zt_posture_rules_empty">No posture checks yet. Tap + below to create one</string>
+    <string name="zt_posture_rule_create_title">Create device posture check</string>
+    <string name="zt_posture_rule_edit_title">Edit device posture check</string>
+    <string name="zt_posture_rule_delete_title">Delete posture check</string>
+    <string name="zt_posture_rule_delete_confirm">Delete posture check \"%1$s\"? Access / Gateway policies referencing it will stop matching devices.</string>
+    <string name="zt_posture_rule_name_empty">Please enter a rule name</string>
+    <string name="zt_posture_rule_type">Check type</string>
+    <string name="zt_posture_rule_integration">Select integration</string>
+    <string name="zt_posture_rule_integration_hint">Select a configured security integration to auto-fill connection_id</string>
+    <string name="zt_posture_rule_schedule">WARP polling frequency</string>
+    <string name="zt_posture_rule_platforms">Match platforms (none = all platforms)</string>
+    <string name="zt_posture_platforms_label">Platforms: %1$s</string>
+    <string name="zt_posture_platforms_all">All platforms</string>
+    <string name="zt_posture_schedule_label">Poll: %1$s</string>
+    <string name="zt_posture_rule_input_json">Check conditions (JSON)</string>
+    <string name="zt_posture_rule_input_hint">Switching type fills in its template. For S2S checks, paste the connection_id created under \"Integrations\".</string>
+    <string name="zt_posture_rule_input_invalid">Conditions must be a valid JSON object</string>
+    <string name="zt_posture_detail_type">Check type: %1$s</string>
+    <string name="zt_posture_type_unknown">Unknown type</string>
+    <string name="zt_posture_type_file">File existence</string>
+    <string name="zt_posture_type_application">Application check</string>
+    <string name="zt_posture_type_firewall">Firewall</string>
+    <string name="zt_posture_type_disk_encryption">Disk encryption</string>
+    <string name="zt_posture_type_domain_joined">Domain joined</string>
+    <string name="zt_posture_type_antivirus">Antivirus</string>
+    <string name="zt_posture_type_client_certificate">Client certificate (legacy)</string>
+    <string name="zt_posture_type_client_certificate_v2">Client certificate</string>
+    <string name="zt_posture_type_serial_number">Serial number list</string>
+    <string name="zt_posture_type_unique_client_id">Unique client ID</string>
+    <string name="zt_posture_type_warp">WARP connection</string>
+    <string name="zt_posture_type_gateway">Gateway connection</string>
+    <string name="zt_posture_type_crowdstrike_s2s">CrowdStrike</string>
+    <string name="zt_posture_type_sentinelone_s2s">SentinelOne S2S</string>
+    <string name="zt_posture_type_sentinelone">SentinelOne app</string>
+    <string name="zt_posture_type_carbonblack">Carbon Black app</string>
+    <string name="zt_posture_type_tanium">Tanium</string>
+    <string name="zt_posture_type_tanium_s2s">Tanium S2S</string>
+    <string name="zt_posture_type_intune">Microsoft Intune</string>
+    <string name="zt_posture_type_workspace_one">VMware Workspace ONE</string>
+    <string name="zt_posture_type_kolide">Kolide</string>
+    <string name="zt_posture_type_custom_s2s">Custom S2S</string>
+    <string name="zt_posture_integrations_empty">No security integrations yet.\nConnect third-party EDR/UEM providers such as CrowdStrike, Intune or Tanium, then reference their connection_id in S2S posture checks.</string>
+    <string name="zt_posture_integration_create_title">Add security integration</string>
+    <string name="zt_posture_integration_edit_title">Edit security integration</string>
+    <string name="zt_posture_integration_delete_title">Delete security integration</string>
+    <string name="zt_posture_integration_delete_confirm">Delete integration \"%1$s\"? Posture checks referencing its connection_id will stop working.</string>
+    <string name="zt_posture_integration_name_hint">Integration name</string>
+    <string name="zt_posture_integration_name_empty">Please enter an integration name</string>
+    <string name="zt_posture_integration_type">Provider</string>
+    <string name="zt_posture_integration_interval">Polling interval</string>
+    <string name="zt_posture_integration_interval_label">Polling interval: %1$s</string>
+    <string name="zt_posture_integration_config_json">Connection config (JSON)</string>
+    <string name="zt_posture_integration_config_hint">Secrets are submitted only on creation. Switching provider fills in its template; secrets cannot be read back afterwards.</string>
+    <string name="zt_posture_integration_config_hint_edit">Secret fields are not shown. Enter new values to update secrets, or leave them blank to keep existing ones.</string>
+    <string name="zt_posture_integration_config_invalid">Connection config must be a valid JSON object</string>
+    <string name="zt_posture_integration_workspace_one">Workspace ONE</string>
+    <string name="zt_posture_integration_uptycs">Uptycs</string>
+    <string name="zt_posture_integration_sentinelone_s2s">SentinelOne</string>
+    <string name="vm_msg_zt_posture_rules_load_failed">Failed to load posture rules: %1$s</string>
+    <string name="vm_msg_zt_posture_rule_created">Posture check created</string>
+    <string name="vm_msg_zt_posture_rule_create_failed">Failed to create posture check: %1$s</string>
+    <string name="vm_msg_zt_posture_rule_updated">Posture check updated</string>
+    <string name="vm_msg_zt_posture_rule_update_failed">Failed to update posture check: %1$s</string>
+    <string name="vm_msg_zt_posture_rule_deleted">Posture check deleted</string>
+    <string name="vm_msg_zt_posture_rule_delete_failed">Failed to delete posture check: %1$s</string>
+    <string name="vm_msg_zt_posture_integrations_load_failed">Failed to load security integrations: %1$s</string>
+    <string name="vm_msg_zt_posture_integration_created">Security integration added</string>
+    <string name="vm_msg_zt_posture_integration_create_failed">Failed to add security integration: %1$s</string>
+    <string name="vm_msg_zt_posture_integration_updated">Security integration updated</string>
+    <string name="vm_msg_zt_posture_integration_update_failed">Failed to update security integration: %1$s</string>
+    <string name="vm_msg_zt_posture_integration_deleted">Security integration deleted</string>
+    <string name="vm_msg_zt_posture_integration_delete_failed">Failed to delete security integration: %1$s</string>
     <!-- Missing WAF example -->
     <string name="waf_expression_example">Example: (ip.src in {192.168.0.0/16 10.0.0.0/8}) or (http.request.uri.path contains "/admin")</string>
     <!-- ========= Phase 2: Toast / Dialog / Status ========= -->
