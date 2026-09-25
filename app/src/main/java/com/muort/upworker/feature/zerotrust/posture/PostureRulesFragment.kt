@@ -138,22 +138,24 @@ class PostureRulesFragment : Fragment() {
 
         nameInput.setText(rule.name.orEmpty())
         descriptionInput.setText(rule.description.orEmpty())
-        val rawJson = rule.input?.toString() ?: PostureTypeSpecs.ruleTemplate(rule.type.orEmpty())
-        inputJson.setText(prettyJson(rawJson))
+        val existingInput = rule.input?.toString()
 
         val integrationLayout = dialogView.findViewById<View>(R.id.ruleIntegrationLayout)
         val integrationDropdown = dialogView.findViewById<android.widget.AutoCompleteTextView>(R.id.ruleIntegrationDropdown)
+        val platformChipGroup = dialogView.findViewById<ChipGroup>(R.id.rulePlatformChips)
 
         // Editing: keep the existing type; changing it is intentionally avoided
         // because input shapes are incompatible across types.
-        setupPlatformChips(
-            dialogView.findViewById(R.id.rulePlatformChips),
-            selectedPlatforms = rule.match.orEmpty().map { it.platform }.toSet()
-        )
+        setupPlatformChips(platformChipGroup, selectedPlatforms = rule.match.orEmpty().map { it.platform }.toSet())
         setupTypeDropdown(typeDropdown, inputJson, initialType = rule.type ?: PostureTypeSpecs.ruleTypes.first().type, locked = true,
-            platformChips = dialogView.findViewById(R.id.rulePlatformChips),
+            platformChips = platformChipGroup,
             integrationLayout = integrationLayout,
             integrationDropdown = integrationDropdown)
+
+        // Restore the actual input from server (must come after setupTypeDropdown which sets template)
+        if (existingInput != null) {
+            inputJson.setText(prettyJson(existingInput))
+        }
 
         // Pre-select matching integration if rule has a connection_id
         val existingConnectionId = rule.input?.get("connection_id")?.asString
@@ -354,9 +356,22 @@ class PostureRulesFragment : Fragment() {
                 isCheckable = true
                 isChecked = spec.platform in selectedPlatforms
                 tag = spec.platform
+                id = android.view.View.generateViewId()
             }
             chipGroup.addView(chip)
         }
+    }
+
+    /** Returns the list of platform values for all checked chips. */
+    private fun getCheckedPlatforms(chipGroup: ChipGroup): List<String> {
+        val result = mutableListOf<String>()
+        for (i in 0 until chipGroup.childCount) {
+            val chip = chipGroup.getChildAt(i) as Chip
+            if (chip.isChecked) {
+                (chip.tag as? String)?.let { result.add(it) }
+            }
+        }
+        return result
     }
 
     /**
