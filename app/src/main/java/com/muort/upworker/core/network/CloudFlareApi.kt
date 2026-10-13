@@ -709,6 +709,150 @@ interface CloudFlareApi {
         @Path("token_id") tokenId: String
     ): Response<CloudFlareResponse<TokenDeleteResult>>
 
+    // ==================== Secrets Store: Stores ====================
+    // 文档: https://developers.cloudflare.com/api/resources/secrets_store/
+
+    /** 列出账户下全部密钥库 */
+    @GET("accounts/{account_id}/secrets_store/stores")
+    suspend fun listSecretStores(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Query("per_page") perPage: Int = 100,
+        @Query("page") page: Int = 1,
+        @Query("order") order: String? = null,
+        @Query("direction") direction: String? = null
+    ): Response<CloudFlareResponse<List<SecretStore>>>
+
+    /** 按 ID 获取密钥库 */
+    @GET("accounts/{account_id}/secrets_store/stores/{store_id}")
+    suspend fun getSecretStore(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("store_id") storeId: String
+    ): Response<CloudFlareResponse<SecretStore>>
+
+    /** 创建密钥库 */
+    @POST("accounts/{account_id}/secrets_store/stores")
+    suspend fun createSecretStore(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Body request: SecretStoreCreateRequest
+    ): Response<CloudFlareResponse<SecretStore>>
+
+    /**
+     * 删除密钥库。非空库默认返回 409 store_not_empty；
+     * force=true 时级联删除库内全部密钥后再删库。
+     */
+    @DELETE("accounts/{account_id}/secrets_store/stores/{store_id}")
+    suspend fun deleteSecretStore(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("store_id") storeId: String,
+        @Query("force") force: Boolean? = null
+    ): Response<CloudFlareResponse<com.google.gson.JsonObject>>
+
+    // ==================== Secrets Store: Secrets ====================
+
+    /** 列出密钥库中的密钥（支持 search 关键字与 scopes 过滤） */
+    @GET("accounts/{account_id}/secrets_store/stores/{store_id}/secrets")
+    suspend fun listStoreSecrets(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("store_id") storeId: String,
+        @Query("per_page") perPage: Int = 100,
+        @Query("page") page: Int = 1,
+        @Query("order") order: String? = null,
+        @Query("direction") direction: String? = null,
+        @Query("search") search: String? = null,
+        @Query("scopes") scopes: List<String>? = null
+    ): Response<CloudFlareResponse<List<StoredSecret>>>
+
+    /** 按 ID 获取密钥（value 永不返回） */
+    @GET("accounts/{account_id}/secrets_store/stores/{store_id}/secrets/{secret_id}")
+    suspend fun getStoreSecret(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("store_id") storeId: String,
+        @Path("secret_id") secretId: String
+    ): Response<CloudFlareResponse<StoredSecret>>
+
+    /** 创建密钥（请求体为数组，返回创建结果数组） */
+    @POST("accounts/{account_id}/secrets_store/stores/{store_id}/secrets")
+    suspend fun createStoreSecrets(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("store_id") storeId: String,
+        @Body body: List<StoredSecretCreateBody>
+    ): Response<CloudFlareResponse<List<StoredSecret>>>
+
+    /** 编辑密钥：可更新 comment / scopes / value（value 只写） */
+    @PATCH("accounts/{account_id}/secrets_store/stores/{store_id}/secrets/{secret_id}")
+    suspend fun editStoreSecret(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("store_id") storeId: String,
+        @Path("secret_id") secretId: String,
+        @Body body: com.google.gson.JsonObject
+    ): Response<CloudFlareResponse<StoredSecret>>
+
+    /** 删除单个密钥 */
+    @DELETE("accounts/{account_id}/secrets_store/stores/{store_id}/secrets/{secret_id}")
+    suspend fun deleteStoreSecret(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("store_id") storeId: String,
+        @Path("secret_id") secretId: String
+    ): Response<CloudFlareResponse<com.google.gson.JsonObject>>
+
+    /** 清空密钥库：删除库内全部密钥（接口无请求体） */
+    @DELETE("accounts/{account_id}/secrets_store/stores/{store_id}/secrets")
+    suspend fun bulkDeleteStoreSecrets(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("store_id") storeId: String
+    ): Response<CloudFlareResponse<com.google.gson.JsonObject>>
+
+    /** 复制密钥（保留原 value，需提供新 name/scopes） */
+    @POST("accounts/{account_id}/secrets_store/stores/{store_id}/secrets/{secret_id}/duplicate")
+    suspend fun duplicateStoreSecret(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String,
+        @Path("store_id") storeId: String,
+        @Path("secret_id") secretId: String,
+        @Body body: StoredSecretDuplicateBody
+    ): Response<CloudFlareResponse<StoredSecret>>
+
+    /** 账户密钥用量配额 */
+    @GET("accounts/{account_id}/secrets_store/quota")
+    suspend fun getSecretsStoreQuota(
+        @Header("Authorization") token: String?,
+        @Header("X-Auth-Email") email: String?,
+        @Header("X-Auth-Key") apiKey: String?,
+        @Path("account_id") accountId: String
+    ): Response<CloudFlareResponse<SecretsStoreQuotaResult>>
+
     // ==================== KV ====================
 
     @GET("accounts/{account_id}/storage/kv/namespaces")

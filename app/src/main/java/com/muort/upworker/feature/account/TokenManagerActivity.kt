@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -51,8 +52,12 @@ class TokenManagerActivity : AppCompatActivity() {
     private val viewModel: TokenManagerViewModel by viewModels()
 
     private lateinit var adapter: TokenAdapter
+    private lateinit var secretsPanel: SecretsStorePanel
     private var currentAccount: Account? = null
     private var accounts: List<Account> = emptyList()
+
+    /** 当前是否停留在 Secrets Store Tab（position 2） */
+    private var secretsTabActive = false
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(DisplaySizeHelper.wrap(LocaleHelper.applyLocale(newBase)))
@@ -67,6 +72,9 @@ class TokenManagerActivity : AppCompatActivity() {
 
         /** 权限组总上限 = 每策略上限 × 策略数上限 */
         const val MAX_TOTAL_PG = MAX_PG_PER_POLICY * MAX_POLICIES
+
+        /** TabLayout 第三个 Tab：Secrets Store */
+        const val TAB_SECRETS_STORE = 2
 
         fun policiesNeeded(pgCount: Int): Int = (pgCount + MAX_PG_PER_POLICY - 1) / MAX_PG_PER_POLICY
 
@@ -86,6 +94,22 @@ class TokenManagerActivity : AppCompatActivity() {
         applySystemBarStyle()
         setupViews()
         observeViewModels()
+        setupBackHandler()
+    }
+
+    /**
+     * Secrets Store 二级页面（库内密钥）优先消费返回键，
+     * 先回到密钥库列表，再按一次才退出页面。
+     */
+    private fun setupBackHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (!secretsPanel.handleBack()) {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     private fun applySystemBarStyle() {
@@ -114,6 +138,8 @@ class TokenManagerActivity : AppCompatActivity() {
             adapter = this@TokenManagerActivity.adapter
         }
 
+        secretsPanel = findViewById(R.id.secretsPanel)
+
         findViewById<View>(R.id.createTokenBtn).setOnClickListener { showEditDialog(null) }
         findViewById<View>(R.id.switchAccountBtn).setOnClickListener { showAccountSelector() }
         findViewById<View>(R.id.retryBtn).setOnClickListener {
@@ -123,8 +149,13 @@ class TokenManagerActivity : AppCompatActivity() {
         findViewById<com.google.android.material.tabs.TabLayout>(R.id.tokenScopeTabs)
             .addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab) {
-                    val newScope = if (tab.position == 0) TokenScope.USER else TokenScope.ACCOUNT
                     invalidateOptionsMenu()
+                    if (tab.position == TAB_SECRETS_STORE) {
+                        currentAccount?.let { showSecretsStore(it) }
+                        return
+                    }
+                    val newScope = if (tab.position == 0) TokenScope.USER else TokenScope.ACCOUNT
+                    showTokenList()
                     currentAccount?.let {
                         viewModel.loadTokens(it, newScope)
                         viewModel.loadPermissionGroups(it)
@@ -134,6 +165,24 @@ class TokenManagerActivity : AppCompatActivity() {
                 override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab) {}
                 override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab) {}
             })
+    }
+
+    /** 切换到 Secrets Store Tab：隐藏令牌列表四态视图，由两级面板接管 */
+    private fun showSecretsStore(account: Account) {
+        secretsTabActive = true
+        findViewById<View>(R.id.createTokenBtn).visibility = View.GONE
+        listOf(
+            R.id.tokensRecyclerView, R.id.progressBar,
+            R.id.emptyStateLayout, R.id.errorStateLayout
+        ).forEach { findViewById<View>(it).visibility = View.GONE }
+        secretsPanel.show(account)
+    }
+
+    /** 切回用户级/账户级令牌 Tab */
+    private fun showTokenList() {
+        secretsTabActive = false
+        secretsPanel.hide()
+        findViewById<View>(R.id.createTokenBtn).visibility = View.VISIBLE
     }
 
     private fun observeViewModels() {
@@ -216,8 +265,12 @@ class TokenManagerActivity : AppCompatActivity() {
     private fun selectAccount(account: Account) {
         currentAccount = account
         findViewById<TextView>(R.id.accountNameText).text = account.name
-        viewModel.loadTokens(account)
-        viewModel.loadPermissionGroups(account)
+        if (secretsTabActive) {
+            secretsPanel.show(account)
+        } else {
+            viewModel.loadTokens(account)
+            viewModel.loadPermissionGroups(account)
+        }
         invalidateOptionsMenu()
     }
 
@@ -600,18 +653,17 @@ class TokenManagerActivity : AppCompatActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        // verify 只接受 Bearer 认证（用户级令牌走 /user/tokens/verify，
-        // cfat_ 账户令牌走 /accounts/{id}/tokens/verify，Repository 自动分发）；
-        // Global API Key 账号无法验证，隐藏
+        // Secrets Store Tab 下隐藏“验证令牌”（该操作仅针对 API 令牌）
         menu.findItem(R.id.action_verify_token)?.isVisible =
-            currentAccount?.getAuthTypeEnum() != AuthType.GLOBAL_API_KEY
+            !secretsTabActive && currentAccount?.getAuthTypeEnum() != AuthType.GLOBAL_API_KEY
         return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                finish()
+                // Secrets Store 二级页面先返回密钥库一级
+                if (!secretsPanel.handleBack()) finish()
                 true
             }
             R.id.action_verify_token -> {
@@ -619,7 +671,11 @@ class TokenManagerActivity : AppCompatActivity() {
                 true
             }
             R.id.action_refresh_tokens -> {
-                currentAccount?.let { viewModel.loadTokens(it) }
+                if (secretsTabActive) {
+                    secretsPanel.refresh()
+                } else {
+                    currentAccount?.let { viewModel.loadTokens(it) }
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)

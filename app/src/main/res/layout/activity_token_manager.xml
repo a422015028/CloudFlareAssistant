@@ -80,6 +80,11 @@
             android:layout_height="wrap_content"
             android:text="@string/xml_activity_token_manager_5" />
 
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ss_tab_title" />
+
     </com.google.android.material.tabs.TabLayout>
 
     <!-- 新建令牌按钮（非悬浮） -->
@@ -186,6 +191,13 @@
                 android:layout_marginTop="8dp" />
 
         </LinearLayout>
+
+        <!-- Secrets Store 面板（第三个 Tab，两级：密钥库 → 密钥） -->
+        <com.muort.upworker.feature.account.SecretsStorePanel
+            android:id="@+id/secretsPanel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
     </FrameLayout>
 

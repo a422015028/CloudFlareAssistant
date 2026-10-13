@@ -809,6 +809,98 @@
     <string name="token_pg_none">Permission groups: None</string>
     <string name="token_pg_list">Permission groups: %1$s</string>
     <string name="token_pg_more">Permission groups: %1$s and %2$d more</string>
+
+    <!-- ==================== Secrets Store ==================== -->
+    <string name="ss_tab_title">Secrets Store</string>
+    <!-- Stores -->
+    <string name="ss_create_store">Create Store</string>
+    <string name="ss_store_name_hint">Store name</string>
+    <string name="ss_store_name_empty">Store name cannot be empty</string>
+    <string name="ss_store_empty">No stores yet</string>
+    <string name="ss_store_empty_hint">Tap \"Create Store\" above to create one</string>
+    <string name="ss_store_open">Open</string>
+    <string name="ss_store_delete_title">Delete store</string>
+    <string name="ss_store_delete_message">Delete store \"%1$s\"? A non-empty store will be rejected by the API.</string>
+    <string name="ss_store_delete_force_title">Store is not empty</string>
+    <string name="ss_store_delete_force_message">Store \"%1$s\" still contains secrets and the normal delete was rejected (store_not_empty).\n\nForce delete will cascade-delete ALL secrets in the store. This cannot be undone — make sure Workers / AI Gateway and other consumers have been migrated.</string>
+    <string name="ss_store_delete_force_btn">Force delete all</string>
+    <string name="ss_store_created_success">Store created</string>
+    <string name="ss_store_deleted_success">Store deleted</string>
+    <!-- Secrets -->
+    <string name="ss_create_secret">Create Secret</string>
+    <string name="ss_edit_secret">Edit Secret</string>
+    <string name="ss_secret_name_hint">Secret name (e.g. MY_API_KEY)</string>
+    <string name="ss_secret_value_hint">Secret value</string>
+    <string name="ss_value_writeonly_hint">The value is write-only. The API never returns it — save it securely now.</string>
+    <string name="ss_value_edit_hint">New secret value (optional)</string>
+    <string name="ss_value_edit_hint_sub">Leave blank to keep the current value. Secret values can never be read back.</string>
+    <string name="ss_secret_scopes_label">Services allowed to use this secret (required)</string>
+    <string name="ss_secret_comment_hint">Comment (optional)</string>
+    <string name="ss_secret_name_empty">Secret name cannot be empty</string>
+    <string name="ss_secret_value_empty">Secret value cannot be empty</string>
+    <string name="ss_secret_scope_empty">Select at least one service that can use this secret</string>
+    <string name="ss_secret_value_too_large">Secret value cannot exceed %1$d bytes (64 KiB)</string>
+    <string name="ss_secret_empty">No secrets in this store</string>
+    <string name="ss_secret_empty_hint">Tap \"Create Secret\" above to add one</string>
+    <string name="ss_secret_filter_empty">No matching secrets</string>
+    <string name="ss_secret_filter_empty_hint">Try a different keyword or service filter</string>
+    <string name="ss_secret_delete_title">Delete secret</string>
+    <string name="ss_secret_delete_message">Delete secret \"%1$s\"? Services using it may stop working immediately.</string>
+    <string name="ss_bulk_delete_btn">Clear all</string>
+    <string name="ss_bulk_delete_title">Clear store</string>
+    <string name="ss_bulk_delete_message">This permanently deletes ALL secrets in store \"%1$s\". This cannot be undone. Continue?</string>
+    <string name="ss_duplicate_btn">Duplicate</string>
+    <string name="ss_duplicate_title">Duplicate secret</string>
+    <string name="ss_secret_created_success">Secret created</string>
+    <string name="ss_secret_updated_success">Secret updated</string>
+    <string name="ss_secret_deleted_success">Secret deleted</string>
+    <string name="ss_secret_bulk_deleted_success">All secrets in the store were cleared</string>
+    <string name="ss_secret_duplicated_success">Secret duplicated (value copied)</string>
+    <!-- Secret detail -->
+    <string name="ss_detail_title">Secret detail</string>
+    <string name="ss_detail_name">Name: %1$s</string>
+    <string name="ss_detail_id">ID: %1$s</string>
+    <string name="ss_detail_status">Status: %1$s</string>
+    <string name="ss_detail_scopes">Services: %1$s</string>
+    <string name="ss_detail_comment">Comment: %1$s</string>
+    <string name="ss_detail_created">Created: %1$s</string>
+    <string name="ss_detail_modified">Modified: %1$s</string>
+    <string name="ss_detail_value_writeonly">The secret value is write-only. It is never returned and cannot be viewed or copied.</string>
+    <!-- Status / scopes / misc -->
+    <string name="ss_status_pending">Pending</string>
+    <string name="ss_status_deleted">Deleted</string>
+    <string name="ss_filter_all">All services</string>
+    <string name="ss_scope_workers">Workers</string>
+    <string name="ss_scope_ai_gateway">AI Gateway</string>
+    <string name="ss_scope_dex">DEX</string>
+    <string name="ss_scope_access">Access</string>
+    <string name="ss_scope_containers">Containers</string>
+    <string name="ss_scope_websearch">Web Search</string>
+    <string name="ss_search_hint">Search by name or comment</string>
+    <string name="ss_back_to_stores">Stores</string>
+    <string name="ss_copy_name">Copy name</string>
+    <string name="ss_copy_id">Copy ID</string>
+    <string name="ss_created_short">Created %1$s</string>
+    <string name="ss_modified_short">Modified %1$s</string>
+    <string name="ss_quota_format">Secret usage: %1$d / %2$d</string>
+    <!-- Repository errors -->
+    <string name="repo_ss_store_list_failed_format">Failed to list stores: %1$s</string>
+    <string name="repo_ss_store_no_result">No store returned</string>
+    <string name="repo_ss_store_get_failed_format">Failed to get store: %1$s</string>
+    <string name="repo_ss_store_create_failed_format">Failed to create store: %1$s</string>
+    <string name="repo_ss_store_delete_failed_format">Failed to delete store: %1$s</string>
+    <string name="repo_ss_secret_list_failed_format">Failed to list secrets: %1$s</string>
+    <string name="repo_ss_secret_no_result">No secret returned</string>
+    <string name="repo_ss_secret_get_failed_format">Failed to get secret: %1$s</string>
+    <string name="repo_ss_secret_create_failed_format">Failed to create secret: %1$s</string>
+    <string name="repo_ss_secret_update_failed_format">Failed to update secret: %1$s</string>
+    <string name="repo_ss_secret_delete_failed_format">Failed to delete secret: %1$s</string>
+    <string name="repo_ss_secret_bulk_delete_failed_format">Failed to clear secrets: %1$s</string>
+    <string name="repo_ss_secret_duplicate_no_result">No duplicated secret returned</string>
+    <string name="repo_ss_secret_duplicate_failed_format">Failed to duplicate secret: %1$s</string>
+    <string name="repo_ss_quota_no_result">No quota returned</string>
+    <string name="repo_ss_quota_failed_format">Failed to get quota: %1$s</string>
+
     <!-- Zone tool items (DomainDetail) -->
     <string name="zone_tool_waf">WAF Rules</string>
     <string name="zone_tool_cache_rules">Cache Rules</string>

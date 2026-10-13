@@ -801,6 +801,98 @@
     <string name="token_pg_none">权限组: 无</string>
     <string name="token_pg_list">权限组: %1$s</string>
     <string name="token_pg_more">权限组: %1$s 等 %2$d 项</string>
+
+    <!-- ==================== Secrets Store（秘密商店） ==================== -->
+    <string name="ss_tab_title">秘密商店</string>
+    <!-- 密钥库 -->
+    <string name="ss_create_store">新建密钥库</string>
+    <string name="ss_store_name_hint">密钥库名称</string>
+    <string name="ss_store_name_empty">密钥库名称不能为空</string>
+    <string name="ss_store_empty">暂无密钥库</string>
+    <string name="ss_store_empty_hint">点击上方“新建密钥库”按钮创建</string>
+    <string name="ss_store_open">进入</string>
+    <string name="ss_store_delete_title">删除密钥库</string>
+    <string name="ss_store_delete_message">确定删除密钥库「%1$s」吗？库内仍有密钥时此操作会被拒绝。</string>
+    <string name="ss_store_delete_force_title">密钥库非空</string>
+    <string name="ss_store_delete_force_message">密钥库「%1$s」中仍有密钥，普通删除已被服务端拒绝（store_not_empty）。\n\n是否强制删除？将级联删除库内的全部密钥，且不可恢复，请确认正在使用这些密钥的 Workers / AI Gateway 等服务已完成切换。</string>
+    <string name="ss_store_delete_force_btn">强制删除全部</string>
+    <string name="ss_store_created_success">密钥库已创建</string>
+    <string name="ss_store_deleted_success">密钥库已删除</string>
+    <!-- 密钥 -->
+    <string name="ss_create_secret">新建密钥</string>
+    <string name="ss_edit_secret">编辑密钥</string>
+    <string name="ss_secret_name_hint">密钥名称（如 MY_API_KEY）</string>
+    <string name="ss_secret_value_hint">密钥值</string>
+    <string name="ss_value_writeonly_hint">密钥值仅写入，接口永远不会返回，请立即自行妥善保存。</string>
+    <string name="ss_value_edit_hint">新密钥值（可选）</string>
+    <string name="ss_value_edit_hint_sub">留空表示保持原值不变；密钥值永远无法通过接口读取。</string>
+    <string name="ss_secret_scopes_label">允许使用该密钥的服务（必选）</string>
+    <string name="ss_secret_comment_hint">备注（可选）</string>
+    <string name="ss_secret_name_empty">密钥名称不能为空</string>
+    <string name="ss_secret_value_empty">密钥值不能为空</string>
+    <string name="ss_secret_scope_empty">请至少选择一个可使用该密钥的服务</string>
+    <string name="ss_secret_value_too_large">密钥值不能超过 %1$d 字节（64 KiB）</string>
+    <string name="ss_secret_empty">此密钥库中暂无密钥</string>
+    <string name="ss_secret_empty_hint">点击上方“新建密钥”按钮添加</string>
+    <string name="ss_secret_filter_empty">没有匹配的密钥</string>
+    <string name="ss_secret_filter_empty_hint">尝试更换搜索关键字或服务筛选</string>
+    <string name="ss_secret_delete_title">删除密钥</string>
+    <string name="ss_secret_delete_message">确定删除密钥「%1$s」吗？使用该密钥的服务可能立即中断。</string>
+    <string name="ss_bulk_delete_btn">清空全部</string>
+    <string name="ss_bulk_delete_title">清空密钥库</string>
+    <string name="ss_bulk_delete_message">将永久删除密钥库「%1$s」中的全部密钥，此操作不可恢复。确定继续吗？</string>
+    <string name="ss_duplicate_btn">创建副本</string>
+    <string name="ss_duplicate_title">创建密钥副本</string>
+    <string name="ss_secret_created_success">密钥已创建</string>
+    <string name="ss_secret_updated_success">密钥已更新</string>
+    <string name="ss_secret_deleted_success">密钥已删除</string>
+    <string name="ss_secret_bulk_deleted_success">已清空密钥库中的全部密钥</string>
+    <string name="ss_secret_duplicated_success">密钥副本已创建（沿用原值）</string>
+    <!-- 密钥详情 -->
+    <string name="ss_detail_title">密钥详情</string>
+    <string name="ss_detail_name">名称: %1$s</string>
+    <string name="ss_detail_id">ID: %1$s</string>
+    <string name="ss_detail_status">状态: %1$s</string>
+    <string name="ss_detail_scopes">可用服务: %1$s</string>
+    <string name="ss_detail_comment">备注: %1$s</string>
+    <string name="ss_detail_created">创建时间: %1$s</string>
+    <string name="ss_detail_modified">修改时间: %1$s</string>
+    <string name="ss_detail_value_writeonly">密钥值为只写字段，接口不会返回，无法查看或复制。</string>
+    <!-- 状态 / scope / 杂项 -->
+    <string name="ss_status_pending">待激活</string>
+    <string name="ss_status_deleted">已删除</string>
+    <string name="ss_filter_all">全部服务</string>
+    <string name="ss_scope_workers">Workers</string>
+    <string name="ss_scope_ai_gateway">AI Gateway</string>
+    <string name="ss_scope_dex">DEX</string>
+    <string name="ss_scope_access">Access</string>
+    <string name="ss_scope_containers">Containers</string>
+    <string name="ss_scope_websearch">Web Search</string>
+    <string name="ss_search_hint">按名称或备注搜索</string>
+    <string name="ss_back_to_stores">密钥库</string>
+    <string name="ss_copy_name">复制名称</string>
+    <string name="ss_copy_id">复制 ID</string>
+    <string name="ss_created_short">创建 %1$s</string>
+    <string name="ss_modified_short">修改 %1$s</string>
+    <string name="ss_quota_format">密钥用量：%1$d / %2$d</string>
+    <!-- Repository 错误 -->
+    <string name="repo_ss_store_list_failed_format">获取密钥库列表失败: %1$s</string>
+    <string name="repo_ss_store_no_result">密钥库无返回结果</string>
+    <string name="repo_ss_store_get_failed_format">获取密钥库详情失败: %1$s</string>
+    <string name="repo_ss_store_create_failed_format">创建密钥库失败: %1$s</string>
+    <string name="repo_ss_store_delete_failed_format">删除密钥库失败: %1$s</string>
+    <string name="repo_ss_secret_list_failed_format">获取密钥列表失败: %1$s</string>
+    <string name="repo_ss_secret_no_result">密钥无返回结果</string>
+    <string name="repo_ss_secret_get_failed_format">获取密钥详情失败: %1$s</string>
+    <string name="repo_ss_secret_create_failed_format">创建密钥失败: %1$s</string>
+    <string name="repo_ss_secret_update_failed_format">更新密钥失败: %1$s</string>
+    <string name="repo_ss_secret_delete_failed_format">删除密钥失败: %1$s</string>
+    <string name="repo_ss_secret_bulk_delete_failed_format">清空密钥失败: %1$s</string>
+    <string name="repo_ss_secret_duplicate_no_result">复制密钥无返回结果</string>
+    <string name="repo_ss_secret_duplicate_failed_format">复制密钥失败: %1$s</string>
+    <string name="repo_ss_quota_no_result">配额无返回结果</string>
+    <string name="repo_ss_quota_failed_format">获取密钥配额失败: %1$s</string>
+
     <!-- 区域工具项（DomainDetail） -->
     <string name="zone_tool_waf">WAF规则</string>
     <string name="zone_tool_cache_rules">缓存规则</string>
